@@ -6526,30 +6526,23 @@ function startTouchContextPress(event, pointer) {
   cancelTouchContextPress();
   const hasHit = hasContextHit(pointer);
   if (state.activeTool === "draw" && !hasHit) return false;
-  const blockDraw = state.activeTool === "draw" && hasHit;
   touchContextPress = {
     pointerId: event.pointerId,
     pointer,
     clientX: event.clientX,
     clientY: event.clientY,
-    blockDraw,
     fired: false,
     timer: window.setTimeout(() => {
       if (!touchContextPress || touchContextPress.pointerId !== event.pointerId) return;
       touchContextPress.fired = true;
       state.previewCandidate = null;
+      cancelPendingDraw({ redraw: false });
       openDrawingContextMenuFromPointer(touchContextPress.pointer, touchContextPress.clientX, touchContextPress.clientY);
       cursorReadout.textContent = "Tap an action";
     }, TOUCH_CONTEXT_PRESS_MS),
   };
 
-  try {
-    drawCanvas.setPointerCapture(event.pointerId);
-  } catch {
-    // Capture is optional, but it makes long-press feel steadier on tablets.
-  }
-
-  return blockDraw;
+  return false;
 }
 
 function updateTouchContextPress(event) {
@@ -6570,11 +6563,6 @@ function updateTouchContextPress(event) {
 function cancelTouchContextPress() {
   if (!touchContextPress) return;
   window.clearTimeout(touchContextPress.timer);
-  try {
-    drawCanvas.releasePointerCapture(touchContextPress.pointerId);
-  } catch {
-    // Ignore browsers that have already released capture.
-  }
   touchContextPress = null;
 }
 
@@ -6677,12 +6665,6 @@ function finishTouchContextPress(event) {
     if (noteDrag) {
       finishNoteDrag(event);
     }
-    event.preventDefault();
-    return true;
-  }
-
-  if (press.blockDraw) {
-    selectContextHitOnTouch(press.pointer, event);
     event.preventDefault();
     return true;
   }
@@ -7160,6 +7142,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
   const noteHit = findNearestNote(pointer);
   if (noteHit && state.activeTool === "select") {
+    cancelTouchContextPress();
     beginNoteDrag(event, noteHit, pointer);
     return;
   }
