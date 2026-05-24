@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f766e" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="IsoSpool" />
+    <title>IsoSpool Studio</title>
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="icon-draw" viewBox="0 0 24 24">
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+      </symbol>
+      <symbol id="icon-select" viewBox="0 0 24 24">
+        <path d="m5 3 14 8-6 2 3 6-3 2-3-6-5 4Z" />
+      </symbol>
+      <symbol id="icon-flange" viewBox="0 0 24 24">
+        <path d="M4 12h16" />
+        <path d="M8 6v12" />
+        <path d="M16 6v12" />
+        <path d="M6 8h4" />
+        <path d="M14 8h4" />
+        <path d="M6 16h4" />
+        <path d="M14 16h4" />
+      </symbol>
+      <symbol id="icon-valve" viewBox="0 0 24 24">
+        <path d="M4 12h4" />
+        <path d="M16 12h4" />
+        <path d="m8 8 8 4-8 4Z" />
+        <path d="M12 8V5" />
+        <path d="M9 5h6" />
+      </symbol>
+      <symbol id="icon-weld" viewBox="0 0 24 24">
+        <path d="M4 12h16" />
+        <path d="m9 7 2 10" />
+        <path d="m13 7 2 10" />
+      </symbol>
+      <symbol id="icon-reducer" viewBox="0 0 24 24">
+        <path d="M3 12h4" />
+        <path d="M17 12h4" />
+        <path d="M7 7v10" />
+        <path d="M17 9v6" />
+        <path d="M7 7 17 9" />
+        <path d="M7 17 17 15" />
+      </symbol>
+      <symbol id="icon-tee" viewBox="0 0 24 24">
+        <path d="M4 12h16" />
+        <path d="M12 12v8" />
+        <circle cx="12" cy="12" r="3" />
+      </symbol>
+      <symbol id="icon-note" viewBox="0 0 24 24">
+        <path d="M5 4h14v16H5z" />
+        <path d="M8 8h8" />
+        <path d="M8 12h8" />
+        <path d="M8 16h5" />
+      </symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24">
+        <path d="M9 14 4 9l5-5" />
+        <path d="M4 9h10a6 6 0 0 1 0 12h-4" />
+      </symbol>
+      <symbol id="icon-reset" viewBox="0 0 24 24">
+        <path d="M3 12a9 9 0 1 0 3-6.7" />
+        <path d="M3 3v6h6" />
+      </symbol>
+      <symbol id="icon-export" viewBox="0 0 24 24">
+        <path d="M12 3v12" />
+        <path d="m7 10 5 5 5-5" />
+        <path d="M5 21h14" />
+      </symbol>
+      <symbol id="icon-sample" viewBox="0 0 24 24">
+        <path d="M4 17V7l8-4 8 4v10l-8 4Z" />
+        <path d="m4 7 8 4 8-4" />
+        <path d="M12 11v10" />
+      </symbol>
+      <symbol id="icon-trash" viewBox="0 0 24 24">
+        <path d="M3 6h18" />
+        <path d="M8 6V4h8v2" />
+        <path d="M6 6 7 21h10l1-15" />
+        <path d="M10 11v6" />
+        <path d="M14 11v6" />
+      </symbol>
+      <symbol id="icon-zoom-in" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M11 8v6" />
+        <path d="M8 11h6" />
+        <path d="m16 16 5 5" />
+      </symbol>
+      <symbol id="icon-zoom-out" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M8 11h6" />
+        <path d="m16 16 5 5" />
+      </symbol>
+      <symbol id="icon-image" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <circle cx="8" cy="10" r="2" />
+        <path d="m21 15-5-5L5 19" />
+      </symbol>
+    </svg>
+
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <strong>IsoSpool Studio</strong>
+            <small>2D isometric pipe spools to 3D images</small>
+          </div>
+        </div>
+
+        <div class="topbar-settings" aria-label="Project defaults and drawing overlays">
+          <label class="top-field">
+            <span>Material</span>
+            <select id="pipeSpecSelect">
+              <option value="carbon40">Carbon Sch 40</option>
+              <option value="stainless10">Stainless Sch 10S</option>
+            </select>
+          </label>
+          <label class="top-field">
+            <span>Pipe NB</span>
+            <select id="pipeSizeSelect"></select>
+          </label>
+          <span class="size-readout top-size-readout" id="pipeSizeReadout">OD 33.4 mm</span>
+          <label class="toggle top-toggle">
+            <input id="dimensionToggle" type="checkbox" checked />
+            <span>Dimensions</span>
+          </label>
+          <label class="dimension-style-field">
+            <span>Dim style</span>
+            <select id="dimensionStyleSelect" aria-label="Dimension style">
+              <option value="labels">Pipe labels</option>
+              <option value="redline">Red C/C lines</option>
+            </select>
+          </label>
+          <label class="toggle top-toggle">
+            <input id="liftingToggle" type="checkbox" checked />
+            <span>Lifting points</span>
+          </label>
+          <label class="preview-mode-field">
+            <span>3D view</span>
+            <select id="previewModeSelect">
+              <option value="carbon">Realistic 3D</option>
+              <option value="black">Carbon dark</option>
+              <option value="stainless">Stainless silver</option>
+              <option value="red">Painted red</option>
+              <option value="ghost">Transparent</option>
+              <option value="outline">Fabrication outline</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="topbar-actions" aria-label="Project actions">
+          <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
+            <svg><use href="#icon-sample"></use></svg>
+            <span>Sample</span>
+          </button>
+          <button class="icon-button labeled" id="undoButton" type="button" title="Undo" aria-label="Undo">
+            <svg><use href="#icon-undo"></use></svg>
+            <span>Undo</span>
+          </button>
+          <button class="icon-button labeled danger" id="resetButton" type="button" title="Reset spool" aria-label="Reset spool">
+            <svg><use href="#icon-reset"></use></svg>
+            <span>Reset</span>
+          </button>
+          <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
+            <svg><use href="#icon-sample"></use></svg>
+            <span>Import</span>
+          </button>
+          <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export spool project" aria-label="Export spool project">
+            <svg><use href="#icon-export"></use></svg>
+            <span>Export</span>
+          </button>
+          <input id="projectFileInput" type="file" accept=".json,application/json" hidden />
+          <button class="primary-button" id="export3dButton" type="button">
+            <svg><use href="#icon-export"></use></svg>
+            Export 3D
+          </button>
+          <button class="primary-button" id="exportReportButton" type="button">
+            <svg><use href="#icon-export"></use></svg>
+            Fab Sheet
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="tool-rail" aria-label="Drawing tools">
+          <div class="tool-grid" role="toolbar" aria-label="Drawing tools">
+            <button class="tool-button active" data-tool="draw" type="button" title="Draw pipe" aria-label="Draw pipe">
+              <svg><use href="#icon-draw"></use></svg>
+              <span>Draw</span>
+            </button>
+            <button class="tool-button" data-tool="select" type="button" title="Select" aria-label="Select">
+              <svg><use href="#icon-select"></use></svg>
+              <span>Select</span>
+            </button>
+            <button class="tool-button" data-tool="flange" type="button" title="Place flange" aria-label="Place flange">
+              <svg><use href="#icon-flange"></use></svg>
+              <span>Flange</span>
+            </button>
+            <button class="tool-button" data-tool="reducer" type="button" title="Place reducer" aria-label="Place reducer">
+              <svg><use href="#icon-reducer"></use></svg>
+              <span>Reducer</span>
+            </button>
+            <button class="tool-button" data-tool="tee" type="button" title="Create tee point" aria-label="Create tee point">
+              <svg><use href="#icon-tee"></use></svg>
+              <span>Tee</span>
+            </button>
+            <button class="tool-button" data-tool="branch" type="button" title="Create branch point" aria-label="Create branch point">
+              <svg><use href="#icon-tee"></use></svg>
+              <span>Branch</span>
+            </button>
+            <button class="tool-button" data-tool="weld" type="button" title="Place weld" aria-label="Place weld">
+              <svg><use href="#icon-weld"></use></svg>
+              <span>Weld</span>
+            </button>
+            <button class="tool-button" data-tool="valve" type="button" title="Place valve" aria-label="Place valve">
+              <svg><use href="#icon-valve"></use></svg>
+              <span>Valve</span>
+            </button>
+            <button class="tool-button" data-tool="note" type="button" title="Place note" aria-label="Place note">
+              <svg><use href="#icon-note"></use></svg>
+              <span>Note</span>
+            </button>
+            <button class="tool-button danger" id="deleteButton" type="button" title="Delete selection" aria-label="Delete selection">
+              <svg><use href="#icon-trash"></use></svg>
+              <span>Delete</span>
+            </button>
+          </div>
+        </aside>
+
+        <section class="drawing-panel" aria-label="Isometric drawing area">
+          <div class="panel-bar">
+            <div class="bar-title">
+              <span>2D Iso Drawing - Draw Here</span>
+              <small id="cursorReadout">0, 0, 0</small>
+            </div>
+            <div class="bar-actions">
+              <button class="icon-button compact labeled" id="zoomOutButton" type="button" title="Zoom out" aria-label="Zoom out">
+                <span class="button-sign" aria-hidden="true">-</span>
+                <span>Zoom</span>
+              </button>
+              <button class="icon-button compact labeled" id="zoomInButton" type="button" title="Zoom in" aria-label="Zoom in">
+                <span class="button-sign" aria-hidden="true">+</span>
+                <span>Zoom</span>
+              </button>
+              <button class="icon-button compact labeled" id="exportIsoButton" type="button" title="Save fabrication sheet" aria-label="Save fabrication sheet">
+                <svg><use href="#icon-image"></use></svg>
+                <span>Sheet</span>
+              </button>
+            </div>
+          </div>
+          <div class="canvas-frame">
+            <canvas id="drawCanvas"></canvas>
+          </div>
+        </section>
+
+        <aside class="control-panel inspector-panel" aria-label="Spool inspector">
+          <div class="inspector-header">
+            <strong>Inspector</strong>
+            <small>Selection, cut list and job details</small>
+          </div>
+          <div class="inspector-tabs" role="tablist" aria-label="Inspector views">
+            <button class="active" data-inspector-tab="properties" type="button">Properties</button>
+            <button data-inspector-tab="cutlist" type="button">Cut List</button>
+            <button data-inspector-tab="weights" type="button">Weights</button>
+            <button data-inspector-tab="notes" type="button">Notes</button>
+          </div>
+
+          <div class="inspector-tab-panel active" data-inspector-panel="properties">
+            <section class="control-section primary-selection">
+              <h2>Selected item</h2>
+              <div class="properties-panel" id="propertiesPanel" aria-live="polite"></div>
+            </section>
+            <section class="control-section">
+              <h2>Draw exact runs</h2>
+              <label class="field">
+                <span>Next run length mm</span>
+                <input id="stepLengthInput" type="number" min="50" max="12000" step="50" value="1000" />
+              </label>
+              <label class="field">
+                <span>Selected run mm</span>
+                <input id="selectedRunLengthInput" type="number" min="50" max="12000" step="50" disabled />
+              </label>
+              <div class="axis-grid" aria-label="Add precise run">
+                <button data-axis="xp" type="button">+X</button>
+                <button data-axis="yp" type="button">+Y</button>
+                <button data-axis="zp" type="button">+Z</button>
+                <button data-axis="xn" type="button">-X</button>
+                <button data-axis="yn" type="button">-Y</button>
+                <button data-axis="zn" type="button">-Z</button>
+              </div>
+            </section>
+            <section class="control-section">
+              <h2>Angles and fittings</h2>
+              <label class="field">
+                <span>Angle degrees</span>
+                <input id="angleInput" type="number" min="1" max="89" step="0.5" value="45" />
+              </label>
+              <label class="field">
+                <span>Plane</span>
+                <select id="anglePlaneSelect">
+                  <option value="xy">X-Y plan</option>
+                  <option value="xz">X-Z elevation</option>
+                  <option value="yz">Y-Z elevation</option>
+                </select>
+              </label>
+              <div class="angle-grid" aria-label="Add angled run">
+                <button id="anglePositiveButton" type="button">+ Angle</button>
+                <button id="angleNegativeButton" type="button">- Angle</button>
+              </div>
+              <label class="field">
+                <span>Default flange type</span>
+                <select id="flangeModeSelect">
+                  <option value="single">Single flange</option>
+                  <option value="double">Double flange</option>
+                </select>
+              </label>
+            </section>
+          </div>
+
+          <div class="inspector-tab-panel" data-inspector-panel="cutlist">
+            <section class="control-section segment-section">
+              <h2>Pipe runs</h2>
+              <div class="segment-list" id="segmentList" aria-live="polite"></div>
+            </section>
+            <section class="control-section">
+              <h2>Cut list notes</h2>
+              <div class="takeoff-summary" id="takeoffSummary" aria-live="polite"></div>
+            </section>
+          </div>
+
+          <div class="inspector-tab-panel" data-inspector-panel="weights">
+            <section class="control-section">
+              <h2>Weight summary</h2>
+              <div class="weights-summary" id="weightsSummary" aria-live="polite"></div>
+            </section>
+          </div>
+
+          <div class="inspector-tab-panel" data-inspector-panel="notes">
+            <section class="control-section">
+              <h2>Drawing note</h2>
+              <label class="field">
+                <span>Note text</span>
+                <input id="noteTextInput" type="text" value="FIELD NOTE" maxlength="80" />
+              </label>
+            </section>
+            <section class="control-section">
+              <h2>Job details</h2>
+              <div class="project-grid">
+                <label class="field">
+                  <span>Job no.</span>
+                  <input data-project-field="jobNumber" type="text" maxlength="32" />
+                </label>
+                <label class="field">
+                  <span>Spool no.</span>
+                  <input data-project-field="spoolNumber" type="text" maxlength="32" />
+                </label>
+                <label class="field">
+                  <span>Revision</span>
+                  <input data-project-field="revision" type="text" maxlength="16" />
+                </label>
+                <label class="field">
+                  <span>Drawn by</span>
+                  <input data-project-field="drawnBy" type="text" maxlength="32" />
+                </label>
+              </div>
+              <label class="field">
+                <span>Client / area</span>
+                <input data-project-field="client" type="text" maxlength="56" />
+              </label>
+            </section>
+          </div>
+        </aside>
+
+        <section class="preview-panel" aria-label="3D preview">
+          <div class="panel-bar">
+            <div class="bar-title">
+              <span>3D Pipe Preview</span>
+              <small id="renderStatus">Starting viewport</small>
+            </div>
+            <div class="bar-actions">
+              <span class="pill" id="spoolStats">0 runs</span>
+            </div>
+          </div>
+          <div class="preview-stage" id="previewStage">
+            <canvas id="threeCanvas" hidden></canvas>
+            <canvas id="fallbackCanvas"></canvas>
+            <div class="preview-label-layer" id="previewLabelLayer" aria-hidden="true"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script defer src="./app.js?v=54"></script>
+  </body>
+</html>
