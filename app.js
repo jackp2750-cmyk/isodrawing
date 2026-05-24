@@ -155,6 +155,7 @@ const FLANGE_BOLT_COUNTS = [
 ];
 const TOUCH_CONTEXT_PRESS_MS = 560;
 const TOUCH_CONTEXT_MOVE_LIMIT = 14;
+const DRAW_COMMIT_MOVE_LIMIT = 8;
 
 const drawingContextMenu = document.createElement("div");
 drawingContextMenu.className = "drawing-context-menu";
@@ -200,7 +201,7 @@ let nextNoteId = 1;
 let state = loadState() ?? blankState();
 let noteDrag = null;
 let touchContextPress = null;
-let pendingTouchDraw = null;
+let pendingDraw = null;
 let activeTouchPointers = new Map();
 let pinchGesture = null;
 let three = {
@@ -6616,7 +6617,7 @@ function beginPinchGesture() {
   const startDistance = touchDistance(pointerEntries);
   if (startDistance <= 0) return;
 
-  cancelPendingTouchDraw();
+  cancelPendingDraw();
   cancelTouchContextPress();
   if (noteDrag) {
     try {
@@ -6689,38 +6690,57 @@ function finishTouchContextPress(event) {
   return false;
 }
 
-function startPendingTouchDraw(event, pointer) {
-  if (!isTouchLikeEvent(event) || state.activeTool !== "draw") return false;
+function startPendingDraw(event, pointer) {
+  if (state.activeTool !== "draw") return false;
+
+  const pointHit = findNearestPoint(pointer);
+  if (pointHit) {
+    state.selectedPoint = pointHit.index;
+    state.activePoint = pointHit.index;
+    state.selectedFitting = null;
+    state.selectedNote = null;
+    clearSelectedSegments();
+  }
+
   const candidate = getSnappedCandidate(pointer);
   if (!candidate) return false;
 
-  cancelPendingTouchDraw();
-  pendingTouchDraw = {
+  cancelPendingDraw();
+  pendingDraw = {
     pointerId: event.pointerId,
+    startClientX: event.clientX,
+    startClientY: event.clientY,
+    startedOnPoint: pointHit?.index ?? null,
     candidate,
+    moved: false,
   };
   state.previewCandidate = candidate;
   state.pointer = pointer;
-  cursorReadout.textContent = formatPoint(candidate.point);
+  cursorReadout.textContent = pointHit ? "Drag to draw from point" : formatPoint(candidate.point);
   try {
     drawCanvas.setPointerCapture(event.pointerId);
   } catch {
-    // Pointer capture keeps Pencil/finger drawing stable near the canvas edge.
+    // Pointer capture keeps mouse, Pencil and finger drawing stable near the canvas edge.
   }
   drawIso();
   event.preventDefault();
   return true;
 }
 
-function updatePendingTouchDraw(event) {
-  if (!pendingTouchDraw || pendingTouchDraw.pointerId !== event.pointerId) return false;
+function updatePendingDraw(event) {
+  if (!pendingDraw || pendingDraw.pointerId !== event.pointerId) return false;
   if (pinchGesture) return false;
 
   const pointer = pointerPosition(event);
   const candidate = getSnappedCandidate(pointer);
   if (!candidate) return false;
 
-  pendingTouchDraw.candidate = candidate;
+  const moved = Math.hypot(
+    event.clientX - pendingDraw.startClientX,
+    event.clientY - pendingDraw.startClientY,
+  );
+  pendingDraw.moved = pendingDraw.moved || moved >= hitLimit(DRAW_COMMIT_MOVE_LIMIT, DRAW_COMMIT_MOVE_LIMIT + 6);
+  pendingDraw.candidate = candidate;
   state.previewCandidate = candidate;
   state.pointer = pointer;
   cursorReadout.textContent = formatPoint(candidate.point);
@@ -6729,25 +6749,36 @@ function updatePendingTouchDraw(event) {
   return true;
 }
 
-function finishPendingTouchDraw(event) {
-  if (!pendingTouchDraw || pendingTouchDraw.pointerId !== event.pointerId) return false;
-  const candidate = pendingTouchDraw.candidate;
-  cancelPendingTouchDraw({ redraw: false });
-  if (candidate) {
+function finishPendingDraw(event) {
+  if (!pendingDraw || pendingDraw.pointerId !== event.pointerId) return false;
+  const candidate = pendingDraw.candidate;
+  const shouldCommit = pendingDraw.moved && candidate;
+  const startedOnPoint = pendingDraw.startedOnPoint;
+  cancelPendingDraw({ redraw: false });
+
+  if (shouldCommit) {
     addRun(candidate.axis, candidate.length);
+  } else if (startedOnPoint !== null) {
+    state.selectedPoint = startedOnPoint;
+    state.activePoint = startedOnPoint;
+    updateAll({ save: false });
+  } else {
+    state.previewCandidate = null;
+    state.pointer = null;
+    drawIso();
   }
   event.preventDefault();
   return true;
 }
 
-function cancelPendingTouchDraw(options = {}) {
-  if (!pendingTouchDraw) return;
+function cancelPendingDraw(options = {}) {
+  if (!pendingDraw) return;
   try {
-    drawCanvas.releasePointerCapture(pendingTouchDraw.pointerId);
+    drawCanvas.releasePointerCapture(pendingDraw.pointerId);
   } catch {
     // Ignore browsers that have already released capture.
   }
-  pendingTouchDraw = null;
+  pendingDraw = null;
   state.previewCandidate = null;
   if (options.redraw !== false) {
     drawIso();
@@ -7047,7 +7078,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
     event.preventDefault();
     return;
   }
-  if (updatePendingTouchDraw(event)) return;
+  if (updatePendingDraw(event)) return;
 
   const pointer = pointerPosition(event);
   state.pointer = pointer;
@@ -7079,7 +7110,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
 });
 
 drawCanvas.addEventListener("pointerleave", () => {
-  if (noteDrag) return;
+  if (noteDrag || pendingDraw) return;
   cancelTouchContextPress();
   state.pointer = null;
   state.previewCandidate = null;
@@ -7102,12 +7133,8 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     return;
   }
-  if (startPendingTouchDraw(event, pointer)) return;
-
   if (state.activeTool === "draw") {
-    const candidate = getSnappedCandidate(pointer);
-    if (!candidate) return;
-    addRun(candidate.axis, candidate.length);
+    startPendingDraw(event, pointer);
     return;
   }
 
@@ -7179,7 +7206,7 @@ drawCanvas.addEventListener("pointerup", (event) => {
     releaseTrackedTouchPointer(event);
     return;
   }
-  if (finishPendingTouchDraw(event)) {
+  if (finishPendingDraw(event)) {
     releaseTrackedTouchPointer(event);
     return;
   }
@@ -7189,7 +7216,7 @@ drawCanvas.addEventListener("pointerup", (event) => {
 drawCanvas.addEventListener("pointercancel", (event) => {
   releaseTrackedTouchPointer(event);
   cancelTouchContextPress();
-  cancelPendingTouchDraw();
+  cancelPendingDraw();
   if (pinchGesture && !pinchGesture.ids.every((id) => activeTouchPointers.has(id))) {
     pinchGesture = null;
   }
