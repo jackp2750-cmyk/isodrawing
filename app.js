@@ -2,6 +2,8 @@ const drawCanvas = document.querySelector("#drawCanvas");
 const fallbackCanvas = document.querySelector("#fallbackCanvas");
 const threeCanvas = document.querySelector("#threeCanvas");
 const previewStage = document.querySelector("#previewStage");
+const controlPanel = document.querySelector(".control-panel");
+const previewPanel = document.querySelector(".preview-panel");
 const cursorReadout = document.querySelector("#cursorReadout");
 const renderStatus = document.querySelector("#renderStatus");
 const spoolStats = document.querySelector("#spoolStats");
@@ -24,6 +26,9 @@ const liftingToggle = document.querySelector("#liftingToggle");
 const previewLabelLayer = document.querySelector("#previewLabelLayer");
 const propertiesPanel = document.querySelector("#propertiesPanel");
 const projectFileInput = document.querySelector("#projectFileInput");
+const mobilePanelScrim = document.querySelector("#mobilePanelScrim");
+const mobilePanelButtons = [...document.querySelectorAll("[data-mobile-panel]")];
+const mobilePanelCloseButtons = [...document.querySelectorAll("[data-mobile-close-panel]")];
 const projectInputs = [...document.querySelectorAll("[data-project-field]")];
 
 const STORAGE_KEY = "isospool-studio-state-v8";
@@ -148,6 +153,8 @@ const FLANGE_BOLT_COUNTS = [
   { maxNb: 150, count: 8 },
   { maxNb: 300, count: 12 },
 ];
+const TOUCH_CONTEXT_PRESS_MS = 560;
+const TOUCH_CONTEXT_MOVE_LIMIT = 14;
 
 const drawingContextMenu = document.createElement("div");
 drawingContextMenu.className = "drawing-context-menu";
@@ -192,6 +199,10 @@ let nextFittingId = 1;
 let nextNoteId = 1;
 let state = loadState() ?? blankState();
 let noteDrag = null;
+let touchContextPress = null;
+let pendingTouchDraw = null;
+let activeTouchPointers = new Map();
+let pinchGesture = null;
 let three = {
   ready: false,
   module: null,
@@ -1889,6 +1900,25 @@ function pointerPosition(event, canvas = drawCanvas) {
   };
 }
 
+function isCoarseInput() {
+  return Boolean(
+    window.matchMedia?.("(pointer: coarse)")?.matches ||
+      window.matchMedia?.("(hover: none)")?.matches,
+  );
+}
+
+function isTabletLayout() {
+  return Boolean(window.matchMedia?.("(max-width: 1024px)")?.matches || isCoarseInput());
+}
+
+function isTouchLikeEvent(event) {
+  return event.pointerType === "touch" || event.pointerType === "pen" || (!event.pointerType && isCoarseInput());
+}
+
+function hitLimit(mouseLimit, touchLimit) {
+  return isCoarseInput() ? touchLimit : mouseLimit;
+}
+
 function unprojectIsoGround(pointer) {
   return unprojectIsoAtZ(pointer, 0, true);
 }
@@ -1978,7 +2008,7 @@ function findNearestSegment(pointer) {
     }
   }
 
-  return nearest && nearest.distance <= 18 ? nearest : null;
+  return nearest && nearest.distance <= hitLimit(18, 34) ? nearest : null;
 }
 
 function findNearestPoint(pointer) {
@@ -1991,7 +2021,7 @@ function findNearestPoint(pointer) {
       nearest = { index, point, distance };
     }
   }
-  return nearest && nearest.distance <= 14 ? nearest : null;
+  return nearest && nearest.distance <= hitLimit(14, 28) ? nearest : null;
 }
 
 function findNearestNote(pointer) {
@@ -2015,7 +2045,7 @@ function findNearestNote(pointer) {
       nearest = { note, distance };
     }
   }
-  return nearest && nearest.distance <= 38 ? nearest : null;
+  return nearest && nearest.distance <= hitLimit(38, 56) ? nearest : null;
 }
 
 function findNearestFitting(pointer) {
@@ -2040,7 +2070,7 @@ function findNearestFitting(pointer) {
     }
   }
 
-  return nearest && nearest.distance <= 26 ? nearest : null;
+  return nearest && nearest.distance <= hitLimit(26, 40) ? nearest : null;
 }
 
 function distanceToSegment(point, start, end) {
@@ -3713,6 +3743,50 @@ function setupInspectorTabs() {
     tab.addEventListener("click", () => activate(tab.dataset.inspectorTab));
   }
   activate(tabs.find((tab) => tab.classList.contains("active"))?.dataset.inspectorTab ?? tabs[0].dataset.inspectorTab);
+}
+
+function setupMobilePanels() {
+  if (!mobilePanelButtons.length) return;
+
+  for (const button of mobilePanelButtons) {
+    button.addEventListener("click", () => showMobilePanel(button.dataset.mobilePanel));
+  }
+
+  for (const button of mobilePanelCloseButtons) {
+    button.addEventListener("click", () => showMobilePanel("drawing"));
+  }
+
+  mobilePanelScrim?.addEventListener("click", () => showMobilePanel("drawing"));
+  showMobilePanel("drawing");
+}
+
+function showMobilePanel(panel = "drawing") {
+  let normalized = panel === "inspector" || panel === "preview" ? panel : "drawing";
+  if (!isTabletLayout()) {
+    normalized = "drawing";
+  }
+  const sheetOpen = normalized !== "drawing";
+
+  document.body.dataset.mobilePanel = normalized;
+  document.body.classList.toggle("mobile-panel-open", sheetOpen);
+  controlPanel?.classList.toggle("mobile-sheet-open", normalized === "inspector");
+  previewPanel?.classList.toggle("mobile-sheet-open", normalized === "preview");
+
+  if (mobilePanelScrim) {
+    mobilePanelScrim.hidden = !sheetOpen;
+  }
+
+  for (const button of mobilePanelButtons) {
+    button.classList.toggle("active", button.dataset.mobilePanel === normalized);
+    button.setAttribute("aria-pressed", String(button.dataset.mobilePanel === normalized));
+  }
+
+  if (normalized === "preview") {
+    renderFallbackPreview();
+    resizeThree();
+  } else if (normalized === "drawing") {
+    closeDrawingContextMenu();
+  }
 }
 
 function registerServiceWorker() {
@@ -6225,6 +6299,10 @@ function drawWrappedReportText(ctx, text, x, y, maxWidth, lineHeight) {
 function openDrawingContextMenu(event) {
   event.preventDefault();
   const pointer = pointerPosition(event);
+  openDrawingContextMenuFromPointer(pointer, event.clientX, event.clientY);
+}
+
+function contextTargetFromPointer(pointer) {
   const segmentHit = findNearestSegment(pointer);
   const pointHit = findNearestPoint(pointer);
   const endpointHit = endpointSegmentHitForPoint(pointHit);
@@ -6235,7 +6313,7 @@ function openDrawingContextMenu(event) {
     pipeHit ? lerpPoint(pipeHit.segment.start, pipeHit.segment.end, pipeHit.t) : unprojectIsoGround(pointer)
   );
 
-  drawingContextTarget = {
+  return {
     segmentHit: pipeHit,
     fittingHit,
     pointHit,
@@ -6243,11 +6321,14 @@ function openDrawingContextMenu(event) {
     noteHit,
     notePoint,
   };
+}
 
-  state.hoveredSegment = pipeHit ? pipeHit.segment.index : null;
+function openDrawingContextMenuFromPointer(pointer, clientX, clientY) {
+  drawingContextTarget = contextTargetFromPointer(pointer);
+  state.hoveredSegment = drawingContextTarget.segmentHit ? drawingContextTarget.segmentHit.segment.index : null;
   drawIso();
   renderDrawingContextMenu();
-  positionDrawingContextMenu(event.clientX, event.clientY);
+  positionDrawingContextMenu(clientX, clientY);
 }
 
 function endpointSegmentHitForPoint(pointHit) {
@@ -6430,6 +6511,285 @@ function positionDrawingContextMenu(clientX, clientY) {
 function closeDrawingContextMenu() {
   drawingContextMenu.hidden = true;
   drawingContextTarget = null;
+}
+
+function hasContextHit(pointer) {
+  const target = contextTargetFromPointer(pointer);
+  return Boolean(target.segmentHit || target.fittingHit || target.pointHit || target.noteHit);
+}
+
+function startTouchContextPress(event, pointer) {
+  if (!isTouchLikeEvent(event) || event.button !== 0) return false;
+  if (state.activeTool !== "draw" && state.activeTool !== "select") return false;
+
+  cancelTouchContextPress();
+  const hasHit = hasContextHit(pointer);
+  if (state.activeTool === "draw" && !hasHit) return false;
+  const blockDraw = state.activeTool === "draw" && hasHit;
+  touchContextPress = {
+    pointerId: event.pointerId,
+    pointer,
+    clientX: event.clientX,
+    clientY: event.clientY,
+    blockDraw,
+    fired: false,
+    timer: window.setTimeout(() => {
+      if (!touchContextPress || touchContextPress.pointerId !== event.pointerId) return;
+      touchContextPress.fired = true;
+      state.previewCandidate = null;
+      openDrawingContextMenuFromPointer(touchContextPress.pointer, touchContextPress.clientX, touchContextPress.clientY);
+      cursorReadout.textContent = "Tap an action";
+    }, TOUCH_CONTEXT_PRESS_MS),
+  };
+
+  try {
+    drawCanvas.setPointerCapture(event.pointerId);
+  } catch {
+    // Capture is optional, but it makes long-press feel steadier on tablets.
+  }
+
+  return blockDraw;
+}
+
+function updateTouchContextPress(event) {
+  if (!touchContextPress || touchContextPress.pointerId !== event.pointerId) return false;
+
+  const moved = Math.hypot(
+    event.clientX - touchContextPress.clientX,
+    event.clientY - touchContextPress.clientY,
+  );
+  if (moved > TOUCH_CONTEXT_MOVE_LIMIT) {
+    cancelTouchContextPress();
+    return false;
+  }
+
+  return touchContextPress.fired;
+}
+
+function cancelTouchContextPress() {
+  if (!touchContextPress) return;
+  window.clearTimeout(touchContextPress.timer);
+  try {
+    drawCanvas.releasePointerCapture(touchContextPress.pointerId);
+  } catch {
+    // Ignore browsers that have already released capture.
+  }
+  touchContextPress = null;
+}
+
+function trackTouchPointer(event) {
+  if (!isTouchLikeEvent(event)) return;
+  activeTouchPointers.set(event.pointerId, {
+    clientX: event.clientX,
+    clientY: event.clientY,
+  });
+  if (activeTouchPointers.size >= 2) {
+    beginPinchGesture();
+  }
+}
+
+function updateTrackedTouchPointer(event) {
+  if (!activeTouchPointers.has(event.pointerId)) return;
+  activeTouchPointers.set(event.pointerId, {
+    clientX: event.clientX,
+    clientY: event.clientY,
+  });
+}
+
+function releaseTrackedTouchPointer(event) {
+  activeTouchPointers.delete(event.pointerId);
+}
+
+function firstTwoTouchPointers() {
+  return [...activeTouchPointers.entries()].slice(0, 2);
+}
+
+function touchDistance(pointerEntries) {
+  if (pointerEntries.length < 2) return 0;
+  const first = pointerEntries[0][1];
+  const second = pointerEntries[1][1];
+  return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
+}
+
+function beginPinchGesture() {
+  const pointerEntries = firstTwoTouchPointers();
+  const startDistance = touchDistance(pointerEntries);
+  if (startDistance <= 0) return;
+
+  cancelPendingTouchDraw();
+  cancelTouchContextPress();
+  if (noteDrag) {
+    try {
+      drawCanvas.releasePointerCapture(noteDrag.pointerId);
+    } catch {
+      // Ignore browsers that have already released capture.
+    }
+    noteDrag = null;
+  }
+
+  pinchGesture = {
+    ids: pointerEntries.map(([id]) => id),
+    startDistance,
+    startScale: state.gridScale,
+  };
+}
+
+function updatePinchGesture() {
+  if (!pinchGesture) return false;
+  const pointerEntries = pinchGesture.ids
+    .map((id) => [id, activeTouchPointers.get(id)])
+    .filter((entry) => entry[1]);
+  if (pointerEntries.length < 2) return false;
+
+  const distance = touchDistance(pointerEntries);
+  if (distance <= 0) return false;
+  state.gridScale = clampNumber(pinchGesture.startScale * (distance / pinchGesture.startDistance), 24, 72);
+  state.previewCandidate = null;
+  cursorReadout.textContent = `Zoom ${Math.round(state.gridScale)}`;
+  drawIso();
+  return true;
+}
+
+function finishPinchGestureForPointer(event) {
+  const wasPinching = Boolean(pinchGesture && pinchGesture.ids.includes(event.pointerId));
+  releaseTrackedTouchPointer(event);
+  if (!wasPinching) return false;
+
+  if (activeTouchPointers.size >= 2) {
+    beginPinchGesture();
+  } else {
+    pinchGesture = null;
+    updateAll();
+  }
+
+  event.preventDefault();
+  return true;
+}
+
+function finishTouchContextPress(event) {
+  if (!touchContextPress || touchContextPress.pointerId !== event.pointerId) return false;
+
+  const press = touchContextPress;
+  cancelTouchContextPress();
+
+  if (press.fired) {
+    if (noteDrag) {
+      finishNoteDrag(event);
+    }
+    event.preventDefault();
+    return true;
+  }
+
+  if (press.blockDraw) {
+    selectContextHitOnTouch(press.pointer, event);
+    event.preventDefault();
+    return true;
+  }
+
+  return false;
+}
+
+function startPendingTouchDraw(event, pointer) {
+  if (!isTouchLikeEvent(event) || state.activeTool !== "draw") return false;
+  const candidate = getSnappedCandidate(pointer);
+  if (!candidate) return false;
+
+  cancelPendingTouchDraw();
+  pendingTouchDraw = {
+    pointerId: event.pointerId,
+    candidate,
+  };
+  state.previewCandidate = candidate;
+  state.pointer = pointer;
+  cursorReadout.textContent = formatPoint(candidate.point);
+  try {
+    drawCanvas.setPointerCapture(event.pointerId);
+  } catch {
+    // Pointer capture keeps Pencil/finger drawing stable near the canvas edge.
+  }
+  drawIso();
+  event.preventDefault();
+  return true;
+}
+
+function updatePendingTouchDraw(event) {
+  if (!pendingTouchDraw || pendingTouchDraw.pointerId !== event.pointerId) return false;
+  if (pinchGesture) return false;
+
+  const pointer = pointerPosition(event);
+  const candidate = getSnappedCandidate(pointer);
+  if (!candidate) return false;
+
+  pendingTouchDraw.candidate = candidate;
+  state.previewCandidate = candidate;
+  state.pointer = pointer;
+  cursorReadout.textContent = formatPoint(candidate.point);
+  drawIso();
+  event.preventDefault();
+  return true;
+}
+
+function finishPendingTouchDraw(event) {
+  if (!pendingTouchDraw || pendingTouchDraw.pointerId !== event.pointerId) return false;
+  const candidate = pendingTouchDraw.candidate;
+  cancelPendingTouchDraw({ redraw: false });
+  if (candidate) {
+    addRun(candidate.axis, candidate.length);
+  }
+  event.preventDefault();
+  return true;
+}
+
+function cancelPendingTouchDraw(options = {}) {
+  if (!pendingTouchDraw) return;
+  try {
+    drawCanvas.releasePointerCapture(pendingTouchDraw.pointerId);
+  } catch {
+    // Ignore browsers that have already released capture.
+  }
+  pendingTouchDraw = null;
+  state.previewCandidate = null;
+  if (options.redraw !== false) {
+    drawIso();
+  }
+}
+
+function selectContextHitOnTouch(pointer, event) {
+  const target = contextTargetFromPointer(pointer);
+
+  if (target.noteHit) {
+    state.selectedNote = target.noteHit.note.id;
+    state.selectedFitting = null;
+    state.selectedPoint = null;
+    clearSelectedSegments();
+    setTool("select");
+    updateAll({ save: false });
+    showMobilePanel("inspector");
+    return;
+  }
+
+  if (target.pointHit) {
+    state.selectedPoint = target.pointHit.index;
+    state.activePoint = target.pointHit.index;
+    state.selectedFitting = null;
+    state.selectedNote = null;
+    clearSelectedSegments();
+    setTool("select");
+    updateAll({ save: false });
+    showMobilePanel("inspector");
+    return;
+  }
+
+  if (target.segmentHit) {
+    chooseSegmentFromPointer(event, target.segmentHit.segment.index);
+    state.selectedNote = null;
+    state.selectedFitting = target.fittingHit ? target.fittingHit.fitting.id : null;
+    state.selectedPoint = target.segmentHit.t < 0.5 ? target.segmentHit.segment.from : target.segmentHit.segment.to;
+    state.activePoint = state.selectedPoint;
+    setTool("select");
+    updateAll({ save: false });
+    showMobilePanel("inspector");
+  }
 }
 
 function placeContextFitting(type, options = {}) {
@@ -6677,7 +7037,17 @@ function finishNoteDrag(event) {
 drawCanvas.addEventListener("contextmenu", openDrawingContextMenu);
 
 drawCanvas.addEventListener("pointermove", (event) => {
+  updateTrackedTouchPointer(event);
+  if (updatePinchGesture()) {
+    event.preventDefault();
+    return;
+  }
   if (updateNoteDrag(event)) return;
+  if (updateTouchContextPress(event)) {
+    event.preventDefault();
+    return;
+  }
+  if (updatePendingTouchDraw(event)) return;
 
   const pointer = pointerPosition(event);
   state.pointer = pointer;
@@ -6710,6 +7080,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
 
 drawCanvas.addEventListener("pointerleave", () => {
   if (noteDrag) return;
+  cancelTouchContextPress();
   state.pointer = null;
   state.previewCandidate = null;
   state.hoveredSegment = null;
@@ -6721,6 +7092,17 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   if (event.button !== 0) return;
   closeDrawingContextMenu();
   const pointer = pointerPosition(event);
+  trackTouchPointer(event);
+  if (pinchGesture) {
+    event.preventDefault();
+    return;
+  }
+  const touchPressBlocksDraw = startTouchContextPress(event, pointer);
+  if (touchPressBlocksDraw) {
+    event.preventDefault();
+    return;
+  }
+  if (startPendingTouchDraw(event, pointer)) return;
 
   if (state.activeTool === "draw") {
     const candidate = getSnappedCandidate(pointer);
@@ -6763,6 +7145,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     state.selectedFitting = null;
     state.selectedNote = null;
     updateAll({ save: false });
+    showMobilePanel("inspector");
     return;
   }
 
@@ -6781,6 +7164,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   if (state.activeTool === "select") {
     state.selectedFitting = event.shiftKey || event.ctrlKey || event.metaKey ? null : fittingAtHit ? fittingAtHit.id : null;
     updateAll({ save: false });
+    showMobilePanel("inspector");
     return;
   }
 
@@ -6789,8 +7173,28 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   }
 });
 
-drawCanvas.addEventListener("pointerup", finishNoteDrag);
-drawCanvas.addEventListener("pointercancel", finishNoteDrag);
+drawCanvas.addEventListener("pointerup", (event) => {
+  if (finishPinchGestureForPointer(event)) return;
+  if (finishTouchContextPress(event)) {
+    releaseTrackedTouchPointer(event);
+    return;
+  }
+  if (finishPendingTouchDraw(event)) {
+    releaseTrackedTouchPointer(event);
+    return;
+  }
+  finishNoteDrag(event);
+  releaseTrackedTouchPointer(event);
+});
+drawCanvas.addEventListener("pointercancel", (event) => {
+  releaseTrackedTouchPointer(event);
+  cancelTouchContextPress();
+  cancelPendingTouchDraw();
+  if (pinchGesture && !pinchGesture.ids.every((id) => activeTouchPointers.has(id))) {
+    pinchGesture = null;
+  }
+  finishNoteDrag(event);
+});
 
 document.querySelectorAll("[data-tool]").forEach((button) => {
   button.addEventListener("click", () => setTool(button.dataset.tool));
@@ -6953,7 +7357,12 @@ document.addEventListener("pointerdown", (event) => {
   closeDrawingContextMenu();
 });
 
-window.addEventListener("resize", closeDrawingContextMenu);
+window.addEventListener("resize", () => {
+  closeDrawingContextMenu();
+  if (!isTabletLayout()) {
+    showMobilePanel("drawing");
+  }
+});
 document.addEventListener("scroll", closeDrawingContextMenu, true);
 
 const resizeObserver = new ResizeObserver(() => {
@@ -6967,6 +7376,7 @@ resizeObserver.observe(previewStage);
 
 setupCollapsibleControls();
 setupInspectorTabs();
+setupMobilePanels();
 registerServiceWorker();
 populatePipeSizeOptions();
 updateControls();

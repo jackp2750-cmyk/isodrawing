@@ -263,8 +263,11 @@
 
         <aside class="control-panel inspector-panel" aria-label="Spool inspector">
           <div class="inspector-header">
-            <strong>Inspector</strong>
-            <small>Selection, cut list and job details</small>
+            <div>
+              <strong>Inspector</strong>
+              <small>Selection, cut list and job details</small>
+            </div>
+            <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close inspector">Close</button>
           </div>
           <div class="inspector-tabs" role="tablist" aria-label="Inspector views">
             <button class="active" data-inspector-tab="properties" type="button">Properties</button>
@@ -387,6 +390,7 @@
             </div>
             <div class="bar-actions">
               <span class="pill" id="spoolStats">0 runs</span>
+              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close 3D preview">Close</button>
             </div>
           </div>
           <div class="preview-stage" id="previewStage">
@@ -396,6 +400,13 @@
           </div>
         </section>
       </main>
+
+      <div class="mobile-panel-scrim" id="mobilePanelScrim" hidden></div>
+      <nav class="mobile-panel-dock" aria-label="Tablet panels">
+        <button class="active" data-mobile-panel="drawing" type="button">Drawing</button>
+        <button data-mobile-panel="inspector" type="button">Details</button>
+        <button data-mobile-panel="preview" type="button">3D Preview</button>
+      </nav>
     </div>
 
     <script type="importmap">
@@ -406,6 +417,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=54"></script>
+    <script defer src="./app.js?v=55"></script>
   </body>
 </html>
