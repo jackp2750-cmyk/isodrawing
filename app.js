@@ -26,6 +26,26 @@ const liftingToggle = document.querySelector("#liftingToggle");
 const previewLabelLayer = document.querySelector("#previewLabelLayer");
 const propertiesPanel = document.querySelector("#propertiesPanel");
 const projectFileInput = document.querySelector("#projectFileInput");
+const projectReadout = document.querySelector("#projectReadout");
+const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
+const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
+const projectDialog = document.querySelector("#projectDialog");
+const projectDialogForm = document.querySelector("#projectDialogForm");
+const projectDialogTitle = document.querySelector("#projectDialogTitle");
+const projectDialogSubmitButton = document.querySelector("#projectDialogSubmitButton");
+const projectDialogCancelButton = document.querySelector("#projectDialogCancelButton");
+const projectDialogJobPickerButton = document.querySelector("#projectDialogJobPickerButton");
+const projectJobQuickPick = document.querySelector("#projectJobQuickPick");
+const projectLibraryDialog = document.querySelector("#projectLibraryDialog");
+const projectLibraryList = document.querySelector("#projectLibraryList");
+const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
+const projectDialogInputs = {
+  jobNumber: document.querySelector("#projectDialogJobNumber"),
+  spoolNumber: document.querySelector("#projectDialogSpoolNumber"),
+  revision: document.querySelector("#projectDialogRevision"),
+  drawnBy: document.querySelector("#projectDialogDrawnBy"),
+  client: document.querySelector("#projectDialogClient"),
+};
 const mobilePanelScrim = document.querySelector("#mobilePanelScrim");
 const mobilePanelButtons = [...document.querySelectorAll("[data-mobile-panel]")];
 const mobilePanelCloseButtons = [...document.querySelectorAll("[data-mobile-close-panel]")];
@@ -33,6 +53,7 @@ const projectInputs = [...document.querySelectorAll("[data-project-field]")];
 
 const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
+const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
 const PROJECT_FILE_VERSION = 1;
 const MM_PER_GRID = 1000;
@@ -41,7 +62,7 @@ const MIN_LENGTH_MM = 50;
 const MAX_LENGTH_MM = 12000;
 const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
-const FITTING_TOOLS = new Set(["flange", "valve", "weld", "reducer"]);
+const FITTING_TOOLS = new Set(["flange", "valve", "weld", "reducer", "socket"]);
 const FLANGE_MODES = new Set(["single", "double"]);
 const PREVIEW_MODES = new Set(["carbon", "black", "stainless", "red", "ghost", "outline"]);
 const DIMENSION_STYLES = new Set(["labels", "redline"]);
@@ -156,6 +177,9 @@ const FLANGE_BOLT_COUNTS = [
 const TOUCH_CONTEXT_PRESS_MS = 560;
 const TOUCH_CONTEXT_MOVE_LIMIT = 14;
 const DRAW_COMMIT_MOVE_LIMIT = 8;
+const SOCKET_SIZE_NB = 15;
+const MAX_SOCKET_COUNT = 24;
+const DEFAULT_SOCKET_SPACING_MM = 150;
 
 const drawingContextMenu = document.createElement("div");
 drawingContextMenu.className = "drawing-context-menu";
@@ -204,6 +228,7 @@ let touchContextPress = null;
 let pendingDraw = null;
 let activeTouchPointers = new Map();
 let pinchGesture = null;
+let projectDialogResolver = null;
 let three = {
   ready: false,
   module: null,
@@ -266,6 +291,8 @@ function sampleState() {
     showDimensions: true,
     dimensionStyle: "labels",
     showLiftingPoints: false,
+    projectId: null,
+    projectInfoPrompted: true,
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -305,6 +332,8 @@ function blankState() {
     showDimensions: true,
     dimensionStyle: "labels",
     showLiftingPoints: false,
+    projectId: null,
+    projectInfoPrompted: false,
     projectInfo: defaultProjectInfo(),
     history: [],
   };
@@ -350,6 +379,8 @@ function statePayload() {
     showDimensions: state.showDimensions,
     dimensionStyle: normalizeDimensionStyle(state.dimensionStyle),
     showLiftingPoints: state.showLiftingPoints,
+    projectId: state.projectId,
+    projectInfoPrompted: state.projectInfoPrompted === true,
     projectInfo: normalizeProjectInfo(state.projectInfo),
   };
 }
@@ -357,6 +388,7 @@ function statePayload() {
 function persistState() {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(statePayload()));
+    autoSaveCurrentBrowserProject();
   } catch (error) {
     console.warn("Could not save spool state in this browser.", error);
   }
@@ -401,6 +433,8 @@ function stateFromPayload(payload, options = {}) {
     showDimensions: saved.showDimensions !== false,
     dimensionStyle: normalizeDimensionStyle(saved.dimensionStyle),
     showLiftingPoints: applyNewDefaults ? false : saved.showLiftingPoints === true,
+    projectId: normalizeProjectId(saved.projectId),
+    projectInfoPrompted: saved.projectInfoPrompted === true || hasProjectInfo(saved.projectInfo),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
   };
@@ -501,6 +535,9 @@ function normalizeFittings(fittings, edgeCount) {
       if (type === "flange") {
         normalized.flangeMode = normalizeFlangeMode(fitting.flangeMode);
       }
+      if (type === "socket") {
+        normalized.socketSizeNb = normalizePipeSize(fitting.socketSizeNb ?? SOCKET_SIZE_NB);
+      }
 
       const weightKg = Number(fitting.weightKg);
       if (Number.isFinite(weightKg) && weightKg >= 0) {
@@ -529,6 +566,33 @@ function normalizeProjectInfo(info) {
       String(source[key] ?? "").trim().slice(0, key === "client" ? 56 : 32),
     ]),
   );
+}
+
+function normalizeProjectId(value) {
+  const text = String(value ?? "").trim();
+  return text ? text.slice(0, 80) : null;
+}
+
+function hasProjectInfo(info = state.projectInfo) {
+  return Object.values(normalizeProjectInfo(info)).some(Boolean);
+}
+
+function hasDrawingContent() {
+  return Boolean(state.edges.length || state.fittings.length || state.notes.length);
+}
+
+function projectDisplayName(info = state.projectInfo) {
+  const project = normalizeProjectInfo(info);
+  const parts = [
+    project.jobNumber ? `Job ${project.jobNumber}` : "",
+    project.spoolNumber ? `Spool ${project.spoolNumber}` : "",
+    project.client,
+  ].filter(Boolean);
+  return parts.join(" - ") || "Untitled project";
+}
+
+function createProjectId() {
+  return `project-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
 function normalizeFittingPosition(type, value) {
@@ -590,6 +654,10 @@ function normalizeDimensionStyle(value) {
 
 function fittingFlangeMode(fitting) {
   return normalizeFlangeMode(fitting?.flangeMode);
+}
+
+function fittingSocketSizeNb(fitting) {
+  return normalizePipeSize(fitting?.socketSizeNb ?? SOCKET_SIZE_NB);
 }
 
 function selectedSegmentIndexes() {
@@ -1775,6 +1843,31 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
       ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.58, along.y * offset + normal.y * fittingWidth * 0.58);
       ctx.stroke();
     }
+  } else if (fitting.type === "socket") {
+    const branchLength = Math.max(19, fittingWidth * 1.45);
+    const socketRadius = Math.max(4.2, fittingWidth * 0.32);
+    ctx.lineCap = "butt";
+    ctx.lineWidth = selected ? 4 : 3;
+    drawLine(
+      ctx,
+      { x: normal.x * 2, y: normal.y * 2 },
+      { x: normal.x * branchLength, y: normal.y * branchLength },
+    );
+    ctx.beginPath();
+    ctx.arc(normal.x * (branchLength + socketRadius * 0.35), normal.y * (branchLength + socketRadius * 0.35), socketRadius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.font = "900 8px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillStyle = selected ? "#b42318" : "#0f766e";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
+    const label = '1/2"';
+    const labelX = normal.x * (branchLength + socketRadius * 1.9);
+    const labelY = normal.y * (branchLength + socketRadius * 1.9);
+    ctx.strokeText(label, labelX, labelY);
+    ctx.fillText(label, labelX, labelY);
   } else if (fitting.type === "reducer") {
     ctx.beginPath();
     ctx.moveTo(along.x * -12 + normal.x * fittingWidth * -0.6, along.y * -12 + normal.y * fittingWidth * -0.6);
@@ -1793,6 +1886,7 @@ function fittingColor(type) {
   if (type === "valve") return "#d99a23";
   if (type === "weld") return "#2563eb";
   if (type === "reducer") return "#7a4dc2";
+  if (type === "socket") return "#0f766e";
   return "#3f484b";
 }
 
@@ -1800,6 +1894,7 @@ function fittingFill(type) {
   if (type === "valve") return "#fff4cf";
   if (type === "weld") return "#eff6ff";
   if (type === "reducer") return "#f1ebff";
+  if (type === "socket") return "#dcfce7";
   return "#eef2f0";
 }
 
@@ -2684,6 +2779,10 @@ function estimatedFittingWeightKg(fitting, segment) {
   if (fitting.type === "valve") return Math.max(0.6, scale * 5.6);
   if (fitting.type === "weld") return Math.max(0.05, scale * 0.12);
   if (fitting.type === "reducer") return Math.max(0.25, scale * 1.35);
+  if (fitting.type === "socket") {
+    const socketSize = pipeSizeByNb(fittingSocketSizeNb(fitting));
+    return Math.max(0.06, pipeMassPerMetreForSize(socketSize) * 0.05 + 0.03);
+  }
   return 0;
 }
 
@@ -3085,6 +3184,8 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   };
   if (type === "flange") {
     fitting.flangeMode = normalizeFlangeMode(options.flangeMode ?? state.flangeMode);
+  } else if (type === "socket") {
+    fitting.socketSizeNb = normalizePipeSize(options.socketSizeNb ?? SOCKET_SIZE_NB);
   }
 
   state.fittings.push(fitting);
@@ -3093,6 +3194,29 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   state.selectedNote = null;
   nextFittingId += 1;
   state.history.push({ type: "fitting" });
+  updateAll();
+}
+
+function placeSocketFittings(segmentIndex, positions) {
+  const fittingIds = [];
+  for (const t of positions) {
+    const fitting = {
+      id: nextFittingId,
+      type: "socket",
+      segmentIndex,
+      t: normalizeFittingPosition("socket", t),
+      socketSizeNb: SOCKET_SIZE_NB,
+    };
+    state.fittings.push(fitting);
+    fittingIds.push(fitting.id);
+    nextFittingId += 1;
+  }
+
+  if (!fittingIds.length) return;
+  state.selectedFitting = fittingIds[fittingIds.length - 1];
+  selectSingleSegment(segmentIndex);
+  state.selectedNote = null;
+  state.history.push({ type: "fittings", fittingIds });
   updateAll();
 }
 
@@ -3136,6 +3260,10 @@ function undo() {
     state.activePoint = state.selectedPoint;
   } else if (last.type === "fitting") {
     state.fittings.pop();
+    state.selectedFitting = null;
+  } else if (last.type === "fittings") {
+    const fittingIds = new Set(last.fittingIds ?? []);
+    state.fittings = state.fittings.filter((fitting) => !fittingIds.has(fitting.id));
     state.selectedFitting = null;
   } else if (last.type === "note") {
     state.notes = state.notes.filter((note) => note.id !== last.noteId);
@@ -3265,7 +3393,7 @@ function updateWeightsSummary() {
       <div class="weight-card total"><span>Total estimated</span><strong>${formatMass(quantities.totalWeightKg)} kg</strong></div>
       <div class="weight-card"><span>COG</span><strong>${liftPoint ? formatPointCompact(liftPoint.point) : "N/A"}</strong></div>
     </div>
-    <p class="weight-note">${pipeSpec().label}. Atlas table weights are used where available. Branch welds, valves and custom weld allowances remain estimates unless set manually.</p>
+    <p class="weight-note">${pipeSpec().label}. Atlas table weights are used where available. Branch welds, valves, sockets and custom weld allowances remain estimates unless set manually.</p>
   `;
 }
 
@@ -3367,7 +3495,7 @@ function updateTakeoffSummary() {
       <ul>${fittingNotes}</ul>
     </div>
     ${liftSection}
-    <p>${pipeSpec().label}, LR elbows.${liftDisclaimer} Atlas table weights are used where available. Valves and weld allowances remain estimated unless set manually.</p>
+    <p>${pipeSpec().label}, LR elbows.${liftDisclaimer} Atlas table weights are used where available. Valves, sockets and weld allowances remain estimated unless set manually.</p>
   `;
 }
 
@@ -3432,6 +3560,18 @@ function updateProjectInputs() {
     const field = input.dataset.projectField;
     input.value = project[field] ?? "";
   }
+  updateProjectReadout();
+}
+
+function updateProjectReadout() {
+  if (!projectReadout) return;
+  const title = projectDisplayName();
+  projectReadout.textContent = hasProjectInfo() ? title : "No project set";
+  projectReadout.title = state.projectId
+    ? `${title} - saved in this browser`
+    : hasProjectInfo()
+    ? `${title} - not saved in project list yet`
+    : "No project details entered";
 }
 
 function updatePropertiesPanel() {
@@ -3446,7 +3586,7 @@ function updatePropertiesPanel() {
         ["Run", fitting.segment.index + 1],
         ["Position", `${formatLength(distance)} mm`],
         ["NB", pipeSizeForSegment(fitting.segment).nb],
-        ["Mode", fitting.fitting.type === "flange" ? fittingFlangeMode(fitting.fitting) : fitting.weightSource],
+        ["Mode", fittingModeText(fitting)],
         ["Weight", `${formatMass(fitting.weightKg)} kg ${fitting.weightSource}`],
       ],
       [
@@ -3790,6 +3930,82 @@ function showMobilePanel(panel = "drawing") {
   }
 }
 
+function setupProjectDialog() {
+  if (!projectDialogForm || !projectDialogCancelButton) return;
+
+  projectDialogForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    closeProjectDetailsDialog(projectDetailsFromDialog());
+  });
+
+  projectDialogCancelButton.addEventListener("click", () => {
+    closeProjectDetailsDialog(null);
+  });
+
+  projectDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === projectDialog) {
+      closeProjectDetailsDialog(null);
+    }
+  });
+
+  projectDialogJobPickerButton?.addEventListener("click", () => {
+    if (!projectJobQuickPick || projectDialogJobPickerButton.disabled) return;
+    if (projectJobQuickPick.hidden) {
+      openProjectJobPicker();
+    } else {
+      closeProjectJobPicker();
+    }
+  });
+
+  projectDialogInputs.jobNumber?.addEventListener("contextmenu", (event) => {
+    if (!recentProjectChoices().length) return;
+    event.preventDefault();
+    openProjectJobPicker();
+  });
+
+  projectDialogInputs.jobNumber?.addEventListener("input", () => {
+    if (projectJobQuickPick && !projectJobQuickPick.hidden) renderProjectJobPicker();
+  });
+
+  projectJobQuickPick?.addEventListener("click", (event) => {
+    const choiceButton = event.target.closest("[data-project-job-number]");
+    if (!choiceButton) return;
+    applyProjectJobChoice(choiceButton);
+  });
+
+  document.addEventListener("pointerdown", (event) => {
+    if (!projectJobQuickPick || projectJobQuickPick.hidden) return;
+    const target = event.target;
+    if (
+      projectJobQuickPick.contains(target) ||
+      projectDialogJobPickerButton?.contains(target) ||
+      projectDialogInputs.jobNumber?.contains(target)
+    ) {
+      return;
+    }
+    closeProjectJobPicker();
+  });
+
+  projectLibraryCloseButton?.addEventListener("click", closeProjectLibrary);
+  projectLibraryDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === projectLibraryDialog) {
+      closeProjectLibrary();
+    }
+  });
+  projectLibraryList?.addEventListener("click", (event) => {
+    const deleteButton = event.target.closest("[data-delete-project-id]");
+    if (deleteButton) {
+      deleteSavedBrowserProject(deleteButton.dataset.deleteProjectId);
+      return;
+    }
+
+    const openTarget = event.target.closest("[data-open-project-id]");
+    if (openTarget) {
+      openSavedBrowserProject(openTarget.dataset.openProjectId);
+    }
+  });
+}
+
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   if (location.protocol === "file:") return;
@@ -3924,6 +4140,7 @@ function rebuildThreeSpool() {
   const valveMaterial = previewMaterial(style, "valve");
   const weldMaterial = previewMaterial(style, "weld");
   const reducerMaterial = previewMaterial(style, "reducer");
+  const socketMaterial = previewMaterial(style, "socket");
 
   const modelPoints = state.points.map((point) => {
     const modelPoint = toModelUnits(point);
@@ -4097,6 +4314,8 @@ function rebuildThreeSpool() {
         reducer.castShadow = true;
         group.add(reducer);
       }
+    } else if (fitting.type === "socket") {
+      group.add(socketAssembly(position, direction, radius, fitting, socketMaterial, style));
     }
   }
 
@@ -4134,6 +4353,7 @@ function previewViewStyle() {
     valve: 0x5f696c,
     weld: 0x667681,
     reducer: 0x40484b,
+    socket: 0x0f766e,
   };
   const stainlessColors = {
     pipe: 0xfbfcfc,
@@ -4144,6 +4364,7 @@ function previewViewStyle() {
     valve: 0xf8fbfb,
     weld: 0xffffff,
     reducer: 0xf5f8f9,
+    socket: 0xe8f4f2,
   };
   const styles = {
     carbon: {
@@ -4197,6 +4418,7 @@ function previewViewStyle() {
         valve: 0xc03a25,
         weld: 0xf9735b,
         reducer: 0xa72a1b,
+        socket: 0xb42318,
       },
     },
     ghost: {
@@ -4214,6 +4436,7 @@ function previewViewStyle() {
         valve: 0xaebdbb,
         weld: 0x88a6b4,
         reducer: 0x9aa9a7,
+        socket: 0x78aaa4,
       },
     },
     outline: {
@@ -4233,6 +4456,7 @@ function previewViewStyle() {
         valve: 0xc1121f,
         weld: 0xc1121f,
         reducer: 0xc1121f,
+        socket: 0xc1121f,
       },
     },
   };
@@ -4517,6 +4741,51 @@ function outlineReducerMarker(position, direction, radius, material) {
     ));
   }
   return group;
+}
+
+function socketAssembly(position, direction, pipeRadius, fitting, material, style) {
+  const THREE = three.module;
+  const group = new THREE.Group();
+  const radial = socketRadialDirection(direction);
+  const socketRadius = socketRadiusMetres(fitting);
+  const socketLength = Math.max(0.12, socketRadius * 3.2);
+  const start = position.clone().addScaledVector(radial, pipeRadius * 0.72);
+  const end = position.clone().addScaledVector(radial, pipeRadius + socketLength);
+
+  if (style.lineDrawing) {
+    group.add(lineBetween(start, end, material));
+    group.add(outlineRing(start, radial, socketRadius * 1.05, material));
+    group.add(outlineRing(end, radial, socketRadius, material));
+    return group;
+  }
+
+  const socket = cylinderBetween(start, end, socketRadius, material, 18);
+  socket.castShadow = true;
+  socket.receiveShadow = true;
+  group.add(socket);
+
+  const weld = cylinderBetween(
+    position.clone().addScaledVector(radial, pipeRadius * 0.65),
+    position.clone().addScaledVector(radial, pipeRadius * 0.86),
+    socketRadius * 1.22,
+    material,
+    18,
+  );
+  weld.castShadow = true;
+  group.add(weld);
+  return group;
+}
+
+function socketRadialDirection(direction) {
+  const radial = radialBasis(direction).v;
+  if (radial.z < 0) radial.multiplyScalar(-1);
+  return radial.normalize();
+}
+
+function socketRadiusMetres(fitting) {
+  const size = pipeSizeByNb(fittingSocketSizeNb(fitting));
+  const maxOd = PIPE_SIZES[PIPE_SIZES.length - 1].od;
+  return Math.max(0.035, (0.055 + (size.od / maxOd) * 0.255) * 0.72);
 }
 
 function autoReducerAssembly(reducer, modelPoints, material, style) {
@@ -5067,12 +5336,7 @@ function build3dPipeLabels(segmentData, modelPoints) {
 }
 
 function pipePreviewLabelLines(segment) {
-  const lines = [`NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule}`];
-  if (state.showDimensions) {
-    const quantity = segmentQuantity(segment);
-    lines.push(`Cut ${formatLength(quantity.cutLengthMm)} mm`);
-  }
-  return lines;
+  return [`NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule}`];
 }
 
 function update3dLabelPositions() {
@@ -5681,6 +5945,20 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
         else ctx.fill();
       }
     }
+  } else if (fitting.type === "socket") {
+    const branchLength = Math.max(22, pipeWidth * 1.18);
+    const socketRadius = Math.max(5, pipeWidth * 0.28);
+    ctx.lineCap = "butt";
+    ctx.lineWidth = style.outline ? 3 : 4;
+    drawLine(
+      ctx,
+      { x: normal.x * pipeWidth * 0.25, y: normal.y * pipeWidth * 0.25 },
+      { x: normal.x * branchLength, y: normal.y * branchLength },
+    );
+    ctx.beginPath();
+    ctx.arc(normal.x * (branchLength + socketRadius * 0.25), normal.y * (branchLength + socketRadius * 0.25), socketRadius, 0, Math.PI * 2);
+    if (!style.outline) ctx.fill();
+    ctx.stroke();
   } else {
     const offsets = [-4, 4];
     for (const offset of offsets) {
@@ -5742,6 +6020,502 @@ function safeFilePart(value, fallback) {
     .replace(/[^a-z0-9_-]+/gi, "-")
     .replace(/^-+|-+$/g, "");
   return cleaned || fallback;
+}
+
+function loadSavedBrowserProjects() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(SAVED_PROJECTS_KEY));
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map((project) => ({
+        id: normalizeProjectId(project.id),
+        name: String(project.name ?? "").trim().slice(0, 120),
+        updatedAt: String(project.updatedAt ?? ""),
+        projectInfo: normalizeProjectInfo(project.projectInfo),
+        state: project.state,
+      }))
+      .filter((project) => project.id && stateFromPayload(project.state));
+  } catch {
+    return [];
+  }
+}
+
+function storeSavedBrowserProjects(projects) {
+  localStorage.setItem(SAVED_PROJECTS_KEY, JSON.stringify(projects));
+}
+
+function browserProjectRecord() {
+  const projectInfo = normalizeProjectInfo(state.projectInfo);
+  const id = normalizeProjectId(state.projectId) ?? createProjectId();
+  state.projectId = id;
+  return {
+    id,
+    name: projectDisplayName(projectInfo),
+    updatedAt: new Date().toISOString(),
+    projectInfo,
+    state: statePayload(),
+  };
+}
+
+function autoSaveCurrentBrowserProject() {
+  if (!state.projectId) return;
+  const projects = loadSavedBrowserProjects();
+  const record = browserProjectRecord();
+  const existingIndex = projects.findIndex((project) => project.id === record.id);
+  if (existingIndex >= 0) {
+    projects[existingIndex] = record;
+  } else {
+    projects.unshift(record);
+  }
+  storeSavedBrowserProjects(projects);
+}
+
+async function saveBrowserProject() {
+  const info = await openProjectDetailsDialog({
+    title: state.projectId ? "Save project" : "Save as project",
+    action: "Save project",
+    defaults: state.projectInfo,
+  });
+  if (!info) return;
+
+  state.projectInfo = info;
+  state.projectInfoPrompted = true;
+  if (!state.projectId) {
+    state.projectId = createProjectId();
+  }
+  updateControls();
+  updateAll();
+  window.alert(`Saved ${projectDisplayName(info)} in this browser.`);
+}
+
+function openBrowserProject() {
+  const projects = loadSavedBrowserProjects()
+    .sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt)));
+  renderProjectLibrary(projects);
+  if (projectLibraryDialog) {
+    projectLibraryDialog.hidden = false;
+  } else if (!projects.length) {
+    window.alert("No saved projects in this browser yet.");
+  }
+}
+
+function renderProjectLibrary(projects = loadSavedBrowserProjects()) {
+  if (!projectLibraryList) return;
+  projectLibraryList.innerHTML = "";
+
+  if (!projects.length) {
+    const empty = document.createElement("div");
+    empty.className = "project-library-empty";
+    empty.textContent = "No saved projects yet. Fill in the project details, then press Save.";
+    projectLibraryList.append(empty);
+    return;
+  }
+
+  const folders = projectFolders(projects);
+  for (const [folderIndex, folder] of folders.entries()) {
+    const details = document.createElement("details");
+    details.className = "project-folder";
+    details.open = folder.active || folderIndex === 0;
+
+    const summary = document.createElement("summary");
+    summary.className = "project-folder-summary";
+
+    const folderMain = document.createElement("div");
+    folderMain.className = "project-folder-main";
+
+    const title = document.createElement("strong");
+    title.textContent = folder.title;
+
+    const meta = document.createElement("span");
+    meta.textContent = folder.meta;
+
+    folderMain.append(title, meta);
+
+    const count = document.createElement("span");
+    count.className = "project-folder-count";
+    count.textContent = `${folder.projects.length} spool${folder.projects.length === 1 ? "" : "s"}`;
+
+    summary.append(folderMain, count);
+    details.append(summary);
+
+    const drawings = document.createElement("div");
+    drawings.className = "project-folder-drawings";
+
+    for (const project of folder.projects) {
+      drawings.append(projectLibraryRow(project));
+    }
+
+    details.append(drawings);
+    projectLibraryList.append(details);
+  }
+}
+
+function recentProjectChoices(limit = 9) {
+  const choices = new Map();
+  const projects = loadSavedBrowserProjects()
+    .sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt)));
+
+  for (const project of projects) {
+    const info = normalizeProjectInfo(project.projectInfo);
+    if (!info.jobNumber) continue;
+    const key = `${info.jobNumber.toLowerCase()}::${info.client.toLowerCase()}`;
+    const existing = choices.get(key);
+    if (existing) {
+      existing.count += 1;
+      continue;
+    }
+
+    choices.set(key, {
+      key,
+      jobNumber: info.jobNumber,
+      client: info.client,
+      revision: info.revision,
+      drawnBy: info.drawnBy,
+      updatedAt: project.updatedAt,
+      count: 1,
+    });
+  }
+
+  return [...choices.values()].slice(0, limit);
+}
+
+function updateProjectJobPickerButton() {
+  if (!projectDialogJobPickerButton) return;
+  const choices = recentProjectChoices();
+  projectDialogJobPickerButton.disabled = choices.length === 0;
+  projectDialogJobPickerButton.title = choices.length
+    ? "Pick from previous project numbers. You can also right-click the Job no. field."
+    : "No previous saved project numbers yet.";
+}
+
+function openProjectJobPicker() {
+  if (!projectJobQuickPick) return;
+  renderProjectJobPicker();
+  projectJobQuickPick.hidden = false;
+}
+
+function closeProjectJobPicker() {
+  if (projectJobQuickPick) projectJobQuickPick.hidden = true;
+}
+
+function renderProjectJobPicker() {
+  if (!projectJobQuickPick) return;
+  projectJobQuickPick.innerHTML = "";
+
+  const query = projectDialogInputs.jobNumber?.value.trim().toLowerCase() ?? "";
+  const choices = recentProjectChoices()
+    .filter((choice) => {
+      if (!query) return true;
+      return choice.jobNumber.toLowerCase().includes(query) || choice.client.toLowerCase().includes(query);
+    });
+
+  if (!choices.length) {
+    const empty = document.createElement("div");
+    empty.className = "project-job-picker-empty";
+    empty.textContent = query ? "No matching saved jobs." : "No saved project numbers yet.";
+    projectJobQuickPick.append(empty);
+    return;
+  }
+
+  for (const choice of choices) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "project-job-choice";
+    button.dataset.projectJobNumber = choice.jobNumber;
+    button.dataset.projectClient = choice.client;
+    button.dataset.projectRevision = choice.revision;
+    button.dataset.projectDrawnBy = choice.drawnBy;
+
+    const title = document.createElement("strong");
+    title.textContent = `Job ${choice.jobNumber}`;
+
+    const detail = document.createElement("span");
+    detail.textContent = [
+      choice.client || "No client / area",
+      `${choice.count} saved spool${choice.count === 1 ? "" : "s"}`,
+    ].join(" / ");
+
+    const meta = document.createElement("small");
+    meta.textContent = choice.updatedAt ? `Last used ${new Date(choice.updatedAt).toLocaleDateString()}` : "Saved project";
+
+    button.append(title, detail, meta);
+    projectJobQuickPick.append(button);
+  }
+}
+
+function applyProjectJobChoice(choiceButton) {
+  const jobNumber = choiceButton.dataset.projectJobNumber ?? "";
+  const client = choiceButton.dataset.projectClient ?? "";
+  const revision = choiceButton.dataset.projectRevision ?? "";
+  const drawnBy = choiceButton.dataset.projectDrawnBy ?? "";
+
+  if (projectDialogInputs.jobNumber) projectDialogInputs.jobNumber.value = jobNumber;
+  if (projectDialogInputs.client) projectDialogInputs.client.value = client;
+  if (projectDialogInputs.revision && !projectDialogInputs.revision.value.trim()) {
+    projectDialogInputs.revision.value = revision;
+  }
+  if (projectDialogInputs.drawnBy && !projectDialogInputs.drawnBy.value.trim()) {
+    projectDialogInputs.drawnBy.value = drawnBy;
+  }
+
+  closeProjectJobPicker();
+  projectDialogInputs.spoolNumber?.focus();
+}
+
+function projectLibraryRow(project) {
+    const row = document.createElement("div");
+    row.className = "project-library-row";
+    row.classList.toggle("active", project.id === state.projectId);
+    row.dataset.openProjectId = project.id;
+
+    const main = document.createElement("div");
+    main.className = "project-library-main";
+
+    const title = document.createElement("strong");
+    title.textContent = savedProjectSpoolTitle(project);
+
+    const details = document.createElement("span");
+    details.textContent = savedProjectDetailLine(project);
+
+    const meta = document.createElement("span");
+    meta.textContent = savedProjectMetaLine(project);
+
+    main.append(title, details, meta);
+
+    const openButton = document.createElement("button");
+    openButton.type = "button";
+    openButton.className = "project-library-action primary";
+    openButton.textContent = "Open";
+    openButton.dataset.openProjectId = project.id;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "project-library-action danger";
+    deleteButton.textContent = "Delete";
+    deleteButton.dataset.deleteProjectId = project.id;
+
+    row.append(main, openButton, deleteButton);
+    return row;
+}
+
+function projectFolders(projects) {
+  const folderMap = new Map();
+  for (const project of projects) {
+    const key = projectFolderKey(project);
+    if (!folderMap.has(key)) {
+      folderMap.set(key, {
+        key,
+        title: projectFolderTitle(project),
+        projects: [],
+        latest: "",
+        active: false,
+      });
+    }
+
+    const folder = folderMap.get(key);
+    folder.projects.push(project);
+    if (String(project.updatedAt) > String(folder.latest)) {
+      folder.latest = project.updatedAt;
+    }
+    if (project.id === state.projectId) {
+      folder.active = true;
+    }
+  }
+
+  return [...folderMap.values()]
+    .map((folder) => ({
+      ...folder,
+      projects: folder.projects.sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt))),
+      meta: projectFolderMetaLine(folder),
+    }))
+    .sort((first, second) => {
+      if (first.active !== second.active) return first.active ? -1 : 1;
+      return String(second.latest).localeCompare(String(first.latest));
+    });
+}
+
+function projectFolderKey(project) {
+  const info = normalizeProjectInfo(project.projectInfo);
+  const main = info.jobNumber || info.client || "unfiled";
+  const client = info.jobNumber && info.client ? info.client : "";
+  return `${main}::${client}`.toLowerCase();
+}
+
+function projectFolderTitle(project) {
+  const info = normalizeProjectInfo(project.projectInfo);
+  if (info.jobNumber && info.client) return `Job ${info.jobNumber} - ${info.client}`;
+  if (info.jobNumber) return `Job ${info.jobNumber}`;
+  if (info.client) return info.client;
+  return "Unfiled project";
+}
+
+function projectFolderMetaLine(folder) {
+  const updated = folder.latest ? new Date(folder.latest).toLocaleString() : "not dated";
+  return `Last saved ${updated}`;
+}
+
+function savedProjectSpoolTitle(project) {
+  const info = normalizeProjectInfo(project.projectInfo);
+  const parts = [
+    info.spoolNumber ? `Spool ${info.spoolNumber}` : "",
+    info.revision ? `Rev ${info.revision}` : "",
+  ].filter(Boolean);
+  return parts.join(" - ") || project.name || "Untitled spool";
+}
+
+function savedProjectDetailLine(project) {
+  const info = normalizeProjectInfo(project.projectInfo);
+  const parts = [
+    info.drawnBy ? `Drawn by ${info.drawnBy}` : "",
+    info.client,
+    info.jobNumber ? `Job ${info.jobNumber}` : "",
+  ].filter(Boolean);
+  return parts.join(" / ") || "No spool details";
+}
+
+function savedProjectMetaLine(project) {
+  const savedState = project.state?.state && typeof project.state.state === "object" ? project.state.state : project.state;
+  const runs = Array.isArray(savedState?.edges) ? savedState.edges.length : 0;
+  const updated = project.updatedAt ? new Date(project.updatedAt).toLocaleString() : "not dated";
+  return `${runs} run${runs === 1 ? "" : "s"} - saved ${updated}`;
+}
+
+function closeProjectLibrary() {
+  if (projectLibraryDialog) projectLibraryDialog.hidden = true;
+}
+
+function openSavedBrowserProject(projectId) {
+  const record = loadSavedBrowserProjects().find((project) => project.id === projectId);
+  if (!record) {
+    window.alert("That saved project was not found.");
+    renderProjectLibrary();
+    return;
+  }
+
+  if (state.projectId !== record.id && hasDrawingContent()) {
+    const proceed = window.confirm("Open this project? Your current drawing will be replaced.");
+    if (!proceed) return;
+    persistState();
+  }
+
+  const restored = stateFromPayload(record.state);
+  if (!restored) {
+    window.alert("That saved project could not be opened.");
+    return;
+  }
+
+  state = restored;
+  state.projectId = record.id;
+  state.projectInfo = normalizeProjectInfo(record.projectInfo);
+  state.projectInfoPrompted = true;
+  setNextIdsFromState(state);
+  updateControls();
+  updateAll();
+  closeProjectLibrary();
+}
+
+function deleteSavedBrowserProject(projectId) {
+  const projects = loadSavedBrowserProjects();
+  const record = projects.find((project) => project.id === projectId);
+  if (!record) return;
+
+  const proceed = window.confirm(`Delete ${record.name || projectDisplayName(record.projectInfo)} from this browser?`);
+  if (!proceed) return;
+
+  storeSavedBrowserProjects(projects.filter((project) => project.id !== projectId));
+  if (state.projectId === projectId) {
+    state.projectId = null;
+    updateControls();
+    persistState();
+  }
+  renderProjectLibrary();
+}
+
+async function startNewDrawing() {
+  if (hasDrawingContent()) {
+    const proceed = window.confirm("Start a new drawing? Save this project first if you want it kept in the project list.");
+    if (!proceed) return;
+  }
+
+  state = blankState();
+  nextFittingId = 1;
+  nextNoteId = 1;
+  updateControls();
+  updateAll({ save: false });
+  await promptForProjectDetails({ force: true });
+}
+
+async function promptForProjectDetails(options = {}) {
+  if (!options.force && (state.projectInfoPrompted || hasProjectInfo() || hasDrawingContent())) return;
+  const info = await openProjectDetailsDialog({
+    title: "New drawing details",
+    action: "Start drawing",
+    defaults: state.projectInfo,
+  });
+
+  state.projectInfoPrompted = true;
+  if (info) {
+    state.projectInfo = info;
+    state.projectId = createProjectId();
+  }
+  updateControls();
+  updateAll();
+}
+
+function openProjectDetailsDialog(options = {}) {
+  const fallback = () => Promise.resolve(promptProjectDetailsFallback(options.defaults));
+  if (!projectDialog || !projectDialogForm || !projectDialogSubmitButton) return fallback();
+
+  if (projectDialogResolver) {
+    projectDialogResolver(null);
+    projectDialogResolver = null;
+  }
+
+  const defaults = normalizeProjectInfo(options.defaults ?? state.projectInfo);
+  for (const [field, input] of Object.entries(projectDialogInputs)) {
+    if (input) input.value = defaults[field] ?? "";
+  }
+  if (projectDialogTitle) projectDialogTitle.textContent = options.title ?? "Project details";
+  projectDialogSubmitButton.textContent = options.action ?? "Save project";
+  closeProjectJobPicker();
+  updateProjectJobPickerButton();
+  projectDialog.hidden = false;
+  projectDialogInputs.jobNumber?.focus();
+
+  return new Promise((resolve) => {
+    projectDialogResolver = resolve;
+  });
+}
+
+function closeProjectDetailsDialog(result) {
+  closeProjectJobPicker();
+  if (projectDialog) projectDialog.hidden = true;
+  const resolve = projectDialogResolver;
+  projectDialogResolver = null;
+  resolve?.(result);
+}
+
+function projectDetailsFromDialog() {
+  return normalizeProjectInfo(
+    Object.fromEntries(
+      Object.entries(projectDialogInputs).map(([field, input]) => [field, input?.value ?? ""]),
+    ),
+  );
+}
+
+function promptProjectDetailsFallback(defaults = state.projectInfo) {
+  const current = normalizeProjectInfo(defaults);
+  const jobNumber = window.prompt("Job no.", current.jobNumber);
+  if (jobNumber === null) return null;
+  const spoolNumber = window.prompt("Spool no.", current.spoolNumber);
+  if (spoolNumber === null) return null;
+  const client = window.prompt("Client / area", current.client);
+  if (client === null) return null;
+  const revision = window.prompt("Revision", current.revision || "A");
+  if (revision === null) return null;
+  const drawnBy = window.prompt("Drawn by", current.drawnBy);
+  if (drawnBy === null) return null;
+  return normalizeProjectInfo({ jobNumber, spoolNumber, client, revision, drawnBy });
 }
 
 function exportProjectFile() {
@@ -6003,8 +6777,8 @@ function drawReportTakeoff(ctx, area, quantities) {
   drawWrappedReportText(
     ctx,
     state.showLiftingPoints
-      ? `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; branch welds, valves and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
-      : `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; branch welds, valves and weld allowances are estimated unless manually set.`,
+      ? `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; branch welds, valves, sockets and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
+      : `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; branch welds, valves, sockets and weld allowances are estimated unless manually set.`,
     x,
     area.y + area.height - 36,
     area.width - 48,
@@ -6391,6 +7165,11 @@ function renderDrawingContextMenu() {
         label: "Add reducer",
         detail: "On this run",
         action: () => placeContextFitting("reducer"),
+      },
+      {
+        label: "Add 1/2 sockets",
+        detail: "Choose count and spacing",
+        action: () => addContextSockets(),
       },
     );
 
@@ -6811,12 +7590,80 @@ function placeContextFitting(type, options = {}) {
   placeFitting(type, hit.segment.index, hit.t, options);
 }
 
+function addContextSockets() {
+  const hit = drawingContextTarget?.segmentHit;
+  if (!hit) return;
+
+  const countText = window.prompt("How many 1/2 inch sockets?", "1");
+  if (countText === null) return;
+
+  const count = Math.round(Number(countText));
+  if (!Number.isInteger(count) || count < 1 || count > MAX_SOCKET_COUNT) {
+    window.alert(`Enter a socket count from 1 to ${MAX_SOCKET_COUNT}.`);
+    return;
+  }
+
+  const evenSpaced = count > 1
+    ? window.confirm("Evenly space the sockets along this pipe section?\nOK = even spaced\nCancel = grouped around the right-click spot")
+    : false;
+  const positions = socketPositionsForContext(hit, count, evenSpaced);
+  if (!positions.length) return;
+  placeSocketFittings(hit.segment.index, positions);
+}
+
+function socketPositionsForContext(hit, count, evenSpaced) {
+  const lengthMm = Math.max(1, pointLength(hit.segment.vector));
+  const endMarginT = clampNumber(50 / lengthMm, 0.04, 0.18);
+  const minT = endMarginT;
+  const maxT = 1 - endMarginT;
+
+  if (count === 1) {
+    return [clampNumber(hit.t, minT, maxT)];
+  }
+
+  if (evenSpaced) {
+    return evenlySpacedSocketPositions(count, minT, maxT);
+  }
+
+  const spacingText = window.prompt("Socket spacing mm centre-to-centre", String(DEFAULT_SOCKET_SPACING_MM));
+  if (spacingText === null) return [];
+
+  const spacingMm = Number(spacingText);
+  if (!Number.isFinite(spacingMm) || spacingMm <= 0) {
+    window.alert("Enter a valid socket spacing in mm.");
+    return [];
+  }
+
+  const stepT = spacingMm / lengthMm;
+  const spanT = stepT * (count - 1);
+  if (spanT >= maxT - minT) {
+    window.alert("That spacing does not fit on this pipe section, so the sockets will be evenly spaced instead.");
+    return evenlySpacedSocketPositions(count, minT, maxT);
+  }
+
+  const startT = clampNumber(hit.t - spanT * 0.5, minT, maxT - spanT);
+  return Array.from({ length: count }, (_, index) => startT + index * stepT);
+}
+
+function evenlySpacedSocketPositions(count, minT, maxT) {
+  const span = maxT - minT;
+  return Array.from({ length: count }, (_, index) => minT + ((index + 1) / (count + 1)) * span);
+}
+
 function fittingActionLabel(type) {
   if (type === "flange") return "flange";
   if (type === "valve") return "valve";
   if (type === "weld") return "weld";
   if (type === "reducer") return "reducer";
+  if (type === "socket") return "1/2 socket";
   return "fitting";
+}
+
+function fittingModeText(fittingData) {
+  const fitting = fittingData?.fitting ?? fittingData;
+  if (fitting?.type === "flange") return fittingFlangeMode(fitting);
+  if (fitting?.type === "socket") return `NB ${fittingSocketSizeNb(fitting)} socket`;
+  return fittingData?.weightSource ?? "estimated";
 }
 
 function deleteContextSegments() {
@@ -7225,6 +8072,8 @@ projectInputs.forEach((input) => {
       ...state.projectInfo,
       [field]: input.value,
     });
+    state.projectInfoPrompted = true;
+    updateProjectReadout();
     persistState();
   });
 });
@@ -7309,13 +8158,9 @@ document.querySelector("#sampleButton").addEventListener("click", () => {
 });
 
 document.querySelector("#undoButton").addEventListener("click", undo);
-document.querySelector("#resetButton").addEventListener("click", () => {
-  state = blankState();
-  nextFittingId = 1;
-  nextNoteId = 1;
-  updateControls();
-  updateAll();
-});
+document.querySelector("#resetButton").addEventListener("click", startNewDrawing);
+saveBrowserProjectButton?.addEventListener("click", saveBrowserProject);
+openBrowserProjectButton?.addEventListener("click", openBrowserProject);
 document.querySelector("#deleteButton").addEventListener("click", deleteSelection);
 document.querySelector("#exportProjectButton").addEventListener("click", exportProjectFile);
 document.querySelector("#importProjectButton").addEventListener("click", () => projectFileInput.click());
@@ -7348,7 +8193,12 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "Delete" || event.key === "Backspace") {
     deleteSelection();
   } else if (event.key === "Escape") {
+    if (projectJobQuickPick && !projectJobQuickPick.hidden) {
+      closeProjectJobPicker();
+      return;
+    }
     closeDrawingContextMenu();
+    closeProjectLibrary();
     state.selectedFitting = null;
     clearSelectedSegments();
     setTool("draw");
@@ -7387,8 +8237,10 @@ resizeObserver.observe(previewStage);
 setupCollapsibleControls();
 setupInspectorTabs();
 setupMobilePanels();
+setupProjectDialog();
 registerServiceWorker();
 populatePipeSizeOptions();
 updateControls();
 updateAll({ save: false });
+setTimeout(() => promptForProjectDetails(), 250);
 initThree();

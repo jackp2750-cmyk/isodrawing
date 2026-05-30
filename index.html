@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./styles.css?v=66" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -116,6 +116,7 @@
         </div>
 
         <div class="topbar-settings" aria-label="Project defaults and drawing overlays">
+          <span class="project-readout" id="projectReadout">No project set</span>
           <label class="top-field">
             <span>Material</span>
             <select id="pipeSpecSelect">
@@ -167,7 +168,15 @@
           </button>
           <button class="icon-button labeled danger" id="resetButton" type="button" title="Reset spool" aria-label="Reset spool">
             <svg><use href="#icon-reset"></use></svg>
-            <span>Reset</span>
+            <span>New</span>
+          </button>
+          <button class="icon-button labeled" id="saveBrowserProjectButton" type="button" title="Save project in this browser" aria-label="Save project in this browser">
+            <svg><use href="#icon-export"></use></svg>
+            <span>Save</span>
+          </button>
+          <button class="icon-button labeled" id="openBrowserProjectButton" type="button" title="Open saved project" aria-label="Open saved project">
+            <svg><use href="#icon-sample"></use></svg>
+            <span>Open</span>
           </button>
           <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
             <svg><use href="#icon-sample"></use></svg>
@@ -407,6 +416,62 @@
         <button data-mobile-panel="inspector" type="button">Details</button>
         <button data-mobile-panel="preview" type="button">3D Preview</button>
       </nav>
+
+      <div class="project-dialog-backdrop" id="projectDialog" hidden>
+        <form class="project-dialog-card" id="projectDialogForm">
+          <div class="project-dialog-header">
+            <div>
+              <strong id="projectDialogTitle">Project details</strong>
+              <small>These details go on the fabrication sheet and saved project list.</small>
+            </div>
+          </div>
+          <div class="project-dialog-grid">
+            <label class="field">
+              <span>Job no.</span>
+              <div class="project-job-entry">
+                <input id="projectDialogJobNumber" type="text" maxlength="32" autocomplete="off" />
+                <button class="project-job-picker-button" id="projectDialogJobPickerButton" type="button">Recent</button>
+              </div>
+              <div class="project-job-picker" id="projectJobQuickPick" hidden></div>
+            </label>
+            <label class="field">
+              <span>Spool no.</span>
+              <input id="projectDialogSpoolNumber" type="text" maxlength="32" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Revision</span>
+              <input id="projectDialogRevision" type="text" maxlength="16" autocomplete="off" />
+            </label>
+            <label class="field">
+              <span>Drawn by</span>
+              <input id="projectDialogDrawnBy" type="text" maxlength="32" autocomplete="off" />
+            </label>
+            <label class="field project-dialog-wide">
+              <span>Client / area</span>
+              <input id="projectDialogClient" type="text" maxlength="56" autocomplete="off" />
+            </label>
+          </div>
+          <div class="project-dialog-actions">
+            <button class="icon-button labeled" id="projectDialogCancelButton" type="button">Cancel</button>
+            <button class="primary-button" id="projectDialogSubmitButton" type="submit">Save project</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="project-dialog-backdrop" id="projectLibraryDialog" hidden>
+        <section class="project-dialog-card project-library-card" aria-label="Saved projects">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Saved projects</strong>
+              <small>Projects are saved on this device/browser. Open a project folder, then tap a spool drawing.</small>
+            </div>
+          </div>
+          <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
+          <div class="project-dialog-actions">
+            <button class="icon-button labeled" id="projectLibraryCloseButton" type="button">Close</button>
+          </div>
+        </section>
+      </div>
     </div>
 
     <script type="importmap">
@@ -417,6 +482,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=57"></script>
+    <script defer src="./app.js?v=66"></script>
   </body>
 </html>

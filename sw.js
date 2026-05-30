@@ -1,9 +1,9 @@
-const CACHE_NAME = "isospool-studio-v4";
+const CACHE_NAME = "isospool-studio-v14";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css",
-  "./app.js",
+  "./styles.css?v=66",
+  "./app.js?v=66",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
@@ -37,7 +37,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (url.origin === self.location.origin) {
-    event.respondWith(staleWhileRevalidate(request, true));
+    event.respondWith(staleWhileRevalidate(request, false));
     return;
   }
 
