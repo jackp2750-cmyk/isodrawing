@@ -5173,7 +5173,7 @@ function previewViewStyle() {
     weld: 0x667681,
     reducer: 0x40484b,
     socket: 0x0f766e,
-    groove: 0x0f766e,
+    groove: 0x111719,
   };
   const stainlessColors = {
     pipe: 0xfbfcfc,
@@ -5185,7 +5185,7 @@ function previewViewStyle() {
     weld: 0xffffff,
     reducer: 0xf5f8f9,
     socket: 0xe8f4f2,
-    groove: 0xb7c5c9,
+    groove: 0x9aa6aa,
   };
   const styles = {
     carbon: {
@@ -5240,7 +5240,7 @@ function previewViewStyle() {
         weld: 0xf9735b,
         reducer: 0xa72a1b,
         socket: 0xb42318,
-        groove: 0x7f1d1d,
+        groove: 0x5f1410,
       },
     },
     ghost: {
@@ -5259,7 +5259,7 @@ function previewViewStyle() {
         weld: 0x88a6b4,
         reducer: 0x9aa9a7,
         socket: 0x78aaa4,
-        groove: 0x5f7f7b,
+        groove: 0x4d6561,
       },
     },
     outline: {
@@ -5607,22 +5607,27 @@ function socketAssembly(position, direction, pipeRadius, fitting, material, styl
 function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
-  const grooveSpacing = clampNumber(pipeRadius * 0.62, 0.045, 0.12);
+  const grooveSpacing = clampNumber(pipeRadius * 0.22, 0.014, 0.036);
 
   if (style.lineDrawing) {
-    return outlineBandMarker(position, axis, pipeRadius * 1.06, material, grooveSpacing * 2.2);
+    return outlineBandMarker(position, axis, pipeRadius * 1.01, material, grooveSpacing * 1.6);
   }
 
   const group = new THREE.Group();
-  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
-    const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(pipeRadius * 1.018, clampNumber(pipeRadius * 0.035, 0.004, 0.012), 8, 48),
-      material,
-    );
-    ring.position.copy(position).addScaledVector(axis, offset);
-    ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), axis);
-    ring.castShadow = true;
-    group.add(ring);
+  const lineMaterial = new THREE.LineBasicMaterial({
+    color: material.color?.getHex?.() ?? 0x111719,
+    transparent: style.opacity < 1,
+    opacity: Math.min(0.94, (style.opacity ?? 1) + 0.08),
+  });
+  const shadowMaterial = new THREE.LineBasicMaterial({
+    color: material.color?.getHex?.() ?? 0x111719,
+    transparent: true,
+    opacity: Math.min(0.46, style.opacity ?? 1),
+  });
+
+  group.add(outlineRing(position, axis, pipeRadius * 1.006, shadowMaterial));
+  for (const offset of [-grooveSpacing, grooveSpacing]) {
+    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.01, lineMaterial));
   }
   return group;
 }
@@ -8240,6 +8245,7 @@ function renderDrawingContextMenu() {
       label: "Change pipe size",
       detail: contextPipeSizeDetail(target.segmentHit.segment),
       action: () => changeContextPipeSize(),
+      keepOpen: true,
     });
 
     if (currentBend !== null) {
@@ -8391,10 +8397,73 @@ function renderDrawingContextMenu() {
 
     button.addEventListener("click", () => {
       action.action();
+      if (!action.keepOpen) {
+        closeDrawingContextMenu();
+      }
+    });
+    drawingContextMenu.append(button);
+  }
+}
+
+function renderContextPipeSizeMenu() {
+  const hit = drawingContextTarget?.segmentHit;
+  if (!hit) return;
+
+  const targetIndexes = contextPipeSizeTargetIndexes(hit.segment);
+  const segmentData = segments();
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  const currentSizes = new Set(
+    targetIndexes
+      .map((index) => segmentByIndex.get(index))
+      .filter(Boolean)
+      .map((segment) => pipeSizeForSegment(segment).nb),
+  );
+  const countText = targetIndexes.length > 1 ? `${targetIndexes.length} selected runs` : `Run ${hit.segment.index + 1}`;
+
+  drawingContextMenu.innerHTML = "";
+
+  const header = document.createElement("div");
+  header.className = "drawing-context-header";
+  const title = document.createElement("strong");
+  title.textContent = "Pipe size";
+  const subtitle = document.createElement("small");
+  subtitle.textContent = `${countText} - choose NB`;
+  header.append(title, subtitle);
+  drawingContextMenu.append(header);
+
+  const backButton = document.createElement("button");
+  backButton.type = "button";
+  backButton.className = "drawing-context-item compact";
+  backButton.innerHTML = "<span>Back</span><small>Return to pipe actions</small>";
+  backButton.addEventListener("click", () => {
+    renderDrawingContextMenu();
+    clampDrawingContextMenuToViewport();
+  });
+  drawingContextMenu.append(backButton);
+
+  for (const size of PIPE_SIZES) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "drawing-context-item";
+    if (currentSizes.size === 1 && currentSizes.has(size.nb)) {
+      button.classList.add("active");
+    }
+    button.setAttribute("role", "menuitem");
+
+    const label = document.createElement("span");
+    label.textContent = `NB ${size.nb}`;
+    const detail = document.createElement("small");
+    detail.textContent = `NPS ${size.nps} / OD ${size.od.toFixed(1)} mm / ${pipeSpec().schedule}`;
+    button.append(label, detail);
+
+    button.addEventListener("click", () => {
+      setPipeSizeForSegments(targetIndexes, size.nb);
       closeDrawingContextMenu();
     });
     drawingContextMenu.append(button);
   }
+
+  clampDrawingContextMenuToViewport();
 }
 
 function positionDrawingContextMenu(clientX, clientY) {
@@ -8402,10 +8471,16 @@ function positionDrawingContextMenu(clientX, clientY) {
   drawingContextMenu.style.left = `${clientX}px`;
   drawingContextMenu.style.top = `${clientY}px`;
 
+  clampDrawingContextMenuToViewport();
+}
+
+function clampDrawingContextMenuToViewport() {
   requestAnimationFrame(() => {
     const rect = drawingContextMenu.getBoundingClientRect();
-    const left = clampNumber(clientX, 8, window.innerWidth - rect.width - 8);
-    const top = clampNumber(clientY, 8, window.innerHeight - rect.height - 8);
+    const currentLeft = Number.parseFloat(drawingContextMenu.style.left) || rect.left;
+    const currentTop = Number.parseFloat(drawingContextMenu.style.top) || rect.top;
+    const left = clampNumber(currentLeft, 8, Math.max(8, window.innerWidth - rect.width - 8));
+    const top = clampNumber(currentTop, 8, Math.max(8, window.innerHeight - rect.height - 8));
     drawingContextMenu.style.left = `${left}px`;
     drawingContextMenu.style.top = `${top}px`;
   });
@@ -8416,6 +8491,12 @@ function closeDrawingContextMenu() {
   drawingContextTarget = null;
 }
 
+function handleDocumentScrollForContextMenu(event) {
+  if (drawingContextMenu.hidden) return;
+  if (event.target && drawingContextMenu.contains(event.target)) return;
+  closeDrawingContextMenu();
+}
+
 function hasContextHit(pointer) {
   const target = contextTargetFromPointer(pointer);
   return Boolean(target.segmentHit || target.fittingHit || target.pointHit || target.noteHit);
@@ -8423,11 +8504,11 @@ function hasContextHit(pointer) {
 
 function startTouchContextPress(event, pointer) {
   if (!isTouchLikeEvent(event) || event.button !== 0) return false;
-  if (state.activeTool !== "draw" && state.activeTool !== "select") return false;
+  if (state.activeTool !== "select") return false;
 
   cancelTouchContextPress();
   const hasHit = hasContextHit(pointer);
-  if (state.activeTool === "draw" && !hasHit) return false;
+  if (!hasHit) return false;
   touchContextPress = {
     pointerId: event.pointerId,
     pointer,
@@ -8634,7 +8715,7 @@ function updatePendingDraw(event) {
     event.clientX - pendingDraw.startClientX,
     event.clientY - pendingDraw.startClientY,
   );
-  pendingDraw.moved = pendingDraw.moved || moved >= hitLimit(DRAW_COMMIT_MOVE_LIMIT, DRAW_COMMIT_MOVE_LIMIT + 6);
+  pendingDraw.moved = pendingDraw.moved || moved >= hitLimit(DRAW_COMMIT_MOVE_LIMIT, DRAW_COMMIT_MOVE_LIMIT);
   pendingDraw.candidate = candidate;
   state.previewCandidate = candidate;
   state.pointer = pointer;
@@ -8946,29 +9027,21 @@ function editContextSegmentAngle() {
 }
 
 function contextPipeSizeDetail(segment) {
-  const selected = selectedSegmentIndexes();
-  const targetIsSelected = selected.includes(segment.index);
-  const count = targetIsSelected && selected.length > 1 ? selected.length : 1;
+  const count = contextPipeSizeTargetIndexes(segment).length;
   const nb = pipeSizeForSegment(segment).nb;
   return count > 1 ? `${count} selected sections` : `Current NB ${nb}`;
+}
+
+function contextPipeSizeTargetIndexes(segment) {
+  if (!segment) return [];
+  const selected = selectedSegmentIndexes();
+  return selected.includes(segment.index) && selected.length > 1 ? selected : [segment.index];
 }
 
 function changeContextPipeSize() {
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
-
-  const selected = selectedSegmentIndexes();
-  const targetIndexes = selected.includes(hit.segment.index) ? selected : [hit.segment.index];
-  const currentSize = pipeSizeForSegment(hit.segment).nb;
-  const requested = window.prompt(`Pipe size NB (${PIPE_SIZES.map((size) => size.nb).join(", ")})`, String(currentSize));
-  if (requested === null) return;
-
-  const pipeSizeNb = pipeSizeFromText(requested);
-  if (pipeSizeNb === null) {
-    window.alert("That NB size is not in the pipe size list.");
-    return;
-  }
-  setPipeSizeForSegments(targetIndexes, pipeSizeNb);
+  renderContextPipeSizeMenu();
 }
 
 function addContextNote(point) {
@@ -9498,7 +9571,7 @@ window.addEventListener("resize", () => {
     showMobilePanel("drawing");
   }
 });
-document.addEventListener("scroll", closeDrawingContextMenu, true);
+document.addEventListener("scroll", handleDocumentScrollForContextMenu, true);
 
 const resizeObserver = new ResizeObserver(() => {
   drawIso();
