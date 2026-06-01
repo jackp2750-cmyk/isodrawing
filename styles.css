@@ -259,6 +259,13 @@ button svg path {
   color: #fff;
 }
 
+.top-toggle:has(input:checked) span,
+.tool-button.active span,
+.mobile-panel-dock button.active,
+.inspector-tabs button.active {
+  color: #fff;
+}
+
 .top-toggle input {
   width: 16px;
   height: 16px;
@@ -1340,6 +1347,17 @@ button svg path {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.new-drawing-card {
+  max-width: 440px;
+}
+
+.new-drawing-options {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .project-library-card {

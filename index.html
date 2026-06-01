@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=66" />
+    <link rel="stylesheet" href="./styles.css?v=77" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -30,6 +30,13 @@
         <path d="M14 8h4" />
         <path d="M6 16h4" />
         <path d="M14 16h4" />
+      </symbol>
+      <symbol id="icon-groove" viewBox="0 0 24 24">
+        <path d="M4 12h16" />
+        <path d="M8 7v10" />
+        <path d="M10 8v8" />
+        <path d="M14 8v8" />
+        <path d="M16 7v10" />
       </symbol>
       <symbol id="icon-valve" viewBox="0 0 24 24">
         <path d="M4 12h4" />
@@ -144,6 +151,16 @@
             <input id="liftingToggle" type="checkbox" checked />
             <span>Lifting points</span>
           </label>
+          <label class="dimension-style-field">
+            <span>Sling angle</span>
+            <select id="liftingAngleSelect" aria-label="Sling angle from horizontal">
+              <option value="30">30 deg</option>
+              <option value="45">45 deg</option>
+              <option value="60">60 deg</option>
+              <option value="75">75 deg</option>
+              <option value="90">90 deg</option>
+            </select>
+          </label>
           <label class="preview-mode-field">
             <span>3D view</span>
             <select id="previewModeSelect">
@@ -182,11 +199,11 @@
             <svg><use href="#icon-sample"></use></svg>
             <span>Import</span>
           </button>
-          <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export spool project" aria-label="Export spool project">
+          <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
             <svg><use href="#icon-export"></use></svg>
             <span>Export</span>
           </button>
-          <input id="projectFileInput" type="file" accept=".json,application/json" hidden />
+          <input id="projectFileInput" type="file" accept=".html,text/html,.json,application/json" hidden />
           <button class="primary-button" id="export3dButton" type="button">
             <svg><use href="#icon-export"></use></svg>
             Export 3D
@@ -212,6 +229,10 @@
             <button class="tool-button" data-tool="flange" type="button" title="Place flange" aria-label="Place flange">
               <svg><use href="#icon-flange"></use></svg>
               <span>Flange</span>
+            </button>
+            <button class="tool-button" data-tool="rollGroove" type="button" title="Place roll groove" aria-label="Place roll groove">
+              <svg><use href="#icon-groove"></use></svg>
+              <span>Groove</span>
             </button>
             <button class="tool-button" data-tool="reducer" type="button" title="Place reducer" aria-label="Place reducer">
               <svg><use href="#icon-reducer"></use></svg>
@@ -458,6 +479,22 @@
         </form>
       </div>
 
+      <div class="project-dialog-backdrop" id="newDrawingDialog" hidden>
+        <section class="project-dialog-card new-drawing-card" aria-label="Start new drawing">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Start a new drawing?</strong>
+              <small>Choose what to do with the drawing currently on screen.</small>
+            </div>
+          </div>
+          <div class="new-drawing-options">
+            <button class="icon-button labeled" id="newDrawingCancelButton" type="button">Cancel</button>
+            <button class="icon-button labeled danger" id="newDrawingDiscardButton" type="button">Don't save</button>
+            <button class="primary-button" id="newDrawingSaveButton" type="button">Save and start new</button>
+          </div>
+        </section>
+      </div>
+
       <div class="project-dialog-backdrop" id="projectLibraryDialog" hidden>
         <section class="project-dialog-card project-library-card" aria-label="Saved projects">
           <div class="project-dialog-header">
@@ -482,6 +519,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=66"></script>
+    <script defer src="./app.js?v=77"></script>
   </body>
 </html>

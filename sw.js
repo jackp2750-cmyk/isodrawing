@@ -1,9 +1,9 @@
-const CACHE_NAME = "isospool-studio-v14";
+const CACHE_NAME = "isospool-studio-v25";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=66",
-  "./app.js?v=66",
+  "./styles.css?v=77",
+  "./app.js?v=77",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
@@ -14,7 +14,6 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -42,6 +41,12 @@ self.addEventListener("fetch", (event) => {
   }
 
   event.respondWith(staleWhileRevalidate(request, false));
+});
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 async function networkFirst(request, fallbackUrl) {

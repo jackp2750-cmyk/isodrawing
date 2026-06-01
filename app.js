@@ -23,6 +23,7 @@ const flangeModeSelect = document.querySelector("#flangeModeSelect");
 const dimensionToggle = document.querySelector("#dimensionToggle");
 const dimensionStyleSelect = document.querySelector("#dimensionStyleSelect");
 const liftingToggle = document.querySelector("#liftingToggle");
+const liftingAngleSelect = document.querySelector("#liftingAngleSelect");
 const previewLabelLayer = document.querySelector("#previewLabelLayer");
 const propertiesPanel = document.querySelector("#propertiesPanel");
 const projectFileInput = document.querySelector("#projectFileInput");
@@ -36,6 +37,10 @@ const projectDialogSubmitButton = document.querySelector("#projectDialogSubmitBu
 const projectDialogCancelButton = document.querySelector("#projectDialogCancelButton");
 const projectDialogJobPickerButton = document.querySelector("#projectDialogJobPickerButton");
 const projectJobQuickPick = document.querySelector("#projectJobQuickPick");
+const newDrawingDialog = document.querySelector("#newDrawingDialog");
+const newDrawingCancelButton = document.querySelector("#newDrawingCancelButton");
+const newDrawingDiscardButton = document.querySelector("#newDrawingDiscardButton");
+const newDrawingSaveButton = document.querySelector("#newDrawingSaveButton");
 const projectLibraryDialog = document.querySelector("#projectLibraryDialog");
 const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
@@ -60,13 +65,16 @@ const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 50;
 const MIN_LENGTH_MM = 50;
 const MAX_LENGTH_MM = 12000;
+const RUN_CONNECTION_TOLERANCE_MM = 8;
 const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
-const FITTING_TOOLS = new Set(["flange", "valve", "weld", "reducer", "socket"]);
+const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer", "socket"]);
 const FLANGE_MODES = new Set(["single", "double"]);
+const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const PREVIEW_MODES = new Set(["carbon", "black", "stainless", "red", "ghost", "outline"]);
 const DIMENSION_STYLES = new Set(["labels", "redline"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
+const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
 const PIPE_SPECS = {
   carbon40: {
     label: "Carbon steel Sch 40",
@@ -180,6 +188,7 @@ const DRAW_COMMIT_MOVE_LIMIT = 8;
 const SOCKET_SIZE_NB = 15;
 const MAX_SOCKET_COUNT = 24;
 const DEFAULT_SOCKET_SPACING_MM = 150;
+const SOCKET_ROTATION_STEP_DEG = 90;
 
 const drawingContextMenu = document.createElement("div");
 drawingContextMenu.className = "drawing-context-menu";
@@ -224,11 +233,15 @@ let nextFittingId = 1;
 let nextNoteId = 1;
 let state = loadState() ?? blankState();
 let noteDrag = null;
+let socketDrag = null;
 let touchContextPress = null;
 let pendingDraw = null;
 let activeTouchPointers = new Map();
 let pinchGesture = null;
 let projectDialogResolver = null;
+let newDrawingDialogResolver = null;
+let appUpdatePromptOpen = false;
+let appUpdateReloadPending = false;
 let three = {
   ready: false,
   module: null,
@@ -277,6 +290,7 @@ function sampleState() {
       { id: 1, text: "SHOP WELD", point: { x: 2800, y: 1200, z: 0 } },
     ],
     nodeTypes: {},
+    reducerSideOverrides: {},
     hoveredSegment: null,
     pointer: null,
     previewCandidate: null,
@@ -291,6 +305,7 @@ function sampleState() {
     showDimensions: true,
     dimensionStyle: "labels",
     showLiftingPoints: false,
+    liftingSlingAngleDegrees: 60,
     projectId: null,
     projectInfoPrompted: true,
     projectInfo: {
@@ -318,6 +333,7 @@ function blankState() {
     activePoint: 0,
     notes: [],
     nodeTypes: {},
+    reducerSideOverrides: {},
     hoveredSegment: null,
     pointer: null,
     previewCandidate: null,
@@ -332,6 +348,7 @@ function blankState() {
     showDimensions: true,
     dimensionStyle: "labels",
     showLiftingPoints: false,
+    liftingSlingAngleDegrees: 60,
     projectId: null,
     projectInfoPrompted: false,
     projectInfo: defaultProjectInfo(),
@@ -365,6 +382,7 @@ function statePayload() {
     fittings: state.fittings,
     notes: state.notes,
     nodeTypes: normalizeNodeTypes(state.nodeTypes, state.points.length),
+    reducerSideOverrides: normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length),
     activePoint: state.activePoint,
     selectedPoint: state.selectedPoint,
     selectedSegments: selectedSegmentIndexes(),
@@ -379,6 +397,7 @@ function statePayload() {
     showDimensions: state.showDimensions,
     dimensionStyle: normalizeDimensionStyle(state.dimensionStyle),
     showLiftingPoints: state.showLiftingPoints,
+    liftingSlingAngleDegrees: normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees),
     projectId: state.projectId,
     projectInfoPrompted: state.projectInfoPrompted === true,
     projectInfo: normalizeProjectInfo(state.projectInfo),
@@ -411,6 +430,7 @@ function stateFromPayload(payload, options = {}) {
       : cloned;
   });
   const edges = normalizeEdges(saved.edges, points.length);
+  const selectedSegments = normalizeSelectedSegments(saved.selectedSegments, edges.length);
 
   return {
     ...blankState(),
@@ -419,25 +439,41 @@ function stateFromPayload(payload, options = {}) {
     fittings: normalizeFittings(saved.fittings, edges.length),
     notes: normalizeNotes(saved.notes),
     nodeTypes: normalizeNodeTypes(saved.nodeTypes, points.length),
-    pipeSizeNb: normalizePipeSize(saved.pipeSizeNb),
+    reducerSideOverrides: normalizeReducerSideOverrides(saved.reducerSideOverrides, points.length),
+    pipeSizeNb: defaultPipeSizeFromSaved(saved, edges, selectedSegments),
     pipeSpec: normalizePipeSpec(saved.pipeSpec),
     stepLength: normalizeLength(legacyUnits ? Number(saved.stepLength) * MM_PER_GRID : saved.stepLength),
     angleDegrees: normalizeAngle(saved.angleDegrees),
     anglePlane: normalizeAnglePlane(saved.anglePlane),
     flangeMode: applyNewDefaults ? "single" : normalizeFlangeMode(saved.flangeMode),
     previewMode: normalizePreviewMode(saved.previewMode),
-    selectedSegments: normalizeSelectedSegments(saved.selectedSegments, edges.length),
+    selectedSegments,
     activePoint: Number.isInteger(saved.activePoint) && saved.activePoint >= 0 && saved.activePoint < points.length ? saved.activePoint : points.length - 1,
     selectedPoint: Number.isInteger(saved.selectedPoint) && saved.selectedPoint >= 0 && saved.selectedPoint < points.length ? saved.selectedPoint : null,
     gridScale: Number(saved.gridScale) || 42,
     showDimensions: saved.showDimensions !== false,
     dimensionStyle: normalizeDimensionStyle(saved.dimensionStyle),
     showLiftingPoints: applyNewDefaults ? false : saved.showLiftingPoints === true,
+    liftingSlingAngleDegrees: normalizeLiftingSlingAngle(saved.liftingSlingAngleDegrees),
     projectId: normalizeProjectId(saved.projectId),
     projectInfoPrompted: saved.projectInfoPrompted === true || hasProjectInfo(saved.projectInfo),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
   };
+}
+
+function defaultPipeSizeFromSaved(saved, edges, selectedSegments) {
+  const savedNb = normalizePipeSize(saved?.pipeSizeNb);
+  if (savedNb !== 25) return savedNb;
+
+  const selectedEdge = edges[selectedSegments[selectedSegments.length - 1]];
+  const selectedNb = selectedEdge ? normalizePipeSize(selectedEdge.pipeSizeNb) : 25;
+  if (selectedNb !== 25) return selectedNb;
+
+  const edgeSizes = [...new Set(edges.map((edge) => normalizePipeSize(edge.pipeSizeNb)))];
+  if (edgeSizes.length === 1 && edgeSizes[0] !== 25) return edgeSizes[0];
+
+  return savedNb;
 }
 
 function setNextIdsFromState(sourceState) {
@@ -460,6 +496,24 @@ function normalizeNodeTypes(nodeTypes, pointCount) {
       NODE_CONNECTION_TYPES.has(type)
     ) {
       normalized[index] = type;
+    }
+  }
+  return normalized;
+}
+
+function normalizeReducerSideOverrides(overrides, pointCount) {
+  if (!overrides || typeof overrides !== "object") return {};
+
+  const normalized = {};
+  for (const [key, value] of Object.entries(overrides)) {
+    const index = Number(key);
+    if (
+      Number.isInteger(index) &&
+      index >= 0 &&
+      index < pointCount &&
+      REDUCER_SIDE_OPTIONS.has(value)
+    ) {
+      normalized[index] = value;
     }
   }
   return normalized;
@@ -492,6 +546,18 @@ function reindexNodeTypesAfterPointRemoval(removedIndex) {
     next[index > removedIndex ? index - 1 : index] = type;
   }
   state.nodeTypes = next;
+}
+
+function reindexReducerSideOverridesAfterPointRemoval(removedIndex) {
+  if (!state.reducerSideOverrides || typeof state.reducerSideOverrides !== "object") return;
+
+  const next = {};
+  for (const [key, value] of Object.entries(state.reducerSideOverrides)) {
+    const index = Number(key);
+    if (!Number.isInteger(index) || index === removedIndex || !REDUCER_SIDE_OPTIONS.has(value)) continue;
+    next[index > removedIndex ? index - 1 : index] = value;
+  }
+  state.reducerSideOverrides = next;
 }
 
 function normalizeEdges(edges, pointCount) {
@@ -537,10 +603,11 @@ function normalizeFittings(fittings, edgeCount) {
       }
       if (type === "socket") {
         normalized.socketSizeNb = normalizePipeSize(fitting.socketSizeNb ?? SOCKET_SIZE_NB);
+        normalized.socketAngle = normalizeSocketAngle(fitting.socketAngle);
       }
 
       const weightKg = Number(fitting.weightKg);
-      if (Number.isFinite(weightKg) && weightKg >= 0) {
+      if (type !== "rollGroove" && Number.isFinite(weightKg) && weightKg >= 0) {
         normalized.weightKg = Math.round(weightKg * 10) / 10;
       }
 
@@ -597,7 +664,7 @@ function createProjectId() {
 
 function normalizeFittingPosition(type, value) {
   const fallback = Number.isFinite(Number(value)) ? Number(value) : 0.5;
-  if (type === "flange") {
+  if (type === "flange" || type === "rollGroove") {
     return clampNumber(fallback, 0, 1);
   }
   return clampNumber(fallback, 0.04, 0.96);
@@ -652,12 +719,28 @@ function normalizeDimensionStyle(value) {
   return DIMENSION_STYLES.has(value) ? value : "labels";
 }
 
+function normalizeLiftingSlingAngle(value) {
+  const numeric = Math.round(Number(value));
+  return LIFTING_SLING_ANGLES.has(numeric) ? numeric : 60;
+}
+
 function fittingFlangeMode(fitting) {
   return normalizeFlangeMode(fitting?.flangeMode);
 }
 
 function fittingSocketSizeNb(fitting) {
   return normalizePipeSize(fitting?.socketSizeNb ?? SOCKET_SIZE_NB);
+}
+
+function normalizeSocketAngle(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  const stepped = Math.round(numeric / SOCKET_ROTATION_STEP_DEG) * SOCKET_ROTATION_STEP_DEG;
+  return ((stepped % 360) + 360) % 360;
+}
+
+function fittingSocketAngle(fitting) {
+  return normalizeSocketAngle(fitting?.socketAngle);
 }
 
 function selectedSegmentIndexes() {
@@ -978,6 +1061,7 @@ function drawIso() {
     drawLiftPoint2d(ctx, projection);
   }
   drawPreviewRun(ctx, projection);
+  drawSocketDragDimension(ctx, projection);
 }
 
 function drawGrid(ctx, width, height, projection) {
@@ -1146,6 +1230,9 @@ function drawSpool2d(ctx, projection) {
     for (const item of dimensionSegments) {
       drawDimension(ctx, item.segment, item.start, item.end, dimensionLayout);
     }
+    if (normalizeDimensionStyle(state.dimensionStyle) === "redline") {
+      drawSocketPositionDimensions(ctx, projection, segmentListForDraw, dimensionLayout);
+    }
   }
 
   if (state.showDimensions) {
@@ -1200,6 +1287,20 @@ function drawLiftPoint2d(ctx, projection, quantities = quantitySummary()) {
 function drawSuggestedLugs2d(ctx, projection, quantities = quantitySummary()) {
   const lugPlan = suggestedLugPlan(quantities);
   if (!lugPlan) return;
+  const segmentData = quantities.segments.map(({ segment }) => segment);
+  const dimensionLayout = {
+    labels: [],
+    lines: [],
+    pipes: segmentData.map((segment) => ({
+      index: segment.index,
+      start: projectIso(segment.start, projection),
+      end: projectIso(segment.end, projection),
+    })),
+  };
+
+  for (const [index, lug] of lugPlan.points.entries()) {
+    drawLugPositionDimension2d(ctx, projection, lug, dimensionLayout, index);
+  }
 
   ctx.save();
   ctx.textAlign = "center";
@@ -1246,25 +1347,37 @@ function drawAutoReducers2d(ctx, projection, segmentData) {
     const joint = projectIso(state.points[reducer.nodeIndex], projection);
     const largeOther = projectIso(state.points[reducer.largeOtherIndex], projection);
     const smallOther = projectIso(state.points[reducer.smallOtherIndex], projection);
-    const along = reducer.kind === "tee"
-      ? normalizeScreenVector({ x: smallOther.x - joint.x, y: smallOther.y - joint.y })
+    const placementOther = reducerPlacementSide(reducer) === "large" ? largeOther : smallOther;
+    const startsAtJoint = reducerStartsAtJoint(reducer);
+    const startsAfterBend = reducer.kind === "bend";
+    const along = startsAtJoint || startsAfterBend
+      ? normalizeScreenVector({ x: placementOther.x - joint.x, y: placementOther.y - joint.y })
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
     const normal = { x: -along.y, y: along.x };
     const length = 26;
     const largeWidth = Math.max(14, visualPipeWidth(reducer.largeSegment) * 1.45);
     const smallWidth = Math.max(8, visualPipeWidth(reducer.smallSegment) * 0.95);
-    const start = reducer.kind === "tee"
-      ? { x: joint.x + along.x * 2, y: joint.y + along.y * 2 }
-      : { x: joint.x - along.x * length * 0.5, y: joint.y - along.y * length * 0.5 };
-    const end = reducer.kind === "tee"
-      ? { x: joint.x + along.x * length, y: joint.y + along.y * length }
-      : { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
+    const startWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? smallWidth : largeWidth;
+    const endWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? largeWidth : smallWidth;
+    let start;
+    let end;
+    if (startsAfterBend) {
+      const offset = reducerScreenOffsetPixels(reducer, joint, placementOther, length);
+      start = { x: joint.x + along.x * offset, y: joint.y + along.y * offset };
+      end = { x: start.x + along.x * length, y: start.y + along.y * length };
+    } else if (startsAtJoint) {
+      start = { x: joint.x + along.x * 2, y: joint.y + along.y * 2 };
+      end = { x: joint.x + along.x * length, y: joint.y + along.y * length };
+    } else {
+      start = { x: joint.x - along.x * length * 0.5, y: joint.y - along.y * length * 0.5 };
+      end = { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
+    }
 
     ctx.beginPath();
-    ctx.moveTo(start.x + normal.x * largeWidth * -0.5, start.y + normal.y * largeWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * smallWidth * -0.5, end.y + normal.y * smallWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * smallWidth * 0.5, end.y + normal.y * smallWidth * 0.5);
-    ctx.lineTo(start.x + normal.x * largeWidth * 0.5, start.y + normal.y * largeWidth * 0.5);
+    ctx.moveTo(start.x + normal.x * startWidth * -0.5, start.y + normal.y * startWidth * -0.5);
+    ctx.lineTo(end.x + normal.x * endWidth * -0.5, end.y + normal.y * endWidth * -0.5);
+    ctx.lineTo(end.x + normal.x * endWidth * 0.5, end.y + normal.y * endWidth * 0.5);
+    ctx.lineTo(start.x + normal.x * startWidth * 0.5, start.y + normal.y * startWidth * 0.5);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -1569,6 +1682,295 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   ctx.restore();
 }
 
+function drawSocketPositionDimensions(ctx, projection, segmentData, dimensionLayout = []) {
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  const socketFittings = state.fittings
+    .filter((fitting) => fitting.type === "socket")
+    .sort((first, second) => first.segmentIndex - second.segmentIndex || first.t - second.t);
+
+  for (const [socketIndex, fitting] of socketFittings.entries()) {
+    const segment = segmentByIndex.get(fitting.segmentIndex);
+    if (!segment) continue;
+    const start = projectIso(segment.start, projection);
+    const socketPoint = projectIso(lerpPoint(segment.start, segment.end, fitting.t), projection);
+    const distanceMm = pointLength(subtractPoints(lerpPoint(segment.start, segment.end, fitting.t), segment.start));
+    drawRedSocketPositionDimension(ctx, start, socketPoint, segment.index, distanceMm, socketIndex, dimensionLayout);
+  }
+}
+
+function drawRedSocketPositionDimension(ctx, start, socketPoint, segmentIndex, distanceMm, socketIndex, dimensionLayout = []) {
+  const layoutState = Array.isArray(dimensionLayout)
+    ? { labels: dimensionLayout, lines: [], pipes: [] }
+    : dimensionLayout;
+  const dx = socketPoint.x - start.x;
+  const dy = socketPoint.y - start.y;
+  const screenLength = Math.hypot(dx, dy);
+  if (screenLength < 8) return;
+
+  const along = { x: dx / screenLength, y: dy / screenLength };
+  const baseNormal = { x: -along.y, y: along.x };
+  const pipeGap = 11;
+  const tick = 5;
+  const text = `1/2" SOCK ${formatLength(distanceMm)} mm`;
+  const baseOffset = Math.min(92, Math.max(56, screenLength * 0.08)) + (socketIndex % 3) * 18;
+  let labelAngle = Math.atan2(along.y, along.x);
+  if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
+    labelAngle += Math.PI;
+  }
+
+  ctx.save();
+  ctx.font = "900 11px Inter, system-ui, sans-serif";
+  const metrics = ctx.measureText(text);
+  const labelWidth = metrics.width + 18;
+  const labelHeight = 21;
+  const layout = redDimensionLayout(start, socketPoint, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, layoutState, segmentIndex);
+  const { lineStart, lineEnd, midpoint, normal } = layout;
+  const { extensionStart, extensionEnd } = layout;
+
+  ctx.shadowColor = "rgba(31, 42, 47, 0.1)";
+  ctx.shadowBlur = 2;
+  ctx.lineCap = "butt";
+  ctx.lineJoin = "miter";
+
+  for (const stroke of [
+    { color: "rgba(255, 253, 248, 0.92)", width: 5 },
+    { color: "#c1121f", width: 2 },
+  ]) {
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.width;
+    drawLine(ctx, lineStart, lineEnd);
+    drawLine(ctx, extensionStart, lineStart);
+    drawLine(ctx, extensionEnd, lineEnd);
+    drawLine(
+      ctx,
+      { x: lineEnd.x + normal.x * tick + along.x * -tick, y: lineEnd.y + normal.y * tick + along.y * -tick },
+      { x: lineEnd.x + normal.x * -tick + along.x * tick, y: lineEnd.y + normal.y * -tick + along.y * tick },
+    );
+  }
+
+  ctx.shadowColor = "transparent";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.translate(midpoint.x, midpoint.y);
+  ctx.rotate(labelAngle);
+  roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
+  ctx.fillStyle = "rgba(255, 253, 248, 0.97)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(193, 18, 31, 0.25)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = "#c1121f";
+  ctx.fillText(text, 0, 0.5);
+  layoutState.labels.push(layout.bounds);
+  layoutState.lines.push(...layout.lines);
+  ctx.restore();
+}
+
+function drawLugPositionDimension2d(ctx, projection, lug, dimensionLayout = [], lugIndex = 0) {
+  if (!lug?.segment || !lug?.point) return;
+
+  const start = projectIso(lug.segment.start, projection);
+  const lugPoint = projectIso(lug.point, projection);
+  const distanceMm = Number.isFinite(lug.distanceFromRunStartMm)
+    ? lug.distanceFromRunStartMm
+    : pointLength(subtractPoints(lug.point, lug.segment.start));
+  const text = `LUG ${lug.number ?? lugIndex + 1} ${formatLength(distanceMm)} mm`;
+
+  drawLugDimensionLine(ctx, start, lugPoint, lug.segment.index, text, dimensionLayout, lugIndex);
+}
+
+function drawLugDimensionLine(ctx, start, end, segmentIndex, text, dimensionLayout = [], lugIndex = 0) {
+  const layoutState = Array.isArray(dimensionLayout)
+    ? { labels: dimensionLayout, lines: [], pipes: [] }
+    : dimensionLayout;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const screenLength = Math.hypot(dx, dy);
+  if (screenLength < 10) return;
+
+  const along = { x: dx / screenLength, y: dy / screenLength };
+  const baseNormal = { x: -along.y, y: along.x };
+  const pipeGap = 12;
+  const baseOffset = Math.min(96, Math.max(54, screenLength * 0.1)) + (lugIndex % 2) * 20;
+  let labelAngle = Math.atan2(along.y, along.x);
+  if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
+    labelAngle += Math.PI;
+  }
+
+  ctx.save();
+  ctx.font = "950 11px Inter, system-ui, sans-serif";
+  const labelWidth = ctx.measureText(text).width + 18;
+  const labelHeight = 22;
+  const layout = redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, layoutState, segmentIndex);
+  const { lineStart, lineEnd, midpoint } = layout;
+  const { extensionStart, extensionEnd } = layout;
+  const lineAngle = Math.atan2(lineEnd.y - lineStart.y, lineEnd.x - lineStart.x);
+
+  ctx.shadowColor = "rgba(31, 42, 47, 0.12)";
+  ctx.shadowBlur = 2;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  for (const stroke of [
+    { color: "rgba(255, 253, 248, 0.94)", width: 6 },
+    { color: "#0f766e", width: 2.2 },
+  ]) {
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.width;
+    drawLine(ctx, lineStart, lineEnd);
+    drawLine(ctx, extensionStart, lineStart);
+    drawLine(ctx, extensionEnd, lineEnd);
+    drawArrowHead(ctx, lineStart, lineAngle, stroke.width);
+    drawArrowHead(ctx, lineEnd, lineAngle + Math.PI, stroke.width);
+  }
+
+  ctx.shadowColor = "transparent";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.translate(midpoint.x, midpoint.y);
+  ctx.rotate(labelAngle);
+  roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
+  ctx.fillStyle = "rgba(255, 253, 248, 0.98)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(15, 118, 110, 0.34)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = "#0f766e";
+  ctx.fillText(text, 0, 0.5);
+  layoutState.labels.push(layout.bounds);
+  layoutState.lines.push(...layout.lines);
+  ctx.restore();
+}
+
+function drawSocketDragDimension(ctx, projection) {
+  if (!socketDrag) return;
+
+  const fitting = state.fittings.find((item) => item.id === socketDrag.fittingId);
+  const segmentData = segments();
+  const segment = segmentData.find((item) => item.index === socketDrag.segmentIndex);
+  if (!fitting || fitting.type !== "socket" || !segment) return;
+
+  const lengthMm = pointLength(segment.vector);
+  if (lengthMm <= 0.001) return;
+
+  const socketPointWorld = lerpPoint(segment.start, segment.end, fitting.t);
+  const fromDistance = lengthMm * fitting.t;
+  const toDistance = lengthMm - fromDistance;
+  const useFrom = fromDistance <= toDistance;
+  const referenceWorld = useFrom ? segment.start : segment.end;
+  const referenceIndex = useFrom ? segment.from : segment.to;
+  const distanceMm = useFrom ? fromDistance : toDistance;
+  const referencePoint = projectIso(referenceWorld, projection);
+  const socketPoint = projectIso(socketPointWorld, projection);
+  const referenceLabel = socketReferenceLabel(referenceIndex, segment, segmentData);
+  const text = `SOCKET ${formatLength(distanceMm)} mm FROM ${referenceLabel}`;
+  const dimensionLayout = {
+    labels: [],
+    lines: [],
+    pipes: segmentData.map((item) => ({
+      index: item.index,
+      start: projectIso(item.start, projection),
+      end: projectIso(item.end, projection),
+    })),
+  };
+
+  drawRedArrowDimension(ctx, referencePoint, socketPoint, segment.index, text, dimensionLayout);
+}
+
+function socketReferenceLabel(nodeIndex, currentSegment, segmentData) {
+  const connections = nodeConnections(segmentData);
+  const connected = connections.get(nodeIndex) ?? [];
+  if (connected.length <= 1) return "END";
+  if (connected.length >= 3) return nodeConnectionType(nodeIndex) === "branch" ? "BRANCH" : "TEE";
+  if (connected.length === 2) {
+    const first = segmentData.find((segment) => segment.index === connected[0].segmentIndex);
+    const second = segmentData.find((segment) => segment.index === connected[1].segmentIndex);
+    if (!first || !second) return "JOINT";
+    const firstVector = subtractPoints(state.points[connected[0].other], state.points[nodeIndex]);
+    const secondVector = subtractPoints(state.points[connected[1].other], state.points[nodeIndex]);
+    const bend = Math.abs(180 - bendAngle(firstVector, secondVector));
+    if (bend >= 0.5) return "BEND";
+    const firstSize = pipeSizeForSegment(first).nb;
+    const secondSize = pipeSizeForSegment(second).nb;
+    if (firstSize !== secondSize) return "REDUCER";
+  }
+  return currentSegment ? "JOINT" : "POINT";
+}
+
+function drawRedArrowDimension(ctx, start, end, segmentIndex, text, dimensionLayout = []) {
+  const layoutState = Array.isArray(dimensionLayout)
+    ? { labels: dimensionLayout, lines: [], pipes: [] }
+    : dimensionLayout;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const screenLength = Math.hypot(dx, dy);
+  if (screenLength < 10) return;
+
+  const along = { x: dx / screenLength, y: dy / screenLength };
+  const baseNormal = { x: -along.y, y: along.x };
+  const pipeGap = 13;
+  const baseOffset = Math.min(112, Math.max(70, screenLength * 0.12));
+  let labelAngle = Math.atan2(along.y, along.x);
+  if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
+    labelAngle += Math.PI;
+  }
+
+  ctx.save();
+  ctx.font = "950 12px Inter, system-ui, sans-serif";
+  const metrics = ctx.measureText(text);
+  const labelWidth = metrics.width + 22;
+  const labelHeight = 24;
+  const layout = redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, layoutState, segmentIndex);
+  const { lineStart, lineEnd, midpoint } = layout;
+  const { extensionStart, extensionEnd } = layout;
+  const lineAngle = Math.atan2(lineEnd.y - lineStart.y, lineEnd.x - lineStart.x);
+
+  ctx.shadowColor = "rgba(31, 42, 47, 0.16)";
+  ctx.shadowBlur = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  for (const stroke of [
+    { color: "rgba(255, 253, 248, 0.94)", width: 6 },
+    { color: "#c1121f", width: 2.4 },
+  ]) {
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.width;
+    drawLine(ctx, lineStart, lineEnd);
+    drawLine(ctx, extensionStart, lineStart);
+    drawLine(ctx, extensionEnd, lineEnd);
+    drawArrowHead(ctx, lineStart, lineAngle, stroke.width);
+    drawArrowHead(ctx, lineEnd, lineAngle + Math.PI, stroke.width);
+  }
+
+  ctx.shadowColor = "transparent";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.translate(midpoint.x, midpoint.y);
+  ctx.rotate(labelAngle);
+  roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
+  ctx.fillStyle = "rgba(255, 253, 248, 0.98)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(193, 18, 31, 0.36)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = "#c1121f";
+  ctx.fillText(text, 0, 0.5);
+  layoutState.labels.push(layout.bounds);
+  layoutState.lines.push(...layout.lines);
+  ctx.restore();
+}
+
+function drawArrowHead(ctx, point, angle, strokeWidth = 2) {
+  const size = strokeWidth > 4 ? 9 : 8;
+  ctx.beginPath();
+  ctx.moveTo(point.x, point.y);
+  ctx.lineTo(point.x + Math.cos(angle + 0.48) * size, point.y + Math.sin(angle + 0.48) * size);
+  ctx.moveTo(point.x, point.y);
+  ctx.lineTo(point.x + Math.cos(angle - 0.48) * size, point.y + Math.sin(angle - 0.48) * size);
+  ctx.stroke();
+}
+
 function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, dimensionLayout, segmentIndex) {
   const midpointBase = {
     x: (start.x + end.x) * 0.5,
@@ -1789,6 +2191,31 @@ function normalizeScreenVector(vector) {
   return { x: vector.x / length, y: vector.y / length };
 }
 
+function socketRadialDirectionPoint(direction, angleDegrees = 0) {
+  const axis = normalizePoint(direction);
+  const reference = Math.abs(axis.z) > 0.82 ? { x: 1, y: 0, z: 0 } : { x: 0, y: 0, z: 1 };
+  const u = normalizePoint(crossPoints(reference, axis));
+  const v = normalizePoint(crossPoints(axis, u));
+  const angle = normalizeSocketAngle(angleDegrees) * Math.PI / 180;
+  return normalizePoint(addPoints(scalePoint(v, Math.cos(angle)), scalePoint(u, Math.sin(angle))));
+}
+
+function socketScreenDirection(segment, fitting, projection) {
+  const base = lerpPoint(segment.start, segment.end, fitting.t);
+  const radial = socketRadialDirectionPoint(segment.vector, fittingSocketAngle(fitting));
+  const start = projectIso(base, projection);
+  const end = projectIso(addPoints(base, radial, 1000), projection);
+  const screenVector = { x: end.x - start.x, y: end.y - start.y };
+  if (Math.hypot(screenVector.x, screenVector.y) > 0.001) {
+    return normalizeScreenVector(screenVector);
+  }
+
+  const segmentStart = projectIso(segment.start, projection);
+  const segmentEnd = projectIso(segment.end, projection);
+  const along = normalizeScreenVector({ x: segmentEnd.x - segmentStart.x, y: segmentEnd.y - segmentStart.y });
+  return { x: -along.y, y: along.x };
+}
+
 function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
   const start = projectIso(segment.start, projection);
   const end = projectIso(segment.end, projection);
@@ -1796,6 +2223,7 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
   const angle = Math.atan2(end.y - start.y, end.x - start.x);
   const along = { x: Math.cos(angle), y: Math.sin(angle) };
   const normal = { x: -Math.sin(angle), y: Math.cos(angle) };
+  const socketDirection = fitting.type === "socket" ? socketScreenDirection(segment, fitting, projection) : null;
   const selected = state.selectedFitting === fitting.id;
   const fittingWidth = Math.max(14, pipeWidth * 2.8);
 
@@ -1823,6 +2251,24 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
         ctx.fill();
       }
     }
+  } else if (fitting.type === "rollGroove") {
+    ctx.lineWidth = selected ? 3.2 : 2.4;
+    for (const offset of [-4, 4]) {
+      ctx.beginPath();
+      ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.58, along.y * offset + normal.y * fittingWidth * -0.58);
+      ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.58, along.y * offset + normal.y * fittingWidth * 0.58);
+      ctx.stroke();
+    }
+    ctx.font = "900 8px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
+    ctx.fillStyle = selected ? "#b42318" : "#0f766e";
+    const labelX = normal.x * (fittingWidth * 0.95 + 8);
+    const labelY = normal.y * (fittingWidth * 0.95 + 8);
+    ctx.strokeText("RG", labelX, labelY);
+    ctx.fillText("RG", labelX, labelY);
   } else if (fitting.type === "valve") {
     ctx.beginPath();
     ctx.moveTo(along.x * -11, along.y * -11);
@@ -1844,17 +2290,18 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
       ctx.stroke();
     }
   } else if (fitting.type === "socket") {
+    const branch = socketDirection ?? normal;
     const branchLength = Math.max(19, fittingWidth * 1.45);
     const socketRadius = Math.max(4.2, fittingWidth * 0.32);
     ctx.lineCap = "butt";
     ctx.lineWidth = selected ? 4 : 3;
     drawLine(
       ctx,
-      { x: normal.x * 2, y: normal.y * 2 },
-      { x: normal.x * branchLength, y: normal.y * branchLength },
+      { x: branch.x * 2, y: branch.y * 2 },
+      { x: branch.x * branchLength, y: branch.y * branchLength },
     );
     ctx.beginPath();
-    ctx.arc(normal.x * (branchLength + socketRadius * 0.35), normal.y * (branchLength + socketRadius * 0.35), socketRadius, 0, Math.PI * 2);
+    ctx.arc(branch.x * (branchLength + socketRadius * 0.35), branch.y * (branchLength + socketRadius * 0.35), socketRadius, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
     ctx.font = "900 8px Inter, system-ui, sans-serif";
@@ -1864,8 +2311,8 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
     ctx.lineWidth = 3;
     ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
     const label = '1/2"';
-    const labelX = normal.x * (branchLength + socketRadius * 1.9);
-    const labelY = normal.y * (branchLength + socketRadius * 1.9);
+    const labelX = branch.x * (branchLength + socketRadius * 1.9);
+    const labelY = branch.y * (branchLength + socketRadius * 1.9);
     ctx.strokeText(label, labelX, labelY);
     ctx.fillText(label, labelX, labelY);
   } else if (fitting.type === "reducer") {
@@ -1887,6 +2334,7 @@ function fittingColor(type) {
   if (type === "weld") return "#2563eb";
   if (type === "reducer") return "#7a4dc2";
   if (type === "socket") return "#0f766e";
+  if (type === "rollGroove") return "#0f766e";
   return "#3f484b";
 }
 
@@ -1895,6 +2343,7 @@ function fittingFill(type) {
   if (type === "weld") return "#eff6ff";
   if (type === "reducer") return "#f1ebff";
   if (type === "socket") return "#dcfce7";
+  if (type === "rollGroove") return "#d8f1ed";
   return "#eef2f0";
 }
 
@@ -2169,6 +2618,33 @@ function findNearestFitting(pointer) {
   return nearest && nearest.distance <= hitLimit(26, 40) ? nearest : null;
 }
 
+function findNearestAutoReducer(pointer) {
+  const projection = getProjection();
+  let nearest = null;
+
+  for (const reducer of autoReducerTransitions(segments())) {
+    if (reducer.kind !== "bend") continue;
+    const segment = reducerPlacementSegment(reducer);
+    if (!segment) continue;
+
+    const point = reducerCentrePoint(reducer);
+    const screen = projectIso(point, projection);
+    const distance = Math.hypot(pointer.x - screen.x, pointer.y - screen.y);
+    const lengthSq = Math.max(dotPoints(segment.vector, segment.vector), 1);
+    const t = clampNumber(dotPoints(subtractPoints(point, segment.start), segment.vector) / lengthSq, 0, 1);
+    if (!nearest || distance < nearest.distance) {
+      nearest = {
+        reducer,
+        point,
+        distance,
+        segmentHit: { segment, distance, t },
+      };
+    }
+  }
+
+  return nearest && nearest.distance <= hitLimit(30, 46) ? nearest : null;
+}
+
 function distanceToSegment(point, start, end) {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
@@ -2185,11 +2661,143 @@ function distanceToSegment(point, start, end) {
   };
 }
 
+function closestSegmentParameters3d(firstStart, firstEnd, secondStart, secondEnd) {
+  const u = subtractPoints(firstEnd, firstStart);
+  const v = subtractPoints(secondEnd, secondStart);
+  const w = subtractPoints(firstStart, secondStart);
+  const a = dotPoints(u, u);
+  const b = dotPoints(u, v);
+  const c = dotPoints(v, v);
+  const d = dotPoints(u, w);
+  const e = dotPoints(v, w);
+  const denominator = a * c - b * b;
+  let firstT = 0;
+  let secondT = 0;
+
+  if (a <= 0.001 && c <= 0.001) {
+    return { firstT: 0, secondT: 0, distance: pointLength(subtractPoints(firstStart, secondStart)) };
+  }
+
+  if (a <= 0.001) {
+    secondT = clampNumber(e / c, 0, 1);
+  } else if (c <= 0.001) {
+    firstT = clampNumber(-d / a, 0, 1);
+  } else if (Math.abs(denominator) > 0.001) {
+    firstT = clampNumber((b * e - c * d) / denominator, 0, 1);
+    secondT = clampNumber((a * e - b * d) / denominator, 0, 1);
+  } else {
+    const overlap = collinearOverlapParameters(firstStart, firstEnd, secondStart, secondEnd);
+    if (overlap) {
+      firstT = overlap.firstT;
+      secondT = overlap.secondT;
+    }
+  }
+
+  const firstPoint = lerpPoint(firstStart, firstEnd, firstT);
+  const secondPoint = lerpPoint(secondStart, secondEnd, secondT);
+  return {
+    firstT,
+    secondT,
+    distance: pointLength(subtractPoints(firstPoint, secondPoint)),
+  };
+}
+
+function collinearOverlapParameters(firstStart, firstEnd, secondStart, secondEnd) {
+  const firstVector = subtractPoints(firstEnd, firstStart);
+  const secondVector = subtractPoints(secondEnd, secondStart);
+  const firstLengthSq = dotPoints(firstVector, firstVector);
+  const secondLengthSq = dotPoints(secondVector, secondVector);
+  if (firstLengthSq <= 0.001 || secondLengthSq <= 0.001) return null;
+
+  const cross = pointLength(crossPoints(firstVector, secondVector));
+  const relativeCross = cross / Math.max(1, Math.sqrt(firstLengthSq * secondLengthSq));
+  const offLine = pointLength(crossPoints(subtractPoints(secondStart, firstStart), firstVector)) / Math.sqrt(firstLengthSq);
+  if (relativeCross > 0.001 || offLine > RUN_CONNECTION_TOLERANCE_MM) return null;
+
+  const tA = dotPoints(subtractPoints(secondStart, firstStart), firstVector) / firstLengthSq;
+  const tB = dotPoints(subtractPoints(secondEnd, firstStart), firstVector) / firstLengthSq;
+  const overlapStart = Math.max(0, Math.min(tA, tB));
+  const overlapEnd = Math.min(1, Math.max(tA, tB));
+  if (overlapEnd <= Math.max(overlapStart, 0.02)) return null;
+
+  const firstT = Math.max(overlapStart, 0.02);
+  const point = lerpPoint(firstStart, firstEnd, firstT);
+  const secondT = clampNumber(dotPoints(subtractPoints(point, secondStart), secondVector) / secondLengthSq, 0, 1);
+  return { firstT, secondT };
+}
+
+function findRunConnectionForNewSegment(startIndex, endPoint) {
+  const start = state.points[startIndex];
+  if (!start || almostSamePoint(start, endPoint)) return null;
+
+  let best = null;
+  for (const segment of segments()) {
+    if (segment.from === startIndex || segment.to === startIndex) continue;
+
+    const closest = closestSegmentParameters3d(start, endPoint, segment.start, segment.end);
+    if (closest.distance > RUN_CONNECTION_TOLERANCE_MM) continue;
+    if (closest.firstT <= 0.025 || closest.firstT > 1.001) continue;
+
+    let candidate = null;
+    if (closest.secondT > 0.025 && closest.secondT < 0.975) {
+      candidate = {
+        type: "segment",
+        firstT: closest.firstT,
+        segmentIndex: segment.index,
+        segmentT: closest.secondT,
+        point: lerpPoint(segment.start, segment.end, closest.secondT),
+      };
+    } else {
+      const pointIndex = closest.secondT <= 0.5 ? segment.from : segment.to;
+      if (pointIndex === startIndex) continue;
+      candidate = {
+        type: "point",
+        firstT: closest.firstT,
+        pointIndex,
+        point: state.points[pointIndex],
+      };
+    }
+
+    if (!best || candidate.firstT < best.firstT || (Math.abs(candidate.firstT - best.firstT) < 0.001 && candidate.type === "segment")) {
+      best = candidate;
+    }
+  }
+
+  return best;
+}
+
 function addRun(axis, length) {
   const from = activePointIndex();
   const start = state.points[from];
   const next = addPoints(start, axis.vector, length);
-  if (almostSamePoint(start, next)) {
+  addRunToPoint(from, next);
+}
+
+function addRunToPoint(from, next) {
+  const start = state.points[from];
+  if (!start || almostSamePoint(start, next)) {
+    return;
+  }
+
+  const connection = findRunConnectionForNewSegment(from, next);
+  if (connection) {
+    const snapshot = createUndoSnapshot();
+    const to = connection.type === "segment"
+      ? splitSegmentAt(connection.segmentIndex, connection.segmentT)
+      : connection.pointIndex;
+    if (to === null || to === from) return;
+    if (connection.type === "segment") {
+      setNodeConnectionType(to, "tee", { update: false });
+    }
+    state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb });
+    selectSingleSegment(state.edges.length - 1);
+    state.selectedFitting = null;
+    state.selectedNote = null;
+    state.selectedPoint = to;
+    state.activePoint = to;
+    state.previewCandidate = null;
+    state.history.push({ type: "snapshot", snapshot });
+    updateAll();
     return;
   }
 
@@ -2198,6 +2806,7 @@ function addRun(axis, length) {
   state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb });
   selectSingleSegment(state.edges.length - 1);
   state.selectedFitting = null;
+  state.selectedNote = null;
   state.selectedPoint = to;
   state.activePoint = to;
   state.previewCandidate = null;
@@ -2436,12 +3045,13 @@ function takeoffData(segmentData = segments()) {
     const firstVector = subtractPoints(state.points[connected[0].other], state.points[nodeIndex]);
     const secondVector = subtractPoints(state.points[connected[1].other], state.points[nodeIndex]);
     const bend = Math.abs(180 - bendAngle(firstVector, secondVector));
+    const reducer = autoReducerForConnection(nodeIndex, connected[0], connected[1], firstSegment, secondSegment, { bend });
+    if (reducer) {
+      applyReducerTakeoff(segmentTakeoffs, reducer);
+      reducers.push(reducer);
+    }
+
     if (bend < 0.5) {
-      const reducer = autoReducerForConnection(nodeIndex, connected[0], connected[1], firstSegment, secondSegment);
-      if (reducer) {
-        applyReducerTakeoff(segmentTakeoffs, reducer);
-        reducers.push(reducer);
-      }
       continue;
     }
 
@@ -2485,9 +3095,8 @@ function autoReducerTransitions(segmentData = segments()) {
     const firstVector = subtractPoints(state.points[connected[0].other], state.points[nodeIndex]);
     const secondVector = subtractPoints(state.points[connected[1].other], state.points[nodeIndex]);
     const bend = Math.abs(180 - bendAngle(firstVector, secondVector));
-    if (bend >= 0.5) continue;
 
-    const reducer = autoReducerForConnection(nodeIndex, connected[0], connected[1], firstSegment, secondSegment);
+    const reducer = autoReducerForConnection(nodeIndex, connected[0], connected[1], firstSegment, secondSegment, { bend });
     if (reducer) reducers.push(reducer);
   }
 
@@ -2643,14 +3252,13 @@ function estimatedBranchWeldWeightKg(mainSize, branchSize) {
   return Math.max(0.06, scale * 0.16 * Math.min(mainScale, 1.8));
 }
 
-function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, firstSegment, secondSegment) {
+function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, firstSegment, secondSegment, options = {}) {
   const firstSize = pipeSizeForSegment(firstSegment);
   const secondSize = pipeSizeForSegment(secondSegment);
   if (firstSize.nb === secondSize.nb) return null;
 
   const lengthMm = reducerLengthMm(firstSize, secondSize);
-  const firstTakeoffMm = Math.min(lengthMm * 0.5, pointLength(firstSegment.vector) * 0.45);
-  const secondTakeoffMm = Math.min(lengthMm * 0.5, pointLength(secondSegment.vector) * 0.45);
+  const isBendReducer = Number(options.bend) >= 0.5;
   const firstIsLarge = firstSize.od >= secondSize.od;
   const largeSegment = firstIsLarge ? firstSegment : secondSegment;
   const smallSegment = firstIsLarge ? secondSegment : firstSegment;
@@ -2658,6 +3266,19 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   const smallSize = firstIsLarge ? secondSize : firstSize;
   const largeOtherIndex = firstIsLarge ? firstConnection.other : secondConnection.other;
   const smallOtherIndex = firstIsLarge ? secondConnection.other : firstConnection.other;
+  const placementSide = isBendReducer ? reducerSideForNode(nodeIndex) : "small";
+  const placementSegment = placementSide === "large" ? largeSegment : smallSegment;
+  const inlineFirstTakeoffMm = Math.min(lengthMm * 0.5, pointLength(firstSegment.vector) * 0.45);
+  const inlineSecondTakeoffMm = Math.min(lengthMm * 0.5, pointLength(secondSegment.vector) * 0.45);
+  const bendReducerTakeoffMm = Math.min(lengthMm, pointLength(placementSegment.vector) * 0.45);
+  const firstTakeoffMm = isBendReducer
+    ? (firstSegment.index === placementSegment.index ? bendReducerTakeoffMm : 0)
+    : inlineFirstTakeoffMm;
+  const secondTakeoffMm = isBendReducer
+    ? (secondSegment.index === placementSegment.index ? bendReducerTakeoffMm : 0)
+    : inlineSecondTakeoffMm;
+  const firstBendTakeoffMm = isBendReducer ? bendTakeoffMm(firstSegment, options.bend) : 0;
+  const secondBendTakeoffMm = isBendReducer ? bendTakeoffMm(secondSegment, options.bend) : 0;
   const atlasWeightKg = atlasReducerWeightForSizes(largeSize, smallSize);
   const reducerWeightKg = atlasWeightKg ?? (lengthMm / 1000) * ((pipeMassPerMetreForSize(firstSize) + pipeMassPerMetreForSize(secondSize)) * 0.5) * 1.12;
 
@@ -2670,6 +3291,11 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     lengthMm,
     weightKg: reducerWeightKg,
     source: atlasWeightKg === null ? "estimated" : "Atlas table",
+    kind: isBendReducer ? "bend" : "inline",
+    placementSide,
+    bend: Number(options.bend) || 0,
+    largeBendTakeoffMm: firstIsLarge ? firstBendTakeoffMm : secondBendTakeoffMm,
+    smallBendTakeoffMm: firstIsLarge ? secondBendTakeoffMm : firstBendTakeoffMm,
     largeNb: largeSize.nb,
     smallNb: smallSize.nb,
     largeSegment,
@@ -2724,16 +3350,19 @@ function segmentQuantity(segment, takeoffs = takeoffData(segments()).segmentTake
 }
 
 function fittingWeightOverride(fitting) {
+  if (fitting?.type === "rollGroove") return null;
   const weightKg = Number(fitting?.weightKg);
   return Number.isFinite(weightKg) && weightKg >= 0 ? weightKg : null;
 }
 
 function fittingWeightSource(fitting, segment = null) {
+  if (fitting?.type === "rollGroove") return "zero weight";
   if (fittingWeightOverride(fitting) !== null) return "manual";
   return atlasFittingWeightKg(fitting, segment) === null ? "estimated" : "Atlas table";
 }
 
 function fittingWeightKg(fitting, segment) {
+  if (fitting?.type === "rollGroove") return 0;
   return fittingWeightOverride(fitting) ?? atlasFittingWeightKg(fitting, segment) ?? estimatedFittingWeightKg(fitting, segment);
 }
 
@@ -2783,6 +3412,7 @@ function estimatedFittingWeightKg(fitting, segment) {
     const socketSize = pipeSizeByNb(fittingSocketSizeNb(fitting));
     return Math.max(0.06, pipeMassPerMetreForSize(socketSize) * 0.05 + 0.03);
   }
+  if (fitting.type === "rollGroove") return 0;
   return 0;
 }
 
@@ -2897,12 +3527,84 @@ function centreOfGravityData(quantities = quantitySummary()) {
 
 function reducerCentrePoint(reducer) {
   const joint = state.points[reducer.nodeIndex];
-  const smallOther = state.points[reducer.smallOtherIndex];
-  if (!joint || !smallOther || reducer.kind !== "tee") return joint;
+  const placementOther = state.points[reducerPlacementOtherIndex(reducer)];
+  if (!joint || !placementOther) return joint;
+  if (reducer.kind !== "bend" && !reducerStartsAtJoint(reducer)) return joint;
 
-  const direction = normalizePoint(subtractPoints(smallOther, joint));
-  const distance = Math.min((reducer.lengthMm ?? 0) * 0.5, pointLength(subtractPoints(smallOther, joint)) * 0.45);
+  const direction = normalizePoint(subtractPoints(placementOther, joint));
+  const segmentLength = pointLength(subtractPoints(placementOther, joint));
+  const offset = reducer.kind === "bend" ? reducerLegOffsetMm(reducer) : 0;
+  const distance = Math.min(offset + (reducer.lengthMm ?? 0) * 0.5, segmentLength * 0.95);
   return addPoints(joint, direction, distance);
+}
+
+function reducerStartsAtJoint(reducer) {
+  return reducer?.kind === "tee";
+}
+
+function reducerSideForNode(nodeIndex) {
+  const value = state.reducerSideOverrides?.[nodeIndex];
+  return value === "large" ? "large" : "small";
+}
+
+function reducerPlacementSide(reducer) {
+  return reducer?.kind === "bend" && reducer.placementSide === "large" ? "large" : "small";
+}
+
+function reducerPlacementSegment(reducer) {
+  return reducerPlacementSide(reducer) === "large" ? reducer.largeSegment : reducer.smallSegment;
+}
+
+function reducerPlacementOtherIndex(reducer) {
+  return reducerPlacementSide(reducer) === "large" ? reducer.largeOtherIndex : reducer.smallOtherIndex;
+}
+
+function reducerPlacementBendTakeoffMm(reducer) {
+  return reducerPlacementSide(reducer) === "large"
+    ? Number(reducer.largeBendTakeoffMm) || 0
+    : Number(reducer.smallBendTakeoffMm) || 0;
+}
+
+function reducerLegOffsetMm(reducer) {
+  if (reducer?.kind !== "bend") return 0;
+  const placementSegment = reducerPlacementSegment(reducer);
+  const smallLength = pointLength(placementSegment?.vector ?? { x: 0, y: 0, z: 0 });
+  const bendTakeoff = reducerPlacementBendTakeoffMm(reducer);
+  const reducerLength = Number(reducer.lengthMm) || 0;
+  return clampNumber(bendTakeoff, 0, Math.max(0, smallLength - reducerLength));
+}
+
+function reducerScreenOffsetPixels(reducer, joint, placementOther, reducerLengthPx) {
+  const screenLength = Math.hypot(placementOther.x - joint.x, placementOther.y - joint.y);
+  const placementLength = pointLength(reducerPlacementSegment(reducer)?.vector ?? { x: 0, y: 0, z: 0 });
+  if (screenLength <= reducerLengthPx + 4 || placementLength <= 0) return 2;
+
+  const raw = (reducerLegOffsetMm(reducer) / placementLength) * screenLength;
+  const visibleOffset = Math.max(raw, 18);
+  return clampNumber(visibleOffset, 2, Math.max(2, screenLength - reducerLengthPx - 2));
+}
+
+function computeAutoReducerRenderTrims(reducers) {
+  const trims = new Map();
+  const addTrim = (segment, nodeIndex, amount) => {
+    if (!segment || !Number.isInteger(nodeIndex) || !Number.isFinite(amount) || amount <= 0) return;
+    const key = `${segment.index}:${nodeIndex}`;
+    trims.set(key, Math.max(trims.get(key) ?? 0, amount));
+  };
+
+  for (const reducer of reducers) {
+    const modelLength = Math.max(0.08, (Number(reducer.lengthMm) || 0) / 1000);
+    if (reducer.kind === "bend") {
+      addTrim(reducerPlacementSegment(reducer), reducer.nodeIndex, modelLength);
+    } else if (reducerStartsAtJoint(reducer)) {
+      addTrim(reducer.smallSegment, reducer.nodeIndex, modelLength);
+    } else {
+      addTrim(reducer.largeSegment, reducer.nodeIndex, modelLength * 0.5);
+      addTrim(reducer.smallSegment, reducer.nodeIndex, modelLength * 0.5);
+    }
+  }
+
+  return trims;
 }
 
 function centreOfGravityReferenceData(quantities = quantitySummary(), liftPoint = centreOfGravityData(quantities)) {
@@ -3013,6 +3715,8 @@ function centreOfGravityReferenceLines(quantities = quantitySummary(), liftPoint
 function suggestedLugPlan(quantities = quantitySummary(), liftPoint = centreOfGravityData(quantities)) {
   if (!liftPoint || !quantities.segments.length) return null;
 
+  const slingAngleDegrees = normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees);
+  const slingLoadFactor = slingAngleLoadFactor(slingAngleDegrees);
   const segmentEntries = quantities.segments
     .filter(({ segment, quantity }) => quantity.pipeWeightKg > 0 && pointLength(segment.vector) > 200);
   if (!segmentEntries.length) return null;
@@ -3032,8 +3736,10 @@ function suggestedLugPlan(quantities = quantitySummary(), liftPoint = centreOfGr
 
   if (candidates.length < 2) return null;
 
-  const minSeparation = Math.min(Math.max(600, span * 0.12), Math.max(600, span * 0.7));
-  const targetSeparation = clampNumber(span * 0.45, 900, 4500);
+  const spreadRatio = clampNumber(0.3 + ((90 - slingAngleDegrees) / 60) * 0.3, 0.3, 0.6);
+  const minSeparation = Math.min(Math.max(600, span * spreadRatio * 0.68), Math.max(600, span * 0.7));
+  const targetSeparation = clampNumber(span * spreadRatio, 900, Math.min(6000, span * 0.78));
+  const separationWeight = slingAngleDegrees <= 45 ? 0.5 : slingAngleDegrees >= 75 ? 0.2 : 0.32;
   let best = null;
 
   for (let firstIndex = 0; firstIndex < candidates.length; firstIndex += 1) {
@@ -3049,7 +3755,7 @@ function suggestedLugPlan(quantities = quantitySummary(), liftPoint = centreOfGr
       const firstFromCog = subtractPoints(first.point, liftPoint.point);
       const secondFromCog = subtractPoints(second.point, liftPoint.point);
       const sameSidePenalty = dotPoints(firstFromCog, secondFromCog) > 0 ? span * 0.4 : 0;
-      const separationPenalty = Math.abs(separationMm - targetSeparation) * 0.12;
+      const separationPenalty = Math.abs(separationMm - targetSeparation) * separationWeight;
       const outsidePenalty = loadSplit.withinSpan ? 0 : span * 2;
       const imbalancePenalty = liftPoint.totalWeightKg > 0
         ? (Math.abs(loadSplit.firstLoadKg - loadSplit.secondLoadKg) / liftPoint.totalWeightKg) * span * 0.18
@@ -3087,8 +3793,22 @@ function suggestedLugPlan(quantities = quantitySummary(), liftPoint = centreOfGr
   best.separationMm = pointLength(subtractPoints(best.points[0].point, best.points[1].point));
   best.points[0].loadKg = loadSplit.firstLoadKg;
   best.points[1].loadKg = loadSplit.secondLoadKg;
+  best.points[0].slingTensionKg = loadSplit.firstLoadKg * slingLoadFactor;
+  best.points[1].slingTensionKg = loadSplit.secondLoadKg * slingLoadFactor;
+  best.points[0].slingAngleDegrees = slingAngleDegrees;
+  best.points[1].slingAngleDegrees = slingAngleDegrees;
+  best.slingAngleDegrees = slingAngleDegrees;
+  best.slingLoadFactor = slingLoadFactor;
+  best.targetSeparationMm = targetSeparation;
+  best.minSeparationMm = minSeparation;
 
   return best;
+}
+
+function slingAngleLoadFactor(angleDegrees = state.liftingSlingAngleDegrees) {
+  const angle = normalizeLiftingSlingAngle(angleDegrees);
+  const sine = Math.sin((angle * Math.PI) / 180);
+  return 1 / Math.max(0.001, sine);
 }
 
 function liftingPointLoadSplit(firstPoint, secondPoint, cogPoint, totalWeightKg) {
@@ -3130,13 +3850,18 @@ function spoolSpanMm(segmentData) {
 }
 
 function lugPointText(lug) {
-  return `Lug ${lug.number}: run ${lug.segment.index + 1}, ${formatLength(lug.distanceFromRunStartMm)} mm from run start, est. vertical share ${formatMass(lug.loadKg ?? 0)} kg`;
+  const angle = normalizeLiftingSlingAngle(lug.slingAngleDegrees ?? state.liftingSlingAngleDegrees);
+  const slingTension = lug.slingTensionKg ?? ((lug.loadKg ?? 0) * slingAngleLoadFactor(angle));
+  return `Lug ${lug.number}: run ${lug.segment.index + 1}, ${formatLength(lug.distanceFromRunStartMm)} mm from run start, est. vertical share ${formatMass(lug.loadKg ?? 0)} kg / sling tension ${formatMass(slingTension)} kg @ ${angle} deg`;
 }
 
 function liftingPointPlanSummary(lugPlan) {
   if (!lugPlan) return "No calculated lifting points yet.";
   const offLine = lugPlan.loadSplit?.offLineErrorMm ?? 0;
-  return `Spacing ${formatLength(lugPlan.separationMm)} mm; COG ${formatLength(offLine)} mm off lug line; midpoint ${formatLength(lugPlan.midpointErrorMm)} mm from COG.`;
+  const angle = normalizeLiftingSlingAngle(lugPlan.slingAngleDegrees ?? state.liftingSlingAngleDegrees);
+  const factor = lugPlan.slingLoadFactor ?? slingAngleLoadFactor(angle);
+  const target = Number.isFinite(lugPlan.targetSeparationMm) ? `target ${formatLength(lugPlan.targetSeparationMm)} mm; ` : "";
+  return `Spacing ${formatLength(lugPlan.separationMm)} mm; ${target}COG ${formatLength(offLine)} mm off lug line; midpoint ${formatLength(lugPlan.midpointErrorMm)} mm from COG; sling angle ${angle} deg from horizontal, load factor x${factor.toFixed(2)}.`;
 }
 
 function splitSegmentAt(segmentIndex, t) {
@@ -3186,6 +3911,7 @@ function placeFitting(type, segmentIndex, t, options = {}) {
     fitting.flangeMode = normalizeFlangeMode(options.flangeMode ?? state.flangeMode);
   } else if (type === "socket") {
     fitting.socketSizeNb = normalizePipeSize(options.socketSizeNb ?? SOCKET_SIZE_NB);
+    fitting.socketAngle = normalizeSocketAngle(options.socketAngle);
   }
 
   state.fittings.push(fitting);
@@ -3206,6 +3932,7 @@ function placeSocketFittings(segmentIndex, positions) {
       segmentIndex,
       t: normalizeFittingPosition("socket", t),
       socketSizeNb: SOCKET_SIZE_NB,
+      socketAngle: 0,
     };
     state.fittings.push(fitting);
     fittingIds.push(fitting.id);
@@ -3237,14 +3964,32 @@ function placeNote(point, textOverride = null) {
   updateAll();
 }
 
+function createUndoSnapshot() {
+  return {
+    payload: statePayload(),
+    nextFittingId,
+    nextNoteId,
+  };
+}
+
 function undo() {
   const last = state.history.pop();
   if (!last) return;
 
-  if (last.type === "edge" && state.points.length > 1) {
+  if (last.type === "snapshot") {
+    const remainingHistory = state.history;
+    const restored = stateFromPayload(last.snapshot?.payload);
+    if (restored) {
+      state = restored;
+      state.history = remainingHistory;
+      nextFittingId = Number(last.snapshot?.nextFittingId) || nextFittingId;
+      nextNoteId = Number(last.snapshot?.nextNoteId) || nextNoteId;
+    }
+  } else if (last.type === "edge" && state.points.length > 1) {
     state.edges.splice(last.edgeIndex, 1);
     state.points.splice(last.pointIndex, 1);
     reindexNodeTypesAfterPointRemoval(last.pointIndex);
+    reindexReducerSideOverridesAfterPointRemoval(last.pointIndex);
     state.edges = state.edges.map((edge) => ({
       ...edge,
       from: edge.from > last.pointIndex ? edge.from - 1 : edge.from,
@@ -3393,7 +4138,7 @@ function updateWeightsSummary() {
       <div class="weight-card total"><span>Total estimated</span><strong>${formatMass(quantities.totalWeightKg)} kg</strong></div>
       <div class="weight-card"><span>COG</span><strong>${liftPoint ? formatPointCompact(liftPoint.point) : "N/A"}</strong></div>
     </div>
-    <p class="weight-note">${pipeSpec().label}. Atlas table weights are used where available. Branch welds, valves, sockets and custom weld allowances remain estimates unless set manually.</p>
+    <p class="weight-note">${pipeSpec().label}. Atlas table weights are used where available. Roll grooves add 0 kg. Branch welds, valves, sockets and custom weld allowances remain estimates unless set manually.</p>
   `;
 }
 
@@ -3495,7 +4240,7 @@ function updateTakeoffSummary() {
       <ul>${fittingNotes}</ul>
     </div>
     ${liftSection}
-    <p>${pipeSpec().label}, LR elbows.${liftDisclaimer} Atlas table weights are used where available. Valves, sockets and weld allowances remain estimated unless set manually.</p>
+    <p>${pipeSpec().label}, LR elbows.${liftDisclaimer} Atlas table weights are used where available. Roll grooves add 0 kg. Valves, sockets and weld allowances remain estimated unless set manually.</p>
   `;
 }
 
@@ -3532,9 +4277,9 @@ function updatePipeSizeControls() {
 }
 
 function setPipeSizeForSegments(indexes, pipeSizeNb) {
+  state.pipeSizeNb = pipeSizeNb;
   const selected = normalizeSelectedSegments(indexes, state.edges.length);
   if (!selected.length) {
-    state.pipeSizeNb = pipeSizeNb;
     updateAll();
     return;
   }
@@ -3580,6 +4325,13 @@ function updatePropertiesPanel() {
   const fitting = selectedFittingData();
   if (fitting) {
     const distance = pointLength(subtractPoints(fitting.point, fitting.segment.start));
+    const fittingActions = fitting.fitting.type === "rollGroove"
+      ? [["delete-fitting", "Delete", "danger"]]
+      : [
+          ["set-fitting-weight", "Set weight"],
+          ...(fitting.weightSource === "manual" ? [["clear-fitting-weight", "Clear manual"]] : []),
+          ["delete-fitting", "Delete", "danger"],
+        ];
     renderProperties(
       `${fittingActionLabel(fitting.fitting.type)} fitting`,
       [
@@ -3589,11 +4341,7 @@ function updatePropertiesPanel() {
         ["Mode", fittingModeText(fitting)],
         ["Weight", `${formatMass(fitting.weightKg)} kg ${fitting.weightSource}`],
       ],
-      [
-        ["set-fitting-weight", "Set weight"],
-        ...(fitting.weightSource === "manual" ? [["clear-fitting-weight", "Clear manual"]] : []),
-        ["delete-fitting", "Delete", "danger"],
-      ],
+      fittingActions,
     );
     return;
   }
@@ -3731,6 +4479,7 @@ function handlePropertyAction(action) {
 function setSelectedFittingWeight() {
   const data = selectedFittingData();
   if (!data) return;
+  if (data.fitting.type === "rollGroove") return;
 
   const text = window.prompt("Fitting weight kg", formatMass(data.weightKg));
   if (text === null) return;
@@ -3800,6 +4549,8 @@ function updateControls() {
   dimensionStyleSelect.value = normalizeDimensionStyle(state.dimensionStyle);
   dimensionStyleSelect.disabled = !state.showDimensions;
   liftingToggle.checked = state.showLiftingPoints;
+  liftingAngleSelect.value = String(normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees));
+  liftingAngleSelect.disabled = !state.showLiftingPoints;
   setTool(state.activeTool);
 }
 
@@ -3948,6 +4699,15 @@ function setupProjectDialog() {
     }
   });
 
+  newDrawingCancelButton?.addEventListener("click", () => closeNewDrawingDialog("cancel"));
+  newDrawingDiscardButton?.addEventListener("click", () => closeNewDrawingDialog("discard"));
+  newDrawingSaveButton?.addEventListener("click", () => closeNewDrawingDialog("save"));
+  newDrawingDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === newDrawingDialog) {
+      closeNewDrawingDialog("cancel");
+    }
+  });
+
   projectDialogJobPickerButton?.addEventListener("click", () => {
     if (!projectJobQuickPick || projectDialogJobPickerButton.disabled) return;
     if (projectJobQuickPick.hidden) {
@@ -4011,10 +4771,62 @@ function registerServiceWorker() {
   if (location.protocol === "file:") return;
 
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch((error) => {
-      console.warn("Service worker registration failed.", error);
+    navigator.serviceWorker.register("./sw.js")
+      .then((registration) => {
+        setupServiceWorkerUpdateChecks(registration);
+      })
+      .catch((error) => {
+        console.warn("Service worker registration failed.", error);
+      });
+  });
+}
+
+function setupServiceWorkerUpdateChecks(registration) {
+  if (!registration) return;
+
+  if (registration.waiting && navigator.serviceWorker.controller) {
+    promptForAppUpdate(registration.waiting);
+  }
+
+  registration.addEventListener("updatefound", () => {
+    const worker = registration.installing;
+    if (!worker) return;
+    worker.addEventListener("statechange", () => {
+      if (worker.state === "installed" && navigator.serviceWorker.controller) {
+        promptForAppUpdate(worker);
+      }
     });
   });
+
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (!appUpdateReloadPending) return;
+    window.location.reload();
+  });
+
+  const checkForUpdate = () => {
+    registration.update().catch((error) => {
+      console.warn("Could not check for app updates.", error);
+    });
+  };
+
+  setTimeout(checkForUpdate, 3000);
+  setInterval(checkForUpdate, 15 * 60 * 1000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") checkForUpdate();
+  });
+}
+
+function promptForAppUpdate(worker) {
+  if (!worker || appUpdatePromptOpen || appUpdateReloadPending) return;
+
+  appUpdatePromptOpen = true;
+  const reloadNow = window.confirm("A new IsoSpool update is ready. Reload now to use it?");
+  appUpdatePromptOpen = false;
+  if (!reloadNow) return;
+
+  appUpdateReloadPending = true;
+  worker.postMessage({ type: "SKIP_WAITING" });
+  setTimeout(() => window.location.reload(), 1500);
 }
 
 async function initThree() {
@@ -4141,6 +4953,7 @@ function rebuildThreeSpool() {
   const weldMaterial = previewMaterial(style, "weld");
   const reducerMaterial = previewMaterial(style, "reducer");
   const socketMaterial = previewMaterial(style, "socket");
+  const grooveMaterial = previewMaterial(style, "groove");
 
   const modelPoints = state.points.map((point) => {
     const modelPoint = toModelUnits(point);
@@ -4149,6 +4962,8 @@ function rebuildThreeSpool() {
   const segmentData = segments();
   const connections = nodeConnections(segmentData);
   const elbowTrims = computeGraphElbowTrims(modelPoints, segmentData, connections);
+  const autoReducers = autoReducerTransitions(segmentData);
+  const reducerTrims = computeAutoReducerRenderTrims(autoReducers);
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
 
   for (const segment of segmentData) {
@@ -4158,8 +4973,10 @@ function rebuildThreeSpool() {
     const direction = end.clone().sub(start).normalize();
     const startTrim = elbowTrims.segment.get(`${segment.index}:${segment.from}`) ?? 0;
     const endTrim = elbowTrims.segment.get(`${segment.index}:${segment.to}`) ?? 0;
-    start.addScaledVector(direction, startTrim);
-    end.addScaledVector(direction, -endTrim);
+    const startReducerTrim = reducerTrims.get(`${segment.index}:${segment.from}`) ?? 0;
+    const endReducerTrim = reducerTrims.get(`${segment.index}:${segment.to}`) ?? 0;
+    start.addScaledVector(direction, startTrim + startReducerTrim);
+    end.addScaledVector(direction, -(endTrim + endReducerTrim));
 
     if (start.distanceTo(end) < segmentRadius * 0.5) {
       continue;
@@ -4316,11 +5133,13 @@ function rebuildThreeSpool() {
       }
     } else if (fitting.type === "socket") {
       group.add(socketAssembly(position, direction, radius, fitting, socketMaterial, style));
+    } else if (fitting.type === "rollGroove") {
+      group.add(rollGrooveAssembly(position, direction, radius, grooveMaterial, style));
     }
   }
 
-  for (const reducer of autoReducerTransitions(segmentData)) {
-    group.add(autoReducerAssembly(reducer, modelPoints, reducerMaterial, style));
+  for (const reducer of autoReducers) {
+    group.add(autoReducerAssembly(reducer, modelPoints, reducerMaterial, style, elbowTrims));
   }
 
   const liftPoint = centreOfGravityData(quantitySummary(segmentData));
@@ -4354,6 +5173,7 @@ function previewViewStyle() {
     weld: 0x667681,
     reducer: 0x40484b,
     socket: 0x0f766e,
+    groove: 0x0f766e,
   };
   const stainlessColors = {
     pipe: 0xfbfcfc,
@@ -4365,6 +5185,7 @@ function previewViewStyle() {
     weld: 0xffffff,
     reducer: 0xf5f8f9,
     socket: 0xe8f4f2,
+    groove: 0xb7c5c9,
   };
   const styles = {
     carbon: {
@@ -4419,6 +5240,7 @@ function previewViewStyle() {
         weld: 0xf9735b,
         reducer: 0xa72a1b,
         socket: 0xb42318,
+        groove: 0x7f1d1d,
       },
     },
     ghost: {
@@ -4437,6 +5259,7 @@ function previewViewStyle() {
         weld: 0x88a6b4,
         reducer: 0x9aa9a7,
         socket: 0x78aaa4,
+        groove: 0x5f7f7b,
       },
     },
     outline: {
@@ -4457,6 +5280,7 @@ function previewViewStyle() {
         weld: 0xc1121f,
         reducer: 0xc1121f,
         socket: 0xc1121f,
+        groove: 0xc1121f,
       },
     },
   };
@@ -4537,12 +5361,12 @@ function outlinePipeBetween(start, end, radius, material, caps = {}) {
 
   const axis = axisVector.normalize();
   const basis = radialBasis(axis);
-  const railOffsets = [
-    basis.u.clone().multiplyScalar(radius),
-    basis.u.clone().multiplyScalar(-radius),
-    basis.v.clone().multiplyScalar(radius),
-    basis.v.clone().multiplyScalar(-radius),
-  ];
+  const railOffsets = Array.from({ length: 6 }, (_, index) => {
+    const angle = (Math.PI * 2 * index) / 6;
+    return basis.u.clone()
+      .multiplyScalar(Math.cos(angle) * radius)
+      .add(basis.v.clone().multiplyScalar(Math.sin(angle) * radius));
+  });
 
   for (const offset of railOffsets) {
     group.add(lineBetween(start.clone().add(offset), end.clone().add(offset), material));
@@ -4583,7 +5407,7 @@ function outlineElbowBetween(entry, joint, exit, radius, material) {
 
   bendNormal.normalize();
   const centerPoints = curve.getPoints(30);
-  const rails = [[], [], [], []];
+  const rails = Array.from({ length: 6 }, () => []);
   for (let index = 0; index < centerPoints.length; index += 1) {
     const previous = centerPoints[Math.max(0, index - 1)];
     const next = centerPoints[Math.min(centerPoints.length - 1, index + 1)];
@@ -4591,10 +5415,14 @@ function outlineElbowBetween(entry, joint, exit, radius, material) {
     const side = bendNormal.clone().cross(tangent).normalize();
     const point = centerPoints[index];
 
-    rails[0].push(point.clone().addScaledVector(bendNormal, radius));
-    rails[1].push(point.clone().addScaledVector(bendNormal, -radius));
-    rails[2].push(point.clone().addScaledVector(side, radius));
-    rails[3].push(point.clone().addScaledVector(side, -radius));
+    for (let railIndex = 0; railIndex < rails.length; railIndex += 1) {
+      const angle = (Math.PI * 2 * railIndex) / rails.length;
+      rails[railIndex].push(
+        point.clone()
+          .addScaledVector(side, Math.cos(angle) * radius)
+          .addScaledVector(bendNormal, Math.sin(angle) * radius),
+      );
+    }
   }
 
   for (const points of rails) {
@@ -4746,7 +5574,7 @@ function outlineReducerMarker(position, direction, radius, material) {
 function socketAssembly(position, direction, pipeRadius, fitting, material, style) {
   const THREE = three.module;
   const group = new THREE.Group();
-  const radial = socketRadialDirection(direction);
+  const radial = socketRadialDirection(direction, fitting);
   const socketRadius = socketRadiusMetres(fitting);
   const socketLength = Math.max(0.12, socketRadius * 3.2);
   const start = position.clone().addScaledVector(radial, pipeRadius * 0.72);
@@ -4776,9 +5604,35 @@ function socketAssembly(position, direction, pipeRadius, fitting, material, styl
   return group;
 }
 
-function socketRadialDirection(direction) {
-  const radial = radialBasis(direction).v;
-  if (radial.z < 0) radial.multiplyScalar(-1);
+function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
+  const THREE = three.module;
+  const axis = direction.clone().normalize();
+  const grooveSpacing = clampNumber(pipeRadius * 0.62, 0.045, 0.12);
+
+  if (style.lineDrawing) {
+    return outlineBandMarker(position, axis, pipeRadius * 1.06, material, grooveSpacing * 2.2);
+  }
+
+  const group = new THREE.Group();
+  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(pipeRadius * 1.018, clampNumber(pipeRadius * 0.035, 0.004, 0.012), 8, 48),
+      material,
+    );
+    ring.position.copy(position).addScaledVector(axis, offset);
+    ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), axis);
+    ring.castShadow = true;
+    group.add(ring);
+  }
+  return group;
+}
+
+function socketRadialDirection(direction, fitting = null) {
+  const basis = radialBasis(direction);
+  const angle = fittingSocketAngle(fitting) * Math.PI / 180;
+  const radial = basis.v.clone()
+    .multiplyScalar(Math.cos(angle))
+    .add(basis.u.clone().multiplyScalar(Math.sin(angle)));
   return radial.normalize();
 }
 
@@ -4788,7 +5642,7 @@ function socketRadiusMetres(fitting) {
   return Math.max(0.035, (0.055 + (size.od / maxOd) * 0.255) * 0.72);
 }
 
-function autoReducerAssembly(reducer, modelPoints, material, style) {
+function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims = null) {
   const THREE = three.module;
   const group = new THREE.Group();
   const joint = modelPoints[reducer.nodeIndex];
@@ -4798,20 +5652,38 @@ function autoReducerAssembly(reducer, modelPoints, material, style) {
 
   const largeDirection = largeOther.clone().sub(joint);
   const smallDirection = smallOther.clone().sub(joint);
+  const placementDirection = reducerPlacementSide(reducer) === "large" ? largeDirection.clone() : smallDirection.clone();
   if (largeDirection.length() < 0.0001 || smallDirection.length() < 0.0001) return group;
 
+  const placementLength = placementDirection.length();
   largeDirection.normalize();
   smallDirection.normalize();
+  placementDirection.normalize();
   const modelLength = Math.max(0.08, reducer.lengthMm / 1000);
   const halfLength = modelLength * 0.5;
-  const start = reducer.kind === "tee"
-    ? joint.clone().addScaledVector(smallDirection, 0.015)
-    : joint.clone().addScaledVector(largeDirection, halfLength);
-  const end = reducer.kind === "tee"
-    ? joint.clone().addScaledVector(smallDirection, modelLength)
-    : joint.clone().addScaledVector(smallDirection, halfLength);
-  const startRadius = pipeRadiusMetres(reducer.largeSegment) * 1.18;
-  const endRadius = pipeRadiusMetres(reducer.smallSegment) * 0.94;
+  const startsAtJoint = reducerStartsAtJoint(reducer);
+  const startsAfterBend = reducer.kind === "bend";
+  let start;
+  let end;
+  if (startsAfterBend) {
+    const placementSegment = reducerPlacementSegment(reducer);
+    const renderedBendOffset = elbowTrims?.segment?.get(`${placementSegment.index}:${reducer.nodeIndex}`) ?? (reducerLegOffsetMm(reducer) / 1000);
+    const offset = clampNumber(renderedBendOffset, 0.015, Math.max(0.015, placementLength - modelLength));
+    start = joint.clone().addScaledVector(placementDirection, offset);
+    end = start.clone().addScaledVector(placementDirection, modelLength);
+  } else if (startsAtJoint) {
+    start = joint.clone().addScaledVector(smallDirection, 0.015);
+    end = joint.clone().addScaledVector(smallDirection, modelLength);
+  } else {
+    start = joint.clone().addScaledVector(largeDirection, halfLength);
+    end = joint.clone().addScaledVector(smallDirection, halfLength);
+  }
+  const startRadius = startsAfterBend && reducerPlacementSide(reducer) === "large"
+    ? pipeRadiusMetres(reducer.smallSegment) * 0.94
+    : pipeRadiusMetres(reducer.largeSegment) * 1.18;
+  const endRadius = startsAfterBend && reducerPlacementSide(reducer) === "large"
+    ? pipeRadiusMetres(reducer.largeSegment) * 1.18
+    : pipeRadiusMetres(reducer.smallSegment) * 0.94;
 
   const reducerObject = style.lineDrawing
     ? outlineReducerBetween(start, end, startRadius, endRadius, material)
@@ -5659,17 +6531,34 @@ function fallbackPreviewStyle() {
 
 function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
   if (style.outline) {
-    ctx.lineWidth = segmentPipeWidth;
+    const dx = segment.end2.x - segment.start2.x;
+    const dy = segment.end2.y - segment.start2.y;
+    const length = Math.hypot(dx, dy);
+    if (length < 0.001) return;
+    const along = { x: dx / length, y: dy / length };
+    const normal = { x: -along.y, y: along.x };
+    const halfWidth = segmentPipeWidth * 0.5;
+
     ctx.strokeStyle = style.pipeStops[0];
-    drawLine(ctx, segment.start2, segment.end2);
-
-    ctx.lineWidth = Math.max(2, segmentPipeWidth - 5);
-    ctx.strokeStyle = style.background;
-    drawLine(ctx, segment.start2, segment.end2);
-
     ctx.lineWidth = 2.5;
-    ctx.strokeStyle = style.pipeStops[0];
-    drawLine(ctx, segment.start2, segment.end2);
+    drawLine(
+      ctx,
+      { x: segment.start2.x + normal.x * halfWidth, y: segment.start2.y + normal.y * halfWidth },
+      { x: segment.end2.x + normal.x * halfWidth, y: segment.end2.y + normal.y * halfWidth },
+    );
+    drawLine(
+      ctx,
+      { x: segment.start2.x - normal.x * halfWidth, y: segment.start2.y - normal.y * halfWidth },
+      { x: segment.end2.x - normal.x * halfWidth, y: segment.end2.y - normal.y * halfWidth },
+    );
+    ctx.globalAlpha = 0.55;
+    ctx.lineWidth = 1.5;
+    drawLine(
+      ctx,
+      { x: segment.start2.x + normal.x * halfWidth * 0.42, y: segment.start2.y + normal.y * halfWidth * 0.42 },
+      { x: segment.end2.x + normal.x * halfWidth * 0.42, y: segment.end2.y + normal.y * halfWidth * 0.42 },
+    );
+    ctx.globalAlpha = 1;
     return;
   }
 
@@ -5705,15 +6594,30 @@ function drawFallbackFlushEndCaps(ctx, fallbackSegments, connections, style) {
       const angle = Math.atan2(point.y - other.y, point.x - other.x);
       const normal = { x: -Math.sin(angle), y: Math.cos(angle) };
 
-      ctx.lineWidth = capLineWidth;
-      drawLine(
-        ctx,
-        { x: point.x + normal.x * capHalf, y: point.y + normal.y * capHalf },
-        { x: point.x - normal.x * capHalf, y: point.y - normal.y * capHalf },
-      );
+      if (style.outline) {
+        drawFallbackPipeEndRing(ctx, point, angle, capHalf, Math.max(4, capHalf * 0.38));
+      } else {
+        ctx.lineWidth = capLineWidth;
+        drawLine(
+          ctx,
+          { x: point.x + normal.x * capHalf, y: point.y + normal.y * capHalf },
+          { x: point.x - normal.x * capHalf, y: point.y - normal.y * capHalf },
+        );
+      }
     }
   }
 
+  ctx.restore();
+}
+
+function drawFallbackPipeEndRing(ctx, point, angle, radius, minorRadius) {
+  ctx.save();
+  ctx.translate(point.x, point.y);
+  ctx.rotate(angle);
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, minorRadius, radius, 0, 0, Math.PI * 2);
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -5738,25 +6642,37 @@ function drawAutoReducersFallback(ctx, fallbackSegments, connections, style) {
     const joint = firstSegment.from === reducer.nodeIndex ? firstSegment.start2 : firstSegment.end2;
     const largeOther = largeSegment.from === reducer.nodeIndex ? largeSegment.end2 : largeSegment.start2;
     const smallOther = smallSegment.from === reducer.nodeIndex ? smallSegment.end2 : smallSegment.start2;
-    const along = reducer.kind === "tee"
-      ? normalizeScreenVector({ x: smallOther.x - joint.x, y: smallOther.y - joint.y })
+    const placementOther = reducerPlacementSide(reducer) === "large" ? largeOther : smallOther;
+    const startsAtJoint = reducerStartsAtJoint(reducer);
+    const startsAfterBend = reducer.kind === "bend";
+    const along = startsAtJoint || startsAfterBend
+      ? normalizeScreenVector({ x: placementOther.x - joint.x, y: placementOther.y - joint.y })
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
     const normal = { x: -along.y, y: along.x };
     const length = 30;
     const largeWidth = Math.max(14, visualPipeWidth(reducer.largeSegment) * 1.25);
     const smallWidth = Math.max(8, visualPipeWidth(reducer.smallSegment) * 0.82);
-    const start = reducer.kind === "tee"
-      ? { x: joint.x + along.x * 2, y: joint.y + along.y * 2 }
-      : { x: joint.x - along.x * length * 0.5, y: joint.y - along.y * length * 0.5 };
-    const end = reducer.kind === "tee"
-      ? { x: joint.x + along.x * length, y: joint.y + along.y * length }
-      : { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
+    const startWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? smallWidth : largeWidth;
+    const endWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? largeWidth : smallWidth;
+    let start;
+    let end;
+    if (startsAfterBend) {
+      const offset = reducerScreenOffsetPixels(reducer, joint, placementOther, length);
+      start = { x: joint.x + along.x * offset, y: joint.y + along.y * offset };
+      end = { x: start.x + along.x * length, y: start.y + along.y * length };
+    } else if (startsAtJoint) {
+      start = { x: joint.x + along.x * 2, y: joint.y + along.y * 2 };
+      end = { x: joint.x + along.x * length, y: joint.y + along.y * length };
+    } else {
+      start = { x: joint.x - along.x * length * 0.5, y: joint.y - along.y * length * 0.5 };
+      end = { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
+    }
 
     ctx.beginPath();
-    ctx.moveTo(start.x + normal.x * largeWidth * -0.5, start.y + normal.y * largeWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * smallWidth * -0.5, end.y + normal.y * smallWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * smallWidth * 0.5, end.y + normal.y * smallWidth * 0.5);
-    ctx.lineTo(start.x + normal.x * largeWidth * 0.5, start.y + normal.y * largeWidth * 0.5);
+    ctx.moveTo(start.x + normal.x * startWidth * -0.5, start.y + normal.y * startWidth * -0.5);
+    ctx.lineTo(end.x + normal.x * endWidth * -0.5, end.y + normal.y * endWidth * -0.5);
+    ctx.lineTo(end.x + normal.x * endWidth * 0.5, end.y + normal.y * endWidth * 0.5);
+    ctx.lineTo(start.x + normal.x * startWidth * 0.5, start.y + normal.y * startWidth * 0.5);
     ctx.closePath();
     if (!style.outline) ctx.fill();
     ctx.stroke();
@@ -5796,6 +6712,24 @@ function drawFallbackLiftPoint(ctx, toScreen, quantities, style) {
 function drawSuggestedLugsFallback(ctx, toScreen, quantities, style) {
   const lugPlan = suggestedLugPlan(quantities);
   if (!lugPlan) return;
+  const dimensionLayout = {
+    labels: [],
+    lines: [],
+    pipes: quantities.segments.map(({ segment }) => ({
+      index: segment.index,
+      start: toScreen(projectPreviewPoint(segment.start)),
+      end: toScreen(projectPreviewPoint(segment.end)),
+    })),
+  };
+
+  for (const [index, lug] of lugPlan.points.entries()) {
+    const start = toScreen(projectPreviewPoint(lug.segment.start));
+    const point = toScreen(projectPreviewPoint(lug.point));
+    const distanceMm = Number.isFinite(lug.distanceFromRunStartMm)
+      ? lug.distanceFromRunStartMm
+      : pointLength(subtractPoints(lug.point, lug.segment.start));
+    drawLugDimensionLine(ctx, start, point, lug.segment.index, `LUG ${lug.number ?? index + 1} ${formatLength(distanceMm)} mm`, dimensionLayout, index);
+  }
 
   ctx.save();
   ctx.textAlign = "center";
@@ -5945,18 +6879,41 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
         else ctx.fill();
       }
     }
+  } else if (fitting.type === "rollGroove") {
+    ctx.lineWidth = style.outline ? 3 : 3.6;
+    for (const offset of [-5, 5]) {
+      ctx.beginPath();
+      ctx.moveTo(along.x * offset + normal.x * pipeWidth * -0.58, along.y * offset + normal.y * pipeWidth * -0.58);
+      ctx.lineTo(along.x * offset + normal.x * pipeWidth * 0.58, along.y * offset + normal.y * pipeWidth * 0.58);
+      ctx.stroke();
+    }
+    ctx.font = "900 9px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = style.background;
+    ctx.fillStyle = style.fittingStroke;
+    const labelX = normal.x * (pipeWidth * 0.95 + 8);
+    const labelY = normal.y * (pipeWidth * 0.95 + 8);
+    ctx.strokeText("RG", labelX, labelY);
+    ctx.fillText("RG", labelX, labelY);
   } else if (fitting.type === "socket") {
+    const socketAngle = fittingSocketAngle(fitting) * Math.PI / 180;
+    const branch = normalizeScreenVector({
+      x: normal.x * Math.cos(socketAngle) + along.x * Math.sin(socketAngle),
+      y: normal.y * Math.cos(socketAngle) + along.y * Math.sin(socketAngle),
+    });
     const branchLength = Math.max(22, pipeWidth * 1.18);
     const socketRadius = Math.max(5, pipeWidth * 0.28);
     ctx.lineCap = "butt";
     ctx.lineWidth = style.outline ? 3 : 4;
     drawLine(
       ctx,
-      { x: normal.x * pipeWidth * 0.25, y: normal.y * pipeWidth * 0.25 },
-      { x: normal.x * branchLength, y: normal.y * branchLength },
+      { x: branch.x * pipeWidth * 0.25, y: branch.y * pipeWidth * 0.25 },
+      { x: branch.x * branchLength, y: branch.y * branchLength },
     );
     ctx.beginPath();
-    ctx.arc(normal.x * (branchLength + socketRadius * 0.25), normal.y * (branchLength + socketRadius * 0.25), socketRadius, 0, Math.PI * 2);
+    ctx.arc(branch.x * (branchLength + socketRadius * 0.25), branch.y * (branchLength + socketRadius * 0.25), socketRadius, 0, Math.PI * 2);
     if (!style.outline) ctx.fill();
     ctx.stroke();
   } else {
@@ -6070,13 +7027,13 @@ function autoSaveCurrentBrowserProject() {
   storeSavedBrowserProjects(projects);
 }
 
-async function saveBrowserProject() {
+async function saveBrowserProject(options = {}) {
   const info = await openProjectDetailsDialog({
     title: state.projectId ? "Save project" : "Save as project",
     action: "Save project",
     defaults: state.projectInfo,
   });
-  if (!info) return;
+  if (!info) return false;
 
   state.projectInfo = info;
   state.projectInfoPrompted = true;
@@ -6085,7 +7042,10 @@ async function saveBrowserProject() {
   }
   updateControls();
   updateAll();
-  window.alert(`Saved ${projectDisplayName(info)} in this browser.`);
+  if (!options.silent) {
+    window.alert(`Saved ${projectDisplayName(info)} in this browser.`);
+  }
+  return true;
 }
 
 function openBrowserProject() {
@@ -6433,8 +7393,12 @@ function deleteSavedBrowserProject(projectId) {
 
 async function startNewDrawing() {
   if (hasDrawingContent()) {
-    const proceed = window.confirm("Start a new drawing? Save this project first if you want it kept in the project list.");
-    if (!proceed) return;
+    const choice = await openNewDrawingDialog();
+    if (choice === "cancel") return;
+    if (choice === "save") {
+      const saved = await saveBrowserProject({ silent: true });
+      if (!saved) return;
+    }
   }
 
   state = blankState();
@@ -6443,6 +7407,31 @@ async function startNewDrawing() {
   updateControls();
   updateAll({ save: false });
   await promptForProjectDetails({ force: true });
+}
+
+function openNewDrawingDialog() {
+  if (!newDrawingDialog || !newDrawingCancelButton || !newDrawingDiscardButton || !newDrawingSaveButton) {
+    const saveFirst = window.confirm("Save this drawing before starting a new one?");
+    return Promise.resolve(saveFirst ? "save" : "discard");
+  }
+
+  if (newDrawingDialogResolver) {
+    newDrawingDialogResolver("cancel");
+    newDrawingDialogResolver = null;
+  }
+
+  newDrawingDialog.hidden = false;
+  newDrawingCancelButton.focus();
+  return new Promise((resolve) => {
+    newDrawingDialogResolver = resolve;
+  });
+}
+
+function closeNewDrawingDialog(choice = "cancel") {
+  if (newDrawingDialog) newDrawingDialog.hidden = true;
+  const resolve = newDrawingDialogResolver;
+  newDrawingDialogResolver = null;
+  if (resolve) resolve(choice);
 }
 
 async function promptForProjectDetails(options = {}) {
@@ -6519,6 +7508,14 @@ function promptProjectDetailsFallback(defaults = state.projectInfo) {
 }
 
 function exportProjectFile() {
+  const { name, payload } = exportedProjectPayload();
+  const reportCanvas = buildSpoolReportCanvas();
+  const modelImage = capture3dPreviewImage();
+  const html = projectExportHtml(payload, reportCanvas.toDataURL("image/png"), modelImage);
+  downloadTextFile(html, `${name}.html`, "text/html");
+}
+
+function exportedProjectPayload() {
   const project = normalizeProjectInfo(state.projectInfo);
   const stamp = new Date().toISOString().slice(0, 10);
   const name = [
@@ -6532,7 +7529,92 @@ function exportProjectFile() {
     exportedAt: new Date().toISOString(),
     state: statePayload(),
   };
-  downloadTextFile(JSON.stringify(payload, null, 2), `${name}.isospool.json`);
+  return { name, payload };
+}
+
+function capture3dPreviewImage() {
+  try {
+    if (three.ready) {
+      update3dPreview();
+      three.renderer.render(three.scene, three.camera);
+      return threeCanvas.toDataURL("image/png");
+    }
+
+    renderFallbackPreview();
+    return fallbackCanvas.toDataURL("image/png");
+  } catch (error) {
+    console.warn("Could not capture 3D model for export.", error);
+    return "";
+  }
+}
+
+function projectExportHtml(payload, reportImage, modelImage = "") {
+  const project = normalizeProjectInfo(payload.state?.projectInfo);
+  const title = projectDisplayName(project);
+  const exportedAt = new Date(payload.exportedAt ?? Date.now()).toLocaleString();
+  const data = jsonForHtmlScript(payload);
+  const modelSection = modelImage
+    ? `<section class="figure">
+        <h2>3D model view</h2>
+        <img class="model-image" src="${modelImage}" alt="3D pipe spool model" />
+      </section>`
+    : "";
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>${escapeHtml(title)} - IsoSpool export</title>
+    <style>
+      body { margin: 0; background: #eef4f2; color: #1f3438; font-family: Arial, Helvetica, sans-serif; }
+      main { max-width: 1160px; margin: 0 auto; padding: 24px; }
+      header { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; margin-bottom: 18px; }
+      h1 { margin: 0 0 6px; font-size: 24px; }
+      h2 { margin: 0 0 10px; font-size: 18px; }
+      p { margin: 4px 0; color: #516169; font-weight: 700; }
+      button { border: 0; border-radius: 8px; padding: 10px 14px; background: #0f766e; color: white; font-weight: 800; cursor: pointer; }
+      img { display: block; width: 100%; height: auto; border: 1px solid #bed8d1; border-radius: 10px; background: white; }
+      .figure { margin: 0 0 20px; }
+      .model-image { background: #f8fbfb; max-height: 680px; object-fit: contain; }
+      .note { margin-top: 14px; font-size: 13px; }
+      @media print {
+        body { background: white; }
+        main { max-width: none; padding: 0; }
+        header, .note { display: none; }
+        h2 { margin: 0 0 5mm; }
+        img { border: 0; border-radius: 0; }
+        .figure { break-inside: avoid; margin: 0 0 8mm; }
+        .model-image { max-height: 42vh; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>${escapeHtml(title)}</h1>
+          <p>IsoSpool fabrication sheet export</p>
+          <p>Exported ${escapeHtml(exportedAt)}</p>
+        </div>
+        <button type="button" onclick="window.print()">Print / Save PDF</button>
+      </header>
+      <section class="figure">
+        <h2>Fabrication sheet</h2>
+        <img src="${reportImage}" alt="Pipe spool fabrication sheet" />
+      </section>
+      ${modelSection}
+      <p class="note">This HTML file opens in a browser. It also contains the IsoSpool project data, so it can be imported back into IsoSpool later.</p>
+    </main>
+    <script id="isospool-project-data" type="application/json">${data}</script>
+  </body>
+</html>`;
+}
+
+function jsonForHtmlScript(payload) {
+  return JSON.stringify(payload)
+    .replace(/</g, "\\u003c")
+    .replace(/\u2028/g, "\\u2028")
+    .replace(/\u2029/g, "\\u2029");
 }
 
 function importProjectFile(file) {
@@ -6541,7 +7623,7 @@ function importProjectFile(file) {
   const reader = new FileReader();
   reader.addEventListener("load", () => {
     try {
-      const payload = JSON.parse(String(reader.result ?? ""));
+      const payload = parseImportedProjectPayload(String(reader.result ?? ""));
       const restored = stateFromPayload(payload);
       if (!restored) {
         window.alert("That file does not look like an IsoSpool project.");
@@ -6560,6 +7642,18 @@ function importProjectFile(file) {
   reader.readAsText(file);
 }
 
+function parseImportedProjectPayload(text) {
+  const source = String(text ?? "").trim();
+  if (!source) return null;
+  if (source.startsWith("{")) {
+    return JSON.parse(source);
+  }
+
+  const match = source.match(/<script[^>]*id=["']isospool-project-data["'][^>]*>([\s\S]*?)<\/script>/i);
+  if (!match) return null;
+  return JSON.parse(match[1]);
+}
+
 function export3dImage() {
   if (three.ready) {
     three.renderer.render(three.scene, three.camera);
@@ -6575,6 +7669,10 @@ function exportIsoImage() {
 }
 
 function exportSpoolReportImage() {
+  downloadCanvas(buildSpoolReportCanvas(), "pipe-spool-cut-list.png");
+}
+
+function buildSpoolReportCanvas() {
   const quantities = quantitySummary();
   const rowCount = Math.max(quantities.segments.length, 1);
   const bendCount = Math.max(quantities.elbows.length, 1);
@@ -6610,7 +7708,7 @@ function exportSpoolReportImage() {
 
   drawReportDrawing(ctx, drawingArea);
   drawReportTakeoff(ctx, reportArea, quantities);
-  downloadCanvas(canvas, "pipe-spool-cut-list.png");
+  return canvas;
 }
 
 function drawReportHeader(ctx, width) {
@@ -6777,8 +7875,8 @@ function drawReportTakeoff(ctx, area, quantities) {
   drawWrappedReportText(
     ctx,
     state.showLiftingPoints
-      ? `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; branch welds, valves, sockets and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
-      : `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; branch welds, valves, sockets and weld allowances are estimated unless manually set.`,
+      ? `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
+      : `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets and weld allowances are estimated unless manually set.`,
     x,
     area.y + area.height - 36,
     area.width - 48,
@@ -7082,7 +8180,8 @@ function contextTargetFromPointer(pointer) {
   const pointHit = findNearestPoint(pointer);
   const endpointHit = endpointSegmentHitForPoint(pointHit);
   const fittingHit = findNearestFitting(pointer);
-  const pipeHit = endpointHit ?? fittingHit?.segmentHit ?? segmentHit;
+  const reducerHit = findNearestAutoReducer(pointer);
+  const pipeHit = endpointHit ?? fittingHit?.segmentHit ?? reducerHit?.segmentHit ?? segmentHit;
   const noteHit = findNearestNote(pointer);
   const notePoint = noteHit?.note.point ?? pointHit?.point ?? (
     pipeHit ? lerpPoint(pipeHit.segment.start, pipeHit.segment.end, pipeHit.t) : unprojectIsoGround(pointer)
@@ -7091,6 +8190,7 @@ function contextTargetFromPointer(pointer) {
   return {
     segmentHit: pipeHit,
     fittingHit,
+    reducerHit,
     pointHit,
     endpointHit,
     noteHit,
@@ -7162,6 +8262,11 @@ function renderDrawingContextMenu() {
         action: () => placeContextFitting("flange", { flangeMode: "double" }),
       },
       {
+        label: "Add roll groove",
+        detail: "Grooved pipe end / 0 kg added",
+        action: () => placeContextFitting("rollGroove"),
+      },
+      {
         label: "Add reducer",
         detail: "On this run",
         action: () => placeContextFitting("reducer"),
@@ -7178,6 +8283,14 @@ function renderDrawingContextMenu() {
       detail: deleteCount > 1 ? `Remove ${deleteCount} selected runs` : `Remove run ${target.segmentHit.segment.index + 1}`,
       danger: true,
       action: () => deleteContextSegments(),
+    });
+  }
+
+  if (target?.reducerHit?.reducer?.kind === "bend") {
+    actions.push({
+      label: "Move reducer to other side",
+      detail: reducerSideDetail(target.reducerHit.reducer),
+      action: () => toggleContextBendReducerSide(),
     });
   }
 
@@ -7199,17 +8312,27 @@ function renderDrawingContextMenu() {
       segment: target.fittingHit.segmentHit.segment,
     };
     const weightKg = fittingWeightKg(fittingData.fitting, fittingData.segment);
-    actions.push({
-      label: "Set fitting weight",
-      detail: `${formatMass(weightKg)} kg ${fittingWeightSource(fittingData.fitting)}`,
-      action: () => setContextFittingWeight(),
-    });
-
-    if (fittingWeightOverride(fittingData.fitting) !== null) {
+    if (fittingData.fitting.type !== "rollGroove") {
       actions.push({
-        label: "Clear manual weight",
-        detail: "Use estimated fitting weight",
-        action: () => clearContextFittingWeight(),
+        label: "Set fitting weight",
+        detail: `${formatMass(weightKg)} kg ${fittingWeightSource(fittingData.fitting)}`,
+        action: () => setContextFittingWeight(),
+      });
+
+      if (fittingWeightOverride(fittingData.fitting) !== null) {
+        actions.push({
+          label: "Clear manual weight",
+          detail: "Use estimated fitting weight",
+          action: () => clearContextFittingWeight(),
+        });
+      }
+    }
+
+    if (target.fittingHit.fitting.type === "socket") {
+      actions.push({
+        label: "Spin socket 90 deg",
+        detail: `Current ${formatAngle(fittingSocketAngle(target.fittingHit.fitting))} deg around pipe`,
+        action: () => rotateContextSocket(),
       });
     }
 
@@ -7394,6 +8517,14 @@ function beginPinchGesture() {
     }
     noteDrag = null;
   }
+  if (socketDrag) {
+    try {
+      drawCanvas.releasePointerCapture(socketDrag.pointerId);
+    } catch {
+      // Ignore browsers that have already released capture.
+    }
+    socketDrag = null;
+  }
 
   pinchGesture = {
     ids: pointerEntries.map(([id]) => id),
@@ -7443,6 +8574,9 @@ function finishTouchContextPress(event) {
   if (press.fired) {
     if (noteDrag) {
       finishNoteDrag(event);
+    }
+    if (socketDrag) {
+      finishSocketDrag(event);
     }
     event.preventDefault();
     return true;
@@ -7652,6 +8786,7 @@ function evenlySpacedSocketPositions(count, minT, maxT) {
 
 function fittingActionLabel(type) {
   if (type === "flange") return "flange";
+  if (type === "rollGroove") return "roll groove";
   if (type === "valve") return "valve";
   if (type === "weld") return "weld";
   if (type === "reducer") return "reducer";
@@ -7662,8 +8797,15 @@ function fittingActionLabel(type) {
 function fittingModeText(fittingData) {
   const fitting = fittingData?.fitting ?? fittingData;
   if (fitting?.type === "flange") return fittingFlangeMode(fitting);
-  if (fitting?.type === "socket") return `NB ${fittingSocketSizeNb(fitting)} socket`;
+  if (fitting?.type === "rollGroove") return "0 kg roll groove";
+  if (fitting?.type === "socket") return `NB ${fittingSocketSizeNb(fitting)} socket / ${formatAngle(fittingSocketAngle(fitting))} deg`;
   return fittingData?.weightSource ?? "estimated";
+}
+
+function reducerSideDetail(reducer) {
+  const current = reducerPlacementSide(reducer) === "large" ? "large pipe side" : "small pipe side";
+  const next = reducerPlacementSide(reducer) === "large" ? "small pipe side" : "large pipe side";
+  return `Currently on ${current}; move to ${next}`;
 }
 
 function deleteContextSegments() {
@@ -7684,9 +8826,24 @@ function deleteContextFitting() {
   updateAll();
 }
 
+function toggleContextBendReducerSide() {
+  const reducer = drawingContextTarget?.reducerHit?.reducer;
+  if (!reducer || reducer.kind !== "bend") return;
+
+  state.reducerSideOverrides = normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length);
+  const current = reducerSideForNode(reducer.nodeIndex);
+  if (current === "large") {
+    delete state.reducerSideOverrides[reducer.nodeIndex];
+  } else {
+    state.reducerSideOverrides[reducer.nodeIndex] = "large";
+  }
+  updateAll();
+}
+
 function setContextFittingWeight() {
   const hit = drawingContextTarget?.fittingHit;
   if (!hit) return;
+  if (hit.fitting.type === "rollGroove") return;
 
   const currentWeight = fittingWeightKg(hit.fitting, hit.segmentHit.segment);
   const text = window.prompt("Fitting weight kg", formatMass(currentWeight));
@@ -7712,6 +8869,14 @@ function clearContextFittingWeight() {
   updateAll();
 }
 
+function rotateContextSocket() {
+  const fitting = drawingContextTarget?.fittingHit?.fitting;
+  if (!fitting || fitting.type !== "socket") return;
+  fitting.socketAngle = normalizeSocketAngle(fittingSocketAngle(fitting) + SOCKET_ROTATION_STEP_DEG);
+  state.selectedFitting = fitting.id;
+  updateAll();
+}
+
 function deleteContextNote() {
   const note = drawingContextTarget?.noteHit?.note;
   if (!note) return;
@@ -7730,6 +8895,7 @@ function deleteContextPoint() {
 
   state.points.splice(pointHit.index, 1);
   reindexNodeTypesAfterPointRemoval(pointHit.index);
+  reindexReducerSideOverridesAfterPointRemoval(pointHit.index);
   state.selectedPoint = null;
   state.activePoint = Math.max(0, Math.min(state.activePoint, state.points.length - 1));
   updateAll();
@@ -7894,6 +9060,93 @@ function finishNoteDrag(event) {
   return true;
 }
 
+function beginSocketDrag(event, fittingHit, pointer) {
+  const fitting = fittingHit?.fitting;
+  const segment = fittingHit?.segmentHit?.segment ?? segments().find((item) => item.index === fitting?.segmentIndex);
+  if (!fitting || fitting.type !== "socket" || !segment) return false;
+
+  socketDrag = {
+    pointerId: event.pointerId,
+    fittingId: fitting.id,
+    segmentIndex: segment.index,
+    moved: false,
+  };
+  state.selectedFitting = fitting.id;
+  state.selectedNote = null;
+  state.selectedPoint = null;
+  selectSingleSegment(segment.index);
+  cursorReadout.textContent = socketPositionReadout(segment, fitting.t);
+  cancelTouchContextPress();
+  try {
+    drawCanvas.setPointerCapture(event.pointerId);
+  } catch {
+    // Pointer capture is a nice-to-have for dragging outside the canvas.
+  }
+  drawIso();
+  updatePropertiesPanel();
+  event.preventDefault();
+  return true;
+}
+
+function updateSocketDrag(event) {
+  if (!socketDrag) return false;
+
+  const fitting = state.fittings.find((item) => item.id === socketDrag.fittingId);
+  const segment = segments().find((item) => item.index === socketDrag.segmentIndex);
+  if (!fitting || fitting.type !== "socket" || !segment) {
+    socketDrag = null;
+    return false;
+  }
+
+  const pointer = pointerPosition(event);
+  const projection = getProjection();
+  const start = projectIso(segment.start, projection);
+  const end = projectIso(segment.end, projection);
+  const hit = distanceToSegment(pointer, start, end);
+  fitting.t = normalizeFittingPosition("socket", hit.t);
+  socketDrag.moved = true;
+  state.pointer = pointer;
+  state.selectedFitting = fitting.id;
+  cursorReadout.textContent = socketPositionReadout(segment, fitting.t);
+  drawIso();
+  updatePropertiesPanel();
+  event.preventDefault();
+  return true;
+}
+
+function finishSocketDrag(event) {
+  if (!socketDrag) return false;
+
+  try {
+    drawCanvas.releasePointerCapture(socketDrag.pointerId);
+  } catch {
+    // Ignore browsers that have already released capture.
+  }
+  const moved = socketDrag.moved;
+  socketDrag = null;
+  state.pointer = null;
+  cursorReadout.textContent = formatPoint(activePoint());
+  if (moved) {
+    updateAll();
+  } else {
+    updateAll({ save: false });
+  }
+  event?.preventDefault?.();
+  return true;
+}
+
+function socketPositionReadout(segment, t) {
+  const lengthMm = pointLength(segment.vector);
+  const position = normalizeFittingPosition("socket", t);
+  const fromDistance = lengthMm * position;
+  const toDistance = lengthMm - fromDistance;
+  const useFrom = fromDistance <= toDistance;
+  const referenceIndex = useFrom ? segment.from : segment.to;
+  const distanceMm = useFrom ? fromDistance : toDistance;
+  const label = socketReferenceLabel(referenceIndex, segment, segments()).toLowerCase();
+  return `Socket ${formatLength(distanceMm)} mm from ${label}`;
+}
+
 drawCanvas.addEventListener("contextmenu", openDrawingContextMenu);
 
 drawCanvas.addEventListener("pointermove", (event) => {
@@ -7903,6 +9156,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
     return;
   }
   if (updateNoteDrag(event)) return;
+  if (updateSocketDrag(event)) return;
   if (updateTouchContextPress(event)) {
     event.preventDefault();
     return;
@@ -7939,7 +9193,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
 });
 
 drawCanvas.addEventListener("pointerleave", () => {
-  if (noteDrag || pendingDraw) return;
+  if (noteDrag || socketDrag || pendingDraw) return;
   cancelTouchContextPress();
   state.pointer = null;
   state.previewCandidate = null;
@@ -7994,6 +9248,12 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     return;
   }
 
+  const fittingHit = findNearestFitting(pointer);
+  if (fittingHit?.fitting?.type === "socket" && state.activeTool === "select") {
+    beginSocketDrag(event, fittingHit, pointer);
+    return;
+  }
+
   const pointHit = findNearestPoint(pointer);
   if (pointHit && state.activeTool === "select") {
     state.selectedPoint = pointHit.index;
@@ -8040,7 +9300,11 @@ drawCanvas.addEventListener("pointerup", (event) => {
     releaseTrackedTouchPointer(event);
     return;
   }
-  finishNoteDrag(event);
+  if (finishNoteDrag(event)) {
+    releaseTrackedTouchPointer(event);
+    return;
+  }
+  finishSocketDrag(event);
   releaseTrackedTouchPointer(event);
 });
 drawCanvas.addEventListener("pointercancel", (event) => {
@@ -8051,6 +9315,7 @@ drawCanvas.addEventListener("pointercancel", (event) => {
     pinchGesture = null;
   }
   finishNoteDrag(event);
+  finishSocketDrag(event);
 });
 
 document.querySelectorAll("[data-tool]").forEach((button) => {
@@ -8134,6 +9399,12 @@ dimensionStyleSelect.addEventListener("change", () => {
 
 liftingToggle.addEventListener("change", () => {
   state.showLiftingPoints = liftingToggle.checked;
+  liftingAngleSelect.disabled = !state.showLiftingPoints;
+  updateAll();
+});
+
+liftingAngleSelect.addEventListener("change", () => {
+  state.liftingSlingAngleDegrees = normalizeLiftingSlingAngle(liftingAngleSelect.value);
   updateAll();
 });
 
@@ -8193,6 +9464,10 @@ document.addEventListener("keydown", (event) => {
   } else if (event.key === "Delete" || event.key === "Backspace") {
     deleteSelection();
   } else if (event.key === "Escape") {
+    if (newDrawingDialog && !newDrawingDialog.hidden) {
+      closeNewDrawingDialog("cancel");
+      return;
+    }
     if (projectJobQuickPick && !projectJobQuickPick.hidden) {
       closeProjectJobPicker();
       return;
