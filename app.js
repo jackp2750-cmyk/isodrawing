@@ -1177,6 +1177,20 @@ function worldBounds(padding = 0) {
   };
 }
 
+function dimensionViewport(ctx, padding = 18) {
+  const rect = ctx?.canvas?.getBoundingClientRect?.();
+  const width = rect?.width || ctx?.canvas?.width || 0;
+  const height = rect?.height || ctx?.canvas?.height || 0;
+  const safeRight = Math.max(padding, width - padding);
+  const safeBottom = Math.max(padding, height - padding);
+  return {
+    left: padding,
+    top: padding,
+    right: safeRight,
+    bottom: safeBottom,
+  };
+}
+
 function drawSpool2d(ctx, projection) {
   const pipeWidth = 4;
   const segmentListForDraw = segments();
@@ -1184,6 +1198,7 @@ function drawSpool2d(ctx, projection) {
   const dimensionLayout = {
     labels: [],
     lines: [],
+    viewport: dimensionViewport(ctx, 18),
     pipes: segmentListForDraw.map((segment) => ({
       index: segment.index,
       start: projectIso(segment.start, projection),
@@ -1291,6 +1306,7 @@ function drawSuggestedLugs2d(ctx, projection, quantities = quantitySummary()) {
   const dimensionLayout = {
     labels: [],
     lines: [],
+    viewport: dimensionViewport(ctx, 18),
     pipes: segmentData.map((segment) => ({
       index: segment.index,
       start: projectIso(segment.start, projection),
@@ -1867,6 +1883,7 @@ function drawSocketDragDimension(ctx, projection) {
   const dimensionLayout = {
     labels: [],
     lines: [],
+    viewport: dimensionViewport(ctx, 18),
     pipes: segmentData.map((item) => ({
       index: item.index,
       start: projectIso(item.start, projection),
@@ -1979,6 +1996,7 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
   const labels = Array.isArray(dimensionLayout) ? dimensionLayout : dimensionLayout.labels ?? [];
   const existingLines = Array.isArray(dimensionLayout) ? [] : dimensionLayout.lines ?? [];
   const pipes = Array.isArray(dimensionLayout) ? [] : dimensionLayout.pipes ?? [];
+  const viewport = Array.isArray(dimensionLayout) ? null : dimensionLayout.viewport ?? null;
   let best = null;
 
   for (let level = 0; level < 12; level += 1) {
@@ -1998,13 +2016,20 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
         x: midpointBase.x + normal.x * offset,
         y: midpointBase.y + normal.y * offset,
       };
-      const bounds = rotatedLabelBounds(midpoint, labelWidth, labelHeight, labelAngle, 12);
+      const rawBounds = rotatedLabelBounds(midpoint, labelWidth, labelHeight, labelAngle, 12);
+      const labelShift = dimensionLabelShiftForViewport(rawBounds, viewport);
+      const shiftedMidpoint = {
+        x: midpoint.x + labelShift.x,
+        y: midpoint.y + labelShift.y,
+      };
+      const bounds = shiftBounds(rawBounds, labelShift.x, labelShift.y);
+      const labelShiftPenalty = labelShift.x * labelShift.x + labelShift.y * labelShift.y;
       const overlapArea = labels.reduce((sum, existing) => sum + boundsOverlapArea(bounds, existing), 0);
       const labelPipePenalty = pipes.reduce((sum, pipe) => {
         if (pipe.index === segmentIndex) return sum;
         if (segmentIntersectsBounds(pipe.start, pipe.end, bounds)) return sum + 18000;
         const clearance = Math.hypot(labelWidth, labelHeight) * 0.5 + 18;
-        const distance = distancePointToSegment(midpoint, pipe.start, pipe.end);
+        const distance = distancePointToSegment(shiftedMidpoint, pipe.start, pipe.end);
         return distance < clearance ? sum + Math.pow(clearance - distance, 2) : sum;
       }, 0);
       const linePipePenalty = candidateLines.reduce((sum, line) => sum + pipes.reduce((pipeSum, pipe) => {
@@ -2020,20 +2045,20 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
         const distance = distanceSegmentToSegment(line.start, line.end, existing.start, existing.end);
         return distance < clearance ? lineSum + Math.pow(clearance - distance, 2) * 3 : lineSum;
       }, 0), 0);
-      const score = overlapArea * 90 + labelPipePenalty * 4 + linePipePenalty + dimensionLinePenalty + level * 10 + sideIndex * 2;
+      const score = overlapArea * 90 + labelPipePenalty * 4 + linePipePenalty + dimensionLinePenalty + labelShiftPenalty * 80 + level * 10 + sideIndex * 2;
       const candidate = {
         lineStart,
         lineEnd,
         extensionStart,
         extensionEnd,
-        midpoint,
+        midpoint: shiftedMidpoint,
         normal,
         bounds,
         lines: candidateLines,
         score,
       };
 
-      if (overlapArea === 0 && labelPipePenalty === 0 && linePipePenalty === 0 && dimensionLinePenalty === 0) {
+      if (overlapArea === 0 && labelPipePenalty === 0 && linePipePenalty === 0 && dimensionLinePenalty === 0 && labelShiftPenalty === 0) {
         return candidate;
       }
       if (!best || score < best.score) {
@@ -2043,6 +2068,45 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
   }
 
   return best;
+}
+
+function dimensionLabelShiftForViewport(bounds, viewport) {
+  if (!viewport) return { x: 0, y: 0 };
+
+  const labelWidth = bounds.right - bounds.left;
+  const labelHeight = bounds.bottom - bounds.top;
+  const viewportWidth = Math.max(1, viewport.right - viewport.left);
+  const viewportHeight = Math.max(1, viewport.bottom - viewport.top);
+  let x = 0;
+  let y = 0;
+
+  if (labelWidth > viewportWidth) {
+    x = (viewport.left + viewport.right - bounds.left - bounds.right) * 0.5;
+  } else if (bounds.left < viewport.left) {
+    x = viewport.left - bounds.left;
+  } else if (bounds.right > viewport.right) {
+    x = viewport.right - bounds.right;
+  }
+
+  if (labelHeight > viewportHeight) {
+    y = (viewport.top + viewport.bottom - bounds.top - bounds.bottom) * 0.5;
+  } else if (bounds.top < viewport.top) {
+    y = viewport.top - bounds.top;
+  } else if (bounds.bottom > viewport.bottom) {
+    y = viewport.bottom - bounds.bottom;
+  }
+
+  return { x, y };
+}
+
+function shiftBounds(bounds, x, y) {
+  if (!x && !y) return bounds;
+  return {
+    left: bounds.left + x,
+    right: bounds.right + x,
+    top: bounds.top + y,
+    bottom: bounds.bottom + y,
+  };
 }
 
 function rotatedLabelBounds(center, width, height, angle, padding = 0) {
@@ -3084,6 +3148,7 @@ function autoReducerTransitions(segmentData = segments()) {
 
   for (const [nodeIndex, connected] of connections.entries()) {
     if (connected.length >= 3) {
+      reducers.push(...autoReducersForTeeNode(nodeIndex, connected, segmentData));
       continue;
     }
 
@@ -3101,6 +3166,27 @@ function autoReducerTransitions(segmentData = segments()) {
   }
 
   return reducers;
+}
+
+function autoReducersForTeeNode(nodeIndex, connected, segmentData = segments()) {
+  if (nodeConnectionType(nodeIndex) === "branch") return [];
+
+  const entries = nodeConnectionEntries(nodeIndex, connected, segmentData);
+  const mainPair = mostOppositeEntryPair(entries);
+  if (!mainPair) return [];
+
+  const [first, second] = mainPair;
+  const reducer = autoReducerForConnection(nodeIndex, first, second, first.segment, second.segment, { bend: 0 });
+  if (!reducer) return [];
+
+  return [{
+    ...reducer,
+    kind: "tee",
+    firstTakeoffMm: 0,
+    secondTakeoffMm: 0,
+    weightKg: 0,
+    source: "visual reducing tee",
+  }];
 }
 
 function applyReducerTakeoff(segmentTakeoffs, reducer) {
@@ -5039,8 +5125,8 @@ function rebuildThreeSpool() {
           ? outlineBranchMarker(index, point, connected, modelPoints, segmentData, jointMaterial)
           : branchNodeAssembly(index, point, connected, modelPoints, segmentData, jointMaterial))
         : (style.lineDrawing
-          ? outlineTeeMarker(point, connected, modelPoints, nodeRadius, jointMaterial)
-          : teeNodeAssembly(point, connected, modelPoints, nodeRadius, jointMaterial));
+          ? outlineTeeMarker(point, connected, modelPoints, nodeRadius, jointMaterial, segmentData)
+          : teeNodeAssembly(point, connected, modelPoints, nodeRadius, jointMaterial, segmentData));
       group.add(nodeObject);
       continue;
     }
@@ -5695,6 +5781,17 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     : taperedCylinderBetween(start, end, startRadius, endRadius, material, 32);
   if (!style.lineDrawing) {
     reducerObject.castShadow = true;
+    const axis = end.clone().sub(start);
+    if (axis.length() > 0.0001) {
+      axis.normalize();
+      const edgeMaterial = new THREE.LineBasicMaterial({
+        color: material?.color?.getHex?.() ?? 0x7a4dc2,
+        transparent: true,
+        opacity: 0.9,
+      });
+      group.add(outlineRing(start, axis, startRadius * 1.01, edgeMaterial));
+      group.add(outlineRing(end, axis, endRadius * 1.01, edgeMaterial));
+    }
   }
   group.add(reducerObject);
   return group;
@@ -5741,18 +5838,59 @@ function connectionDirections(position, connected, modelPoints) {
   return directions;
 }
 
-function teeNodeAssembly(position, connected, modelPoints, radius, material) {
+function connectionRenderEntries(position, connected, modelPoints, segmentData = []) {
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  return connected
+    .map((connection) => {
+      const target = modelPoints[connection.other];
+      if (!target) return null;
+      const direction = target.clone().sub(position);
+      if (direction.length() < 0.0001) return null;
+      direction.normalize();
+      return {
+        connection,
+        direction,
+        segment: segmentByIndex.get(connection.segmentIndex) ?? null,
+      };
+    })
+    .filter(Boolean)
+    .map((entry) => ({
+      ...entry,
+      radius: entry.segment ? pipeRadiusMetres(entry.segment) : pipeRadiusMetres(),
+    }));
+}
+
+function mostOppositeRenderEntryPair(entries) {
+  if (entries.length < 2) return null;
+
+  let best = null;
+  let bestDot = Infinity;
+  for (let i = 0; i < entries.length; i += 1) {
+    for (let j = i + 1; j < entries.length; j += 1) {
+      const dot = entries[i].direction.dot(entries[j].direction);
+      if (dot < bestDot) {
+        bestDot = dot;
+        best = [entries[i], entries[j]];
+      }
+    }
+  }
+  return best;
+}
+
+function teeNodeAssembly(position, connected, modelPoints, radius, material, segmentData = []) {
   const THREE = three.module;
   const group = new THREE.Group();
-  const directions = connectionDirections(position, connected, modelPoints);
-  const mainPair = mostOppositeDirectionPair(directions);
-  const length = Math.max(radius * 3.0, 0.16);
+  const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
+  const mainPair = mostOppositeRenderEntryPair(entries);
+  const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
+  const length = Math.max(coreRadius * 3.0, 0.16);
 
   if (mainPair) {
+    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius)) * 1.08;
     const main = cylinderBetween(
-      position.clone().addScaledVector(mainPair[0], length),
-      position.clone().addScaledVector(mainPair[1], length),
-      radius * 1.08,
+      position.clone().addScaledVector(mainPair[0].direction, length),
+      position.clone().addScaledVector(mainPair[1].direction, length),
+      mainRadius,
       material,
       28,
     );
@@ -5761,12 +5899,14 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material) {
     group.add(main);
   }
 
-  for (const direction of directions) {
-    if (mainPair && (direction === mainPair[0] || direction === mainPair[1])) continue;
+  for (const entry of entries) {
+    if (mainPair && mainPair.includes(entry)) continue;
+    const branchRadius = entry.radius * 1.08;
+    const branchLength = Math.max(length, branchRadius * 4.0, 0.16);
     const branch = cylinderBetween(
-      position.clone().addScaledVector(direction, -radius * 0.12),
-      position.clone().addScaledVector(direction, length),
-      radius * 1.08,
+      position.clone().addScaledVector(entry.direction, -branchRadius * 0.12),
+      position.clone().addScaledVector(entry.direction, branchLength),
+      branchRadius,
       material,
       28,
     );
@@ -5775,7 +5915,7 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material) {
     group.add(branch);
   }
 
-  const core = new THREE.Mesh(new THREE.SphereGeometry(radius * 1.05, 24, 16), material);
+  const core = new THREE.Mesh(new THREE.SphereGeometry(coreRadius * 1.05, 24, 16), material);
   core.position.copy(position);
   core.castShadow = true;
   core.receiveShadow = true;
@@ -5784,33 +5924,36 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material) {
   return group;
 }
 
-function outlineTeeMarker(position, connected, modelPoints, radius, material) {
+function outlineTeeMarker(position, connected, modelPoints, radius, material, segmentData = []) {
   const THREE = three.module;
   const group = new THREE.Group();
-  const directions = connectionDirections(position, connected, modelPoints);
-  const mainPair = mostOppositeDirectionPair(directions);
-  const length = Math.max(radius * 3.8, 0.2);
-  const pipeRadius = radius * 1.08;
+  const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
+  const mainPair = mostOppositeRenderEntryPair(entries);
+  const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
+  const length = Math.max(coreRadius * 3.8, 0.2);
 
   if (mainPair) {
+    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius)) * 1.08;
     group.add(outlinePipeBetween(
-      position.clone().addScaledVector(mainPair[0], length),
-      position.clone().addScaledVector(mainPair[1], length),
-      pipeRadius,
+      position.clone().addScaledVector(mainPair[0].direction, length),
+      position.clone().addScaledVector(mainPair[1].direction, length),
+      mainRadius,
       material,
     ));
   }
 
-  for (const direction of directions) {
-    if (mainPair && (direction === mainPair[0] || direction === mainPair[1])) continue;
-    const branchStart = position.clone().addScaledVector(direction, pipeRadius * 0.42);
-    const branchEnd = position.clone().addScaledVector(direction, length);
+  for (const entry of entries) {
+    if (mainPair && mainPair.includes(entry)) continue;
+    const branchRadius = entry.radius * 1.08;
+    const branchLength = Math.max(length, branchRadius * 4.0, 0.2);
+    const branchStart = position.clone().addScaledVector(entry.direction, branchRadius * 0.42);
+    const branchEnd = position.clone().addScaledVector(entry.direction, branchLength);
 
-    group.add(outlineRing(branchStart, direction, pipeRadius * 1.03, material));
+    group.add(outlineRing(branchStart, entry.direction, branchRadius * 1.03, material));
     group.add(outlinePipeBetween(
       branchStart,
       branchEnd,
-      pipeRadius,
+      branchRadius,
       material,
       { endCap: true },
     ));
@@ -6720,6 +6863,7 @@ function drawSuggestedLugsFallback(ctx, toScreen, quantities, style) {
   const dimensionLayout = {
     labels: [],
     lines: [],
+    viewport: dimensionViewport(ctx, 18),
     pipes: quantities.segments.map(({ segment }) => ({
       index: segment.index,
       start: toScreen(projectPreviewPoint(segment.start)),
@@ -8229,6 +8373,11 @@ function renderDrawingContextMenu() {
   const actions = [];
   const target = drawingContextTarget;
 
+  if (isCoarseInput()) {
+    renderMobileDrawingContextMenu(target);
+    return;
+  }
+
   if (target?.segmentHit) {
     const bendAnchor = bendEditAnchorForHit(target.segmentHit);
     const currentBend = bendAnchor === null ? null : bendAngleForSegmentAt(target.segmentHit.segment, bendAnchor);
@@ -8382,6 +8531,10 @@ function renderDrawingContextMenu() {
     action: () => addContextNote(target?.notePoint),
   });
 
+  appendDrawingContextActions(actions);
+}
+
+function appendDrawingContextActions(actions) {
   for (const action of actions) {
     const button = document.createElement("button");
     button.type = "button";
@@ -8403,6 +8556,186 @@ function renderDrawingContextMenu() {
     });
     drawingContextMenu.append(button);
   }
+}
+
+function addDrawingContextHeader(titleText, detailText) {
+  const header = document.createElement("div");
+  header.className = "drawing-context-header";
+  const title = document.createElement("strong");
+  title.textContent = titleText;
+  const subtitle = document.createElement("small");
+  subtitle.textContent = detailText;
+  header.append(title, subtitle);
+  drawingContextMenu.append(header);
+}
+
+function renderMobileDrawingContextMenu(target) {
+  drawingContextMenu.innerHTML = "";
+  const actions = [];
+
+  if (target?.noteHit) {
+    addDrawingContextHeader("Text note", "Quick note actions");
+    actions.push(
+      {
+        label: "Edit note",
+        detail: "Change note wording",
+        action: () => editContextNote(target.noteHit.note),
+      },
+      {
+        label: "Delete note",
+        detail: "Remove this note",
+        danger: true,
+        action: () => deleteContextNote(),
+      },
+    );
+    appendDrawingContextActions(actions);
+    return;
+  }
+
+  if (target?.fittingHit) {
+    const fitting = target.fittingHit.fitting;
+    addDrawingContextHeader(`${fittingActionLabel(fitting.type)} fitting`, "Quick fitting actions");
+    if (fitting.type === "socket") {
+      actions.push({
+        label: "Spin socket 90 deg",
+        detail: `${formatAngle(fittingSocketAngle(fitting))} deg now`,
+        action: () => rotateContextSocket(),
+      });
+    }
+    actions.push({
+      label: `Delete ${fittingActionLabel(fitting.type)}`,
+      detail: "Remove this fitting only",
+      danger: true,
+      action: () => deleteContextFitting(),
+    });
+    appendDrawingContextActions(actions);
+    return;
+  }
+
+  if (target?.reducerHit?.reducer?.kind === "bend") {
+    addDrawingContextHeader("Reducer", "Bend reducer actions");
+    actions.push({
+      label: "Move reducer to other side",
+      detail: reducerSideDetail(target.reducerHit.reducer),
+      action: () => toggleContextBendReducerSide(),
+    });
+    appendDrawingContextActions(actions);
+    return;
+  }
+
+  const pointConnections = target?.pointHit
+    ? segments().filter((segment) => segment.from === target.pointHit.index || segment.to === target.pointHit.index)
+    : [];
+  if (target?.pointHit && pointConnections.length >= 3) {
+    const type = nodeConnectionType(target.pointHit.index);
+    addDrawingContextHeader("Connection point", `Point ${pointLabel(target.pointHit.index)}`);
+    actions.push({
+      label: type === "branch" ? "Mark as tee" : "Mark as branch",
+      detail: type === "branch" ? "Use tee take-off" : "Use welded branch take-off",
+      action: () => setContextPointConnectionType(type === "branch" ? "tee" : "branch"),
+    });
+    appendDrawingContextActions(actions);
+    return;
+  }
+
+  if (target?.segmentHit) {
+    const segment = target.segmentHit.segment;
+    const bendAnchor = bendEditAnchorForHit(target.segmentHit);
+    const currentBend = bendAnchor === null ? null : bendAngleForSegmentAt(segment, bendAnchor);
+    const selected = selectedSegmentIndexes();
+    const deleteCount = selected.includes(segment.index) && selected.length > 1 ? selected.length : 1;
+
+    addDrawingContextHeader(`Run ${segment.index + 1}`, contextPipeSizeDetail(segment));
+    actions.push(
+      {
+        label: "Pipe size",
+        detail: "Pick NB from list",
+        action: () => changeContextPipeSize(),
+        keepOpen: true,
+      },
+      {
+        label: "Length",
+        detail: `${formatLength(pointLength(segment.vector))} mm now`,
+        action: () => editContextSegmentLength(),
+      },
+      {
+        label: "Add fitting",
+        detail: "Flange, groove, reducer or sockets",
+        action: () => renderMobileFittingMenu(),
+        keepOpen: true,
+      },
+    );
+    if (currentBend !== null) {
+      actions.push({
+        label: "Bend angle",
+        detail: `${formatAngle(currentBend)} deg now`,
+        action: () => editContextSegmentAngle(),
+      });
+    }
+    actions.push(
+      {
+        label: "Add note",
+        detail: "Text at this spot",
+        action: () => addContextNote(target.notePoint),
+      },
+      {
+        label: target.endpointHit ? "Delete end run" : "Delete run",
+        detail: deleteCount > 1 ? `Remove ${deleteCount} selected runs` : `Remove run ${segment.index + 1}`,
+        danger: true,
+        action: () => deleteContextSegments(),
+      },
+    );
+    appendDrawingContextActions(actions);
+    return;
+  }
+
+  addDrawingContextHeader("Drawing", "Quick actions");
+  actions.push({
+    label: "Add note",
+    detail: "Text on the iso paper",
+    action: () => addContextNote(target?.notePoint),
+  });
+  appendDrawingContextActions(actions);
+}
+
+function renderMobileFittingMenu() {
+  const target = drawingContextTarget;
+  drawingContextMenu.innerHTML = "";
+  addDrawingContextHeader("Add fitting", target?.endpointHit ? "End fittings" : "Pipe fittings");
+  appendDrawingContextActions([
+    {
+      label: "Back",
+      detail: "Return to pipe actions",
+      action: () => renderMobileDrawingContextMenu(drawingContextTarget),
+      keepOpen: true,
+    },
+    {
+      label: "Single flange",
+      detail: target?.endpointHit ? "Flush on pipe end" : "One flanged plate",
+      action: () => placeContextFitting("flange", { flangeMode: "single" }),
+    },
+    {
+      label: "Double flange",
+      detail: target?.endpointHit ? "Flush on pipe end" : "Two plates and gasket",
+      action: () => placeContextFitting("flange", { flangeMode: "double" }),
+    },
+    {
+      label: "Roll groove",
+      detail: "Grooved pipe end / 0 kg",
+      action: () => placeContextFitting("rollGroove"),
+    },
+    {
+      label: "Reducer",
+      detail: "On this run",
+      action: () => placeContextFitting("reducer"),
+    },
+    {
+      label: "1/2 sockets",
+      detail: "Choose count and spacing",
+      action: () => addContextSockets(),
+    },
+  ]);
+  clampDrawingContextMenuToViewport();
 }
 
 function renderContextPipeSizeMenu() {
@@ -8759,6 +9092,16 @@ function cancelPendingDraw(options = {}) {
   if (options.redraw !== false) {
     drawIso();
   }
+}
+
+function stopDrawingMode() {
+  cancelPendingDraw({ redraw: false });
+  cancelTouchContextPress();
+  state.previewCandidate = null;
+  state.pointer = null;
+  state.hoveredSegment = null;
+  setTool("select");
+  updateAll({ save: false });
 }
 
 function selectContextHitOnTouch(pointer, event) {
@@ -9525,16 +9868,14 @@ document.querySelector("#zoomOutButton").addEventListener("click", () => {
 });
 
 document.addEventListener("keydown", (event) => {
+  const isEnterKey = event.key === "Enter" || event.code === "NumpadEnter";
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
     event.preventDefault();
     undo();
-  } else if (event.key === "Enter" && state.activeTool === "draw" && !isEditingField(event.target)) {
+  } else if (isEnterKey && !isEditingField(event.target) && (state.activeTool === "draw" || pendingDraw)) {
     event.preventDefault();
-    state.previewCandidate = null;
-    state.pointer = null;
-    setTool("select");
-    updateAll({ save: false });
-  } else if (event.key === "Delete" || event.key === "Backspace") {
+    stopDrawingMode();
+  } else if ((event.key === "Delete" || event.key === "Backspace") && !isEditingField(event.target)) {
     deleteSelection();
   } else if (event.key === "Escape") {
     if (newDrawingDialog && !newDrawingDialog.hidden) {
