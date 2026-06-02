@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=84" />
+    <link rel="stylesheet" href="./styles.css?v=89" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -119,6 +119,7 @@
           <div>
             <strong>IsoSpool Studio</strong>
             <small>2D isometric pipe spools to 3D images</small>
+            <span class="version-badge" id="appVersionBadge">v0.89</span>
           </div>
         </div>
 
@@ -419,6 +420,11 @@
               <small id="renderStatus">Starting viewport</small>
             </div>
             <div class="bar-actions">
+              <div class="preview-nav" aria-label="3D navigation">
+                <button class="active" id="previewRotateButton" type="button" aria-pressed="true">Rotate</button>
+                <button id="previewMoveButton" type="button" aria-pressed="false">Move</button>
+                <button id="previewResetButton" type="button">Reset</button>
+              </div>
               <span class="pill" id="spoolStats">0 runs</span>
               <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close 3D preview">Close</button>
             </div>
@@ -519,6 +525,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=84"></script>
+    <script defer src="./app.js?v=89"></script>
   </body>
 </html>

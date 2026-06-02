@@ -8,6 +8,9 @@ const cursorReadout = document.querySelector("#cursorReadout");
 const renderStatus = document.querySelector("#renderStatus");
 const spoolStats = document.querySelector("#spoolStats");
 const previewModeSelect = document.querySelector("#previewModeSelect");
+const previewRotateButton = document.querySelector("#previewRotateButton");
+const previewMoveButton = document.querySelector("#previewMoveButton");
+const previewResetButton = document.querySelector("#previewResetButton");
 const segmentList = document.querySelector("#segmentList");
 const takeoffSummary = document.querySelector("#takeoffSummary");
 const weightsSummary = document.querySelector("#weightsSummary");
@@ -28,6 +31,7 @@ const previewLabelLayer = document.querySelector("#previewLabelLayer");
 const propertiesPanel = document.querySelector("#propertiesPanel");
 const projectFileInput = document.querySelector("#projectFileInput");
 const projectReadout = document.querySelector("#projectReadout");
+const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
 const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
 const projectDialog = document.querySelector("#projectDialog");
@@ -60,6 +64,8 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
+const APP_VERSION = "v0.89";
+const APP_BUILD_DATE = "2026-06-02";
 const PROJECT_FILE_VERSION = 1;
 const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 50;
@@ -252,6 +258,9 @@ let three = {
   spoolGroup: null,
   labels: [],
   animationFrame: 0,
+  navigationMode: "orbit",
+  userMovedCamera: false,
+  modelCenter: null,
 };
 
 function sampleState() {
@@ -377,6 +386,7 @@ function loadState() {
 
 function statePayload() {
   return {
+    appVersion: APP_VERSION,
     points: state.points,
     edges: state.edges,
     fittings: state.fittings,
@@ -3556,6 +3566,176 @@ function quantitySummary(segmentData = segments()) {
   };
 }
 
+function takeoffCountRows(quantities = quantitySummary()) {
+  const rows = new Map();
+  const spec = pipeSpec();
+  const add = (key, label, quantity = 1, weightKg = 0, detail = "", order = 50) => {
+    const existing = rows.get(key) ?? {
+      key,
+      label,
+      quantity: 0,
+      weightKg: 0,
+      detail,
+      order,
+      lengthMm: 0,
+      runCount: 0,
+      singleFlanges: 0,
+      doubleFlangeSets: 0,
+    };
+    existing.quantity += quantity;
+    existing.weightKg += Number(weightKg) || 0;
+    rows.set(key, existing);
+    return existing;
+  };
+
+  for (const { segment, quantity } of quantities.segments) {
+    const size = pipeSizeForSegment(segment);
+    const row = add(
+      `pipe:${size.nb}:${spec.schedule}`,
+      `Pipe NB ${size.nb} ${spec.schedule}`,
+      0,
+      quantity.pipeWeightKg,
+      `${spec.material} pipe`,
+      0,
+    );
+    row.lengthMm += quantity.cutLengthMm;
+    row.runCount += 1;
+  }
+
+  for (const elbow of quantities.elbows) {
+    const angle = formatAngle(elbow.bend);
+    add(
+      `elbow:${elbow.nb}:${angle}`,
+      `LR elbow NB ${elbow.nb} ${angle} deg`,
+      1,
+      elbow.weightKg,
+      "buttweld bend",
+      10,
+    );
+  }
+
+  for (const tee of quantities.tees) {
+    const label = tee.reducing
+      ? `Reducing tee NB ${tee.nb} x NB ${tee.branchNb}`
+      : `Tee NB ${tee.nb}`;
+    add(
+      `tee:${tee.nb}:${tee.branchNb}:${tee.reducing ? "reducing" : "equal"}`,
+      label,
+      1,
+      tee.weightKg,
+      tee.source,
+      20,
+    );
+  }
+
+  for (const branch of quantities.branches) {
+    add(
+      `branch:${branch.nb}:${branch.branchNb}`,
+      `Branch weld NB ${branch.nb} x NB ${branch.branchNb}`,
+      1,
+      branch.weightKg,
+      branch.source,
+      25,
+    );
+  }
+
+  for (const reducer of quantities.reducers) {
+    add(
+      `reducer:auto:${reducer.largeNb}:${reducer.smallNb}`,
+      `Reducer NB ${reducer.largeNb} x NB ${reducer.smallNb}`,
+      1,
+      reducer.weightKg,
+      reducer.source ?? "auto size change",
+      30,
+    );
+  }
+
+  for (const item of quantities.fittings) {
+    const size = pipeSizeForSegment(item.segment);
+    const type = item.fitting?.type;
+    if (type === "flange") {
+      const mode = fittingFlangeMode(item.fitting);
+      const row = add(
+        `flange:${size.nb}`,
+        `Flange NB ${size.nb}`,
+        mode === "double" ? 2 : 1,
+        item.weightKg,
+        "physical flange plates",
+        40,
+      );
+      if (mode === "double") row.doubleFlangeSets += 1;
+      else row.singleFlanges += 1;
+      continue;
+    }
+
+    if (type === "reducer") {
+      add(
+        `reducer:manual:${size.nb}`,
+        `Manual reducer on NB ${size.nb}`,
+        1,
+        item.weightKg,
+        "confirm outlet size",
+        31,
+      );
+      continue;
+    }
+
+    if (type === "socket") {
+      const socketNb = fittingSocketSizeNb(item.fitting);
+      add(
+        `socket:${socketNb}:host:${size.nb}`,
+        `Socket NB ${socketNb} on NB ${size.nb}`,
+        1,
+        item.weightKg,
+        `${formatAngle(fittingSocketAngle(item.fitting))} deg rotation`,
+        70,
+      );
+      continue;
+    }
+
+    if (type === "rollGroove") {
+      add(
+        `rollGroove:${size.nb}`,
+        `Roll groove NB ${size.nb}`,
+        1,
+        0,
+        "0 kg allowance",
+        60,
+      );
+      continue;
+    }
+
+    if (type === "valve") {
+      add(`valve:${size.nb}`, `Valve NB ${size.nb}`, 1, item.weightKg, item.weightSource, 50);
+      continue;
+    }
+
+    if (type === "weld") {
+      add(`weld:${size.nb}`, `Weld mark NB ${size.nb}`, 1, item.weightKg, item.weightSource, 55);
+    }
+  }
+
+  return [...rows.values()]
+    .map((row) => {
+      let countText = row.lengthMm > 0
+        ? `${formatLength(row.lengthMm)} mm`
+        : `x${row.quantity}`;
+      let detail = row.detail;
+      if (row.runCount) {
+        detail = `${detail}; ${row.runCount} cut run${row.runCount === 1 ? "" : "s"}`;
+      }
+      if (row.singleFlanges || row.doubleFlangeSets) {
+        detail = `${row.singleFlanges} single / ${row.doubleFlangeSets} double set${row.doubleFlangeSets === 1 ? "" : "s"}`;
+      }
+      return {
+        ...row,
+        countText,
+        detail,
+      };
+    })
+    .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+}
+
 function centreOfGravityData(quantities = quantitySummary()) {
   const components = [];
   const addComponent = (weightKg, point, type) => {
@@ -3822,10 +4002,12 @@ function suggestedLugPlan(quantities = quantitySummary(), liftPoint = centreOfGr
 
   if (candidates.length < 2) return null;
 
-  const spreadRatio = clampNumber(0.3 + ((90 - slingAngleDegrees) / 60) * 0.3, 0.3, 0.6);
-  const minSeparation = Math.min(Math.max(600, span * spreadRatio * 0.68), Math.max(600, span * 0.7));
-  const targetSeparation = clampNumber(span * spreadRatio, 900, Math.min(6000, span * 0.78));
-  const separationWeight = slingAngleDegrees <= 45 ? 0.5 : slingAngleDegrees >= 75 ? 0.2 : 0.32;
+  const spreadRatio = slingAngleSpreadRatio(slingAngleDegrees);
+  const targetMin = Math.min(900, Math.max(350, span * 0.18));
+  const targetMax = Math.min(7000, Math.max(targetMin, span * 0.86));
+  const targetSeparation = clampNumber(span * spreadRatio, targetMin, targetMax);
+  const minSeparation = Math.min(Math.max(350, targetSeparation * 0.48), Math.max(350, span * 0.72));
+  const separationWeight = slingAngleSeparationWeight(slingAngleDegrees);
   let best = null;
 
   for (let firstIndex = 0; firstIndex < candidates.length; firstIndex += 1) {
@@ -3842,11 +4024,16 @@ function suggestedLugPlan(quantities = quantitySummary(), liftPoint = centreOfGr
       const secondFromCog = subtractPoints(second.point, liftPoint.point);
       const sameSidePenalty = dotPoints(firstFromCog, secondFromCog) > 0 ? span * 0.4 : 0;
       const separationPenalty = Math.abs(separationMm - targetSeparation) * separationWeight;
+      const halfTargetSeparation = targetSeparation * 0.5;
+      const angleDistancePenalty = (
+        Math.abs(pointLength(firstFromCog) - halfTargetSeparation) +
+        Math.abs(pointLength(secondFromCog) - halfTargetSeparation)
+      ) * 0.55;
       const outsidePenalty = loadSplit.withinSpan ? 0 : span * 2;
       const imbalancePenalty = liftPoint.totalWeightKg > 0
         ? (Math.abs(loadSplit.firstLoadKg - loadSplit.secondLoadKg) / liftPoint.totalWeightKg) * span * 0.18
         : 0;
-      const score = midpointErrorMm * 1.4 + loadSplit.offLineErrorMm * 2.2 + sameSidePenalty + separationPenalty + imbalancePenalty + outsidePenalty;
+      const score = midpointErrorMm * 1.15 + loadSplit.offLineErrorMm * 2.2 + sameSidePenalty + separationPenalty + angleDistancePenalty + imbalancePenalty + outsidePenalty;
 
       if (!best || score < best.score) {
         best = {
@@ -3889,6 +4076,18 @@ function suggestedLugPlan(quantities = quantitySummary(), liftPoint = centreOfGr
   best.minSeparationMm = minSeparation;
 
   return best;
+}
+
+function slingAngleSpreadRatio(angleDegrees = state.liftingSlingAngleDegrees) {
+  const angle = normalizeLiftingSlingAngle(angleDegrees);
+  const flatness = clampNumber((90 - angle) / 60, 0, 1);
+  return clampNumber(0.2 + flatness * 0.56, 0.2, 0.76);
+}
+
+function slingAngleSeparationWeight(angleDegrees = state.liftingSlingAngleDegrees) {
+  const angle = normalizeLiftingSlingAngle(angleDegrees);
+  const flatness = clampNumber((90 - angle) / 60, 0, 1);
+  return clampNumber(1.15 + flatness * 1.35, 1.15, 2.5);
 }
 
 function slingAngleLoadFactor(angleDegrees = state.liftingSlingAngleDegrees) {
@@ -4290,6 +4489,13 @@ function updateTakeoffSummary() {
   const liftDisclaimer = state.showLiftingPoints
     ? " Branch weld weights, automatic reducer weights, COG and lifting points are estimates. Verify all lifting points, sling angles and attachments before lifting."
     : " Branch weld weights, automatic reducer weights and COG are estimates.";
+  const takeoffCounts = takeoffCountRows(quantities)
+    .map((row) => `
+      <span>${row.label}</span>
+      <strong>${row.countText}${row.weightKg ? ` / ${formatMass(row.weightKg)} kg` : ""}</strong>
+      <small>${row.detail}</small>
+    `)
+    .join("");
 
   takeoffSummary.innerHTML = `
     <div class="takeoff-grid">
@@ -4304,6 +4510,10 @@ function updateTakeoffSummary() {
       <span>Fittings</span><strong>${quantities.fittings.length} / ${formatMass(quantities.fittingWeightKg)} kg</strong>
       <span>Total est.</span><strong>${formatMass(quantities.totalWeightKg)} kg</strong>
       ${liftRows}
+    </div>
+    <div class="bend-notes takeoff-counts">
+      <strong>Take-off list by size</strong>
+      <div class="takeoff-count-grid">${takeoffCounts}</div>
     </div>
     <div class="bend-notes">
       <strong>Bend notes</strong>
@@ -4622,6 +4832,10 @@ function setSelectedPointConnectionType(type) {
 }
 
 function updateControls() {
+  if (appVersionBadge) {
+    appVersionBadge.textContent = APP_VERSION;
+    appVersionBadge.title = `IsoSpool Studio ${APP_VERSION} build ${APP_BUILD_DATE}`;
+  }
   stepLengthInput.value = String(state.stepLength);
   updateSelectionControls();
   updateProjectInputs();
@@ -4978,8 +5192,23 @@ function setupThree(THREE, OrbitControls) {
 
   three.controls = new OrbitControls(three.camera, three.renderer.domElement);
   three.controls.enableDamping = true;
-  three.controls.dampingFactor = 0.08;
+  three.controls.dampingFactor = 0.16;
   three.controls.screenSpacePanning = true;
+  three.controls.enablePan = true;
+  three.controls.enableZoom = true;
+  three.controls.rotateSpeed = 0.48;
+  three.controls.panSpeed = 0.7;
+  three.controls.zoomSpeed = 0.72;
+  three.controls.minZoom = 0.35;
+  three.controls.maxZoom = 8;
+  three.controls.addEventListener("start", () => {
+    three.userMovedCamera = true;
+    previewStage?.classList.add("preview-interacting");
+  });
+  three.controls.addEventListener("end", () => {
+    previewStage?.classList.remove("preview-interacting");
+  });
+  applyThreeNavigationMode(three.navigationMode);
 
   three.ready = true;
   threeCanvas.hidden = false;
@@ -4996,6 +5225,55 @@ function animateThree() {
   three.controls.update();
   three.renderer.render(three.scene, three.camera);
   update3dLabelPositions();
+}
+
+function setThreeNavigationMode(mode) {
+  three.navigationMode = mode === "pan" ? "pan" : "orbit";
+  applyThreeNavigationMode(three.navigationMode);
+}
+
+function applyThreeNavigationMode(mode = three.navigationMode) {
+  if (previewStage) {
+    previewStage.dataset.navMode = mode === "pan" ? "pan" : "orbit";
+  }
+
+  for (const [button, active] of [
+    [previewRotateButton, mode !== "pan"],
+    [previewMoveButton, mode === "pan"],
+  ]) {
+    if (!button) continue;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
+
+  if (!three.controls || !three.module) return;
+  const THREE = three.module;
+  three.controls.mouseButtons = mode === "pan"
+    ? {
+        LEFT: THREE.MOUSE.PAN,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.ROTATE,
+      }
+    : {
+        LEFT: THREE.MOUSE.ROTATE,
+        MIDDLE: THREE.MOUSE.DOLLY,
+        RIGHT: THREE.MOUSE.PAN,
+      };
+  three.controls.touches = mode === "pan"
+    ? {
+        ONE: THREE.TOUCH.PAN,
+        TWO: THREE.TOUCH.DOLLY_ROTATE,
+      }
+    : {
+        ONE: THREE.TOUCH.ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN,
+      };
+}
+
+function resetThreeView() {
+  if (!three.ready) return;
+  three.userMovedCamera = false;
+  frameThreeCamera({ reset: true });
 }
 
 function resizeThree() {
@@ -5209,8 +5487,8 @@ function rebuildThreeSpool() {
         const reducer = taperedCylinderBetween(
           position.clone().addScaledVector(direction, -0.18),
           position.clone().addScaledVector(direction, 0.18),
-          radius * 1.55,
-          radius * 0.82,
+          radius * 1.02,
+          radius * 0.72,
           reducerMaterial,
           32,
         );
@@ -5528,6 +5806,28 @@ function outlineBandMarker(position, direction, radius, material, width = 0.18) 
   return group;
 }
 
+function outlineRollGrooveMarker(position, direction, radius, material, width = 0.12) {
+  const group = outlineBandMarker(position, direction, radius * 1.03, material, width);
+  const axis = direction.clone().normalize();
+  const basis = radialBasis(axis);
+  group.add(outlineRing(position, axis, radius * 1.06, material));
+
+  for (const radial of [
+    basis.u,
+    basis.u.clone().multiplyScalar(-1),
+    basis.v,
+    basis.v.clone().multiplyScalar(-1),
+  ]) {
+    group.add(lineBetween(
+      position.clone().addScaledVector(axis, -width * 0.5).add(radial.clone().multiplyScalar(radius * 1.03)),
+      position.clone().addScaledVector(axis, width * 0.5).add(radial.clone().multiplyScalar(radius * 1.03)),
+      material,
+    ));
+  }
+
+  return group;
+}
+
 function outlineFlangeMarker(position, direction, radius, nominalBore, flangeMode, material) {
   const THREE = three.module;
   const group = new THREE.Group();
@@ -5636,8 +5936,8 @@ function outlineReducerMarker(position, direction, radius, material) {
   const basis = radialBasis(axis);
   const start = position.clone().addScaledVector(axis, -0.17);
   const end = position.clone().addScaledVector(axis, 0.17);
-  const startRadius = radius * 1.45;
-  const endRadius = radius * 0.86;
+  const startRadius = radius * 1.02;
+  const endRadius = radius * 0.72;
   const railDirections = [
     basis.u,
     basis.u.clone().multiplyScalar(-1),
@@ -5693,27 +5993,62 @@ function socketAssembly(position, direction, pipeRadius, fitting, material, styl
 function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
-  const grooveSpacing = clampNumber(pipeRadius * 0.22, 0.014, 0.036);
+  const markerLength = clampNumber(pipeRadius * 0.95, 0.07, 0.16);
+  const grooveSpacing = markerLength * 0.28;
 
   if (style.lineDrawing) {
-    return outlineBandMarker(position, axis, pipeRadius * 1.01, material, grooveSpacing * 1.6);
+    return outlineRollGrooveMarker(position, axis, pipeRadius, material, markerLength);
   }
 
   const group = new THREE.Group();
+  const grooveColor = material.color?.getHex?.() ?? 0x111719;
+  const brightColor = new THREE.Color(grooveColor).offsetHSL(0, 0, 0.18).getHex();
+  const darkColor = new THREE.Color(grooveColor).offsetHSL(0, 0, -0.16).getHex();
+  const baseMaterialParams = {
+    transparent: style.opacity < 1,
+    opacity: Math.min(0.92, (style.opacity ?? 1) + 0.04),
+    metalness: Math.min(0.72, style.metalness ?? 0.35),
+    roughness: Math.max(0.22, style.roughness ?? 0.36),
+  };
+  const bandMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({ color: grooveColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
+    : new THREE.MeshStandardMaterial({ ...baseMaterialParams, color: grooveColor });
+  const darkBandMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({ color: darkColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
+    : new THREE.MeshStandardMaterial({ ...baseMaterialParams, color: darkColor, roughness: Math.max(0.38, baseMaterialParams.roughness) });
+  const lipMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({ color: brightColor, transparent: baseMaterialParams.transparent, opacity: 1 })
+    : new THREE.MeshStandardMaterial({ ...baseMaterialParams, color: brightColor, metalness: Math.min(0.82, baseMaterialParams.metalness + 0.1), roughness: Math.max(0.18, baseMaterialParams.roughness - 0.08) });
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: material.color?.getHex?.() ?? 0x111719,
+    color: brightColor,
     transparent: style.opacity < 1,
     opacity: Math.min(0.94, (style.opacity ?? 1) + 0.08),
   });
-  const shadowMaterial = new THREE.LineBasicMaterial({
-    color: material.color?.getHex?.() ?? 0x111719,
-    transparent: true,
-    opacity: Math.min(0.46, style.opacity ?? 1),
-  });
 
-  group.add(outlineRing(position, axis, pipeRadius * 1.006, shadowMaterial));
+  const sleeveStart = position.clone().addScaledVector(axis, -markerLength * 0.5);
+  const sleeveEnd = position.clone().addScaledVector(axis, markerLength * 0.5);
+  const sleeve = cylinderBetween(sleeveStart, sleeveEnd, pipeRadius * 1.028, bandMaterial, 36);
+  sleeve.castShadow = true;
+  sleeve.receiveShadow = true;
+  group.add(sleeve);
+
+  const centreBand = cylinderBetween(
+    position.clone().addScaledVector(axis, -grooveSpacing * 0.55),
+    position.clone().addScaledVector(axis, grooveSpacing * 0.55),
+    pipeRadius * 1.036,
+    darkBandMaterial,
+    36,
+  );
+  centreBand.castShadow = true;
+  centreBand.receiveShadow = true;
+  group.add(centreBand);
+
+  const lipTube = clampNumber(pipeRadius * 0.055, 0.004, 0.012);
+  for (const offset of [-markerLength * 0.42, markerLength * 0.42]) {
+    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.035, lipTube, lipMaterial));
+  }
   for (const offset of [-grooveSpacing, grooveSpacing]) {
-    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.01, lineMaterial));
+    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.046, lineMaterial));
   }
   return group;
 }
@@ -5769,12 +6104,14 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     start = joint.clone().addScaledVector(largeDirection, halfLength);
     end = joint.clone().addScaledVector(smallDirection, halfLength);
   }
+  const largeRadius = pipeRadiusMetres(reducer.largeSegment) * 1.01;
+  const smallRadius = pipeRadiusMetres(reducer.smallSegment) * 1.01;
   const startRadius = startsAfterBend && reducerPlacementSide(reducer) === "large"
-    ? pipeRadiusMetres(reducer.smallSegment) * 0.94
-    : pipeRadiusMetres(reducer.largeSegment) * 1.18;
+    ? smallRadius
+    : largeRadius;
   const endRadius = startsAfterBend && reducerPlacementSide(reducer) === "large"
-    ? pipeRadiusMetres(reducer.largeSegment) * 1.18
-    : pipeRadiusMetres(reducer.smallSegment) * 0.94;
+    ? largeRadius
+    : smallRadius;
 
   const reducerObject = style.lineDrawing
     ? outlineReducerBetween(start, end, startRadius, endRadius, material)
@@ -6058,6 +6395,19 @@ function outlineRing(position, direction, radius, material) {
   const ring = new THREE.LineLoop(geometry, material);
   ring.position.copy(position);
   ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction.clone().normalize());
+  return ring;
+}
+
+function torusRing(position, direction, radius, tubeRadius, material, radialSegments = 10, tubularSegments = 48) {
+  const THREE = three.module;
+  const ring = new THREE.Mesh(
+    new THREE.TorusGeometry(radius, tubeRadius, radialSegments, tubularSegments),
+    material,
+  );
+  ring.position.copy(position);
+  ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction.clone().normalize());
+  ring.castShadow = true;
+  ring.receiveShadow = true;
   return ring;
 }
 
@@ -6446,7 +6796,7 @@ function radiusForNode(nodeIndex, connections, segmentByIndex) {
   );
 }
 
-function frameThreeCamera() {
+function frameThreeCamera(options = {}) {
   if (!three.ready) return;
 
   const THREE = three.module;
@@ -6465,6 +6815,14 @@ function frameThreeCamera() {
   const maxDim = Math.max(size.x, size.y, size.z, 5);
   const halfHeight = maxDim * 0.78;
   const halfWidth = halfHeight * aspect;
+  const preserveView = three.userMovedCamera && options.reset !== true && three.controls;
+  const previousTarget = preserveView ? three.controls.target.clone() : null;
+  const previousOffset = preserveView ? three.camera.position.clone().sub(previousTarget) : null;
+  const previousTargetOffset = preserveView && three.modelCenter
+    ? previousTarget.clone().sub(three.modelCenter)
+    : new THREE.Vector3(0, 0, 0);
+  const previousZoom = preserveView ? three.camera.zoom : 1;
+  const target = preserveView ? center.clone().add(previousTargetOffset) : center.clone();
 
   three.camera.left = -halfWidth;
   three.camera.right = halfWidth;
@@ -6472,14 +6830,22 @@ function frameThreeCamera() {
   three.camera.bottom = -halfHeight;
   three.camera.near = 0.1;
   three.camera.far = maxDim * 20 + 100;
-  three.camera.position.copy(center).add(new THREE.Vector3(-maxDim * 1.25, -maxDim * 1.25, -maxDim * 1.25));
-  three.camera.lookAt(center);
+  if (preserveView && previousOffset.length() > 0.001) {
+    const distance = Math.max(previousOffset.length(), maxDim * 1.35);
+    three.camera.position.copy(target).add(previousOffset.normalize().multiplyScalar(distance));
+    three.camera.zoom = clampNumber(previousZoom, three.controls.minZoom ?? 0.35, three.controls.maxZoom ?? 8);
+  } else {
+    three.camera.position.copy(target).add(new THREE.Vector3(-maxDim * 1.25, -maxDim * 1.25, -maxDim * 1.25));
+    three.camera.zoom = 1;
+  }
+  three.camera.lookAt(target);
   three.camera.updateProjectionMatrix();
 
   if (three.controls) {
-    three.controls.target.copy(center);
+    three.controls.target.copy(target);
     three.controls.update();
   }
+  three.modelCenter = center.clone();
 }
 
 function disposeObject3d(object) {
@@ -6688,6 +7054,7 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
     const halfWidth = segmentPipeWidth * 0.5;
 
     ctx.strokeStyle = style.pipeStops[0];
+    ctx.lineCap = "round";
     ctx.lineWidth = 2.5;
     drawLine(
       ctx,
@@ -6707,6 +7074,18 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
       { x: segment.end2.x + normal.x * halfWidth * 0.42, y: segment.end2.y + normal.y * halfWidth * 0.42 },
     );
     ctx.globalAlpha = 1;
+    ctx.lineCap = "butt";
+
+    drawFallbackPipeSectionRing(ctx, segment.start2, Math.atan2(dy, dx), halfWidth, 0.22);
+    drawFallbackPipeSectionRing(ctx, segment.end2, Math.atan2(dy, dx), halfWidth, 0.22);
+    const sectionCount = Math.min(4, Math.floor(length / 155));
+    for (let index = 1; index <= sectionCount; index += 1) {
+      const t = index / (sectionCount + 1);
+      drawFallbackPipeSectionRing(ctx, {
+        x: segment.start2.x + dx * t,
+        y: segment.start2.y + dy * t,
+      }, Math.atan2(dy, dx), halfWidth, 0.14);
+    }
     return;
   }
 
@@ -6759,10 +7138,15 @@ function drawFallbackFlushEndCaps(ctx, fallbackSegments, connections, style) {
 }
 
 function drawFallbackPipeEndRing(ctx, point, angle, radius, minorRadius) {
+  drawFallbackPipeSectionRing(ctx, point, angle, radius, 1, minorRadius, 2.5);
+}
+
+function drawFallbackPipeSectionRing(ctx, point, angle, radius, alpha = 1, minorRadius = Math.max(4, radius * 0.36), lineWidth = 1.5) {
   ctx.save();
   ctx.translate(point.x, point.y);
   ctx.rotate(angle);
-  ctx.lineWidth = 2.5;
+  ctx.globalAlpha *= alpha;
+  ctx.lineWidth = lineWidth;
   ctx.beginPath();
   ctx.ellipse(0, 0, minorRadius, radius, 0, 0, Math.PI * 2);
   ctx.stroke();
@@ -6798,8 +7182,8 @@ function drawAutoReducersFallback(ctx, fallbackSegments, connections, style) {
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
     const normal = { x: -along.y, y: along.x };
     const length = 30;
-    const largeWidth = Math.max(14, visualPipeWidth(reducer.largeSegment) * 1.25);
-    const smallWidth = Math.max(8, visualPipeWidth(reducer.smallSegment) * 0.82);
+    const largeWidth = Math.max(10, visualPipeWidth(reducer.largeSegment) * 1.03);
+    const smallWidth = Math.max(7, visualPipeWidth(reducer.smallSegment) * 0.92);
     const startWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? smallWidth : largeWidth;
     const endWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? largeWidth : smallWidth;
     let start;
@@ -7029,11 +7413,26 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
       }
     }
   } else if (fitting.type === "rollGroove") {
-    ctx.lineWidth = style.outline ? 3 : 3.6;
-    for (const offset of [-5, 5]) {
+    const halfLength = Math.max(9, pipeWidth * 0.48);
+    const halfWidth = pipeWidth * 0.62;
+    ctx.beginPath();
+    ctx.moveTo(along.x * -halfLength + normal.x * -halfWidth, along.y * -halfLength + normal.y * -halfWidth);
+    ctx.lineTo(along.x * halfLength + normal.x * -halfWidth, along.y * halfLength + normal.y * -halfWidth);
+    ctx.lineTo(along.x * halfLength + normal.x * halfWidth, along.y * halfLength + normal.y * halfWidth);
+    ctx.lineTo(along.x * -halfLength + normal.x * halfWidth, along.y * -halfLength + normal.y * halfWidth);
+    ctx.closePath();
+    if (!style.outline) {
+      ctx.globalAlpha = 0.86;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    ctx.lineWidth = style.outline ? 2.6 : 3.2;
+    ctx.stroke();
+    ctx.lineWidth = style.outline ? 2.2 : 2.6;
+    for (const offset of [-halfLength * 0.52, 0, halfLength * 0.52]) {
       ctx.beginPath();
-      ctx.moveTo(along.x * offset + normal.x * pipeWidth * -0.58, along.y * offset + normal.y * pipeWidth * -0.58);
-      ctx.lineTo(along.x * offset + normal.x * pipeWidth * 0.58, along.y * offset + normal.y * pipeWidth * 0.58);
+      ctx.moveTo(along.x * offset + normal.x * -halfWidth, along.y * offset + normal.y * -halfWidth);
+      ctx.lineTo(along.x * offset + normal.x * halfWidth, along.y * offset + normal.y * halfWidth);
       ctx.stroke();
     }
     ctx.font = "900 9px Inter, system-ui, sans-serif";
@@ -7517,6 +7916,7 @@ function openSavedBrowserProject(projectId) {
   state.projectId = record.id;
   state.projectInfo = normalizeProjectInfo(record.projectInfo);
   state.projectInfoPrompted = true;
+  three.userMovedCamera = false;
   setNextIdsFromState(state);
   updateControls();
   updateAll();
@@ -7553,6 +7953,7 @@ async function startNewDrawing() {
   state = blankState();
   nextFittingId = 1;
   nextNoteId = 1;
+  three.userMovedCamera = false;
   updateControls();
   updateAll({ save: false });
   await promptForProjectDetails({ force: true });
@@ -7674,6 +8075,8 @@ function exportedProjectPayload() {
   ].join("-");
   const payload = {
     app: "IsoSpool Studio",
+    appVersion: APP_VERSION,
+    appBuildDate: APP_BUILD_DATE,
     fileVersion: PROJECT_FILE_VERSION,
     exportedAt: new Date().toISOString(),
     state: statePayload(),
@@ -7742,7 +8145,7 @@ function projectExportHtml(payload, reportImage, modelImage = "") {
       <header>
         <div>
           <h1>${escapeHtml(title)}</h1>
-          <p>IsoSpool fabrication sheet export</p>
+          <p>IsoSpool fabrication sheet export ${escapeHtml(payload.appVersion ?? APP_VERSION)}</p>
           <p>Exported ${escapeHtml(exportedAt)}</p>
         </div>
         <button type="button" onclick="window.print()">Print / Save PDF</button>
@@ -7780,6 +8183,7 @@ function importProjectFile(file) {
       }
 
       state = restored;
+      three.userMovedCamera = false;
       setNextIdsFromState(state);
       updateControls();
       updateAll();
@@ -7829,9 +8233,10 @@ function buildSpoolReportCanvas() {
   const branchCount = Math.max(quantities.branches.length, 1);
   const reducerCount = Math.max(quantities.reducers.length, 1);
   const fittingCount = Math.max(quantities.fittings.length, 1);
+  const takeoffCount = Math.max(takeoffCountRows(quantities).length, 1);
   const canvas = document.createElement("canvas");
   canvas.width = 1800;
-  canvas.height = Math.max(1180, 910 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
+  canvas.height = Math.max(1240, 990 + takeoffCount * 22 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
   const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = "#f7f3e9";
@@ -7881,8 +8286,9 @@ function drawReportHeader(ctx, width) {
   }
   ctx.textAlign = "right";
   ctx.fillText(new Date().toLocaleString(), width - 36, 56);
+  ctx.fillText(`IsoSpool ${APP_VERSION}`, width - 36, 82);
   if (project.drawnBy) {
-    ctx.fillText(`Drawn by ${project.drawnBy}`, width - 36, 82);
+    ctx.fillText(`Drawn by ${project.drawnBy}`, width - 36, 104);
   }
   ctx.restore();
 }
@@ -8001,6 +8407,8 @@ function drawReportTakeoff(ctx, area, quantities) {
 
   y = drawReportTotals(ctx, x, y, area.width - 48, quantities);
   y += 18;
+  y = drawReportTakeoffList(ctx, x, y, area.width - 48, quantities);
+  y += 18;
   if (state.showLiftingPoints) {
     y = drawReportLiftPoint(ctx, x, y, area.width - 48, quantities);
     y += 18;
@@ -8067,6 +8475,52 @@ function drawReportTotals(ctx, x, y, width, quantities) {
   }
 
   return y + Math.ceil(totals.length / 2) * (rowHeight + 10);
+}
+
+function drawReportTakeoffList(ctx, x, y, width, quantities) {
+  const rows = takeoffCountRows(quantities);
+  ctx.fillStyle = "#1f3438";
+  ctx.font = "900 18px Inter, system-ui, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Take-off list by size", x, y);
+  y += 26;
+
+  const columns = [
+    { label: "Item", x: 0, align: "left" },
+    { label: "Qty", x: width * 0.5, align: "left" },
+    { label: "kg", x: width, align: "right" },
+  ];
+
+  ctx.fillStyle = "#eaf7f3";
+  roundRect(ctx, x, y - 17, width, 28, 7);
+  ctx.fill();
+  ctx.font = "900 12px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#607174";
+  for (const column of columns) {
+    ctx.textAlign = column.align;
+    ctx.fillText(column.label, x + column.x, y);
+  }
+  y += 16;
+
+  for (const row of rows) {
+    y += 24;
+    ctx.strokeStyle = "rgba(31, 42, 47, 0.1)";
+    ctx.beginPath();
+    ctx.moveTo(x, y - 18);
+    ctx.lineTo(x + width, y - 18);
+    ctx.stroke();
+
+    ctx.font = "900 13px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#263d45";
+    ctx.textAlign = "left";
+    ctx.fillText(row.label, x, y);
+    ctx.fillText(row.countText, x + width * 0.5, y);
+    ctx.textAlign = "right";
+    ctx.fillText(row.weightKg ? `${formatMass(row.weightKg)} kg` : "-", x + width, y);
+    ctx.textAlign = "left";
+  }
+
+  return y + 14;
 }
 
 function drawReportLiftPoint(ctx, x, y, width, quantities) {
@@ -9836,10 +10290,15 @@ previewModeSelect.addEventListener("change", () => {
   persistState();
 });
 
+previewRotateButton?.addEventListener("click", () => setThreeNavigationMode("orbit"));
+previewMoveButton?.addEventListener("click", () => setThreeNavigationMode("pan"));
+previewResetButton?.addEventListener("click", resetThreeView);
+
 document.querySelector("#sampleButton").addEventListener("click", () => {
   state = sampleState();
   nextFittingId = 5;
   nextNoteId = 2;
+  three.userMovedCamera = false;
   updateControls();
   updateAll();
 });

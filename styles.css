@@ -161,6 +161,22 @@ button svg path {
   line-height: 1.4;
 }
 
+.version-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  margin-top: 3px;
+  padding: 0 7px;
+  border: 1px solid rgba(8, 125, 115, 0.24);
+  border-radius: 999px;
+  background: #ecf8f4;
+  color: var(--teal-strong);
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
+}
+
 .topbar-actions,
 .topbar-settings,
 .bar-actions {
@@ -565,6 +581,42 @@ button svg path {
 .mobile-panel-dock,
 .mobile-panel-scrim {
   display: none;
+}
+
+.preview-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #edf7f4;
+}
+
+.preview-nav button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.preview-nav button.active,
+.preview-nav button:hover {
+  background: var(--teal);
+  color: #fff;
+}
+
+.preview-stage[data-nav-mode="orbit"],
+.preview-stage[data-nav-mode="pan"] {
+  cursor: grab;
+}
+
+.preview-stage.preview-interacting {
+  cursor: grabbing;
 }
 
 .sheet-close-button {
@@ -1059,6 +1111,42 @@ button svg path {
   color: var(--ink);
   font-size: 12px;
   text-align: right;
+}
+
+.takeoff-counts {
+  border-color: rgba(8, 125, 115, 0.22);
+  background: #f3fbf8;
+}
+
+.takeoff-count-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(86px, auto);
+  gap: 5px 10px;
+  align-items: baseline;
+}
+
+.takeoff-count-grid span {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.takeoff-count-grid strong {
+  max-width: 170px;
+  color: var(--teal-strong);
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1.25;
+  text-align: right;
+  white-space: normal;
+}
+
+.takeoff-count-grid small {
+  grid-column: 1 / -1;
+  margin-top: -3px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
 }
 
 .bend-notes {
