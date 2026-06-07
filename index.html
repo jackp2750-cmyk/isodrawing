@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=89" />
+    <link rel="stylesheet" href="./styles.css?v=121" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -21,6 +21,17 @@
       </symbol>
       <symbol id="icon-select" viewBox="0 0 24 24">
         <path d="m5 3 14 8-6 2 3 6-3 2-3-6-5 4Z" />
+      </symbol>
+      <symbol id="icon-box-select" viewBox="0 0 24 24">
+        <path d="M4 8V4h4" />
+        <path d="M16 4h4v4" />
+        <path d="M20 16v4h-4" />
+        <path d="M8 20H4v-4" />
+        <path d="M10 4h4" />
+        <path d="M20 10v4" />
+        <path d="M14 20h-4" />
+        <path d="M4 14v-4" />
+        <rect x="8" y="8" width="8" height="8" rx="1" />
       </symbol>
       <symbol id="icon-flange" viewBox="0 0 24 24">
         <path d="M4 12h16" />
@@ -119,7 +130,7 @@
           <div>
             <strong>IsoSpool Studio</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v0.89</span>
+            <span class="version-badge" id="appVersionBadge">v1.21</span>
           </div>
         </div>
 
@@ -146,6 +157,7 @@
             <select id="dimensionStyleSelect" aria-label="Dimension style">
               <option value="labels">Pipe labels</option>
               <option value="redline">Red C/C lines</option>
+              <option value="numbered">Numbered list</option>
             </select>
           </label>
           <label class="toggle top-toggle">
@@ -160,17 +172,6 @@
               <option value="60">60 deg</option>
               <option value="75">75 deg</option>
               <option value="90">90 deg</option>
-            </select>
-          </label>
-          <label class="preview-mode-field">
-            <span>3D view</span>
-            <select id="previewModeSelect">
-              <option value="carbon">Realistic 3D</option>
-              <option value="black">Carbon dark</option>
-              <option value="stainless">Stainless silver</option>
-              <option value="red">Painted red</option>
-              <option value="ghost">Transparent</option>
-              <option value="outline">Fabrication outline</option>
             </select>
           </label>
         </div>
@@ -226,6 +227,10 @@
             <button class="tool-button" data-tool="select" type="button" title="Select" aria-label="Select">
               <svg><use href="#icon-select"></use></svg>
               <span>Select</span>
+            </button>
+            <button class="tool-button" data-tool="boxSelect" type="button" title="Box select multiple pipe runs" aria-label="Box select multiple pipe runs">
+              <svg><use href="#icon-box-select"></use></svg>
+              <span>Box Select</span>
             </button>
             <button class="tool-button" data-tool="flange" type="button" title="Place flange" aria-label="Place flange">
               <svg><use href="#icon-flange"></use></svg>
@@ -420,11 +425,26 @@
               <small id="renderStatus">Starting viewport</small>
             </div>
             <div class="bar-actions">
+              <label class="preview-panel-mode">
+                <span>3D view</span>
+                <select id="previewModePanelSelect" aria-label="3D preview style">
+                  <option value="carbon">Realistic 3D</option>
+                  <option value="black">Carbon dark</option>
+                  <option value="stainless">Stainless silver</option>
+                  <option value="red">Painted red</option>
+                  <option value="ghost">Transparent</option>
+                  <option value="outline">Fabrication outline</option>
+                </select>
+              </label>
               <div class="preview-nav" aria-label="3D navigation">
                 <button class="active" id="previewRotateButton" type="button" aria-pressed="true">Rotate</button>
                 <button id="previewMoveButton" type="button" aria-pressed="false">Move</button>
                 <button id="previewResetButton" type="button">Reset</button>
               </div>
+              <label class="preview-label-toggle">
+                <input id="previewLabelToggle" type="checkbox" checked />
+                <span>3D labels</span>
+              </label>
               <span class="pill" id="spoolStats">0 runs</span>
               <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close 3D preview">Close</button>
             </div>
@@ -515,6 +535,7 @@
           </div>
         </section>
       </div>
+
     </div>
 
     <script type="importmap">
@@ -525,6 +546,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=89"></script>
+    <script defer src="./app.js?v=121"></script>
   </body>
 </html>

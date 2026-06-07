@@ -8,9 +8,30 @@ const cursorReadout = document.querySelector("#cursorReadout");
 const renderStatus = document.querySelector("#renderStatus");
 const spoolStats = document.querySelector("#spoolStats");
 const previewModeSelect = document.querySelector("#previewModeSelect");
+const previewModePanelSelect = document.querySelector("#previewModePanelSelect");
+const previewLabelToggle = document.querySelector("#previewLabelToggle");
 const previewRotateButton = document.querySelector("#previewRotateButton");
 const previewMoveButton = document.querySelector("#previewMoveButton");
 const previewResetButton = document.querySelector("#previewResetButton");
+const loadPlanButton = document.querySelector("#loadPlanButton");
+const loadPlanDialog = document.querySelector("#loadPlanDialog");
+const loadPlanProjectList = document.querySelector("#loadPlanProjectList");
+const loadPlanStage = document.querySelector("#loadPlanStage");
+const loadPlanCanvas = document.querySelector("#loadPlanCanvas");
+const loadPlanThreeCanvas = document.querySelector("#loadPlanThreeCanvas");
+const loadPlanSummary = document.querySelector("#loadPlanSummary");
+const loadPlanPlayButton = document.querySelector("#loadPlanPlayButton");
+const loadPlanCloseButton = document.querySelector("#loadPlanCloseButton");
+const loadPlanTraySelect = document.querySelector("#loadPlanTraySelect");
+const loadPlanRackSelect = document.querySelector("#loadPlanRackSelect");
+const loadPlanJobSelect = document.querySelector("#loadPlanJobSelect");
+const loadPlanLayoutButton = document.querySelector("#loadPlanLayoutButton");
+const loadPlanModelButton = document.querySelector("#loadPlanModelButton");
+const loadPlanAnimateButton = document.querySelector("#loadPlanAnimateButton");
+const loadPlanSpinButton = document.querySelector("#loadPlanSpinButton");
+const loadPlanResetButton = document.querySelector("#loadPlanResetButton");
+const loadPlanSelectAllButton = document.querySelector("#loadPlanSelectAllButton");
+const loadPlanDeselectAllButton = document.querySelector("#loadPlanDeselectAllButton");
 const segmentList = document.querySelector("#segmentList");
 const takeoffSummary = document.querySelector("#takeoffSummary");
 const weightsSummary = document.querySelector("#weightsSummary");
@@ -64,8 +85,8 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v0.89";
-const APP_BUILD_DATE = "2026-06-02";
+const APP_VERSION = "v1.21";
+const APP_BUILD_DATE = "2026-06-08";
 const PROJECT_FILE_VERSION = 1;
 const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 50;
@@ -78,9 +99,35 @@ const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer
 const FLANGE_MODES = new Set(["single", "double"]);
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const PREVIEW_MODES = new Set(["carbon", "black", "stainless", "red", "ghost", "outline"]);
-const DIMENSION_STYLES = new Set(["labels", "redline"]);
+const DIMENSION_STYLES = new Set(["labels", "redline", "numbered"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
+const LOAD_PLAN_TRAYS = {
+  medium: { key: "medium", label: "3460 x 2040 mm tray", lengthMm: 3460, widthMm: 2040 },
+  long: { key: "long", label: "4490 x 2040 mm tray", lengthMm: 4490, widthMm: 2040 },
+};
+const LOAD_PLAN_TRAY_KEYS = new Set(Object.keys(LOAD_PLAN_TRAYS));
+const LOAD_PLAN_RACKS = {
+  off: null,
+  standard: { key: "standard", label: "6500 x 2040 mm roof racks", lengthMm: 6500, widthMm: 2040 },
+  long: { key: "long", label: "7500 x 2040 mm roof racks", lengthMm: 7500, widthMm: 2040 },
+};
+const LOAD_PLAN_RACK_KEYS = new Set(Object.keys(LOAD_PLAN_RACKS));
+const LOAD_PLAN_PACK_STEP_MM = 100;
+const LOAD_PLAN_CLEARANCE_MM = 20;
+const LOAD_PLAN_MAX_SPOOLS = 30;
+const LOAD_PLAN_DEFAULT_SPOOLS = 0;
+const LOAD_PLAN_TRAY_LAYERS = 6;
+const LOAD_PLAN_RACK_LAYERS = 3;
+const LOAD_PLAN_ROTATION_STEP_DEG = 15;
+const LOAD_PLAN_DEPTH_SKEW_X = 0.24;
+const LOAD_PLAN_DEPTH_SKEW_Y = 0.34;
+const LOAD_PLAN_Z_SKEW = 0.58;
+const LOAD_PLAN_LAYER_RISE_MM = 320;
+const LOAD_PLAN_3D_SCALE = 0.001;
+const LOAD_PLAN_VISIBLE_SEGMENT_LIMIT = 80;
+const LOAD_PLAN_TIMBER_THICKNESS_MM = 90;
+const LOAD_PLAN_TIMBER_WIDTH_MM = 140;
 const PIPE_SPECS = {
   carbon40: {
     label: "Carbon steel Sch 40",
@@ -240,6 +287,7 @@ let nextNoteId = 1;
 let state = loadState() ?? blankState();
 let noteDrag = null;
 let socketDrag = null;
+let boxSelectDrag = null;
 let touchContextPress = null;
 let pendingDraw = null;
 let activeTouchPointers = new Map();
@@ -248,9 +296,17 @@ let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
+let loadPlanSelection = new Set();
+let loadPlanAnimationFrame = 0;
+let currentLoadPlan = null;
+let loadPlanTrayKey = "medium";
+let loadPlanRackKey = "standard";
+let loadPlanJobKey = "";
+let loadPlanViewMode = "layout";
 let three = {
   ready: false,
   module: null,
+  OrbitControls: null,
   renderer: null,
   scene: null,
   camera: null,
@@ -261,6 +317,17 @@ let three = {
   navigationMode: "orbit",
   userMovedCamera: false,
   modelCenter: null,
+};
+let loadPlanThree = {
+  ready: false,
+  renderer: null,
+  scene: null,
+  camera: null,
+  controls: null,
+  group: null,
+  animationFrame: 0,
+  spinning: false,
+  bounds: null,
 };
 
 function sampleState() {
@@ -310,6 +377,7 @@ function sampleState() {
     anglePlane: "xy",
     flangeMode: "single",
     previewMode: "carbon",
+    show3dLabels: true,
     gridScale: 42,
     showDimensions: true,
     dimensionStyle: "labels",
@@ -353,6 +421,7 @@ function blankState() {
     anglePlane: "xy",
     flangeMode: "single",
     previewMode: "carbon",
+    show3dLabels: true,
     gridScale: 42,
     showDimensions: true,
     dimensionStyle: "labels",
@@ -403,6 +472,7 @@ function statePayload() {
     anglePlane: state.anglePlane,
     flangeMode: state.flangeMode,
     previewMode: state.previewMode,
+    show3dLabels: state.show3dLabels !== false,
     gridScale: state.gridScale,
     showDimensions: state.showDimensions,
     dimensionStyle: normalizeDimensionStyle(state.dimensionStyle),
@@ -457,6 +527,7 @@ function stateFromPayload(payload, options = {}) {
     anglePlane: normalizeAnglePlane(saved.anglePlane),
     flangeMode: applyNewDefaults ? "single" : normalizeFlangeMode(saved.flangeMode),
     previewMode: normalizePreviewMode(saved.previewMode),
+    show3dLabels: saved.show3dLabels !== false,
     selectedSegments,
     activePoint: Number.isInteger(saved.activePoint) && saved.activePoint >= 0 && saved.activePoint < points.length ? saved.activePoint : points.length - 1,
     selectedPoint: Number.isInteger(saved.selectedPoint) && saved.selectedPoint >= 0 && saved.selectedPoint < points.length ? saved.selectedPoint : null,
@@ -1072,6 +1143,7 @@ function drawIso() {
   }
   drawPreviewRun(ctx, projection);
   drawSocketDragDimension(ctx, projection);
+  drawBoxSelectOverlay(ctx);
 }
 
 function drawGrid(ctx, width, height, projection) {
@@ -1255,7 +1327,7 @@ function drawSpool2d(ctx, projection) {
     for (const item of dimensionSegments) {
       drawDimension(ctx, item.segment, item.start, item.end, dimensionLayout);
     }
-    if (normalizeDimensionStyle(state.dimensionStyle) === "redline") {
+    if (normalizeDimensionStyle(state.dimensionStyle) === "redline" || normalizeDimensionStyle(state.dimensionStyle) === "numbered") {
       drawSocketPositionDimensions(ctx, projection, segmentListForDraw, dimensionLayout);
     }
   }
@@ -1273,6 +1345,7 @@ function drawSpool2d(ctx, projection) {
   drawAutoReducers2d(ctx, projection, segmentListForDraw);
   drawTeeMarkers2d(ctx, projection, segmentListForDraw, connections, pipeWidth);
   drawPipePointMarkers(ctx, projection, connections);
+  drawNumberedDimensionLegend(ctx, dimensionLayout);
 
   ctx.restore();
 }
@@ -1611,7 +1684,8 @@ function roundRect(ctx, x, y, width, height, radius) {
 }
 
 function drawDimension(ctx, segment, start, end, dimensionLayout = []) {
-  if (normalizeDimensionStyle(state.dimensionStyle) === "redline") {
+  const dimensionStyle = normalizeDimensionStyle(state.dimensionStyle);
+  if (dimensionStyle === "redline" || dimensionStyle === "numbered") {
     drawRedCentreDimension(ctx, segment, start, end, dimensionLayout);
     return;
   }
@@ -1651,7 +1725,8 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   const baseNormal = { x: -along.y, y: along.x };
   const pipeGap = 9;
   const tick = 6;
-  const text = `${formatLength(pointLength(segment.vector))} mm`;
+  const fullText = `${formatLength(pointLength(segment.vector))} mm`;
+  const text = dimensionLabelText(layoutState, fullText, `Run ${segment.index + 1}: C/C ${fullText}`, "D");
   const baseOffset = Math.min(64, Math.max(42, screenLength * 0.065));
   let labelAngle = Math.atan2(along.y, along.x);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
@@ -1708,6 +1783,88 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   ctx.restore();
 }
 
+function dimensionLabelText(layoutState, displayText, legendText, prefix = "D") {
+  if (normalizeDimensionStyle(state.dimensionStyle) !== "numbered") return displayText;
+  layoutState.numberedItems ??= [];
+  const code = `${prefix}${layoutState.numberedItems.length + 1}`;
+  layoutState.numberedItems.push({
+    code,
+    text: legendText,
+  });
+  return code;
+}
+
+function drawNumberedDimensionLegend(ctx, dimensionLayout) {
+  if (normalizeDimensionStyle(state.dimensionStyle) !== "numbered") return;
+  const items = dimensionLayout?.numberedItems ?? [];
+  if (!items.length) return;
+
+  const viewport = dimensionViewport(ctx, 12);
+  const maxItems = 18;
+  const visibleItems = items.slice(0, maxItems);
+  const overflowCount = items.length - visibleItems.length;
+
+  ctx.save();
+  ctx.font = "900 11px Inter, system-ui, sans-serif";
+  const maxTextWidth = Math.min(210, Math.max(118, (viewport.right - viewport.left) * 0.36));
+  const lineHeight = 16;
+  const titleHeight = 21;
+  const columns = visibleItems.length > 9 && viewport.right - viewport.left > 560 ? 2 : 1;
+  const rows = Math.ceil((visibleItems.length + (overflowCount > 0 ? 1 : 0)) / columns);
+  const colWidth = maxTextWidth + 36;
+  const gap = columns > 1 ? 12 : 0;
+  const padding = 10;
+  const cardWidth = Math.min(viewport.right - viewport.left, columns * colWidth + gap + padding * 2);
+  const cardHeight = titleHeight + rows * lineHeight + padding * 2;
+  const x = viewport.right - cardWidth;
+  const y = viewport.top;
+
+  ctx.shadowColor = "rgba(31, 42, 47, 0.14)";
+  ctx.shadowBlur = 10;
+  ctx.shadowOffsetY = 4;
+  roundRect(ctx, x, y, cardWidth, cardHeight, 8);
+  ctx.fillStyle = "rgba(255, 253, 248, 0.94)";
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = "rgba(193, 18, 31, 0.2)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = "#7f1d1d";
+  ctx.font = "950 11px Inter, system-ui, sans-serif";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillText("Dimension key", x + padding, y + padding + 10);
+
+  ctx.font = "850 10.5px Inter, system-ui, sans-serif";
+  const listItems = overflowCount > 0
+    ? [...visibleItems, { code: "...", text: `${overflowCount} more in Cut List` }]
+    : visibleItems;
+
+  listItems.forEach((item, index) => {
+    const column = columns > 1 ? Math.floor(index / rows) : 0;
+    const row = columns > 1 ? index % rows : index;
+    const itemX = x + padding + column * (colWidth + gap);
+    const itemY = y + padding + titleHeight + row * lineHeight + 10;
+    ctx.fillStyle = item.code === "..." ? "#657579" : "#c1121f";
+    ctx.fillText(item.code, itemX, itemY);
+    ctx.fillStyle = "#263538";
+    ctx.fillText(fitCanvasText(ctx, item.text, maxTextWidth), itemX + 28, itemY);
+  });
+
+  ctx.restore();
+}
+
+function fitCanvasText(ctx, text, maxWidth) {
+  const value = String(text ?? "");
+  if (ctx.measureText(value).width <= maxWidth) return value;
+  let trimmed = value;
+  while (trimmed.length > 4 && ctx.measureText(`${trimmed}...`).width > maxWidth) {
+    trimmed = trimmed.slice(0, -1);
+  }
+  return `${trimmed.trimEnd()}...`;
+}
+
 function drawSocketPositionDimensions(ctx, projection, segmentData, dimensionLayout = []) {
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
   const socketFittings = state.fittings
@@ -1737,7 +1894,8 @@ function drawRedSocketPositionDimension(ctx, start, socketPoint, segmentIndex, d
   const baseNormal = { x: -along.y, y: along.x };
   const pipeGap = 11;
   const tick = 5;
-  const text = `1/2" SOCK ${formatLength(distanceMm)} mm`;
+  const fullText = `1/2" SOCK ${formatLength(distanceMm)} mm`;
+  const text = dimensionLabelText(layoutState, fullText, `Run ${segmentIndex + 1}: ${fullText}`, "S");
   const baseOffset = Math.min(92, Math.max(56, screenLength * 0.08)) + (socketIndex % 3) * 18;
   let labelAngle = Math.atan2(along.y, along.x);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
@@ -4343,6 +4501,9 @@ function deleteSegmentsByIndex(indexes) {
 }
 
 function setTool(tool) {
+  if (tool !== "boxSelect") {
+    cancelBoxSelect({ redraw: false });
+  }
   state.activeTool = tool;
   state.previewCandidate = null;
   document.querySelectorAll("[data-tool]").forEach((button) => {
@@ -4831,6 +4992,15 @@ function setSelectedPointConnectionType(type) {
   setNodeConnectionType(state.selectedPoint, type);
 }
 
+function setPreviewMode(value) {
+  state.previewMode = normalizePreviewMode(value);
+  if (previewModeSelect) previewModeSelect.value = state.previewMode;
+  if (previewModePanelSelect) previewModePanelSelect.value = state.previewMode;
+  update3dPreview();
+  renderFallbackPreview();
+  persistState();
+}
+
 function updateControls() {
   if (appVersionBadge) {
     appVersionBadge.textContent = APP_VERSION;
@@ -4843,7 +5013,10 @@ function updateControls() {
   anglePlaneSelect.value = state.anglePlane;
   pipeSpecSelect.value = normalizePipeSpec(state.pipeSpec);
   flangeModeSelect.value = normalizeFlangeMode(state.flangeMode);
-  previewModeSelect.value = normalizePreviewMode(state.previewMode);
+  const previewMode = normalizePreviewMode(state.previewMode);
+  if (previewModeSelect) previewModeSelect.value = previewMode;
+  if (previewModePanelSelect) previewModePanelSelect.value = previewMode;
+  if (previewLabelToggle) previewLabelToggle.checked = state.show3dLabels !== false;
   updatePipeSizeControls();
   dimensionToggle.checked = state.showDimensions;
   dimensionStyleSelect.value = normalizeDimensionStyle(state.dimensionStyle);
@@ -5066,6 +5239,45 @@ function setupProjectDialog() {
   });
 }
 
+function setupLoadPlanner() {
+  loadPlanButton?.addEventListener("click", openLoadPlanDialog);
+  loadPlanCloseButton?.addEventListener("click", closeLoadPlanDialog);
+  loadPlanPlayButton?.addEventListener("click", playTruckLoadAnimation);
+  loadPlanProjectList?.addEventListener("change", handleLoadPlanChoiceChange);
+  loadPlanJobSelect?.addEventListener("change", () => {
+    loadPlanJobKey = loadPlanJobSelect.value;
+    loadPlanSelection.clear();
+    currentLoadPlan = createTruckLoadPlan([]);
+    renderLoadPlanProjectChoices();
+  });
+  loadPlanSelectAllButton?.addEventListener("click", () => setVisibleLoadPlanSelection(true));
+  loadPlanDeselectAllButton?.addEventListener("click", () => setVisibleLoadPlanSelection(false));
+  loadPlanLayoutButton?.addEventListener("click", () => setLoadPlanViewMode("layout"));
+  loadPlanModelButton?.addEventListener("click", () => setLoadPlanViewMode("model"));
+  loadPlanAnimateButton?.addEventListener("click", () => {
+    if (currentLoadPlan?.placements?.length) {
+      startTruckLoadAnimation(currentLoadPlan);
+    }
+  });
+  loadPlanTraySelect?.addEventListener("change", () => {
+    loadPlanTrayKey = normalizeLoadPlanTrayKey(loadPlanTraySelect.value);
+    loadPlanTraySelect.value = loadPlanTrayKey;
+    renderLoadPlanProjectChoices();
+  });
+  loadPlanRackSelect?.addEventListener("change", () => {
+    loadPlanRackKey = normalizeLoadPlanRackKey(loadPlanRackSelect.value);
+    loadPlanRackSelect.value = loadPlanRackKey;
+    renderLoadPlanProjectChoices();
+  });
+  loadPlanSpinButton?.addEventListener("click", () => setLoadPlanSpin(!loadPlanThree.spinning));
+  loadPlanResetButton?.addEventListener("click", () => resetLoadPlanThreeView());
+  loadPlanDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === loadPlanDialog) {
+      closeLoadPlanDialog();
+    }
+  });
+}
+
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
   if (location.protocol === "file:") return;
@@ -5151,6 +5363,7 @@ async function initThree() {
 
 function setupThree(THREE, OrbitControls) {
   three.module = THREE;
+  three.OrbitControls = OrbitControls;
   three.scene = new THREE.Scene();
   three.scene.background = new THREE.Color(0xf8fbfb);
 
@@ -5216,6 +5429,7 @@ function setupThree(THREE, OrbitControls) {
   renderStatus.textContent = "Three.js viewport";
   resizeThree();
   update3dPreview();
+  redrawLoadPlanIfOpen();
   animateThree();
 }
 
@@ -5487,7 +5701,7 @@ function rebuildThreeSpool() {
         const reducer = taperedCylinderBetween(
           position.clone().addScaledVector(direction, -0.18),
           position.clone().addScaledVector(direction, 0.18),
-          radius * 1.02,
+          radius,
           radius * 0.72,
           reducerMaterial,
           32,
@@ -5936,7 +6150,7 @@ function outlineReducerMarker(position, direction, radius, material) {
   const basis = radialBasis(axis);
   const start = position.clone().addScaledVector(axis, -0.17);
   const end = position.clone().addScaledVector(axis, 0.17);
-  const startRadius = radius * 1.02;
+  const startRadius = radius;
   const endRadius = radius * 0.72;
   const railDirections = [
     basis.u,
@@ -6104,8 +6318,8 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     start = joint.clone().addScaledVector(largeDirection, halfLength);
     end = joint.clone().addScaledVector(smallDirection, halfLength);
   }
-  const largeRadius = pipeRadiusMetres(reducer.largeSegment) * 1.01;
-  const smallRadius = pipeRadiusMetres(reducer.smallSegment) * 1.01;
+  const largeRadius = pipeRadiusMetres(reducer.largeSegment);
+  const smallRadius = pipeRadiusMetres(reducer.smallSegment);
   const startRadius = startsAfterBend && reducerPlacementSide(reducer) === "large"
     ? smallRadius
     : largeRadius;
@@ -6126,8 +6340,8 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
         transparent: true,
         opacity: 0.9,
       });
-      group.add(outlineRing(start, axis, startRadius * 1.01, edgeMaterial));
-      group.add(outlineRing(end, axis, endRadius * 1.01, edgeMaterial));
+      group.add(outlineRing(start, axis, startRadius, edgeMaterial));
+      group.add(outlineRing(end, axis, endRadius, edgeMaterial));
     }
   }
   group.add(reducerObject);
@@ -6223,7 +6437,7 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
   const length = Math.max(coreRadius * 3.0, 0.16);
 
   if (mainPair) {
-    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius)) * 1.08;
+    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius));
     const main = cylinderBetween(
       position.clone().addScaledVector(mainPair[0].direction, length),
       position.clone().addScaledVector(mainPair[1].direction, length),
@@ -6238,10 +6452,10 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
 
   for (const entry of entries) {
     if (mainPair && mainPair.includes(entry)) continue;
-    const branchRadius = entry.radius * 1.08;
+    const branchRadius = entry.radius;
     const branchLength = Math.max(length, branchRadius * 4.0, 0.16);
     const branch = cylinderBetween(
-      position.clone().addScaledVector(entry.direction, -branchRadius * 0.12),
+      position.clone().addScaledVector(entry.direction, -branchRadius * 0.04),
       position.clone().addScaledVector(entry.direction, branchLength),
       branchRadius,
       material,
@@ -6252,7 +6466,7 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
     group.add(branch);
   }
 
-  const core = new THREE.Mesh(new THREE.SphereGeometry(coreRadius * 1.05, 24, 16), material);
+  const core = new THREE.Mesh(new THREE.SphereGeometry(coreRadius * 0.96, 24, 16), material);
   core.position.copy(position);
   core.castShadow = true;
   core.receiveShadow = true;
@@ -6270,7 +6484,7 @@ function outlineTeeMarker(position, connected, modelPoints, radius, material, se
   const length = Math.max(coreRadius * 3.8, 0.2);
 
   if (mainPair) {
-    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius)) * 1.08;
+    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius));
     group.add(outlinePipeBetween(
       position.clone().addScaledVector(mainPair[0].direction, length),
       position.clone().addScaledVector(mainPair[1].direction, length),
@@ -6281,12 +6495,12 @@ function outlineTeeMarker(position, connected, modelPoints, radius, material, se
 
   for (const entry of entries) {
     if (mainPair && mainPair.includes(entry)) continue;
-    const branchRadius = entry.radius * 1.08;
+    const branchRadius = entry.radius;
     const branchLength = Math.max(length, branchRadius * 4.0, 0.2);
-    const branchStart = position.clone().addScaledVector(entry.direction, branchRadius * 0.42);
+    const branchStart = position.clone().addScaledVector(entry.direction, branchRadius * 0.2);
     const branchEnd = position.clone().addScaledVector(entry.direction, branchLength);
 
-    group.add(outlineRing(branchStart, entry.direction, branchRadius * 1.03, material));
+    group.add(outlineRing(branchStart, entry.direction, branchRadius, material));
     group.add(outlinePipeBetween(
       branchStart,
       branchEnd,
@@ -6317,11 +6531,11 @@ function branchNodeAssembly(nodeIndex, position, connected, modelPoints, segment
     if (direction.length() < 0.0001) continue;
     direction.normalize();
     const radius = pipeRadiusMetres(segment);
-    const collarLength = Math.max(radius * 3.2, 0.08);
+    const collarLength = Math.max(radius * 2.8, 0.07);
     const collar = cylinderBetween(
-      position.clone().addScaledVector(direction, -radius * 0.18),
+      position.clone().addScaledVector(direction, -radius * 0.04),
       position.clone().addScaledVector(direction, collarLength),
-      radius * 1.14,
+      radius * 1.02,
       material,
       24,
     );
@@ -6330,7 +6544,7 @@ function branchNodeAssembly(nodeIndex, position, connected, modelPoints, segment
     group.add(collar);
 
     const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(radius * 1.18, Math.max(radius * 0.12, 0.004), 8, 28),
+      new THREE.TorusGeometry(radius * 1.03, Math.max(radius * 0.055, 0.003), 8, 28),
       material,
     );
     ring.position.copy(position).addScaledVector(direction, radius * 0.1);
@@ -6361,10 +6575,10 @@ function outlineBranchMarker(nodeIndex, position, connected, modelPoints, segmen
     direction.normalize();
     const radius = pipeRadiusMetres(segment);
     const length = Math.max(radius * 3.6, 0.11);
-    const start = position.clone().addScaledVector(direction, radius * 0.22);
+    const start = position.clone().addScaledVector(direction, radius * 0.12);
     const end = position.clone().addScaledVector(direction, length);
-    group.add(outlineRing(start, direction, radius * 1.18, material));
-    group.add(outlinePipeBetween(start, end, radius * 1.1, material, { endCap: true }));
+    group.add(outlineRing(start, direction, radius * 1.03, material));
+    group.add(outlinePipeBetween(start, end, radius, material, { endCap: true }));
   }
 
   return group;
@@ -6653,11 +6867,13 @@ function lugPointMarker3d(position, style) {
 function clear3dPipeLabels() {
   three.labels = [];
   previewLabelLayer.innerHTML = "";
+  previewLabelLayer.hidden = state.show3dLabels === false;
 }
 
 function build3dPipeLabels(segmentData, modelPoints) {
   clear3dPipeLabels();
-  if (!three.ready) return;
+  previewLabelLayer.hidden = state.show3dLabels === false;
+  if (!three.ready || state.show3dLabels === false) return;
 
   for (const segment of segmentData) {
     const midpoint = modelPoints[segment.from].clone().lerp(modelPoints[segment.to], 0.5);
@@ -6710,7 +6926,7 @@ function pipePreviewLabelLines(segment) {
 }
 
 function update3dLabelPositions() {
-  if (!three.ready || !three.labels.length) return;
+  if (!three.ready || state.show3dLabels === false || !three.labels.length) return;
 
   const rect = previewStage.getBoundingClientRect();
   for (const label of three.labels) {
@@ -6718,8 +6934,14 @@ function update3dLabelPositions() {
     const visible = projected.z > -1 && projected.z < 1;
     label.element.hidden = !visible;
     if (!visible) continue;
-    label.element.style.left = `${(projected.x * 0.5 + 0.5) * rect.width}px`;
-    label.element.style.top = `${(-projected.y * 0.5 + 0.5) * rect.height}px`;
+    const labelWidth = label.element.offsetWidth || 90;
+    const labelHeight = label.element.offsetHeight || 24;
+    const rawX = (projected.x * 0.5 + 0.5) * rect.width;
+    const rawY = (-projected.y * 0.5 + 0.5) * rect.height;
+    const x = clampNumber(rawX, labelWidth * 0.5 + 8, Math.max(labelWidth * 0.5 + 8, rect.width - labelWidth * 0.5 - 8));
+    const y = clampNumber(rawY, labelHeight * 0.5 + 8, Math.max(labelHeight * 0.5 + 8, rect.height - labelHeight * 0.5 - 8));
+    label.element.style.left = `${x}px`;
+    label.element.style.top = `${y}px`;
   }
 }
 
@@ -6908,10 +7130,12 @@ function renderFallbackPreview() {
     const segmentPipeWidth = Math.max(12, visualPipeWidth(segment) * 1.02);
     drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style);
 
-    drawFallbackPipeSizeLabel(ctx, segment, {
-      x: (segment.start2.x + segment.end2.x) * 0.5,
-      y: (segment.start2.y + segment.end2.y) * 0.5,
-    });
+    if (state.show3dLabels !== false) {
+      drawFallbackPipeSizeLabel(ctx, segment, {
+        x: (segment.start2.x + segment.end2.x) * 0.5,
+        y: (segment.start2.y + segment.end2.y) * 0.5,
+      });
+    }
   }
 
   drawFallbackFlushEndCaps(ctx, fallbackSegments, connectionCounts, style);
@@ -7182,8 +7406,8 @@ function drawAutoReducersFallback(ctx, fallbackSegments, connections, style) {
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
     const normal = { x: -along.y, y: along.x };
     const length = 30;
-    const largeWidth = Math.max(10, visualPipeWidth(reducer.largeSegment) * 1.03);
-    const smallWidth = Math.max(7, visualPipeWidth(reducer.smallSegment) * 0.92);
+    const largeWidth = Math.max(10, visualPipeWidth(reducer.largeSegment));
+    const smallWidth = Math.max(7, visualPipeWidth(reducer.smallSegment));
     const startWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? smallWidth : largeWidth;
     const endWidth = startsAfterBend && reducerPlacementSide(reducer) === "large" ? largeWidth : smallWidth;
     let start;
@@ -7230,38 +7454,43 @@ function drawFallbackLiftPoint(ctx, toScreen, quantities, style) {
   ctx.lineTo(point.x - 11, point.y + 11);
   ctx.stroke();
 
-  ctx.font = "900 12px Inter, system-ui, sans-serif";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.lineWidth = 5;
-  ctx.strokeStyle = style.background;
-  ctx.fillStyle = "#c1121f";
-  ctx.strokeText("COG", point.x, point.y - 24);
-  ctx.fillText("COG", point.x, point.y - 24);
+  if (state.show3dLabels !== false) {
+    ctx.font = "900 12px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = style.background;
+    ctx.fillStyle = "#c1121f";
+    ctx.strokeText("COG", point.x, point.y - 24);
+    ctx.fillText("COG", point.x, point.y - 24);
+  }
   ctx.restore();
 }
 
 function drawSuggestedLugsFallback(ctx, toScreen, quantities, style) {
   const lugPlan = suggestedLugPlan(quantities);
   if (!lugPlan) return;
-  const dimensionLayout = {
-    labels: [],
-    lines: [],
-    viewport: dimensionViewport(ctx, 18),
-    pipes: quantities.segments.map(({ segment }) => ({
-      index: segment.index,
-      start: toScreen(projectPreviewPoint(segment.start)),
-      end: toScreen(projectPreviewPoint(segment.end)),
-    })),
-  };
 
-  for (const [index, lug] of lugPlan.points.entries()) {
-    const start = toScreen(projectPreviewPoint(lug.segment.start));
-    const point = toScreen(projectPreviewPoint(lug.point));
-    const distanceMm = Number.isFinite(lug.distanceFromRunStartMm)
-      ? lug.distanceFromRunStartMm
-      : pointLength(subtractPoints(lug.point, lug.segment.start));
-    drawLugDimensionLine(ctx, start, point, lug.segment.index, `LUG ${lug.number ?? index + 1} ${formatLength(distanceMm)} mm`, dimensionLayout, index);
+  if (state.show3dLabels !== false) {
+    const dimensionLayout = {
+      labels: [],
+      lines: [],
+      viewport: dimensionViewport(ctx, 18),
+      pipes: quantities.segments.map(({ segment }) => ({
+        index: segment.index,
+        start: toScreen(projectPreviewPoint(segment.start)),
+        end: toScreen(projectPreviewPoint(segment.end)),
+      })),
+    };
+
+    for (const [index, lug] of lugPlan.points.entries()) {
+      const start = toScreen(projectPreviewPoint(lug.segment.start));
+      const point = toScreen(projectPreviewPoint(lug.point));
+      const distanceMm = Number.isFinite(lug.distanceFromRunStartMm)
+        ? lug.distanceFromRunStartMm
+        : pointLength(subtractPoints(lug.point, lug.segment.start));
+      drawLugDimensionLine(ctx, start, point, lug.segment.index, `LUG ${lug.number ?? index + 1} ${formatLength(distanceMm)} mm`, dimensionLayout, index);
+    }
   }
 
   ctx.save();
@@ -7283,12 +7512,14 @@ function drawSuggestedLugsFallback(ctx, toScreen, quantities, style) {
     if (!style.outline) ctx.fill();
     ctx.stroke();
 
-    const label = `LUG ${lug.number}`;
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = style.background;
-    ctx.fillStyle = "#0f766e";
-    ctx.strokeText(label, point.x, point.y - 25);
-    ctx.fillText(label, point.x, point.y - 25);
+    if (state.show3dLabels !== false) {
+      const label = `LUG ${lug.number}`;
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = style.background;
+      ctx.fillStyle = "#0f766e";
+      ctx.strokeText(label, point.x, point.y - 25);
+      ctx.fillText(label, point.x, point.y - 25);
+    }
   }
 
   ctx.restore();
@@ -7938,6 +8169,2050 @@ function deleteSavedBrowserProject(projectId) {
     persistState();
   }
   renderProjectLibrary();
+}
+
+function withTemporaryState(tempState, callback) {
+  const previousState = state;
+  state = tempState;
+  try {
+    return callback();
+  } finally {
+    state = previousState;
+  }
+}
+
+function normalizeLoadPlanTrayKey(value) {
+  return LOAD_PLAN_TRAY_KEYS.has(value) ? value : "medium";
+}
+
+function normalizeLoadPlanRackKey(value) {
+  return LOAD_PLAN_RACK_KEYS.has(value) ? value : "standard";
+}
+
+function selectedLoadPlanTray() {
+  return LOAD_PLAN_TRAYS[normalizeLoadPlanTrayKey(loadPlanTrayKey)] ?? LOAD_PLAN_TRAYS.medium;
+}
+
+function selectedLoadPlanRack() {
+  return LOAD_PLAN_RACKS[normalizeLoadPlanRackKey(loadPlanRackKey)] ?? LOAD_PLAN_RACKS.standard;
+}
+
+function loadPlanExtentsFromPoints(points) {
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const zs = points.map((point) => point.z);
+  const min = { x: Math.min(...xs), y: Math.min(...ys), z: Math.min(...zs) };
+  const max = { x: Math.max(...xs), y: Math.max(...ys), z: Math.max(...zs) };
+  return {
+    min,
+    max,
+    span: {
+      x: max.x - min.x,
+      y: max.y - min.y,
+      z: max.z - min.z,
+    },
+  };
+}
+
+function loadPlanAxisValue(point, axis) {
+  return Number(point?.[axis]) || 0;
+}
+
+function loadPlanFootprintForAxes(segmentData, extents, pipeSizes, largestPipe, axes) {
+  const [primaryAxis, secondaryAxis, heightAxis] = axes;
+  const label = `${primaryAxis.toUpperCase()}${secondaryAxis.toUpperCase()} lay`;
+  const rawPoints = state.points.map((point) => ({
+    x: loadPlanAxisValue(point, primaryAxis),
+    y: loadPlanAxisValue(point, secondaryAxis),
+  }));
+  const minX = Math.min(...rawPoints.map((point) => point.x));
+  const minY = Math.min(...rawPoints.map((point) => point.y));
+  const rawWidthMm = Math.max(...rawPoints.map((point) => point.x)) - minX;
+  const rawHeightMm = Math.max(...rawPoints.map((point) => point.y)) - minY;
+  const paddingMm = Math.max(90, largestPipe.od * 1.3);
+  const pointByIndex = rawPoints.map((point) => ({
+    x: point.x - minX + paddingMm,
+    y: point.y - minY + paddingMm,
+  }));
+  const segments = segmentData.map((segment) => {
+    const size = pipeSizeForSegment(segment);
+    return {
+      from: pointByIndex[segment.from],
+      to: pointByIndex[segment.to],
+      nb: size.nb,
+      od: size.od,
+    };
+  });
+  const widthMm = Math.max(largestPipe.od * 4, rawWidthMm + paddingMm * 2);
+  const heightMm = Math.max(largestPipe.od * 4, rawHeightMm + paddingMm * 2);
+  const verticalMm = Math.max(largestPipe.od * 2, extents.span[heightAxis]);
+
+  return {
+    label,
+    axes: { primary: primaryAxis, secondary: secondaryAxis, height: heightAxis },
+    segments,
+    widthMm,
+    heightMm,
+    verticalMm,
+    maxPipeOdMm: largestPipe.od,
+    pipeSizes,
+    areaMm2: widthMm * heightMm,
+  };
+}
+
+function loadPlanStackFootprintForAxis(segmentData, extents, pipeSizes, largestPipe, primaryAxis) {
+  const otherAxes = ["x", "y", "z"].filter((axis) => axis !== primaryAxis);
+  const sideAxis = otherAxes[0];
+  const heightAxis = otherAxes[1];
+  const rawPoints = state.points.map((point) => ({
+    x: loadPlanAxisValue(point, primaryAxis),
+    side: loadPlanAxisValue(point, sideAxis),
+    height: loadPlanAxisValue(point, heightAxis),
+  }));
+  const minX = Math.min(...rawPoints.map((point) => point.x));
+  const minSide = Math.min(...rawPoints.map((point) => point.side));
+  const maxSide = Math.max(...rawPoints.map((point) => point.side));
+  const rawWidthMm = Math.max(...rawPoints.map((point) => point.x)) - minX;
+  const paddingMm = Math.max(90, largestPipe.od * 1.3);
+  const pipeLaneMm = Math.max(420, largestPipe.od * 4.2);
+  const sideSpanMm = Math.max(1, maxSide - minSide);
+  const sideTravelMm = Math.min(pipeLaneMm * 0.58, Math.max(largestPipe.od * 1.5, 180));
+  const pointByIndex = rawPoints.map((point) => ({
+    x: point.x - minX + paddingMm,
+    y: paddingMm + pipeLaneMm / 2 + ((point.side - minSide) / sideSpanMm - 0.5) * sideTravelMm,
+  }));
+  const segments = segmentData.map((segment) => {
+    const size = pipeSizeForSegment(segment);
+    return {
+      from: pointByIndex[segment.from],
+      to: pointByIndex[segment.to],
+      nb: size.nb,
+      od: size.od,
+    };
+  });
+  const widthMm = Math.max(largestPipe.od * 4, rawWidthMm + paddingMm * 2);
+  const heightMm = pipeLaneMm + paddingMm * 2;
+  const verticalMm = Math.max(largestPipe.od * 2, extents.span[sideAxis], extents.span[heightAxis]);
+
+  return {
+    label: `${primaryAxis.toUpperCase()} edge stack`,
+    axes: { primary: primaryAxis, secondary: "stack", height: `${sideAxis}${heightAxis}` },
+    segments,
+    widthMm,
+    heightMm,
+    verticalMm,
+    maxPipeOdMm: largestPipe.od,
+    pipeSizes,
+    areaMm2: widthMm * heightMm,
+    stackLay: true,
+  };
+}
+
+function loadPlanFootprintsFromSegments(segmentData) {
+  const extents = loadPlanExtentsFromPoints(state.points);
+  const pipeSizes = [...new Set(segmentData.map((segment) => pipeSizeForSegment(segment).nb))].sort((first, second) => first - second);
+  const largestPipe = pipeSizeByNb(pipeSizes.length ? pipeSizes[pipeSizes.length - 1] : state.pipeSizeNb);
+  const axisSets = [
+    ["x", "y", "z"],
+    ["x", "z", "y"],
+    ["y", "z", "x"],
+  ];
+  const seen = new Set();
+  const stackAxes = ["x", "y", "z"].sort((first, second) => extents.span[second] - extents.span[first]);
+  const footprints = [
+    ...axisSets.map((axes) => loadPlanFootprintForAxes(segmentData, extents, pipeSizes, largestPipe, axes)),
+    ...stackAxes.map((axis) => loadPlanStackFootprintForAxis(segmentData, extents, pipeSizes, largestPipe, axis)),
+  ]
+    .filter((footprint) => {
+      const key = `${footprint.stackLay ? "stack" : "flat"}:${Math.round(footprint.widthMm)}:${Math.round(footprint.heightMm)}:${Math.round(footprint.verticalMm)}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((first, second) => {
+      if (first.stackLay !== second.stackLay) return first.stackLay ? 1 : -1;
+      const heightDiff = first.verticalMm - second.verticalMm;
+      if (Math.abs(heightDiff) > 1) return heightDiff;
+      return second.areaMm2 - first.areaMm2;
+    });
+
+  return {
+    footprints,
+    pipeSizes,
+    largestPipe,
+  };
+}
+
+function loadPlanItemFromPayload(id, name, payload, projectInfo, updatedAt = "", source = "saved") {
+  const restored = stateFromPayload(payload);
+  if (!restored) return null;
+
+  return withTemporaryState(restored, () => {
+    const segmentData = segments();
+    if (!segmentData.length) return null;
+
+    const quantities = quantitySummary(segmentData);
+    const footprintSet = loadPlanFootprintsFromSegments(segmentData);
+    const footprint = footprintSet.footprints[0];
+    if (!footprint) return null;
+    const normalizedInfo = normalizeProjectInfo(projectInfo ?? state.projectInfo);
+    const displayName = name || projectDisplayName(normalizedInfo);
+
+    return {
+      id,
+      name: displayName,
+      projectInfo: normalizedInfo,
+      updatedAt,
+      source,
+      segmentCount: segmentData.length,
+      lengthMm: footprint.widthMm,
+      widthMm: footprint.heightMm,
+      heightMm: footprint.verticalMm,
+      jobKey: loadPlanJobKeyFromInfo(normalizedInfo),
+      jobLabel: loadPlanJobLabelFromInfo(normalizedInfo),
+      footprint,
+      footprints: footprintSet.footprints,
+      footprintAreaMm2: Math.max(...footprintSet.footprints.map((item) => item.areaMm2)),
+      weightKg: quantities.totalWeightKg,
+      pipeSpecLabel: pipeSpecShortLabel(),
+      pipeSizesLabel: footprintSet.pipeSizes.length ? `NB ${footprintSet.pipeSizes.join(", NB ")}` : `NB ${state.pipeSizeNb}`,
+    };
+  });
+}
+
+function loadPlanAvailableItems() {
+  const items = [];
+  const currentPayload = statePayload();
+  const current = loadPlanItemFromPayload(
+    "__current__",
+    `${projectDisplayName(currentPayload.projectInfo)} (current)`,
+    currentPayload,
+    currentPayload.projectInfo,
+    "",
+    "current",
+  );
+  if (current) items.push(current);
+
+  const projects = loadSavedBrowserProjects()
+    .filter((project) => project.id !== state.projectId)
+    .sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt)));
+
+  for (const project of projects) {
+    const item = loadPlanItemFromPayload(
+      project.id,
+      project.name || projectDisplayName(project.projectInfo),
+      project.state,
+      project.projectInfo,
+      project.updatedAt,
+    );
+    if (item) items.push(item);
+  }
+
+  return items;
+}
+
+function loadPlanJobKeyFromInfo(info) {
+  const normalized = normalizeProjectInfo(info);
+  const jobNumber = String(normalized.jobNumber ?? "").trim();
+  return jobNumber ? jobNumber.toLowerCase() : "__unassigned__";
+}
+
+function loadPlanJobLabelFromInfo(info) {
+  const normalized = normalizeProjectInfo(info);
+  const jobNumber = String(normalized.jobNumber ?? "").trim();
+  const client = String(normalized.client ?? "").trim();
+  if (!jobNumber) return client ? `Unassigned job - ${client}` : "Unassigned job";
+  return client ? `${jobNumber} - ${client}` : jobNumber;
+}
+
+function loadPlanJobChoices(items = loadPlanAvailableItems()) {
+  const byKey = new Map();
+  for (const item of items) {
+    if (!byKey.has(item.jobKey)) {
+      byKey.set(item.jobKey, {
+        key: item.jobKey,
+        label: item.jobLabel,
+        count: 0,
+      });
+    }
+    byKey.get(item.jobKey).count += 1;
+  }
+
+  return [...byKey.values()].sort((first, second) => {
+    if (first.key === "__unassigned__") return 1;
+    if (second.key === "__unassigned__") return -1;
+    return first.label.localeCompare(second.label, undefined, { numeric: true, sensitivity: "base" });
+  });
+}
+
+function renderLoadPlanJobOptions(items = loadPlanAvailableItems()) {
+  if (!loadPlanJobSelect) return;
+  const choices = loadPlanJobChoices(items);
+  const validKeys = new Set(choices.map((choice) => choice.key));
+  if (loadPlanJobKey && !validKeys.has(loadPlanJobKey)) {
+    loadPlanJobKey = "";
+  }
+
+  loadPlanJobSelect.innerHTML = "";
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = choices.length ? "Select job first" : "No jobs saved yet";
+  loadPlanJobSelect.append(placeholder);
+
+  for (const choice of choices) {
+    const option = document.createElement("option");
+    option.value = choice.key;
+    option.textContent = `${choice.label} (${choice.count})`;
+    loadPlanJobSelect.append(option);
+  }
+
+  loadPlanJobSelect.value = loadPlanJobKey;
+  loadPlanJobSelect.disabled = !choices.length;
+}
+
+function loadPlanVisibleItems(items = loadPlanAvailableItems()) {
+  if (!loadPlanJobKey) return [];
+  return items.filter((item) => item.jobKey === loadPlanJobKey);
+}
+
+function selectedLoadPlanItems(items = loadPlanVisibleItems()) {
+  return items.filter((item) => loadPlanSelection.has(item.id)).slice(0, LOAD_PLAN_MAX_SPOOLS);
+}
+
+function loadPlanItemMeta(item) {
+  const size = `${formatLength(item.lengthMm)} x ${formatLength(item.widthMm)} footprint / ${formatLength(item.heightMm)} high`;
+  return `${formatMass(item.weightKg)} kg / ${item.segmentCount} runs / ${size}`;
+}
+
+function loadPlanItemFitStatus(item) {
+  const tray = selectedLoadPlanTray();
+  const rack = selectedLoadPlanRack();
+  const trayPlacement = findLoadPlanPlacement(item, [], tray, "tray");
+  const rackPlacement = rack ? findLoadPlanPlacement(item, [], rack, "rack") : null;
+
+  if (trayPlacement) {
+    return {
+      className: "fit-tray",
+      text: "Fits tray",
+    };
+  }
+
+  if (rackPlacement) {
+    return {
+      className: "fit-rack",
+      text: "Won't fit tray - roof racks only",
+    };
+  }
+
+  return {
+    className: "fit-none",
+    text: rack ? "Won't fit selected tray or roof racks" : "Won't fit selected tray",
+  };
+}
+
+function renderLoadPlanProjectChoices() {
+  if (!loadPlanProjectList) return [];
+
+  if (loadPlanTraySelect) loadPlanTraySelect.value = normalizeLoadPlanTrayKey(loadPlanTrayKey);
+  if (loadPlanRackSelect) loadPlanRackSelect.value = normalizeLoadPlanRackKey(loadPlanRackKey);
+  const allItems = loadPlanAvailableItems();
+  renderLoadPlanJobOptions(allItems);
+  const items = loadPlanVisibleItems(allItems);
+  const validIds = new Set(items.map((item) => item.id));
+  loadPlanSelection = new Set([...loadPlanSelection].filter((id) => validIds.has(id)));
+
+  loadPlanProjectList.innerHTML = "";
+  if (!allItems.length) {
+    const empty = document.createElement("div");
+    empty.className = "project-library-empty";
+    empty.textContent = "No pipe spools available yet. Draw or open a saved spool, then come back to Load plan.";
+    loadPlanProjectList.append(empty);
+    if (loadPlanPlayButton) loadPlanPlayButton.disabled = true;
+    updateLoadPlanBulkButtons([]);
+    drawLoadPlanEmpty();
+    return allItems;
+  }
+
+  if (!loadPlanJobKey) {
+    const empty = document.createElement("div");
+    empty.className = "project-library-empty";
+    empty.textContent = "Select a job first, then the spools for that job will show here.";
+    loadPlanProjectList.append(empty);
+    if (loadPlanPlayButton) loadPlanPlayButton.disabled = true;
+    currentLoadPlan = createTruckLoadPlan([]);
+    updateLoadPlanBulkButtons([]);
+    updateLoadPlanPendingSelection([]);
+    return allItems;
+  }
+
+  if (!items.length) {
+    const empty = document.createElement("div");
+    empty.className = "project-library-empty";
+    empty.textContent = "No spools found for this job.";
+    loadPlanProjectList.append(empty);
+    if (loadPlanPlayButton) loadPlanPlayButton.disabled = true;
+    updateLoadPlanBulkButtons([]);
+    updateLoadPlanPendingSelection([]);
+    return allItems;
+  }
+
+  if (loadPlanPlayButton) loadPlanPlayButton.disabled = false;
+  updateLoadPlanBulkButtons(items);
+
+  for (const item of items) {
+    const label = document.createElement("label");
+    label.className = "load-plan-choice";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.value = item.id;
+    checkbox.checked = loadPlanSelection.has(item.id);
+
+    const body = document.createElement("span");
+    const title = document.createElement("strong");
+    title.textContent = item.name;
+
+    const meta = document.createElement("span");
+    meta.textContent = loadPlanItemMeta(item);
+
+    const fitStatus = loadPlanItemFitStatus(item);
+    const fit = document.createElement("em");
+    fit.className = `load-plan-fit-status ${fitStatus.className}`;
+    fit.textContent = fitStatus.text;
+
+    const detail = document.createElement("small");
+    detail.textContent = `${item.pipeSizesLabel} / ${item.pipeSpecLabel} / ${item.footprints.length} lay option${item.footprints.length === 1 ? "" : "s"}${item.source === "current" ? " / on screen now" : ""}`;
+
+    body.append(title, meta, fit, detail);
+    label.append(checkbox, body);
+    loadPlanProjectList.append(label);
+  }
+
+  updateLoadPlanPendingSelection(items);
+  return allItems;
+}
+
+function updateLoadPlanBulkButtons(items = loadPlanVisibleItems()) {
+  const hasItems = Boolean(loadPlanJobKey && items.length);
+  if (loadPlanSelectAllButton) loadPlanSelectAllButton.disabled = !hasItems;
+  if (loadPlanDeselectAllButton) loadPlanDeselectAllButton.disabled = !hasItems;
+}
+
+function setVisibleLoadPlanSelection(selectAll) {
+  const items = loadPlanVisibleItems();
+  if (!items.length) return;
+
+  if (selectAll) {
+    loadPlanSelection = new Set(items.slice(0, LOAD_PLAN_MAX_SPOOLS).map((item) => item.id));
+    if (items.length > LOAD_PLAN_MAX_SPOOLS) {
+      window.alert(`Selected the first ${LOAD_PLAN_MAX_SPOOLS} spools. This load planner handles up to ${LOAD_PLAN_MAX_SPOOLS} at once.`);
+    }
+  } else {
+    loadPlanSelection.clear();
+  }
+
+  renderLoadPlanProjectChoices();
+}
+
+function updateLoadPlanPendingSelection(items = loadPlanVisibleItems()) {
+  const selectedItems = selectedLoadPlanItems(items);
+  const selectedCount = selectedItems.length;
+  currentLoadPlan = loadPlanViewMode === "model" && selectedCount
+    ? createTruckLoadPlan(selectedItems)
+    : createTruckLoadPlan([]);
+  renderLoadPlan(currentLoadPlan);
+  if (!loadPlanSummary) return;
+  if (loadPlanViewMode === "model" && selectedCount) {
+    updateLoadPlanSummary(currentLoadPlan);
+    return;
+  }
+  loadPlanSummary.textContent = selectedCount
+    ? `${selectedCount} spool${selectedCount === 1 ? "" : "s"} selected. Press Make layout.`
+    : loadPlanJobKey ? "Select spools, then press Make layout." : "Select a job first.";
+}
+
+function handleLoadPlanChoiceChange(event) {
+  const checkbox = event.target instanceof HTMLInputElement ? event.target : null;
+  if (!checkbox || checkbox.type !== "checkbox") return;
+
+  if (checkbox.checked && loadPlanSelection.size >= LOAD_PLAN_MAX_SPOOLS) {
+    checkbox.checked = false;
+    window.alert(`Pick up to ${LOAD_PLAN_MAX_SPOOLS} spools for this load plan.`);
+    return;
+  }
+
+  if (checkbox.checked) {
+    loadPlanSelection.add(checkbox.value);
+  } else {
+    loadPlanSelection.delete(checkbox.value);
+  }
+
+  updateLoadPlanPendingSelection(loadPlanVisibleItems());
+}
+
+function updateLoadPlanViewControls() {
+  const modelActive = loadPlanViewMode === "model";
+  const hasPlan = Boolean(currentLoadPlan?.placements?.length);
+  loadPlanLayoutButton?.classList.toggle("active", !modelActive);
+  loadPlanLayoutButton?.setAttribute("aria-pressed", String(!modelActive));
+  loadPlanModelButton?.classList.toggle("active", modelActive);
+  loadPlanModelButton?.setAttribute("aria-pressed", String(modelActive));
+  if (loadPlanAnimateButton) loadPlanAnimateButton.disabled = !hasPlan;
+  loadPlanSpinButton?.classList.toggle("active", modelActive && loadPlanThree.spinning);
+  loadPlanSpinButton?.setAttribute("aria-pressed", String(modelActive && loadPlanThree.spinning));
+  if (loadPlanSpinButton) loadPlanSpinButton.disabled = !modelActive;
+  if (loadPlanResetButton) loadPlanResetButton.disabled = !modelActive;
+  loadPlanStage?.classList.toggle("is-3d-model", modelActive);
+}
+
+function setLoadPlanViewMode(mode) {
+  const nextMode = mode === "model" ? "model" : "layout";
+  const selectedItems = selectedLoadPlanItems();
+  loadPlanViewMode = nextMode;
+
+  if (nextMode === "model") {
+    if (selectedItems.length) {
+      currentLoadPlan = createTruckLoadPlan(selectedItems);
+      updateLoadPlanSummary(currentLoadPlan);
+    } else if (!currentLoadPlan) {
+      currentLoadPlan = createTruckLoadPlan([]);
+    }
+  }
+
+  updateLoadPlanViewControls();
+  renderLoadPlan(currentLoadPlan ?? createTruckLoadPlan([]));
+}
+
+function loadPlanNormalizeRotation(rotation) {
+  return ((Number(rotation) || 0) % 360 + 360) % 360;
+}
+
+function loadPlanRotationOptions() {
+  const preferred = [0, 180, 90, 270, 15, 345, 30, 330, 45, 315, 60, 300, 75, 285];
+  const all = [];
+  for (let angle = 0; angle < 360; angle += LOAD_PLAN_ROTATION_STEP_DEG) {
+    all.push(angle);
+  }
+  return [...new Set([...preferred, ...all].map(loadPlanNormalizeRotation))];
+}
+
+function loadPlanRotatePointAroundCenter(point, footprint, rotation) {
+  const radians = loadPlanNormalizeRotation(rotation) * Math.PI / 180;
+  const centerX = footprint.widthMm / 2;
+  const centerY = footprint.heightMm / 2;
+  const dx = point.x - centerX;
+  const dy = point.y - centerY;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  return {
+    x: dx * cos - dy * sin,
+    y: dx * sin + dy * cos,
+  };
+}
+
+function loadPlanRotationBounds(footprint, rotation) {
+  const rotationKey = String(loadPlanNormalizeRotation(rotation));
+  footprint.rotationBounds ??= {};
+  if (footprint.rotationBounds[rotationKey]) return footprint.rotationBounds[rotationKey];
+
+  const points = (footprint.segments ?? [])
+    .flatMap((segment) => [segment.from, segment.to])
+    .filter(Boolean);
+  if (!points.length) {
+    const fallback = {
+      minX: 0,
+      minY: 0,
+      widthMm: footprint.widthMm,
+      heightMm: footprint.heightMm,
+      paddingMm: 0,
+    };
+    footprint.rotationBounds[rotationKey] = fallback;
+    return fallback;
+  }
+
+  const rotated = points.map((point) => loadPlanRotatePointAroundCenter(point, footprint, rotation));
+  const minX = Math.min(...rotated.map((point) => point.x));
+  const maxX = Math.max(...rotated.map((point) => point.x));
+  const minY = Math.min(...rotated.map((point) => point.y));
+  const maxY = Math.max(...rotated.map((point) => point.y));
+  const paddingMm = Math.max(70, (footprint.maxPipeOdMm ?? 50) * 0.85);
+  const bounds = {
+    minX,
+    minY,
+    widthMm: Math.max((footprint.maxPipeOdMm ?? 50) * 4, maxX - minX + paddingMm * 2),
+    heightMm: Math.max((footprint.maxPipeOdMm ?? 50) * 4, maxY - minY + paddingMm * 2),
+    paddingMm,
+  };
+  footprint.rotationBounds[rotationKey] = bounds;
+  return bounds;
+}
+
+function loadPlanRotatedSize(footprint, rotation) {
+  const bounds = loadPlanRotationBounds(footprint, rotation);
+  return { widthMm: bounds.widthMm, heightMm: bounds.heightMm };
+}
+
+function loadPlanTransformPoint(point, footprint, rotation) {
+  const bounds = loadPlanRotationBounds(footprint, rotation);
+  const rotated = loadPlanRotatePointAroundCenter(point, footprint, rotation);
+  return {
+    x: rotated.x - bounds.minX + bounds.paddingMm,
+    y: rotated.y - bounds.minY + bounds.paddingMm,
+  };
+}
+
+function loadPlanAxisPositions(maxValue, step, centredValue = 0) {
+  const values = new Set([0, Math.max(0, maxValue), clampNumber(centredValue, 0, Math.max(0, maxValue))]);
+  for (let value = 0; value <= maxValue; value += step) {
+    values.add(Math.round(value));
+  }
+  return [...values].sort((first, second) => first - second);
+}
+
+function loadPlanRectsOverlap(first, second, clearanceMm = LOAD_PLAN_CLEARANCE_MM) {
+  return !(
+    first.x + first.widthMm + clearanceMm <= second.x ||
+    second.x + second.widthMm + clearanceMm <= first.x ||
+    first.y + first.heightMm + clearanceMm <= second.y ||
+    second.y + second.heightMm + clearanceMm <= first.y
+  );
+}
+
+function loadPlanRectCenter(rect) {
+  return {
+    x: rect.x + rect.widthMm / 2,
+    y: rect.y + rect.heightMm / 2,
+  };
+}
+
+function loadPlanStackRepeatPenalty(rect, layer, placed) {
+  if (layer <= 0) return 0;
+  const center = loadPlanRectCenter(rect);
+  return placed.reduce((penalty, placement) => {
+    if ((placement.layer ?? 0) >= layer) return penalty;
+    const otherCenter = loadPlanRectCenter(placement.rect);
+    const distance = pointDistance2d(center, otherCenter);
+    const repeatRange = Math.max(260, Math.min(rect.widthMm, rect.heightMm, placement.widthMm, placement.heightMm) * 0.85);
+    if (distance >= repeatRange) return penalty;
+    return penalty + (1 - distance / repeatRange) * 560000;
+  }, 0);
+}
+
+function loadPlanFrontCrowdPenalty(rect, layer, placed, zoneType) {
+  const sameLayer = placed.filter((placement) => (placement.layer ?? 0) === layer);
+  if (!sameLayer.length) return 0;
+
+  const center = loadPlanRectCenter(rect);
+  return sameLayer.reduce((penalty, placement) => {
+    const otherCenter = loadPlanRectCenter(placement.rect);
+    const xGap = Math.abs(center.x - otherCenter.x);
+    const xRange = clampNumber((rect.widthMm + placement.widthMm) * 0.34, 620, 1450);
+    if (xGap >= xRange) return penalty;
+
+    const yGap = Math.abs(center.y - otherCenter.y);
+    const sideBySide = yGap > Math.min(rect.heightMm, placement.heightMm) * 0.55;
+    const strength = zoneType === "rack" ? 7800000 : 9800000;
+    return penalty + (1 - xGap / xRange) * strength * (sideBySide ? 1 : 0.62);
+  }, 0);
+}
+
+function loadPlanLayerQueuePenalty(rect, layer, placed, loadZone) {
+  const sameLayer = placed.filter((placement) => (placement.layer ?? 0) === layer);
+  if (!sameLayer.length) return rect.x * 1200;
+
+  const openEnd = Math.max(...sameLayer.map((placement) => placement.x + placement.widthMm));
+  const targetX = clampNumber(openEnd + LOAD_PLAN_CLEARANCE_MM * 2, 0, Math.max(0, loadZone.lengthMm - rect.widthMm));
+  return Math.abs(rect.x - targetX) * 2700;
+}
+
+function findLoadPlanPlacement(item, placed, loadZone, zoneType) {
+  let best = null;
+  const rotations = loadPlanRotationOptions();
+  const footprints = item.footprints?.length ? item.footprints : [item.footprint].filter(Boolean);
+  const maxLayers = zoneType === "tray" ? LOAD_PLAN_TRAY_LAYERS : LOAD_PLAN_RACK_LAYERS;
+
+  for (const footprint of footprints) {
+    for (const rotation of rotations) {
+      const size = loadPlanRotatedSize(footprint, rotation);
+      if (size.widthMm > loadZone.lengthMm || size.heightMm > loadZone.widthMm) continue;
+
+      const maxX = loadZone.lengthMm - size.widthMm;
+      const maxY = loadZone.widthMm - size.heightMm;
+      const xPositions = loadPlanAxisPositions(maxX, LOAD_PLAN_PACK_STEP_MM, maxX / 2);
+      const yPositions = loadPlanAxisPositions(maxY, LOAD_PLAN_PACK_STEP_MM, maxY / 2);
+
+      for (let layer = 0; layer < maxLayers; layer += 1) {
+        for (const x of xPositions) {
+          for (const y of yPositions) {
+            const rect = { x, y, widthMm: size.widthMm, heightMm: size.heightMm };
+            const clearanceMm = layer > 0 ? Math.max(4, LOAD_PLAN_CLEARANCE_MM * 0.4) : LOAD_PLAN_CLEARANCE_MM;
+            if (placed.some((placement) => placement.layer === layer && loadPlanRectsOverlap(rect, placement.rect, clearanceMm))) continue;
+
+            const usedLengthMm = Math.max(
+              x + size.widthMm,
+              ...placed.map((placement) => placement.x + placement.widthMm),
+              0,
+            );
+            const sideBalance = Math.abs(y + size.heightMm / 2 - loadZone.widthMm / 2);
+            const normalizedRotation = loadPlanNormalizeRotation(rotation);
+            const simpleAngle = normalizedRotation % 90 === 0;
+            const diagonalBonus = simpleAngle ? 0 : -Math.min(90000, Math.abs(Math.sin(normalizedRotation * Math.PI / 180)) * 42000);
+            const rotationPenalty = normalizedRotation === 0 ? 0 : simpleAngle ? 20 : 34;
+            const layPenalty = footprint === item.footprint ? 0 : footprint.verticalMm * 5;
+            const layerPenalty = layer * (zoneType === "tray" ? 220000 : 320000);
+            const roofPenalty = zoneType === "rack" ? 180000 : 0;
+            const xPositionPenalty = layer > 0 ? Math.abs(x - maxX / 2) * 18 : x * 2;
+            const frontCrowdPenalty = loadPlanFrontCrowdPenalty(rect, layer, placed, zoneType);
+            const queuePenalty = loadPlanLayerQueuePenalty(rect, layer, placed, loadZone);
+            const repeatPenalty = loadPlanStackRepeatPenalty(rect, layer, placed);
+            const score = usedLengthMm * 4200 + sideBalance * 24 + xPositionPenalty + queuePenalty + y + rotationPenalty + layPenalty + layerPenalty + roofPenalty + diagonalBonus + repeatPenalty + frontCrowdPenalty;
+            if (!best || score < best.score) {
+              best = {
+                x,
+                y,
+                widthMm: size.widthMm,
+                heightMm: size.heightMm,
+                rotation,
+                rect,
+                zone: zoneType,
+                layer,
+                footprint,
+                score,
+              };
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return best;
+}
+
+function createTruckLoadPlan(items) {
+  const tray = selectedLoadPlanTray();
+  const rack = selectedLoadPlanRack();
+  if (!items.length) return { tray, rack, placements: [], rejected: [], usedLengthMm: 0, rackUsedLengthMm: 0, totalDuration: 900 };
+
+  const sorted = [...items].sort((first, second) => {
+    const areaDiff = second.footprintAreaMm2 - first.footprintAreaMm2;
+    if (Math.abs(areaDiff) > 1) return areaDiff;
+    return second.weightKg - first.weightKg;
+  });
+  const placements = [];
+  const trayPlacements = [];
+  const rackPlacements = [];
+  const rejected = [];
+
+  for (const item of sorted) {
+    const rackCandidate = rack ? findLoadPlanPlacement(item, rackPlacements, rack, "rack") : null;
+    const trayCandidate = findLoadPlanPlacement(item, trayPlacements, tray, "tray");
+    const placement = trayCandidate ?? rackCandidate;
+    if (!placement) {
+      rejected.push(item);
+      continue;
+    }
+
+    const zonePlacements = placement.zone === "rack" ? rackPlacements : trayPlacements;
+    zonePlacements.push(placement);
+    placements.push({
+      ...placement,
+      item,
+      order: placements.length + 1,
+      delay: placements.length * 620,
+      duration: 860,
+    });
+  }
+
+  const usedLengthMm = trayPlacements.reduce((max, placement) => Math.max(max, placement.x + placement.widthMm), 0);
+  const rackUsedLengthMm = rackPlacements.reduce((max, placement) => Math.max(max, placement.x + placement.widthMm), 0);
+  return {
+    tray,
+    rack,
+    placements,
+    rejected,
+    usedLengthMm,
+    rackUsedLengthMm,
+    totalWeightKg: placements.reduce((sum, placement) => sum + placement.item.weightKg, 0),
+    totalDuration: placements.length
+      ? placements[placements.length - 1].delay + placements[placements.length - 1].duration + 320
+      : 900,
+  };
+}
+
+function openLoadPlanDialog() {
+  if (!loadPlanDialog) return;
+  loadPlanSelection = new Set();
+  loadPlanJobKey = "";
+  loadPlanViewMode = "layout";
+  updateLoadPlanViewControls();
+  if (loadPlanTraySelect) loadPlanTraySelect.value = normalizeLoadPlanTrayKey(loadPlanTrayKey);
+  if (loadPlanRackSelect) loadPlanRackSelect.value = normalizeLoadPlanRackKey(loadPlanRackKey);
+  loadPlanDialog.hidden = false;
+  renderLoadPlanProjectChoices();
+  loadPlanPlayButton?.focus();
+}
+
+function closeLoadPlanDialog() {
+  if (loadPlanAnimationFrame) {
+    cancelAnimationFrame(loadPlanAnimationFrame);
+    loadPlanAnimationFrame = 0;
+  }
+  setLoadPlanSpin(false);
+  stopLoadPlanThreeLoop();
+  currentLoadPlan = null;
+  if (loadPlanDialog) loadPlanDialog.hidden = true;
+}
+
+function drawLoadPlanEmpty() {
+  if (!loadPlanCanvas) return;
+  if (loadPlanThreeCanvas) loadPlanThreeCanvas.hidden = true;
+  loadPlanCanvas.hidden = false;
+  const { ctx, width, height } = resizeCanvas(loadPlanCanvas);
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#f7fbfa";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "#5b6b70";
+  ctx.font = "900 14px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("No spools ready for load planning", width / 2, height / 2);
+  if (loadPlanSummary) loadPlanSummary.textContent = "Draw or open saved spools first. The planner can use the current spool plus saved browser projects.";
+}
+
+function renderLoadPlan(plan, elapsed = 0, playing = false) {
+  updateLoadPlanViewControls();
+  if (loadPlanViewMode === "model") {
+    if (renderLoadPlanThree(plan, elapsed, playing)) return;
+    loadPlanViewMode = "layout";
+    updateLoadPlanViewControls();
+  }
+
+  stopLoadPlanThreeLoop();
+  setLoadPlanSpin(false);
+  if (loadPlanThreeCanvas) loadPlanThreeCanvas.hidden = true;
+  if (loadPlanCanvas) loadPlanCanvas.hidden = false;
+  drawTruckLoadPlan(plan, elapsed, playing);
+}
+
+function renderLoadPlanThree(plan, elapsed = 0, playing = false) {
+  if (!plan || !ensureLoadPlanThree()) return false;
+  if (loadPlanCanvas) loadPlanCanvas.hidden = true;
+  if (loadPlanThreeCanvas) loadPlanThreeCanvas.hidden = false;
+  resizeLoadPlanThree();
+  rebuildLoadPlanThree(plan, elapsed, playing);
+  updateLoadPlanViewControls();
+  return true;
+}
+
+function ensureLoadPlanThree() {
+  if (!loadPlanThreeCanvas || !loadPlanStage || !three.module || !three.OrbitControls) return false;
+  if (loadPlanThree.ready) {
+    loadPlanThreeCanvas.hidden = false;
+    if (loadPlanCanvas) loadPlanCanvas.hidden = true;
+    resizeLoadPlanThree();
+    startLoadPlanThreeLoop();
+    return true;
+  }
+
+  try {
+    const THREE = three.module;
+    loadPlanThree.scene = new THREE.Scene();
+    loadPlanThree.scene.background = new THREE.Color(0xf7fbfa);
+    loadPlanThree.camera = new THREE.PerspectiveCamera(42, 1, 0.05, 100);
+    loadPlanThree.camera.up.set(0, 0, 1);
+    loadPlanThree.renderer = new THREE.WebGLRenderer({
+      canvas: loadPlanThreeCanvas,
+      antialias: true,
+      alpha: false,
+      preserveDrawingBuffer: true,
+    });
+    loadPlanThree.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    loadPlanThree.renderer.shadowMap.enabled = true;
+    loadPlanThree.renderer.outputColorSpace = THREE.SRGBColorSpace;
+    loadPlanThree.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    loadPlanThree.renderer.toneMappingExposure = 1.08;
+
+    loadPlanThree.scene.add(new THREE.HemisphereLight(0xffffff, 0xb8c2c0, 2.2));
+    const keyLight = new THREE.DirectionalLight(0xffffff, 3.4);
+    keyLight.position.set(6, -8, 8);
+    keyLight.castShadow = true;
+    loadPlanThree.scene.add(keyLight);
+    const fillLight = new THREE.DirectionalLight(0xe8f0ef, 1.25);
+    fillLight.position.set(-7, 7, 6);
+    loadPlanThree.scene.add(fillLight);
+
+    loadPlanThree.controls = new three.OrbitControls(loadPlanThree.camera, loadPlanThree.renderer.domElement);
+    loadPlanThree.controls.enableDamping = true;
+    loadPlanThree.controls.dampingFactor = 0.12;
+    loadPlanThree.controls.screenSpacePanning = true;
+    loadPlanThree.controls.enablePan = true;
+    loadPlanThree.controls.enableZoom = true;
+    loadPlanThree.controls.rotateSpeed = 0.58;
+    loadPlanThree.controls.panSpeed = 0.72;
+    loadPlanThree.controls.zoomSpeed = 0.78;
+    loadPlanThree.controls.autoRotateSpeed = 1.15;
+
+    loadPlanThree.ready = true;
+    loadPlanThreeCanvas.hidden = false;
+    if (loadPlanCanvas) loadPlanCanvas.hidden = true;
+    resizeLoadPlanThree();
+    startLoadPlanThreeLoop();
+    return true;
+  } catch (error) {
+    console.warn("Load planner 3D view failed; using canvas fallback.", error);
+    return false;
+  }
+}
+
+function startLoadPlanThreeLoop() {
+  if (!loadPlanThree.ready || loadPlanThree.animationFrame) return;
+  loadPlanThree.animationFrame = requestAnimationFrame(animateLoadPlanThree);
+}
+
+function stopLoadPlanThreeLoop() {
+  if (!loadPlanThree.animationFrame) return;
+  cancelAnimationFrame(loadPlanThree.animationFrame);
+  loadPlanThree.animationFrame = 0;
+}
+
+function animateLoadPlanThree() {
+  if (!loadPlanThree.ready) {
+    loadPlanThree.animationFrame = 0;
+    return;
+  }
+  loadPlanThree.animationFrame = requestAnimationFrame(animateLoadPlanThree);
+  if (loadPlanThree.controls) {
+    loadPlanThree.controls.autoRotate = loadPlanThree.spinning;
+    loadPlanThree.controls.update();
+  }
+  loadPlanThree.renderer?.render(loadPlanThree.scene, loadPlanThree.camera);
+}
+
+function resizeLoadPlanThree() {
+  if (!loadPlanThree.ready || !loadPlanStage) return;
+  const rect = loadPlanStage.getBoundingClientRect();
+  const width = Math.max(1, Math.floor(rect.width));
+  const height = Math.max(1, Math.floor(rect.height));
+  loadPlanThree.renderer.setSize(width, height, false);
+  loadPlanThree.camera.aspect = width / height;
+  loadPlanThree.camera.updateProjectionMatrix();
+}
+
+function rebuildLoadPlanThree(plan, elapsed = 0, playing = false) {
+  if (!loadPlanThree.ready || !plan) return;
+  const THREE = three.module;
+  if (loadPlanThree.group) {
+    loadPlanThree.scene.remove(loadPlanThree.group);
+    disposeObject3d(loadPlanThree.group);
+  }
+
+  const group = new THREE.Group();
+  buildLoadPlanTruckBody3d(group, plan);
+  buildLoadPlanZone3d(group, plan.tray, "tray", plan.tray);
+  if (plan.rack) buildLoadPlanZone3d(group, plan.rack, "rack", plan.tray);
+
+  const drawPlacements = [...plan.placements].sort((first, second) => {
+    if (first.zone !== second.zone) return first.zone === "rack" ? -1 : 1;
+    if ((first.layer ?? 0) !== (second.layer ?? 0)) return (first.layer ?? 0) - (second.layer ?? 0);
+    return first.order - second.order;
+  });
+  for (const placement of drawPlacements) {
+    buildLoadPlanSpool3d(group, plan, placement, elapsed, playing);
+  }
+
+  loadPlanThree.scene.add(group);
+  loadPlanThree.group = group;
+  frameLoadPlanThreeCamera();
+  loadPlanThree.renderer.render(loadPlanThree.scene, loadPlanThree.camera);
+}
+
+function buildLoadPlanTruckBody3d(group, plan) {
+  const THREE = three.module;
+  const trayLength = plan.tray.lengthMm * LOAD_PLAN_3D_SCALE;
+  const trayWidth = plan.tray.widthMm * LOAD_PLAN_3D_SCALE;
+  const trayStartX = -trayLength / 2;
+  const trayEndX = trayLength / 2;
+  const cabLength = clampNumber(trayLength * 0.32, 0.95, 1.25);
+  const bonnetLength = clampNumber(trayLength * 0.16, 0.45, 0.62);
+  const cabWidth = Math.min(trayWidth * 0.86, 1.72);
+  const cabX = trayStartX - cabLength / 2 - 0.12;
+  const bonnetX = cabX - cabLength / 2 - bonnetLength / 2 + 0.05;
+  const frontX = bonnetX - bonnetLength / 2 - 0.08;
+  const chassisLength = trayEndX - frontX + 0.16;
+  const chassisX = (trayEndX + frontX) / 2;
+
+  const chassisMaterial = new THREE.MeshStandardMaterial({ color: 0x2e383a, roughness: 0.48, metalness: 0.42 });
+  const cabMaterial = new THREE.MeshStandardMaterial({ color: 0xe7eeee, roughness: 0.45, metalness: 0.18 });
+  const trimMaterial = new THREE.MeshStandardMaterial({ color: 0x445154, roughness: 0.4, metalness: 0.35 });
+  const glassMaterial = new THREE.MeshStandardMaterial({ color: 0x5f7c84, roughness: 0.18, metalness: 0.2 });
+  const tyreMaterial = new THREE.MeshStandardMaterial({ color: 0x101516, roughness: 0.72, metalness: 0.05 });
+  const hubMaterial = new THREE.MeshStandardMaterial({ color: 0xb8c4c2, roughness: 0.32, metalness: 0.62 });
+
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(chassisLength, trayWidth * 0.72, 0.12), chassisMaterial);
+  chassis.position.set(chassisX, 0, -0.08);
+  chassis.castShadow = true;
+  chassis.receiveShadow = true;
+  group.add(chassis);
+
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(cabLength, cabWidth, 0.62), cabMaterial);
+  cab.position.set(cabX, 0, 0.28);
+  cab.castShadow = true;
+  cab.receiveShadow = true;
+  group.add(cab);
+
+  const bonnet = new THREE.Mesh(new THREE.BoxGeometry(bonnetLength, cabWidth * 0.92, 0.32), cabMaterial);
+  bonnet.position.set(bonnetX, 0, 0.16);
+  bonnet.castShadow = true;
+  bonnet.receiveShadow = true;
+  group.add(bonnet);
+
+  const windscreen = new THREE.Mesh(new THREE.BoxGeometry(0.045, cabWidth * 0.72, 0.28), glassMaterial);
+  windscreen.position.set(cabX - cabLength * 0.28, 0, 0.56);
+  windscreen.castShadow = true;
+  group.add(windscreen);
+
+  const trayApron = new THREE.Mesh(new THREE.BoxGeometry(trayLength, 0.08, 0.16), trimMaterial);
+  for (const side of [-1, 1]) {
+    const apron = trayApron.clone();
+    apron.position.set(0, side * (trayWidth / 2 + 0.035), -0.01);
+    apron.castShadow = true;
+    group.add(apron);
+  }
+
+  const wheelXPositions = [
+    bonnetX - bonnetLength * 0.12,
+    trayStartX + trayLength * 0.28,
+    trayEndX - trayLength * 0.18,
+  ];
+  for (const x of wheelXPositions) {
+    for (const side of [-1, 1]) {
+      const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.16, 32), tyreMaterial);
+      wheel.position.set(x, side * (trayWidth / 2 + 0.18), -0.13);
+      wheel.castShadow = true;
+      group.add(wheel);
+
+      const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 0.18, 20), hubMaterial);
+      hub.position.copy(wheel.position);
+      hub.castShadow = true;
+      group.add(hub);
+    }
+  }
+
+  if (plan.rack) {
+    const rackLength = plan.rack.lengthMm * LOAD_PLAN_3D_SCALE;
+    const rackStartX = trayStartX;
+    const rackEndX = rackStartX + rackLength;
+    const rackTopZ = loadPlanZoneBaseZ("rack") + 0.08;
+    const rackY = trayWidth / 2;
+    const mastMaterial = new THREE.MeshStandardMaterial({ color: 0x50676b, roughness: 0.42, metalness: 0.46 });
+    const postXs = [
+      rackStartX + Math.min(0.55, rackLength * 0.12),
+      rackStartX + rackLength * 0.34,
+      rackStartX + rackLength * 0.66,
+      rackEndX - Math.min(0.55, rackLength * 0.12),
+    ];
+    for (const x of postXs) {
+      const postBottom = x > trayEndX ? 0.18 : 0.08;
+      for (const side of [-1, 1]) {
+        const post = cylinderBetween(
+          new THREE.Vector3(x, side * rackY, postBottom),
+          new THREE.Vector3(x, side * rackY, rackTopZ),
+          0.024,
+          mastMaterial,
+          14,
+        );
+        post.castShadow = true;
+        group.add(post);
+      }
+    }
+  }
+}
+
+function buildLoadPlanZone3d(group, loadZone, zone, tray = selectedLoadPlanTray()) {
+  const THREE = three.module;
+  const length = loadZone.lengthMm * LOAD_PLAN_3D_SCALE;
+  const width = loadZone.widthMm * LOAD_PLAN_3D_SCALE;
+  const offsetX = loadPlanZoneOffsetX(loadZone, zone, tray);
+  const baseZ = loadPlanZoneBaseZ(zone);
+  const edgeMaterial = new THREE.MeshStandardMaterial({ color: 0x50676b, roughness: 0.5, metalness: 0.35 });
+
+  if (zone === "tray") {
+    const deckThickness = 0.09;
+    const deckMaterial = new THREE.MeshStandardMaterial({
+      color: 0xd8e8e4,
+      roughness: 0.62,
+      metalness: 0.2,
+    });
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(length, width, deckThickness), deckMaterial);
+    deck.position.set(0, 0, baseZ - deckThickness * 0.5);
+    deck.receiveShadow = true;
+    deck.castShadow = true;
+    group.add(deck);
+
+    const railDepth = 0.16;
+    for (const side of [-1, 1]) {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(length, 0.05, railDepth), edgeMaterial);
+      rail.position.set(0, side * width * 0.5, baseZ + railDepth * 0.5);
+      rail.castShadow = true;
+      group.add(rail);
+    }
+
+    const headboard = new THREE.Mesh(new THREE.BoxGeometry(0.07, width + 0.12, 0.62), edgeMaterial);
+    headboard.position.set(-length / 2 + 0.035, 0, baseZ + 0.31);
+    headboard.castShadow = true;
+    group.add(headboard);
+
+    const tailBar = new THREE.Mesh(new THREE.BoxGeometry(0.07, width + 0.08, 0.18), edgeMaterial);
+    tailBar.position.set(length / 2 - 0.035, 0, baseZ + 0.09);
+    tailBar.castShadow = true;
+    group.add(tailBar);
+  } else {
+    const railRadius = 0.035;
+    const railY = width / 2;
+    const railZ = baseZ + 0.08;
+    const crossbarXs = [-length * 0.42, -length * 0.14, length * 0.14, length * 0.42];
+    for (const side of [-1, 1]) {
+      const start = new THREE.Vector3(offsetX - length / 2, side * railY, railZ);
+      const end = new THREE.Vector3(offsetX + length / 2, side * railY, railZ);
+      const rail = cylinderBetween(start, end, railRadius, edgeMaterial, 16);
+      rail.castShadow = true;
+      group.add(rail);
+    }
+
+    for (const x of crossbarXs) {
+      const crossbar = cylinderBetween(
+        new THREE.Vector3(offsetX + x, -railY, railZ + 0.012),
+        new THREE.Vector3(offsetX + x, railY, railZ + 0.012),
+        0.028,
+        edgeMaterial,
+        14,
+      );
+      crossbar.castShadow = true;
+      group.add(crossbar);
+    }
+  }
+}
+
+function loadPlanAnimationProgress(placement, elapsed, playing) {
+  if (!playing) return 1;
+  return clampNumber((elapsed - placement.delay) / placement.duration, 0, 1);
+}
+
+function loadPlanAnimationOffset(placement, plan, progress) {
+  if (progress >= 1) return new three.module.Vector3(0, 0, 0);
+  const eased = 1 - Math.pow(1 - progress, 3);
+  const trayLength = plan.tray.lengthMm * LOAD_PLAN_3D_SCALE;
+  const trayWidth = plan.tray.widthMm * LOAD_PLAN_3D_SCALE;
+  const side = placement.order % 2 ? -1 : 1;
+  const lane = (placement.order - 1) % 4;
+  const start = new three.module.Vector3(
+    -trayLength * 0.58 - 0.72 - lane * 0.28,
+    side * (trayWidth * 0.58 + 0.38 + lane * 0.14),
+    0.46 + ((placement.order - 1) % 3) * 0.14,
+  );
+  const lift = Math.sin(progress * Math.PI) * 0.24;
+  return start.multiplyScalar(1 - eased).add(new three.module.Vector3(0, 0, lift));
+}
+
+function buildLoadPlanSpool3d(group, plan, placement, elapsed = 0, playing = false) {
+  const THREE = three.module;
+  const loadZone = placement.zone === "rack" ? plan.rack : plan.tray;
+  if (!loadZone) return;
+  const progress = loadPlanAnimationProgress(placement, elapsed, playing);
+  if (playing && progress <= 0) return;
+  const spoolGroup = new THREE.Group();
+  spoolGroup.position.copy(loadPlanAnimationOffset(placement, plan, progress));
+  const drawPlacement = loadPlanSettledPlacement(plan, placement, loadZone);
+  const pipeMaterial = new THREE.MeshStandardMaterial({
+    color: 0x202524,
+    metalness: 0.55,
+    roughness: 0.34,
+  });
+  const darkMaterial = new THREE.MeshStandardMaterial({ color: 0x0b1112, metalness: 0.42, roughness: 0.5 });
+  const zBase = loadPlanZoneBaseZ(placement.zone) + loadPlanLayerHeightMm(placement) * LOAD_PLAN_3D_SCALE + 0.08;
+  const center = loadPlanPlacementCenter3d(drawPlacement, loadZone, zBase - 0.025, plan.tray);
+  buildLoadPlanDunnage3d(spoolGroup, loadZone, drawPlacement, zBase, plan.tray);
+
+  for (const segment of loadPlanVisibleSegments(drawPlacement)) {
+    const from = loadPlanTransformPoint(segment.from, drawPlacement.footprint, drawPlacement.rotation);
+    const to = loadPlanTransformPoint(segment.to, drawPlacement.footprint, drawPlacement.rotation);
+    const start = loadPlanPoint3d(drawPlacement, loadZone, from, zBase, plan.tray);
+    const end = loadPlanPoint3d(drawPlacement, loadZone, to, zBase, plan.tray);
+    const radius = clampNumber(segment.od * LOAD_PLAN_3D_SCALE * 0.5, 0.018, 0.18);
+    const shadowPipe = cylinderBetween(
+      start.clone().add(new THREE.Vector3(0.035, -0.035, -0.035)),
+      end.clone().add(new THREE.Vector3(0.035, -0.035, -0.035)),
+      radius * 1.08,
+      darkMaterial,
+      18,
+    );
+    shadowPipe.castShadow = true;
+    spoolGroup.add(shadowPipe);
+
+    const pipe = cylinderBetween(start, end, radius, pipeMaterial, 28);
+    pipe.castShadow = true;
+    pipe.receiveShadow = true;
+    spoolGroup.add(pipe);
+  }
+
+  for (const node of loadPlanPlacementNodePoints(drawPlacement)) {
+    const point = loadPlanPoint3d(drawPlacement, loadZone, node.point, zBase, plan.tray);
+    const radius = clampNumber(node.od * LOAD_PLAN_3D_SCALE * 0.43, 0.014, 0.13);
+    const nodeMaterial = new THREE.MeshStandardMaterial({
+      color: node.count >= 3 ? 0xf2f6f5 : 0x202524,
+      metalness: 0.5,
+      roughness: 0.34,
+    });
+    const marker = new THREE.Mesh(new THREE.SphereGeometry(radius, 18, 12), nodeMaterial);
+    marker.position.copy(point);
+    marker.castShadow = true;
+    marker.receiveShadow = true;
+    spoolGroup.add(marker);
+  }
+
+  const marker = new THREE.Mesh(
+    new THREE.SphereGeometry(0.075, 18, 12),
+    new THREE.MeshStandardMaterial({ color: loadPlanSpoolColor(placement.order - 1), roughness: 0.28, metalness: 0.2 }),
+  );
+  marker.position.copy(center).add(new THREE.Vector3(-drawPlacement.widthMm * LOAD_PLAN_3D_SCALE * 0.5, -drawPlacement.heightMm * LOAD_PLAN_3D_SCALE * 0.5, 0.16));
+  marker.castShadow = true;
+  spoolGroup.add(marker);
+  group.add(spoolGroup);
+}
+
+function loadPlanSettledPlacement(plan, placement, loadZone) {
+  const layer = placement.layer ?? 0;
+  if (layer <= 0 || placement.zone !== "tray") return placement;
+
+  const supports = plan.placements.filter((candidate) => {
+    if (candidate.zone !== placement.zone || (candidate.layer ?? 0) !== layer - 1) return false;
+    const firstRight = placement.x + placement.widthMm;
+    const secondRight = candidate.x + candidate.widthMm;
+    return Math.min(firstRight, secondRight) - Math.max(placement.x, candidate.x) > Math.min(placement.widthMm, candidate.widthMm) * 0.18;
+  });
+  if (!supports.length) return placement;
+
+  const supportCenters = supports
+    .map((support) => support.y + support.heightMm / 2)
+    .sort((first, second) => first - second);
+  const targetCenter = supportCenters.length >= 2
+    ? (supportCenters[0] + supportCenters[supportCenters.length - 1]) / 2
+    : supportCenters[0];
+  const targetY = clampNumber(targetCenter - placement.heightMm / 2, 0, loadZone.widthMm - placement.heightMm);
+  const settledY = placement.y + (targetY - placement.y) * 0.65;
+  return { ...placement, y: settledY, settled: Math.abs(settledY - placement.y) > 1 };
+}
+
+function loadPlanVisibleSegments(placement) {
+  const segments = placement.footprint.segments ?? [];
+  if (segments.length <= LOAD_PLAN_VISIBLE_SEGMENT_LIMIT) return segments;
+  return [...segments]
+    .sort((first, second) => {
+      const firstLength = pointDistance2d(first.from, first.to);
+      const secondLength = pointDistance2d(second.from, second.to);
+      return secondLength - firstLength;
+    })
+    .slice(0, LOAD_PLAN_VISIBLE_SEGMENT_LIMIT);
+}
+
+function loadPlanPlacementNodePoints(placement) {
+  const nodes = new Map();
+  for (const segment of loadPlanVisibleSegments(placement)) {
+    for (const point of [segment.from, segment.to]) {
+      const transformed = loadPlanTransformPoint(point, placement.footprint, placement.rotation);
+      const key = `${Math.round(transformed.x)}:${Math.round(transformed.y)}`;
+      const existing = nodes.get(key);
+      nodes.set(key, {
+        point: transformed,
+        od: Math.max(existing?.od ?? 0, segment.od ?? 50),
+        count: (existing?.count ?? 0) + 1,
+      });
+    }
+  }
+  return [...nodes.values()];
+}
+
+function buildLoadPlanDunnage3d(group, loadZone, placement, zBase, tray = selectedLoadPlanTray()) {
+  const THREE = three.module;
+  const timberMaterial = new THREE.MeshStandardMaterial({
+    color: 0x8a6a48,
+    roughness: 0.78,
+    metalness: 0.02,
+  });
+  const timberWidth = LOAD_PLAN_TIMBER_WIDTH_MM * LOAD_PLAN_3D_SCALE;
+  const timberHeight = LOAD_PLAN_TIMBER_THICKNESS_MM * LOAD_PLAN_3D_SCALE * 0.62;
+  const yLength = Math.min(loadZone.widthMm, Math.max(placement.heightMm, 520)) * LOAD_PLAN_3D_SCALE;
+  const timberZ = zBase - timberHeight * 0.86;
+  const supportCount = placement.widthMm > 3600 ? 3 : 2;
+  const xPositions = Array.from({ length: supportCount }, (_, index) => {
+    const fraction = supportCount === 2 ? 0.28 + index * 0.44 : 0.18 + index * 0.32;
+    return placement.x + placement.widthMm * fraction;
+  });
+
+  for (const xMm of xPositions) {
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(timberWidth, yLength, timberHeight), timberMaterial);
+    beam.position.copy(loadPlanPoint3d({ ...placement, x: xMm, y: placement.y + placement.heightMm / 2 }, loadZone, { x: 0, y: 0 }, timberZ, tray));
+    beam.castShadow = true;
+    beam.receiveShadow = true;
+    group.add(beam);
+  }
+}
+
+function loadPlanZoneBaseZ(zone) {
+  return zone === "rack" ? 1.65 : 0.08;
+}
+
+function loadPlanZoneOffsetX(loadZone, zone, tray = selectedLoadPlanTray()) {
+  if (zone !== "rack") return 0;
+  return ((loadZone.lengthMm - tray.lengthMm) / 2) * LOAD_PLAN_3D_SCALE;
+}
+
+function loadPlanPoint3d(placement, loadZone, point, z, tray = selectedLoadPlanTray()) {
+  const zone = placement.zone ?? "tray";
+  const x = (placement.x + point.x - loadZone.lengthMm / 2) * LOAD_PLAN_3D_SCALE + loadPlanZoneOffsetX(loadZone, zone, tray);
+  const y = (placement.y + point.y - loadZone.widthMm / 2) * LOAD_PLAN_3D_SCALE;
+  return new three.module.Vector3(x, y, z);
+}
+
+function loadPlanPlacementCenter3d(placement, loadZone, z, tray = selectedLoadPlanTray()) {
+  const zone = placement.zone ?? "tray";
+  return new three.module.Vector3(
+    (placement.x + placement.widthMm / 2 - loadZone.lengthMm / 2) * LOAD_PLAN_3D_SCALE + loadPlanZoneOffsetX(loadZone, zone, tray),
+    (placement.y + placement.heightMm / 2 - loadZone.widthMm / 2) * LOAD_PLAN_3D_SCALE,
+    z,
+  );
+}
+
+function frameLoadPlanThreeCamera() {
+  if (!loadPlanThree.ready || !loadPlanThree.group) return;
+  const THREE = three.module;
+  const box = new THREE.Box3().setFromObject(loadPlanThree.group);
+  const center = new THREE.Vector3();
+  const size = new THREE.Vector3();
+  box.getCenter(center);
+  box.getSize(size);
+  const maxDim = Math.max(size.x, size.y, size.z, 2.5);
+  loadPlanThree.bounds = { center, size };
+  if (loadPlanThree.controls) {
+    loadPlanThree.controls.target.copy(center);
+  }
+  loadPlanThree.camera.position.set(center.x + maxDim * 0.72, center.y - maxDim * 1.55, center.z + maxDim * 0.42);
+  loadPlanThree.camera.near = 0.03;
+  loadPlanThree.camera.far = Math.max(100, maxDim * 8);
+  loadPlanThree.camera.updateProjectionMatrix();
+  loadPlanThree.camera.lookAt(center);
+  loadPlanThree.controls?.update();
+}
+
+function resetLoadPlanThreeView() {
+  if (!ensureLoadPlanThree()) {
+    renderLoadPlan(currentLoadPlan);
+    return;
+  }
+  setLoadPlanSpin(false);
+  if (loadPlanThree.group) loadPlanThree.group.rotation.set(0, 0, 0);
+  frameLoadPlanThreeCamera();
+}
+
+function setLoadPlanSpin(active) {
+  loadPlanThree.spinning = Boolean(active);
+  if (loadPlanThree.controls) loadPlanThree.controls.autoRotate = loadPlanThree.spinning;
+  loadPlanSpinButton?.classList.toggle("active", loadPlanThree.spinning);
+  loadPlanSpinButton?.setAttribute("aria-pressed", String(loadPlanThree.spinning));
+  updateLoadPlanViewControls();
+}
+
+function loadPlanZoneTitle(zone) {
+  return zone === "rack" ? "Roof racks" : "Truck tray";
+}
+
+function loadPlanLayerGroups(plan, tray, rack = null) {
+  const placements = plan?.placements ?? [];
+  const groups = [];
+  const addZone = (zone, loadZone) => {
+    if (!loadZone) return;
+    const zonePlacements = placements.filter((placement) => placement.zone === zone);
+    const layers = [...new Set(zonePlacements.map((placement) => placement.layer ?? 0))]
+      .sort((first, second) => first - second);
+    for (const layer of layers) {
+      groups.push({
+        zone,
+        loadZone,
+        layer,
+        placements: zonePlacements
+          .filter((placement) => (placement.layer ?? 0) === layer)
+          .sort((first, second) => first.x - second.x || first.y - second.y || first.order - second.order),
+      });
+    }
+  };
+
+  addZone("rack", rack);
+  addZone("tray", tray);
+
+  if (!groups.length && (plan?.rejected?.length || !placements.length)) {
+    if (rack) groups.push({ zone: "rack", loadZone: rack, layer: 0, placements: [] });
+    groups.push({ zone: "tray", loadZone: tray, layer: 0, placements: [] });
+  }
+
+  return groups;
+}
+
+function loadPlanTopViewTiles(width, height, groups, hasRejected = false) {
+  const margin = Math.max(16, Math.min(30, width * 0.035));
+  const headerHeight = 42;
+  const footerHeight = hasRejected ? 72 : 34;
+  const gap = 14;
+  const count = Math.max(groups.length, 1);
+  const columns = width >= 780 && count > 2 ? 2 : 1;
+  const rows = Math.ceil(count / columns);
+  const tileWidth = (width - margin * 2 - gap * (columns - 1)) / columns;
+  const tileHeight = Math.max(78, (height - headerHeight - footerHeight - margin - gap * (rows - 1)) / rows);
+
+  return groups.map((group, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    return {
+      group,
+      x: margin + column * (tileWidth + gap),
+      y: headerHeight + row * (tileHeight + gap),
+      width: tileWidth,
+      height: tileHeight,
+    };
+  });
+}
+
+function loadPlanFitText(ctx, text, maxWidth) {
+  const value = String(text ?? "");
+  if (ctx.measureText(value).width <= maxWidth) return value;
+  let trimmed = value;
+  while (trimmed.length > 4 && ctx.measureText(`${trimmed}...`).width > maxWidth) {
+    trimmed = trimmed.slice(0, -1);
+  }
+  return `${trimmed}...`;
+}
+
+function loadPlanShortName(item) {
+  const info = item?.projectInfo ?? {};
+  const parts = [info.jobNumber, info.spoolNumber].map((part) => String(part ?? "").trim()).filter(Boolean);
+  return parts.length ? parts.join(" ") : truncateLoadPlanName(item?.name ?? "Spool", 18);
+}
+
+function drawLoadPlanDirectionArrow(ctx, start, end, color) {
+  const angle = Math.atan2(end.y - start.y, end.x - start.x);
+  const head = 7;
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  drawLine(ctx, start, end);
+  ctx.beginPath();
+  ctx.moveTo(end.x, end.y);
+  ctx.lineTo(end.x - Math.cos(angle - 0.58) * head, end.y - Math.sin(angle - 0.58) * head);
+  ctx.lineTo(end.x - Math.cos(angle + 0.58) * head, end.y - Math.sin(angle + 0.58) * head);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawLoadPlanTopViewTile(ctx, tile) {
+  const { group } = tile;
+  const { loadZone } = group;
+  const isRack = group.zone === "rack";
+  const pad = 14;
+  const titleY = tile.y + 18;
+  const planX = tile.x + pad;
+  const planY = tile.y + 34;
+  const planMaxWidth = tile.width - pad * 2;
+  const planMaxHeight = Math.max(48, tile.height - 48);
+  const scaleX = planMaxWidth / loadZone.lengthMm;
+  const scaleY = planMaxHeight / loadZone.widthMm;
+  const zoneWidth = loadZone.lengthMm * scaleX;
+  const zoneHeight = loadZone.widthMm * scaleY;
+  const zoneX = tile.x + (tile.width - zoneWidth) / 2;
+  const zoneY = planY + (planMaxHeight - zoneHeight) / 2;
+
+  ctx.save();
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.14)";
+  ctx.lineWidth = 1;
+  roundRect(ctx, tile.x, tile.y, tile.width, tile.height, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#17282c";
+  ctx.font = "950 13px Arial, sans-serif";
+  ctx.textAlign = "left";
+  const layerText = `${loadPlanZoneTitle(group.zone)} - Layer ${group.layer + 1}`;
+  ctx.fillText(layerText, tile.x + pad, titleY);
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#607176";
+  ctx.font = "850 11px Arial, sans-serif";
+  ctx.fillText(`${formatLength(loadZone.lengthMm)} x ${formatLength(loadZone.widthMm)} mm`, tile.x + tile.width - pad, titleY);
+
+  ctx.fillStyle = isRack ? "#eef5f6" : "#eef7f3";
+  ctx.strokeStyle = isRack ? "#789096" : "#5f8583";
+  ctx.lineWidth = 2;
+  roundRect(ctx, zoneX, zoneY, zoneWidth, zoneHeight, 4);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(zoneX, zoneY, zoneWidth, zoneHeight);
+  ctx.clip();
+  ctx.strokeStyle = "rgba(96, 113, 118, 0.18)";
+  ctx.lineWidth = 1;
+  for (let x = 1000; x < loadZone.lengthMm; x += 1000) {
+    const sx = zoneX + x * scaleX;
+    drawLine(ctx, { x: sx, y: zoneY }, { x: sx, y: zoneY + zoneHeight });
+  }
+  for (let y = 500; y < loadZone.widthMm; y += 500) {
+    const sy = zoneY + y * scaleY;
+    drawLine(ctx, { x: zoneX, y: sy }, { x: zoneX + zoneWidth, y: sy });
+  }
+  ctx.restore();
+
+  if (isRack) {
+    ctx.strokeStyle = "rgba(23, 40, 44, 0.32)";
+    ctx.lineWidth = 3;
+    for (const yFraction of [0.28, 0.72]) {
+      const railY = zoneY + zoneHeight * yFraction;
+      drawLine(ctx, { x: zoneX, y: railY }, { x: zoneX + zoneWidth, y: railY });
+    }
+  }
+
+  for (const placement of group.placements) {
+    drawLoadPlanTopViewPlacement(ctx, placement, zoneX, zoneY, scaleX, scaleY);
+  }
+
+  if (!group.placements.length) {
+    ctx.fillStyle = "#6b7b80";
+    ctx.font = "900 12px Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("No spools on this layer", zoneX + zoneWidth / 2, zoneY + zoneHeight / 2 + 4);
+  }
+
+  ctx.restore();
+}
+
+function drawLoadPlanTopViewPlacement(ctx, placement, zoneX, zoneY, scaleX, scaleY) {
+  const x = zoneX + placement.x * scaleX;
+  const y = zoneY + placement.y * scaleY;
+  const width = Math.max(8, placement.widthMm * scaleX);
+  const height = Math.max(8, placement.heightMm * scaleY);
+  const pipeScale = Math.sqrt(scaleX * scaleY);
+  const color = loadPlanSpoolColor(placement.order - 1);
+  const label = `#${placement.order} ${loadPlanShortName(placement.item)}`;
+  const detail = `${placement.item.pipeSizesLabel} / ${formatMass(placement.item.weightKg)} kg`;
+
+  ctx.save();
+  ctx.globalAlpha = 0.32;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1.3;
+  ctx.setLineDash([5, 5]);
+  roundRect(ctx, x, y, width, height, 6);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  for (const segment of placement.footprint.segments ?? []) {
+    const from = loadPlanTransformPoint(segment.from, placement.footprint, placement.rotation);
+    const to = loadPlanTransformPoint(segment.to, placement.footprint, placement.rotation);
+    const start = {
+      x: zoneX + (placement.x + from.x) * scaleX,
+      y: zoneY + (placement.y + from.y) * scaleY,
+    };
+    const end = {
+      x: zoneX + (placement.x + to.x) * scaleX,
+      y: zoneY + (placement.y + to.y) * scaleY,
+    };
+    const pipeWidth = clampNumber(segment.od * pipeScale * 0.72, 3.2, 13);
+    ctx.lineCap = "butt";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(18, 32, 36, 0.34)";
+    ctx.lineWidth = pipeWidth + 3;
+    drawLine(ctx, { x: start.x + 2, y: start.y + 3 }, { x: end.x + 2, y: end.y + 3 });
+    ctx.strokeStyle = "#122024";
+    ctx.lineWidth = pipeWidth + 1.5;
+    drawLine(ctx, start, end);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = pipeWidth;
+    drawLine(ctx, start, end);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.54)";
+    ctx.lineWidth = Math.max(1.2, pipeWidth * 0.18);
+    drawLine(ctx, { x: start.x, y: start.y - pipeWidth * 0.16 }, { x: end.x, y: end.y - pipeWidth * 0.16 });
+
+    if (pointDistance2d(start, end) < 2) {
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#122024";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(start.x, start.y, Math.max(4, pipeWidth * 0.65), 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+  }
+
+  for (const node of loadPlanPlacementNodePoints(placement)) {
+    const point = {
+      x: zoneX + (placement.x + node.point.x) * scaleX,
+      y: zoneY + (placement.y + node.point.y) * scaleY,
+    };
+    const radius = clampNumber(node.od * pipeScale * 0.36, 2.4, 7.5);
+    ctx.fillStyle = node.count >= 3 ? "#ffffff" : color;
+    ctx.strokeStyle = node.count >= 3 ? "#122024" : "rgba(18, 32, 36, 0.82)";
+    ctx.lineWidth = node.count >= 3 ? 2.2 : 1.4;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  const arrowColor = "rgba(18, 32, 36, 0.82)";
+  if (width >= height) {
+    const arrowY = height >= 42 ? y + height - 11 : y + height / 2;
+    drawLoadPlanDirectionArrow(ctx, { x: x + 10, y: arrowY }, { x: x + width - 10, y: arrowY }, arrowColor);
+  } else {
+    const arrowX = width >= 56 ? x + width - 11 : x + width / 2;
+    drawLoadPlanDirectionArrow(ctx, { x: arrowX, y: y + 10 }, { x: arrowX, y: y + height - 10 }, arrowColor);
+  }
+
+  ctx.fillStyle = "#122024";
+  ctx.font = "950 12px Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  const labelPadding = 6;
+  const labelMax = Math.max(18, Math.min(260, width - labelPadding * 2));
+  const cardWidth = Math.min(width - 4, Math.max(58, ctx.measureText(label).width + 12));
+  const cardHeight = height >= 48 ? 34 : 20;
+  const cardX = x + 3;
+  const cardY = y + 3;
+  if (width >= 64 && height >= 28) {
+    ctx.fillStyle = "rgba(255, 255, 255, 0.86)";
+    roundRect(ctx, cardX, cardY, cardWidth, cardHeight, 5);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(18, 32, 36, 0.16)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = "#122024";
+    ctx.fillText(loadPlanFitText(ctx, label, labelMax), cardX + labelPadding, cardY + 4);
+    if (height >= 48) {
+      ctx.font = "850 10px Arial, sans-serif";
+      ctx.fillStyle = "#35474c";
+      ctx.fillText(loadPlanFitText(ctx, detail, labelMax), cardX + labelPadding, cardY + 19);
+    }
+  } else {
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(`#${placement.order}`, x + width / 2, y + height / 2);
+  }
+
+  ctx.restore();
+}
+
+function loadPlanProjectIsoPoint(projector, xMm, yMm, zMm = 0) {
+  return {
+    x: projector.originX + (xMm + yMm * projector.skewX) * projector.scale,
+    y: projector.originY + yMm * projector.skewY * projector.scale - zMm * projector.zLift * projector.scale,
+  };
+}
+
+function drawLoadPlanIsoDeck(ctx, projector, loadZone, zone) {
+  const corners = [
+    loadPlanProjectIsoPoint(projector, 0, 0, 0),
+    loadPlanProjectIsoPoint(projector, loadZone.lengthMm, 0, 0),
+    loadPlanProjectIsoPoint(projector, loadZone.lengthMm, loadZone.widthMm, 0),
+    loadPlanProjectIsoPoint(projector, 0, loadZone.widthMm, 0),
+  ];
+  ctx.save();
+  ctx.fillStyle = zone === "rack" ? "#eef5f6" : "#edf6f2";
+  ctx.strokeStyle = zone === "rack" ? "#789096" : "#5f8583";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(corners[0].x, corners[0].y);
+  for (const corner of corners.slice(1)) ctx.lineTo(corner.x, corner.y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(96, 113, 118, 0.18)";
+  ctx.lineWidth = 1;
+  for (let x = 1000; x < loadZone.lengthMm; x += 1000) {
+    drawLine(ctx, loadPlanProjectIsoPoint(projector, x, 0, 0), loadPlanProjectIsoPoint(projector, x, loadZone.widthMm, 0));
+  }
+  for (let y = 500; y < loadZone.widthMm; y += 500) {
+    drawLine(ctx, loadPlanProjectIsoPoint(projector, 0, y, 0), loadPlanProjectIsoPoint(projector, loadZone.lengthMm, y, 0));
+  }
+
+  if (zone === "rack") {
+    ctx.strokeStyle = "rgba(23, 40, 44, 0.34)";
+    ctx.lineWidth = 3;
+    for (const yFraction of [0.28, 0.72]) {
+      drawLine(
+        ctx,
+        loadPlanProjectIsoPoint(projector, 0, loadZone.widthMm * yFraction, 65),
+        loadPlanProjectIsoPoint(projector, loadZone.lengthMm, loadZone.widthMm * yFraction, 65),
+      );
+    }
+  }
+  ctx.restore();
+}
+
+function drawLoadPlanIsoSpool(ctx, placement, projector) {
+  const color = loadPlanSpoolColor(placement.order - 1);
+  const zMm = (placement.layer ?? 0) * LOAD_PLAN_LAYER_RISE_MM + Math.max(40, placement.footprint.maxPipeOdMm * 0.5);
+  const center = loadPlanProjectIsoPoint(
+    projector,
+    placement.x + placement.widthMm / 2,
+    placement.y + placement.heightMm / 2,
+    zMm + 70,
+  );
+
+  ctx.save();
+  for (const segment of placement.footprint.segments ?? []) {
+    const from = loadPlanTransformPoint(segment.from, placement.footprint, placement.rotation);
+    const to = loadPlanTransformPoint(segment.to, placement.footprint, placement.rotation);
+    const start = loadPlanProjectIsoPoint(projector, placement.x + from.x, placement.y + from.y, zMm);
+    const end = loadPlanProjectIsoPoint(projector, placement.x + to.x, placement.y + to.y, zMm);
+    const pipeWidth = clampNumber(segment.od * projector.scale * 0.58, 2.4, 9.5);
+
+    ctx.lineCap = "butt";
+    ctx.lineJoin = "round";
+    ctx.strokeStyle = "rgba(18, 32, 36, 0.26)";
+    ctx.lineWidth = pipeWidth + 3;
+    drawLine(ctx, { x: start.x + 2, y: start.y + 4 }, { x: end.x + 2, y: end.y + 4 });
+    ctx.strokeStyle = "#102328";
+    ctx.lineWidth = pipeWidth + 1.3;
+    drawLine(ctx, start, end);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = pipeWidth;
+    drawLine(ctx, start, end);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.lineWidth = Math.max(1, pipeWidth * 0.18);
+    drawLine(ctx, { x: start.x, y: start.y - pipeWidth * 0.18 }, { x: end.x, y: end.y - pipeWidth * 0.18 });
+  }
+
+  for (const node of loadPlanPlacementNodePoints(placement)) {
+    const point = loadPlanProjectIsoPoint(projector, placement.x + node.point.x, placement.y + node.point.y, zMm);
+    const radius = clampNumber(node.od * projector.scale * 0.28, 2.2, 6.5);
+    ctx.fillStyle = node.count >= 3 ? "#ffffff" : color;
+    ctx.strokeStyle = "#102328";
+    ctx.lineWidth = node.count >= 3 ? 2 : 1.2;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(center.x, center.y, 11, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#122024";
+  ctx.font = "950 10px Arial, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(String(placement.order), center.x, center.y + 0.5);
+  ctx.restore();
+}
+
+function drawLoadPlanIsoZone(ctx, zonePlacements, loadZone, zone, area) {
+  const maxLayer = zonePlacements.reduce((max, placement) => Math.max(max, placement.layer ?? 0), 0);
+  const maxZ = Math.max(260, maxLayer * LOAD_PLAN_LAYER_RISE_MM + 260);
+  const skewX = 0.38;
+  const skewY = 0.24;
+  const zLift = 0.56;
+  const projectedWidthMm = loadZone.lengthMm + loadZone.widthMm * skewX;
+  const projectedHeightMm = loadZone.widthMm * skewY + maxZ * zLift;
+  const scale = Math.min(
+    (area.width - 28) / projectedWidthMm,
+    Math.max(1, area.height - 42) / projectedHeightMm,
+  );
+  const projector = {
+    scale,
+    skewX,
+    skewY,
+    zLift,
+    originX: area.x + (area.width - projectedWidthMm * scale) / 2,
+    originY: area.y + 30 + maxZ * zLift * scale,
+  };
+
+  ctx.save();
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.14)";
+  ctx.lineWidth = 1;
+  roundRect(ctx, area.x, area.y, area.width, area.height, 8);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#17282c";
+  ctx.font = "950 13px Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText(`${loadPlanZoneTitle(zone)} 3D guide`, area.x + 12, area.y + 19);
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#607176";
+  ctx.font = "850 11px Arial, sans-serif";
+  ctx.fillText("order dots match top view", area.x + area.width - 12, area.y + 19);
+
+  drawLoadPlanIsoDeck(ctx, projector, loadZone, zone);
+  const sorted = [...zonePlacements].sort((first, second) => {
+    if ((first.layer ?? 0) !== (second.layer ?? 0)) return (first.layer ?? 0) - (second.layer ?? 0);
+    return first.y - second.y || first.x - second.x || first.order - second.order;
+  });
+  for (const placement of sorted) {
+    drawLoadPlanIsoSpool(ctx, placement, projector);
+  }
+
+  if (!zonePlacements.length) {
+    ctx.fillStyle = "#6b7b80";
+    ctx.font = "900 12px Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("No spools here", area.x + area.width / 2, area.y + area.height / 2);
+  }
+  ctx.restore();
+}
+
+function drawLoadPlanIsoModel(ctx, plan, area) {
+  const placements = plan?.placements ?? [];
+  const zones = [];
+  if (plan?.rack && placements.some((placement) => placement.zone === "rack")) {
+    zones.push({ zone: "rack", loadZone: plan.rack });
+  }
+  if (placements.some((placement) => placement.zone === "tray") || !zones.length) {
+    zones.push({ zone: "tray", loadZone: plan?.tray ?? selectedLoadPlanTray() });
+  }
+
+  const gap = 10;
+  const zoneHeight = Math.max(86, (area.height - gap * (zones.length - 1)) / zones.length);
+  for (const [index, zoneData] of zones.entries()) {
+    const zoneArea = {
+      x: area.x,
+      y: area.y + index * (zoneHeight + gap),
+      width: area.width,
+      height: zoneHeight,
+    };
+    drawLoadPlanIsoZone(
+      ctx,
+      placements.filter((placement) => placement.zone === zoneData.zone),
+      zoneData.loadZone,
+      zoneData.zone,
+      zoneArea,
+    );
+  }
+}
+
+function drawLoadPlanRejected(ctx, plan, tiles, width, height) {
+  if (!plan.rejected.length) return;
+  const x = Math.max(16, Math.min(...tiles.map((tile) => tile.x)));
+  const right = Math.min(width - 16, Math.max(...tiles.map((tile) => tile.x + tile.width)));
+  const y = height - 58;
+  ctx.save();
+  ctx.fillStyle = "#fff5f3";
+  ctx.strokeStyle = "rgba(180, 35, 24, 0.35)";
+  roundRect(ctx, x, y, right - x, 38, 8);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = "#9f2d20";
+  ctx.font = "900 11px Arial, sans-serif";
+  ctx.textAlign = "left";
+  const loadZones = plan.rack ? "tray or roof racks" : "tray";
+  ctx.fillText(loadPlanFitText(ctx, `Does not fit ${loadZones}: ${plan.rejected.map((item) => item.name).join(", ")}`, right - x - 20), x + 10, y + 24);
+  ctx.restore();
+}
+
+function loadPlanSpoolColor(index) {
+  const colors = ["#0f6b73", "#b55532", "#6b5aa8", "#2f7d4f", "#9b4c72", "#4f6d7a"];
+  return colors[index % colors.length];
+}
+
+function loadPlanLayerHeightMm(placement) {
+  return (placement.layer ?? 0) * Math.max(
+    LOAD_PLAN_LAYER_RISE_MM,
+    Math.min(900, placement.footprint.verticalMm * 0.55 + placement.footprint.maxPipeOdMm * 1.5),
+  );
+}
+
+function pointDistance2d(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+function drawTruckLoadPlan(plan, elapsed = 0, playing = false) {
+  if (!loadPlanCanvas) return;
+  const { ctx, width, height } = resizeCanvas(loadPlanCanvas);
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#f8fbfa";
+  ctx.fillRect(0, 0, width, height);
+
+  const tray = plan?.tray ?? selectedLoadPlanTray();
+  const rack = plan?.rack ?? selectedLoadPlanRack();
+
+  if (!plan?.placements.length && !plan?.rejected.length) {
+    ctx.fillStyle = "#17282c";
+    ctx.font = "950 16px Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Select spools to make a yard load layout", width / 2, height / 2);
+    return;
+  }
+
+  const groups = loadPlanLayerGroups(plan, tray, rack);
+  const margin = Math.max(14, Math.min(24, width * 0.03));
+  const footerReserve = plan.rejected.length ? 68 : 30;
+  const sideBySide = width >= 780;
+  const topArea = sideBySide
+    ? {
+      x: margin,
+      y: 36,
+      width: Math.max(310, width * 0.56 - margin * 1.4),
+      height: Math.max(190, height - 36 - footerReserve),
+    }
+    : {
+      x: margin,
+      y: 36,
+      width: width - margin * 2,
+      height: Math.max(150, (height - 36 - footerReserve) * 0.55),
+    };
+  const modelArea = sideBySide
+    ? {
+      x: topArea.x + topArea.width + 12,
+      y: topArea.y,
+      width: Math.max(220, width - (topArea.x + topArea.width + 12) - margin),
+      height: topArea.height,
+    }
+    : {
+      x: margin,
+      y: topArea.y + topArea.height + 10,
+      width: width - margin * 2,
+      height: Math.max(118, height - (topArea.y + topArea.height + 10) - footerReserve),
+    };
+  const tiles = loadPlanTopViewTiles(topArea.width, topArea.height, groups, false)
+    .map((tile) => ({
+      ...tile,
+      x: tile.x + topArea.x,
+      y: tile.y + topArea.y,
+    }));
+
+  ctx.save();
+  ctx.fillStyle = "#17282c";
+  ctx.font = "950 15px Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Top-view load layout", topArea.x, 24);
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#607176";
+  ctx.font = "850 11px Arial, sans-serif";
+  ctx.fillText("3D guide shows loading height", modelArea.x + modelArea.width, 24);
+  ctx.restore();
+
+  for (const tile of tiles) {
+    drawLoadPlanTopViewTile(ctx, tile);
+  }
+  drawLoadPlanIsoModel(ctx, plan, modelArea);
+  drawLoadPlanRejected(ctx, plan, tiles, width, height);
+
+  ctx.save();
+  ctx.fillStyle = "#5b6b70";
+  ctx.font = "850 11px Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("Use this as a basic yard guide only. Check the real tray, overhang and tie-downs before loading.", Math.max(16, tiles[0]?.x ?? 20), height - 14);
+  ctx.restore();
+}
+
+function truncateLoadPlanName(value, maxLength) {
+  const text = String(value ?? "").trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}...` : text;
+}
+
+function updateLoadPlanSummary(plan) {
+  if (!loadPlanSummary) return;
+  if (!plan?.placements.length && !plan?.rejected.length) {
+    loadPlanSummary.textContent = "Select spools, then press Make layout.";
+    return;
+  }
+
+  const tray = plan.tray;
+  const fitted = `${plan.placements.length}/${plan.placements.length + plan.rejected.length} fit`;
+  const trayHasLoad = plan.placements.some((placement) => placement.zone === "tray");
+  const rackHasLoad = plan.placements.some((placement) => placement.zone === "rack");
+  const usedParts = [];
+  const unusedParts = [];
+  if (trayHasLoad) usedParts.push(`${formatLength(plan.usedLengthMm)} of ${formatLength(tray.lengthMm)} mm tray`);
+  else unusedParts.push("tray unused");
+  if (plan.rack && rackHasLoad) usedParts.push(`${formatLength(plan.rackUsedLengthMm)} of ${formatLength(plan.rack.lengthMm)} mm roof racks`);
+  else if (plan.rack) unusedParts.push("roof racks unused");
+  const used = plan.placements.length
+    ? `using ${usedParts.join(" and ")}${unusedParts.length ? `; ${unusedParts.join(", ")}` : ""}`
+    : plan.rack ? "no spool fits inside this tray or roof-rack footprint" : "no spool fits inside this tray footprint";
+  const order = plan.placements
+    .map((placement) => {
+      const where = placement.zone === "rack" ? "roof racks" : "tray";
+      const layer = placement.layer ? ` layer ${placement.layer + 1}` : "";
+      const lay = placement.footprint?.label ? ` ${placement.footprint.label}` : "";
+      return `${placement.order}. ${placement.item.name} on ${where}${layer}${lay}${placement.rotation ? ` rotated ${placement.rotation} deg` : ""}`;
+    })
+    .join("  ");
+  const rejected = plan.rejected.length ? ` Not fitting: ${plan.rejected.map((item) => item.name).join(", ")}.` : "";
+  loadPlanSummary.textContent = `${tray.label}: ${fitted}, ${used}. Load order: ${order}.${rejected} Basic yard guide only - check the real tray, overhang and tie-down points before loading.`;
+}
+
+function playTruckLoadAnimation() {
+  const items = selectedLoadPlanItems();
+  if (!items.length) {
+    currentLoadPlan = createTruckLoadPlan([]);
+    renderLoadPlan(currentLoadPlan);
+    if (loadPlanSummary) {
+      loadPlanSummary.textContent = "Tick one or more spools on the left, then press Make layout.";
+    }
+    return;
+  }
+
+  const plan = createTruckLoadPlan(items);
+  currentLoadPlan = plan;
+  if (!plan) {
+    drawLoadPlanEmpty();
+    return;
+  }
+
+  updateLoadPlanSummary(plan);
+  startTruckLoadAnimation(plan);
+}
+
+function startTruckLoadAnimation(plan) {
+  if (!plan) return;
+  if (loadPlanAnimationFrame) {
+    cancelAnimationFrame(loadPlanAnimationFrame);
+    loadPlanAnimationFrame = 0;
+  }
+
+  loadPlanViewMode = "model";
+  setLoadPlanSpin(false);
+  updateLoadPlanViewControls();
+  const startTime = performance.now();
+  const duration = Math.max(900, plan.totalDuration + 360);
+
+  const tick = (now) => {
+    const elapsed = now - startTime;
+    renderLoadPlan(plan, elapsed, true);
+    if (elapsed < duration) {
+      loadPlanAnimationFrame = requestAnimationFrame(tick);
+      return;
+    }
+    loadPlanAnimationFrame = 0;
+    renderLoadPlan(plan, duration, false);
+  };
+
+  loadPlanAnimationFrame = requestAnimationFrame(tick);
+}
+
+function redrawLoadPlanIfOpen() {
+  if (!loadPlanDialog || loadPlanDialog.hidden) return;
+  if (currentLoadPlan) {
+    renderLoadPlan(currentLoadPlan);
+  } else {
+    renderLoadPlanProjectChoices();
+  }
 }
 
 async function startNewDrawing() {
@@ -10005,6 +12280,252 @@ function finishSocketDrag(event) {
   return true;
 }
 
+function beginBoxSelect(event, pointer) {
+  boxSelectDrag = {
+    pointerId: event.pointerId,
+    start: { ...pointer },
+    current: { ...pointer },
+    addMode: event.shiftKey || event.ctrlKey || event.metaKey,
+    moved: false,
+  };
+  state.pointer = pointer;
+  state.hoveredSegment = null;
+  cursorReadout.textContent = "Drag box around pipe runs";
+  try {
+    drawCanvas.setPointerCapture(event.pointerId);
+  } catch {
+    // Pointer capture is a nice-to-have for dragging outside the canvas.
+  }
+  drawIso();
+  event.preventDefault();
+  return true;
+}
+
+function updateBoxSelect(event) {
+  if (!boxSelectDrag) return false;
+
+  const pointer = pointerPosition(event);
+  boxSelectDrag.current = pointer;
+  boxSelectDrag.moved =
+    Math.hypot(pointer.x - boxSelectDrag.start.x, pointer.y - boxSelectDrag.start.y) > 6;
+  state.pointer = pointer;
+
+  const indexes = segmentsInBoxSelect(boxSelectRect(boxSelectDrag));
+  state.hoveredSegment = indexes.length ? indexes[indexes.length - 1] : null;
+  cursorReadout.textContent = indexes.length
+    ? `${indexes.length} run${indexes.length === 1 ? "" : "s"} inside box`
+    : "Drag box around pipe runs";
+  drawIso();
+  event.preventDefault();
+  return true;
+}
+
+function finishBoxSelect(event) {
+  if (!boxSelectDrag) return false;
+
+  const drag = boxSelectDrag;
+  if (event) {
+    drag.current = pointerPosition(event);
+  }
+  const rect = boxSelectRect(drag);
+  const chosen = boxSelectSelectionFromDrag(drag, rect);
+
+  try {
+    drawCanvas.releasePointerCapture(drag.pointerId);
+  } catch {
+    // Ignore browsers that have already released capture.
+  }
+
+  boxSelectDrag = null;
+  setSelectedSegments(chosen);
+  state.selectedFitting = null;
+  state.selectedNote = null;
+  const selectedSegments = segments().filter((segment) => chosen.includes(segment.index));
+  if (selectedSegments.length) {
+    const last = selectedSegments[selectedSegments.length - 1];
+    state.activePoint = last.to;
+    state.selectedPoint = selectedSegments.length === 1 ? last.to : null;
+    showMobilePanel("inspector");
+  } else {
+    state.selectedPoint = null;
+  }
+  state.pointer = null;
+  state.hoveredSegment = null;
+  cursorReadout.textContent = chosen.length
+    ? `${chosen.length} run${chosen.length === 1 ? "" : "s"} selected`
+    : "No runs selected";
+  updateAll({ save: false });
+  event?.preventDefault?.();
+  return true;
+}
+
+function cancelBoxSelect(options = {}) {
+  if (!boxSelectDrag) return;
+  try {
+    drawCanvas.releasePointerCapture(boxSelectDrag.pointerId);
+  } catch {
+    // Ignore browsers that have already released capture.
+  }
+  boxSelectDrag = null;
+  state.pointer = null;
+  state.hoveredSegment = null;
+  if (options.redraw !== false) {
+    drawIso();
+  }
+}
+
+function boxSelectSelectionFromDrag(drag, rect) {
+  const current = selectedSegmentIndexes();
+  const useBox = drag.moved || rect.width > 8 || rect.height > 8;
+  if (useBox) {
+    const boxed = segmentsInBoxSelect(rect);
+    return drag.addMode ? normalizeSelectedSegments([...current, ...boxed], state.edges.length) : boxed;
+  }
+
+  const hit = findNearestSegment(drag.current);
+  if (!hit) return drag.addMode ? current : [];
+  if (!drag.addMode) return [hit.segment.index];
+
+  const selected = new Set(current);
+  if (selected.has(hit.segment.index)) {
+    selected.delete(hit.segment.index);
+  } else {
+    selected.add(hit.segment.index);
+  }
+  return normalizeSelectedSegments([...selected], state.edges.length);
+}
+
+function boxSelectRect(drag) {
+  const left = Math.min(drag.start.x, drag.current.x);
+  const top = Math.min(drag.start.y, drag.current.y);
+  const right = Math.max(drag.start.x, drag.current.x);
+  const bottom = Math.max(drag.start.y, drag.current.y);
+  return {
+    left,
+    top,
+    right,
+    bottom,
+    width: right - left,
+    height: bottom - top,
+  };
+}
+
+function padScreenRect(rect, amount) {
+  return {
+    left: rect.left - amount,
+    top: rect.top - amount,
+    right: rect.right + amount,
+    bottom: rect.bottom + amount,
+    width: rect.width + amount * 2,
+    height: rect.height + amount * 2,
+  };
+}
+
+function segmentsInBoxSelect(rect) {
+  if (!rect) return [];
+  const pickRect = padScreenRect(rect, 6);
+  const projection = getProjection();
+  return segments()
+    .filter((segment) =>
+      screenSegmentIntersectsRect(
+        projectIso(segment.start, projection),
+        projectIso(segment.end, projection),
+        pickRect,
+      ),
+    )
+    .map((segment) => segment.index);
+}
+
+function screenSegmentIntersectsRect(start, end, rect) {
+  const segmentMinX = Math.min(start.x, end.x);
+  const segmentMaxX = Math.max(start.x, end.x);
+  const segmentMinY = Math.min(start.y, end.y);
+  const segmentMaxY = Math.max(start.y, end.y);
+  if (segmentMaxX < rect.left || segmentMinX > rect.right || segmentMaxY < rect.top || segmentMinY > rect.bottom) {
+    return false;
+  }
+
+  if (screenPointInRect(start, rect) || screenPointInRect(end, rect)) return true;
+
+  const topLeft = { x: rect.left, y: rect.top };
+  const topRight = { x: rect.right, y: rect.top };
+  const bottomRight = { x: rect.right, y: rect.bottom };
+  const bottomLeft = { x: rect.left, y: rect.bottom };
+  return (
+    screenSegmentsIntersect(start, end, topLeft, topRight) ||
+    screenSegmentsIntersect(start, end, topRight, bottomRight) ||
+    screenSegmentsIntersect(start, end, bottomRight, bottomLeft) ||
+    screenSegmentsIntersect(start, end, bottomLeft, topLeft)
+  );
+}
+
+function screenPointInRect(point, rect) {
+  return point.x >= rect.left && point.x <= rect.right && point.y >= rect.top && point.y <= rect.bottom;
+}
+
+function screenSegmentsIntersect(firstStart, firstEnd, secondStart, secondEnd) {
+  const o1 = screenOrientation(firstStart, firstEnd, secondStart);
+  const o2 = screenOrientation(firstStart, firstEnd, secondEnd);
+  const o3 = screenOrientation(secondStart, secondEnd, firstStart);
+  const o4 = screenOrientation(secondStart, secondEnd, firstEnd);
+
+  if (o1 !== o2 && o3 !== o4) return true;
+  if (o1 === 0 && screenPointOnSegment(secondStart, firstStart, firstEnd)) return true;
+  if (o2 === 0 && screenPointOnSegment(secondEnd, firstStart, firstEnd)) return true;
+  if (o3 === 0 && screenPointOnSegment(firstStart, secondStart, secondEnd)) return true;
+  if (o4 === 0 && screenPointOnSegment(firstEnd, secondStart, secondEnd)) return true;
+  return false;
+}
+
+function screenOrientation(a, b, c) {
+  const value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
+  if (Math.abs(value) < 0.001) return 0;
+  return value > 0 ? 1 : 2;
+}
+
+function screenPointOnSegment(point, start, end) {
+  return (
+    point.x <= Math.max(start.x, end.x) + 0.001 &&
+    point.x >= Math.min(start.x, end.x) - 0.001 &&
+    point.y <= Math.max(start.y, end.y) + 0.001 &&
+    point.y >= Math.min(start.y, end.y) - 0.001
+  );
+}
+
+function drawBoxSelectOverlay(ctx) {
+  if (!boxSelectDrag) return;
+
+  const rect = boxSelectRect(boxSelectDrag);
+  ctx.save();
+  ctx.fillStyle = "rgba(13, 148, 136, 0.10)";
+  ctx.strokeStyle = "#0f766e";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 6]);
+  ctx.fillRect(rect.left, rect.top, rect.width, rect.height);
+  ctx.strokeRect(rect.left + 0.5, rect.top + 0.5, rect.width, rect.height);
+  ctx.setLineDash([]);
+
+  const count = segmentsInBoxSelect(rect).length;
+  if (count) {
+    const label = `${count} run${count === 1 ? "" : "s"}`;
+    ctx.font = "900 13px Inter, system-ui, sans-serif";
+    const metrics = ctx.measureText(label);
+    const width = metrics.width + 14;
+    const canvasRect = drawCanvas.getBoundingClientRect();
+    const x = clampNumber(rect.left, 8, Math.max(8, canvasRect.width - width - 8));
+    const y = rect.top > 32 ? rect.top - 28 : rect.bottom + 8;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+    ctx.strokeStyle = "rgba(15, 118, 110, 0.35)";
+    ctx.lineWidth = 1;
+    roundRect(ctx, x, y, width, 22, 6);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#0f766e";
+    ctx.fillText(label, x + 7, y + 15);
+  }
+  ctx.restore();
+}
+
 function socketPositionReadout(segment, t) {
   const lengthMm = pointLength(segment.vector);
   const position = normalizeFittingPosition("socket", t);
@@ -10025,6 +12546,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
     event.preventDefault();
     return;
   }
+  if (updateBoxSelect(event)) return;
   if (updateNoteDrag(event)) return;
   if (updateSocketDrag(event)) return;
   if (updateTouchContextPress(event)) {
@@ -10052,6 +12574,10 @@ drawCanvas.addEventListener("pointermove", (event) => {
       ? `Point ${pointHit.index + 1} / tee start`
       : state.activeTool === "note"
       ? "Click to place note"
+      : state.activeTool === "boxSelect" && hit
+      ? `Box select / run ${hit.segment.index + 1}`
+      : state.activeTool === "boxSelect"
+      ? "Box select"
       : state.activeTool === "tee" && hit
       ? `Tee on run ${hit.segment.index + 1}`
       : hit
@@ -10063,7 +12589,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
 });
 
 drawCanvas.addEventListener("pointerleave", () => {
-  if (noteDrag || socketDrag || pendingDraw) return;
+  if (noteDrag || socketDrag || pendingDraw || boxSelectDrag) return;
   cancelTouchContextPress();
   state.pointer = null;
   state.previewCandidate = null;
@@ -10079,6 +12605,10 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   trackTouchPointer(event);
   if (pinchGesture) {
     event.preventDefault();
+    return;
+  }
+  if (state.activeTool === "boxSelect") {
+    beginBoxSelect(event, pointer);
     return;
   }
   const touchPressBlocksDraw = startTouchContextPress(event, pointer);
@@ -10162,6 +12692,10 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
 drawCanvas.addEventListener("pointerup", (event) => {
   if (finishPinchGestureForPointer(event)) return;
+  if (finishBoxSelect(event)) {
+    releaseTrackedTouchPointer(event);
+    return;
+  }
   if (finishTouchContextPress(event)) {
     releaseTrackedTouchPointer(event);
     return;
@@ -10181,6 +12715,7 @@ drawCanvas.addEventListener("pointercancel", (event) => {
   releaseTrackedTouchPointer(event);
   cancelTouchContextPress();
   cancelPendingDraw();
+  cancelBoxSelect();
   if (pinchGesture && !pinchGesture.ids.every((id) => activeTouchPointers.has(id))) {
     pinchGesture = null;
   }
@@ -10240,7 +12775,8 @@ pipeSpecSelect.addEventListener("change", () => {
   state.pipeSpec = normalizePipeSpec(pipeSpecSelect.value);
   if (state.previewMode === "black" || state.previewMode === "stainless") {
     state.previewMode = "carbon";
-    previewModeSelect.value = "carbon";
+    if (previewModeSelect) previewModeSelect.value = "carbon";
+    if (previewModePanelSelect) previewModePanelSelect.value = "carbon";
   }
   updateAll();
 });
@@ -10283,8 +12819,10 @@ flangeModeSelect.addEventListener("change", () => {
   persistState();
 });
 
-previewModeSelect.addEventListener("change", () => {
-  state.previewMode = normalizePreviewMode(previewModeSelect.value);
+previewModeSelect?.addEventListener("change", () => setPreviewMode(previewModeSelect.value));
+previewModePanelSelect?.addEventListener("change", () => setPreviewMode(previewModePanelSelect.value));
+previewLabelToggle?.addEventListener("change", () => {
+  state.show3dLabels = previewLabelToggle.checked;
   update3dPreview();
   renderFallbackPreview();
   persistState();
@@ -10337,6 +12875,10 @@ document.addEventListener("keydown", (event) => {
   } else if ((event.key === "Delete" || event.key === "Backspace") && !isEditingField(event.target)) {
     deleteSelection();
   } else if (event.key === "Escape") {
+    if (loadPlanDialog && !loadPlanDialog.hidden) {
+      closeLoadPlanDialog();
+      return;
+    }
     if (newDrawingDialog && !newDrawingDialog.hidden) {
       closeNewDrawingDialog("cancel");
       return;
@@ -10367,6 +12909,7 @@ document.addEventListener("pointerdown", (event) => {
 
 window.addEventListener("resize", () => {
   closeDrawingContextMenu();
+  redrawLoadPlanIfOpen();
   if (!isTabletLayout()) {
     showMobilePanel("drawing");
   }
@@ -10377,6 +12920,7 @@ const resizeObserver = new ResizeObserver(() => {
   drawIso();
   renderFallbackPreview();
   resizeThree();
+  redrawLoadPlanIfOpen();
 });
 
 resizeObserver.observe(drawCanvas.parentElement);
@@ -10386,6 +12930,7 @@ setupCollapsibleControls();
 setupInspectorTabs();
 setupMobilePanels();
 setupProjectDialog();
+setupLoadPlanner();
 registerServiceWorker();
 populatePipeSizeOptions();
 updateControls();

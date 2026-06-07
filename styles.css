@@ -385,6 +385,9 @@ button svg path {
 .preview-panel {
   grid-area: preview;
   border-right: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
 }
 
 .panel-bar {
@@ -396,6 +399,26 @@ button svg path {
   padding: 0 14px;
   border-bottom: 1px solid var(--line);
   background: #f3faf7;
+}
+
+.preview-panel .panel-bar {
+  height: auto;
+  min-height: 64px;
+  align-items: flex-start;
+  padding: 10px 14px;
+}
+
+.preview-panel .bar-title {
+  flex: 0 0 auto;
+  padding-top: 3px;
+}
+
+.preview-panel .bar-actions {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: center;
+  justify-content: flex-end;
+  row-gap: 6px;
 }
 
 .bar-title {
@@ -528,6 +551,11 @@ button svg path {
   overflow: hidden;
 }
 
+.preview-panel .preview-stage {
+  height: auto;
+  min-height: 0;
+}
+
 .canvas-frame {
   background:
     linear-gradient(rgba(255, 255, 255, 0.54), rgba(255, 255, 255, 0.54)),
@@ -608,6 +636,56 @@ button svg path {
 .preview-nav button:hover {
   background: var(--teal);
   color: #fff;
+}
+
+.preview-panel-mode {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 3px 3px 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #edf7f4;
+  color: var(--teal-strong);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.preview-panel-mode select {
+  min-height: 30px;
+  max-width: 160px;
+  border: 1px solid rgba(8, 125, 115, 0.2);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.preview-label-toggle {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #edf7f4;
+  color: var(--teal-strong);
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.preview-label-toggle input {
+  width: 15px;
+  height: 15px;
+}
+
+.preview-label-toggle:has(input:not(:checked)) {
+  background: var(--button);
+  color: var(--muted);
 }
 
 .preview-stage[data-nav-mode="orbit"],
@@ -1486,6 +1564,277 @@ button svg path {
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
+.load-plan-card {
+  width: min(1040px, 100%);
+  max-height: min(86vh, 760px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+.load-plan-card .project-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.load-plan-tray-field {
+  min-width: 180px;
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.load-plan-tray-field select {
+  min-height: 38px;
+  border: 1px solid var(--button-border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.load-plan-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(230px, 0.82fr) minmax(0, 1.55fr);
+  gap: 12px;
+}
+
+.load-plan-picker {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.load-plan-bulk-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.load-plan-bulk-actions button {
+  min-height: 34px;
+  flex: 1 1 96px;
+  padding: 0 10px;
+  border: 1px solid var(--button-border);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+  box-shadow: var(--button-shadow);
+}
+
+.load-plan-bulk-actions button:hover {
+  border-color: var(--teal);
+  background: var(--button-hover);
+  color: var(--teal-strong);
+}
+
+.load-plan-bulk-actions button:disabled {
+  cursor: default;
+  opacity: 0.5;
+  transform: none;
+}
+
+.load-plan-project-list {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+.load-plan-choice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+  box-shadow: 0 1px 4px rgba(31, 49, 52, 0.06);
+}
+
+.load-plan-choice input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--teal);
+}
+
+.load-plan-choice strong,
+.load-plan-choice span,
+.load-plan-choice small {
+  min-width: 0;
+}
+
+.load-plan-choice strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 950;
+  overflow-wrap: anywhere;
+}
+
+.load-plan-choice span,
+.load-plan-choice small,
+.load-plan-summary {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.load-plan-fit-status {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 5px;
+  padding: 3px 7px;
+  border: 1px solid rgba(8, 125, 115, 0.18);
+  border-radius: 999px;
+  background: #edf7f4;
+  color: var(--teal-strong);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.load-plan-fit-status.fit-rack {
+  border-color: rgba(180, 87, 28, 0.28);
+  background: #fff4e8;
+  color: #9a4b18;
+}
+
+.load-plan-fit-status.fit-none {
+  border-color: rgba(180, 35, 24, 0.3);
+  background: #fff1ee;
+  color: #9f2d20;
+}
+
+.load-plan-view {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(260px, 1fr) auto;
+  gap: 10px;
+}
+
+.load-plan-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.load-plan-view-tabs,
+.load-plan-model-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.load-plan-view-tabs button,
+.load-plan-model-tools button {
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--button-border);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+  box-shadow: var(--button-shadow);
+}
+
+.load-plan-view-tabs button:hover,
+.load-plan-model-tools button:hover {
+  border-color: var(--teal);
+  background: var(--button-hover);
+  color: var(--teal-strong);
+}
+
+.load-plan-view-tabs button.active,
+.load-plan-model-tools button.active {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: #fff;
+}
+
+.load-plan-model-tools button:disabled {
+  cursor: default;
+  opacity: 0.45;
+  transform: none;
+}
+
+.load-plan-layer-hint {
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.load-plan-stage {
+  position: relative;
+  min-height: 300px;
+  overflow: hidden;
+  border: 1px solid rgba(31, 42, 47, 0.14);
+  border-radius: 8px;
+  background: #f7fbfa;
+}
+
+#loadPlanCanvas,
+#loadPlanThreeCanvas {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  display: block;
+}
+
+#loadPlanThreeCanvas {
+  touch-action: none;
+}
+
+#loadPlanCanvas[hidden],
+#loadPlanThreeCanvas[hidden] {
+  display: none;
+}
+
+.load-plan-summary {
+  padding: 10px 12px;
+  border: 1px solid rgba(8, 125, 115, 0.18);
+  border-radius: 8px;
+  background: #edf7f4;
+}
+
+@media (max-width: 760px) {
+  .load-plan-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .load-plan-view-tabs,
+  .load-plan-model-tools {
+    flex: 1 1 auto;
+    overflow-x: auto;
+  }
+
+  .load-plan-layer-hint {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
 .project-library-list {
   display: grid;
   gap: 10px;
@@ -1708,6 +2057,11 @@ button svg path {
     height: 520px;
     min-height: 420px;
   }
+
+  .preview-panel .preview-stage {
+    height: 520px;
+    min-height: 420px;
+  }
 }
 
 @media (max-width: 760px) {
@@ -1904,6 +2258,26 @@ button svg path {
     flex-wrap: nowrap;
   }
 
+  .preview-panel .bar-actions {
+    min-width: 0;
+    flex: 1 1 auto;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .preview-panel-mode,
+  .preview-label-toggle,
+  .preview-nav,
+  .preview-panel .pill {
+    flex: 0 0 auto;
+  }
+
+  .preview-panel-mode select {
+    max-width: 148px;
+  }
+
   .icon-button.compact.labeled {
     min-width: 70px;
     height: 40px;
@@ -2066,9 +2440,32 @@ button svg path {
     grid-template-rows: auto minmax(0, 1fr);
   }
 
-  .preview-stage {
+  .preview-stage,
+  .preview-panel .preview-stage {
     height: auto;
     min-height: 0;
+  }
+
+  .load-plan-card {
+    width: min(100%, 920px);
+    max-height: calc(100dvh - 36px);
+  }
+
+  .load-plan-card .project-dialog-header {
+    display: grid;
+  }
+
+  .load-plan-tray-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .load-plan-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .load-plan-project-list {
+    max-height: 190px;
   }
 
   .drawing-context-menu {
