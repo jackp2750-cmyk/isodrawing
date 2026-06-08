@@ -222,6 +222,35 @@ button svg path {
   white-space: nowrap;
 }
 
+.cloud-status-pill {
+  min-height: 32px;
+  max-width: 170px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border: 1px solid rgba(31, 42, 47, 0.16);
+  border-radius: 999px;
+  background: #fffdf8;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cloud-status-pill.signed-in {
+  border-color: rgba(8, 125, 115, 0.28);
+  background: #d4f0ea;
+  color: var(--teal-strong);
+}
+
+.cloud-status-pill.warning {
+  border-color: rgba(185, 84, 54, 0.32);
+  background: #fff1e8;
+  color: #8a3a25;
+}
+
 .top-field {
   min-height: 32px;
   display: inline-flex;
@@ -1429,6 +1458,39 @@ button svg path {
   border-radius: 10px;
   background: var(--panel);
   box-shadow: var(--shadow);
+}
+
+.auth-card {
+  width: min(460px, 100%);
+}
+
+.auth-remember {
+  justify-content: flex-start;
+  min-height: 36px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+}
+
+.auth-remember span {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.auth-remember input {
+  width: 17px;
+  height: 17px;
+}
+
+.auth-actions {
+  flex-wrap: wrap;
+}
+
+.auth-actions .primary-button {
+  margin-left: auto;
 }
 
 .project-dialog-header strong {

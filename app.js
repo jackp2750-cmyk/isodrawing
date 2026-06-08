@@ -55,6 +55,19 @@ const projectReadout = document.querySelector("#projectReadout");
 const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
 const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
+const accountButton = document.querySelector("#accountButton");
+const accountButtonLabel = document.querySelector("#accountButtonLabel");
+const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
+const authDialog = document.querySelector("#authDialog");
+const authDialogForm = document.querySelector("#authDialogForm");
+const authDialogStatus = document.querySelector("#authDialogStatus");
+const authEmailInput = document.querySelector("#authEmailInput");
+const authPasswordInput = document.querySelector("#authPasswordInput");
+const authRememberDeviceInput = document.querySelector("#authRememberDeviceInput");
+const authCloseButton = document.querySelector("#authCloseButton");
+const authSignInButton = document.querySelector("#authSignInButton");
+const authSignUpButton = document.querySelector("#authSignUpButton");
+const authSignOutButton = document.querySelector("#authSignOutButton");
 const projectDialog = document.querySelector("#projectDialog");
 const projectDialogForm = document.querySelector("#projectDialogForm");
 const projectDialogTitle = document.querySelector("#projectDialogTitle");
@@ -69,6 +82,7 @@ const newDrawingSaveButton = document.querySelector("#newDrawingSaveButton");
 const projectLibraryDialog = document.querySelector("#projectLibraryDialog");
 const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
+const projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
 const projectDialogInputs = {
   jobNumber: document.querySelector("#projectDialogJobNumber"),
   spoolNumber: document.querySelector("#projectDialogSpoolNumber"),
@@ -85,8 +99,16 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.21";
+const APP_VERSION = "v1.26";
 const APP_BUILD_DATE = "2026-06-08";
+const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
+const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const CLOUD_PROJECTS_TABLE = "spool_projects";
+const CLOUD_PROFILES_TABLE = "profiles";
+const CLOUD_AUTOSAVE_DELAY_MS = 1600;
+const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
+const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
 const PROJECT_FILE_VERSION = 1;
 const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 50;
@@ -99,7 +121,7 @@ const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer
 const FLANGE_MODES = new Set(["single", "double"]);
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const PREVIEW_MODES = new Set(["carbon", "black", "stainless", "red", "ghost", "outline"]);
-const DIMENSION_STYLES = new Set(["labels", "redline", "numbered"]);
+const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
 const LOAD_PLAN_TRAYS = {
@@ -287,6 +309,8 @@ let nextNoteId = 1;
 let state = loadState() ?? blankState();
 let noteDrag = null;
 let socketDrag = null;
+let dimensionDrag = null;
+let dimensionHitTargets = [];
 let boxSelectDrag = null;
 let touchContextPress = null;
 let pendingDraw = null;
@@ -296,6 +320,16 @@ let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
+let startupProjectPromptPending = false;
+let supabaseClient = null;
+let cloudUser = null;
+let cloudProfile = null;
+let cloudInitStarted = false;
+let cloudInitPromise = null;
+let cloudProjectCache = null;
+let cloudAutosaveTimer = null;
+let cloudAutosaveBusy = false;
+let projectLibrarySource = "browser";
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
 let currentLoadPlan = null;
@@ -367,6 +401,7 @@ function sampleState() {
     ],
     nodeTypes: {},
     reducerSideOverrides: {},
+    dimensionOffsets: {},
     hoveredSegment: null,
     pointer: null,
     previewCandidate: null,
@@ -411,6 +446,7 @@ function blankState() {
     notes: [],
     nodeTypes: {},
     reducerSideOverrides: {},
+    dimensionOffsets: {},
     hoveredSegment: null,
     pointer: null,
     previewCandidate: null,
@@ -462,6 +498,7 @@ function statePayload() {
     notes: state.notes,
     nodeTypes: normalizeNodeTypes(state.nodeTypes, state.points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length),
+    dimensionOffsets: normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length),
     activePoint: state.activePoint,
     selectedPoint: state.selectedPoint,
     selectedSegments: selectedSegmentIndexes(),
@@ -491,6 +528,7 @@ function persistState() {
   } catch (error) {
     console.warn("Could not save spool state in this browser.", error);
   }
+  queueCloudAutosave();
 }
 
 function stateFromPayload(payload, options = {}) {
@@ -520,6 +558,7 @@ function stateFromPayload(payload, options = {}) {
     notes: normalizeNotes(saved.notes),
     nodeTypes: normalizeNodeTypes(saved.nodeTypes, points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(saved.reducerSideOverrides, points.length),
+    dimensionOffsets: normalizeDimensionOffsets(saved.dimensionOffsets, edges.length),
     pipeSizeNb: defaultPipeSizeFromSaved(saved, edges, selectedSegments),
     pipeSpec: normalizePipeSpec(saved.pipeSpec),
     stepLength: normalizeLength(legacyUnits ? Number(saved.stepLength) * MM_PER_GRID : saved.stepLength),
@@ -600,6 +639,25 @@ function normalizeReducerSideOverrides(overrides, pointCount) {
   return normalized;
 }
 
+function normalizeDimensionOffsets(offsets, edgeCount) {
+  if (!offsets || typeof offsets !== "object") return {};
+
+  const normalized = {};
+  for (const [key, value] of Object.entries(offsets)) {
+    const index = Number(key);
+    if (!Number.isInteger(index) || index < 0 || index >= edgeCount) continue;
+
+    const raw = typeof value === "object" && value !== null
+      ? value
+      : { offset: Number(value), side: 1 };
+    const side = Number(raw.side) < 0 ? -1 : 1;
+    const offset = clampNumber(Number(raw.offset) || 0, 0, 520);
+    if (offset <= 0.5) continue;
+    normalized[index] = { side, offset: Math.round(offset) };
+  }
+  return normalized;
+}
+
 function nodeConnectionType(nodeIndex) {
   return state.nodeTypes?.[nodeIndex] === "branch" ? "branch" : "tee";
 }
@@ -639,6 +697,36 @@ function reindexReducerSideOverridesAfterPointRemoval(removedIndex) {
     next[index > removedIndex ? index - 1 : index] = value;
   }
   state.reducerSideOverrides = next;
+}
+
+function reindexDimensionOffsetsAfterSegmentSplit(splitIndex) {
+  state.dimensionOffsets = normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length);
+  const next = {};
+  for (const [key, value] of Object.entries(state.dimensionOffsets)) {
+    const index = Number(key);
+    if (!Number.isInteger(index)) continue;
+    if (index < splitIndex) {
+      next[index] = value;
+    } else if (index === splitIndex) {
+      next[index] = value;
+      next[index + 1] = { ...value };
+    } else {
+      next[index + 1] = value;
+    }
+  }
+  state.dimensionOffsets = normalizeDimensionOffsets(next, state.edges.length);
+}
+
+function reindexDimensionOffsetsAfterSegmentRemoval(removedIndex) {
+  if (!state.dimensionOffsets || typeof state.dimensionOffsets !== "object") return;
+
+  const next = {};
+  for (const [key, value] of Object.entries(state.dimensionOffsets)) {
+    const index = Number(key);
+    if (!Number.isInteger(index) || index === removedIndex) continue;
+    next[index > removedIndex ? index - 1 : index] = value;
+  }
+  state.dimensionOffsets = normalizeDimensionOffsets(next, state.edges.length);
 }
 
 function normalizeEdges(edges, pointCount) {
@@ -800,6 +888,32 @@ function normalizeDimensionStyle(value) {
   return DIMENSION_STYLES.has(value) ? value : "labels";
 }
 
+function isLineDimensionStyle(value = state.dimensionStyle) {
+  const style = normalizeDimensionStyle(value);
+  return style === "redline" || style === "numbered" || style === "chain";
+}
+
+function dimensionLinePalette() {
+  const chain = normalizeDimensionStyle(state.dimensionStyle) === "chain";
+  return chain
+    ? {
+        line: "#1f2a2f",
+        halo: "rgba(255, 253, 248, 0.94)",
+        text: "#1f2a2f",
+        fill: "rgba(255, 253, 248, 0.96)",
+        border: "rgba(31, 42, 47, 0.28)",
+        shadow: "rgba(31, 42, 47, 0.08)",
+      }
+    : {
+        line: "#c1121f",
+        halo: "rgba(255, 253, 248, 0.9)",
+        text: "#c1121f",
+        fill: "rgba(255, 253, 248, 0.96)",
+        border: "rgba(193, 18, 31, 0.28)",
+        shadow: "rgba(31, 42, 47, 0.12)",
+      };
+}
+
 function normalizeLiftingSlingAngle(value) {
   const numeric = Math.round(Number(value));
   return LIFTING_SLING_ANGLES.has(numeric) ? numeric : 60;
@@ -860,6 +974,36 @@ function toggleSelectedSegment(index) {
 
 function isSegmentSelected(index) {
   return selectedSegmentIndexes().includes(index);
+}
+
+function dimensionOffsetForSegment(segmentIndex) {
+  const normalized = normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length);
+  const value = normalized[segmentIndex];
+  return value ?? { side: 1, offset: 0 };
+}
+
+function setDimensionOffsetForSegment(segmentIndex, value) {
+  if (!Number.isInteger(segmentIndex) || segmentIndex < 0 || segmentIndex >= state.edges.length) return;
+  const next = normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length);
+  const offset = clampNumber(Number(value?.offset) || 0, 0, 520);
+  if (offset <= 0.5) {
+    delete next[segmentIndex];
+  } else {
+    next[segmentIndex] = {
+      side: Number(value?.side) < 0 ? -1 : 1,
+      offset: Math.round(offset),
+    };
+  }
+  state.dimensionOffsets = next;
+}
+
+function resetDimensionHitTargets() {
+  dimensionHitTargets = [];
+}
+
+function addDimensionHitTarget(target) {
+  if (!target || !Number.isInteger(target.segmentIndex)) return;
+  dimensionHitTargets.push(target);
 }
 
 function chooseSegmentFromPointer(event, index) {
@@ -1135,6 +1279,7 @@ function drawIso() {
   ctx.clearRect(0, 0, width, height);
   drawGrid(ctx, width, height, projection);
   drawEndpointGuides(ctx, projection);
+  resetDimensionHitTargets();
   drawSpool2d(ctx, projection);
   drawNotes2d(ctx, projection);
   if (state.showLiftingPoints) {
@@ -1327,7 +1472,7 @@ function drawSpool2d(ctx, projection) {
     for (const item of dimensionSegments) {
       drawDimension(ctx, item.segment, item.start, item.end, dimensionLayout);
     }
-    if (normalizeDimensionStyle(state.dimensionStyle) === "redline" || normalizeDimensionStyle(state.dimensionStyle) === "numbered") {
+    if (isLineDimensionStyle()) {
       drawSocketPositionDimensions(ctx, projection, segmentListForDraw, dimensionLayout);
     }
   }
@@ -1685,7 +1830,7 @@ function roundRect(ctx, x, y, width, height, radius) {
 
 function drawDimension(ctx, segment, start, end, dimensionLayout = []) {
   const dimensionStyle = normalizeDimensionStyle(state.dimensionStyle);
-  if (dimensionStyle === "redline" || dimensionStyle === "numbered") {
+  if (isLineDimensionStyle(dimensionStyle)) {
     drawRedCentreDimension(ctx, segment, start, end, dimensionLayout);
     return;
   }
@@ -1728,6 +1873,7 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   const fullText = `${formatLength(pointLength(segment.vector))} mm`;
   const text = dimensionLabelText(layoutState, fullText, `Run ${segment.index + 1}: C/C ${fullText}`, "D");
   const baseOffset = Math.min(64, Math.max(42, screenLength * 0.065));
+  const manualOffset = dimensionOffsetForSegment(segment.index);
   let labelAngle = Math.atan2(along.y, along.x);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
     labelAngle += Math.PI;
@@ -1738,18 +1884,21 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   const metrics = ctx.measureText(text);
   const labelWidth = metrics.width + 20;
   const labelHeight = 23;
-  const layout = redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, layoutState, segment.index);
+  const layout = redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, layoutState, segment.index, {
+    manual: manualOffset.offset > 0.5 ? manualOffset : null,
+  });
   const { lineStart, lineEnd, midpoint, normal } = layout;
   const { extensionStart, extensionEnd } = layout;
+  const palette = dimensionLinePalette();
 
-  ctx.shadowColor = "rgba(31, 42, 47, 0.12)";
+  ctx.shadowColor = palette.shadow;
   ctx.shadowBlur = 2;
   ctx.lineCap = "butt";
   ctx.lineJoin = "miter";
 
   for (const stroke of [
-    { color: "rgba(255, 253, 248, 0.9)", width: 5 },
-    { color: "#c1121f", width: 2 },
+    { color: palette.halo, width: 5 },
+    { color: palette.line, width: 2 },
   ]) {
     ctx.strokeStyle = stroke.color;
     ctx.lineWidth = stroke.width;
@@ -1771,15 +1920,25 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   ctx.translate(midpoint.x, midpoint.y);
   ctx.rotate(labelAngle);
   roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
-  ctx.fillStyle = "rgba(255, 253, 248, 0.96)";
+  ctx.fillStyle = palette.fill;
   ctx.fill();
-  ctx.strokeStyle = "rgba(193, 18, 31, 0.28)";
+  ctx.strokeStyle = palette.border;
   ctx.lineWidth = 1;
   ctx.stroke();
-  ctx.fillStyle = "#c1121f";
+  ctx.fillStyle = palette.text;
   ctx.fillText(text, 0, 0.5);
   layoutState.labels.push(layout.bounds);
   layoutState.lines.push(...layout.lines);
+  addDimensionHitTarget({
+    type: "segment",
+    segmentIndex: segment.index,
+    bounds: layout.bounds,
+    lines: layout.lines,
+    normal,
+    side: layout.side,
+    offset: layout.offset,
+    baseOffset,
+  });
   ctx.restore();
 }
 
@@ -1910,15 +2069,16 @@ function drawRedSocketPositionDimension(ctx, start, socketPoint, segmentIndex, d
   const layout = redDimensionLayout(start, socketPoint, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, layoutState, segmentIndex);
   const { lineStart, lineEnd, midpoint, normal } = layout;
   const { extensionStart, extensionEnd } = layout;
+  const palette = dimensionLinePalette();
 
-  ctx.shadowColor = "rgba(31, 42, 47, 0.1)";
+  ctx.shadowColor = palette.shadow;
   ctx.shadowBlur = 2;
   ctx.lineCap = "butt";
   ctx.lineJoin = "miter";
 
   for (const stroke of [
-    { color: "rgba(255, 253, 248, 0.92)", width: 5 },
-    { color: "#c1121f", width: 2 },
+    { color: palette.halo, width: 5 },
+    { color: palette.line, width: 2 },
   ]) {
     ctx.strokeStyle = stroke.color;
     ctx.lineWidth = stroke.width;
@@ -1938,12 +2098,12 @@ function drawRedSocketPositionDimension(ctx, start, socketPoint, segmentIndex, d
   ctx.translate(midpoint.x, midpoint.y);
   ctx.rotate(labelAngle);
   roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
-  ctx.fillStyle = "rgba(255, 253, 248, 0.97)";
+  ctx.fillStyle = palette.fill;
   ctx.fill();
-  ctx.strokeStyle = "rgba(193, 18, 31, 0.25)";
+  ctx.strokeStyle = palette.border;
   ctx.lineWidth = 1;
   ctx.stroke();
-  ctx.fillStyle = "#c1121f";
+  ctx.fillStyle = palette.text;
   ctx.fillText(text, 0, 0.5);
   layoutState.labels.push(layout.bounds);
   layoutState.lines.push(...layout.lines);
@@ -2156,7 +2316,7 @@ function drawArrowHead(ctx, point, angle, strokeWidth = 2) {
   ctx.stroke();
 }
 
-function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, dimensionLayout, segmentIndex) {
+function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, dimensionLayout, segmentIndex, options = {}) {
   const midpointBase = {
     x: (start.x + end.x) * 0.5,
     y: (start.y + end.y) * 0.5,
@@ -2165,11 +2325,19 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
   const existingLines = Array.isArray(dimensionLayout) ? [] : dimensionLayout.lines ?? [];
   const pipes = Array.isArray(dimensionLayout) ? [] : dimensionLayout.pipes ?? [];
   const viewport = Array.isArray(dimensionLayout) ? null : dimensionLayout.viewport ?? null;
+  const manual = options.manual && Number(options.manual.offset) > 0.5
+    ? {
+        side: Number(options.manual.side) < 0 ? -1 : 1,
+        offset: clampNumber(Number(options.manual.offset) || 0, 0, 520),
+      }
+    : null;
+  const sideOptions = manual ? [manual.side] : [1, -1];
+  const maxLevels = manual ? 3 : 12;
   let best = null;
 
-  for (let level = 0; level < 12; level += 1) {
-    const offset = baseOffset + level * 38;
-    for (const [sideIndex, side] of [1, -1].entries()) {
+  for (let level = 0; level < maxLevels; level += 1) {
+    const offset = baseOffset + (manual?.offset ?? 0) + level * 38;
+    for (const [sideIndex, side] of sideOptions.entries()) {
       const normal = { x: baseNormal.x * side, y: baseNormal.y * side };
       const lineStart = { x: start.x + normal.x * offset, y: start.y + normal.y * offset };
       const lineEnd = { x: end.x + normal.x * offset, y: end.y + normal.y * offset };
@@ -2223,6 +2391,8 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
         normal,
         bounds,
         lines: candidateLines,
+        side,
+        offset,
         score,
       };
 
@@ -2319,6 +2489,15 @@ function segmentIntersectsBounds(start, end, bounds) {
 
 function pointInBounds(point, bounds) {
   return point.x >= bounds.left && point.x <= bounds.right && point.y >= bounds.top && point.y <= bounds.bottom;
+}
+
+function inflateBounds(bounds, amount) {
+  return {
+    left: bounds.left - amount,
+    right: bounds.right + amount,
+    top: bounds.top - amount,
+    bottom: bounds.bottom + amount,
+  };
 }
 
 function segmentsIntersect(a, b, c, d) {
@@ -2850,6 +3029,26 @@ function findNearestFitting(pointer) {
   return nearest && nearest.distance <= hitLimit(26, 40) ? nearest : null;
 }
 
+function findNearestDimensionTarget(pointer) {
+  if (!state.showDimensions || !isLineDimensionStyle()) return null;
+  let nearest = null;
+
+  for (const target of dimensionHitTargets) {
+    const labelBounds = inflateBounds(target.bounds, hitLimit(10, 16));
+    const labelHit = pointInBounds(pointer, labelBounds);
+    const lineDistance = (target.lines ?? []).reduce((best, line) => {
+      const hit = distanceToSegment(pointer, line.start, line.end);
+      return Math.min(best, hit.distance);
+    }, Infinity);
+    const distance = labelHit ? 0 : lineDistance;
+    if (distance <= hitLimit(12, 22) && (!nearest || distance < nearest.distance)) {
+      nearest = { ...target, distance };
+    }
+  }
+
+  return nearest;
+}
+
 function findNearestAutoReducer(pointer) {
   const projection = getProjection();
   let nearest = null;
@@ -3343,18 +3542,40 @@ function autoReducersForTeeNode(nodeIndex, connected, segmentData = segments()) 
   const mainPair = mostOppositeEntryPair(entries);
   if (!mainPair) return [];
 
-  const [first, second] = mainPair;
-  const reducer = autoReducerForConnection(nodeIndex, first, second, first.segment, second.segment, { bend: 0 });
-  if (!reducer) return [];
+  const reducers = [];
+  const addTeeReducer = (first, second) => {
+    const reducer = teeReducerFromEntries(nodeIndex, first, second);
+    if (!reducer) return;
+    const duplicate = reducers.some((item) => item.smallSegment.index === reducer.smallSegment.index);
+    if (!duplicate) reducers.push(reducer);
+  };
 
-  return [{
+  const [first, second] = mainPair;
+  addTeeReducer(first, second);
+
+  const mainSegments = new Set(mainPair.map((entry) => entry.segment.index));
+  const largestMainEntry = [...mainPair].sort((a, b) => b.size.od - a.size.od)[0];
+  for (const entry of entries) {
+    if (mainSegments.has(entry.segment.index)) continue;
+    if (entry.size.od >= largestMainEntry.size.od || entry.size.nb === largestMainEntry.size.nb) continue;
+    addTeeReducer(largestMainEntry, entry);
+  }
+
+  return reducers;
+}
+
+function teeReducerFromEntries(nodeIndex, first, second) {
+  const reducer = autoReducerForConnection(nodeIndex, first, second, first.segment, second.segment, { bend: 0 });
+  if (!reducer) return null;
+
+  const takeoffMm = Math.min(reducer.lengthMm, pointLength(reducer.smallSegment.vector) * 0.45);
+  return {
     ...reducer,
     kind: "tee",
-    firstTakeoffMm: 0,
-    secondTakeoffMm: 0,
-    weightKg: 0,
-    source: "visual reducing tee",
-  }];
+    firstTakeoffMm: reducer.firstSegmentIndex === reducer.smallSegment.index ? takeoffMm : 0,
+    secondTakeoffMm: reducer.secondSegmentIndex === reducer.smallSegment.index ? takeoffMm : 0,
+    source: reducer.source === "Atlas table" ? "Atlas table tee reducer" : "estimated tee reducer",
+  };
 }
 
 function applyReducerTakeoff(segmentTakeoffs, reducer) {
@@ -4320,6 +4541,7 @@ function splitSegmentAt(segmentIndex, t) {
     { from: edge.from, to: splitIndex, pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? state.pipeSizeNb) },
     { from: splitIndex, to: edge.to, pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? state.pipeSizeNb) },
   );
+  reindexDimensionOffsetsAfterSegmentSplit(segmentIndex);
 
   state.fittings = state.fittings.map((fitting) => {
     if (fitting.segmentIndex < segmentIndex) return fitting;
@@ -4433,6 +4655,7 @@ function undo() {
     state.points.splice(last.pointIndex, 1);
     reindexNodeTypesAfterPointRemoval(last.pointIndex);
     reindexReducerSideOverridesAfterPointRemoval(last.pointIndex);
+    reindexDimensionOffsetsAfterSegmentRemoval(last.edgeIndex);
     state.edges = state.edges.map((edge) => ({
       ...edge,
       from: edge.from > last.pointIndex ? edge.from - 1 : edge.from,
@@ -4488,6 +4711,7 @@ function deleteSegmentsByIndex(indexes) {
 
   for (const removedEdgeIndex of selectedSegments) {
     state.edges.splice(removedEdgeIndex, 1);
+    reindexDimensionOffsetsAfterSegmentRemoval(removedEdgeIndex);
     state.fittings = state.fittings.filter((fitting) => fitting.segmentIndex !== removedEdgeIndex);
     state.fittings = state.fittings.map((fitting) => ({
       ...fitting,
@@ -4504,6 +4728,7 @@ function setTool(tool) {
   if (tool !== "boxSelect") {
     cancelBoxSelect({ redraw: false });
   }
+  cancelDimensionDrag({ redraw: false });
   state.activeTool = tool;
   state.previewCandidate = null;
   document.querySelectorAll("[data-tool]").forEach((button) => {
@@ -5154,6 +5379,209 @@ function showMobilePanel(panel = "drawing") {
   }
 }
 
+function setupAuthDialog() {
+  loadAuthRememberPreference();
+  updateCloudStatus();
+
+  accountButton?.addEventListener("click", () => {
+    openAuthDialog();
+  });
+
+  authRememberDeviceInput?.addEventListener("change", saveAuthRememberPreference);
+
+  authCloseButton?.addEventListener("click", closeAuthDialog);
+  authDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === authDialog) {
+      closeAuthDialog();
+    }
+  });
+
+  authDialogForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    signInWithSupabase();
+  });
+
+  authSignUpButton?.addEventListener("click", () => {
+    signUpWithSupabase();
+  });
+
+  authSignOutButton?.addEventListener("click", () => {
+    signOutFromSupabase();
+  });
+}
+
+function openAuthDialog(options = {}) {
+  if (!authDialog) return;
+  loadAuthRememberPreference();
+  updateCloudStatus();
+  if (options.startup) {
+    startupProjectPromptPending = true;
+    if (authDialogStatus) {
+      authDialogStatus.textContent = "Sign in or create an account to save your spool projects to the cloud. You can close this and keep working locally.";
+    }
+  }
+  authDialog.hidden = false;
+  if (cloudUser) {
+    authSignOutButton?.focus();
+  } else {
+    authEmailInput?.focus();
+  }
+}
+
+function closeAuthDialog() {
+  saveAuthRememberPreference();
+  if (authDialog) authDialog.hidden = true;
+  if (startupProjectPromptPending) {
+    startupProjectPromptPending = false;
+    window.setTimeout(() => promptForProjectDetails(), 150);
+  }
+}
+
+function loadAuthRememberPreference() {
+  if (!authRememberDeviceInput) return;
+  try {
+    authRememberDeviceInput.checked = localStorage.getItem(AUTH_REMEMBER_DEVICE_KEY) === "yes";
+  } catch {
+    authRememberDeviceInput.checked = false;
+  }
+}
+
+function saveAuthRememberPreference() {
+  if (!authRememberDeviceInput) return;
+  try {
+    if (authRememberDeviceInput.checked) {
+      localStorage.setItem(AUTH_REMEMBER_DEVICE_KEY, "yes");
+    } else {
+      localStorage.removeItem(AUTH_REMEMBER_DEVICE_KEY);
+    }
+  } catch {
+    // The checkbox still works visually if browser storage is unavailable.
+  }
+}
+
+function authPromptRememberedOnDevice() {
+  try {
+    return localStorage.getItem(AUTH_REMEMBER_DEVICE_KEY) === "yes";
+  } catch {
+    return false;
+  }
+}
+
+async function runStartupPrompts() {
+  await initSupabase();
+  if (maybeOpenStartupAuthPrompt()) return;
+  promptForProjectDetails();
+}
+
+function maybeOpenStartupAuthPrompt() {
+  if (!authDialog || !supabaseClient || cloudUser) return false;
+  if (authDialog.hidden === false) return true;
+  if (authPromptRememberedOnDevice()) return false;
+
+  try {
+    if (sessionStorage.getItem(AUTH_PROMPT_SESSION_KEY) === "shown") return false;
+    sessionStorage.setItem(AUTH_PROMPT_SESSION_KEY, "shown");
+  } catch {
+    // If session storage is unavailable, still show the first-run prompt.
+  }
+
+  openAuthDialog({ startup: true });
+  return true;
+}
+
+function authCredentials() {
+  const email = String(authEmailInput?.value ?? "").trim();
+  const password = String(authPasswordInput?.value ?? "");
+  if (!email || !email.includes("@")) {
+    window.alert("Enter a valid email address.");
+    return null;
+  }
+  if (password.length < 6) {
+    window.alert("Password must be at least 6 characters.");
+    return null;
+  }
+  return { email, password };
+}
+
+async function ensureSupabaseClient() {
+  await initSupabase();
+  if (!supabaseClient) {
+    window.alert("Cloud login is not available right now. Check your internet connection and Supabase setup.");
+    return false;
+  }
+  return true;
+}
+
+async function signInWithSupabase() {
+  const credentials = authCredentials();
+  if (!credentials || !(await ensureSupabaseClient())) return;
+
+  authSignInButton.disabled = true;
+  updateCloudStatus("Signing in...", "");
+  try {
+    const { data, error } = await supabaseClient.auth.signInWithPassword(credentials);
+    if (error) throw error;
+    await applyCloudSession(data?.session ?? null);
+    saveAuthRememberPreference();
+    authPasswordInput.value = "";
+    closeAuthDialog();
+  } catch (error) {
+    console.warn("Sign in failed.", error);
+    updateCloudStatus("Sign in failed", "warning");
+    window.alert(error?.message || "Sign in failed.");
+  } finally {
+    authSignInButton.disabled = false;
+  }
+}
+
+async function signUpWithSupabase() {
+  const credentials = authCredentials();
+  if (!credentials || !(await ensureSupabaseClient())) return;
+
+  authSignUpButton.disabled = true;
+  updateCloudStatus("Creating account...", "");
+  try {
+    const { data, error } = await supabaseClient.auth.signUp({
+      email: credentials.email,
+      password: credentials.password,
+      options: {
+        emailRedirectTo: location.href.split("#")[0],
+      },
+    });
+    if (error) throw error;
+    if (data?.session) {
+      await applyCloudSession(data.session);
+      saveAuthRememberPreference();
+      authPasswordInput.value = "";
+      closeAuthDialog();
+    } else {
+      saveAuthRememberPreference();
+      updateCloudStatus("Check email", "");
+      window.alert("Account created. Check your email for the Supabase confirmation link, then sign in here.");
+    }
+  } catch (error) {
+    console.warn("Sign up failed.", error);
+    updateCloudStatus("Sign up failed", "warning");
+    window.alert(error?.message || "Sign up failed.");
+  } finally {
+    authSignUpButton.disabled = false;
+  }
+}
+
+async function signOutFromSupabase() {
+  if (!supabaseClient) return;
+
+  try {
+    const { error } = await supabaseClient.auth.signOut();
+    if (error) throw error;
+    await applyCloudSession(null);
+    closeAuthDialog();
+  } catch (error) {
+    console.warn("Sign out failed.", error);
+    window.alert(error?.message || "Sign out failed.");
+  }
+}
+
 function setupProjectDialog() {
   if (!projectDialogForm || !projectDialogCancelButton) return;
 
@@ -5228,13 +5656,27 @@ function setupProjectDialog() {
   projectLibraryList?.addEventListener("click", (event) => {
     const deleteButton = event.target.closest("[data-delete-project-id]");
     if (deleteButton) {
-      deleteSavedBrowserProject(deleteButton.dataset.deleteProjectId);
+      if (deleteButton.dataset.projectSource === "cloud") {
+        deleteSavedCloudProject(deleteButton.dataset.deleteProjectId).catch((error) => {
+          console.warn("Could not delete cloud project.", error);
+          updateCloudStatus("Cloud delete failed", "warning");
+        });
+      } else {
+        deleteSavedBrowserProject(deleteButton.dataset.deleteProjectId);
+      }
       return;
     }
 
     const openTarget = event.target.closest("[data-open-project-id]");
     if (openTarget) {
-      openSavedBrowserProject(openTarget.dataset.openProjectId);
+      if (openTarget.dataset.projectSource === "cloud") {
+        openSavedCloudProject(openTarget.dataset.openProjectId).catch((error) => {
+          console.warn("Could not open cloud project.", error);
+          updateCloudStatus("Cloud open failed", "warning");
+        });
+      } else {
+        openSavedBrowserProject(openTarget.dataset.openProjectId);
+      }
     }
   });
 }
@@ -7758,6 +8200,297 @@ function safeFilePart(value, fallback) {
   return cleaned || fallback;
 }
 
+function supabaseConfigured() {
+  return Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
+}
+
+function updateCloudStatus(message = null, mode = "") {
+  const signedIn = Boolean(cloudUser);
+  const active = signedIn && hasActiveCloudLicense();
+  const defaultMessage = signedIn
+    ? active
+      ? cloudLicenseText()
+      : cloudProfile
+      ? "Trial expired"
+      : "Cloud setup needed"
+    : "Local only";
+  const text = message || defaultMessage;
+
+  if (cloudSyncStatus) {
+    cloudSyncStatus.textContent = text;
+    cloudSyncStatus.title = signedIn && cloudUser?.email ? cloudUser.email : "Not signed in";
+    cloudSyncStatus.classList.toggle("signed-in", signedIn && active && mode !== "warning");
+    cloudSyncStatus.classList.toggle("warning", mode === "warning" || (signedIn && !active));
+  }
+  if (accountButtonLabel) {
+    accountButtonLabel.textContent = signedIn ? "Account" : "Sign in";
+  }
+  if (authDialogStatus) {
+    authDialogStatus.textContent = signedIn
+      ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}`
+      : "Sign in to save and open spool projects from the cloud.";
+  }
+  if (authEmailInput && signedIn) authEmailInput.value = cloudUser.email || "";
+  if (authSignOutButton) authSignOutButton.hidden = !signedIn;
+  if (authSignInButton) authSignInButton.disabled = signedIn;
+  if (authSignUpButton) authSignUpButton.disabled = signedIn;
+  if (saveBrowserProjectButton) {
+    saveBrowserProjectButton.title = signedIn && active
+      ? "Save project to cloud and this browser"
+      : "Save project in this browser";
+  }
+  if (openBrowserProjectButton) {
+    openBrowserProjectButton.title = signedIn && active
+      ? "Open cloud saved project"
+      : "Open saved project from this browser";
+  }
+}
+
+function cloudLicenseText(profile = cloudProfile) {
+  if (!cloudUser) return "Local only";
+  if (!profile) return "No licence profile";
+  const status = String(profile.license_status ?? "trial").toLowerCase();
+  if (status === "full") return "Full licence";
+  if (status === "paid") return "Paid licence";
+  const trialEnds = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+  if (status === "trial" && trialEnds && trialEnds > new Date()) {
+    const days = Math.max(1, Math.ceil((trialEnds - new Date()) / 86400000));
+    return `Trial ${days} day${days === 1 ? "" : "s"} left`;
+  }
+  return "Trial expired";
+}
+
+function hasActiveCloudLicense(profile = cloudProfile) {
+  if (!cloudUser || !profile) return false;
+  const status = String(profile.license_status ?? "trial").toLowerCase();
+  if (status === "full" || status === "paid") return true;
+  if (status !== "trial") return false;
+  const trialEnds = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
+  return Boolean(trialEnds && trialEnds > new Date());
+}
+
+function cloudProjectRecord() {
+  const projectInfo = normalizeProjectInfo(state.projectInfo);
+  const id = normalizeProjectId(state.projectId) ?? createProjectId();
+  state.projectId = id;
+  return {
+    id,
+    owner_id: cloudUser?.id,
+    name: projectDisplayName(projectInfo),
+    project_info: projectInfo,
+    drawing_state: statePayload(),
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function mapCloudProject(row) {
+  return {
+    id: normalizeProjectId(row.id),
+    name: String(row.name ?? "").trim().slice(0, 120),
+    updatedAt: String(row.updated_at ?? row.created_at ?? ""),
+    projectInfo: normalizeProjectInfo(row.project_info),
+    state: row.drawing_state,
+    source: "cloud",
+  };
+}
+
+async function initSupabase() {
+  if (cloudInitStarted) return cloudInitPromise;
+  if (!supabaseConfigured()) return null;
+  cloudInitStarted = true;
+  cloudInitPromise = (async () => {
+    updateCloudStatus("Connecting...", "");
+
+    try {
+      const { createClient } = await import(SUPABASE_JS_URL);
+      supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+      const { data, error } = await supabaseClient.auth.getSession();
+      if (error) throw error;
+      await applyCloudSession(data?.session ?? null);
+      supabaseClient.auth.onAuthStateChange((_event, session) => {
+        applyCloudSession(session).catch((sessionError) => {
+          console.warn("Cloud session update failed.", sessionError);
+          updateCloudStatus("Cloud setup needed", "warning");
+        });
+      });
+    } catch (error) {
+      console.warn("Supabase failed to initialise.", error);
+      updateCloudStatus("Cloud unavailable", "warning");
+    }
+    return supabaseClient;
+  })();
+  return cloudInitPromise;
+}
+
+async function applyCloudSession(session) {
+  cloudUser = session?.user ?? null;
+  cloudProjectCache = null;
+  if (!cloudUser) {
+    cloudProfile = null;
+    updateCloudStatus();
+    return;
+  }
+
+  cloudProfile = await ensureCloudProfile();
+  updateCloudStatus();
+  if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
+    queueCloudAutosave();
+  }
+}
+
+async function ensureCloudProfile() {
+  if (!supabaseClient || !cloudUser) return null;
+
+  const selectProfile = async () => {
+    const { data, error } = await supabaseClient
+      .from(CLOUD_PROFILES_TABLE)
+      .select("id,email,license_status,trial_started_at,trial_ends_at")
+      .eq("id", cloudUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
+  };
+
+  try {
+    const existing = await selectProfile();
+    if (existing) return existing;
+
+    const { error: insertError } = await supabaseClient
+      .from(CLOUD_PROFILES_TABLE)
+      .insert({
+        id: cloudUser.id,
+        email: cloudUser.email ?? "",
+      });
+    if (insertError) throw insertError;
+    return await selectProfile();
+  } catch (error) {
+    console.warn("Could not load cloud profile.", error);
+    return null;
+  }
+}
+
+function queueCloudAutosave() {
+  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !state.projectId || !hasDrawingContent()) return;
+  window.clearTimeout(cloudAutosaveTimer);
+  cloudAutosaveTimer = window.setTimeout(() => {
+    saveCloudProject({ silent: true }).catch((error) => {
+      console.warn("Cloud autosave failed.", error);
+      updateCloudStatus("Cloud save failed", "warning");
+    });
+  }, CLOUD_AUTOSAVE_DELAY_MS);
+}
+
+async function saveCloudProject(options = {}) {
+  if (!supabaseClient || !cloudUser) return false;
+  if (!hasActiveCloudLicense()) {
+    updateCloudStatus(cloudLicenseText(), "warning");
+    if (!options.silent) window.alert("This account does not have an active trial or licence.");
+    return false;
+  }
+  if (cloudAutosaveBusy) return false;
+
+  cloudAutosaveBusy = true;
+  if (!options.silent) updateCloudStatus("Saving cloud...", "");
+  try {
+    const record = cloudProjectRecord();
+    const { data, error } = await supabaseClient
+      .from(CLOUD_PROJECTS_TABLE)
+      .upsert(record, { onConflict: "id" })
+      .select("id,name,updated_at,project_info,drawing_state")
+      .single();
+    if (error) throw error;
+    cloudProjectCache = null;
+    if (data) {
+      state.projectId = data.id;
+    }
+    updateCloudStatus("Cloud saved", "");
+    window.setTimeout(() => updateCloudStatus(), 1600);
+    return true;
+  } finally {
+    cloudAutosaveBusy = false;
+  }
+}
+
+async function loadSavedCloudProjects() {
+  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense()) return [];
+  if (cloudProjectCache) return cloudProjectCache;
+
+  const { data, error } = await supabaseClient
+    .from(CLOUD_PROJECTS_TABLE)
+    .select("id,name,updated_at,created_at,project_info,drawing_state")
+    .order("updated_at", { ascending: false });
+  if (error) throw error;
+  cloudProjectCache = (data ?? [])
+    .map(mapCloudProject)
+    .filter((project) => project.id && stateFromPayload(project.state));
+  return cloudProjectCache;
+}
+
+async function openSavedCloudProject(projectId) {
+  let record = (cloudProjectCache ?? []).find((project) => project.id === projectId);
+  if (!record) {
+    const projects = await loadSavedCloudProjects();
+    record = projects.find((project) => project.id === projectId);
+  }
+  if (!record) {
+    window.alert("That cloud project was not found.");
+    return;
+  }
+
+  if (state.projectId !== record.id && hasDrawingContent()) {
+    const proceed = window.confirm("Open this cloud project? Your current drawing will be replaced.");
+    if (!proceed) return;
+    persistState();
+  }
+
+  const restored = stateFromPayload(record.state);
+  if (!restored) {
+    window.alert("That cloud project could not be opened.");
+    return;
+  }
+
+  state = restored;
+  state.projectId = record.id;
+  state.projectInfo = normalizeProjectInfo(record.projectInfo);
+  state.projectInfoPrompted = true;
+  three.userMovedCamera = false;
+  setNextIdsFromState(state);
+  updateControls();
+  updateAll();
+  closeProjectLibrary();
+  updateCloudStatus("Cloud project opened", "");
+  window.setTimeout(() => updateCloudStatus(), 1600);
+}
+
+async function deleteSavedCloudProject(projectId) {
+  let record = (cloudProjectCache ?? []).find((project) => project.id === projectId);
+  if (!record) {
+    const projects = await loadSavedCloudProjects();
+    record = projects.find((project) => project.id === projectId);
+  }
+  if (!record) return;
+
+  const proceed = window.confirm(`Delete ${record.name || projectDisplayName(record.projectInfo)} from the cloud?`);
+  if (!proceed) return;
+
+  const { error } = await supabaseClient
+    .from(CLOUD_PROJECTS_TABLE)
+    .delete()
+    .eq("id", projectId);
+  if (error) {
+    window.alert("Could not delete that cloud project.");
+    throw error;
+  }
+  cloudProjectCache = null;
+  if (state.projectId === projectId) {
+    state.projectId = null;
+    updateControls();
+    persistState();
+  }
+  const projects = await loadSavedCloudProjects();
+  renderProjectLibrary(projects, { source: "cloud" });
+}
+
 function loadSavedBrowserProjects() {
   try {
     const raw = JSON.parse(localStorage.getItem(SAVED_PROJECTS_KEY));
@@ -7808,7 +8541,7 @@ function autoSaveCurrentBrowserProject() {
 
 async function saveBrowserProject(options = {}) {
   const info = await openProjectDetailsDialog({
-    title: state.projectId ? "Save project" : "Save as project",
+    title: state.projectId ? "Save project" : cloudUser && hasActiveCloudLicense() ? "Save cloud project" : "Save as project",
     action: "Save project",
     defaults: state.projectInfo,
   });
@@ -7821,31 +8554,63 @@ async function saveBrowserProject(options = {}) {
   }
   updateControls();
   updateAll();
+  const savedToCloud = cloudUser && hasActiveCloudLicense()
+    ? await saveCloudProject({ silent: true }).catch((error) => {
+        console.warn("Cloud save failed.", error);
+        updateCloudStatus("Cloud save failed", "warning");
+        return false;
+      })
+    : false;
   if (!options.silent) {
-    window.alert(`Saved ${projectDisplayName(info)} in this browser.`);
+    window.alert(`Saved ${projectDisplayName(info)} ${savedToCloud ? "to the cloud and this browser" : "in this browser"}.`);
   }
   return true;
 }
 
-function openBrowserProject() {
-  const projects = loadSavedBrowserProjects()
+async function openBrowserProject() {
+  const useCloud = Boolean(cloudUser && hasActiveCloudLicense());
+  let projects = [];
+  if (useCloud) {
+    try {
+      updateCloudStatus("Loading cloud...", "");
+      projects = await loadSavedCloudProjects();
+      updateCloudStatus();
+    } catch (error) {
+      console.warn("Could not load cloud projects.", error);
+      updateCloudStatus("Cloud load failed", "warning");
+      window.alert("Cloud projects could not be loaded. Showing projects saved in this browser instead.");
+      projects = loadSavedBrowserProjects();
+    }
+  } else {
+    projects = loadSavedBrowserProjects();
+  }
+
+  projects = projects
     .sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt)));
-  renderProjectLibrary(projects);
+  renderProjectLibrary(projects, { source: useCloud && projects.every((project) => project.source === "cloud") ? "cloud" : "browser" });
   if (projectLibraryDialog) {
     projectLibraryDialog.hidden = false;
   } else if (!projects.length) {
-    window.alert("No saved projects in this browser yet.");
+    window.alert(useCloud ? "No cloud projects saved yet." : "No saved projects in this browser yet.");
   }
 }
 
-function renderProjectLibrary(projects = loadSavedBrowserProjects()) {
+function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
+  projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
+  if (projectLibrarySubtitle) {
+    projectLibrarySubtitle.textContent = projectLibrarySource === "cloud"
+      ? "Projects are saved to your IsoSpool cloud account. Open a project folder, then tap a spool drawing."
+      : "Projects are saved on this device/browser. Open a project folder, then tap a spool drawing.";
+  }
   projectLibraryList.innerHTML = "";
 
   if (!projects.length) {
     const empty = document.createElement("div");
     empty.className = "project-library-empty";
-    empty.textContent = "No saved projects yet. Fill in the project details, then press Save.";
+    empty.textContent = projectLibrarySource === "cloud"
+      ? "No cloud projects yet. Fill in the project details, then press Save."
+      : "No saved projects yet. Fill in the project details, then press Save.";
     projectLibraryList.append(empty);
     return;
   }
@@ -8032,7 +8797,10 @@ function projectLibraryRow(project) {
     deleteButton.className = "project-library-action danger";
     deleteButton.textContent = "Delete";
     deleteButton.dataset.deleteProjectId = project.id;
+    deleteButton.dataset.projectSource = project.source ?? projectLibrarySource;
 
+    row.dataset.projectSource = project.source ?? projectLibrarySource;
+    openButton.dataset.projectSource = project.source ?? projectLibrarySource;
     row.append(main, openButton, deleteButton);
     return row;
 }
@@ -11668,6 +12436,14 @@ function beginPinchGesture() {
     }
     socketDrag = null;
   }
+  if (dimensionDrag) {
+    try {
+      drawCanvas.releasePointerCapture(dimensionDrag.pointerId);
+    } catch {
+      // Ignore browsers that have already released capture.
+    }
+    dimensionDrag = null;
+  }
 
   pinchGesture = {
     ids: pointerEntries.map(([id]) => id),
@@ -11720,6 +12496,9 @@ function finishTouchContextPress(event) {
     }
     if (socketDrag) {
       finishSocketDrag(event);
+    }
+    if (dimensionDrag) {
+      finishDimensionDrag(event);
     }
     event.preventDefault();
     return true;
@@ -12140,6 +12919,92 @@ function promptNoteText(defaultText) {
   return text.trim() || "NOTE";
 }
 
+function beginDimensionDrag(event, target, pointer) {
+  if (!target || !Number.isInteger(target.segmentIndex)) return false;
+
+  const currentOffset = dimensionOffsetForSegment(target.segmentIndex);
+  dimensionDrag = {
+    pointerId: event.pointerId,
+    segmentIndex: target.segmentIndex,
+    startPointer: { ...pointer },
+    normal: { ...target.normal },
+    side: Number(target.side) < 0 ? -1 : 1,
+    startOffset: currentOffset.offset > 0.5
+      ? currentOffset.offset
+      : Math.max(0, (Number(target.offset) || 0) - (Number(target.baseOffset) || 0)),
+    moved: false,
+  };
+  state.selectedNote = null;
+  state.selectedFitting = null;
+  clearSelectedSegments();
+  state.selectedPoint = null;
+  cursorReadout.textContent = "Dragging dimension";
+  cancelTouchContextPress();
+  try {
+    drawCanvas.setPointerCapture(event.pointerId);
+  } catch {
+    // Pointer capture is a nice-to-have for dragging outside the canvas.
+  }
+  event.preventDefault();
+  return true;
+}
+
+function updateDimensionDrag(event) {
+  if (!dimensionDrag || dimensionDrag.pointerId !== event.pointerId) return false;
+
+  const pointer = pointerPosition(event);
+  const delta = {
+    x: pointer.x - dimensionDrag.startPointer.x,
+    y: pointer.y - dimensionDrag.startPointer.y,
+  };
+  const pull = delta.x * dimensionDrag.normal.x + delta.y * dimensionDrag.normal.y;
+  const offset = clampNumber(dimensionDrag.startOffset + pull, 0, 520);
+  setDimensionOffsetForSegment(dimensionDrag.segmentIndex, {
+    side: dimensionDrag.side,
+    offset,
+  });
+  dimensionDrag.moved = true;
+  state.pointer = pointer;
+  cursorReadout.textContent = offset > 1
+    ? `Dimension offset ${Math.round(offset)} px`
+    : "Dimension offset reset";
+  drawIso();
+  event.preventDefault();
+  return true;
+}
+
+function finishDimensionDrag(event) {
+  if (!dimensionDrag) return false;
+
+  try {
+    drawCanvas.releasePointerCapture(dimensionDrag.pointerId);
+  } catch {
+    // Ignore browsers that have already released capture.
+  }
+  const moved = dimensionDrag.moved;
+  dimensionDrag = null;
+  state.pointer = null;
+  cursorReadout.textContent = formatPoint(activePoint());
+  if (moved) {
+    updateAll();
+  } else {
+    drawIso();
+  }
+  event?.preventDefault?.();
+  return true;
+}
+
+function cancelDimensionDrag(options = {}) {
+  if (!dimensionDrag) return;
+  try {
+    drawCanvas.releasePointerCapture(dimensionDrag.pointerId);
+  } catch {
+    // Ignore browsers that have already released capture.
+  }
+  dimensionDrag = null;
+  if (options.redraw !== false) drawIso();
+}
+
 function beginNoteDrag(event, noteHit, pointer) {
   const note = noteHit?.note;
   if (!note) return false;
@@ -12549,6 +13414,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
   if (updateBoxSelect(event)) return;
   if (updateNoteDrag(event)) return;
   if (updateSocketDrag(event)) return;
+  if (updateDimensionDrag(event)) return;
   if (updateTouchContextPress(event)) {
     event.preventDefault();
     return;
@@ -12565,11 +13431,14 @@ drawCanvas.addEventListener("pointermove", (event) => {
     }
   } else {
     const noteHit = findNearestNote(pointer);
+    const dimensionHit = state.activeTool === "select" ? findNearestDimensionTarget(pointer) : null;
     const pointHit = findNearestPoint(pointer);
     const hit = findNearestSegment(pointer);
     state.hoveredSegment = hit ? hit.segment.index : null;
     cursorReadout.textContent = noteHit
       ? "Text note"
+      : dimensionHit
+      ? "Drag dimension"
       : pointHit
       ? `Point ${pointHit.index + 1} / tee start`
       : state.activeTool === "note"
@@ -12589,7 +13458,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
 });
 
 drawCanvas.addEventListener("pointerleave", () => {
-  if (noteDrag || socketDrag || pendingDraw || boxSelectDrag) return;
+  if (noteDrag || socketDrag || dimensionDrag || pendingDraw || boxSelectDrag) return;
   cancelTouchContextPress();
   state.pointer = null;
   state.previewCandidate = null;
@@ -12654,6 +13523,12 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     return;
   }
 
+  const dimensionHit = findNearestDimensionTarget(pointer);
+  if (dimensionHit && state.activeTool === "select") {
+    beginDimensionDrag(event, dimensionHit, pointer);
+    return;
+  }
+
   const pointHit = findNearestPoint(pointer);
   if (pointHit && state.activeTool === "select") {
     state.selectedPoint = pointHit.index;
@@ -12708,7 +13583,11 @@ drawCanvas.addEventListener("pointerup", (event) => {
     releaseTrackedTouchPointer(event);
     return;
   }
-  finishSocketDrag(event);
+  if (finishSocketDrag(event)) {
+    releaseTrackedTouchPointer(event);
+    return;
+  }
+  finishDimensionDrag(event);
   releaseTrackedTouchPointer(event);
 });
 drawCanvas.addEventListener("pointercancel", (event) => {
@@ -12721,6 +13600,7 @@ drawCanvas.addEventListener("pointercancel", (event) => {
   }
   finishNoteDrag(event);
   finishSocketDrag(event);
+  finishDimensionDrag(event);
 });
 
 document.querySelectorAll("[data-tool]").forEach((button) => {
@@ -12843,8 +13723,18 @@ document.querySelector("#sampleButton").addEventListener("click", () => {
 
 document.querySelector("#undoButton").addEventListener("click", undo);
 document.querySelector("#resetButton").addEventListener("click", startNewDrawing);
-saveBrowserProjectButton?.addEventListener("click", saveBrowserProject);
-openBrowserProjectButton?.addEventListener("click", openBrowserProject);
+saveBrowserProjectButton?.addEventListener("click", () => {
+  saveBrowserProject().catch((error) => {
+    console.warn("Save project failed.", error);
+    window.alert(error?.message || "Save project failed.");
+  });
+});
+openBrowserProjectButton?.addEventListener("click", () => {
+  openBrowserProject().catch((error) => {
+    console.warn("Open project failed.", error);
+    window.alert(error?.message || "Open project failed.");
+  });
+});
 document.querySelector("#deleteButton").addEventListener("click", deleteSelection);
 document.querySelector("#exportProjectButton").addEventListener("click", exportProjectFile);
 document.querySelector("#importProjectButton").addEventListener("click", () => projectFileInput.click());
@@ -12881,6 +13771,10 @@ document.addEventListener("keydown", (event) => {
     }
     if (newDrawingDialog && !newDrawingDialog.hidden) {
       closeNewDrawingDialog("cancel");
+      return;
+    }
+    if (authDialog && !authDialog.hidden) {
+      closeAuthDialog();
       return;
     }
     if (projectJobQuickPick && !projectJobQuickPick.hidden) {
@@ -12929,11 +13823,17 @@ resizeObserver.observe(previewStage);
 setupCollapsibleControls();
 setupInspectorTabs();
 setupMobilePanels();
+setupAuthDialog();
 setupProjectDialog();
 setupLoadPlanner();
 registerServiceWorker();
 populatePipeSizeOptions();
 updateControls();
 updateAll({ save: false });
-setTimeout(() => promptForProjectDetails(), 250);
 initThree();
+setTimeout(() => {
+  runStartupPrompts().catch((error) => {
+    console.warn("Startup prompts failed.", error);
+    promptForProjectDetails();
+  });
+}, 250);

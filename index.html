@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=121" />
+    <link rel="stylesheet" href="./styles.css?v=126" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -121,6 +121,10 @@
         <circle cx="8" cy="10" r="2" />
         <path d="m21 15-5-5L5 19" />
       </symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <circle cx="12" cy="8" r="4" />
+        <path d="M4 21c1.4-4 4.1-6 8-6s6.6 2 8 6" />
+      </symbol>
     </svg>
 
     <div class="app-shell">
@@ -130,7 +134,7 @@
           <div>
             <strong>IsoSpool Studio</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.21</span>
+            <span class="version-badge" id="appVersionBadge">v1.26</span>
           </div>
         </div>
 
@@ -158,6 +162,7 @@
               <option value="labels">Pipe labels</option>
               <option value="redline">Red C/C lines</option>
               <option value="numbered">Numbered list</option>
+              <option value="chain">Chain dims</option>
             </select>
           </label>
           <label class="toggle top-toggle">
@@ -197,6 +202,11 @@
             <svg><use href="#icon-sample"></use></svg>
             <span>Open</span>
           </button>
+          <button class="icon-button labeled" id="accountButton" type="button" title="Sign in for cloud projects" aria-label="Account and cloud sync">
+            <svg><use href="#icon-user"></use></svg>
+            <span id="accountButtonLabel">Account</span>
+          </button>
+          <span class="cloud-status-pill" id="cloudSyncStatus">Local only</span>
           <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
             <svg><use href="#icon-sample"></use></svg>
             <span>Import</span>
@@ -521,12 +531,43 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop" id="authDialog" hidden>
+        <form class="project-dialog-card auth-card" id="authDialogForm">
+          <div class="project-dialog-header">
+            <div>
+              <strong>IsoSpool account</strong>
+              <small id="authDialogStatus">Sign in to save and open spool projects from the cloud.</small>
+            </div>
+          </div>
+          <div class="project-dialog-grid">
+            <label class="field project-dialog-wide">
+              <span>Email</span>
+              <input id="authEmailInput" type="email" autocomplete="email" />
+            </label>
+            <label class="field project-dialog-wide">
+              <span>Password</span>
+              <input id="authPasswordInput" type="password" autocomplete="current-password" minlength="6" />
+            </label>
+            <label class="toggle auth-remember project-dialog-wide">
+              <input id="authRememberDeviceInput" type="checkbox" />
+              <span>Remember me on this device</span>
+            </label>
+          </div>
+          <div class="project-dialog-actions auth-actions">
+            <button class="icon-button labeled" id="authCloseButton" type="button">Close</button>
+            <button class="icon-button labeled" id="authSignOutButton" type="button" hidden>Sign out</button>
+            <button class="icon-button labeled" id="authSignUpButton" type="button">Sign up</button>
+            <button class="primary-button" id="authSignInButton" type="submit">Sign in</button>
+          </div>
+        </form>
+      </div>
+
       <div class="project-dialog-backdrop" id="projectLibraryDialog" hidden>
         <section class="project-dialog-card project-library-card" aria-label="Saved projects">
           <div class="project-dialog-header">
             <div>
               <strong>Saved projects</strong>
-              <small>Projects are saved on this device/browser. Open a project folder, then tap a spool drawing.</small>
+              <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Open a project folder, then tap a spool drawing.</small>
             </div>
           </div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
@@ -546,6 +587,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=121"></script>
+    <script defer src="./app.js?v=126"></script>
   </body>
 </html>
