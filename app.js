@@ -2,6 +2,7 @@ const drawCanvas = document.querySelector("#drawCanvas");
 const fallbackCanvas = document.querySelector("#fallbackCanvas");
 const threeCanvas = document.querySelector("#threeCanvas");
 const previewStage = document.querySelector("#previewStage");
+const drawingPanel = document.querySelector(".drawing-panel");
 const controlPanel = document.querySelector(".control-panel");
 const previewPanel = document.querySelector(".preview-panel");
 const cursorReadout = document.querySelector("#cursorReadout");
@@ -13,6 +14,8 @@ const previewLabelToggle = document.querySelector("#previewLabelToggle");
 const previewRotateButton = document.querySelector("#previewRotateButton");
 const previewMoveButton = document.querySelector("#previewMoveButton");
 const previewResetButton = document.querySelector("#previewResetButton");
+const drawingFullscreenButton = document.querySelector("#drawingFullscreenButton");
+const previewFullscreenButton = document.querySelector("#previewFullscreenButton");
 const loadPlanButton = document.querySelector("#loadPlanButton");
 const loadPlanDialog = document.querySelector("#loadPlanDialog");
 const loadPlanProjectList = document.querySelector("#loadPlanProjectList");
@@ -88,6 +91,11 @@ const projectLibraryDialog = document.querySelector("#projectLibraryDialog");
 const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
 const projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
+const toolSettingsButton = document.querySelector("#toolSettingsButton");
+const toolSettingsDialog = document.querySelector("#toolSettingsDialog");
+const toolSettingsList = document.querySelector("#toolSettingsList");
+const toolSettingsDoneButton = document.querySelector("#toolSettingsDoneButton");
+const toolSettingsResetButton = document.querySelector("#toolSettingsResetButton");
 const projectDialogInputs = {
   jobNumber: document.querySelector("#projectDialogJobNumber"),
   spoolNumber: document.querySelector("#projectDialogSpoolNumber"),
@@ -99,12 +107,14 @@ const mobilePanelScrim = document.querySelector("#mobilePanelScrim");
 const mobilePanelButtons = [...document.querySelectorAll("[data-mobile-panel]")];
 const mobilePanelCloseButtons = [...document.querySelectorAll("[data-mobile-close-panel]")];
 const projectInputs = [...document.querySelectorAll("[data-project-field]")];
+const sideToolButtons = [...document.querySelectorAll(".tool-rail [data-tool], .tool-rail [data-side-tool]")];
 
 const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
+const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.29";
+const APP_VERSION = "v1.34";
 const APP_BUILD_DATE = "2026-06-08";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -127,10 +137,25 @@ const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer
 const FLANGE_MODES = new Set(["single", "double"]);
 const END_FITTING_SNAP_TOLERANCE = 0.015;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
-const PREVIEW_MODES = new Set(["carbon", "black", "stainless", "red", "ghost", "outline"]);
+const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
+const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select"]);
+const SIDE_TOOL_DETAILS = {
+  draw: ["Draw", "Create pipe runs from points"],
+  select: ["Select", "Pick, edit and drag items"],
+  boxSelect: ["Box Select", "Select multiple pipe runs"],
+  flange: ["Flange", "Place single or double flanges"],
+  rollGroove: ["Groove", "Place roll grooves"],
+  reducer: ["Reducer", "Place manual reducers"],
+  tee: ["Tee", "Split a run into a tee point"],
+  branch: ["Branch", "Mark a welded branch"],
+  weld: ["Weld", "Place weld markers"],
+  valve: ["Valve", "Place butterfly valves"],
+  note: ["Note", "Add text notes"],
+  delete: ["Delete", "Delete the selected item"],
+};
 const LOAD_PLAN_TRAYS = {
   medium: { key: "medium", label: "3460 x 2040 mm tray", lengthMm: 3460, widthMm: 2040 },
   long: { key: "long", label: "4490 x 2040 mm tray", lengthMm: 4490, widthMm: 2040 },
@@ -327,6 +352,7 @@ let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
+let appFullscreenPanel = null;
 let startupProjectPromptPending = false;
 let authMode = "signin";
 let supabaseClient = null;
@@ -4749,6 +4775,9 @@ function deleteSegmentsByIndex(indexes) {
 }
 
 function setTool(tool) {
+  if (tool && !isSideToolVisible(tool)) {
+    tool = "draw";
+  }
   if (tool !== "boxSelect") {
     cancelBoxSelect({ redraw: false });
   }
@@ -5239,6 +5268,258 @@ function setSelectedPointConnectionType(type) {
   const connected = segments().filter((segment) => segment.from === state.selectedPoint || segment.to === state.selectedPoint);
   if (connected.length < 3) return;
   setNodeConnectionType(state.selectedPoint, type);
+}
+
+function sideToolIdForButton(button) {
+  return button?.dataset?.tool || button?.dataset?.sideTool || "";
+}
+
+function sideToolLabel(id) {
+  return SIDE_TOOL_DETAILS[id]?.[0] ?? id;
+}
+
+function sideToolDetail(id) {
+  return SIDE_TOOL_DETAILS[id]?.[1] ?? "Side rail tool";
+}
+
+function readSideToolVisibility() {
+  let saved = {};
+  try {
+    saved = JSON.parse(localStorage.getItem(SIDE_TOOL_VISIBILITY_KEY)) ?? {};
+  } catch {
+    saved = {};
+  }
+
+  const visibility = {};
+  for (const button of sideToolButtons) {
+    const id = sideToolIdForButton(button);
+    if (!id) continue;
+    visibility[id] = ALWAYS_VISIBLE_SIDE_TOOLS.has(id) ? true : saved[id] !== false;
+  }
+  return visibility;
+}
+
+function writeSideToolVisibility(visibility) {
+  const normalized = {};
+  for (const button of sideToolButtons) {
+    const id = sideToolIdForButton(button);
+    if (!id) continue;
+    normalized[id] = ALWAYS_VISIBLE_SIDE_TOOLS.has(id) ? true : visibility[id] !== false;
+  }
+  try {
+    localStorage.setItem(SIDE_TOOL_VISIBILITY_KEY, JSON.stringify(normalized));
+  } catch (error) {
+    console.warn("Could not save side tool settings.", error);
+  }
+}
+
+function isSideToolVisible(id, visibility = readSideToolVisibility()) {
+  return ALWAYS_VISIBLE_SIDE_TOOLS.has(id) || visibility[id] !== false;
+}
+
+function applySideToolVisibility(options = {}) {
+  const visibility = readSideToolVisibility();
+  for (const button of sideToolButtons) {
+    const id = sideToolIdForButton(button);
+    if (!id) continue;
+    button.hidden = !isSideToolVisible(id, visibility);
+  }
+
+  if (options.keepActive !== true && state.activeTool && !isSideToolVisible(state.activeTool, visibility)) {
+    setTool("draw");
+  }
+}
+
+function renderToolSettingsOptions() {
+  if (!toolSettingsList) return;
+  const visibility = readSideToolVisibility();
+  toolSettingsList.innerHTML = "";
+
+  for (const button of sideToolButtons) {
+    const id = sideToolIdForButton(button);
+    if (!id) continue;
+    const locked = ALWAYS_VISIBLE_SIDE_TOOLS.has(id);
+    const row = document.createElement("label");
+    row.className = "tool-setting-row";
+    if (locked) row.classList.add("locked");
+    row.innerHTML = `
+      <input type="checkbox" data-tool-setting-id="${escapeHtml(id)}" ${isSideToolVisible(id, visibility) ? "checked" : ""} ${locked ? "disabled" : ""} />
+      <span class="tool-setting-copy">
+        <strong>${escapeHtml(sideToolLabel(id))}</strong>
+        <small>${escapeHtml(locked ? "Always available" : sideToolDetail(id))}</small>
+      </span>
+    `;
+    toolSettingsList.append(row);
+  }
+}
+
+function openToolSettingsDialog() {
+  renderToolSettingsOptions();
+  if (toolSettingsDialog) toolSettingsDialog.hidden = false;
+}
+
+function closeToolSettingsDialog() {
+  if (toolSettingsDialog) toolSettingsDialog.hidden = true;
+}
+
+function resetSideToolVisibility() {
+  const visibility = {};
+  for (const button of sideToolButtons) {
+    const id = sideToolIdForButton(button);
+    if (id) visibility[id] = true;
+  }
+  writeSideToolVisibility(visibility);
+  applySideToolVisibility();
+  renderToolSettingsOptions();
+}
+
+function setupToolSettingsDialog() {
+  toolSettingsButton?.addEventListener("click", openToolSettingsDialog);
+  toolSettingsDoneButton?.addEventListener("click", closeToolSettingsDialog);
+  toolSettingsResetButton?.addEventListener("click", resetSideToolVisibility);
+  toolSettingsDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === toolSettingsDialog) {
+      closeToolSettingsDialog();
+    }
+  });
+  toolSettingsList?.addEventListener("change", (event) => {
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) return;
+    const id = input.dataset.toolSettingId;
+    if (!id || ALWAYS_VISIBLE_SIDE_TOOLS.has(id)) return;
+    const visibility = readSideToolVisibility();
+    visibility[id] = input.checked;
+    writeSideToolVisibility(visibility);
+    applySideToolVisibility();
+  });
+  applySideToolVisibility({ keepActive: true });
+}
+
+function browserFullscreenElement() {
+  return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+}
+
+async function requestNativeFullscreen(element) {
+  const request =
+    element?.requestFullscreen ||
+    element?.webkitRequestFullscreen ||
+    element?.msRequestFullscreen;
+  if (!request) return false;
+  const result = request.call(element);
+  if (result?.then) await result;
+  return true;
+}
+
+async function exitNativeFullscreen() {
+  const exit =
+    document.exitFullscreen ||
+    document.webkitExitFullscreen ||
+    document.msExitFullscreen;
+  if (!exit || !browserFullscreenElement()) return false;
+  const result = exit.call(document);
+  if (result?.then) await result;
+  return true;
+}
+
+function panelFullscreenActive(panel) {
+  return Boolean(panel && (panel.classList.contains("panel-fullscreen") || browserFullscreenElement() === panel));
+}
+
+function schedulePanelFullscreenResize() {
+  requestAnimationFrame(() => {
+    drawIso();
+    renderFallbackPreview();
+    resizeThree();
+    update3dLabelPositions();
+  });
+}
+
+function setFullscreenButtonState(button, active) {
+  if (!button) return;
+  button.setAttribute("aria-pressed", String(active));
+  button.title = active ? "Exit full screen" : "View full screen";
+  button.setAttribute("aria-label", button.title);
+  const label = button.querySelector("span");
+  if (label) label.textContent = active ? "Exit" : "Full";
+}
+
+function updatePanelFullscreenState() {
+  const native = browserFullscreenElement();
+  for (const panel of [drawingPanel, previewPanel]) {
+    if (!panel) continue;
+    const active = panel === appFullscreenPanel || panel === native;
+    panel.classList.toggle("panel-fullscreen", active);
+  }
+  document.body.classList.toggle("has-panel-fullscreen", Boolean(appFullscreenPanel || native));
+  setFullscreenButtonState(drawingFullscreenButton, panelFullscreenActive(drawingPanel));
+  setFullscreenButtonState(previewFullscreenButton, panelFullscreenActive(previewPanel));
+  schedulePanelFullscreenResize();
+}
+
+async function closePanelFullscreen() {
+  appFullscreenPanel = null;
+  if (browserFullscreenElement()) {
+    try {
+      await exitNativeFullscreen();
+    } catch (error) {
+      console.warn("Could not exit browser fullscreen.", error);
+    }
+  }
+  updatePanelFullscreenState();
+}
+
+async function togglePanelFullscreen(panel) {
+  if (!panel) return;
+  if (panelFullscreenActive(panel)) {
+    await closePanelFullscreen();
+    return;
+  }
+
+  await closePanelFullscreen();
+  try {
+    const usedNativeFullscreen = await requestNativeFullscreen(panel);
+    if (!usedNativeFullscreen) {
+      appFullscreenPanel = panel;
+    }
+  } catch (error) {
+    console.warn("Browser fullscreen unavailable; using app focus mode.", error);
+    appFullscreenPanel = panel;
+  }
+  updatePanelFullscreenState();
+}
+
+function setupPanelFullscreen() {
+  drawingFullscreenButton?.addEventListener("click", () => togglePanelFullscreen(drawingPanel));
+  previewFullscreenButton?.addEventListener("click", () => togglePanelFullscreen(previewPanel));
+  document.addEventListener("fullscreenchange", () => {
+    if (!browserFullscreenElement()) appFullscreenPanel = null;
+    updatePanelFullscreenState();
+  });
+  document.addEventListener("webkitfullscreenchange", () => {
+    if (!browserFullscreenElement()) appFullscreenPanel = null;
+    updatePanelFullscreenState();
+  });
+}
+
+function isGestureSurfaceTarget(target) {
+  return target instanceof Element && Boolean(target.closest(
+    "#drawCanvas, #threeCanvas, #fallbackCanvas, .canvas-frame, .preview-stage, .tool-rail, .drawing-panel, .preview-panel",
+  ));
+}
+
+function setupTouchSelectionGuards() {
+  for (const eventName of ["selectstart", "dragstart"]) {
+    document.addEventListener(eventName, (event) => {
+      if (isGestureSurfaceTarget(event.target) && !isEditingField(event.target)) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+  }
+
+  for (const surface of [drawCanvas, threeCanvas, fallbackCanvas, previewStage]) {
+    surface?.addEventListener("gesturestart", (event) => event.preventDefault(), { passive: false });
+    surface?.addEventListener("gesturechange", (event) => event.preventDefault(), { passive: false });
+  }
 }
 
 function setPreviewMode(value) {
@@ -6050,6 +6331,7 @@ function setupThree(THREE, OrbitControls) {
   const grid = new THREE.GridHelper(24, 24, 0x9aaaa5, 0xdce2df);
   grid.rotation.x = Math.PI / 2;
   grid.position.z = -0.02;
+  three.previewGrid = grid;
   three.scene.add(grid);
 
   three.controls = new OrbitControls(three.camera, three.renderer.domElement);
@@ -6114,12 +6396,12 @@ function applyThreeNavigationMode(mode = three.navigationMode) {
   three.controls.mouseButtons = mode === "pan"
     ? {
         LEFT: THREE.MOUSE.PAN,
-        MIDDLE: THREE.MOUSE.DOLLY,
+        MIDDLE: THREE.MOUSE.PAN,
         RIGHT: THREE.MOUSE.ROTATE,
       }
     : {
         LEFT: THREE.MOUSE.ROTATE,
-        MIDDLE: THREE.MOUSE.DOLLY,
+        MIDDLE: THREE.MOUSE.PAN,
         RIGHT: THREE.MOUSE.PAN,
       };
   three.controls.touches = mode === "pan"
@@ -6150,6 +6432,28 @@ function resizeThree() {
   update3dLabelPositions();
 }
 
+function updateThreeSceneStyle(style) {
+  if (!three.ready || !three.module) return;
+  const THREE = three.module;
+  three.scene.background = new THREE.Color(style.background ?? 0xf8fbfb);
+
+  const gridMaterials = three.previewGrid
+    ? (Array.isArray(three.previewGrid.material) ? three.previewGrid.material : [three.previewGrid.material])
+    : [];
+  const gridColors = style.gridColors ?? [0x9aaaa5, 0xdce2df];
+  const gridOpacity = style.gridOpacity ?? 1;
+  if (three.previewGrid) {
+    three.previewGrid.visible = gridOpacity > 0.02;
+  }
+  for (const [index, material] of gridMaterials.entries()) {
+    if (!material) continue;
+    material.color?.setHex(gridColors[Math.min(index, gridColors.length - 1)]);
+    material.transparent = gridOpacity < 1;
+    material.opacity = gridOpacity;
+    material.needsUpdate = true;
+  }
+}
+
 function update3dPreview() {
   if (!three.ready) {
     clear3dPipeLabels();
@@ -6161,9 +6465,30 @@ function update3dPreview() {
   frameThreeCamera();
 }
 
+function fittingRenderPosition(fitting, start, end, renderedSegment, pipeRadius) {
+  const t = normalizeFittingPosition(fitting.type, fitting.t);
+  const axis = end.clone().sub(start);
+  if (axis.length() < 0.0001) return start.clone();
+  axis.normalize();
+
+  if (renderedSegment) {
+    if (fitting.type === "rollGroove") {
+      const inset = clampNumber(pipeRadius * 1.35, 0.08, 0.22);
+      if (t <= 0.000001) return renderedSegment.start.clone().addScaledVector(axis, inset);
+      if (t >= 0.999999) return renderedSegment.end.clone().addScaledVector(axis, -inset);
+    }
+
+    if (t <= 0.000001) return renderedSegment.start.clone();
+    if (t >= 0.999999) return renderedSegment.end.clone();
+  }
+
+  return start.clone().lerp(end, t);
+}
+
 function rebuildThreeSpool() {
   const THREE = three.module;
   const style = previewViewStyle();
+  updateThreeSceneStyle(style);
   clear3dPipeLabels();
   if (three.spoolGroup) {
     three.scene.remove(three.spoolGroup);
@@ -6192,6 +6517,7 @@ function rebuildThreeSpool() {
   const autoReducers = autoReducerTransitions(segmentData);
   const reducerTrims = computeAutoReducerRenderTrims(autoReducers);
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  const renderedSegments = new Map();
 
   for (const segment of segmentData) {
     const segmentRadius = pipeRadiusMetres(segment);
@@ -6204,6 +6530,7 @@ function rebuildThreeSpool() {
     const endReducerTrim = reducerTrims.get(`${segment.index}:${segment.to}`) ?? 0;
     start.addScaledVector(direction, startTrim + startReducerTrim);
     end.addScaledVector(direction, -(endTrim + endReducerTrim));
+    renderedSegments.set(segment.index, { start: start.clone(), end: end.clone() });
 
     if (start.distanceTo(end) < segmentRadius * 0.5) {
       continue;
@@ -6288,15 +6615,15 @@ function rebuildThreeSpool() {
   }
 
   for (const fitting of state.fittings) {
-    const segment = segments().find((item) => item.index === fitting.segmentIndex);
+    const segment = segmentByIndex.get(fitting.segmentIndex);
     if (!segment) continue;
     const startModel = toModelUnits(segment.start);
     const endModel = toModelUnits(segment.end);
     const start = new THREE.Vector3(startModel.x, startModel.y, startModel.z);
     const end = new THREE.Vector3(endModel.x, endModel.y, endModel.z);
-    const position = start.clone().lerp(end, fitting.t);
     const direction = end.clone().sub(start).normalize();
     const radius = pipeRadiusMetres(segment);
+    const position = fittingRenderPosition(fitting, start, end, renderedSegments.get(segment.index), radius);
 
     if (fitting.type === "flange") {
       if (style.lineDrawing) {
@@ -6323,25 +6650,9 @@ function rebuildThreeSpool() {
       group.add(weld);
     } else if (fitting.type === "valve") {
       if (style.lineDrawing) {
-        group.add(outlineValveMarker(position, direction, radius, valveMaterial));
+        group.add(outlineButterflyValveMarker(position, direction, radius, pipeSizeForSegment(segment).nb, valveMaterial));
       } else {
-        const valve = new THREE.Mesh(new THREE.OctahedronGeometry(radius * 2.15, 0), valveMaterial);
-        valve.position.copy(position);
-        valve.castShadow = true;
-        group.add(valve);
-
-        const stemBase = position.clone().add(new THREE.Vector3(0, 0, radius * 0.8));
-        const stemTop = position.clone().add(new THREE.Vector3(0, 0, radius * 3.8));
-        group.add(cylinderBetween(stemBase, stemTop, radius * 0.28, valveMaterial, 16));
-        group.add(
-          cylinderBetween(
-            stemTop.clone().add(new THREE.Vector3(-radius * 1.5, 0, 0)),
-            stemTop.clone().add(new THREE.Vector3(radius * 1.5, 0, 0)),
-            radius * 0.2,
-            valveMaterial,
-            16,
-          ),
-        );
+        group.add(butterflyValveAssembly(position, direction, radius, pipeSizeForSegment(segment).nb, valveMaterial, boltMaterial, style));
       }
     } else if (fitting.type === "reducer") {
       if (style.lineDrawing) {
@@ -6414,6 +6725,18 @@ function previewViewStyle() {
     socket: 0xe8f4f2,
     groove: 0x9aa6aa,
   };
+  const workshopColors = {
+    pipe: 0xc9c7bd,
+    joint: 0xbeb9aa,
+    flange: 0xb8ad93,
+    bolt: 0x303035,
+    gasket: 0x202224,
+    valve: 0xb9ad91,
+    weld: 0xd6d0bd,
+    reducer: 0xc0bbae,
+    socket: 0xb6c4bd,
+    groove: 0x7e817d,
+  };
   const styles = {
     carbon: {
       basic: false,
@@ -6437,6 +6760,23 @@ function previewViewStyle() {
       clearcoat: 0.08,
       clearcoatRoughness: 0.28,
       colors: carbonColors,
+    },
+    workshop: {
+      background: 0xe8e3d7,
+      gridColors: [0xb8b2a3, 0xd6d0c0],
+      gridOpacity: 0.12,
+      basic: false,
+      physical: true,
+      wireframe: false,
+      opacity: 1,
+      metalness: 0.34,
+      roughness: 0.22,
+      clearcoat: 0.32,
+      clearcoatRoughness: 0.16,
+      emissive: 0x1c1a16,
+      emissiveIntensity: 0.02,
+      detailModel: true,
+      colors: workshopColors,
     },
     stainless: {
       basic: false,
@@ -6490,6 +6830,7 @@ function previewViewStyle() {
       },
     },
     outline: {
+      background: 0xfffafa,
       basic: true,
       wireframe: false,
       opacity: 1,
@@ -6508,6 +6849,30 @@ function previewViewStyle() {
         reducer: 0xc1121f,
         socket: 0xc1121f,
         groove: 0xc1121f,
+      },
+    },
+    cad: {
+      background: 0x050706,
+      gridColors: [0x1f3d2e, 0x12251e],
+      gridOpacity: 0.8,
+      basic: true,
+      wireframe: false,
+      opacity: 1,
+      outline: true,
+      lineDrawing: true,
+      metalness: 0,
+      roughness: 1,
+      colors: {
+        pipe: 0x33ff66,
+        joint: 0x33ff66,
+        flange: 0xd4d28a,
+        bolt: 0xd4d28a,
+        gasket: 0x88948d,
+        valve: 0x33ff66,
+        weld: 0x6be6ff,
+        reducer: 0x33ff66,
+        socket: 0x6be6ff,
+        groove: 0x33ff66,
       },
     },
   };
@@ -6564,6 +6929,20 @@ function cylinderBetween(start, end, radius, material, radialSegments) {
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.copy(start).add(end).multiplyScalar(0.5);
   mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+  return mesh;
+}
+
+function orientedBoxMesh(center, axisX, axisY, axisZ, sizeX, sizeY, sizeZ, material) {
+  const THREE = three.module;
+  const geometry = new THREE.BoxGeometry(sizeX, sizeY, sizeZ);
+  const mesh = new THREE.Mesh(geometry, material);
+  const matrix = new THREE.Matrix4().makeBasis(
+    axisX.clone().normalize(),
+    axisY.clone().normalize(),
+    axisZ.clone().normalize(),
+  );
+  mesh.position.copy(center);
+  mesh.quaternion.setFromRotationMatrix(matrix);
   return mesh;
 }
 
@@ -6670,10 +7049,13 @@ function outlineBandMarker(position, direction, radius, material, width = 0.18) 
 }
 
 function outlineRollGrooveMarker(position, direction, radius, material, width = 0.12) {
-  const group = outlineBandMarker(position, direction, radius * 1.03, material, width);
+  const group = new three.module.Group();
   const axis = direction.clone().normalize();
   const basis = radialBasis(axis);
-  group.add(outlineRing(position, axis, radius * 1.06, material));
+  const shoulderWidth = width * 0.42;
+  for (const offset of [-width * 0.44, -shoulderWidth * 0.5, shoulderWidth * 0.5, width * 0.44]) {
+    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, radius * 1.02, material));
+  }
 
   for (const radial of [
     basis.u,
@@ -6682,8 +7064,8 @@ function outlineRollGrooveMarker(position, direction, radius, material, width = 
     basis.v.clone().multiplyScalar(-1),
   ]) {
     group.add(lineBetween(
-      position.clone().addScaledVector(axis, -width * 0.5).add(radial.clone().multiplyScalar(radius * 1.03)),
-      position.clone().addScaledVector(axis, width * 0.5).add(radial.clone().multiplyScalar(radius * 1.03)),
+      position.clone().addScaledVector(axis, -width * 0.44).add(radial.clone().multiplyScalar(radius * 1.01)),
+      position.clone().addScaledVector(axis, width * 0.44).add(radial.clone().multiplyScalar(radius * 1.01)),
       material,
     ));
   }
@@ -6766,29 +7148,186 @@ function outlineFlangePlate(position, axis, outerRadius, innerRadius, thickness,
   return group;
 }
 
-function outlineValveMarker(position, direction, radius, material) {
+function outlineButterflyValveMarker(position, direction, radius, nominalBore, material) {
   const THREE = three.module;
   const group = new THREE.Group();
   const axis = direction.clone().normalize();
   const basis = radialBasis(axis);
-  const size = radius * 1.85;
-  const points = [
-    position.clone().addScaledVector(axis, -size),
-    position.clone().add(basis.u.clone().multiplyScalar(size)),
-    position.clone().addScaledVector(axis, size),
-    position.clone().add(basis.u.clone().multiplyScalar(-size)),
-    position.clone().addScaledVector(axis, -size),
-  ];
-  group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), material));
+  const bodyRadius = radius * 1.62;
+  const bodyLength = clampNumber(radius * 2.25, 0.18, 0.42);
+  const boltCount = Math.min(8, Math.max(4, boltCountForNb(nominalBore)));
+  const faces = [-0.5, 0.5].map((side) => position.clone().addScaledVector(axis, bodyLength * side));
 
-  const stemBase = position.clone().add(basis.v.clone().multiplyScalar(radius * 0.8));
-  const stemTop = position.clone().add(basis.v.clone().multiplyScalar(radius * 3.6));
+  for (const face of faces) {
+    group.add(outlineRing(face, axis, bodyRadius, material));
+    group.add(outlineRing(face, axis, radius * 1.05, material));
+  }
+  for (const radial of [basis.u, basis.u.clone().multiplyScalar(-1), basis.v, basis.v.clone().multiplyScalar(-1)]) {
+    group.add(lineBetween(
+      faces[0].clone().add(radial.clone().multiplyScalar(bodyRadius)),
+      faces[1].clone().add(radial.clone().multiplyScalar(bodyRadius)),
+      material,
+    ));
+  }
+
+  for (let index = 0; index < boltCount; index += 1) {
+    const angle = (Math.PI * 2 * index) / boltCount;
+    const radial = basis.u.clone().multiplyScalar(Math.cos(angle))
+      .add(basis.v.clone().multiplyScalar(Math.sin(angle)))
+      .normalize();
+    const lugCenter = position.clone().add(radial.clone().multiplyScalar(bodyRadius * 1.08));
+    group.add(lineBetween(
+      lugCenter.clone().addScaledVector(axis, -bodyLength * 0.66),
+      lugCenter.clone().addScaledVector(axis, bodyLength * 0.66),
+      material,
+    ));
+    group.add(outlineRing(lugCenter, axis, clampNumber(radius * 0.16, 0.016, 0.045), material));
+  }
+
+  const stemBase = position.clone().add(basis.v.clone().multiplyScalar(bodyRadius * 0.82));
+  const stemTop = position.clone().add(basis.v.clone().multiplyScalar(bodyRadius * 1.9));
   group.add(lineBetween(stemBase, stemTop, material));
   group.add(lineBetween(
-    stemTop.clone().add(basis.u.clone().multiplyScalar(-radius * 1.45)),
-    stemTop.clone().add(basis.u.clone().multiplyScalar(radius * 1.45)),
+    stemTop.clone().addScaledVector(axis, -bodyRadius * 0.42),
+    stemTop.clone().addScaledVector(axis, bodyRadius * 0.42),
     material,
   ));
+  return group;
+}
+
+function butterflyValveAssembly(position, direction, pipeRadius, nominalBore, valveMaterial, boltMaterial, style) {
+  const THREE = three.module;
+  const axis = direction.clone().normalize();
+  const basis = radialBasis(axis);
+  const group = new THREE.Group();
+  const bodyLength = clampNumber(pipeRadius * 1.85, 0.16, 0.38);
+  const bodyRadius = pipeRadius * 1.62;
+  const boreRadius = pipeRadius * 0.94;
+  const faceRadius = pipeRadius * 1.72;
+  const boltCount = Math.min(8, Math.max(4, boltCountForNb(nominalBore)));
+  const lugRadius = clampNumber(pipeRadius * 0.16, 0.016, 0.048);
+  const lugDistance = bodyRadius * 1.1;
+  const shaftRadius = clampNumber(pipeRadius * 0.095, 0.01, 0.032);
+  const opacity = style.opacity ?? 1;
+  const darkMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({ color: 0x1d2426, transparent: opacity < 1, opacity })
+    : new THREE.MeshStandardMaterial({
+      color: 0x1d2426,
+      metalness: Math.min(0.5, style.metalness ?? 0.35),
+      roughness: Math.max(0.34, style.roughness ?? 0.36),
+      transparent: opacity < 1,
+      opacity,
+    });
+  const discMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({ color: 0x4f5554, transparent: opacity < 1, opacity })
+    : new THREE.MeshStandardMaterial({
+      color: style.detailModel ? 0x74766f : 0x42494b,
+      metalness: Math.min(0.58, style.metalness ?? 0.35),
+      roughness: Math.max(0.24, style.roughness ?? 0.36),
+      transparent: opacity < 1,
+      opacity,
+    });
+
+  const body = flangePlate(
+    position,
+    axis,
+    bodyRadius,
+    boreRadius,
+    bodyLength,
+    0,
+    0,
+    0,
+    valveMaterial,
+  );
+  body.castShadow = true;
+  body.receiveShadow = true;
+  group.add(body);
+
+  const discThickness = clampNumber(pipeRadius * 0.16, 0.014, 0.044);
+  const disc = cylinderBetween(
+    position.clone().addScaledVector(axis, -discThickness * 0.5),
+    position.clone().addScaledVector(axis, discThickness * 0.5),
+    boreRadius * 0.86,
+    discMaterial,
+    40,
+  );
+  disc.castShadow = true;
+  disc.receiveShadow = true;
+  group.add(disc);
+
+  const discRib = cylinderBetween(
+    position.clone().add(basis.u.clone().multiplyScalar(-boreRadius * 0.72)),
+    position.clone().add(basis.u.clone().multiplyScalar(boreRadius * 0.72)),
+    clampNumber(pipeRadius * 0.035, 0.005, 0.014),
+    boltMaterial,
+    10,
+  );
+  discRib.castShadow = true;
+  group.add(discRib);
+
+  for (const offset of [-bodyLength * 0.54, bodyLength * 0.54]) {
+    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, faceRadius, clampNumber(pipeRadius * 0.05, 0.006, 0.016), valveMaterial, 10, 52));
+    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, boreRadius, clampNumber(pipeRadius * 0.028, 0.004, 0.01), darkMaterial, 8, 42));
+  }
+
+  for (let index = 0; index < boltCount; index += 1) {
+    const angle = (Math.PI * 2 * index) / boltCount;
+    const radial = basis.u.clone().multiplyScalar(Math.cos(angle))
+      .add(basis.v.clone().multiplyScalar(Math.sin(angle)))
+      .normalize();
+    const lugCenter = position.clone().add(radial.clone().multiplyScalar(lugDistance));
+    const lug = cylinderBetween(
+      lugCenter.clone().addScaledVector(axis, -bodyLength * 0.72),
+      lugCenter.clone().addScaledVector(axis, bodyLength * 0.72),
+      lugRadius,
+      valveMaterial,
+      16,
+    );
+    lug.castShadow = true;
+    lug.receiveShadow = true;
+    group.add(lug);
+
+    const bolt = cylinderBetween(
+      lugCenter.clone().addScaledVector(axis, -bodyLength * 0.76),
+      lugCenter.clone().addScaledVector(axis, bodyLength * 0.76),
+      lugRadius * 0.46,
+      darkMaterial,
+      12,
+    );
+    bolt.castShadow = true;
+    group.add(bolt);
+  }
+
+  const stemBase = position.clone().add(basis.v.clone().multiplyScalar(-bodyRadius * 0.86));
+  const stemTop = position.clone().add(basis.v.clone().multiplyScalar(bodyRadius * 1.62));
+  const stem = cylinderBetween(stemBase, stemTop, shaftRadius, boltMaterial, 16);
+  stem.castShadow = true;
+  group.add(stem);
+
+  const actuator = orientedBoxMesh(
+    stemTop.clone().add(basis.v.clone().multiplyScalar(bodyRadius * 0.18)),
+    basis.u,
+    axis,
+    basis.v,
+    bodyRadius * 1.08,
+    Math.max(bodyLength * 0.92, pipeRadius * 0.8),
+    bodyRadius * 0.4,
+    valveMaterial,
+  );
+  actuator.castShadow = true;
+  actuator.receiveShadow = true;
+  group.add(actuator);
+
+  const handle = cylinderBetween(
+    stemTop.clone().add(basis.u.clone().multiplyScalar(-bodyRadius * 0.78)).add(basis.v.clone().multiplyScalar(bodyRadius * 0.5)),
+    stemTop.clone().add(basis.u.clone().multiplyScalar(bodyRadius * 0.78)).add(basis.v.clone().multiplyScalar(bodyRadius * 0.5)),
+    clampNumber(pipeRadius * 0.055, 0.007, 0.02),
+    boltMaterial,
+    12,
+  );
+  handle.castShadow = true;
+  group.add(handle);
+
   return group;
 }
 
@@ -6856,8 +7395,8 @@ function socketAssembly(position, direction, pipeRadius, fitting, material, styl
 function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
-  const markerLength = clampNumber(pipeRadius * 0.95, 0.07, 0.16);
-  const grooveSpacing = markerLength * 0.28;
+  const markerLength = clampNumber(pipeRadius * 1.05, 0.075, 0.18);
+  const grooveSpacing = markerLength * 0.34;
 
   if (style.lineDrawing) {
     return outlineRollGrooveMarker(position, axis, pipeRadius, material, markerLength);
@@ -6868,14 +7407,11 @@ function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const brightColor = new THREE.Color(grooveColor).offsetHSL(0, 0, 0.18).getHex();
   const darkColor = new THREE.Color(grooveColor).offsetHSL(0, 0, -0.16).getHex();
   const baseMaterialParams = {
-    transparent: style.opacity < 1,
-    opacity: Math.min(0.92, (style.opacity ?? 1) + 0.04),
+    transparent: true,
+    opacity: Math.min(0.68, (style.opacity ?? 1) * 0.68),
     metalness: Math.min(0.72, style.metalness ?? 0.35),
     roughness: Math.max(0.22, style.roughness ?? 0.36),
   };
-  const bandMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: grooveColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
-    : new THREE.MeshStandardMaterial({ ...baseMaterialParams, color: grooveColor });
   const darkBandMaterial = style.basic
     ? new THREE.MeshBasicMaterial({ color: darkColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
     : new THREE.MeshStandardMaterial({ ...baseMaterialParams, color: darkColor, roughness: Math.max(0.38, baseMaterialParams.roughness) });
@@ -6888,30 +7424,27 @@ function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
     opacity: Math.min(0.94, (style.opacity ?? 1) + 0.08),
   });
 
-  const sleeveStart = position.clone().addScaledVector(axis, -markerLength * 0.5);
-  const sleeveEnd = position.clone().addScaledVector(axis, markerLength * 0.5);
-  const sleeve = cylinderBetween(sleeveStart, sleeveEnd, pipeRadius * 1.028, bandMaterial, 36);
-  sleeve.castShadow = true;
-  sleeve.receiveShadow = true;
-  group.add(sleeve);
-
-  const centreBand = cylinderBetween(
-    position.clone().addScaledVector(axis, -grooveSpacing * 0.55),
-    position.clone().addScaledVector(axis, grooveSpacing * 0.55),
-    pipeRadius * 1.036,
+  const shadowBand = cylinderBetween(
+    position.clone().addScaledVector(axis, -grooveSpacing * 0.5),
+    position.clone().addScaledVector(axis, grooveSpacing * 0.5),
+    pipeRadius * 1.006,
     darkBandMaterial,
-    36,
+    48,
   );
-  centreBand.castShadow = true;
-  centreBand.receiveShadow = true;
-  group.add(centreBand);
+  shadowBand.castShadow = false;
+  shadowBand.receiveShadow = true;
+  group.add(shadowBand);
 
-  const lipTube = clampNumber(pipeRadius * 0.055, 0.004, 0.012);
-  for (const offset of [-markerLength * 0.42, markerLength * 0.42]) {
-    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.035, lipTube, lipMaterial));
+  const grooveTube = clampNumber(pipeRadius * 0.026, 0.0035, 0.009);
+  const lipTube = clampNumber(pipeRadius * 0.035, 0.0035, 0.01);
+  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
+    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.004, grooveTube, darkBandMaterial, 8, 48));
+  }
+  for (const offset of [-markerLength * 0.44, markerLength * 0.44]) {
+    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.012, lipTube, lipMaterial, 8, 48));
   }
   for (const offset of [-grooveSpacing, grooveSpacing]) {
-    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.046, lineMaterial));
+    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.018, lineMaterial));
   }
   return group;
 }
@@ -7758,7 +8291,7 @@ function renderFallbackPreview() {
     depth: point.depth,
   });
 
-  drawFallbackGrid(ctx, width, height);
+  drawFallbackGrid(ctx, width, height, style);
 
   const pipeWidth = Math.max(12, visualPipeWidth() * 1.02);
   const connectionCounts = nodeConnections(segments());
@@ -7831,9 +8364,9 @@ function projectPreviewPoint(point) {
   };
 }
 
-function drawFallbackGrid(ctx, width, height) {
+function drawFallbackGrid(ctx, width, height, style = {}) {
   ctx.save();
-  ctx.strokeStyle = "rgba(99, 115, 109, 0.16)";
+  ctx.strokeStyle = style.gridStroke ?? "rgba(99, 115, 109, 0.16)";
   ctx.lineWidth = 1;
   const spacing = 32;
   for (let x = -width; x < width * 2; x += spacing) {
@@ -7875,6 +8408,19 @@ function fallbackPreviewStyle() {
   const styles = {
     carbon: stainless ? stainlessStyle : carbonStyle,
     black: carbonStyle,
+    workshop: {
+      background: "#e8e3d7",
+      shadow: "rgba(54, 49, 40, 0.13)",
+      gridStroke: "rgba(109, 101, 84, 0.1)",
+      pipeStops: ["#9f9b90", "#efeadf", "#85867f"],
+      highlight: "rgba(255, 255, 255, 0.72)",
+      fittingStroke: "#746d5d",
+      fittingFill: "#c9bfaa",
+      nodeFill: "#b8ad93",
+      nodeStroke: "#504a40",
+      outline: false,
+      ghost: false,
+    },
     stainless: stainlessStyle,
     red: {
       background: "#fff8f7",
@@ -7909,6 +8455,20 @@ function fallbackPreviewStyle() {
       fittingFill: "rgba(255, 255, 255, 0)",
       nodeFill: "rgba(255, 255, 255, 0)",
       nodeStroke: "#c1121f",
+      outline: true,
+      ghost: false,
+    },
+    cad: {
+      background: "#050706",
+      shadow: "rgba(0, 0, 0, 0)",
+      gridStroke: "rgba(51, 255, 102, 0.16)",
+      pipeStops: ["#33ff66", "#33ff66", "#33ff66"],
+      highlight: "#33ff66",
+      fittingStroke: "#33ff66",
+      fittingFill: "rgba(0, 0, 0, 0)",
+      nodeFill: "rgba(0, 0, 0, 0)",
+      nodeStroke: "#d4d28a",
+      weldStroke: "#6be6ff",
       outline: true,
       ghost: false,
     },
@@ -8258,13 +8818,36 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
   ctx.lineWidth = 4;
 
   if (fitting.type === "valve") {
+    const body = Math.max(18, pipeWidth * 0.92);
+    const length = Math.max(20, pipeWidth * 0.82);
     ctx.beginPath();
-    ctx.moveTo(along.x * -14, along.y * -14);
-    ctx.lineTo(normal.x * 16, normal.y * 16);
-    ctx.lineTo(along.x * 14, along.y * 14);
-    ctx.lineTo(normal.x * -16, normal.y * -16);
-    ctx.closePath();
-    if (!style.outline) ctx.fill();
+    ctx.ellipse(0, 0, length * 0.56, body * 0.62, angle, 0, Math.PI * 2);
+    if (!style.outline) {
+      ctx.fill();
+    }
+    ctx.stroke();
+    for (const offset of [-length * 0.52, length * 0.52]) {
+      ctx.beginPath();
+      ctx.moveTo(along.x * offset + normal.x * body * -0.7, along.y * offset + normal.y * body * -0.7);
+      ctx.lineTo(along.x * offset + normal.x * body * 0.7, along.y * offset + normal.y * body * 0.7);
+      ctx.stroke();
+    }
+    ctx.lineWidth = 2.4;
+    for (const side of [-1, 1]) {
+      for (const offset of [-0.42, 0.42]) {
+        ctx.beginPath();
+        ctx.arc(along.x * length * offset + normal.x * body * side * 0.52, along.y * length * offset + normal.y * body * side * 0.52, 2.4, 0, Math.PI * 2);
+        if (style.outline) ctx.stroke();
+        else ctx.fill();
+      }
+    }
+    ctx.beginPath();
+    ctx.moveTo(normal.x * body * 0.58, normal.y * body * 0.58);
+    ctx.lineTo(normal.x * body * 1.32, normal.y * body * 1.32);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(normal.x * body * 1.32 + along.x * body * -0.38, normal.y * body * 1.32 + along.y * body * -0.38);
+    ctx.lineTo(normal.x * body * 1.32 + along.x * body * 0.38, normal.y * body * 1.32 + along.y * body * 0.38);
     ctx.stroke();
   } else if (fitting.type === "reducer") {
     ctx.beginPath();
@@ -13975,6 +14558,10 @@ document.addEventListener("keydown", (event) => {
   } else if ((event.key === "Delete" || event.key === "Backspace") && !isEditingField(event.target)) {
     deleteSelection();
   } else if (event.key === "Escape") {
+    if (appFullscreenPanel || browserFullscreenElement()) {
+      closePanelFullscreen();
+      return;
+    }
     if (loadPlanDialog && !loadPlanDialog.hidden) {
       closeLoadPlanDialog();
       return;
@@ -13985,6 +14572,10 @@ document.addEventListener("keydown", (event) => {
     }
     if (authDialog && !authDialog.hidden) {
       closeAuthDialog();
+      return;
+    }
+    if (toolSettingsDialog && !toolSettingsDialog.hidden) {
+      closeToolSettingsDialog();
       return;
     }
     if (projectJobQuickPick && !projectJobQuickPick.hidden) {
@@ -14035,6 +14626,9 @@ setupInspectorTabs();
 setupMobilePanels();
 setupAuthDialog();
 setupProjectDialog();
+setupToolSettingsDialog();
+setupPanelFullscreen();
+setupTouchSelectionGuards();
 setupLoadPlanner();
 registerServiceWorker();
 setupAppVersionChecks();

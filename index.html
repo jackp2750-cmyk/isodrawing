@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=129" />
+    <link rel="stylesheet" href="./styles.css?v=134" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -125,6 +125,23 @@
         <circle cx="12" cy="8" r="4" />
         <path d="M4 21c1.4-4 4.1-6 8-6s6.6 2 8 6" />
       </symbol>
+      <symbol id="icon-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M12 2v3" />
+        <path d="M12 19v3" />
+        <path d="m4.93 4.93 2.12 2.12" />
+        <path d="m16.95 16.95 2.12 2.12" />
+        <path d="M2 12h3" />
+        <path d="M19 12h3" />
+        <path d="m4.93 19.07 2.12-2.12" />
+        <path d="m16.95 7.05 2.12-2.12" />
+      </symbol>
+      <symbol id="icon-fullscreen" viewBox="0 0 24 24">
+        <path d="M4 9V4h5" />
+        <path d="M20 9V4h-5" />
+        <path d="M4 15v5h5" />
+        <path d="M20 15v5h-5" />
+      </symbol>
     </svg>
 
     <div class="app-shell">
@@ -134,7 +151,7 @@
           <div>
             <strong>IsoSpool Studio</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.29</span>
+            <span class="version-badge" id="appVersionBadge">v1.34</span>
           </div>
         </div>
 
@@ -207,6 +224,10 @@
             <span id="accountButtonLabel">Account</span>
           </button>
           <span class="cloud-status-pill" id="cloudSyncStatus">Local only</span>
+          <button class="icon-button labeled" id="toolSettingsButton" type="button" title="Choose side tools" aria-label="Choose side tools">
+            <svg><use href="#icon-settings"></use></svg>
+            <span>Tools</span>
+          </button>
           <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
             <svg><use href="#icon-sample"></use></svg>
             <span>Import</span>
@@ -274,7 +295,7 @@
               <svg><use href="#icon-note"></use></svg>
               <span>Note</span>
             </button>
-            <button class="tool-button danger" id="deleteButton" type="button" title="Delete selection" aria-label="Delete selection">
+            <button class="tool-button danger" id="deleteButton" data-side-tool="delete" type="button" title="Delete selection" aria-label="Delete selection">
               <svg><use href="#icon-trash"></use></svg>
               <span>Delete</span>
             </button>
@@ -295,6 +316,10 @@
               <button class="icon-button compact labeled" id="zoomInButton" type="button" title="Zoom in" aria-label="Zoom in">
                 <span class="button-sign" aria-hidden="true">+</span>
                 <span>Zoom</span>
+              </button>
+              <button class="icon-button compact labeled" id="drawingFullscreenButton" type="button" title="View drawing full screen" aria-label="View drawing full screen" aria-pressed="false">
+                <svg><use href="#icon-fullscreen"></use></svg>
+                <span>Full</span>
               </button>
               <button class="icon-button compact labeled" id="exportIsoButton" type="button" title="Save fabrication sheet" aria-label="Save fabrication sheet">
                 <svg><use href="#icon-image"></use></svg>
@@ -439,11 +464,13 @@
                 <span>3D view</span>
                 <select id="previewModePanelSelect" aria-label="3D preview style">
                   <option value="carbon">Realistic 3D</option>
+                  <option value="workshop">Workshop model</option>
                   <option value="black">Carbon dark</option>
                   <option value="stainless">Stainless silver</option>
                   <option value="red">Painted red</option>
                   <option value="ghost">Transparent</option>
                   <option value="outline">Fabrication outline</option>
+                  <option value="cad">CAD green line</option>
                 </select>
               </label>
               <div class="preview-nav" aria-label="3D navigation">
@@ -451,6 +478,10 @@
                 <button id="previewMoveButton" type="button" aria-pressed="false">Move</button>
                 <button id="previewResetButton" type="button">Reset</button>
               </div>
+              <button class="icon-button compact labeled" id="previewFullscreenButton" type="button" title="View 3D full screen" aria-label="View 3D full screen" aria-pressed="false">
+                <svg><use href="#icon-fullscreen"></use></svg>
+                <span>Full</span>
+              </button>
               <label class="preview-label-toggle">
                 <input id="previewLabelToggle" type="checkbox" checked />
                 <span>3D labels</span>
@@ -583,6 +614,22 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop" id="toolSettingsDialog" hidden>
+        <section class="project-dialog-card tool-settings-card" aria-label="Side tool settings">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Side tools</strong>
+              <small>Choose which tools appear in the side rail. Draw and Select stay available.</small>
+            </div>
+          </div>
+          <div class="tool-settings-list" id="toolSettingsList" aria-live="polite"></div>
+          <div class="project-dialog-actions tool-settings-actions">
+            <button class="icon-button labeled" id="toolSettingsResetButton" type="button">Show all</button>
+            <button class="primary-button" id="toolSettingsDoneButton" type="button">Done</button>
+          </div>
+        </section>
+      </div>
+
     </div>
 
     <script type="importmap">
@@ -593,6 +640,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=129"></script>
+    <script defer src="./app.js?v=134"></script>
   </body>
 </html>

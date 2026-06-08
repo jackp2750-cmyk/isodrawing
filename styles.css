@@ -37,6 +37,7 @@ body {
   width: 100%;
   min-height: 100%;
   margin: 0;
+  overscroll-behavior: none;
 }
 
 body {
@@ -44,10 +45,36 @@ body {
   color: var(--ink);
 }
 
+.app-shell,
+.workspace,
+.topbar,
+.panel-bar,
+.tool-rail,
+.drawing-panel,
+.preview-panel,
+.canvas-frame,
+.preview-stage,
+.mobile-panel-dock,
+.drawing-context-menu {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 button,
 input,
 select {
   font: inherit;
+}
+
+input,
+textarea,
+select,
+[contenteditable="true"] {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 button {
@@ -598,6 +625,10 @@ button svg path {
   height: 100%;
   display: block;
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .control-panel {
@@ -1661,6 +1692,69 @@ button svg path {
   grid-template-rows: auto minmax(0, 1fr) auto;
 }
 
+.tool-settings-card {
+  width: min(560px, 100%);
+}
+
+.tool-settings-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.tool-setting-row {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  box-shadow: var(--button-shadow);
+  cursor: pointer;
+}
+
+.tool-setting-row:hover {
+  border-color: var(--teal);
+  background: var(--button-hover);
+}
+
+.tool-setting-row.locked {
+  cursor: default;
+  background: #f5f8f6;
+}
+
+.tool-setting-row input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--teal);
+}
+
+.tool-setting-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.tool-setting-copy strong {
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.tool-setting-copy small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 820;
+  line-height: 1.25;
+}
+
+.tool-settings-actions {
+  align-items: center;
+}
+
 .load-plan-card {
   width: min(1040px, 100%);
   max-height: min(86vh, 760px);
@@ -2600,6 +2694,10 @@ button svg path {
     grid-template-columns: 1fr;
   }
 
+  .tool-settings-list {
+    grid-template-columns: 1fr;
+  }
+
   .project-dialog-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -2651,4 +2749,61 @@ button svg path {
     min-width: 72px;
     flex-basis: 72px;
   }
+}
+
+body.has-panel-fullscreen {
+  overflow: hidden;
+}
+
+body .drawing-panel.panel-fullscreen,
+body .preview-panel.panel-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  width: 100vw;
+  height: 100dvh;
+  max-height: none;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+body .drawing-panel.panel-fullscreen {
+  background: var(--panel);
+  padding: 0;
+}
+
+body .preview-panel.panel-fullscreen {
+  background: var(--panel-strong);
+}
+
+body .drawing-panel.panel-fullscreen .panel-bar,
+body .preview-panel.panel-fullscreen .panel-bar {
+  height: auto;
+  min-height: 58px;
+  align-items: center;
+  padding: 8px 14px;
+}
+
+body .drawing-panel.panel-fullscreen .canvas-frame,
+body .preview-panel.panel-fullscreen .preview-stage {
+  height: auto;
+  min-height: 0;
+}
+
+body .drawing-panel.panel-fullscreen .bar-actions,
+body .preview-panel.panel-fullscreen .bar-actions {
+  align-items: center;
+  justify-content: flex-end;
+}
+
+body .drawing-panel:fullscreen,
+body .preview-panel:fullscreen {
+  background: var(--panel);
 }
