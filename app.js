@@ -104,7 +104,7 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.27";
+const APP_VERSION = "v1.29";
 const APP_BUILD_DATE = "2026-06-08";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -114,6 +114,7 @@ const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
 const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
+const VERSION_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const PROJECT_FILE_VERSION = 1;
 const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 50;
@@ -124,6 +125,7 @@ const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
 const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer", "socket"]);
 const FLANGE_MODES = new Set(["single", "double"]);
+const END_FITTING_SNAP_TOLERANCE = 0.015;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const PREVIEW_MODES = new Set(["carbon", "black", "stainless", "red", "ghost", "outline"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
@@ -500,7 +502,10 @@ function statePayload() {
     appVersion: APP_VERSION,
     points: state.points,
     edges: state.edges,
-    fittings: state.fittings,
+    fittings: state.fittings.map((fitting) => ({
+      ...fitting,
+      t: normalizeFittingPosition(fitting.type, fitting.t),
+    })),
     notes: state.notes,
     nodeTypes: normalizeNodeTypes(state.nodeTypes, state.points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length),
@@ -840,9 +845,22 @@ function createProjectId() {
 function normalizeFittingPosition(type, value) {
   const fallback = Number.isFinite(Number(value)) ? Number(value) : 0.5;
   if (type === "flange" || type === "rollGroove") {
-    return clampNumber(fallback, 0, 1);
+    const clamped = clampNumber(fallback, 0, 1);
+    if (clamped <= END_FITTING_SNAP_TOLERANCE) return 0;
+    if (clamped >= 1 - END_FITTING_SNAP_TOLERANCE) return 1;
+    return clamped;
   }
   return clampNumber(fallback, 0.04, 0.96);
+}
+
+function normalizeStateFittingPositions() {
+  for (const fitting of state.fittings) {
+    const current = Number(fitting.t);
+    const normalized = normalizeFittingPosition(fitting.type, fitting.t);
+    if (!Number.isFinite(current) || Math.abs(normalized - current) > 0.000001) {
+      fitting.t = normalized;
+    }
+  }
 }
 
 function normalizeSelectedSegments(values, edgeCount) {
@@ -5260,6 +5278,7 @@ function updateControls() {
 
 function updateAll(options = {}) {
   const save = options.save !== false;
+  normalizeStateFittingPositions();
   drawIso();
   updateSegmentList();
   updateStats();
@@ -5563,6 +5582,29 @@ function authEmail() {
   return email;
 }
 
+function isEmailNotConfirmedError(error) {
+  const message = String(error?.message ?? error?.error_description ?? "").toLowerCase();
+  const code = String(error?.code ?? "").toLowerCase();
+  return code.includes("email_not_confirmed") ||
+    message.includes("email not confirmed") ||
+    message.includes("not confirmed");
+}
+
+function showConfirmationResendState(email = authEmailInput?.value) {
+  if (email && authEmailInput) authEmailInput.value = String(email).trim();
+  setAuthMode("signup");
+  if (authDialogStatus) {
+    authDialogStatus.textContent = "This email is registered but not confirmed yet. Press Resend email, then check your inbox and junk/spam folders.";
+  }
+  if (authModeHelp) {
+    authModeHelp.textContent = "If your work email scans incoming mail, the confirmation can take a few minutes. You can resend it from here.";
+  }
+  if (authResendButton) {
+    authResendButton.hidden = false;
+    authResendButton.focus();
+  }
+}
+
 async function ensureSupabaseClient() {
   await initSupabase();
   if (!supabaseClient) {
@@ -5575,6 +5617,7 @@ async function ensureSupabaseClient() {
 async function signInWithSupabase() {
   const credentials = authCredentials();
   if (!credentials || !(await ensureSupabaseClient())) return;
+  if (await reloadIfOutdatedBeforeAuth()) return;
 
   authSignInButton.disabled = true;
   updateCloudStatus("Signing in...", "");
@@ -5587,8 +5630,13 @@ async function signInWithSupabase() {
     closeAuthDialog();
   } catch (error) {
     console.warn("Sign in failed.", error);
-    updateCloudStatus("Sign in failed", "warning");
-    window.alert(error?.message || "Sign in failed.");
+    if (isEmailNotConfirmedError(error)) {
+      showConfirmationResendState(credentials.email);
+      updateCloudStatus("Email not confirmed", "warning");
+    } else {
+      updateCloudStatus("Sign in failed", "warning");
+      window.alert(error?.message || "Sign in failed.");
+    }
   } finally {
     authSignInButton.disabled = false;
   }
@@ -5597,6 +5645,7 @@ async function signInWithSupabase() {
 async function signUpWithSupabase() {
   const credentials = authCredentials();
   if (!credentials || !(await ensureSupabaseClient())) return;
+  if (await reloadIfOutdatedBeforeAuth()) return;
 
   authSignUpButton.disabled = true;
   updateCloudStatus("Creating account...", "");
@@ -5616,6 +5665,11 @@ async function signUpWithSupabase() {
       closeAuthDialog();
     } else {
       saveAuthRememberPreference();
+      setAuthMode("signup");
+      if (authDialogStatus) {
+        authDialogStatus.textContent = "Account created. Check your email for the confirmation link. You can press Resend email if it does not arrive.";
+      }
+      if (authResendButton) authResendButton.hidden = false;
       updateCloudStatus("Check email", "");
       window.alert("Account created. Check your email for the Supabase confirmation link, then sign in here.");
     }
@@ -5632,6 +5686,7 @@ async function signUpWithSupabase() {
 async function resendSignupEmail() {
   const email = authEmail();
   if (!email || !(await ensureSupabaseClient())) return;
+  if (await reloadIfOutdatedBeforeAuth()) return;
 
   authResendButton.disabled = true;
   updateCloudStatus("Resending email...", "");
@@ -5871,6 +5926,68 @@ function promptForAppUpdate(worker) {
   appUpdateReloadPending = true;
   worker.postMessage({ type: "SKIP_WAITING" });
   setTimeout(() => window.location.reload(), 1500);
+}
+
+function appVersionNumber(value) {
+  const match = String(value ?? "").match(/\d+/);
+  return match ? Number(match[0]) : 0;
+}
+
+async function latestAvailableAppVersion() {
+  if (location.protocol === "file:") return null;
+
+  const response = await fetch(`./app.js?version-check=${Date.now()}`, {
+    cache: "no-store",
+  });
+  if (!response.ok) return null;
+  const source = await response.text();
+  const match = source.match(/const\s+APP_VERSION\s*=\s*["']([^"']+)["']/);
+  return match?.[1] ?? null;
+}
+
+async function checkForNewerAppVersion(options = {}) {
+  try {
+    const latest = await latestAvailableAppVersion();
+    if (!latest || appVersionNumber(latest) <= appVersionNumber(APP_VERSION)) return false;
+
+    const message = `IsoSpool ${latest} is available. You are using ${APP_VERSION}.`;
+    if (options.autoReload) {
+      window.alert(`${message} The app will reload before continuing.`);
+      reloadToLatestApp(latest);
+      return true;
+    }
+
+    updateCloudStatus(`Update ${latest} ready`, "warning");
+    const reloadNow = window.confirm(`${message} Reload now?`);
+    if (reloadNow) {
+      reloadToLatestApp(latest);
+    }
+    return true;
+  } catch (error) {
+    console.warn("Could not check for latest app version.", error);
+    return false;
+  }
+}
+
+function reloadToLatestApp(latestVersion = "") {
+  appUpdateReloadPending = true;
+  const url = new URL(location.href);
+  url.searchParams.set("v", String(appVersionNumber(latestVersion) || Date.now()));
+  url.searchParams.set("reload", String(Date.now()));
+  window.location.replace(url.toString());
+}
+
+function setupAppVersionChecks() {
+  if (location.protocol === "file:") return;
+  setTimeout(() => checkForNewerAppVersion(), 4500);
+  setInterval(() => checkForNewerAppVersion(), VERSION_CHECK_INTERVAL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") checkForNewerAppVersion();
+  });
+}
+
+async function reloadIfOutdatedBeforeAuth() {
+  return checkForNewerAppVersion({ autoReload: true });
 }
 
 async function initThree() {
@@ -13920,6 +14037,7 @@ setupAuthDialog();
 setupProjectDialog();
 setupLoadPlanner();
 registerServiceWorker();
+setupAppVersionChecks();
 populatePipeSizeOptions();
 updateControls();
 updateAll({ save: false });

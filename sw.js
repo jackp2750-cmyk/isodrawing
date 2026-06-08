@@ -1,9 +1,9 @@
-const CACHE_NAME = "isospool-studio-v75";
+const CACHE_NAME = "isospool-studio-v77";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=127",
-  "./app.js?v=127",
+  "./styles.css?v=129",
+  "./app.js?v=129",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
