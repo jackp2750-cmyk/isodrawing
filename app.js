@@ -60,13 +60,18 @@ const accountButtonLabel = document.querySelector("#accountButtonLabel");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
 const authDialog = document.querySelector("#authDialog");
 const authDialogForm = document.querySelector("#authDialogForm");
+const authDialogTitle = document.querySelector("#authDialogTitle");
 const authDialogStatus = document.querySelector("#authDialogStatus");
+const authSignInModeButton = document.querySelector("#authSignInModeButton");
+const authCreateModeButton = document.querySelector("#authCreateModeButton");
 const authEmailInput = document.querySelector("#authEmailInput");
 const authPasswordInput = document.querySelector("#authPasswordInput");
 const authRememberDeviceInput = document.querySelector("#authRememberDeviceInput");
+const authModeHelp = document.querySelector("#authModeHelp");
 const authCloseButton = document.querySelector("#authCloseButton");
 const authSignInButton = document.querySelector("#authSignInButton");
 const authSignUpButton = document.querySelector("#authSignUpButton");
+const authResendButton = document.querySelector("#authResendButton");
 const authSignOutButton = document.querySelector("#authSignOutButton");
 const projectDialog = document.querySelector("#projectDialog");
 const projectDialogForm = document.querySelector("#projectDialogForm");
@@ -99,7 +104,7 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.26";
+const APP_VERSION = "v1.27";
 const APP_BUILD_DATE = "2026-06-08";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -321,6 +326,7 @@ let newDrawingDialogResolver = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
 let startupProjectPromptPending = false;
+let authMode = "signin";
 let supabaseClient = null;
 let cloudUser = null;
 let cloudProfile = null;
@@ -5382,11 +5388,14 @@ function showMobilePanel(panel = "drawing") {
 function setupAuthDialog() {
   loadAuthRememberPreference();
   updateCloudStatus();
+  setAuthMode("signin");
 
   accountButton?.addEventListener("click", () => {
     openAuthDialog();
   });
 
+  authSignInModeButton?.addEventListener("click", () => setAuthMode("signin"));
+  authCreateModeButton?.addEventListener("click", () => setAuthMode("signup"));
   authRememberDeviceInput?.addEventListener("change", saveAuthRememberPreference);
 
   authCloseButton?.addEventListener("click", closeAuthDialog);
@@ -5398,11 +5407,19 @@ function setupAuthDialog() {
 
   authDialogForm?.addEventListener("submit", (event) => {
     event.preventDefault();
-    signInWithSupabase();
+    if (authMode === "signup") {
+      signUpWithSupabase();
+    } else {
+      signInWithSupabase();
+    }
   });
 
   authSignUpButton?.addEventListener("click", () => {
     signUpWithSupabase();
+  });
+
+  authResendButton?.addEventListener("click", () => {
+    resendSignupEmail();
   });
 
   authSignOutButton?.addEventListener("click", () => {
@@ -5410,10 +5427,47 @@ function setupAuthDialog() {
   });
 }
 
+function setAuthMode(mode, options = {}) {
+  authMode = mode === "signup" ? "signup" : "signin";
+  const createMode = authMode === "signup";
+
+  authSignInModeButton?.classList.toggle("active", !createMode);
+  authCreateModeButton?.classList.toggle("active", createMode);
+  authSignInModeButton?.setAttribute("aria-selected", String(!createMode));
+  authCreateModeButton?.setAttribute("aria-selected", String(createMode));
+
+  if (authDialogTitle) authDialogTitle.textContent = createMode ? "Create account" : "Sign in";
+  if (authSignInButton) {
+    authSignInButton.hidden = createMode;
+    authSignInButton.disabled = Boolean(cloudUser);
+  }
+  if (authSignUpButton) {
+    authSignUpButton.hidden = !createMode;
+    authSignUpButton.disabled = Boolean(cloudUser);
+  }
+  if (authResendButton) authResendButton.hidden = !createMode || Boolean(cloudUser);
+  if (authPasswordInput) {
+    authPasswordInput.autocomplete = createMode ? "new-password" : "current-password";
+  }
+  if (authModeHelp) {
+    authModeHelp.textContent = createMode
+      ? "Create an account, then check your inbox for the confirmation email. If it does not arrive, press Resend email."
+      : "Use the email and password you created for IsoSpool.";
+  }
+  if (authDialogStatus && !options.keepStatus) {
+    authDialogStatus.textContent = cloudUser
+      ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}`
+      : createMode
+      ? "Create an account to start a free trial and save spool projects to the cloud."
+      : "Sign in to save and open spool projects from the cloud.";
+  }
+}
+
 function openAuthDialog(options = {}) {
   if (!authDialog) return;
   loadAuthRememberPreference();
   updateCloudStatus();
+  setAuthMode(options.mode ?? authMode, { keepStatus: options.startup });
   if (options.startup) {
     startupProjectPromptPending = true;
     if (authDialogStatus) {
@@ -5490,17 +5544,23 @@ function maybeOpenStartupAuthPrompt() {
 }
 
 function authCredentials() {
-  const email = String(authEmailInput?.value ?? "").trim();
+  const email = authEmail();
   const password = String(authPasswordInput?.value ?? "");
-  if (!email || !email.includes("@")) {
-    window.alert("Enter a valid email address.");
-    return null;
-  }
+  if (!email) return null;
   if (password.length < 6) {
     window.alert("Password must be at least 6 characters.");
     return null;
   }
   return { email, password };
+}
+
+function authEmail() {
+  const email = String(authEmailInput?.value ?? "").trim();
+  if (!email || !email.includes("@")) {
+    window.alert("Enter a valid email address.");
+    return null;
+  }
+  return email;
 }
 
 async function ensureSupabaseClient() {
@@ -5565,6 +5625,36 @@ async function signUpWithSupabase() {
     window.alert(error?.message || "Sign up failed.");
   } finally {
     authSignUpButton.disabled = false;
+    setAuthMode("signup", { keepStatus: true });
+  }
+}
+
+async function resendSignupEmail() {
+  const email = authEmail();
+  if (!email || !(await ensureSupabaseClient())) return;
+
+  authResendButton.disabled = true;
+  updateCloudStatus("Resending email...", "");
+  try {
+    const { error } = await supabaseClient.auth.resend({
+      type: "signup",
+      email,
+      options: {
+        emailRedirectTo: location.href.split("#")[0],
+      },
+    });
+    if (error) throw error;
+    saveAuthRememberPreference();
+    setAuthMode("signup");
+    updateCloudStatus("Email resent", "");
+    window.alert("Confirmation email sent again. Check your inbox and junk/spam folders.");
+  } catch (error) {
+    console.warn("Confirmation resend failed.", error);
+    updateCloudStatus("Resend failed", "warning");
+    window.alert(error?.message || "Could not resend the confirmation email.");
+  } finally {
+    authResendButton.disabled = false;
+    setAuthMode("signup", { keepStatus: true });
   }
 }
 
@@ -8228,12 +8318,15 @@ function updateCloudStatus(message = null, mode = "") {
   if (authDialogStatus) {
     authDialogStatus.textContent = signedIn
       ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}`
+      : authMode === "signup"
+      ? "Create an account to start a free trial and save spool projects to the cloud."
       : "Sign in to save and open spool projects from the cloud.";
   }
   if (authEmailInput && signedIn) authEmailInput.value = cloudUser.email || "";
   if (authSignOutButton) authSignOutButton.hidden = !signedIn;
   if (authSignInButton) authSignInButton.disabled = signedIn;
   if (authSignUpButton) authSignUpButton.disabled = signedIn;
+  setAuthMode(authMode, { keepStatus: true });
   if (saveBrowserProjectButton) {
     saveBrowserProjectButton.title = signedIn && active
       ? "Save project to cloud and this browser"
