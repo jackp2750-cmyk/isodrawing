@@ -55,9 +55,15 @@ const previewLabelLayer = document.querySelector("#previewLabelLayer");
 const propertiesPanel = document.querySelector("#propertiesPanel");
 const projectFileInput = document.querySelector("#projectFileInput");
 const projectReadout = document.querySelector("#projectReadout");
+const projectStatusSelect = document.querySelector("#projectStatusSelect");
+const projectLockToggle = document.querySelector("#projectLockToggle");
 const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
 const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
+const healthCheckButton = document.querySelector("#healthCheckButton");
+const newRevisionButton = document.querySelector("#newRevisionButton");
+const shareReadOnlyButton = document.querySelector("#shareReadOnlyButton");
+const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
 const accountButton = document.querySelector("#accountButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
@@ -91,6 +97,10 @@ const projectLibraryDialog = document.querySelector("#projectLibraryDialog");
 const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
 const projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
+const healthSummary = document.querySelector("#healthSummary");
+const bomSummary = document.querySelector("#bomSummary");
+const workflowSummary = document.querySelector("#workflowSummary");
+const backupSummary = document.querySelector("#backupSummary");
 const toolSettingsButton = document.querySelector("#toolSettingsButton");
 const toolSettingsDialog = document.querySelector("#toolSettingsDialog");
 const toolSettingsList = document.querySelector("#toolSettingsList");
@@ -113,9 +123,11 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
+const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
+const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.34";
-const APP_BUILD_DATE = "2026-06-08";
+const APP_VERSION = "v1.41";
+const APP_BUILD_DATE = "2026-06-09";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -136,11 +148,14 @@ const ISO_SIN = Math.sin(Math.PI / 6);
 const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer", "socket"]);
 const FLANGE_MODES = new Set(["single", "double"]);
 const END_FITTING_SNAP_TOLERANCE = 0.015;
+const ROLL_GROOVE_SETBACK_MM = 10;
+const ROLL_GROOVE_VISUAL_WIDTH_MM = 24;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
+const PROJECT_STATUSES = new Set(["draft", "checked", "issued", "fabricated"]);
 const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select"]);
 const SIDE_TOOL_DETAILS = {
   draw: ["Draw", "Create pipe runs from points"],
@@ -454,6 +469,11 @@ function sampleState() {
     liftingSlingAngleDegrees: 60,
     projectId: null,
     projectInfoPrompted: true,
+    projectStatus: "draft",
+    checkedBy: "",
+    checkedAt: "",
+    locked: false,
+    revisionHistory: [],
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -465,7 +485,79 @@ function sampleState() {
   };
 }
 
-function blankState() {
+function hardCodedDrawingDefaults() {
+  return {
+    pipeSizeNb: 25,
+    pipeSpec: "carbon40",
+    stepLength: 1000,
+    angleDegrees: 45,
+    anglePlane: "xy",
+    flangeMode: "single",
+    previewMode: "carbon",
+    show3dLabels: true,
+    gridScale: 42,
+    showDimensions: true,
+    dimensionStyle: "labels",
+    showLiftingPoints: false,
+    liftingSlingAngleDegrees: 60,
+  };
+}
+
+function normalizeDrawingDefaults(defaults = {}) {
+  const base = hardCodedDrawingDefaults();
+  return {
+    pipeSizeNb: normalizePipeSize(defaults.pipeSizeNb ?? base.pipeSizeNb),
+    pipeSpec: normalizePipeSpec(defaults.pipeSpec ?? base.pipeSpec),
+    stepLength: normalizeLength(defaults.stepLength ?? base.stepLength),
+    angleDegrees: normalizeAngle(defaults.angleDegrees ?? base.angleDegrees),
+    anglePlane: normalizeAnglePlane(defaults.anglePlane ?? base.anglePlane),
+    flangeMode: normalizeFlangeMode(defaults.flangeMode ?? base.flangeMode),
+    previewMode: normalizePreviewMode(defaults.previewMode ?? base.previewMode),
+    show3dLabels: defaults.show3dLabels !== false,
+    gridScale: clampNumber(Number(defaults.gridScale) || base.gridScale, 24, 72),
+    showDimensions: defaults.showDimensions !== false,
+    dimensionStyle: normalizeDimensionStyle(defaults.dimensionStyle ?? base.dimensionStyle),
+    showLiftingPoints: defaults.showLiftingPoints === true,
+    liftingSlingAngleDegrees: normalizeLiftingSlingAngle(defaults.liftingSlingAngleDegrees ?? base.liftingSlingAngleDegrees),
+  };
+}
+
+function readUserDrawingDefaults() {
+  try {
+    return normalizeDrawingDefaults(JSON.parse(localStorage.getItem(USER_DRAWING_DEFAULTS_KEY)) ?? {});
+  } catch {
+    return normalizeDrawingDefaults();
+  }
+}
+
+function drawingDefaultsFromState(source = state) {
+  return normalizeDrawingDefaults({
+    pipeSizeNb: source?.pipeSizeNb,
+    pipeSpec: source?.pipeSpec,
+    stepLength: source?.stepLength,
+    angleDegrees: source?.angleDegrees,
+    anglePlane: source?.anglePlane,
+    flangeMode: source?.flangeMode,
+    previewMode: source?.previewMode,
+    show3dLabels: source?.show3dLabels !== false,
+    gridScale: source?.gridScale,
+    showDimensions: source?.showDimensions,
+    dimensionStyle: source?.dimensionStyle,
+    showLiftingPoints: source?.showLiftingPoints,
+    liftingSlingAngleDegrees: source?.liftingSlingAngleDegrees,
+  });
+}
+
+function persistUserDrawingDefaults(source = state) {
+  try {
+    localStorage.setItem(USER_DRAWING_DEFAULTS_KEY, JSON.stringify(drawingDefaultsFromState(source)));
+  } catch (error) {
+    console.warn("Could not save user drawing defaults.", error);
+  }
+}
+
+function blankState(options = {}) {
+  const defaults = options.userDefaults === false ? hardCodedDrawingDefaults() : readUserDrawingDefaults();
   return {
     points: [{ x: 0, y: 0, z: 0 }],
     edges: [],
@@ -484,21 +576,26 @@ function blankState() {
     hoveredSegment: null,
     pointer: null,
     previewCandidate: null,
-    pipeSizeNb: 25,
-    pipeSpec: "carbon40",
-    stepLength: 1000,
-    angleDegrees: 45,
-    anglePlane: "xy",
-    flangeMode: "single",
-    previewMode: "carbon",
-    show3dLabels: true,
-    gridScale: 42,
-    showDimensions: true,
-    dimensionStyle: "labels",
-    showLiftingPoints: false,
-    liftingSlingAngleDegrees: 60,
+    pipeSizeNb: defaults.pipeSizeNb,
+    pipeSpec: defaults.pipeSpec,
+    stepLength: defaults.stepLength,
+    angleDegrees: defaults.angleDegrees,
+    anglePlane: defaults.anglePlane,
+    flangeMode: defaults.flangeMode,
+    previewMode: defaults.previewMode,
+    show3dLabels: defaults.show3dLabels,
+    gridScale: defaults.gridScale,
+    showDimensions: defaults.showDimensions,
+    dimensionStyle: defaults.dimensionStyle,
+    showLiftingPoints: defaults.showLiftingPoints,
+    liftingSlingAngleDegrees: defaults.liftingSlingAngleDegrees,
     projectId: null,
     projectInfoPrompted: false,
+    projectStatus: "draft",
+    checkedBy: "",
+    checkedAt: "",
+    locked: false,
+    revisionHistory: [],
     projectInfo: defaultProjectInfo(),
     history: [],
   };
@@ -523,7 +620,7 @@ function loadState() {
   return null;
 }
 
-function statePayload() {
+function statePayload(options = {}) {
   return {
     appVersion: APP_VERSION,
     points: state.points,
@@ -554,14 +651,21 @@ function statePayload() {
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees),
     projectId: state.projectId,
     projectInfoPrompted: state.projectInfoPrompted === true,
+    projectStatus: normalizeProjectStatus(state.projectStatus),
+    checkedBy: String(state.checkedBy ?? "").trim().slice(0, 64),
+    checkedAt: String(state.checkedAt ?? "").trim(),
+    locked: state.locked === true,
+    revisionHistory: options.includeRevisionHistory === false ? [] : normalizeRevisionHistory(state.revisionHistory),
     projectInfo: normalizeProjectInfo(state.projectInfo),
   };
 }
 
 function persistState() {
+  persistUserDrawingDefaults();
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(statePayload()));
     autoSaveCurrentBrowserProject();
+    maybeCreateProjectBackup();
   } catch (error) {
     console.warn("Could not save spool state in this browser.", error);
   }
@@ -588,7 +692,7 @@ function stateFromPayload(payload, options = {}) {
   const selectedSegments = normalizeSelectedSegments(saved.selectedSegments, edges.length);
 
   return {
-    ...blankState(),
+    ...blankState({ userDefaults: false }),
     points,
     edges,
     fittings: normalizeFittings(saved.fittings, edges.length),
@@ -614,6 +718,11 @@ function stateFromPayload(payload, options = {}) {
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(saved.liftingSlingAngleDegrees),
     projectId: normalizeProjectId(saved.projectId),
     projectInfoPrompted: saved.projectInfoPrompted === true || hasProjectInfo(saved.projectInfo),
+    projectStatus: normalizeProjectStatus(saved.projectStatus),
+    checkedBy: String(saved.checkedBy ?? "").trim().slice(0, 64),
+    checkedAt: String(saved.checkedAt ?? "").trim(),
+    locked: saved.locked === true,
+    revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
   };
@@ -841,6 +950,24 @@ function normalizeProjectInfo(info) {
   );
 }
 
+function nextSpoolNumber(value) {
+  const text = String(value ?? "").trim();
+  const match = text.match(/(\d+)(?!.*\d)/);
+  if (!match) return text;
+
+  const current = match[1];
+  const next = String(Number(current) + 1).padStart(current.length, "0");
+  return `${text.slice(0, match.index)}${next}${text.slice(match.index + current.length)}`;
+}
+
+function nextProjectInfoForNewSpool(info) {
+  const project = normalizeProjectInfo(info);
+  return normalizeProjectInfo({
+    ...project,
+    spoolNumber: nextSpoolNumber(project.spoolNumber),
+  });
+}
+
 function normalizeProjectId(value) {
   const text = String(value ?? "").trim();
   return text ? text.slice(0, 80) : null;
@@ -864,6 +991,77 @@ function projectDisplayName(info = state.projectInfo) {
   return parts.join(" - ") || "Untitled project";
 }
 
+function normalizeProjectStatus(value) {
+  const status = String(value ?? "draft").trim().toLowerCase();
+  return PROJECT_STATUSES.has(status) ? status : "draft";
+}
+
+function projectStatusLabel(value = state.projectStatus) {
+  const status = normalizeProjectStatus(value);
+  if (status === "checked") return "Checked";
+  if (status === "issued") return "Issued";
+  if (status === "fabricated") return "Fabricated";
+  return "Draft";
+}
+
+function normalizeRevisionHistory(history) {
+  if (!Array.isArray(history)) return [];
+  return history
+    .map((entry) => ({
+      id: String(entry?.id ?? "").trim().slice(0, 80) || `rev-${Date.now().toString(36)}`,
+      revision: String(entry?.revision ?? "").trim().slice(0, 16),
+      createdAt: String(entry?.createdAt ?? "").trim(),
+      status: normalizeProjectStatus(entry?.status),
+      note: String(entry?.note ?? "").trim().slice(0, 120),
+      state: entry?.state && typeof entry.state === "object" ? entry.state : null,
+    }))
+    .filter((entry) => entry.revision || entry.state)
+    .slice(0, 12);
+}
+
+function projectCornerLabelLines(info = state.projectInfo) {
+  const project = normalizeProjectInfo(info);
+  return [
+    `Job ${project.jobNumber || "-"}`,
+    `Spool ${project.spoolNumber || "-"}`,
+  ];
+}
+
+function drawProjectCornerTag(ctx, width, height, options = {}) {
+  const padding = options.padding ?? 14;
+  const fontSize = options.fontSize ?? 12;
+  const lineHeight = Math.round(fontSize * 1.35);
+  const availableWidth = Math.max(72, width - padding * 2);
+  const maxBoxWidth = Math.min(options.maxWidth ?? 260, availableWidth);
+  const contentWidth = Math.max(52, maxBoxWidth - 18);
+
+  ctx.save();
+  ctx.font = `900 ${fontSize}px Inter, system-ui, sans-serif`;
+  const lines = projectCornerLabelLines(options.projectInfo).map((line) => fitCanvasText(ctx, line, contentWidth));
+  const tagWidth = Math.min(
+    availableWidth,
+    Math.max(...lines.map((line) => ctx.measureText(line).width)) + 18,
+  );
+  const tagHeight = lineHeight * lines.length + 12;
+  const x = Math.max(padding, width - padding - tagWidth);
+  const y = padding;
+
+  roundRect(ctx, x, y, tagWidth, tagHeight, 7);
+  ctx.fillStyle = options.fill ?? "rgba(255, 253, 248, 0.94)";
+  ctx.fill();
+  ctx.strokeStyle = options.stroke ?? "rgba(8, 125, 115, 0.24)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.fillStyle = options.color ?? "#1f3438";
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  lines.forEach((line, index) => {
+    ctx.fillText(line, x + 9, y + 7 + index * lineHeight);
+  });
+  ctx.restore();
+}
+
 function createProjectId() {
   return `project-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -877,6 +1075,22 @@ function normalizeFittingPosition(type, value) {
     return clamped;
   }
   return clampNumber(fallback, 0.04, 0.96);
+}
+
+function fittingDisplayT(segment, fitting) {
+  const t = normalizeFittingPosition(fitting?.type, fitting?.t);
+  if (fitting?.type !== "rollGroove") return t;
+  if (!segment) return t;
+  const lengthMm = pointLength(segment?.vector);
+  if (!Number.isFinite(lengthMm) || lengthMm <= 0) return t;
+  const insetT = Math.min(ROLL_GROOVE_SETBACK_MM / lengthMm, 0.45);
+  if (t <= 0.000001) return insetT;
+  if (t >= 0.999999) return 1 - insetT;
+  return t;
+}
+
+function fittingDisplayPoint(segment, fitting) {
+  return lerpPoint(segment.start, segment.end, fittingDisplayT(segment, fitting));
 }
 
 function normalizeStateFittingPositions() {
@@ -1339,6 +1553,7 @@ function drawIso() {
   drawPreviewRun(ctx, projection);
   drawSocketDragDimension(ctx, projection);
   drawBoxSelectOverlay(ctx);
+  drawProjectCornerTag(ctx, width, height);
 }
 
 function drawGrid(ctx, width, height, projection) {
@@ -2680,7 +2895,7 @@ function socketScreenDirection(segment, fitting, projection) {
 function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
   const start = projectIso(segment.start, projection);
   const end = projectIso(segment.end, projection);
-  const point = projectIso(lerpPoint(segment.start, segment.end, fitting.t), projection);
+  const point = projectIso(fittingDisplayPoint(segment, fitting), projection);
   const angle = Math.atan2(end.y - start.y, end.x - start.x);
   const along = { x: Math.cos(angle), y: Math.sin(angle) };
   const normal = { x: -Math.sin(angle), y: Math.cos(angle) };
@@ -2713,11 +2928,23 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
       }
     }
   } else if (fitting.type === "rollGroove") {
-    ctx.lineWidth = selected ? 3.2 : 2.4;
-    for (const offset of [-4, 4]) {
+    const grooveHalfSpan = Math.max(3, Math.min(7, pipeWidth * 0.22));
+    const shoulderHalfSpan = grooveHalfSpan * 1.75;
+    ctx.lineCap = "butt";
+    ctx.strokeStyle = selected ? "#b42318" : "#d7dde0";
+    ctx.lineWidth = selected ? 3 : 2.8;
+    for (const offset of [-shoulderHalfSpan, shoulderHalfSpan]) {
       ctx.beginPath();
-      ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.58, along.y * offset + normal.y * fittingWidth * -0.58);
-      ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.58, along.y * offset + normal.y * fittingWidth * 0.58);
+      ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.54, along.y * offset + normal.y * fittingWidth * -0.54);
+      ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.54, along.y * offset + normal.y * fittingWidth * 0.54);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = selected ? "#7f1d1d" : "#1f272a";
+    ctx.lineWidth = selected ? 4 : 3.4;
+    for (const offset of [-grooveHalfSpan, grooveHalfSpan]) {
+      ctx.beginPath();
+      ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.6, along.y * offset + normal.y * fittingWidth * -0.6);
+      ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.6, along.y * offset + normal.y * fittingWidth * 0.6);
       ctx.stroke();
     }
     ctx.font = "900 8px Inter, system-ui, sans-serif";
@@ -2725,7 +2952,7 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
     ctx.textBaseline = "middle";
     ctx.lineWidth = 3;
     ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
-    ctx.fillStyle = selected ? "#b42318" : "#0f766e";
+    ctx.fillStyle = selected ? "#b42318" : "#526067";
     const labelX = normal.x * (fittingWidth * 0.95 + 8);
     const labelY = normal.y * (fittingWidth * 0.95 + 8);
     ctx.strokeText("RG", labelX, labelY);
@@ -3063,13 +3290,13 @@ function findNearestFitting(pointer) {
     const segment = segmentByIndex.get(fitting.segmentIndex);
     if (!segment) continue;
 
-    const point = lerpPoint(segment.start, segment.end, fitting.t);
+    const point = fittingDisplayPoint(segment, fitting);
     const screen = projectIso(point, projection);
     const distance = Math.hypot(pointer.x - screen.x, pointer.y - screen.y);
     if (!nearest || distance < nearest.distance) {
       nearest = {
         fitting,
-        segmentHit: { segment, distance, t: fitting.t },
+        segmentHit: { segment, distance, t: fittingDisplayT(segment, fitting) },
         point,
         distance,
       };
@@ -3255,6 +3482,7 @@ function addRun(axis, length) {
 }
 
 function addRunToPoint(from, next) {
+  if (!ensureDrawingEditable("draw more pipe")) return;
   const start = state.points[from];
   if (!start || almostSamePoint(start, next)) {
     return;
@@ -3336,6 +3564,7 @@ function selectedFittingData() {
 }
 
 function setSelectedSegmentLength(length) {
+  if (!ensureDrawingEditable("change pipe lengths")) return;
   const segment = selectedSegmentData();
   if (!segment) return;
 
@@ -3356,6 +3585,7 @@ function setSelectedSegmentLength(length) {
 }
 
 function editSegmentBendAngle(segment, anchorIndex, bendAngleValue) {
+  if (!ensureDrawingEditable("change bend angles")) return false;
   const reference = referenceConnectionForSegment(segment, anchorIndex);
   if (!reference) return false;
 
@@ -4579,6 +4809,7 @@ function liftingPointPlanSummary(lugPlan) {
 }
 
 function splitSegmentAt(segmentIndex, t) {
+  if (!ensureDrawingEditable("split a pipe run")) return null;
   const edge = state.edges[segmentIndex];
   if (!edge || t <= 0.02 || t >= 0.98) return null;
 
@@ -4616,6 +4847,7 @@ function splitSegmentAt(segmentIndex, t) {
 }
 
 function placeFitting(type, segmentIndex, t, options = {}) {
+  if (!ensureDrawingEditable("add fittings")) return;
   const fitting = {
     id: nextFittingId,
     type,
@@ -4639,6 +4871,7 @@ function placeFitting(type, segmentIndex, t, options = {}) {
 }
 
 function placeSocketFittings(segmentIndex, positions) {
+  if (!ensureDrawingEditable("add sockets")) return;
   const fittingIds = [];
   for (const t of positions) {
     const fitting = {
@@ -4663,6 +4896,7 @@ function placeSocketFittings(segmentIndex, positions) {
 }
 
 function placeNote(point, textOverride = null) {
+  if (!ensureDrawingEditable("add notes")) return;
   const text = String(textOverride ?? noteTextInput.value).trim() || "NOTE";
   noteTextInput.value = text.slice(0, 80);
   const note = {
@@ -4735,6 +4969,7 @@ function undo() {
 }
 
 function deleteSelection() {
+  if (!ensureDrawingEditable("delete items")) return;
   if (state.selectedNote) {
     state.notes = state.notes.filter((note) => note.id !== state.selectedNote);
     state.selectedNote = null;
@@ -4756,6 +4991,7 @@ function deleteSelection() {
 }
 
 function deleteSegmentsByIndex(indexes) {
+  if (!ensureDrawingEditable("delete pipe runs")) return false;
   const selectedSegments = normalizeSelectedSegments(indexes, state.edges.length).sort((a, b) => b - a);
   if (!selectedSegments.length) return false;
 
@@ -4979,6 +5215,444 @@ function updateTakeoffSummary() {
   `;
 }
 
+function healthIssue(severity, title, detail = "") {
+  return { severity, title, detail };
+}
+
+function endpointHasFinish(segment, pointIndex) {
+  const endpointT = segment.from === pointIndex ? 0 : 1;
+  return state.fittings.some((fitting) =>
+    fitting.segmentIndex === segment.index &&
+    (fitting.type === "flange" || fitting.type === "rollGroove") &&
+    Math.abs(normalizeFittingPosition(fitting.type, fitting.t) - endpointT) < 0.001,
+  );
+}
+
+function missingReducerIssues(segmentData, quantities) {
+  const issues = [];
+  const connections = nodeConnections(segmentData);
+  const reducerNodes = new Set(quantities.reducers.map((reducer) => reducer.nodeIndex));
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+
+  for (const [nodeIndex, connected] of connections.entries()) {
+    const entries = connected
+      .map((connection) => {
+        const segment = segmentByIndex.get(connection.segmentIndex);
+        return segment ? { segment, size: pipeSizeForSegment(segment) } : null;
+      })
+      .filter(Boolean);
+    if (entries.length < 2) continue;
+
+    const sizes = new Set(entries.map((entry) => entry.size.nb));
+    if (sizes.size <= 1) continue;
+    if (nodeConnectionType(nodeIndex) === "branch") continue;
+    if (reducerNodes.has(nodeIndex)) continue;
+
+    const label = entries.length >= 3 ? "tee" : "bend/run";
+    issues.push(healthIssue(
+      "error",
+      `Missing reducer at ${label} ${pointLabel(nodeIndex)}`,
+      `Connected sizes: ${[...sizes].map((nb) => `NB ${nb}`).join(", ")}.`,
+    ));
+  }
+
+  return issues;
+}
+
+function drawingHealthItems() {
+  const segmentData = segments();
+  const quantities = quantitySummary(segmentData);
+  const project = normalizeProjectInfo(state.projectInfo);
+  const items = [];
+
+  if (!project.jobNumber) items.push(healthIssue("error", "Job number missing", "Add a job number before issuing the drawing."));
+  if (!project.spoolNumber) items.push(healthIssue("error", "Spool number missing", "Add a spool number so the shop can identify this spool."));
+  if (!segmentData.length) {
+    items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting."));
+  }
+
+  const connections = nodeConnections(segmentData);
+  const openEnds = [];
+  for (const [pointIndex, connected] of connections.entries()) {
+    if (connected.length !== 1) continue;
+    const segment = segmentData.find((item) => item.index === connected[0].segmentIndex);
+    if (segment && !endpointHasFinish(segment, pointIndex)) {
+      openEnds.push(`${pointLabel(pointIndex)} on run ${segment.index + 1}`);
+    }
+  }
+  if (openEnds.length) {
+    items.push(healthIssue("warning", "Open pipe ends", openEnds.slice(0, 8).join(", ")));
+  }
+
+  items.push(...missingReducerIssues(segmentData, quantities));
+
+  const untypedBranches = [...connections.entries()]
+    .filter(([, connected]) => connected.length >= 3)
+    .filter(([nodeIndex]) => !state.nodeTypes?.[nodeIndex])
+    .map(([nodeIndex]) => pointLabel(nodeIndex));
+  if (untypedBranches.length) {
+    items.push(healthIssue("warning", "Tee/branch points need review", `${untypedBranches.join(", ")} are being treated as tees unless marked as branch welds.`));
+  }
+
+  const estimatedRows = takeoffCountRows(quantities).filter((row) => String(row.detail ?? "").toLowerCase().includes("estimated"));
+  if (estimatedRows.length) {
+    items.push(healthIssue("info", "Estimated weights present", `${estimatedRows.length} order-list row${estimatedRows.length === 1 ? "" : "s"} use estimated weights.`));
+  }
+
+  if (!state.showDimensions) {
+    items.push(healthIssue("warning", "Dimensions hidden", "Turn dimensions on before exporting the fab sheet."));
+  }
+  if (state.dimensionStyle === "redline" && segmentData.length > 8) {
+    items.push(healthIssue("info", "Red dimensions may need dragging", "Use Select to drag crowded red dimension labels away from the pipe."));
+  }
+  if (state.locked) {
+    items.push(healthIssue("ok", "Drawing locked", "Edits are blocked until Lock edits is turned off or a new revision is created."));
+  }
+  if (!items.some((item) => item.severity === "error" || item.severity === "warning")) {
+    items.unshift(healthIssue("ok", "No blocking issues found", "Health check passed for the current drawing."));
+  }
+
+  return items;
+}
+
+function healthCounts(items = drawingHealthItems()) {
+  return items.reduce((counts, item) => {
+    counts[item.severity] = (counts[item.severity] ?? 0) + 1;
+    return counts;
+  }, {});
+}
+
+function healthSummaryText(items = drawingHealthItems()) {
+  const counts = healthCounts(items);
+  if (counts.error) return `${counts.error} issue${counts.error === 1 ? "" : "s"} need fixing`;
+  if (counts.warning) return `${counts.warning} warning${counts.warning === 1 ? "" : "s"} to review`;
+  return "No blocking issues";
+}
+
+function updateHealthSummary() {
+  if (!healthSummary) return;
+  const items = drawingHealthItems();
+  const level = items.some((item) => item.severity === "error")
+    ? "error"
+    : items.some((item) => item.severity === "warning")
+    ? "warning"
+    : "ok";
+  healthSummary.innerHTML = `
+    <div class="health-head ${level}">
+      <strong>${escapeHtml(healthSummaryText(items))}</strong>
+      <span>${escapeHtml(projectStatusLabel())}${state.locked ? " / Locked" : ""}</span>
+    </div>
+    <div class="health-list">
+      ${items.map((item) => `
+        <div class="health-item ${escapeHtml(item.severity)}">
+          <strong>${escapeHtml(item.title)}</strong>
+          ${item.detail ? `<span>${escapeHtml(item.detail)}</span>` : ""}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function updateBomSummary() {
+  if (!bomSummary) return;
+  const rows = takeoffCountRows(quantitySummary());
+  if (!rows.length) {
+    bomSummary.innerHTML = '<div class="takeoff-empty">No items to order yet.</div>';
+    return;
+  }
+
+  bomSummary.innerHTML = `
+    <div class="bom-table">
+      <div class="bom-row bom-head">
+        <strong>Item</strong>
+        <span>Qty / length</span>
+        <span>Weight</span>
+      </div>
+      ${rows.map((row) => `
+        <div class="bom-row">
+          <strong>${escapeHtml(row.label)}<small>${escapeHtml(row.detail)}</small></strong>
+          <span>${escapeHtml(row.countText)}</span>
+          <span>${row.weightKg ? `${escapeHtml(formatMass(row.weightKg))} kg` : "-"}</span>
+        </div>
+      `).join("")}
+    </div>
+    <p>This is the ordering view: pipe by size and length, plus fittings by size.</p>
+  `;
+}
+
+function currentWorkflowRows() {
+  const checked = state.checkedAt ? `${new Date(state.checkedAt).toLocaleString()} by ${state.checkedBy || "unknown"}` : "Not checked";
+  return [
+    ["Status", projectStatusLabel()],
+    ["Lock", state.locked ? "Locked" : "Editable"],
+    ["Checked", checked],
+    ["Health", healthSummaryText()],
+  ];
+}
+
+function updateWorkflowSummary() {
+  if (!workflowSummary) return;
+  const history = normalizeRevisionHistory(state.revisionHistory);
+  workflowSummary.innerHTML = `
+    <div class="workflow-card">
+      <strong>Drawing workflow</strong>
+      <ul class="workflow-list">
+        ${currentWorkflowRows().map(([label, value]) => `<li><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></li>`).join("")}
+      </ul>
+    </div>
+    <div class="workflow-actions">
+      <button type="button" data-workflow-action="mark-checked">Mark checked</button>
+      <button type="button" data-workflow-action="new-revision">New revision</button>
+      <button type="button" data-workflow-action="share-readonly">Read-only export</button>
+      <button type="button" data-workflow-action="save-defaults">Save defaults</button>
+    </div>
+    <div class="revision-card">
+      <strong>Revision history</strong>
+      ${history.length ? `<ul class="revision-list">${history.map((entry) => `
+        <li>
+          <div>
+            <strong>Rev ${escapeHtml(entry.revision || "-")} / ${escapeHtml(projectStatusLabel(entry.status))}</strong>
+            <span>${escapeHtml(entry.createdAt ? new Date(entry.createdAt).toLocaleString() : "not dated")}</span>
+          </div>
+          <button type="button" data-restore-revision="${escapeHtml(entry.id)}">Restore</button>
+        </li>
+      `).join("")}</ul>` : "<span>No saved revisions yet.</span>"}
+    </div>
+  `;
+
+  workflowSummary.querySelectorAll("[data-workflow-action]").forEach((button) => {
+    button.addEventListener("click", () => handleWorkflowAction(button.dataset.workflowAction));
+  });
+  workflowSummary.querySelectorAll("[data-restore-revision]").forEach((button) => {
+    button.addEventListener("click", () => restoreRevision(button.dataset.restoreRevision));
+  });
+}
+
+function handleWorkflowAction(action) {
+  if (action === "mark-checked") markDrawingChecked();
+  if (action === "new-revision") createNextRevision();
+  if (action === "share-readonly") shareReadOnlyProject();
+  if (action === "save-defaults") saveCurrentSettingsAsDefaults();
+}
+
+function checkerName() {
+  return cloudUser?.email || normalizeProjectInfo(state.projectInfo).drawnBy || "";
+}
+
+function markDrawingChecked() {
+  const issues = drawingHealthItems().filter((item) => item.severity === "error");
+  if (issues.length) {
+    const proceed = window.confirm(`${issues.length} health issue${issues.length === 1 ? "" : "s"} still need fixing. Mark checked anyway?`);
+    if (!proceed) {
+      showHealthPanel();
+      return;
+    }
+  }
+
+  const name = window.prompt("Checked by", checkerName());
+  if (name === null) return;
+  state.checkedBy = String(name).trim().slice(0, 64);
+  state.checkedAt = new Date().toISOString();
+  state.projectStatus = "checked";
+  state.locked = true;
+  updateControls();
+  updateAll();
+  showHealthPanel();
+}
+
+function revisionRankText(value) {
+  return String(value ?? "").trim().toUpperCase();
+}
+
+function nextRevisionValue(value) {
+  const current = revisionRankText(value);
+  if (!current) return "A";
+  if (/^\d+$/.test(current)) return String(Number(current) + 1);
+  if (/^[A-Z]+$/.test(current)) {
+    const chars = current.split("");
+    let index = chars.length - 1;
+    while (index >= 0) {
+      if (chars[index] !== "Z") {
+        chars[index] = String.fromCharCode(chars[index].charCodeAt(0) + 1);
+        return chars.join("");
+      }
+      chars[index] = "A";
+      index -= 1;
+    }
+    return `A${chars.join("")}`;
+  }
+  return `${current}-1`;
+}
+
+function addRevisionSnapshot(note = "Saved revision") {
+  const project = normalizeProjectInfo(state.projectInfo);
+  const history = normalizeRevisionHistory(state.revisionHistory);
+  history.unshift({
+    id: `rev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+    revision: project.revision || "-",
+    createdAt: new Date().toISOString(),
+    status: normalizeProjectStatus(state.projectStatus),
+    note,
+    state: statePayload({ includeRevisionHistory: false }),
+  });
+  state.revisionHistory = history.slice(0, 12);
+}
+
+function createNextRevision() {
+  const project = normalizeProjectInfo(state.projectInfo);
+  addRevisionSnapshot("Before new revision");
+  state.projectInfo = normalizeProjectInfo({
+    ...project,
+    revision: nextRevisionValue(project.revision),
+  });
+  state.projectStatus = "draft";
+  state.checkedBy = "";
+  state.checkedAt = "";
+  state.locked = false;
+  updateControls();
+  updateAll();
+  showHealthPanel();
+}
+
+function restoreRevision(revisionId) {
+  const entry = normalizeRevisionHistory(state.revisionHistory).find((item) => item.id === revisionId);
+  if (!entry?.state) return;
+  const proceed = window.confirm(`Restore revision ${entry.revision || "-"}? The current drawing will be replaced.`);
+  if (!proceed) return;
+
+  addRevisionSnapshot("Before restore");
+  const history = normalizeRevisionHistory(state.revisionHistory);
+  const restored = stateFromPayload(entry.state);
+  if (!restored) {
+    window.alert("That revision could not be restored.");
+    return;
+  }
+  state = restored;
+  state.revisionHistory = history;
+  state.projectStatus = "draft";
+  state.locked = false;
+  three.userMovedCamera = false;
+  setNextIdsFromState(state);
+  updateControls();
+  updateAll();
+  showHealthPanel();
+}
+
+function saveCurrentSettingsAsDefaults() {
+  persistUserDrawingDefaults();
+  window.alert("Current material, pipe size, dimensions, lifting, preview and drawing settings saved as your defaults.");
+}
+
+function projectBackupKey(source = state) {
+  return normalizeProjectId(source?.projectId) || [
+    normalizeProjectInfo(source?.projectInfo).jobNumber,
+    normalizeProjectInfo(source?.projectInfo).spoolNumber,
+  ].filter(Boolean).join("::").toLowerCase() || "current";
+}
+
+function loadProjectBackups() {
+  try {
+    const backups = JSON.parse(localStorage.getItem(PROJECT_BACKUPS_KEY));
+    return Array.isArray(backups) ? backups : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeProjectBackups(backups) {
+  try {
+    localStorage.setItem(PROJECT_BACKUPS_KEY, JSON.stringify(backups.slice(0, 36)));
+  } catch (error) {
+    console.warn("Could not save project backup.", error);
+  }
+}
+
+function createProjectBackup(reason = "autosave") {
+  if (!hasDrawingContent()) return;
+  const key = projectBackupKey();
+  const backups = loadProjectBackups().filter((backup) => backup?.state);
+  backups.unshift({
+    id: `backup-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+    key,
+    projectId: normalizeProjectId(state.projectId),
+    name: projectDisplayName(),
+    projectInfo: normalizeProjectInfo(state.projectInfo),
+    createdAt: new Date().toISOString(),
+    reason,
+    state: statePayload({ includeRevisionHistory: false }),
+  });
+  const seen = new Map();
+  for (const backup of backups) {
+    const backupKey = backup.key || projectBackupKey(backup.state);
+    const list = seen.get(backupKey) ?? [];
+    if (list.length < 8) list.push(backup);
+    seen.set(backupKey, list);
+  }
+  storeProjectBackups([...seen.values()].flat().sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))));
+}
+
+function maybeCreateProjectBackup() {
+  if (!hasDrawingContent()) return;
+  const backups = loadProjectBackups();
+  const key = projectBackupKey();
+  const latest = backups.find((backup) => backup.key === key);
+  const lastTime = latest?.createdAt ? new Date(latest.createdAt).getTime() : 0;
+  if (Date.now() - lastTime < 4 * 60 * 1000) return;
+  createProjectBackup("autosave backup");
+}
+
+function relevantProjectBackups() {
+  const key = projectBackupKey();
+  return loadProjectBackups()
+    .filter((backup) => backup.key === key || (state.projectId && backup.projectId === state.projectId))
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)))
+    .slice(0, 5);
+}
+
+function updateBackupSummary() {
+  if (!backupSummary) return;
+  const backups = relevantProjectBackups();
+  backupSummary.innerHTML = backups.length
+    ? `<div class="backup-card">
+        <strong>Local backups</strong>
+        <ul class="backup-list">
+        ${backups.map((backup) => `
+          <li>
+            <div>
+              <strong>${escapeHtml(backup.reason || "backup")}</strong>
+              <span>${escapeHtml(backup.createdAt ? new Date(backup.createdAt).toLocaleString() : "not dated")}</span>
+            </div>
+            <button type="button" data-restore-backup="${escapeHtml(backup.id)}">Restore</button>
+          </li>
+        `).join("")}
+        </ul>
+      </div>`
+    : '<div class="takeoff-empty">No backup snapshots for this drawing yet.</div>';
+
+  backupSummary.querySelectorAll("[data-restore-backup]").forEach((button) => {
+    button.addEventListener("click", () => restoreProjectBackup(button.dataset.restoreBackup));
+  });
+}
+
+function restoreProjectBackup(backupId) {
+  const backup = loadProjectBackups().find((item) => item.id === backupId);
+  if (!backup?.state) return;
+  const proceed = window.confirm("Restore this backup? The current drawing will be replaced.");
+  if (!proceed) return;
+  createProjectBackup("before backup restore");
+  const restored = stateFromPayload(backup.state);
+  if (!restored) {
+    window.alert("That backup could not be restored.");
+    return;
+  }
+  state = restored;
+  three.userMovedCamera = false;
+  setNextIdsFromState(state);
+  updateControls();
+  updateAll();
+  showHealthPanel();
+}
+
 function populatePipeSizeOptions() {
   pipeSizeSelect.innerHTML = "";
   for (const size of PIPE_SIZES) {
@@ -5018,6 +5692,7 @@ function setPipeSizeForSegments(indexes, pipeSizeNb) {
     updateAll();
     return;
   }
+  if (!ensureDrawingEditable("change pipe sizes")) return;
 
   for (const segmentIndex of selected) {
     if (state.edges[segmentIndex]) {
@@ -5046,12 +5721,48 @@ function updateProjectInputs() {
 function updateProjectReadout() {
   if (!projectReadout) return;
   const title = projectDisplayName();
+  const status = projectStatusLabel();
+  const locked = state.locked ? " / Locked" : "";
   projectReadout.textContent = hasProjectInfo() ? title : "No project set";
   projectReadout.title = state.projectId
-    ? `${title} - saved in this browser`
+    ? `${title} - ${status}${locked} - saved in this browser`
     : hasProjectInfo()
-    ? `${title} - not saved in project list yet`
+    ? `${title} - ${status}${locked} - not saved in project list yet`
     : "No project details entered";
+}
+
+function updateWorkflowControls() {
+  if (projectStatusSelect) projectStatusSelect.value = normalizeProjectStatus(state.projectStatus);
+  if (projectLockToggle) projectLockToggle.checked = state.locked === true;
+}
+
+function activateInspectorTab(name) {
+  const tabs = [...document.querySelectorAll("[data-inspector-tab]")];
+  const panels = [...document.querySelectorAll("[data-inspector-panel]")];
+  for (const tab of tabs) {
+    const active = tab.dataset.inspectorTab === name;
+    tab.classList.toggle("active", active);
+    tab.setAttribute("aria-selected", String(active));
+  }
+  for (const panel of panels) {
+    panel.classList.toggle("active", panel.dataset.inspectorPanel === name);
+  }
+}
+
+function showHealthPanel() {
+  activateInspectorTab("checks");
+  showMobilePanel("inspector");
+}
+
+function drawingEditLocked() {
+  return state.locked === true;
+}
+
+function ensureDrawingEditable(action = "edit this drawing") {
+  if (!drawingEditLocked()) return true;
+  window.alert(`This drawing is locked as ${projectStatusLabel()}. Unlock edits or create a new revision before you ${action}.`);
+  showHealthPanel();
+  return false;
 }
 
 function updatePropertiesPanel() {
@@ -5453,6 +6164,8 @@ function updatePanelFullscreenState() {
   document.body.classList.toggle("has-panel-fullscreen", Boolean(appFullscreenPanel || native));
   setFullscreenButtonState(drawingFullscreenButton, panelFullscreenActive(drawingPanel));
   setFullscreenButtonState(previewFullscreenButton, panelFullscreenActive(previewPanel));
+  syncDrawingContextMenuHost();
+  if (!drawingContextMenu.hidden) clampDrawingContextMenuToViewport();
   schedulePanelFullscreenResize();
 }
 
@@ -5554,6 +6267,7 @@ function updateControls() {
   liftingToggle.checked = state.showLiftingPoints;
   liftingAngleSelect.value = String(normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees));
   liftingAngleSelect.disabled = !state.showLiftingPoints;
+  updateWorkflowControls();
   setTool(state.activeTool);
 }
 
@@ -5565,6 +6279,10 @@ function updateAll(options = {}) {
   updateStats();
   updateTakeoffSummary();
   updateWeightsSummary();
+  updateBomSummary();
+  updateHealthSummary();
+  updateWorkflowSummary();
+  updateBackupSummary();
   updateSelectionControls();
   updatePipeSizeControls();
   updatePropertiesPanel();
@@ -5624,21 +6342,10 @@ function setupInspectorTabs() {
   const panels = [...document.querySelectorAll("[data-inspector-panel]")];
   if (!tabs.length || !panels.length) return;
 
-  const activate = (name) => {
-    for (const tab of tabs) {
-      const active = tab.dataset.inspectorTab === name;
-      tab.classList.toggle("active", active);
-      tab.setAttribute("aria-selected", String(active));
-    }
-    for (const panel of panels) {
-      panel.classList.toggle("active", panel.dataset.inspectorPanel === name);
-    }
-  };
-
   for (const tab of tabs) {
-    tab.addEventListener("click", () => activate(tab.dataset.inspectorTab));
+    tab.addEventListener("click", () => activateInspectorTab(tab.dataset.inspectorTab));
   }
-  activate(tabs.find((tab) => tab.classList.contains("active"))?.dataset.inspectorTab ?? tabs[0].dataset.inspectorTab);
+  activateInspectorTab(tabs.find((tab) => tab.classList.contains("active"))?.dataset.inspectorTab ?? tabs[0].dataset.inspectorTab);
 }
 
 function setupMobilePanels() {
@@ -5823,6 +6530,7 @@ function authPromptRememberedOnDevice() {
 
 async function runStartupPrompts() {
   await initSupabase();
+  if (await maybeOpenProjectFromUrl()) return;
   if (maybeOpenStartupAuthPrompt()) return;
   promptForProjectDetails();
 }
@@ -5906,6 +6614,8 @@ async function signInWithSupabase() {
     const { data, error } = await supabaseClient.auth.signInWithPassword(credentials);
     if (error) throw error;
     await applyCloudSession(data?.session ?? null);
+    const openedFromUrl = await maybeOpenProjectFromUrl();
+    if (openedFromUrl) startupProjectPromptPending = false;
     saveAuthRememberPreference();
     authPasswordInput.value = "";
     closeAuthDialog();
@@ -6473,7 +7183,8 @@ function fittingRenderPosition(fitting, start, end, renderedSegment, pipeRadius)
 
   if (renderedSegment) {
     if (fitting.type === "rollGroove") {
-      const inset = clampNumber(pipeRadius * 1.35, 0.08, 0.22);
+      const renderedLength = renderedSegment.start.distanceTo(renderedSegment.end);
+      const inset = Math.min(ROLL_GROOVE_SETBACK_MM / 1000, Math.max(0, renderedLength * 0.45));
       if (t <= 0.000001) return renderedSegment.start.clone().addScaledVector(axis, inset);
       if (t >= 0.999999) return renderedSegment.end.clone().addScaledVector(axis, -inset);
     }
@@ -7052,9 +7763,16 @@ function outlineRollGrooveMarker(position, direction, radius, material, width = 
   const group = new three.module.Group();
   const axis = direction.clone().normalize();
   const basis = radialBasis(axis);
-  const shoulderWidth = width * 0.42;
-  for (const offset of [-width * 0.44, -shoulderWidth * 0.5, shoulderWidth * 0.5, width * 0.44]) {
-    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, radius * 1.02, material));
+  const visualWidth = clampNumber(width, 0.018, 0.055);
+  const grooveWidth = visualWidth * 0.42;
+  const ringOffsets = [
+    -visualWidth * 0.5,
+    -grooveWidth * 0.5,
+    grooveWidth * 0.5,
+    visualWidth * 0.5,
+  ];
+  for (const offset of ringOffsets) {
+    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, radius * 1.006, material));
   }
 
   for (const radial of [
@@ -7064,8 +7782,8 @@ function outlineRollGrooveMarker(position, direction, radius, material, width = 
     basis.v.clone().multiplyScalar(-1),
   ]) {
     group.add(lineBetween(
-      position.clone().addScaledVector(axis, -width * 0.44).add(radial.clone().multiplyScalar(radius * 1.01)),
-      position.clone().addScaledVector(axis, width * 0.44).add(radial.clone().multiplyScalar(radius * 1.01)),
+      position.clone().addScaledVector(axis, -grooveWidth * 0.5).add(radial.clone().multiplyScalar(radius * 0.992)),
+      position.clone().addScaledVector(axis, grooveWidth * 0.5).add(radial.clone().multiplyScalar(radius * 0.992)),
       material,
     ));
   }
@@ -7395,56 +8113,82 @@ function socketAssembly(position, direction, pipeRadius, fitting, material, styl
 function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
-  const markerLength = clampNumber(pipeRadius * 1.05, 0.075, 0.18);
-  const grooveSpacing = markerLength * 0.34;
+  const markerLength = clampNumber(
+    Math.max(ROLL_GROOVE_VISUAL_WIDTH_MM / 1000, pipeRadius * 0.12),
+    0.022,
+    0.05,
+  );
+  const grooveSpacing = markerLength * 0.38;
 
   if (style.lineDrawing) {
     return outlineRollGrooveMarker(position, axis, pipeRadius, material, markerLength);
   }
 
   const group = new THREE.Group();
-  const grooveColor = material.color?.getHex?.() ?? 0x111719;
-  const brightColor = new THREE.Color(grooveColor).offsetHSL(0, 0, 0.18).getHex();
-  const darkColor = new THREE.Color(grooveColor).offsetHSL(0, 0, -0.16).getHex();
+  const brightColor = 0xdce3e6;
+  const highlightColor = 0xf7fafb;
+  const darkColor = 0x15191b;
   const baseMaterialParams = {
     transparent: true,
-    opacity: Math.min(0.68, (style.opacity ?? 1) * 0.68),
-    metalness: Math.min(0.72, style.metalness ?? 0.35),
-    roughness: Math.max(0.22, style.roughness ?? 0.36),
+    opacity: Math.min(0.96, Math.max(0.72, style.opacity ?? 1)),
+    metalness: Math.min(0.9, Math.max(0.58, style.metalness ?? 0.35)),
+    roughness: Math.min(0.3, Math.max(0.12, style.roughness ?? 0.24)),
   };
   const darkBandMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: darkColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
-    : new THREE.MeshStandardMaterial({ ...baseMaterialParams, color: darkColor, roughness: Math.max(0.38, baseMaterialParams.roughness) });
+    ? new THREE.MeshBasicMaterial({ color: darkColor, transparent: true, opacity: Math.min(0.92, style.opacity ?? 1) })
+    : new THREE.MeshStandardMaterial({
+      transparent: true,
+      opacity: Math.min(0.92, style.opacity ?? 1),
+      color: darkColor,
+      metalness: 0.36,
+      roughness: 0.46,
+    });
+  const bandMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({ color: brightColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
+    : new THREE.MeshPhysicalMaterial({
+      ...baseMaterialParams,
+      color: brightColor,
+      clearcoat: 0.76,
+      clearcoatRoughness: 0.1,
+    });
   const lipMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: brightColor, transparent: baseMaterialParams.transparent, opacity: 1 })
-    : new THREE.MeshStandardMaterial({ ...baseMaterialParams, color: brightColor, metalness: Math.min(0.82, baseMaterialParams.metalness + 0.1), roughness: Math.max(0.18, baseMaterialParams.roughness - 0.08) });
+    ? new THREE.MeshBasicMaterial({ color: highlightColor, transparent: baseMaterialParams.transparent, opacity: 1 })
+    : new THREE.MeshPhysicalMaterial({
+      ...baseMaterialParams,
+      color: highlightColor,
+      opacity: 1,
+      metalness: 0.86,
+      roughness: 0.11,
+      clearcoat: 0.86,
+      clearcoatRoughness: 0.08,
+    });
   const lineMaterial = new THREE.LineBasicMaterial({
-    color: brightColor,
+    color: highlightColor,
     transparent: style.opacity < 1,
     opacity: Math.min(0.94, (style.opacity ?? 1) + 0.08),
   });
 
-  const shadowBand = cylinderBetween(
-    position.clone().addScaledVector(axis, -grooveSpacing * 0.5),
-    position.clone().addScaledVector(axis, grooveSpacing * 0.5),
+  const polishedBand = cylinderBetween(
+    position.clone().addScaledVector(axis, -markerLength * 0.5),
+    position.clone().addScaledVector(axis, markerLength * 0.5),
     pipeRadius * 1.006,
-    darkBandMaterial,
+    bandMaterial,
     48,
   );
-  shadowBand.castShadow = false;
-  shadowBand.receiveShadow = true;
-  group.add(shadowBand);
+  polishedBand.castShadow = true;
+  polishedBand.receiveShadow = true;
+  group.add(polishedBand);
 
-  const grooveTube = clampNumber(pipeRadius * 0.026, 0.0035, 0.009);
-  const lipTube = clampNumber(pipeRadius * 0.035, 0.0035, 0.01);
+  const grooveTube = clampNumber(pipeRadius * 0.036, 0.0045, 0.013);
+  const lipTube = clampNumber(pipeRadius * 0.014, 0.0025, 0.006);
   for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
-    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.004, grooveTube, darkBandMaterial, 8, 48));
+    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.012, grooveTube, darkBandMaterial, 8, 48));
   }
-  for (const offset of [-markerLength * 0.44, markerLength * 0.44]) {
-    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.012, lipTube, lipMaterial, 8, 48));
+  for (const offset of [-markerLength * 0.5, markerLength * 0.5]) {
+    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.018, lipTube, lipMaterial, 8, 48));
   }
-  for (const offset of [-grooveSpacing, grooveSpacing]) {
-    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.018, lineMaterial));
+  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
+    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.026, lineMaterial));
   }
   return group;
 }
@@ -8327,7 +9071,7 @@ function renderFallbackPreview() {
     if (!segment) continue;
     const start2 = toScreen(projectPreviewPoint(segment.start));
     const end2 = toScreen(projectPreviewPoint(segment.end));
-    const point2 = toScreen(projectPreviewPoint(lerpPoint(segment.start, segment.end, fitting.t)));
+    const point2 = toScreen(projectPreviewPoint(fittingDisplayPoint(segment, fitting)));
     drawFitting3dFallback(ctx, fitting, start2, end2, point2, pipeWidth, style);
   }
 
@@ -8876,23 +9620,23 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
       }
     }
   } else if (fitting.type === "rollGroove") {
-    const halfLength = Math.max(9, pipeWidth * 0.48);
-    const halfWidth = pipeWidth * 0.62;
-    ctx.beginPath();
-    ctx.moveTo(along.x * -halfLength + normal.x * -halfWidth, along.y * -halfLength + normal.y * -halfWidth);
-    ctx.lineTo(along.x * halfLength + normal.x * -halfWidth, along.y * halfLength + normal.y * -halfWidth);
-    ctx.lineTo(along.x * halfLength + normal.x * halfWidth, along.y * halfLength + normal.y * halfWidth);
-    ctx.lineTo(along.x * -halfLength + normal.x * halfWidth, along.y * -halfLength + normal.y * halfWidth);
-    ctx.closePath();
-    if (!style.outline) {
-      ctx.globalAlpha = 0.86;
-      ctx.fill();
-      ctx.globalAlpha = 1;
+    const grooveHalfSpan = Math.max(4, pipeWidth * 0.16);
+    const shoulderHalfSpan = grooveHalfSpan * 1.9;
+    const halfWidth = pipeWidth * 0.7;
+    ctx.lineCap = "butt";
+    const silverStroke = style.outline ? style.fittingStroke : "#d9e0e3";
+    const darkStroke = style.outline ? style.fittingStroke : "#171d20";
+    ctx.strokeStyle = silverStroke;
+    ctx.lineWidth = style.outline ? 2.4 : 3.2;
+    for (const offset of [-shoulderHalfSpan, shoulderHalfSpan]) {
+      ctx.beginPath();
+      ctx.moveTo(along.x * offset + normal.x * -halfWidth, along.y * offset + normal.y * -halfWidth);
+      ctx.lineTo(along.x * offset + normal.x * halfWidth, along.y * offset + normal.y * halfWidth);
+      ctx.stroke();
     }
-    ctx.lineWidth = style.outline ? 2.6 : 3.2;
-    ctx.stroke();
-    ctx.lineWidth = style.outline ? 2.2 : 2.6;
-    for (const offset of [-halfLength * 0.52, 0, halfLength * 0.52]) {
+    ctx.strokeStyle = darkStroke;
+    ctx.lineWidth = style.outline ? 3 : 3.8;
+    for (const offset of [-grooveHalfSpan, grooveHalfSpan]) {
       ctx.beginPath();
       ctx.moveTo(along.x * offset + normal.x * -halfWidth, along.y * offset + normal.y * -halfWidth);
       ctx.lineTo(along.x * offset + normal.x * halfWidth, along.y * offset + normal.y * halfWidth);
@@ -8903,7 +9647,7 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
     ctx.textBaseline = "middle";
     ctx.lineWidth = 4;
     ctx.strokeStyle = style.background;
-    ctx.fillStyle = style.fittingStroke;
+    ctx.fillStyle = style.outline ? style.fittingStroke : "#526067";
     const labelX = normal.x * (pipeWidth * 0.95 + 8);
     const labelY = normal.y * (pipeWidth * 0.95 + 8);
     ctx.strokeText("RG", labelX, labelY);
@@ -9219,7 +9963,7 @@ async function loadSavedCloudProjects() {
   return cloudProjectCache;
 }
 
-async function openSavedCloudProject(projectId) {
+async function openSavedCloudProject(projectId, options = {}) {
   let record = (cloudProjectCache ?? []).find((project) => project.id === projectId);
   if (!record) {
     const projects = await loadSavedCloudProjects();
@@ -9230,7 +9974,7 @@ async function openSavedCloudProject(projectId) {
     return;
   }
 
-  if (state.projectId !== record.id && hasDrawingContent()) {
+  if (!options.skipConfirm && state.projectId !== record.id && hasDrawingContent()) {
     const proceed = window.confirm("Open this cloud project? Your current drawing will be replaced.");
     if (!proceed) return;
     persistState();
@@ -9246,6 +9990,9 @@ async function openSavedCloudProject(projectId) {
   state.projectId = record.id;
   state.projectInfo = normalizeProjectInfo(record.projectInfo);
   state.projectInfoPrompted = true;
+  if (options.readOnly) {
+    state.locked = true;
+  }
   three.userMovedCamera = false;
   setNextIdsFromState(state);
   updateControls();
@@ -9253,6 +10000,24 @@ async function openSavedCloudProject(projectId) {
   closeProjectLibrary();
   updateCloudStatus("Cloud project opened", "");
   window.setTimeout(() => updateCloudStatus(), 1600);
+}
+
+async function maybeOpenProjectFromUrl() {
+  if (location.protocol === "file:") return false;
+  const params = new URLSearchParams(location.search);
+  const projectId = normalizeProjectId(params.get("project"));
+  if (!projectId) return false;
+
+  await initSupabase();
+  if (!cloudUser) {
+    openAuthDialog({ startup: true });
+    return true;
+  }
+  await openSavedCloudProject(projectId, {
+    skipConfirm: true,
+    readOnly: params.get("readonly") === "1",
+  });
+  return true;
 }
 
 async function deleteSavedCloudProject(projectId) {
@@ -9408,6 +10173,8 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     return;
   }
 
+  projectLibraryList.append(projectDashboardCard(projects));
+
   const folders = projectFolders(projects);
   for (const [folderIndex, folder] of folders.entries()) {
     const details = document.createElement("details");
@@ -9445,6 +10212,32 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     details.append(drawings);
     projectLibraryList.append(details);
   }
+}
+
+function projectDashboardCard(projects) {
+  const card = document.createElement("div");
+  card.className = "project-dashboard-card";
+  const counts = projects.reduce((summary, project) => {
+    const savedState = project.state?.state && typeof project.state.state === "object" ? project.state.state : project.state;
+    const status = normalizeProjectStatus(savedState?.projectStatus);
+    summary[status] = (summary[status] ?? 0) + 1;
+    return summary;
+  }, {});
+  card.innerHTML = `
+    <div>
+      <strong>${projectLibrarySource === "cloud" ? "Cloud dashboard" : "Browser dashboard"}</strong>
+      <span>${projects.length} saved spool${projects.length === 1 ? "" : "s"}</span>
+    </div>
+    <div class="project-dashboard-stats">
+      ${[...PROJECT_STATUSES].map((status) => `
+        <div class="project-dashboard-stat">
+          <b>${counts[status] ?? 0}</b>
+          <small>${escapeHtml(projectStatusLabel(status))}</small>
+        </div>
+      `).join("")}
+    </div>
+  `;
+  return card;
 }
 
 function recentProjectChoices(limit = 9) {
@@ -9677,7 +10470,9 @@ function savedProjectMetaLine(project) {
   const savedState = project.state?.state && typeof project.state.state === "object" ? project.state.state : project.state;
   const runs = Array.isArray(savedState?.edges) ? savedState.edges.length : 0;
   const updated = project.updatedAt ? new Date(project.updatedAt).toLocaleString() : "not dated";
-  return `${runs} run${runs === 1 ? "" : "s"} - saved ${updated}`;
+  const status = projectStatusLabel(savedState?.projectStatus);
+  const locked = savedState?.locked ? " / locked" : "";
+  return `${status}${locked} - ${runs} run${runs === 1 ? "" : "s"} - saved ${updated}`;
 }
 
 function closeProjectLibrary() {
@@ -11777,22 +12572,25 @@ function redrawLoadPlanIfOpen() {
 }
 
 async function startNewDrawing() {
+  let nextProjectDefaults = null;
   if (hasDrawingContent()) {
     const choice = await openNewDrawingDialog();
     if (choice === "cancel") return;
     if (choice === "save") {
       const saved = await saveBrowserProject({ silent: true });
       if (!saved) return;
+      nextProjectDefaults = nextProjectInfoForNewSpool(state.projectInfo);
     }
   }
 
+  persistUserDrawingDefaults();
   state = blankState();
   nextFittingId = 1;
   nextNoteId = 1;
   three.userMovedCamera = false;
   updateControls();
   updateAll({ save: false });
-  await promptForProjectDetails({ force: true });
+  await promptForProjectDetails({ force: true, defaults: nextProjectDefaults });
 }
 
 function openNewDrawingDialog() {
@@ -11825,7 +12623,7 @@ async function promptForProjectDetails(options = {}) {
   const info = await openProjectDetailsDialog({
     title: "New drawing details",
     action: "Start drawing",
-    defaults: state.projectInfo,
+    defaults: options.defaults ?? state.projectInfo,
   });
 
   state.projectInfoPrompted = true;
@@ -11901,6 +12699,36 @@ function exportProjectFile() {
   downloadTextFile(html, `${name}.html`, "text/html");
 }
 
+async function shareReadOnlyProject() {
+  const { name, payload } = exportedProjectPayload();
+  payload.readOnly = true;
+  payload.state = {
+    ...payload.state,
+    locked: true,
+    projectStatus: normalizeProjectStatus(payload.state.projectStatus),
+  };
+
+  if (cloudUser && hasActiveCloudLicense() && location.protocol !== "file:") {
+    await saveCloudProject({ silent: true }).catch((error) => {
+      console.warn("Could not save before creating share link.", error);
+      return false;
+    });
+    if (state.projectId && navigator.clipboard) {
+      const url = new URL(location.href);
+      url.searchParams.set("project", state.projectId);
+      url.searchParams.set("readonly", "1");
+      url.hash = "";
+      await navigator.clipboard.writeText(url.toString()).catch(() => null);
+    }
+  }
+
+  const reportCanvas = buildSpoolReportCanvas();
+  const modelImage = capture3dPreviewImage();
+  const html = projectExportHtml(payload, reportCanvas.toDataURL("image/png"), modelImage, { readOnly: true });
+  downloadTextFile(html, `${name}-readonly.html`, "text/html");
+  window.alert("Read-only share export created. Send that HTML file to someone who only needs to view/print it.");
+}
+
 function exportedProjectPayload() {
   const project = normalizeProjectInfo(state.projectInfo);
   const stamp = new Date().toISOString().slice(0, 10);
@@ -11936,11 +12764,12 @@ function capture3dPreviewImage() {
   }
 }
 
-function projectExportHtml(payload, reportImage, modelImage = "") {
+function projectExportHtml(payload, reportImage, modelImage = "", options = {}) {
   const project = normalizeProjectInfo(payload.state?.projectInfo);
   const title = projectDisplayName(project);
   const exportedAt = new Date(payload.exportedAt ?? Date.now()).toLocaleString();
   const data = jsonForHtmlScript(payload);
+  const readOnly = options.readOnly || payload.readOnly;
   const modelSection = modelImage
     ? `<section class="figure">
         <h2>3D model view</h2>
@@ -11981,7 +12810,7 @@ function projectExportHtml(payload, reportImage, modelImage = "") {
       <header>
         <div>
           <h1>${escapeHtml(title)}</h1>
-          <p>IsoSpool fabrication sheet export ${escapeHtml(payload.appVersion ?? APP_VERSION)}</p>
+          <p>IsoSpool fabrication sheet export ${escapeHtml(payload.appVersion ?? APP_VERSION)}${readOnly ? " / read-only" : ""}</p>
           <p>Exported ${escapeHtml(exportedAt)}</p>
         </div>
         <button type="button" onclick="window.print()">Print / Save PDF</button>
@@ -11991,7 +12820,7 @@ function projectExportHtml(payload, reportImage, modelImage = "") {
         <img src="${reportImage}" alt="Pipe spool fabrication sheet" />
       </section>
       ${modelSection}
-      <p class="note">This HTML file opens in a browser. It also contains the IsoSpool project data, so it can be imported back into IsoSpool later.</p>
+      <p class="note">${readOnly ? "Read-only shop/client copy. " : ""}This HTML file opens in a browser. It also contains the IsoSpool project data, so it can be imported back into IsoSpool later.</p>
     </main>
     <script id="isospool-project-data" type="application/json">${data}</script>
   </body>
@@ -12085,9 +12914,9 @@ function buildSpoolReportCanvas() {
   const reportWidth = 600;
   const drawingArea = {
     x: margin,
-    y: 118,
+    y: 150,
     width: canvas.width - margin * 2 - gutter - reportWidth,
-    height: canvas.height - 154,
+    height: canvas.height - 186,
   };
   const reportArea = {
     x: drawingArea.x + drawingArea.width + gutter,
@@ -12109,22 +12938,35 @@ function drawReportHeader(ctx, width) {
     project.revision ? `Rev ${project.revision}` : "",
     project.client,
   ].filter(Boolean).join("  |  ");
+  const checked = state.checkedAt
+    ? `Checked ${new Date(state.checkedAt).toLocaleDateString()}${state.checkedBy ? ` by ${state.checkedBy}` : ""}`
+    : "Unchecked";
 
   ctx.save();
+  roundRect(ctx, 36, 24, 160, 56, 10);
+  ctx.fillStyle = "#163c40";
+  ctx.fill();
+  ctx.fillStyle = "#fff";
+  ctx.font = "950 22px Inter, system-ui, sans-serif";
+  ctx.fillText("ISOSPOOL", 54, 58);
+
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 34px Inter, system-ui, sans-serif";
-  ctx.fillText("Pipe spool fabrication sheet", 36, 56);
+  ctx.fillText("Pipe spool fabrication sheet", 220, 56);
   ctx.font = "800 14px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
-  ctx.fillText(`Centre-to-centre drawing, cut lengths and estimated ${pipeSpec().material.toLowerCase()} weight`, 38, 82);
+  ctx.fillText(`Centre-to-centre drawing, cut lengths and estimated ${pipeSpec().material.toLowerCase()} weight`, 222, 82);
   if (reference) {
-    ctx.fillText(reference, 38, 104);
+    ctx.fillText(reference, 222, 104);
   }
   ctx.textAlign = "right";
   ctx.fillText(new Date().toLocaleString(), width - 36, 56);
   ctx.fillText(`IsoSpool ${APP_VERSION}`, width - 36, 82);
+  ctx.fillText(`${projectStatusLabel()}${state.locked ? " / Locked" : ""}`, width - 36, 104);
   if (project.drawnBy) {
-    ctx.fillText(`Drawn by ${project.drawnBy}`, width - 36, 104);
+    ctx.fillText(`Drawn by ${project.drawnBy} / ${checked}`, width - 36, 126);
+  } else {
+    ctx.fillText(checked, width - 36, 126);
   }
   ctx.restore();
 }
@@ -12176,6 +13018,7 @@ function drawReportDrawing(ctx, area) {
       drawSuggestedLugs2d(ctx, projection);
       drawLiftPoint2d(ctx, projection);
     }
+    drawProjectCornerTag(ctx, area.width, area.height, { padding: 18, fontSize: 15, maxWidth: 320 });
     ctx.restore();
 
     ctx.save();
@@ -12608,6 +13451,18 @@ function drawWrappedReportText(ctx, text, x, y, maxWidth, lineHeight) {
   return y + 4;
 }
 
+function drawingContextMenuHost() {
+  if (drawingPanel && panelFullscreenActive(drawingPanel)) return drawingPanel;
+  return document.body;
+}
+
+function syncDrawingContextMenuHost() {
+  const host = drawingContextMenuHost();
+  if (host && drawingContextMenu.parentElement !== host) {
+    host.append(drawingContextMenu);
+  }
+}
+
 function openDrawingContextMenu(event) {
   event.preventDefault();
   const pointer = pointerPosition(event);
@@ -12638,6 +13493,7 @@ function contextTargetFromPointer(pointer) {
 }
 
 function openDrawingContextMenuFromPointer(pointer, clientX, clientY) {
+  syncDrawingContextMenuHost();
   drawingContextTarget = contextTargetFromPointer(pointer);
   state.hoveredSegment = drawingContextTarget.segmentHit ? drawingContextTarget.segmentHit.segment.index : null;
   drawIso();
@@ -13090,6 +13946,7 @@ function renderContextPipeSizeMenu() {
 }
 
 function positionDrawingContextMenu(clientX, clientY) {
+  syncDrawingContextMenuHost();
   drawingContextMenu.hidden = false;
   drawingContextMenu.style.left = `${clientX}px`;
   drawingContextMenu.style.top = `${clientY}px`;
@@ -13302,6 +14159,10 @@ function finishTouchContextPress(event) {
 
 function startPendingDraw(event, pointer) {
   if (state.activeTool !== "draw") return false;
+  if (drawingEditLocked()) {
+    cursorReadout.textContent = "Drawing is locked";
+    return false;
+  }
 
   const pointHit = findNearestPoint(pointer);
   if (pointHit) {
@@ -13444,12 +14305,14 @@ function selectContextHitOnTouch(pointer, event) {
 }
 
 function placeContextFitting(type, options = {}) {
+  if (!ensureDrawingEditable("add fitting")) return;
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
   placeFitting(type, hit.segment.index, hit.t, options);
 }
 
 function addContextSockets() {
+  if (!ensureDrawingEditable("add sockets")) return;
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
 
@@ -13543,6 +14406,7 @@ function deleteContextSegments() {
 }
 
 function deleteContextFitting() {
+  if (!ensureDrawingEditable("delete fitting")) return;
   const fitting = drawingContextTarget?.fittingHit?.fitting;
   if (!fitting) return;
 
@@ -13552,6 +14416,7 @@ function deleteContextFitting() {
 }
 
 function toggleContextBendReducerSide() {
+  if (!ensureDrawingEditable("move reducer")) return;
   const reducer = drawingContextTarget?.reducerHit?.reducer;
   if (!reducer || reducer.kind !== "bend") return;
 
@@ -13566,6 +14431,7 @@ function toggleContextBendReducerSide() {
 }
 
 function setContextFittingWeight() {
+  if (!ensureDrawingEditable("set fitting weight")) return;
   const hit = drawingContextTarget?.fittingHit;
   if (!hit) return;
   if (hit.fitting.type === "rollGroove") return;
@@ -13586,6 +14452,7 @@ function setContextFittingWeight() {
 }
 
 function clearContextFittingWeight() {
+  if (!ensureDrawingEditable("clear fitting weight")) return;
   const fitting = drawingContextTarget?.fittingHit?.fitting;
   if (!fitting) return;
 
@@ -13595,6 +14462,7 @@ function clearContextFittingWeight() {
 }
 
 function rotateContextSocket() {
+  if (!ensureDrawingEditable("spin socket")) return;
   const fitting = drawingContextTarget?.fittingHit?.fitting;
   if (!fitting || fitting.type !== "socket") return;
   fitting.socketAngle = normalizeSocketAngle(fittingSocketAngle(fitting) + SOCKET_ROTATION_STEP_DEG);
@@ -13603,6 +14471,7 @@ function rotateContextSocket() {
 }
 
 function deleteContextNote() {
+  if (!ensureDrawingEditable("delete note")) return;
   const note = drawingContextTarget?.noteHit?.note;
   if (!note) return;
 
@@ -13612,6 +14481,7 @@ function deleteContextNote() {
 }
 
 function deleteContextPoint() {
+  if (!ensureDrawingEditable("delete point")) return;
   const pointHit = drawingContextTarget?.pointHit;
   if (!pointHit || state.points.length <= 1) return;
 
@@ -13627,6 +14497,7 @@ function deleteContextPoint() {
 }
 
 function setContextPointConnectionType(type) {
+  if (!ensureDrawingEditable("change connection type")) return;
   const pointHit = drawingContextTarget?.pointHit;
   if (!pointHit) return;
   const connected = segments().filter((segment) => segment.from === pointHit.index || segment.to === pointHit.index);
@@ -13641,6 +14512,7 @@ function setContextPointConnectionType(type) {
 }
 
 function editContextSegmentLength() {
+  if (!ensureDrawingEditable("edit length")) return;
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
 
@@ -13657,6 +14529,7 @@ function editContextSegmentLength() {
 }
 
 function editContextSegmentAngle() {
+  if (!ensureDrawingEditable("edit bend angle")) return;
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
 
@@ -13683,12 +14556,14 @@ function contextPipeSizeTargetIndexes(segment) {
 }
 
 function changeContextPipeSize() {
+  if (!ensureDrawingEditable("change pipe size")) return;
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
   renderContextPipeSizeMenu();
 }
 
 function addContextNote(point) {
+  if (!ensureDrawingEditable("add note")) return;
   if (!point) return;
   const text = promptNoteText(noteTextInput.value);
   if (text === null) return;
@@ -13696,6 +14571,7 @@ function addContextNote(point) {
 }
 
 function editContextNote(note) {
+  if (!ensureDrawingEditable("edit note")) return;
   const text = promptNoteText(note.text);
   if (text === null) return;
   note.text = text.slice(0, 80);
@@ -14465,6 +15341,26 @@ pipeSizeSelect.addEventListener("change", () => {
   }
 });
 
+projectStatusSelect?.addEventListener("change", () => {
+  const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
+  state.projectStatus = nextStatus;
+  if (nextStatus === "checked" && !state.checkedAt) {
+    state.checkedAt = new Date().toISOString();
+    state.checkedBy = checkerName();
+  }
+  if (nextStatus !== "draft" && state.locked !== true) {
+    state.locked = true;
+  }
+  updateControls();
+  updateAll();
+});
+
+projectLockToggle?.addEventListener("change", () => {
+  state.locked = projectLockToggle.checked;
+  updateControls();
+  updateAll();
+});
+
 dimensionToggle.addEventListener("change", () => {
   state.showDimensions = dimensionToggle.checked;
   dimensionStyleSelect.disabled = !state.showDimensions;
@@ -14516,6 +15412,10 @@ document.querySelector("#sampleButton").addEventListener("click", () => {
 
 document.querySelector("#undoButton").addEventListener("click", undo);
 document.querySelector("#resetButton").addEventListener("click", startNewDrawing);
+healthCheckButton?.addEventListener("click", showHealthPanel);
+newRevisionButton?.addEventListener("click", createNextRevision);
+shareReadOnlyButton?.addEventListener("click", shareReadOnlyProject);
+saveDefaultsButton?.addEventListener("click", saveCurrentSettingsAsDefaults);
 saveBrowserProjectButton?.addEventListener("click", () => {
   saveBrowserProject().catch((error) => {
     console.warn("Save project failed.", error);

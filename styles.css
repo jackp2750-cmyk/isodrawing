@@ -924,7 +924,7 @@ button svg path {
 
 .drawing-context-menu {
   position: fixed;
-  z-index: 20;
+  z-index: 180;
   min-width: 190px;
   max-height: min(620px, calc(100dvh - 24px));
   overflow: auto;
@@ -1326,6 +1326,276 @@ button svg path {
   border: 1px dashed var(--line-strong);
   border-radius: 8px;
   background: var(--button);
+}
+
+.bom-table,
+.health-summary,
+.workflow-summary,
+.backup-summary {
+  display: grid;
+  gap: 8px;
+}
+
+.bom-table {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+}
+
+.bom-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(82px, auto) minmax(58px, auto);
+  gap: 10px;
+  align-items: center;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e2ece8;
+}
+
+.bom-row:last-child {
+  border-bottom: 0;
+}
+
+.bom-row strong {
+  min-width: 0;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.bom-row strong small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.bom-row span {
+  justify-self: end;
+  color: var(--teal-strong);
+  font-size: 12px;
+  font-weight: 950;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.bom-head {
+  min-height: 30px;
+  background: #f1f7f4;
+}
+
+.bom-head strong,
+.bom-head span {
+  color: var(--muted);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.health-head,
+.workflow-card,
+.backup-card,
+.revision-card {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+}
+
+.health-head {
+  border-color: rgba(8, 125, 115, 0.22);
+  background: var(--teal-soft);
+}
+
+.health-head.warning {
+  border-color: rgba(217, 154, 35, 0.34);
+  background: #fff6df;
+}
+
+.health-head.error {
+  border-color: rgba(180, 35, 24, 0.34);
+  background: #fff1ee;
+}
+
+.health-head strong,
+.workflow-card strong,
+.backup-card strong,
+.revision-card strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.health-head span,
+.workflow-card span,
+.backup-card span,
+.revision-card span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.health-list,
+.workflow-list,
+.revision-list,
+.backup-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.health-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffdf8;
+}
+
+.health-item::before {
+  content: "";
+  width: 9px;
+  height: 9px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--teal);
+}
+
+.health-item.warning::before {
+  background: var(--amber);
+}
+
+.health-item.error::before {
+  background: var(--danger);
+}
+
+.health-item strong {
+  display: block;
+  grid-column: 2;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.health-item span {
+  display: block;
+  grid-column: 2;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.workflow-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid #e2ece8;
+}
+
+.workflow-list li:last-child {
+  border-bottom: 0;
+}
+
+.workflow-list span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.workflow-list strong {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+  text-align: right;
+}
+
+.workflow-actions,
+.revision-actions,
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.workflow-actions button,
+.revision-actions button,
+.backup-actions button {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--teal-strong);
+  font-size: 12px;
+  font-weight: 950;
+  box-shadow: var(--button-shadow);
+}
+
+.workflow-actions button:hover,
+.revision-actions button:hover,
+.backup-actions button:hover {
+  border-color: var(--teal);
+  background: var(--button-hover);
+}
+
+.revision-list li,
+.backup-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfffd;
+}
+
+.revision-list strong,
+.backup-list strong {
+  display: block;
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.revision-list span,
+.backup-list span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.revision-list button,
+.backup-list button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  background: var(--button);
+  color: var(--teal-strong);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.revision-list button:hover,
+.backup-list button:hover {
+  border-color: var(--teal);
+  background: var(--button-hover);
 }
 
 .toggle {
@@ -2044,6 +2314,59 @@ button svg path {
   text-align: center;
 }
 
+.project-dashboard-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid rgba(8, 125, 115, 0.26);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f3fbf8 0%, #fbfffd 100%);
+  box-shadow: 0 2px 8px rgba(31, 49, 52, 0.07);
+}
+
+.project-dashboard-card strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.project-dashboard-card span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.project-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.project-dashboard-stat {
+  display: grid;
+  gap: 3px;
+  min-height: 50px;
+  align-content: center;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+}
+
+.project-dashboard-stat b {
+  color: var(--teal-strong);
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.project-dashboard-stat small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .project-folder {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -2737,6 +3060,19 @@ button svg path {
     justify-content: flex-start;
   }
 
+  .project-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .bom-row {
+    grid-template-columns: minmax(0, 1fr) minmax(70px, auto);
+  }
+
+  .bom-row span:last-child,
+  .bom-head span:last-child {
+    display: none;
+  }
+
   .drawing-panel {
     padding-bottom: 132px;
   }
@@ -2801,6 +3137,11 @@ body .drawing-panel.panel-fullscreen .bar-actions,
 body .preview-panel.panel-fullscreen .bar-actions {
   align-items: center;
   justify-content: flex-end;
+}
+
+body .drawing-panel.panel-fullscreen .drawing-context-menu,
+body .drawing-panel:fullscreen .drawing-context-menu {
+  z-index: 260;
 }
 
 body .drawing-panel:fullscreen,

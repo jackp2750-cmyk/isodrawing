@@ -11,7 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=134" />
+    <link rel="stylesheet" href="./styles.css?v=141" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -151,12 +151,25 @@
           <div>
             <strong>IsoSpool Studio</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.34</span>
+            <span class="version-badge" id="appVersionBadge">v1.41</span>
           </div>
         </div>
 
         <div class="topbar-settings" aria-label="Project defaults and drawing overlays">
           <span class="project-readout" id="projectReadout">No project set</span>
+          <label class="dimension-style-field">
+            <span>Status</span>
+            <select id="projectStatusSelect" aria-label="Drawing status">
+              <option value="draft">Draft</option>
+              <option value="checked">Checked</option>
+              <option value="issued">Issued</option>
+              <option value="fabricated">Fabricated</option>
+            </select>
+          </label>
+          <label class="toggle top-toggle">
+            <input id="projectLockToggle" type="checkbox" />
+            <span>Lock edits</span>
+          </label>
           <label class="top-field">
             <span>Material</span>
             <select id="pipeSpecSelect">
@@ -227,6 +240,22 @@
           <button class="icon-button labeled" id="toolSettingsButton" type="button" title="Choose side tools" aria-label="Choose side tools">
             <svg><use href="#icon-settings"></use></svg>
             <span>Tools</span>
+          </button>
+          <button class="icon-button labeled" id="healthCheckButton" type="button" title="Run drawing health check" aria-label="Run drawing health check">
+            <svg><use href="#icon-select"></use></svg>
+            <span>Check</span>
+          </button>
+          <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
+            <svg><use href="#icon-reset"></use></svg>
+            <span>Rev</span>
+          </button>
+          <button class="icon-button labeled" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
+            <svg><use href="#icon-export"></use></svg>
+            <span>Share</span>
+          </button>
+          <button class="icon-button labeled" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
+            <svg><use href="#icon-settings"></use></svg>
+            <span>Defaults</span>
           </button>
           <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
             <svg><use href="#icon-sample"></use></svg>
@@ -344,6 +373,8 @@
             <button class="active" data-inspector-tab="properties" type="button">Properties</button>
             <button data-inspector-tab="cutlist" type="button">Cut List</button>
             <button data-inspector-tab="weights" type="button">Weights</button>
+            <button data-inspector-tab="bom" type="button">BOM</button>
+            <button data-inspector-tab="checks" type="button">Checks</button>
             <button data-inspector-tab="notes" type="button">Notes</button>
           </div>
 
@@ -414,6 +445,28 @@
             <section class="control-section">
               <h2>Weight summary</h2>
               <div class="weights-summary" id="weightsSummary" aria-live="polite"></div>
+            </section>
+          </div>
+
+          <div class="inspector-tab-panel" data-inspector-panel="bom">
+            <section class="control-section">
+              <h2>Order list</h2>
+              <div class="takeoff-summary" id="bomSummary" aria-live="polite"></div>
+            </section>
+          </div>
+
+          <div class="inspector-tab-panel" data-inspector-panel="checks">
+            <section class="control-section">
+              <h2>Drawing health</h2>
+              <div class="health-summary" id="healthSummary" aria-live="polite"></div>
+            </section>
+            <section class="control-section">
+              <h2>Workflow</h2>
+              <div class="workflow-summary" id="workflowSummary" aria-live="polite"></div>
+            </section>
+            <section class="control-section">
+              <h2>Backups</h2>
+              <div class="backup-summary" id="backupSummary" aria-live="polite"></div>
             </section>
           </div>
 
@@ -640,6 +693,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=134"></script>
+    <script defer src="./app.js?v=141"></script>
   </body>
 </html>
