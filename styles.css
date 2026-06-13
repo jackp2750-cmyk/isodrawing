@@ -114,6 +114,8 @@ button svg path {
 }
 
 .topbar {
+  position: relative;
+  z-index: 70;
   min-height: 72px;
   height: auto;
   display: flex;
@@ -131,7 +133,16 @@ button svg path {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  flex: 0 0 226px;
+  min-width: 206px;
+  max-width: 242px;
+  overflow: hidden;
+}
+
+.brand > div {
   min-width: 0;
+  display: grid;
+  gap: 2px;
 }
 
 .brand-mark {
@@ -168,6 +179,19 @@ button svg path {
   bottom: 6px;
 }
 
+.brand-logo {
+  width: 50px;
+  height: 50px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(0, 174, 255, 0.34);
+  border-radius: 10px;
+  background: #061018;
+  object-fit: cover;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 8px 22px rgba(0, 112, 255, 0.16);
+}
+
 .brand strong,
 .bar-title span,
 .control-section h2 {
@@ -178,6 +202,9 @@ button svg path {
   display: block;
   font-size: 17px;
   line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .brand small,
@@ -186,6 +213,12 @@ button svg path {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.4;
+}
+
+.brand small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .version-badge {
@@ -214,6 +247,10 @@ button svg path {
   justify-content: flex-end;
 }
 
+.topbar-actions {
+  position: relative;
+}
+
 .topbar-settings {
   flex: 1 1 auto;
   justify-content: center;
@@ -230,6 +267,34 @@ button svg path {
   border-radius: 9px;
   background: #e7f2ef;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.theme-tabs {
+  display: inline-grid;
+  grid-template-columns: repeat(2, minmax(54px, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--panel-strong);
+  box-shadow: var(--button-shadow);
+}
+
+.theme-tabs button {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.theme-tabs button.active {
+  border-color: var(--teal);
+  background: var(--button-selected);
+  color: #fff;
 }
 
 .project-readout {
@@ -276,6 +341,89 @@ button svg path {
   border-color: rgba(185, 84, 54, 0.32);
   background: #fff1e8;
   color: #8a3a25;
+}
+
+.action-menu-toggle[aria-expanded="true"] {
+  border-color: var(--teal);
+  background: var(--button-selected);
+  color: #fff;
+}
+
+.action-menu-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 220;
+  width: min(620px, calc(100vw - 24px));
+  max-height: min(74vh, 620px);
+  overflow: auto;
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid rgba(31, 42, 47, 0.18);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.action-menu-panel[hidden] {
+  display: none;
+}
+
+.action-menu-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.action-menu-header strong {
+  display: block;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.action-menu-header span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 820;
+}
+
+.action-menu-groups {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.action-menu-group {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-strong);
+}
+
+.action-menu-group h2 {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.action-menu-group .icon-button,
+.action-menu-group .primary-button {
+  width: 100%;
+  min-height: 40px;
+  justify-content: center;
 }
 
 .top-field {
@@ -1762,7 +1910,7 @@ button svg path {
 }
 
 .auth-card {
-  width: min(460px, 100%);
+  width: min(620px, 100%);
 }
 
 .auth-mode-tabs {
@@ -1827,6 +1975,144 @@ button svg path {
 
 .auth-actions .primary-button {
   margin-left: auto;
+}
+
+.team-workspace-panel {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(8, 125, 115, 0.22);
+  border-radius: 8px;
+  background: #f7fcfa;
+}
+
+.team-workspace-panel[hidden] {
+  display: none;
+}
+
+.team-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.team-panel-head strong {
+  display: block;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.team-panel-head small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 820;
+  line-height: 1.35;
+}
+
+.team-action-button {
+  align-self: end;
+  min-height: 38px;
+}
+
+.team-members-list,
+.team-comments {
+  display: grid;
+  gap: 8px;
+}
+
+.team-members-list {
+  max-height: 220px;
+  overflow: auto;
+}
+
+.team-member-row,
+.team-comment,
+.team-empty {
+  display: grid;
+  gap: 4px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+}
+
+.team-member-row.pending {
+  border-color: rgba(217, 154, 35, 0.36);
+  background: #fff8e8;
+}
+
+.team-member-main {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.team-member-main strong,
+.team-comment strong {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.team-member-main span,
+.team-comment p,
+.team-empty {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 820;
+  line-height: 1.35;
+}
+
+.team-comment p {
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.team-comment-meta {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 820;
+}
+
+.team-member-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.team-member-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.team-member-actions button {
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--button-border);
+  border-radius: 7px;
+  background: var(--button);
+  color: var(--teal-strong);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.team-member-actions button.danger {
+  color: var(--danger);
+}
+
+.team-comments {
+  max-height: 190px;
+  overflow: auto;
+}
+
+.team-comment {
+  background: #fbfffd;
 }
 
 .project-dialog-header strong {
@@ -2656,10 +2942,10 @@ button svg path {
 
   .topbar {
     position: relative;
-    z-index: 32;
+    z-index: 70;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(150px, auto) minmax(0, 1fr);
+    grid-template-columns: minmax(188px, 224px) minmax(0, 1fr);
     align-items: center;
     gap: 8px 10px;
     padding: 8px 10px;
@@ -2667,12 +2953,23 @@ button svg path {
 
   .brand {
     gap: 8px;
+    min-width: 0;
+    max-width: 224px;
+    width: 100%;
+    flex-basis: auto;
+    grid-column: 1;
   }
 
   .brand-mark {
     width: 32px;
     height: 32px;
     border-radius: 7px;
+  }
+
+  .brand-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
   }
 
   .brand-mark::before {
@@ -2698,12 +2995,27 @@ button svg path {
   }
 
   .topbar-actions {
+    grid-column: 2;
     min-width: 0;
     flex-wrap: nowrap;
     justify-content: flex-end;
     overflow-x: auto;
     padding-bottom: 2px;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .action-menu-panel {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: 76px;
+    z-index: 220;
+    width: auto;
+    max-height: calc(100dvh - 92px);
+  }
+
+  .action-menu-groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .topbar-actions .icon-button.labeled {
@@ -3056,8 +3368,25 @@ button svg path {
     grid-template-columns: 1fr;
   }
 
+  .brand {
+    max-width: 100%;
+  }
+
   .topbar-actions {
+    grid-column: 1;
     justify-content: flex-start;
+  }
+
+  .cloud-status-pill {
+    max-width: 148px;
+  }
+
+  .action-menu-panel {
+    top: 118px;
+  }
+
+  .action-menu-groups {
+    grid-template-columns: 1fr;
   }
 
   .project-dashboard-stats {
@@ -3146,5 +3475,295 @@ body .drawing-panel:fullscreen .drawing-context-menu {
 
 body .drawing-panel:fullscreen,
 body .preview-panel:fullscreen {
+  background: var(--panel);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #02070d;
+  --panel: #071018;
+  --panel-strong: #0b1621;
+  --ink: #e7f3f8;
+  --muted: #91a8b6;
+  --line: #183142;
+  --line-strong: #23506a;
+  --teal: #13d8ff;
+  --teal-strong: #78e8ff;
+  --teal-soft: #0b2638;
+  --teal-wash: #0a2030;
+  --blue: #2b77ff;
+  --rust: #f9734f;
+  --amber: #ffc857;
+  --danger: #ff6b63;
+  --button: #0a1722;
+  --button-border: #24516c;
+  --button-hover: #10283a;
+  --button-active: #0d3450;
+  --button-selected: #0078ff;
+  --button-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
+  --button-shadow-strong: 0 12px 28px rgba(0, 120, 255, 0.22);
+  --shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] body {
+  background:
+    linear-gradient(180deg, rgba(0, 120, 255, 0.08), rgba(0, 0, 0, 0) 280px),
+    var(--bg);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] button:focus-visible,
+:root[data-theme="dark"] input:focus-visible,
+:root[data-theme="dark"] select:focus-visible {
+  outline-color: rgba(19, 216, 255, 0.34);
+}
+
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .topbar-toggles,
+:root[data-theme="dark"] .topbar-settings,
+:root[data-theme="dark"] .action-menu-panel,
+:root[data-theme="dark"] .panel-bar,
+:root[data-theme="dark"] .tool-rail,
+:root[data-theme="dark"] .drawing-panel,
+:root[data-theme="dark"] .preview-panel,
+:root[data-theme="dark"] .control-panel,
+:root[data-theme="dark"] .inspector-panel,
+:root[data-theme="dark"] .project-dialog-card,
+:root[data-theme="dark"] .mobile-panel-dock {
+  border-color: var(--line);
+  background: rgba(7, 16, 24, 0.96);
+  box-shadow: var(--shadow);
+}
+
+:root[data-theme="dark"] .topbar {
+  background:
+    linear-gradient(90deg, rgba(19, 216, 255, 0.09), rgba(43, 119, 255, 0.04) 42%, rgba(7, 16, 24, 0.98)),
+    #071018;
+}
+
+:root[data-theme="dark"] .brand strong {
+  color: #f2f8fb;
+  text-shadow: 0 0 16px rgba(19, 216, 255, 0.24);
+}
+
+:root[data-theme="dark"] .brand {
+  padding: 5px 8px 5px 5px;
+  border-radius: 11px;
+  background: linear-gradient(90deg, rgba(3, 9, 15, 0.86), rgba(3, 9, 15, 0.28));
+}
+
+:root[data-theme="dark"] .brand small,
+:root[data-theme="dark"] .bar-title small,
+:root[data-theme="dark"] .project-dialog-header small,
+:root[data-theme="dark"] .auth-help,
+:root[data-theme="dark"] .team-panel-head small,
+:root[data-theme="dark"] .tool-setting-copy small,
+:root[data-theme="dark"] .workflow-card span,
+:root[data-theme="dark"] .backup-card span,
+:root[data-theme="dark"] .revision-card span,
+:root[data-theme="dark"] .health-head span {
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .brand-logo {
+  border-color: rgba(19, 216, 255, 0.42);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 0 28px rgba(0, 120, 255, 0.28);
+}
+
+:root[data-theme="dark"] .version-badge,
+:root[data-theme="dark"] .cloud-status-pill,
+:root[data-theme="dark"] .project-readout,
+:root[data-theme="dark"] .pill {
+  border-color: rgba(19, 216, 255, 0.28);
+  background: rgba(9, 36, 55, 0.92);
+  color: #d7f8ff;
+}
+
+:root[data-theme="dark"] .theme-tabs,
+:root[data-theme="dark"] .auth-mode-tabs,
+:root[data-theme="dark"] .preview-nav,
+:root[data-theme="dark"] .inspector-tabs {
+  border-color: var(--line-strong);
+  background: rgba(3, 12, 20, 0.86);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="dark"] .theme-tabs button.active,
+:root[data-theme="dark"] .auth-mode-tabs button.active,
+:root[data-theme="dark"] .preview-nav button.active,
+:root[data-theme="dark"] .inspector-tabs button.active,
+:root[data-theme="dark"] .action-menu-toggle[aria-expanded="true"],
+:root[data-theme="dark"] .mobile-panel-dock button.active {
+  border-color: rgba(19, 216, 255, 0.7);
+  background: linear-gradient(180deg, #009dff, #0059d6);
+  color: #fff;
+  box-shadow: 0 0 18px rgba(0, 120, 255, 0.26);
+}
+
+:root[data-theme="dark"] .icon-button,
+:root[data-theme="dark"] .primary-button,
+:root[data-theme="dark"] .project-library-action,
+:root[data-theme="dark"] .workflow-actions button,
+:root[data-theme="dark"] .revision-actions button,
+:root[data-theme="dark"] .backup-actions button,
+:root[data-theme="dark"] .tool-setting-row,
+:root[data-theme="dark"] .team-member-actions button,
+:root[data-theme="dark"] .project-job-picker-button,
+:root[data-theme="dark"] .load-plan-view-tabs button,
+:root[data-theme="dark"] .load-plan-model-tools button {
+  border-color: var(--button-border);
+  background: var(--button);
+  color: var(--ink);
+  box-shadow: var(--button-shadow);
+}
+
+:root[data-theme="dark"] .icon-button:hover,
+:root[data-theme="dark"] .project-library-action:hover,
+:root[data-theme="dark"] .workflow-actions button:hover,
+:root[data-theme="dark"] .revision-actions button:hover,
+:root[data-theme="dark"] .backup-actions button:hover,
+:root[data-theme="dark"] .tool-setting-row:hover,
+:root[data-theme="dark"] .team-member-actions button:hover,
+:root[data-theme="dark"] .project-job-picker-button:hover {
+  border-color: rgba(19, 216, 255, 0.54);
+  background: var(--button-hover);
+  color: #e7faff;
+}
+
+:root[data-theme="dark"] .primary-button,
+:root[data-theme="dark"] .project-library-action.primary {
+  border-color: rgba(19, 216, 255, 0.72);
+  background: linear-gradient(180deg, #009dff, #005bd6);
+  color: #fff;
+}
+
+:root[data-theme="dark"] .icon-button.danger,
+:root[data-theme="dark"] .project-library-action.danger {
+  color: #ff9a92;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select {
+  border-color: var(--button-border);
+  background: #06111a;
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] input::placeholder {
+  color: #668293;
+}
+
+:root[data-theme="dark"] .field span,
+:root[data-theme="dark"] .top-field span,
+:root[data-theme="dark"] .dimension-style-field span,
+:root[data-theme="dark"] .toggle span {
+  color: var(--muted);
+}
+
+:root[data-theme="dark"] .canvas-frame,
+:root[data-theme="dark"] .preview-stage,
+:root[data-theme="dark"] .load-plan-stage {
+  border-color: rgba(19, 216, 255, 0.18);
+  background: #061018;
+}
+
+:root[data-theme="dark"] .drawing-context-menu,
+:root[data-theme="dark"] .project-job-picker,
+:root[data-theme="dark"] .project-library-list,
+:root[data-theme="dark"] .project-folder-drawings {
+  border-color: var(--line);
+  background: #071018;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.42);
+}
+
+:root[data-theme="dark"] .control-section,
+:root[data-theme="dark"] .project-dashboard-card,
+:root[data-theme="dark"] .project-folder,
+:root[data-theme="dark"] .project-library-row,
+:root[data-theme="dark"] .bom-table,
+:root[data-theme="dark"] .bom-row,
+:root[data-theme="dark"] .health-head,
+:root[data-theme="dark"] .workflow-card,
+:root[data-theme="dark"] .backup-card,
+:root[data-theme="dark"] .revision-card,
+:root[data-theme="dark"] .health-item,
+:root[data-theme="dark"] .team-workspace-panel,
+:root[data-theme="dark"] .team-member-row,
+:root[data-theme="dark"] .team-comment,
+:root[data-theme="dark"] .team-empty,
+:root[data-theme="dark"] .project-job-choice,
+:root[data-theme="dark"] .tool-setting-row,
+:root[data-theme="dark"] .load-plan-project-choice,
+:root[data-theme="dark"] .load-plan-summary {
+  border-color: var(--line);
+  background: #0a1722;
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .project-dashboard-card,
+:root[data-theme="dark"] .project-folder-summary {
+  background: linear-gradient(180deg, #0d1f2d 0%, #08131d 100%);
+}
+
+:root[data-theme="dark"] .project-library-row:hover,
+:root[data-theme="dark"] .project-library-row.active,
+:root[data-theme="dark"] .tool-button:hover,
+:root[data-theme="dark"] .tool-button.active {
+  border-color: rgba(19, 216, 255, 0.42);
+  background: #0e283a;
+}
+
+:root[data-theme="dark"] .tool-button {
+  border-color: var(--line);
+  background: #08131d;
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .tool-button svg,
+:root[data-theme="dark"] .icon-button svg {
+  color: #8eefff;
+}
+
+:root[data-theme="dark"] .bom-head,
+:root[data-theme="dark"] .segment-row.active,
+:root[data-theme="dark"] .fitting-row.active,
+:root[data-theme="dark"] .socket-row.active {
+  background: #0c2434;
+}
+
+:root[data-theme="dark"] .health-head.warning,
+:root[data-theme="dark"] .team-member-row.pending,
+:root[data-theme="dark"] .load-plan-project-choice.warning {
+  border-color: rgba(255, 200, 87, 0.34);
+  background: #2a2110;
+}
+
+:root[data-theme="dark"] .health-head.error,
+:root[data-theme="dark"] .load-plan-project-choice.error {
+  border-color: rgba(255, 107, 99, 0.38);
+  background: #2b1214;
+}
+
+:root[data-theme="dark"] .action-menu-header {
+  border-bottom-color: var(--line);
+}
+
+:root[data-theme="dark"] .action-menu-group {
+  border-color: var(--line);
+  background: #08131d;
+}
+
+:root[data-theme="dark"] .mobile-panel-scrim:not([hidden]),
+:root[data-theme="dark"] .project-dialog-backdrop {
+  background: rgba(0, 5, 10, 0.72);
+}
+
+:root[data-theme="dark"] body .drawing-panel.panel-fullscreen,
+:root[data-theme="dark"] body .preview-panel.panel-fullscreen,
+:root[data-theme="dark"] body .drawing-panel:fullscreen,
+:root[data-theme="dark"] body .preview-panel:fullscreen {
   background: var(--panel);
 }

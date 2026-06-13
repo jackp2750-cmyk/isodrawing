@@ -1,13 +1,15 @@
-const CACHE_NAME = "isospool-studio-v89";
+const CACHE_NAME = "spoolmate-v95";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=141",
-  "./app.js?v=141",
+  "./styles.css?v=147",
+  "./app.js?v=147",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-192.png",
-  "./icons/icon-512.png"
+  "./icons/icon-512.png",
+  "./icons/spoolmate-mark.png",
+  "./icons/spoolmate-logo.png"
 ];
 
 self.addEventListener("install", (event) => {

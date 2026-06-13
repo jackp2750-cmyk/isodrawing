@@ -1,4 +1,4 @@
-# IsoSpool Studio
+# SpoolMate
 
 A static prototype for drawing pipe spools in a 2D isometric view and exporting clearer 3D-style images.
 
@@ -18,7 +18,7 @@ Then open `http://localhost:8000`.
 
 ## Install On iPad Or Android
 
-IsoSpool Studio is now set up as a Progressive Web App with:
+SpoolMate is set up as a Progressive Web App with:
 
 - `manifest.webmanifest`
 - `sw.js`
@@ -86,4 +86,4 @@ Each device keeps its own browser storage. Use the Import and Export project but
 - Export PNG images of the 3D preview and the isometric drawing.
 - Save the current spool in browser local storage.
 - Install as a PWA when hosted on HTTPS.
-- Export and import `.isospool.json` project files between devices.
+- Export and import project files between devices.

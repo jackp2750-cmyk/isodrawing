@@ -1,13 +1,13 @@
 {
-  "name": "IsoSpool Studio",
-  "short_name": "IsoSpool",
+  "name": "SpoolMate",
+  "short_name": "SpoolMate",
   "description": "Draw 2D isometric pipe spools, preview them in 3D, and create fabrication sheets.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
-  "background_color": "#f0f2ef",
-  "theme_color": "#0f766e",
+  "background_color": "#071018",
+  "theme_color": "#071018",
   "categories": ["productivity", "utilities"],
   "icons": [
     {

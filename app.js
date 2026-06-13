@@ -82,6 +82,14 @@ const authSignInButton = document.querySelector("#authSignInButton");
 const authSignUpButton = document.querySelector("#authSignUpButton");
 const authResendButton = document.querySelector("#authResendButton");
 const authSignOutButton = document.querySelector("#authSignOutButton");
+const teamWorkspacePanel = document.querySelector("#teamWorkspacePanel");
+const teamWorkspaceStatus = document.querySelector("#teamWorkspaceStatus");
+const teamCompanyNameInput = document.querySelector("#teamCompanyNameInput");
+const teamInviteCodeInput = document.querySelector("#teamInviteCodeInput");
+const teamCreateButton = document.querySelector("#teamCreateButton");
+const teamJoinButton = document.querySelector("#teamJoinButton");
+const teamRefreshButton = document.querySelector("#teamRefreshButton");
+const teamMembersList = document.querySelector("#teamMembersList");
 const projectDialog = document.querySelector("#projectDialog");
 const projectDialogForm = document.querySelector("#projectDialogForm");
 const projectDialogTitle = document.querySelector("#projectDialogTitle");
@@ -101,11 +109,20 @@ const healthSummary = document.querySelector("#healthSummary");
 const bomSummary = document.querySelector("#bomSummary");
 const workflowSummary = document.querySelector("#workflowSummary");
 const backupSummary = document.querySelector("#backupSummary");
+const projectCommentsList = document.querySelector("#projectCommentsList");
+const projectCommentInput = document.querySelector("#projectCommentInput");
+const projectCommentAddButton = document.querySelector("#projectCommentAddButton");
+const projectCommentRefreshButton = document.querySelector("#projectCommentRefreshButton");
 const toolSettingsButton = document.querySelector("#toolSettingsButton");
 const toolSettingsDialog = document.querySelector("#toolSettingsDialog");
 const toolSettingsList = document.querySelector("#toolSettingsList");
 const toolSettingsDoneButton = document.querySelector("#toolSettingsDoneButton");
 const toolSettingsResetButton = document.querySelector("#toolSettingsResetButton");
+const themeChoiceButtons = [...document.querySelectorAll("[data-theme-choice]")];
+const themeColorMeta = document.querySelector("meta[name='theme-color']");
+const actionMenuButton = document.querySelector("#actionMenuButton");
+const actionMenuPanel = document.querySelector("#actionMenuPanel");
+const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
 const projectDialogInputs = {
   jobNumber: document.querySelector("#projectDialogJobNumber"),
   spoolNumber: document.querySelector("#projectDialogSpoolNumber"),
@@ -125,21 +142,28 @@ const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
+const APP_THEME_KEY = "spoolmate-theme-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.41";
-const APP_BUILD_DATE = "2026-06-09";
+const APP_VERSION = "v1.47";
+const APP_BUILD_DATE = "2026-06-14";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const CLOUD_PROJECTS_TABLE = "spool_projects";
 const CLOUD_PROFILES_TABLE = "profiles";
+const CLOUD_COMPANIES_TABLE = "companies";
+const CLOUD_COMPANY_MEMBERS_TABLE = "company_members";
+const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
 const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
+const ACTIVE_COMPANY_KEY = "isospool-active-company-v1";
 const VERSION_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const PROJECT_FILE_VERSION = 1;
+const FAB_PDF_PAGE_WIDTH_PT = 1190.55;
+const FAB_PDF_PAGE_HEIGHT_PT = 841.89;
 const MM_PER_GRID = 1000;
-const LENGTH_INCREMENT_MM = 50;
+const LENGTH_INCREMENT_MM = 1;
 const MIN_LENGTH_MM = 50;
 const MAX_LENGTH_MM = 12000;
 const RUN_CONNECTION_TOLERANCE_MM = 8;
@@ -378,6 +402,16 @@ let cloudInitPromise = null;
 let cloudProjectCache = null;
 let cloudAutosaveTimer = null;
 let cloudAutosaveBusy = false;
+let cloudCompanies = [];
+let cloudCompanyMemberships = [];
+let activeCompany = null;
+let activeCompanyMembership = null;
+let companyMembers = [];
+let projectComments = [];
+let projectCommentsProjectId = null;
+let projectCommentsBusy = false;
+let currentCloudProjectOwnerId = null;
+let currentCloudProjectCompanyId = null;
 let projectLibrarySource = "browser";
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
@@ -973,6 +1007,61 @@ function normalizeProjectId(value) {
   return text ? text.slice(0, 80) : null;
 }
 
+function normalizeUuid(value) {
+  const text = String(value ?? "").trim();
+  return text ? text.slice(0, 80) : null;
+}
+
+function normalizeCompany(row) {
+  if (!row || typeof row !== "object") return null;
+  const id = normalizeUuid(row.id);
+  if (!id) return null;
+  return {
+    id,
+    name: String(row.name ?? "SpoolMate Company").trim().slice(0, 80) || "SpoolMate Company",
+    inviteCode: String(row.invite_code ?? "").trim().toUpperCase().slice(0, 16),
+    createdBy: normalizeUuid(row.created_by),
+    createdAt: String(row.created_at ?? ""),
+    updatedAt: String(row.updated_at ?? ""),
+  };
+}
+
+function normalizeCompanyMember(row) {
+  if (!row || typeof row !== "object") return null;
+  const companyId = normalizeUuid(row.company_id);
+  const userId = normalizeUuid(row.user_id);
+  if (!companyId || !userId) return null;
+  const role = ["owner", "admin", "member"].includes(row.role) ? row.role : "member";
+  const status = ["pending", "approved", "rejected"].includes(row.status) ? row.status : "pending";
+  return {
+    companyId,
+    userId,
+    email: String(row.email ?? "").trim().slice(0, 120),
+    role,
+    status,
+    createdAt: String(row.created_at ?? ""),
+    updatedAt: String(row.updated_at ?? ""),
+  };
+}
+
+function normalizeProjectComment(row) {
+  if (!row || typeof row !== "object") return null;
+  const id = normalizeUuid(row.id);
+  const projectId = normalizeProjectId(row.project_id);
+  const body = String(row.body ?? "").trim().slice(0, 1000);
+  if (!id || !projectId || !body) return null;
+  return {
+    id,
+    projectId,
+    companyId: normalizeUuid(row.company_id),
+    authorId: normalizeUuid(row.author_id),
+    authorEmail: String(row.author_email ?? "").trim().slice(0, 120),
+    body,
+    createdAt: String(row.created_at ?? ""),
+    updatedAt: String(row.updated_at ?? ""),
+  };
+}
+
 function hasProjectInfo(info = state.projectInfo) {
   return Object.values(normalizeProjectInfo(info)).some(Boolean);
 }
@@ -1558,14 +1647,15 @@ function drawIso() {
 
 function drawGrid(ctx, width, height, projection) {
   ctx.save();
-  ctx.fillStyle = "#f7f3e9";
+  const darkTheme = isDarkAppTheme();
+  ctx.fillStyle = darkTheme ? "#061018" : "#f7f3e9";
   ctx.fillRect(0, 0, width, height);
 
   const bounds = worldBounds(8);
   const range = Math.min(34, Math.max(8, Math.ceil(Math.max(bounds.maxAbsX, bounds.maxAbsY) + 8)));
 
   ctx.lineWidth = 1;
-  ctx.strokeStyle = "rgba(112, 124, 116, 0.08)";
+  ctx.strokeStyle = darkTheme ? "rgba(0, 174, 255, 0.12)" : "rgba(112, 124, 116, 0.08)";
 
   for (let i = -range; i <= range; i += 1) {
     drawLine(
@@ -1583,9 +1673,9 @@ function drawGrid(ctx, width, height, projection) {
   drawIsoPaperDots(ctx, width, height, projection, range);
 
   const origin = projectIso({ x: 0, y: 0, z: 0 }, projection);
-  drawAxis(ctx, origin, projectIso({ x: 3000, y: 0, z: 0 }, projection), "#0f766e", "X");
-  drawAxis(ctx, origin, projectIso({ x: 0, y: 3000, z: 0 }, projection), "#2563eb", "Y");
-  drawAxis(ctx, origin, projectIso({ x: 0, y: 0, z: 3000 }, projection), "#b95436", "Z");
+  drawAxis(ctx, origin, projectIso({ x: 3000, y: 0, z: 0 }, projection), darkTheme ? "#13d8ff" : "#0f766e", "X");
+  drawAxis(ctx, origin, projectIso({ x: 0, y: 3000, z: 0 }, projection), darkTheme ? "#2b77ff" : "#2563eb", "Y");
+  drawAxis(ctx, origin, projectIso({ x: 0, y: 0, z: 3000 }, projection), darkTheme ? "#f9734f" : "#b95436", "Z");
   ctx.restore();
 }
 
@@ -1600,7 +1690,9 @@ function drawIsoPaperDots(ctx, width, height, projection, range) {
 
       const major = x % 5 === 0 && y % 5 === 0;
       ctx.beginPath();
-      ctx.fillStyle = major ? "rgba(38, 80, 78, 0.38)" : "rgba(72, 86, 82, 0.24)";
+      ctx.fillStyle = isDarkAppTheme()
+        ? major ? "rgba(35, 190, 255, 0.54)" : "rgba(0, 132, 255, 0.28)"
+        : major ? "rgba(38, 80, 78, 0.38)" : "rgba(72, 86, 82, 0.24)";
       ctx.arc(dot.x, dot.y, major ? 1.9 : 1.25, 0, Math.PI * 2);
       ctx.fill();
     }
@@ -3065,8 +3157,8 @@ function drawLine(ctx, from, to) {
 }
 
 function formatLength(value) {
-  const rounded = Math.round(value * 10) / 10;
-  const text = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  const rounded = Math.round(Number(value) || 0);
+  const text = String(rounded);
   return text.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -5747,6 +5839,20 @@ function activateInspectorTab(name) {
   for (const panel of panels) {
     panel.classList.toggle("active", panel.dataset.inspectorPanel === name);
   }
+  refreshPreviewAfterLayoutChange();
+}
+
+function refreshPreviewAfterLayoutChange() {
+  window.requestAnimationFrame(() => {
+    resizeThree();
+    update3dPreview();
+    renderFallbackPreview();
+    window.requestAnimationFrame(() => {
+      resizeThree();
+      update3dLabelPositions();
+      renderFallbackPreview();
+    });
+  });
 }
 
 function showHealthPanel() {
@@ -6235,6 +6341,101 @@ function setupTouchSelectionGuards() {
   }
 }
 
+function normalizeAppTheme(value) {
+  return value === "dark" ? "dark" : "light";
+}
+
+function loadAppTheme() {
+  try {
+    const saved = localStorage.getItem(APP_THEME_KEY);
+    return saved === "light" ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+function isDarkAppTheme() {
+  return document.documentElement.dataset.theme === "dark";
+}
+
+function setAppTheme(theme, options = {}) {
+  const nextTheme = normalizeAppTheme(theme);
+  document.documentElement.dataset.theme = nextTheme;
+  document.body?.setAttribute("data-theme", nextTheme);
+  if (themeColorMeta) {
+    themeColorMeta.content = nextTheme === "dark" ? "#071018" : "#0f766e";
+  }
+  for (const button of themeChoiceButtons) {
+    const active = button.dataset.themeChoice === nextTheme;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  }
+  if (options.persist !== false) {
+    try {
+      localStorage.setItem(APP_THEME_KEY, nextTheme);
+    } catch {
+      // Theme still applies for this page even if storage is blocked.
+    }
+  }
+  if (options.redraw !== false) {
+    drawIso();
+    update3dPreview();
+    renderFallbackPreview();
+  }
+}
+
+function setupAppTheme() {
+  setAppTheme(loadAppTheme(), { persist: false, redraw: false });
+  for (const button of themeChoiceButtons) {
+    button.addEventListener("click", () => {
+      setAppTheme(button.dataset.themeChoice);
+    });
+  }
+}
+
+function actionMenuOpen() {
+  return Boolean(actionMenuPanel && !actionMenuPanel.hidden);
+}
+
+function openActionMenu() {
+  if (!actionMenuPanel || !actionMenuButton) return;
+  actionMenuPanel.hidden = false;
+  actionMenuButton.setAttribute("aria-expanded", "true");
+}
+
+function closeActionMenu() {
+  if (!actionMenuPanel || !actionMenuButton) return;
+  actionMenuPanel.hidden = true;
+  actionMenuButton.setAttribute("aria-expanded", "false");
+}
+
+function toggleActionMenu() {
+  if (actionMenuOpen()) {
+    closeActionMenu();
+  } else {
+    openActionMenu();
+  }
+}
+
+function setupActionMenu() {
+  actionMenuButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    toggleActionMenu();
+  });
+  actionMenuCloseButton?.addEventListener("click", closeActionMenu);
+  actionMenuPanel?.addEventListener("click", (event) => {
+    const actionButton = event.target.closest("button");
+    if (!actionButton || actionButton === actionMenuCloseButton) return;
+    window.setTimeout(closeActionMenu, 80);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!actionMenuOpen()) return;
+    const target = event.target;
+    if (actionMenuPanel?.contains(target) || actionMenuButton?.contains(target)) return;
+    closeActionMenu();
+  });
+}
+
 function setPreviewMode(value) {
   state.previewMode = normalizePreviewMode(value);
   if (previewModeSelect) previewModeSelect.value = state.previewMode;
@@ -6247,7 +6448,7 @@ function setPreviewMode(value) {
 function updateControls() {
   if (appVersionBadge) {
     appVersionBadge.textContent = APP_VERSION;
-    appVersionBadge.title = `IsoSpool Studio ${APP_VERSION} build ${APP_BUILD_DATE}`;
+    appVersionBadge.title = `SpoolMate ${APP_VERSION} build ${APP_BUILD_DATE}`;
   }
   stepLengthInput.value = String(state.stepLength);
   updateSelectionControls();
@@ -6283,6 +6484,7 @@ function updateAll(options = {}) {
   updateHealthSummary();
   updateWorkflowSummary();
   updateBackupSummary();
+  renderProjectComments();
   updateSelectionControls();
   updatePipeSizeControls();
   updatePropertiesPanel();
@@ -6432,6 +6634,30 @@ function setupAuthDialog() {
   authSignOutButton?.addEventListener("click", () => {
     signOutFromSupabase();
   });
+
+  teamCreateButton?.addEventListener("click", () => {
+    createTeamCompany();
+  });
+
+  teamJoinButton?.addEventListener("click", () => {
+    joinTeamCompany();
+  });
+
+  teamRefreshButton?.addEventListener("click", () => {
+    loadTeamWorkspace().catch((error) => {
+      console.warn("Team refresh failed.", error);
+      window.alert(error?.message || "Team refresh failed.");
+    });
+  });
+
+  teamMembersList?.addEventListener("click", (event) => {
+    const actionButton = event.target.closest("[data-team-member-action]");
+    if (!actionButton) return;
+    const action = actionButton.dataset.teamMemberAction;
+    reviewTeamMember(actionButton.dataset.teamMemberUserId, action === "approve").catch((error) => {
+      console.warn("Team member update failed.", error);
+    });
+  });
 }
 
 function setAuthMode(mode, options = {}) {
@@ -6459,7 +6685,7 @@ function setAuthMode(mode, options = {}) {
   if (authModeHelp) {
     authModeHelp.textContent = createMode
       ? "Create an account, then check your inbox for the confirmation email. If it does not arrive, press Resend email."
-      : "Use the email and password you created for IsoSpool.";
+      : "Use the email and password you created for SpoolMate.";
   }
   if (authDialogStatus && !options.keepStatus) {
     authDialogStatus.textContent = cloudUser
@@ -6910,7 +7136,7 @@ function promptForAppUpdate(worker) {
   if (!worker || appUpdatePromptOpen || appUpdateReloadPending) return;
 
   appUpdatePromptOpen = true;
-  const reloadNow = window.confirm("A new IsoSpool update is ready. Reload now to use it?");
+  const reloadNow = window.confirm("A new SpoolMate update is ready. Reload now to use it?");
   appUpdatePromptOpen = false;
   if (!reloadNow) return;
 
@@ -6941,7 +7167,7 @@ async function checkForNewerAppVersion(options = {}) {
     const latest = await latestAvailableAppVersion();
     if (!latest || appVersionNumber(latest) <= appVersionNumber(APP_VERSION)) return false;
 
-    const message = `IsoSpool ${latest} is available. You are using ${APP_VERSION}.`;
+    const message = `SpoolMate ${latest} is available. You are using ${APP_VERSION}.`;
     if (options.autoReload) {
       window.alert(`${message} The app will reload before continuing.`);
       reloadToLatestApp(latest);
@@ -9125,27 +9351,30 @@ function drawFallbackGrid(ctx, width, height, style = {}) {
 function fallbackPreviewStyle() {
   const mode = normalizePreviewMode(state.previewMode);
   const stainless = normalizePipeSpec(state.pipeSpec) === "stainless10";
+  const darkTheme = isDarkAppTheme();
   const carbonStyle = {
-    background: "#f8fbfb",
-    shadow: "rgba(31, 42, 47, 0.1)",
+    background: darkTheme ? "#071018" : "#f8fbfb",
+    shadow: darkTheme ? "rgba(0, 0, 0, 0.42)" : "rgba(31, 42, 47, 0.1)",
+    gridStroke: darkTheme ? "rgba(0, 174, 255, 0.13)" : undefined,
     pipeStops: ["#22282a", "#596164", "#171b1d"],
-    highlight: "rgba(255, 255, 255, 0.56)",
-    fittingStroke: "#3f484b",
-    fittingFill: "#eef2f0",
-    nodeFill: "#4b5355",
-    nodeStroke: "#1d2325",
+    highlight: darkTheme ? "rgba(19, 216, 255, 0.45)" : "rgba(255, 255, 255, 0.56)",
+    fittingStroke: darkTheme ? "#6f8490" : "#3f484b",
+    fittingFill: darkTheme ? "#1a2730" : "#eef2f0",
+    nodeFill: darkTheme ? "#111d25" : "#4b5355",
+    nodeStroke: darkTheme ? "#22c7ff" : "#1d2325",
     outline: false,
     ghost: false,
   };
   const stainlessStyle = {
-    background: "#fcfefe",
-    shadow: "rgba(83, 98, 102, 0.07)",
+    background: darkTheme ? "#071018" : "#fcfefe",
+    shadow: darkTheme ? "rgba(0, 0, 0, 0.34)" : "rgba(83, 98, 102, 0.07)",
+    gridStroke: darkTheme ? "rgba(0, 174, 255, 0.13)" : undefined,
     pipeStops: ["#d6dee1", "#ffffff", "#c4cdd1"],
     highlight: "rgba(255, 255, 255, 1)",
-    fittingStroke: "#aab5b9",
-    fittingFill: "#ffffff",
-    nodeFill: "#f8fbfb",
-    nodeStroke: "#a0abb0",
+    fittingStroke: darkTheme ? "#dce8ee" : "#aab5b9",
+    fittingFill: darkTheme ? "#e6eef2" : "#ffffff",
+    nodeFill: darkTheme ? "#f8fbfb" : "#f8fbfb",
+    nodeStroke: darkTheme ? "#9fdfff" : "#a0abb0",
     outline: false,
     ghost: false,
   };
@@ -9719,11 +9948,19 @@ function downloadCanvas(canvas, filename) {
 
 function downloadTextFile(text, filename, type = "application/json") {
   const blob = new Blob([text], { type });
+  downloadBlob(blob, filename);
+}
+
+function downloadBlob(blob, filename) {
   const link = document.createElement("a");
   link.download = filename;
   link.href = URL.createObjectURL(blob);
   link.click();
   setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+}
+
+function downloadBytes(bytes, filename, type) {
+  downloadBlob(new Blob([bytes], { type }), filename);
 }
 
 function safeFilePart(value, fallback) {
@@ -9741,9 +9978,14 @@ function supabaseConfigured() {
 function updateCloudStatus(message = null, mode = "") {
   const signedIn = Boolean(cloudUser);
   const active = signedIn && hasActiveCloudLicense();
+  const teamSuffix = activeCompany && activeCompanyMembership?.status === "approved"
+    ? ` / ${activeCompany.name}`
+    : activeCompany && activeCompanyMembership?.status === "pending"
+    ? " / team pending"
+    : "";
   const defaultMessage = signedIn
     ? active
-      ? cloudLicenseText()
+      ? `${cloudLicenseText()}${teamSuffix}`
       : cloudProfile
       ? "Trial expired"
       : "Cloud setup needed"
@@ -9761,7 +10003,7 @@ function updateCloudStatus(message = null, mode = "") {
   }
   if (authDialogStatus) {
     authDialogStatus.textContent = signedIn
-      ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}`
+      ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}${teamSuffix}`
       : authMode === "signup"
       ? "Create an account to start a free trial and save spool projects to the cloud."
       : "Sign in to save and open spool projects from the cloud.";
@@ -9806,13 +10048,468 @@ function hasActiveCloudLicense(profile = cloudProfile) {
   return Boolean(trialEnds && trialEnds > new Date());
 }
 
+function activeCompanyIsApproved() {
+  return Boolean(activeCompany && activeCompanyMembership?.status === "approved");
+}
+
+function activeCompanyCanAdmin() {
+  return activeCompanyIsApproved() && ["owner", "admin"].includes(activeCompanyMembership?.role);
+}
+
+function companyNameForId(companyId) {
+  const id = normalizeUuid(companyId);
+  if (!id) return "";
+  return cloudCompanies.find((company) => company.id === id)?.name || "";
+}
+
+function currentProjectCompanyId() {
+  const cached = (cloudProjectCache ?? []).find((project) => project.id === state.projectId);
+  return normalizeUuid(currentCloudProjectCompanyId) || normalizeUuid(cached?.companyId) || (activeCompanyIsApproved() ? activeCompany.id : null);
+}
+
+function clearTeamWorkspace() {
+  cloudCompanies = [];
+  cloudCompanyMemberships = [];
+  activeCompany = null;
+  activeCompanyMembership = null;
+  companyMembers = [];
+  projectComments = [];
+  projectCommentsProjectId = null;
+  renderTeamWorkspace();
+  renderProjectComments();
+}
+
+function storedActiveCompanyId() {
+  try {
+    return normalizeUuid(localStorage.getItem(ACTIVE_COMPANY_KEY));
+  } catch {
+    return null;
+  }
+}
+
+function storeActiveCompanyId(companyId) {
+  try {
+    const id = normalizeUuid(companyId);
+    if (id) {
+      localStorage.setItem(ACTIVE_COMPANY_KEY, id);
+    } else {
+      localStorage.removeItem(ACTIVE_COMPANY_KEY);
+    }
+  } catch {
+    // Team selection still works for this session if local storage is blocked.
+  }
+}
+
+function setActiveCompanyFromId(companyId) {
+  const id = normalizeUuid(companyId);
+  const membership = id
+    ? cloudCompanyMemberships.find((member) => member.companyId === id && member.userId === cloudUser?.id) ||
+      activeCompanyMembership?.companyId === id && activeCompanyMembership
+    : null;
+  const company = id ? cloudCompanies.find((item) => item.id === id) : null;
+  if (!company || !membership) return false;
+  activeCompany = company;
+  activeCompanyMembership = membership;
+  storeActiveCompanyId(id);
+  renderTeamWorkspace();
+  updateCloudStatus();
+  return true;
+}
+
+async function activateCompanyFromId(companyId) {
+  if (!setActiveCompanyFromId(companyId) || !activeCompany) return false;
+  companyMembers = await loadCompanyMembers(activeCompany.id, cloudCompanyMemberships);
+  renderTeamWorkspace();
+  updateCloudStatus();
+  return true;
+}
+
+async function loadTeamWorkspace(options = {}) {
+  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense()) {
+    clearTeamWorkspace();
+    return;
+  }
+
+  try {
+    const { data: membershipRows, error: membershipError } = await supabaseClient
+      .from(CLOUD_COMPANY_MEMBERS_TABLE)
+      .select("company_id,user_id,email,role,status,created_at,updated_at")
+      .eq("user_id", cloudUser.id)
+      .order("updated_at", { ascending: false });
+    if (membershipError) throw membershipError;
+
+    const memberships = (membershipRows ?? [])
+      .map(normalizeCompanyMember)
+      .filter(Boolean);
+    cloudCompanyMemberships = memberships;
+    const companyIds = [...new Set(memberships.map((member) => member.companyId))];
+    let companies = [];
+    if (companyIds.length) {
+      const { data: companyRows, error: companyError } = await supabaseClient
+        .from(CLOUD_COMPANIES_TABLE)
+        .select("id,name,invite_code,created_by,created_at,updated_at")
+        .in("id", companyIds);
+      if (companyError) throw companyError;
+      companies = (companyRows ?? []).map(normalizeCompany).filter(Boolean);
+    }
+
+    cloudCompanies = companies;
+    const savedCompanyId = storedActiveCompanyId();
+    activeCompanyMembership =
+      memberships.find((member) => member.status === "approved" && member.companyId === savedCompanyId) ||
+      memberships.find((member) => member.status === "approved") ||
+      memberships.find((member) => member.companyId === savedCompanyId) ||
+      memberships[0] ||
+      null;
+    activeCompany = activeCompanyMembership
+      ? companies.find((company) => company.id === activeCompanyMembership.companyId) ?? null
+      : null;
+    if (activeCompany) {
+      storeActiveCompanyId(activeCompany.id);
+    } else {
+      storeActiveCompanyId(null);
+    }
+
+    companyMembers = activeCompany ? await loadCompanyMembers(activeCompany.id, memberships) : [];
+    renderTeamWorkspace();
+    updateCloudStatus();
+  } catch (error) {
+    console.warn("Could not load team workspace.", error);
+    if (!options.silent) window.alert(error?.message || "Could not load team workspace.");
+    renderTeamWorkspace("Could not load team workspace.");
+  }
+}
+
+async function loadCompanyMembers(companyId, fallbackMemberships = []) {
+  const id = normalizeUuid(companyId);
+  if (!supabaseClient || !id) return [];
+  try {
+    const { data, error } = await supabaseClient
+      .from(CLOUD_COMPANY_MEMBERS_TABLE)
+      .select("company_id,user_id,email,role,status,created_at,updated_at")
+      .eq("company_id", id)
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return (data ?? []).map(normalizeCompanyMember).filter(Boolean);
+  } catch (error) {
+    console.warn("Could not load company members.", error);
+    return fallbackMemberships.filter((member) => member.companyId === id);
+  }
+}
+
+function renderTeamWorkspace(errorMessage = "") {
+  if (!teamWorkspacePanel) return;
+  const signedIn = Boolean(cloudUser);
+  teamWorkspacePanel.hidden = !signedIn;
+  if (!signedIn) return;
+
+  const active = hasActiveCloudLicense();
+  if (teamCreateButton) teamCreateButton.disabled = !active;
+  if (teamJoinButton) teamJoinButton.disabled = !active;
+  if (teamRefreshButton) teamRefreshButton.disabled = !active;
+
+  if (teamWorkspaceStatus) {
+    if (errorMessage) {
+      teamWorkspaceStatus.textContent = errorMessage;
+    } else if (!active) {
+      teamWorkspaceStatus.textContent = "An active trial or licence is required for team projects.";
+    } else if (!activeCompany) {
+      teamWorkspaceStatus.textContent = "No team workspace yet. Create one or join with an invite code.";
+    } else if (activeCompanyMembership?.status === "pending") {
+      teamWorkspaceStatus.textContent = `Join request for ${activeCompany.name} is waiting for approval.`;
+    } else if (activeCompanyMembership?.status === "rejected") {
+      teamWorkspaceStatus.textContent = `Join request for ${activeCompany.name} was rejected.`;
+    } else {
+      const invite = activeCompany.inviteCode ? ` Invite code: ${activeCompany.inviteCode}.` : "";
+      teamWorkspaceStatus.textContent = `Using ${activeCompany.name} for shared cloud projects.${invite}`;
+    }
+  }
+
+  if (!teamMembersList) return;
+  teamMembersList.innerHTML = "";
+  if (!activeCompany) {
+    const empty = document.createElement("div");
+    empty.className = "team-empty";
+    empty.textContent = "Create a team, then share its invite code with the people you want to approve.";
+    teamMembersList.append(empty);
+    return;
+  }
+
+  const members = companyMembers.length ? companyMembers : activeCompanyMembership ? [activeCompanyMembership] : [];
+  if (!members.length) {
+    const empty = document.createElement("div");
+    empty.className = "team-empty";
+    empty.textContent = "No members loaded yet.";
+    teamMembersList.append(empty);
+    return;
+  }
+
+  const canAdmin = activeCompanyCanAdmin();
+  for (const member of members) {
+    const row = document.createElement("div");
+    row.className = "team-member-row";
+    row.classList.toggle("pending", member.status === "pending");
+
+    const main = document.createElement("div");
+    main.className = "team-member-main";
+
+    const title = document.createElement("strong");
+    title.textContent = member.email || (member.userId === cloudUser?.id ? "You" : "Team member");
+
+    const detail = document.createElement("span");
+    detail.textContent = `${member.role} / ${member.status}`;
+    main.append(title, detail);
+    row.append(main);
+
+    const actions = document.createElement("div");
+    actions.className = "team-member-actions";
+    if (canAdmin && member.status === "pending" && member.userId !== cloudUser?.id) {
+      const approve = document.createElement("button");
+      approve.type = "button";
+      approve.textContent = "Approve";
+      approve.dataset.teamMemberAction = "approve";
+      approve.dataset.teamMemberUserId = member.userId;
+      const reject = document.createElement("button");
+      reject.type = "button";
+      reject.className = "danger";
+      reject.textContent = "Reject";
+      reject.dataset.teamMemberAction = "reject";
+      reject.dataset.teamMemberUserId = member.userId;
+      actions.append(approve, reject);
+    }
+    row.append(actions);
+    teamMembersList.append(row);
+  }
+}
+
+async function createTeamCompany() {
+  if (!(await ensureSupabaseClient()) || !cloudUser) return;
+  if (!hasActiveCloudLicense()) {
+    window.alert("An active trial or licence is required to create a team.");
+    return;
+  }
+
+  const companyName = String(teamCompanyNameInput?.value ?? "").trim() || "SpoolMate Company";
+  if (teamCreateButton) teamCreateButton.disabled = true;
+  try {
+    const { data, error } = await supabaseClient.rpc("create_company", { company_name: companyName });
+    if (error) throw error;
+    await loadTeamWorkspace({ silent: true });
+    const created = Array.isArray(data) ? data[0] : data;
+    if (created?.company_id) await activateCompanyFromId(created.company_id);
+    if (teamCompanyNameInput) teamCompanyNameInput.value = "";
+    window.alert(`Team created.${activeCompany?.inviteCode ? ` Invite code: ${activeCompany.inviteCode}` : ""}`);
+  } catch (error) {
+    console.warn("Could not create team.", error);
+    window.alert(error?.message || "Could not create team.");
+  } finally {
+    if (teamCreateButton) teamCreateButton.disabled = !hasActiveCloudLicense();
+  }
+}
+
+async function joinTeamCompany() {
+  if (!(await ensureSupabaseClient()) || !cloudUser) return;
+  if (!hasActiveCloudLicense()) {
+    window.alert("An active trial or licence is required to join a team.");
+    return;
+  }
+
+  const joinCode = String(teamInviteCodeInput?.value ?? "").trim().toUpperCase();
+  if (!joinCode) {
+    window.alert("Enter the team invite code.");
+    return;
+  }
+
+  if (teamJoinButton) teamJoinButton.disabled = true;
+  try {
+    const { data, error } = await supabaseClient.rpc("join_company_by_code", { join_code: joinCode });
+    if (error) throw error;
+    await loadTeamWorkspace({ silent: true });
+    const joined = Array.isArray(data) ? data[0] : data;
+    if (joined?.company_id) await activateCompanyFromId(joined.company_id);
+    if (teamInviteCodeInput) teamInviteCodeInput.value = "";
+    window.alert(joined?.status === "approved" ? "You are already approved for that team." : "Join request sent. A team admin can approve it.");
+  } catch (error) {
+    console.warn("Could not join team.", error);
+    window.alert(error?.message || "Could not join team.");
+  } finally {
+    if (teamJoinButton) teamJoinButton.disabled = !hasActiveCloudLicense();
+  }
+}
+
+async function reviewTeamMember(userId, approved) {
+  if (!supabaseClient || !activeCompanyCanAdmin()) return;
+  const memberId = normalizeUuid(userId);
+  if (!memberId || !activeCompany) return;
+
+  const { error } = await supabaseClient
+    .from(CLOUD_COMPANY_MEMBERS_TABLE)
+    .update({ status: approved ? "approved" : "rejected", role: "member" })
+    .eq("company_id", activeCompany.id)
+    .eq("user_id", memberId);
+  if (error) {
+    window.alert(error?.message || "Could not update team member.");
+    throw error;
+  }
+  await loadTeamWorkspace({ silent: true });
+}
+
+function renderProjectComments(errorMessage = "") {
+  if (!projectCommentsList) return;
+  projectCommentsList.innerHTML = "";
+
+  if (projectCommentAddButton) {
+    projectCommentAddButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy;
+  }
+  if (projectCommentRefreshButton) {
+    projectCommentRefreshButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy || !state.projectId;
+  }
+
+  const empty = (message) => {
+    const item = document.createElement("div");
+    item.className = "team-empty";
+    item.textContent = message;
+    projectCommentsList.append(item);
+  };
+
+  if (errorMessage) {
+    empty(errorMessage);
+    return;
+  }
+  if (!cloudUser) {
+    empty("Sign in to use cloud comments.");
+    return;
+  }
+  if (!hasActiveCloudLicense()) {
+    empty("An active trial or licence is required for cloud comments.");
+    return;
+  }
+  if (!state.projectId) {
+    empty("Save this spool to the cloud before adding comments.");
+    return;
+  }
+  if (projectCommentsProjectId !== state.projectId) {
+    empty("Press Refresh to load comments for this spool.");
+    return;
+  }
+  if (!projectComments.length) {
+    empty("No comments yet.");
+    return;
+  }
+
+  for (const comment of projectComments) {
+    const item = document.createElement("div");
+    item.className = "team-comment";
+
+    const author = document.createElement("strong");
+    author.textContent = comment.authorEmail || "Team member";
+
+    const body = document.createElement("p");
+    body.textContent = comment.body;
+
+    const meta = document.createElement("span");
+    meta.className = "team-comment-meta";
+    meta.textContent = comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "Just now";
+
+    item.append(author, body, meta);
+    projectCommentsList.append(item);
+  }
+}
+
+async function loadProjectComments(options = {}) {
+  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !state.projectId) {
+    projectComments = [];
+    projectCommentsProjectId = state.projectId ?? null;
+    renderProjectComments();
+    return [];
+  }
+
+  projectCommentsBusy = true;
+  renderProjectComments();
+  try {
+    const { data, error } = await supabaseClient
+      .from(CLOUD_PROJECT_COMMENTS_TABLE)
+      .select("id,project_id,company_id,author_id,author_email,body,created_at,updated_at")
+      .eq("project_id", state.projectId)
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (error) throw error;
+    projectComments = (data ?? []).map(normalizeProjectComment).filter(Boolean);
+    projectCommentsProjectId = state.projectId;
+    renderProjectComments();
+    return projectComments;
+  } catch (error) {
+    console.warn("Could not load project comments.", error);
+    if (!options.silent) window.alert(error?.message || "Could not load comments.");
+    renderProjectComments("Could not load comments.");
+    return [];
+  } finally {
+    projectCommentsBusy = false;
+    renderProjectComments();
+  }
+}
+
+async function addProjectComment() {
+  if (!(await ensureSupabaseClient()) || !cloudUser) return;
+  if (!hasActiveCloudLicense()) {
+    window.alert("An active trial or licence is required for cloud comments.");
+    return;
+  }
+
+  const body = String(projectCommentInput?.value ?? "").trim();
+  if (!body) {
+    window.alert("Type the comment first.");
+    return;
+  }
+
+  if (!state.projectId) {
+    state.projectId = createProjectId();
+  }
+  const saved = await saveCloudProject({ silent: true });
+  if (!saved) {
+    window.alert("Save the spool to the cloud before adding a comment.");
+    return;
+  }
+
+  projectCommentsBusy = true;
+  renderProjectComments();
+  try {
+    const { error } = await supabaseClient
+      .from(CLOUD_PROJECT_COMMENTS_TABLE)
+      .insert({
+        project_id: state.projectId,
+        company_id: currentProjectCompanyId(),
+        author_id: cloudUser.id,
+        author_email: cloudUser.email ?? "",
+        body,
+      });
+    if (error) throw error;
+    if (projectCommentInput) projectCommentInput.value = "";
+    await loadProjectComments({ silent: true });
+  } catch (error) {
+    console.warn("Could not add project comment.", error);
+    window.alert(error?.message || "Could not add comment.");
+  } finally {
+    projectCommentsBusy = false;
+    renderProjectComments();
+  }
+}
+
 function cloudProjectRecord() {
   const projectInfo = normalizeProjectInfo(state.projectInfo);
   const id = normalizeProjectId(state.projectId) ?? createProjectId();
   state.projectId = id;
+  const existingCloudProject = (cloudProjectCache ?? []).find((project) => project.id === id);
+  const knownCloudProject = Boolean(existingCloudProject || currentCloudProjectOwnerId || currentCloudProjectCompanyId);
+  const companyId = knownCloudProject
+    ? normalizeUuid(currentCloudProjectCompanyId) || normalizeUuid(existingCloudProject?.companyId)
+    : activeCompanyIsApproved()
+    ? activeCompany.id
+    : null;
   return {
     id,
-    owner_id: cloudUser?.id,
+    owner_id: normalizeUuid(currentCloudProjectOwnerId) || normalizeUuid(existingCloudProject?.ownerId) || cloudUser?.id,
+    company_id: companyId ?? null,
     name: projectDisplayName(projectInfo),
     project_info: projectInfo,
     drawing_state: statePayload(),
@@ -9824,6 +10521,8 @@ function mapCloudProject(row) {
   return {
     id: normalizeProjectId(row.id),
     name: String(row.name ?? "").trim().slice(0, 120),
+    ownerId: normalizeUuid(row.owner_id),
+    companyId: normalizeUuid(row.company_id),
     updatedAt: String(row.updated_at ?? row.created_at ?? ""),
     projectInfo: normalizeProjectInfo(row.project_info),
     state: row.drawing_state,
@@ -9864,11 +10563,15 @@ async function applyCloudSession(session) {
   cloudProjectCache = null;
   if (!cloudUser) {
     cloudProfile = null;
+    currentCloudProjectOwnerId = null;
+    currentCloudProjectCompanyId = null;
+    clearTeamWorkspace();
     updateCloudStatus();
     return;
   }
 
   cloudProfile = await ensureCloudProfile();
+  await loadTeamWorkspace({ silent: true });
   updateCloudStatus();
   if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
     queueCloudAutosave();
@@ -9933,12 +10636,15 @@ async function saveCloudProject(options = {}) {
     const { data, error } = await supabaseClient
       .from(CLOUD_PROJECTS_TABLE)
       .upsert(record, { onConflict: "id" })
-      .select("id,name,updated_at,project_info,drawing_state")
+      .select("id,owner_id,company_id,name,updated_at,project_info,drawing_state")
       .single();
     if (error) throw error;
     cloudProjectCache = null;
     if (data) {
       state.projectId = data.id;
+      currentCloudProjectOwnerId = normalizeUuid(data.owner_id);
+      currentCloudProjectCompanyId = normalizeUuid(data.company_id);
+      if (currentCloudProjectCompanyId) await activateCompanyFromId(currentCloudProjectCompanyId);
     }
     updateCloudStatus("Cloud saved", "");
     window.setTimeout(() => updateCloudStatus(), 1600);
@@ -9954,7 +10660,7 @@ async function loadSavedCloudProjects() {
 
   const { data, error } = await supabaseClient
     .from(CLOUD_PROJECTS_TABLE)
-    .select("id,name,updated_at,created_at,project_info,drawing_state")
+    .select("id,owner_id,company_id,name,updated_at,created_at,project_info,drawing_state")
     .order("updated_at", { ascending: false });
   if (error) throw error;
   cloudProjectCache = (data ?? [])
@@ -9990,6 +10696,9 @@ async function openSavedCloudProject(projectId, options = {}) {
   state.projectId = record.id;
   state.projectInfo = normalizeProjectInfo(record.projectInfo);
   state.projectInfoPrompted = true;
+  currentCloudProjectOwnerId = normalizeUuid(record.ownerId);
+  currentCloudProjectCompanyId = normalizeUuid(record.companyId);
+  if (record.companyId) await activateCompanyFromId(record.companyId);
   if (options.readOnly) {
     state.locked = true;
   }
@@ -9999,6 +10708,7 @@ async function openSavedCloudProject(projectId, options = {}) {
   updateAll();
   closeProjectLibrary();
   updateCloudStatus("Cloud project opened", "");
+  await loadProjectComments({ silent: true });
   window.setTimeout(() => updateCloudStatus(), 1600);
 }
 
@@ -10042,6 +10752,10 @@ async function deleteSavedCloudProject(projectId) {
   cloudProjectCache = null;
   if (state.projectId === projectId) {
     state.projectId = null;
+    currentCloudProjectOwnerId = null;
+    currentCloudProjectCompanyId = null;
+    projectComments = [];
+    projectCommentsProjectId = null;
     updateControls();
     persistState();
   }
@@ -10158,7 +10872,9 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = projectLibrarySource === "cloud"
-      ? "Projects are saved to your IsoSpool cloud account. Open a project folder, then tap a spool drawing."
+      ? activeCompanyIsApproved()
+        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Open a project folder, then tap a spool drawing.`
+        : "Projects are saved to your SpoolMate cloud account. Open a project folder, then tap a spool drawing."
       : "Projects are saved on this device/browser. Open a project folder, then tap a spool drawing.";
   }
   projectLibraryList.innerHTML = "";
@@ -10225,7 +10941,7 @@ function projectDashboardCard(projects) {
   }, {});
   card.innerHTML = `
     <div>
-      <strong>${projectLibrarySource === "cloud" ? "Cloud dashboard" : "Browser dashboard"}</strong>
+      <strong>${projectLibrarySource === "cloud" ? activeCompanyIsApproved() ? `${escapeHtml(activeCompany.name)} dashboard` : "Cloud dashboard" : "Browser dashboard"}</strong>
       <span>${projects.length} saved spool${projects.length === 1 ? "" : "s"}</span>
     </div>
     <div class="project-dashboard-stats">
@@ -10472,7 +11188,9 @@ function savedProjectMetaLine(project) {
   const updated = project.updatedAt ? new Date(project.updatedAt).toLocaleString() : "not dated";
   const status = projectStatusLabel(savedState?.projectStatus);
   const locked = savedState?.locked ? " / locked" : "";
-  return `${status}${locked} - ${runs} run${runs === 1 ? "" : "s"} - saved ${updated}`;
+  const scope = project.companyId ? (companyNameForId(project.companyId) || "Team") : project.source === "cloud" ? "Personal cloud" : "";
+  const scopeText = scope ? `${scope} - ` : "";
+  return `${scopeText}${status}${locked} - ${runs} run${runs === 1 ? "" : "s"} - saved ${updated}`;
 }
 
 function closeProjectLibrary() {
@@ -10503,6 +11221,10 @@ function openSavedBrowserProject(projectId) {
   state.projectId = record.id;
   state.projectInfo = normalizeProjectInfo(record.projectInfo);
   state.projectInfoPrompted = true;
+  currentCloudProjectOwnerId = null;
+  currentCloudProjectCompanyId = null;
+  projectComments = [];
+  projectCommentsProjectId = null;
   three.userMovedCamera = false;
   setNextIdsFromState(state);
   updateControls();
@@ -10521,6 +11243,10 @@ function deleteSavedBrowserProject(projectId) {
   storeSavedBrowserProjects(projects.filter((project) => project.id !== projectId));
   if (state.projectId === projectId) {
     state.projectId = null;
+    currentCloudProjectOwnerId = null;
+    currentCloudProjectCompanyId = null;
+    projectComments = [];
+    projectCommentsProjectId = null;
     updateControls();
     persistState();
   }
@@ -12585,6 +13311,10 @@ async function startNewDrawing() {
 
   persistUserDrawingDefaults();
   state = blankState();
+  currentCloudProjectOwnerId = null;
+  currentCloudProjectCompanyId = null;
+  projectComments = [];
+  projectCommentsProjectId = null;
   nextFittingId = 1;
   nextNoteId = 1;
   three.userMovedCamera = false;
@@ -12630,6 +13360,10 @@ async function promptForProjectDetails(options = {}) {
   if (info) {
     state.projectInfo = info;
     state.projectId = createProjectId();
+    currentCloudProjectOwnerId = null;
+    currentCloudProjectCompanyId = null;
+    projectComments = [];
+    projectCommentsProjectId = null;
   }
   updateControls();
   updateAll();
@@ -12738,7 +13472,7 @@ function exportedProjectPayload() {
     stamp,
   ].join("-");
   const payload = {
-    app: "IsoSpool Studio",
+    app: "SpoolMate",
     appVersion: APP_VERSION,
     appBuildDate: APP_BUILD_DATE,
     fileVersion: PROJECT_FILE_VERSION,
@@ -12781,7 +13515,7 @@ function projectExportHtml(payload, reportImage, modelImage = "", options = {}) 
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>${escapeHtml(title)} - IsoSpool export</title>
+    <title>${escapeHtml(title)} - SpoolMate export</title>
     <style>
       body { margin: 0; background: #eef4f2; color: #1f3438; font-family: Arial, Helvetica, sans-serif; }
       main { max-width: 1160px; margin: 0 auto; padding: 24px; }
@@ -12810,7 +13544,7 @@ function projectExportHtml(payload, reportImage, modelImage = "", options = {}) 
       <header>
         <div>
           <h1>${escapeHtml(title)}</h1>
-          <p>IsoSpool fabrication sheet export ${escapeHtml(payload.appVersion ?? APP_VERSION)}${readOnly ? " / read-only" : ""}</p>
+          <p>SpoolMate fabrication sheet export ${escapeHtml(payload.appVersion ?? APP_VERSION)}${readOnly ? " / read-only" : ""}</p>
           <p>Exported ${escapeHtml(exportedAt)}</p>
         </div>
         <button type="button" onclick="window.print()">Print / Save PDF</button>
@@ -12820,7 +13554,7 @@ function projectExportHtml(payload, reportImage, modelImage = "", options = {}) 
         <img src="${reportImage}" alt="Pipe spool fabrication sheet" />
       </section>
       ${modelSection}
-      <p class="note">${readOnly ? "Read-only shop/client copy. " : ""}This HTML file opens in a browser. It also contains the IsoSpool project data, so it can be imported back into IsoSpool later.</p>
+      <p class="note">${readOnly ? "Read-only shop/client copy. " : ""}This HTML file opens in a browser. It also contains the SpoolMate project data, so it can be imported back into SpoolMate later.</p>
     </main>
     <script id="isospool-project-data" type="application/json">${data}</script>
   </body>
@@ -12843,7 +13577,7 @@ function importProjectFile(file) {
       const payload = parseImportedProjectPayload(String(reader.result ?? ""));
       const restored = stateFromPayload(payload);
       if (!restored) {
-        window.alert("That file does not look like an IsoSpool project.");
+        window.alert("That file does not look like a SpoolMate project.");
         return;
       }
 
@@ -12883,11 +13617,189 @@ function export3dImage() {
 }
 
 function exportIsoImage() {
-  exportSpoolReportImage();
+  exportFabSheetPdf().catch((error) => {
+    console.warn("Could not export fab sheet PDF.", error);
+    window.alert("Could not create the PDF. The PNG fab sheet export will be used instead.");
+    exportSpoolReportImage();
+  });
 }
 
 function exportSpoolReportImage() {
   downloadCanvas(buildSpoolReportCanvas(), "pipe-spool-cut-list.png");
+}
+
+async function exportFabSheetPdf() {
+  const { name } = exportedProjectPayload();
+  const reportCanvas = buildSpoolReportCanvas();
+  const pages = [
+    {
+      dataUrl: reportCanvas.toDataURL("image/jpeg", 0.92),
+      width: reportCanvas.width,
+      height: reportCanvas.height,
+    },
+  ];
+
+  const modelImage = capture3dPreviewImage();
+  if (modelImage) {
+    try {
+      const modelCanvas = await buildModelReportCanvas(modelImage);
+      pages.push({
+        dataUrl: modelCanvas.toDataURL("image/jpeg", 0.92),
+        width: modelCanvas.width,
+        height: modelCanvas.height,
+      });
+    } catch (error) {
+      console.warn("Could not add 3D preview page to fab sheet PDF.", error);
+    }
+  }
+
+  const pdfBytes = buildImagePdf(pages);
+  downloadBytes(pdfBytes, `${name}-fab-sheet.pdf`, "application/pdf");
+}
+
+async function buildModelReportCanvas(modelImage) {
+  const image = await loadReportImage(modelImage);
+  const canvas = document.createElement("canvas");
+  canvas.width = 1800;
+  canvas.height = 1240;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#f7f3e9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawReportHeader(ctx, canvas.width);
+
+  const area = { x: 36, y: 150, width: canvas.width - 72, height: canvas.height - 186 };
+  roundRect(ctx, area.x, area.y, area.width, area.height, 10);
+  ctx.fillStyle = "#fbfcfc";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.18)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = "#1f3438";
+  ctx.font = "900 24px Inter, system-ui, sans-serif";
+  ctx.fillText("3D model preview", area.x + 24, area.y + 42);
+  ctx.font = "800 14px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#607174";
+  ctx.fillText(`${pipeSpec().label} / ${projectStatusLabel()} / ${formatMass(quantitySummary().totalWeightKg)} kg estimated`, area.x + 24, area.y + 66);
+
+  const imageArea = {
+    x: area.x + 36,
+    y: area.y + 92,
+    width: area.width - 72,
+    height: area.height - 124,
+  };
+  drawContainedImage(ctx, image, imageArea);
+  return canvas;
+}
+
+function loadReportImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.addEventListener("load", () => resolve(image), { once: true });
+    image.addEventListener("error", reject, { once: true });
+    image.src = src;
+  });
+}
+
+function drawContainedImage(ctx, image, area) {
+  const scale = Math.min(area.width / image.width, area.height / image.height);
+  const width = image.width * scale;
+  const height = image.height * scale;
+  const x = area.x + (area.width - width) * 0.5;
+  const y = area.y + (area.height - height) * 0.5;
+  ctx.drawImage(image, x, y, width, height);
+}
+
+function buildImagePdf(pages) {
+  const encoder = new TextEncoder();
+  const chunks = [];
+  const offsets = [0];
+  let offset = 0;
+  const pushBytes = (bytes) => {
+    chunks.push(bytes);
+    offset += bytes.length;
+  };
+  const pushText = (text) => pushBytes(encoder.encode(text));
+  const writeObject = (id, parts) => {
+    offsets[id] = offset;
+    pushText(`${id} 0 obj\n`);
+    for (const part of parts) {
+      if (typeof part === "string") pushText(part);
+      else pushBytes(part);
+    }
+    pushText("\nendobj\n");
+  };
+
+  const pageObjectIds = pages.map((_, index) => 3 + index * 3);
+  pushText("%PDF-1.4\n");
+  writeObject(1, ["<< /Type /Catalog /Pages 2 0 R >>"]);
+  writeObject(2, [`<< /Type /Pages /Kids [${pageObjectIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pages.length} >>`]);
+
+  pages.forEach((page, index) => {
+    const pageId = pageObjectIds[index];
+    const contentId = pageId + 1;
+    const imageId = pageId + 2;
+    const imageName = `Im${index + 1}`;
+    const imageBytes = dataUrlBytes(page.dataUrl);
+    const fit = pdfImageFit(page.width, page.height);
+    const content = `q ${fit.width} 0 0 ${fit.height} ${fit.x} ${fit.y} cm /${imageName} Do Q`;
+
+    writeObject(pageId, [
+      `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${FAB_PDF_PAGE_WIDTH_PT} ${FAB_PDF_PAGE_HEIGHT_PT}] /Resources << /XObject << /${imageName} ${imageId} 0 R >> /ProcSet [/PDF /ImageC] >> /Contents ${contentId} 0 R >>`,
+    ]);
+    writeObject(contentId, [`<< /Length ${content.length} >>\nstream\n${content}\nendstream`]);
+    writeObject(imageId, [
+      `<< /Type /XObject /Subtype /Image /Width ${page.width} /Height ${page.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${imageBytes.length} >>\nstream\n`,
+      imageBytes,
+      "\nendstream",
+    ]);
+  });
+
+  const xrefOffset = offset;
+  pushText(`xref\n0 ${offsets.length}\n`);
+  pushText("0000000000 65535 f \n");
+  for (let id = 1; id < offsets.length; id += 1) {
+    pushText(`${String(offsets[id] ?? 0).padStart(10, "0")} 00000 n \n`);
+  }
+  pushText(`trailer\n<< /Size ${offsets.length} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF`);
+
+  const output = new Uint8Array(offset);
+  let cursor = 0;
+  for (const chunk of chunks) {
+    output.set(chunk, cursor);
+    cursor += chunk.length;
+  }
+  return output;
+}
+
+function pdfImageFit(imageWidth, imageHeight) {
+  const margin = 22;
+  const maxWidth = FAB_PDF_PAGE_WIDTH_PT - margin * 2;
+  const maxHeight = FAB_PDF_PAGE_HEIGHT_PT - margin * 2;
+  const scale = Math.min(maxWidth / imageWidth, maxHeight / imageHeight);
+  const width = roundPdfNumber(imageWidth * scale);
+  const height = roundPdfNumber(imageHeight * scale);
+  return {
+    width,
+    height,
+    x: roundPdfNumber((FAB_PDF_PAGE_WIDTH_PT - width) * 0.5),
+    y: roundPdfNumber((FAB_PDF_PAGE_HEIGHT_PT - height) * 0.5),
+  };
+}
+
+function roundPdfNumber(value) {
+  return Math.round(value * 100) / 100;
+}
+
+function dataUrlBytes(dataUrl) {
+  const base64 = String(dataUrl).split(",")[1] ?? "";
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+  return bytes;
 }
 
 function buildSpoolReportCanvas() {
@@ -12961,7 +13873,7 @@ function drawReportHeader(ctx, width) {
   }
   ctx.textAlign = "right";
   ctx.fillText(new Date().toLocaleString(), width - 36, 56);
-  ctx.fillText(`IsoSpool ${APP_VERSION}`, width - 36, 82);
+  ctx.fillText(`SpoolMate ${APP_VERSION}`, width - 36, 82);
   ctx.fillText(`${projectStatusLabel()}${state.locked ? " / Locked" : ""}`, width - 36, 104);
   if (project.drawnBy) {
     ctx.fillText(`Drawn by ${project.drawnBy} / ${checked}`, width - 36, 126);
@@ -15401,6 +16313,28 @@ previewRotateButton?.addEventListener("click", () => setThreeNavigationMode("orb
 previewMoveButton?.addEventListener("click", () => setThreeNavigationMode("pan"));
 previewResetButton?.addEventListener("click", resetThreeView);
 
+projectCommentAddButton?.addEventListener("click", () => {
+  addProjectComment().catch((error) => {
+    console.warn("Add comment failed.", error);
+    window.alert(error?.message || "Add comment failed.");
+  });
+});
+projectCommentRefreshButton?.addEventListener("click", () => {
+  loadProjectComments().catch((error) => {
+    console.warn("Refresh comments failed.", error);
+    window.alert(error?.message || "Refresh comments failed.");
+  });
+});
+projectCommentInput?.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    addProjectComment().catch((error) => {
+      console.warn("Add comment failed.", error);
+      window.alert(error?.message || "Add comment failed.");
+    });
+  }
+});
+
 document.querySelector("#sampleButton").addEventListener("click", () => {
   state = sampleState();
   nextFittingId = 5;
@@ -15458,6 +16392,10 @@ document.addEventListener("keydown", (event) => {
   } else if ((event.key === "Delete" || event.key === "Backspace") && !isEditingField(event.target)) {
     deleteSelection();
   } else if (event.key === "Escape") {
+    if (actionMenuOpen()) {
+      closeActionMenu();
+      return;
+    }
     if (appFullscreenPanel || browserFullscreenElement()) {
       closePanelFullscreen();
       return;
@@ -15524,6 +16462,8 @@ resizeObserver.observe(previewStage);
 setupCollapsibleControls();
 setupInspectorTabs();
 setupMobilePanels();
+setupAppTheme();
+setupActionMenu();
 setupAuthDialog();
 setupProjectDialog();
 setupToolSettingsDialog();

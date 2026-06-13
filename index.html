@@ -3,15 +3,22 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="theme-color" content="#071018" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="IsoSpool" />
-    <title>IsoSpool Studio</title>
+    <meta name="apple-mobile-web-app-title" content="SpoolMate" />
+    <title>SpoolMate</title>
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-    <link rel="stylesheet" href="./styles.css?v=141" />
+    <script>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem("spoolmate-theme-v1") === "light" ? "light" : "dark";
+      } catch {
+        document.documentElement.dataset.theme = "dark";
+      }
+    </script>
+    <link rel="stylesheet" href="./styles.css?v=147" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -147,16 +154,20 @@
     <div class="app-shell">
       <header class="topbar">
         <div class="brand">
-          <span class="brand-mark" aria-hidden="true"></span>
+          <img class="brand-logo" src="./icons/spoolmate-mark.png" alt="" aria-hidden="true" />
           <div>
-            <strong>IsoSpool Studio</strong>
+            <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.41</span>
+            <span class="version-badge" id="appVersionBadge">v1.47</span>
           </div>
         </div>
 
         <div class="topbar-settings" aria-label="Project defaults and drawing overlays">
           <span class="project-readout" id="projectReadout">No project set</span>
+          <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
+            <button data-theme-choice="light" type="button" role="tab" aria-selected="false">Light</button>
+            <button class="active" data-theme-choice="dark" type="button" role="tab" aria-selected="true">Dark</button>
+          </div>
           <label class="dimension-style-field">
             <span>Status</span>
             <select id="projectStatusSelect" aria-label="Drawing status">
@@ -212,14 +223,6 @@
         </div>
 
         <div class="topbar-actions" aria-label="Project actions">
-          <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
-            <svg><use href="#icon-sample"></use></svg>
-            <span>Sample</span>
-          </button>
-          <button class="icon-button labeled" id="undoButton" type="button" title="Undo" aria-label="Undo">
-            <svg><use href="#icon-undo"></use></svg>
-            <span>Undo</span>
-          </button>
           <button class="icon-button labeled danger" id="resetButton" type="button" title="Reset spool" aria-label="Reset spool">
             <svg><use href="#icon-reset"></use></svg>
             <span>New</span>
@@ -237,43 +240,78 @@
             <span id="accountButtonLabel">Account</span>
           </button>
           <span class="cloud-status-pill" id="cloudSyncStatus">Local only</span>
-          <button class="icon-button labeled" id="toolSettingsButton" type="button" title="Choose side tools" aria-label="Choose side tools">
-            <svg><use href="#icon-settings"></use></svg>
-            <span>Tools</span>
-          </button>
-          <button class="icon-button labeled" id="healthCheckButton" type="button" title="Run drawing health check" aria-label="Run drawing health check">
-            <svg><use href="#icon-select"></use></svg>
-            <span>Check</span>
-          </button>
-          <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
-            <svg><use href="#icon-reset"></use></svg>
-            <span>Rev</span>
-          </button>
-          <button class="icon-button labeled" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
-            <svg><use href="#icon-export"></use></svg>
-            <span>Share</span>
-          </button>
-          <button class="icon-button labeled" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
-            <svg><use href="#icon-settings"></use></svg>
-            <span>Defaults</span>
-          </button>
-          <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
-            <svg><use href="#icon-sample"></use></svg>
-            <span>Import</span>
-          </button>
-          <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
-            <svg><use href="#icon-export"></use></svg>
-            <span>Export</span>
-          </button>
           <input id="projectFileInput" type="file" accept=".html,text/html,.json,application/json" hidden />
-          <button class="primary-button" id="export3dButton" type="button">
-            <svg><use href="#icon-export"></use></svg>
-            Export 3D
+          <button class="icon-button labeled action-menu-toggle" id="actionMenuButton" type="button" aria-expanded="false" aria-controls="actionMenuPanel">
+            <svg><use href="#icon-settings"></use></svg>
+            <span>Menu</span>
           </button>
-          <button class="primary-button" id="exportReportButton" type="button">
-            <svg><use href="#icon-export"></use></svg>
-            Fab Sheet
-          </button>
+          <div class="action-menu-panel" id="actionMenuPanel" hidden>
+            <div class="action-menu-header">
+              <div>
+                <strong>Menu</strong>
+                <span>Project, review, export and setup tools</span>
+              </div>
+              <button class="icon-button compact labeled" id="actionMenuCloseButton" type="button">Close</button>
+            </div>
+            <div class="action-menu-groups">
+              <section class="action-menu-group">
+                <h2>Project</h2>
+                <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
+                  <svg><use href="#icon-sample"></use></svg>
+                  <span>Sample</span>
+                </button>
+                <button class="icon-button labeled" id="undoButton" type="button" title="Undo" aria-label="Undo">
+                  <svg><use href="#icon-undo"></use></svg>
+                  <span>Undo</span>
+                </button>
+                <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
+                  <svg><use href="#icon-sample"></use></svg>
+                  <span>Import</span>
+                </button>
+              </section>
+              <section class="action-menu-group">
+                <h2>Review</h2>
+                <button class="icon-button labeled" id="healthCheckButton" type="button" title="Run drawing health check" aria-label="Run drawing health check">
+                  <svg><use href="#icon-select"></use></svg>
+                  <span>Check</span>
+                </button>
+                <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
+                  <svg><use href="#icon-reset"></use></svg>
+                  <span>Revision</span>
+                </button>
+                <button class="icon-button labeled" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
+                  <svg><use href="#icon-export"></use></svg>
+                  <span>Share</span>
+                </button>
+              </section>
+              <section class="action-menu-group">
+                <h2>Export</h2>
+                <button class="primary-button" id="export3dButton" type="button">
+                  <svg><use href="#icon-export"></use></svg>
+                  Export 3D
+                </button>
+                <button class="primary-button" id="exportReportButton" type="button" title="Export fabrication sheet PDF" aria-label="Export fabrication sheet PDF">
+                  <svg><use href="#icon-export"></use></svg>
+                  Fab PDF
+                </button>
+                <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
+                  <svg><use href="#icon-export"></use></svg>
+                  <span>Project file</span>
+                </button>
+              </section>
+              <section class="action-menu-group">
+                <h2>Setup</h2>
+                <button class="icon-button labeled" id="toolSettingsButton" type="button" title="Choose side tools" aria-label="Choose side tools">
+                  <svg><use href="#icon-settings"></use></svg>
+                  <span>Side tools</span>
+                </button>
+                <button class="icon-button labeled" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
+                  <svg><use href="#icon-settings"></use></svg>
+                  <span>Defaults</span>
+                </button>
+              </section>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -350,9 +388,9 @@
                 <svg><use href="#icon-fullscreen"></use></svg>
                 <span>Full</span>
               </button>
-              <button class="icon-button compact labeled" id="exportIsoButton" type="button" title="Save fabrication sheet" aria-label="Save fabrication sheet">
+              <button class="icon-button compact labeled" id="exportIsoButton" type="button" title="Save fabrication sheet PDF" aria-label="Save fabrication sheet PDF">
                 <svg><use href="#icon-image"></use></svg>
-                <span>Sheet</span>
+                <span>PDF</span>
               </button>
             </div>
           </div>
@@ -477,6 +515,18 @@
                 <span>Note text</span>
                 <input id="noteTextInput" type="text" value="FIELD NOTE" maxlength="80" />
               </label>
+            </section>
+            <section class="control-section">
+              <h2>Team comments</h2>
+              <div class="team-comments" id="projectCommentsList" aria-live="polite"></div>
+              <label class="field">
+                <span>Comment</span>
+                <input id="projectCommentInput" type="text" maxlength="1000" placeholder="Add a note for the team" />
+              </label>
+              <div class="property-actions">
+                <button id="projectCommentAddButton" type="button">Add comment</button>
+                <button id="projectCommentRefreshButton" type="button">Refresh</button>
+              </div>
             </section>
             <section class="control-section">
               <h2>Job details</h2>
@@ -640,8 +690,30 @@
               <input id="authRememberDeviceInput" type="checkbox" />
               <span>Remember me on this device</span>
             </label>
-            <p class="auth-help project-dialog-wide" id="authModeHelp">Use the email and password you created for IsoSpool.</p>
+            <p class="auth-help project-dialog-wide" id="authModeHelp">Use the email and password you created for SpoolMate.</p>
           </div>
+          <section class="team-workspace-panel" id="teamWorkspacePanel" hidden>
+            <div class="team-panel-head">
+              <div>
+                <strong>Team workspace</strong>
+                <small id="teamWorkspaceStatus">Sign in to use team projects.</small>
+              </div>
+              <button class="icon-button compact labeled" id="teamRefreshButton" type="button">Refresh</button>
+            </div>
+            <div class="project-dialog-grid">
+              <label class="field">
+                <span>Company name</span>
+                <input id="teamCompanyNameInput" type="text" maxlength="80" placeholder="Workshop name" />
+              </label>
+              <button class="icon-button labeled team-action-button" id="teamCreateButton" type="button">Create team</button>
+              <label class="field">
+                <span>Invite code</span>
+                <input id="teamInviteCodeInput" type="text" maxlength="16" placeholder="ABC12345" autocomplete="off" />
+              </label>
+              <button class="icon-button labeled team-action-button" id="teamJoinButton" type="button">Join team</button>
+            </div>
+            <div class="team-members-list" id="teamMembersList" aria-live="polite"></div>
+          </section>
           <div class="project-dialog-actions auth-actions">
             <button class="icon-button labeled" id="authCloseButton" type="button">Close</button>
             <button class="icon-button labeled" id="authSignOutButton" type="button" hidden>Sign out</button>
@@ -693,6 +765,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=141"></script>
+    <script defer src="./app.js?v=147"></script>
   </body>
 </html>
