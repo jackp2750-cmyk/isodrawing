@@ -2,6 +2,8 @@
 
 A static prototype for drawing pipe spools in a 2D isometric view and exporting clearer 3D-style images.
 
+See [`CHANGELOG.md`](CHANGELOG.md) for the update log through the current app version.
+
 ## Run
 
 Open `index.html` in a browser.

@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=147" />
+    <link rel="stylesheet" href="./styles.css?v=152" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -158,7 +158,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.47</span>
+            <span class="version-badge" id="appVersionBadge">v1.52</span>
           </div>
         </div>
 
@@ -260,10 +260,6 @@
                   <svg><use href="#icon-sample"></use></svg>
                   <span>Sample</span>
                 </button>
-                <button class="icon-button labeled" id="undoButton" type="button" title="Undo" aria-label="Undo">
-                  <svg><use href="#icon-undo"></use></svg>
-                  <span>Undo</span>
-                </button>
                 <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
                   <svg><use href="#icon-sample"></use></svg>
                   <span>Import</span>
@@ -322,9 +318,13 @@
               <svg><use href="#icon-draw"></use></svg>
               <span>Draw</span>
             </button>
-            <button class="tool-button" data-tool="select" type="button" title="Select" aria-label="Select">
+            <button class="tool-button" data-tool="select" type="button" title="Select. Hold Shift while clicking runs to select multiple." aria-label="Select. Hold Shift while clicking runs to select multiple.">
               <svg><use href="#icon-select"></use></svg>
               <span>Select</span>
+            </button>
+            <button class="tool-button" id="undoButton" data-side-tool="undo" type="button" title="Undo last action" aria-label="Undo last action">
+              <svg><use href="#icon-undo"></use></svg>
+              <span>Undo</span>
             </button>
             <button class="tool-button" data-tool="boxSelect" type="button" title="Box select multiple pipe runs" aria-label="Box select multiple pipe runs">
               <svg><use href="#icon-box-select"></use></svg>
@@ -424,12 +424,12 @@
             <section class="control-section">
               <h2>Draw exact runs</h2>
               <label class="field">
-                <span>Next run length mm</span>
-                <input id="stepLengthInput" type="number" min="50" max="12000" step="50" value="1000" />
+                <span>Next run / offset set mm</span>
+                <input id="stepLengthInput" type="number" min="50" max="12000" step="1" value="1000" />
               </label>
               <label class="field">
                 <span>Selected run mm</span>
-                <input id="selectedRunLengthInput" type="number" min="50" max="12000" step="50" disabled />
+                <input id="selectedRunLengthInput" type="number" min="50" max="12000" step="1" disabled />
               </label>
               <div class="axis-grid" aria-label="Add precise run">
                 <button data-axis="xp" type="button">+X</button>
@@ -598,6 +598,7 @@
             <canvas id="fallbackCanvas"></canvas>
             <div class="preview-label-layer" id="previewLabelLayer" aria-hidden="true"></div>
           </div>
+          <div class="preview-float-resize" id="previewFloatResize" aria-hidden="true"></div>
         </section>
       </main>
 
@@ -715,7 +716,7 @@
             <div class="team-members-list" id="teamMembersList" aria-live="polite"></div>
           </section>
           <div class="project-dialog-actions auth-actions">
-            <button class="icon-button labeled" id="authCloseButton" type="button">Close</button>
+            <button class="icon-button labeled" id="authCloseButton" type="button">Continue as guest</button>
             <button class="icon-button labeled" id="authSignOutButton" type="button" hidden>Sign out</button>
             <button class="icon-button labeled" id="authResendButton" type="button" hidden>Resend email</button>
             <button class="icon-button labeled" id="authSignUpButton" type="button" hidden>Sign up</button>
@@ -765,6 +766,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=147"></script>
+    <script defer src="./app.js?v=152"></script>
   </body>
 </html>

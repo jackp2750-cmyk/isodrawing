@@ -17,6 +17,7 @@ const previewResetButton = document.querySelector("#previewResetButton");
 const drawingFullscreenButton = document.querySelector("#drawingFullscreenButton");
 const previewFullscreenButton = document.querySelector("#previewFullscreenButton");
 const loadPlanButton = document.querySelector("#loadPlanButton");
+const previewFloatResize = document.querySelector("#previewFloatResize");
 const loadPlanDialog = document.querySelector("#loadPlanDialog");
 const loadPlanProjectList = document.querySelector("#loadPlanProjectList");
 const loadPlanStage = document.querySelector("#loadPlanStage");
@@ -144,7 +145,7 @@ const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.47";
+const APP_VERSION = "v1.52";
 const APP_BUILD_DATE = "2026-06-14";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -180,10 +181,11 @@ const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
 const PROJECT_STATUSES = new Set(["draft", "checked", "issued", "fabricated"]);
-const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select"]);
+const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select", "undo"]);
 const SIDE_TOOL_DETAILS = {
   draw: ["Draw", "Create pipe runs from points"],
   select: ["Select", "Pick, edit and drag items"],
+  undo: ["Undo", "Step back one change"],
   boxSelect: ["Box Select", "Select multiple pipe runs"],
   flange: ["Flange", "Place single or double flanges"],
   rollGroove: ["Groove", "Place roll grooves"],
@@ -392,7 +394,12 @@ let newDrawingDialogResolver = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
+let previewFloatDrag = null;
+let previewFloatBounds = null;
+let healthHighlight = null;
+let healthHighlightAnimationFrame = 0;
 let startupProjectPromptPending = false;
+let authGateOpen = false;
 let authMode = "signin";
 let supabaseClient = null;
 let cloudUser = null;
@@ -916,6 +923,7 @@ function normalizeEdges(edges, pointCount) {
         from: Number(edge.from),
         to: Number(edge.to),
         pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? 25),
+        ...normalizeOffsetEdgeMeta(edge),
       }))
       .filter((edge) =>
         Number.isInteger(edge.from) &&
@@ -933,6 +941,23 @@ function normalizeEdges(edges, pointCount) {
     linearEdges.push({ from: i, to: i + 1, pipeSizeNb: 25 });
   }
   return linearEdges;
+}
+
+function normalizeOffsetEdgeMeta(edge) {
+  const setMm = Math.round(Number(edge?.offsetSetMm));
+  const travelMm = Math.round(Number(edge?.offsetTravelMm));
+  const angleDeg = normalizeAngle(edge?.offsetAngleDeg);
+  const plane = normalizeAnglePlane(edge?.offsetPlane);
+  if (!Number.isFinite(setMm) || setMm <= 0 || !Number.isFinite(travelMm) || travelMm <= 0) {
+    return {};
+  }
+  return {
+    offsetSetMm: setMm,
+    offsetTravelMm: travelMm,
+    offsetAngleDeg: angleDeg,
+    offsetPlane: plane,
+    offsetDirection: Number(edge?.offsetDirection) < 0 ? -1 : 1,
+  };
 }
 
 function normalizeFittings(fittings, edgeCount) {
@@ -1528,6 +1553,7 @@ function segments() {
         from: edge.from,
         to: edge.to,
         pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? state.pipeSizeNb),
+        ...normalizeOffsetEdgeMeta(edge),
         start,
         end,
         vector: subtractPoints(end, start),
@@ -1643,6 +1669,7 @@ function drawIso() {
   drawSocketDragDimension(ctx, projection);
   drawBoxSelectOverlay(ctx);
   drawProjectCornerTag(ctx, width, height);
+  drawHealthIssueCallout(ctx, projection);
 }
 
 function drawGrid(ctx, width, height, projection) {
@@ -1838,6 +1865,10 @@ function drawSpool2d(ctx, projection) {
     drawBendAngles(ctx, projection);
   }
 
+  if (state.showDimensions) {
+    drawPipeSizeLabels2d(ctx, projection, segmentListForDraw, dimensionLayout);
+  }
+
   for (const fitting of state.fittings) {
     const segment = segmentListForDraw.find((item) => item.index === fitting.segmentIndex);
     if (!segment) continue;
@@ -1928,6 +1959,126 @@ function drawSuggestedLugs2d(ctx, projection, quantities = quantitySummary()) {
     ctx.fillStyle = "#0f766e";
     ctx.strokeText(label, point.x, point.y - 25);
     ctx.fillText(label, point.x, point.y - 25);
+  }
+
+  ctx.restore();
+}
+
+function healthTargetPointIndexes(target) {
+  if (!target) return [];
+  const values = [];
+  if (Number.isInteger(target.pointIndex)) values.push(target.pointIndex);
+  if (Number.isInteger(target.nodeIndex)) values.push(target.nodeIndex);
+  if (Array.isArray(target.pointIndexes)) values.push(...target.pointIndexes);
+  return [...new Set(values)].filter((index) => Number.isInteger(index) && state.points[index]);
+}
+
+function healthTargetSegmentIndexes(target) {
+  if (!target) return [];
+  const values = [];
+  if (Number.isInteger(target.segmentIndex)) values.push(target.segmentIndex);
+  if (Array.isArray(target.segmentIndexes)) values.push(...target.segmentIndexes);
+  for (const pointIndex of healthTargetPointIndexes(target)) {
+    for (const segment of segments()) {
+      if (segment.from === pointIndex || segment.to === pointIndex) values.push(segment.index);
+    }
+  }
+  return normalizeSelectedSegments([...new Set(values)], state.edges.length);
+}
+
+function healthTargetScreenPoints(target, projection) {
+  const points = healthTargetPointIndexes(target).map((index) => projectIso(state.points[index], projection));
+  const pointKeySet = new Set(points.map((point) => `${Math.round(point.x)}:${Math.round(point.y)}`));
+  for (const index of healthTargetSegmentIndexes(target)) {
+    const segment = segments().find((item) => item.index === index);
+    if (!segment) continue;
+    const midpoint = projectIso(lerpPoint(segment.start, segment.end, 0.5), projection);
+    const key = `${Math.round(midpoint.x)}:${Math.round(midpoint.y)}`;
+    if (!pointKeySet.has(key)) {
+      points.push(midpoint);
+      pointKeySet.add(key);
+    }
+  }
+  return points;
+}
+
+function drawHealthIssueCallout(ctx, projection) {
+  if (!healthHighlight) return;
+  const now = performance.now();
+  if (now > healthHighlight.expiresAt) {
+    healthHighlight = null;
+    return;
+  }
+
+  const target = healthHighlight.target;
+  const points = healthTargetScreenPoints(target, projection);
+  const segmentIndexes = healthTargetSegmentIndexes(target);
+  if (!points.length && !segmentIndexes.length) return;
+
+  const progress = clampNumber((now - healthHighlight.startedAt) / Math.max(1, healthHighlight.expiresAt - healthHighlight.startedAt), 0, 1);
+  const pulse = Math.sin(progress * Math.PI * 8) * 0.5 + 0.5;
+  const calloutColor = isDarkAppTheme() ? "#13d8ff" : "#c1121f";
+  const washColor = isDarkAppTheme() ? "rgba(19, 216, 255, 0.18)" : "rgba(193, 18, 31, 0.16)";
+  const glowColor = isDarkAppTheme() ? "rgba(19, 216, 255, 0.48)" : "rgba(193, 18, 31, 0.38)";
+
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.shadowColor = glowColor;
+  ctx.shadowBlur = 16 + pulse * 8;
+
+  for (const index of segmentIndexes) {
+    const segment = segments().find((item) => item.index === index);
+    if (!segment) continue;
+    const start = projectIso(segment.start, projection);
+    const end = projectIso(segment.end, projection);
+    ctx.strokeStyle = washColor;
+    ctx.lineWidth = Math.max(14, visualPipeWidth(segment) + 12);
+    drawLine(ctx, start, end);
+    ctx.setLineDash([10, 8]);
+    ctx.strokeStyle = calloutColor;
+    ctx.lineWidth = 3;
+    drawLine(ctx, start, end);
+    ctx.setLineDash([]);
+  }
+
+  for (const point of points) {
+    const radius = 18 + pulse * 9;
+    ctx.fillStyle = washColor;
+    ctx.strokeStyle = calloutColor;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = calloutColor;
+    ctx.fill();
+  }
+
+  const anchor = points[0];
+  if (anchor && healthHighlight.label) {
+    const label = healthHighlight.label.length > 42
+      ? `${healthHighlight.label.slice(0, 39)}...`
+      : healthHighlight.label;
+    ctx.shadowBlur = 10;
+    ctx.font = "950 12px Inter, system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+    const metrics = ctx.measureText(label);
+    const width = metrics.width + 20;
+    const height = 28;
+    const x = clampNumber(anchor.x + 18, 12, Math.max(12, ctx.canvas.getBoundingClientRect().width - width - 12));
+    const y = clampNumber(anchor.y - 32, 18, Math.max(18, ctx.canvas.getBoundingClientRect().height - height - 12));
+    ctx.fillStyle = isDarkAppTheme() ? "rgba(3, 15, 25, 0.92)" : "rgba(255, 253, 248, 0.96)";
+    ctx.strokeStyle = calloutColor;
+    ctx.lineWidth = 2;
+    roundRect(ctx, x, y - height * 0.5, width, height, 8);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = calloutColor;
+    ctx.fillText(label, x + 10, y + 1);
   }
 
   ctx.restore();
@@ -2198,7 +2349,7 @@ function drawDimension(ctx, segment, start, end, dimensionLayout = []) {
   };
   const angle = Math.atan2(end.y - start.y, end.x - start.x);
   const normal = { x: -Math.sin(angle), y: Math.cos(angle) };
-  const text = `C/C ${formatLength(pointLength(segment.vector))} mm`;
+  const text = offsetDimensionText(segment) ?? `C/C ${formatLength(pointLength(segment.vector))} mm`;
   const x = midpoint.x + normal.x * 20;
   const y = midpoint.y + normal.y * 20;
 
@@ -2227,8 +2378,11 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   const baseNormal = { x: -along.y, y: along.x };
   const pipeGap = 9;
   const tick = 6;
-  const fullText = `${formatLength(pointLength(segment.vector))} mm`;
-  const text = dimensionLabelText(layoutState, fullText, `Run ${segment.index + 1}: C/C ${fullText}`, "D");
+  const fullText = offsetDimensionText(segment, { short: true }) ?? `${formatLength(pointLength(segment.vector))} mm`;
+  const legendText = segmentOffsetMeta(segment)
+    ? `Run ${segment.index + 1}: ${offsetDimensionText(segment)} / factor ${offsetTravelMultiplier(segment.offsetAngleDeg).toFixed(3)}`
+    : `Run ${segment.index + 1}: C/C ${fullText}`;
+  const text = dimensionLabelText(layoutState, fullText, legendText, "D");
   const baseOffset = Math.min(64, Math.max(42, screenLength * 0.065));
   const manualOffset = dimensionOffsetForSegment(segment.index);
   let labelAngle = Math.atan2(along.y, along.x);
@@ -2296,6 +2450,79 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
     offset: layout.offset,
     baseOffset,
   });
+  ctx.restore();
+}
+
+function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []) {
+  const layoutState = Array.isArray(dimensionLayout)
+    ? { labels: dimensionLayout, pipes: [] }
+    : dimensionLayout;
+  const labels = layoutState.labels ?? [];
+  const pipes = layoutState.pipes ?? [];
+  const viewport = layoutState.viewport ?? dimensionViewport(ctx, 18);
+
+  ctx.save();
+  ctx.font = "900 10.5px Inter, system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  for (const segment of segmentData) {
+    const start = projectIso(segment.start, projection);
+    const end = projectIso(segment.end, projection);
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const screenLength = Math.hypot(dx, dy);
+    if (screenLength < 64) continue;
+
+    const along = { x: dx / screenLength, y: dy / screenLength };
+    const normal = { x: -along.y, y: along.x };
+    const text = `NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule}`;
+    const labelWidth = ctx.measureText(text).width + 14;
+    const labelHeight = 19;
+    const midpoint = { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 };
+    const candidates = [];
+    for (const side of [-1, 1]) {
+      for (const level of [0, 1, 2, 3]) {
+        const offset = 18 + level * 20;
+        const center = {
+          x: midpoint.x + normal.x * offset * side,
+          y: midpoint.y + normal.y * offset * side,
+        };
+        const rawBounds = {
+          left: center.x - labelWidth * 0.5,
+          right: center.x + labelWidth * 0.5,
+          top: center.y - labelHeight * 0.5,
+          bottom: center.y + labelHeight * 0.5,
+        };
+        const shift = dimensionLabelShiftForViewport(rawBounds, viewport);
+        const bounds = shiftBounds(rawBounds, shift.x, shift.y);
+        const overlapPenalty = labels.reduce((sum, existing) => sum + boundsOverlapArea(bounds, existing), 0) * 80;
+        const pipePenalty = pipes.reduce((sum, pipe) => (
+          pipe.index === segment.index || segmentIntersectsBounds(pipe.start, pipe.end, inflateBounds(bounds, 2))
+            ? sum + 1600
+            : sum
+        ), 0);
+        candidates.push({ center: { x: center.x + shift.x, y: center.y + shift.y }, bounds, score: overlapPenalty + pipePenalty + level * 10 });
+      }
+    }
+    candidates.sort((a, b) => a.score - b.score);
+    const chosen = candidates[0];
+    if (!chosen) continue;
+
+    ctx.shadowColor = isDarkAppTheme() ? "rgba(0, 0, 0, 0.32)" : "rgba(31, 42, 47, 0.1)";
+    ctx.shadowBlur = 4;
+    roundRect(ctx, chosen.bounds.left, chosen.bounds.top, labelWidth, labelHeight, 6);
+    ctx.fillStyle = isDarkAppTheme() ? "rgba(7, 24, 36, 0.88)" : "rgba(239, 250, 247, 0.94)";
+    ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.strokeStyle = isDarkAppTheme() ? "rgba(19, 216, 255, 0.4)" : "rgba(15, 118, 110, 0.22)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = isDarkAppTheme() ? "#dffbff" : "#0f5f62";
+    ctx.fillText(text, chosen.center.x, chosen.center.y + 0.5);
+    labels.push(inflateBounds(chosen.bounds, 3));
+  }
+
   ctx.restore();
 }
 
@@ -3566,19 +3793,49 @@ function findRunConnectionForNewSegment(startIndex, endPoint) {
   return best;
 }
 
-function addRun(axis, length) {
+function offsetTravelMultiplier(angleDegrees) {
+  const radians = normalizeAngle(angleDegrees) * Math.PI / 180;
+  return 1 / Math.max(0.0001, Math.sin(radians));
+}
+
+function offsetTravelLengthMm(setMm, angleDegrees) {
+  return normalizeLength(Number(setMm) * offsetTravelMultiplier(angleDegrees));
+}
+
+function segmentOffsetMeta(segment) {
+  if (!segment || !Number.isFinite(segment.offsetSetMm) || !Number.isFinite(segment.offsetTravelMm)) return null;
+  return {
+    setMm: segment.offsetSetMm,
+    travelMm: segment.offsetTravelMm,
+    angleDeg: normalizeAngle(segment.offsetAngleDeg),
+    plane: normalizeAnglePlane(segment.offsetPlane),
+    direction: Number(segment.offsetDirection) < 0 ? -1 : 1,
+    multiplier: offsetTravelMultiplier(segment.offsetAngleDeg),
+  };
+}
+
+function offsetDimensionText(segment, options = {}) {
+  const meta = segmentOffsetMeta(segment);
+  if (!meta) return null;
+  const travel = formatLength(pointLength(segment.vector));
+  const set = formatLength(meta.setMm);
+  return options.short ? `${travel} mm / SET ${set}` : `C/C ${travel} mm / SET ${set} mm`;
+}
+
+function addRun(axis, length, options = {}) {
   const from = activePointIndex();
   const start = state.points[from];
   const next = addPoints(start, axis.vector, length);
-  addRunToPoint(from, next);
+  addRunToPoint(from, next, options);
 }
 
-function addRunToPoint(from, next) {
+function addRunToPoint(from, next, options = {}) {
   if (!ensureDrawingEditable("draw more pipe")) return;
   const start = state.points[from];
   if (!start || almostSamePoint(start, next)) {
     return;
   }
+  const edgeMeta = normalizeOffsetEdgeMeta(options.edgeMeta);
 
   const connection = findRunConnectionForNewSegment(from, next);
   if (connection) {
@@ -3590,7 +3847,7 @@ function addRunToPoint(from, next) {
     if (connection.type === "segment") {
       setNodeConnectionType(to, "tee", { update: false });
     }
-    state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb });
+    state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb, ...edgeMeta });
     selectSingleSegment(state.edges.length - 1);
     state.selectedFitting = null;
     state.selectedNote = null;
@@ -3604,7 +3861,7 @@ function addRunToPoint(from, next) {
 
   const to = state.points.length;
   state.points.push(next);
-  state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb });
+  state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb, ...edgeMeta });
   selectSingleSegment(state.edges.length - 1);
   state.selectedFitting = null;
   state.selectedNote = null;
@@ -3619,6 +3876,8 @@ function addAngledRun(direction) {
   const angle = normalizeAngle(state.angleDegrees);
   const radians = angle * Math.PI / 180;
   const sign = direction >= 0 ? 1 : -1;
+  const setMm = normalizeLength(state.stepLength);
+  const travelMm = offsetTravelLengthMm(setMm, angle);
   let vector;
 
   if (state.anglePlane === "xz") {
@@ -3629,7 +3888,15 @@ function addAngledRun(direction) {
     vector = { x: Math.cos(radians), y: Math.sin(radians) * sign, z: 0 };
   }
 
-  addRun({ vector }, state.stepLength);
+  addRun({ vector }, travelMm, {
+    edgeMeta: {
+      offsetSetMm: setMm,
+      offsetTravelMm: travelMm,
+      offsetAngleDeg: angle,
+      offsetPlane: state.anglePlane,
+      offsetDirection: sign,
+    },
+  });
 }
 
 function selectedSegmentData() {
@@ -3655,7 +3922,7 @@ function selectedFittingData() {
   };
 }
 
-function setSelectedSegmentLength(length) {
+function setSelectedSegmentLength(length, options = {}) {
   if (!ensureDrawingEditable("change pipe lengths")) return;
   const segment = selectedSegmentData();
   if (!segment) return;
@@ -3671,6 +3938,25 @@ function setSelectedSegmentLength(length) {
   const direction = normalizePoint(subtractPoints(target, anchor));
 
   translateSegmentSide(segment, anchorIndex, targetIndex, addPoints(anchor, direction, normalizedLength));
+  if (options.edgeMeta) {
+    state.edges[segment.index] = {
+      ...state.edges[segment.index],
+      ...normalizeOffsetEdgeMeta(options.edgeMeta),
+    };
+  } else if (segmentOffsetMeta(segment)) {
+    const meta = segmentOffsetMeta(segment);
+    const setMm = Math.round(normalizedLength / meta.multiplier);
+    state.edges[segment.index] = {
+      ...state.edges[segment.index],
+      ...normalizeOffsetEdgeMeta({
+        offsetSetMm: setMm,
+        offsetTravelMm: normalizedLength,
+        offsetAngleDeg: meta.angleDeg,
+        offsetPlane: meta.plane,
+        offsetDirection: meta.direction,
+      }),
+    };
+  }
   state.activePoint = targetIndex;
   state.selectedPoint = targetIndex;
   updateAll();
@@ -4286,6 +4572,7 @@ function quantitySummary(segmentData = segments()) {
     segment,
     quantity: segmentQuantity(segment, data.segmentTakeoffs),
   }));
+  const cutSegmentsWithQuantity = branchMergedCutSegments(segmentData, data.segmentTakeoffs);
   const centrelineMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.centrelineMm, 0);
   const cutLengthMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.cutLengthMm, 0);
   const bendTakeoffMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.bendTakeoffMm, 0);
@@ -4299,6 +4586,7 @@ function quantitySummary(segmentData = segments()) {
 
   return {
     segments: segmentsWithQuantity,
+    cutSegments: cutSegmentsWithQuantity,
     elbows: data.elbows,
     reducers: data.reducers,
     tees: data.tees,
@@ -4315,6 +4603,72 @@ function quantitySummary(segmentData = segments()) {
     fittingWeightKg,
     totalWeightKg: pipeWeightKg + bendWeightKg + reducerWeightKg + teeWeightKg + branchWeightKg + fittingWeightKg,
   };
+}
+
+function branchMergedCutSegments(segmentData = segments(), segmentTakeoffs = takeoffData(segmentData).segmentTakeoffs) {
+  const rawRows = segmentData.map((segment) => ({
+    segment,
+    quantity: segmentQuantity(segment, segmentTakeoffs),
+  }));
+  const rowByIndex = new Map(rawRows.map((row) => [row.segment.index, row]));
+  const connections = nodeConnections(segmentData);
+  const consumed = new Set();
+  const mergedByFirstIndex = new Map();
+
+  for (const [nodeIndex, connected] of connections.entries()) {
+    if (connected.length < 3 || nodeConnectionType(nodeIndex) !== "branch") continue;
+    const info = branchNodeInfo(nodeIndex, connected, segmentData);
+    const mainPair = info?.mainPair ?? [];
+    if (mainPair.length !== 2) continue;
+    const [first, second] = mainPair;
+    if (!first?.segment || !second?.segment) continue;
+    if (pipeSizeForSegment(first.segment).nb !== pipeSizeForSegment(second.segment).nb) continue;
+    if (consumed.has(first.segment.index) || consumed.has(second.segment.index)) continue;
+
+    const firstRow = rowByIndex.get(first.segment.index);
+    const secondRow = rowByIndex.get(second.segment.index);
+    if (!firstRow || !secondRow) continue;
+    const firstIndex = Math.min(first.segment.index, second.segment.index);
+    const startPoint = state.points[first.other];
+    const endPoint = state.points[second.other];
+    const mergedSegment = {
+      index: firstIndex,
+      from: first.other,
+      to: second.other,
+      pipeSizeNb: info.mainSize.nb,
+      start: startPoint,
+      end: endPoint,
+      vector: subtractPoints(endPoint, startPoint),
+      cutLabel: `${pointLabel(first.other)}-${pointLabel(second.other)} via branch ${pointLabel(nodeIndex)}`,
+      mergedIndexes: [first.segment.index, second.segment.index],
+    };
+    mergedByFirstIndex.set(firstIndex, {
+      segment: mergedSegment,
+      quantity: {
+        centrelineMm: firstRow.quantity.centrelineMm + secondRow.quantity.centrelineMm,
+        bendTakeoffMm: firstRow.quantity.bendTakeoffMm + secondRow.quantity.bendTakeoffMm,
+        cutLengthMm: firstRow.quantity.cutLengthMm + secondRow.quantity.cutLengthMm,
+        pipeWeightKg: firstRow.quantity.pipeWeightKg + secondRow.quantity.pipeWeightKg,
+      },
+    });
+    consumed.add(first.segment.index);
+    consumed.add(second.segment.index);
+  }
+
+  const rows = [];
+  for (const row of rawRows) {
+    const merged = mergedByFirstIndex.get(row.segment.index);
+    if (merged) {
+      rows.push(merged);
+      continue;
+    }
+    if (!consumed.has(row.segment.index)) rows.push(row);
+  }
+  return rows;
+}
+
+function cutRunLabel(segment) {
+  return segment?.cutLabel ?? `${pointLabel(segment.from)}-${pointLabel(segment.to)}`;
 }
 
 function takeoffCountRows(quantities = quantitySummary()) {
@@ -4339,7 +4693,7 @@ function takeoffCountRows(quantities = quantitySummary()) {
     return existing;
   };
 
-  for (const { segment, quantity } of quantities.segments) {
+  for (const { segment, quantity } of quantities.cutSegments ?? quantities.segments) {
     const size = pipeSizeForSegment(segment);
     const row = add(
       `pipe:${size.nb}:${spec.schedule}`,
@@ -4498,7 +4852,7 @@ function centreOfGravityData(quantities = quantitySummary()) {
     });
   };
 
-  for (const { segment, quantity } of quantities.segments) {
+  for (const { segment, quantity } of quantities.cutSegments ?? quantities.segments) {
     addComponent(quantity.pipeWeightKg, lerpPoint(segment.start, segment.end, 0.5), "pipe");
   }
 
@@ -4559,6 +4913,19 @@ function reducerStartsAtJoint(reducer) {
   return reducer?.kind === "tee";
 }
 
+function reducerModelLengthMetres(reducer) {
+  return Math.max(0.08, (Number(reducer?.lengthMm) || 0) / 1000);
+}
+
+function teeReducerStartOffsetMetres(reducer) {
+  if (!reducerStartsAtJoint(reducer)) return 0;
+  const coreRadius = Math.max(
+    pipeRadiusMetres(reducer.largeSegment),
+    pipeRadiusMetres(reducer.smallSegment),
+  );
+  return Math.max(coreRadius * 3.15, 0.18);
+}
+
 function reducerSideForNode(nodeIndex) {
   const value = state.reducerSideOverrides?.[nodeIndex];
   return value === "large" ? "large" : "small";
@@ -4610,11 +4977,11 @@ function computeAutoReducerRenderTrims(reducers) {
   };
 
   for (const reducer of reducers) {
-    const modelLength = Math.max(0.08, (Number(reducer.lengthMm) || 0) / 1000);
+    const modelLength = reducerModelLengthMetres(reducer);
     if (reducer.kind === "bend") {
       addTrim(reducerPlacementSegment(reducer), reducer.nodeIndex, modelLength);
     } else if (reducerStartsAtJoint(reducer)) {
-      addTrim(reducer.smallSegment, reducer.nodeIndex, modelLength);
+      addTrim(reducer.smallSegment, reducer.nodeIndex, teeReducerStartOffsetMetres(reducer) + modelLength);
     } else {
       addTrim(reducer.largeSegment, reducer.nodeIndex, modelLength * 0.5);
       addTrim(reducer.smallSegment, reducer.nodeIndex, modelLength * 0.5);
@@ -5115,16 +5482,19 @@ function setTool(tool) {
   document.querySelectorAll("[data-tool]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tool === tool);
   });
+  if (tool === "select") {
+    cursorReadout.textContent = "Select - hold Shift to pick multiple runs";
+  }
   drawIso();
 }
 
 function updateSegmentList() {
   const segmentData = segments();
   const quantities = quantitySummary(segmentData);
-  const quantityBySegment = new Map(quantities.segments.map((item) => [item.segment.index, item.quantity]));
+  const cutRows = quantities.cutSegments ?? quantities.segments;
   segmentList.innerHTML = "";
 
-  if (segmentData.length === 0) {
+  if (cutRows.length === 0) {
     const empty = document.createElement("div");
     empty.className = "segment-row";
     empty.innerHTML = '<span class="segment-index">0</span><span class="segment-main"><strong>Start point</strong><small>Origin ready</small></span><span class="segment-fit">0</span>';
@@ -5132,26 +5502,33 @@ function updateSegmentList() {
     return;
   }
 
-  for (const segment of segmentData) {
+  for (const { segment, quantity } of cutRows) {
+    const segmentIndexes = Array.isArray(segment.mergedIndexes) ? segment.mergedIndexes : [segment.index];
     const row = document.createElement("button");
     row.type = "button";
     row.className = "segment-row";
-    row.classList.toggle("active", isSegmentSelected(segment.index));
+    row.classList.toggle("active", segmentIndexes.some((index) => isSegmentSelected(index)));
     row.dataset.segmentIndex = String(segment.index);
 
-    const fittingCount = state.fittings.filter((fitting) => fitting.segmentIndex === segment.index).length;
-    const quantity = quantityBySegment.get(segment.index);
+    const fittingCount = state.fittings.filter((fitting) => segmentIndexes.includes(fitting.segmentIndex)).length;
+    const indexLabel = segmentIndexes.length > 1 ? segmentIndexes.map((index) => index + 1).join("+") : String(segment.index + 1);
     row.innerHTML = `
-      <span class="segment-index">${segment.index + 1}</span>
+      <span class="segment-index">${indexLabel}</span>
       <span class="segment-main">
-        <strong>${pointLabel(segment.from)}-${pointLabel(segment.to)} ${runLabelForVector(segment.vector)} run</strong>
+        <strong>${cutRunLabel(segment)} ${runLabelForVector(segment.vector)} cut</strong>
         <small>Cut ${formatLength(quantity.cutLengthMm)} mm / CL ${formatLength(quantity.centrelineMm)} mm / ${formatMass(quantity.pipeWeightKg)} kg</small>
         <small>NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule} / deductions ${formatLength(quantity.bendTakeoffMm)} mm</small>
       </span>
       <span class="segment-fit">${fittingCount}</span>
     `;
     row.addEventListener("click", (event) => {
-      chooseSegmentFromPointer(event, segment.index);
+      if (segmentIndexes.length > 1) {
+        setSelectedSegments(event.shiftKey || event.ctrlKey || event.metaKey
+          ? [...new Set([...selectedSegmentIndexes(), ...segmentIndexes])]
+          : segmentIndexes);
+      } else {
+        chooseSegmentFromPointer(event, segment.index);
+      }
       state.selectedFitting = null;
       state.selectedNote = null;
       state.selectedPoint = segment.to;
@@ -5307,8 +5684,8 @@ function updateTakeoffSummary() {
   `;
 }
 
-function healthIssue(severity, title, detail = "") {
-  return { severity, title, detail };
+function healthIssue(severity, title, detail = "", target = null) {
+  return { severity, title, detail, target };
 }
 
 function endpointHasFinish(segment, pointIndex) {
@@ -5345,6 +5722,11 @@ function missingReducerIssues(segmentData, quantities) {
       "error",
       `Missing reducer at ${label} ${pointLabel(nodeIndex)}`,
       `Connected sizes: ${[...sizes].map((nb) => `NB ${nb}`).join(", ")}.`,
+      {
+        type: "reducer-node",
+        pointIndex: nodeIndex,
+        segmentIndexes: entries.map((entry) => entry.segment.index),
+      },
     ));
   }
 
@@ -5357,33 +5739,58 @@ function drawingHealthItems() {
   const project = normalizeProjectInfo(state.projectInfo);
   const items = [];
 
-  if (!project.jobNumber) items.push(healthIssue("error", "Job number missing", "Add a job number before issuing the drawing."));
-  if (!project.spoolNumber) items.push(healthIssue("error", "Spool number missing", "Add a spool number so the shop can identify this spool."));
+  if (!project.jobNumber) items.push(healthIssue("error", "Job number missing", "Add a job number before issuing the drawing.", { type: "project", field: "jobNumber" }));
+  if (!project.spoolNumber) items.push(healthIssue("error", "Spool number missing", "Add a spool number so the shop can identify this spool.", { type: "project", field: "spoolNumber" }));
   if (!segmentData.length) {
     items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting."));
   }
 
   const connections = nodeConnections(segmentData);
   const openEnds = [];
+  const openEndPointIndexes = [];
+  const openEndSegmentIndexes = [];
   for (const [pointIndex, connected] of connections.entries()) {
     if (connected.length !== 1) continue;
     const segment = segmentData.find((item) => item.index === connected[0].segmentIndex);
     if (segment && !endpointHasFinish(segment, pointIndex)) {
       openEnds.push(`${pointLabel(pointIndex)} on run ${segment.index + 1}`);
+      openEndPointIndexes.push(pointIndex);
+      openEndSegmentIndexes.push(segment.index);
     }
   }
   if (openEnds.length) {
-    items.push(healthIssue("warning", "Open pipe ends", openEnds.slice(0, 8).join(", ")));
+    items.push(healthIssue(
+      "warning",
+      "Open pipe ends",
+      openEnds.slice(0, 8).join(", "),
+      {
+        type: "open-ends",
+        pointIndexes: openEndPointIndexes,
+        segmentIndexes: openEndSegmentIndexes,
+      },
+    ));
   }
 
   items.push(...missingReducerIssues(segmentData, quantities));
 
-  const untypedBranches = [...connections.entries()]
+  const untypedBranchNodes = [...connections.entries()]
     .filter(([, connected]) => connected.length >= 3)
     .filter(([nodeIndex]) => !state.nodeTypes?.[nodeIndex])
-    .map(([nodeIndex]) => pointLabel(nodeIndex));
-  if (untypedBranches.length) {
-    items.push(healthIssue("warning", "Tee/branch points need review", `${untypedBranches.join(", ")} are being treated as tees unless marked as branch welds.`));
+    .map(([nodeIndex, connected]) => ({
+      nodeIndex,
+      segmentIndexes: connected.map((connection) => connection.segmentIndex),
+    }));
+  if (untypedBranchNodes.length) {
+    items.push(healthIssue(
+      "warning",
+      "Tee/branch points need review",
+      `${untypedBranchNodes.map((item) => pointLabel(item.nodeIndex)).join(", ")} are being treated as tees unless marked as branch welds.`,
+      {
+        type: "tee-branch-review",
+        pointIndexes: untypedBranchNodes.map((item) => item.nodeIndex),
+        segmentIndexes: [...new Set(untypedBranchNodes.flatMap((item) => item.segmentIndexes))],
+      },
+    ));
   }
 
   const estimatedRows = takeoffCountRows(quantities).filter((row) => String(row.detail ?? "").toLowerCase().includes("estimated"));
@@ -5392,10 +5799,18 @@ function drawingHealthItems() {
   }
 
   if (!state.showDimensions) {
-    items.push(healthIssue("warning", "Dimensions hidden", "Turn dimensions on before exporting the fab sheet."));
+    items.push(healthIssue("warning", "Dimensions hidden", "Turn dimensions on before exporting the fab sheet.", { type: "dimensions" }));
   }
   if (state.dimensionStyle === "redline" && segmentData.length > 8) {
-    items.push(healthIssue("info", "Red dimensions may need dragging", "Use Select to drag crowded red dimension labels away from the pipe."));
+    items.push(healthIssue(
+      "info",
+      "Red dimensions may need dragging",
+      "Use Select to drag crowded red dimension labels away from the pipe.",
+      {
+        type: "segments",
+        segmentIndexes: segmentData.slice(0, 12).map((segment) => segment.index),
+      },
+    ));
   }
   if (state.locked) {
     items.push(healthIssue("ok", "Drawing locked", "Edits are blocked until Lock edits is turned off or a new revision is created."));
@@ -5421,6 +5836,17 @@ function healthSummaryText(items = drawingHealthItems()) {
   return "No blocking issues";
 }
 
+function healthIssueClickable(item) {
+  return Boolean(item?.target);
+}
+
+function healthIssueTargetHint(item) {
+  if (!healthIssueClickable(item)) return "";
+  if (item.target.type === "project") return "Open project details";
+  if (item.target.type === "dimensions") return "Turn dimensions on";
+  return "Show on drawing";
+}
+
 function updateHealthSummary() {
   if (!healthSummary) return;
   const items = drawingHealthItems();
@@ -5435,14 +5861,98 @@ function updateHealthSummary() {
       <span>${escapeHtml(projectStatusLabel())}${state.locked ? " / Locked" : ""}</span>
     </div>
     <div class="health-list">
-      ${items.map((item) => `
-        <div class="health-item ${escapeHtml(item.severity)}">
+      ${items.map((item, index) => {
+        const clickable = healthIssueClickable(item);
+        const tag = clickable ? "button" : "div";
+        const attrs = clickable
+          ? ` type="button" data-health-index="${index}" title="${escapeHtml(healthIssueTargetHint(item))}"`
+          : "";
+        return `
+        <${tag} class="health-item ${escapeHtml(item.severity)}${clickable ? " clickable" : ""}"${attrs}>
           <strong>${escapeHtml(item.title)}</strong>
           ${item.detail ? `<span>${escapeHtml(item.detail)}</span>` : ""}
-        </div>
-      `).join("")}
+          ${clickable ? `<em>${escapeHtml(healthIssueTargetHint(item))}</em>` : ""}
+        </${tag}>
+      `;
+      }).join("")}
     </div>
   `;
+}
+
+function setupHealthIssueClicks() {
+  healthSummary?.addEventListener("click", (event) => {
+    if (!(event.target instanceof Element)) return;
+    const row = event.target.closest(".health-item[data-health-index]");
+    if (!row || !healthSummary.contains(row)) return;
+    const index = Number(row.dataset.healthIndex);
+    const item = drawingHealthItems()[index];
+    if (!item?.target) return;
+    focusHealthIssue(item);
+  });
+}
+
+function focusHealthIssue(item) {
+  const target = item?.target;
+  if (!target) return;
+
+  if (target.type === "project") {
+    promptForProjectDetails();
+    return;
+  }
+
+  if (target.type === "dimensions") {
+    state.showDimensions = true;
+    state.dimensionStyle = normalizeDimensionStyle(state.dimensionStyle);
+    healthHighlight = null;
+    updateAll();
+    return;
+  }
+
+  const segmentIndexes = healthTargetSegmentIndexes(target);
+  const pointIndexes = healthTargetPointIndexes(target);
+  setSelectedSegments(segmentIndexes);
+  state.selectedPoint = pointIndexes[0] ?? null;
+  state.selectedFitting = null;
+  state.selectedNote = null;
+  state.activeTool = "select";
+  startHealthIssueHighlight(target, item.title);
+  updateControls();
+  updateSelectionControls();
+  updatePropertiesPanel();
+  drawIso();
+  if (isTabletLayout()) {
+    showMobilePanel("drawing");
+  }
+}
+
+function startHealthIssueHighlight(target, label) {
+  const now = performance.now();
+  healthHighlight = {
+    target,
+    label,
+    startedAt: now,
+    expiresAt: now + 4200,
+  };
+  if (healthHighlightAnimationFrame) {
+    cancelAnimationFrame(healthHighlightAnimationFrame);
+  }
+  animateHealthIssueHighlight();
+}
+
+function animateHealthIssueHighlight() {
+  if (!healthHighlight) {
+    healthHighlightAnimationFrame = 0;
+    return;
+  }
+  const now = performance.now();
+  drawIso();
+  if (now > healthHighlight.expiresAt) {
+    healthHighlight = null;
+    healthHighlightAnimationFrame = 0;
+    drawIso();
+    return;
+  }
+  healthHighlightAnimationFrame = requestAnimationFrame(animateHealthIssueHighlight);
 }
 
 function updateBomSummary() {
@@ -5843,16 +6353,44 @@ function activateInspectorTab(name) {
 }
 
 function refreshPreviewAfterLayoutChange() {
-  window.requestAnimationFrame(() => {
+  schedulePreviewStabilize();
+}
+
+function syncPreviewCanvasVisibility() {
+  if (!threeCanvas || !fallbackCanvas) return;
+  if (three.ready) {
+    threeCanvas.hidden = false;
+    fallbackCanvas.hidden = true;
+  } else {
+    threeCanvas.hidden = true;
+    fallbackCanvas.hidden = false;
+  }
+}
+
+function forcePreviewRender() {
+  syncPreviewCanvasVisibility();
+  if (three.ready) {
     resizeThree();
     update3dPreview();
-    renderFallbackPreview();
-    window.requestAnimationFrame(() => {
-      resizeThree();
-      update3dLabelPositions();
-      renderFallbackPreview();
-    });
+    resizeThree();
+    if (three.renderer && three.scene && three.camera) {
+      three.renderer.render(three.scene, three.camera);
+    }
+    update3dLabelPositions();
+    return;
+  }
+
+  clear3dPipeLabels();
+  renderFallbackPreview();
+}
+
+function schedulePreviewStabilize() {
+  window.requestAnimationFrame(() => {
+    forcePreviewRender();
+    window.requestAnimationFrame(forcePreviewRender);
   });
+  window.setTimeout(forcePreviewRender, 90);
+  window.setTimeout(forcePreviewRender, 260);
 }
 
 function showHealthPanel() {
@@ -5936,11 +6474,17 @@ function updatePropertiesPanel() {
       const segment = selectedSegments[0];
       const quantity = selectedQuantities[0].quantity;
       const size = pipeSizeForSegment(segment);
+      const offsetMeta = segmentOffsetMeta(segment);
       renderProperties(
         `Run ${segment.index + 1}`,
         [
           ["NB", `${size.nb} ${pipeSpec().schedule}`],
           ["C/C", `${formatLength(quantity.centrelineMm)} mm`],
+          ...(offsetMeta ? [
+            ["Offset set", `${formatLength(offsetMeta.setMm)} mm`],
+            ["Travel factor", offsetMeta.multiplier.toFixed(3)],
+            ["Offset angle", `${formatAngle(offsetMeta.angleDeg)} deg`],
+          ] : []),
           ["Cut", `${formatLength(quantity.cutLengthMm)} mm`],
           ["Deduct", `${formatLength(quantity.bendTakeoffMm)} mm`],
           ["Weight", `${formatMass(quantity.pipeWeightKg)} kg`],
@@ -6245,9 +6789,8 @@ function panelFullscreenActive(panel) {
 function schedulePanelFullscreenResize() {
   requestAnimationFrame(() => {
     drawIso();
-    renderFallbackPreview();
-    resizeThree();
-    update3dLabelPositions();
+    applyPreviewFloatBounds();
+    forcePreviewRender();
   });
 }
 
@@ -6267,9 +6810,14 @@ function updatePanelFullscreenState() {
     const active = panel === appFullscreenPanel || panel === native;
     panel.classList.toggle("panel-fullscreen", active);
   }
+  const drawingFullscreen = panelFullscreenActive(drawingPanel);
+  const previewFullscreen = panelFullscreenActive(previewPanel);
   document.body.classList.toggle("has-panel-fullscreen", Boolean(appFullscreenPanel || native));
-  setFullscreenButtonState(drawingFullscreenButton, panelFullscreenActive(drawingPanel));
-  setFullscreenButtonState(previewFullscreenButton, panelFullscreenActive(previewPanel));
+  document.body.classList.toggle("drawing-panel-fullscreen", drawingFullscreen);
+  document.body.classList.toggle("preview-panel-fullscreen", previewFullscreen);
+  applyPreviewFloatBounds();
+  setFullscreenButtonState(drawingFullscreenButton, drawingFullscreen);
+  setFullscreenButtonState(previewFullscreenButton, previewFullscreen);
   syncDrawingContextMenuHost();
   if (!drawingContextMenu.hidden) clampDrawingContextMenuToViewport();
   schedulePanelFullscreenResize();
@@ -6296,6 +6844,11 @@ async function togglePanelFullscreen(panel) {
 
   await closePanelFullscreen();
   try {
+    if (panel === drawingPanel) {
+      appFullscreenPanel = panel;
+      updatePanelFullscreenState();
+      return;
+    }
     const usedNativeFullscreen = await requestNativeFullscreen(panel);
     if (!usedNativeFullscreen) {
       appFullscreenPanel = panel;
@@ -6318,6 +6871,171 @@ function setupPanelFullscreen() {
     if (!browserFullscreenElement()) appFullscreenPanel = null;
     updatePanelFullscreenState();
   });
+}
+
+function previewFloatingActive() {
+  return Boolean(
+    previewPanel &&
+      document.body.classList.contains("drawing-panel-fullscreen") &&
+      !panelFullscreenActive(previewPanel),
+  );
+}
+
+function defaultPreviewFloatBounds() {
+  const coarse = isTabletLayout();
+  const sideReserve = coarse ? 0 : 86;
+  const bottomReserve = coarse ? 84 : 0;
+  const margin = coarse ? 10 : 18;
+  const availableWidth = Math.max(260, window.innerWidth - sideReserve - margin * 2);
+  const availableHeight = Math.max(200, window.innerHeight - bottomReserve - margin * 2);
+  const width = Math.min(coarse ? 420 : 460, availableWidth);
+  const height = Math.min(coarse ? 320 : 360, availableHeight);
+  return {
+    left: window.innerWidth - width - margin,
+    top: window.innerHeight - bottomReserve - height - margin,
+    width,
+    height,
+  };
+}
+
+function clampPreviewFloatBounds(bounds) {
+  const coarse = isTabletLayout();
+  const sideReserve = previewFloatingActive() && !coarse ? 86 : 0;
+  const bottomReserve = previewFloatingActive() && coarse ? 84 : 0;
+  const margin = coarse ? 10 : 8;
+  const availableWidth = Math.max(220, window.innerWidth - sideReserve - margin * 2);
+  const availableHeight = Math.max(180, window.innerHeight - bottomReserve - margin * 2);
+  const minWidth = Math.min(coarse ? 280 : 300, availableWidth);
+  const minHeight = Math.min(coarse ? 190 : 220, availableHeight);
+  const width = clampNumber(Number(bounds?.width) || 420, minWidth, availableWidth);
+  const height = clampNumber(Number(bounds?.height) || 300, minHeight, availableHeight);
+  const minLeft = sideReserve + margin;
+  const maxLeft = Math.max(minLeft, window.innerWidth - width - margin);
+  const minTop = margin;
+  const maxTop = Math.max(minTop, window.innerHeight - bottomReserve - height - margin);
+  return {
+    left: clampNumber(Number(bounds?.left) || maxLeft, minLeft, maxLeft),
+    top: clampNumber(Number(bounds?.top) || maxTop, minTop, maxTop),
+    width,
+    height,
+  };
+}
+
+function clearPreviewFloatStyles() {
+  if (!previewPanel) return;
+  previewPanel.style.left = "";
+  previewPanel.style.top = "";
+  previewPanel.style.right = "";
+  previewPanel.style.bottom = "";
+  previewPanel.style.width = "";
+  previewPanel.style.height = "";
+}
+
+function applyPreviewFloatBounds() {
+  if (!previewPanel) return;
+  if (!previewFloatingActive()) {
+    clearPreviewFloatStyles();
+    return;
+  }
+
+  previewFloatBounds = clampPreviewFloatBounds(previewFloatBounds ?? defaultPreviewFloatBounds());
+  previewPanel.style.left = `${previewFloatBounds.left}px`;
+  previewPanel.style.top = `${previewFloatBounds.top}px`;
+  previewPanel.style.right = "auto";
+  previewPanel.style.bottom = "auto";
+  previewPanel.style.width = `${previewFloatBounds.width}px`;
+  previewPanel.style.height = `${previewFloatBounds.height}px`;
+}
+
+function previewFloatHandleAllowed(event) {
+  if (!previewFloatingActive()) return false;
+  if (event.pointerType === "mouse" && event.button !== 0) return false;
+  return true;
+}
+
+function isPreviewFloatControlTarget(target) {
+  return target instanceof Element && Boolean(target.closest(
+    "button, input, select, label, textarea, a, .preview-stage, .preview-float-resize",
+  ));
+}
+
+function beginPreviewFloatMove(event) {
+  if (!previewFloatHandleAllowed(event) || isPreviewFloatControlTarget(event.target)) return;
+  const rect = previewPanel.getBoundingClientRect();
+  previewFloatDrag = {
+    mode: "move",
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+  };
+  previewPanel.classList.add("preview-floating-dragging");
+  previewPanel.setPointerCapture?.(event.pointerId);
+  event.preventDefault();
+}
+
+function beginPreviewFloatResize(event) {
+  if (!previewFloatHandleAllowed(event)) return;
+  const rect = previewPanel.getBoundingClientRect();
+  previewFloatDrag = {
+    mode: "resize",
+    pointerId: event.pointerId,
+    startX: event.clientX,
+    startY: event.clientY,
+    left: rect.left,
+    top: rect.top,
+    width: rect.width,
+    height: rect.height,
+  };
+  previewPanel.classList.add("preview-floating-resizing");
+  previewPanel.setPointerCapture?.(event.pointerId);
+  event.preventDefault();
+}
+
+function updatePreviewFloatDrag(event) {
+  if (!previewFloatDrag || previewFloatDrag.pointerId !== event.pointerId) return;
+  const dx = event.clientX - previewFloatDrag.startX;
+  const dy = event.clientY - previewFloatDrag.startY;
+  const nextBounds = previewFloatDrag.mode === "resize"
+    ? {
+        left: previewFloatDrag.left,
+        top: previewFloatDrag.top,
+        width: previewFloatDrag.width + dx,
+        height: previewFloatDrag.height + dy,
+      }
+    : {
+        left: previewFloatDrag.left + dx,
+        top: previewFloatDrag.top + dy,
+        width: previewFloatDrag.width,
+        height: previewFloatDrag.height,
+      };
+
+  previewFloatBounds = clampPreviewFloatBounds(nextBounds);
+  applyPreviewFloatBounds();
+  resizeThree();
+  renderFallbackPreview();
+  event.preventDefault();
+}
+
+function finishPreviewFloatDrag(event) {
+  if (!previewFloatDrag || previewFloatDrag.pointerId !== event.pointerId) return;
+  previewPanel.releasePointerCapture?.(event.pointerId);
+  previewPanel.classList.remove("preview-floating-dragging", "preview-floating-resizing");
+  previewFloatDrag = null;
+  schedulePreviewStabilize();
+  event.preventDefault();
+}
+
+function setupFloatingPreviewPanel() {
+  const previewBar = previewPanel?.querySelector(".panel-bar");
+  previewBar?.addEventListener("pointerdown", beginPreviewFloatMove);
+  previewFloatResize?.addEventListener("pointerdown", beginPreviewFloatResize);
+  window.addEventListener("pointermove", updatePreviewFloatDrag);
+  window.addEventListener("pointerup", finishPreviewFloatDrag);
+  window.addEventListener("pointercancel", finishPreviewFloatDrag);
 }
 
 function isGestureSurfaceTarget(target) {
@@ -6587,8 +7305,7 @@ function showMobilePanel(panel = "drawing") {
   }
 
   if (normalized === "preview") {
-    renderFallbackPreview();
-    resizeThree();
+    schedulePreviewStabilize();
   } else if (normalized === "drawing") {
     closeDrawingContextMenu();
   }
@@ -6609,7 +7326,7 @@ function setupAuthDialog() {
 
   authCloseButton?.addEventListener("click", closeAuthDialog);
   authDialog?.addEventListener("pointerdown", (event) => {
-    if (event.target === authDialog) {
+    if (event.target === authDialog && !authGateOpen) {
       closeAuthDialog();
     }
   });
@@ -6701,10 +7418,17 @@ function openAuthDialog(options = {}) {
   loadAuthRememberPreference();
   updateCloudStatus();
   setAuthMode(options.mode ?? authMode, { keepStatus: options.startup });
+  authGateOpen = options.startup === true;
+  authDialog.classList.toggle("auth-gate", authGateOpen);
+  document.body.classList.toggle("auth-gate-open", authGateOpen);
+  if (authCloseButton) {
+    authCloseButton.textContent = authGateOpen ? "Continue as guest" : "Close";
+    authCloseButton.title = authGateOpen ? "Use SpoolMate without cloud sync on this device" : "Close account panel";
+  }
   if (options.startup) {
     startupProjectPromptPending = true;
     if (authDialogStatus) {
-      authDialogStatus.textContent = "Sign in or create an account to save your spool projects to the cloud. You can close this and keep working locally.";
+      authDialogStatus.textContent = "Sign in, create an account, or continue as guest to use local-only projects on this device.";
     }
   }
   authDialog.hidden = false;
@@ -6717,6 +7441,13 @@ function openAuthDialog(options = {}) {
 
 function closeAuthDialog() {
   saveAuthRememberPreference();
+  authGateOpen = false;
+  authDialog?.classList.remove("auth-gate");
+  document.body.classList.remove("auth-gate-open");
+  if (authCloseButton) {
+    authCloseButton.textContent = "Close";
+    authCloseButton.title = "Close account panel";
+  }
   if (authDialog) authDialog.hidden = true;
   if (startupProjectPromptPending) {
     startupProjectPromptPending = false;
@@ -6762,16 +7493,9 @@ async function runStartupPrompts() {
 }
 
 function maybeOpenStartupAuthPrompt() {
-  if (!authDialog || !supabaseClient || cloudUser) return false;
+  if (!authDialog || cloudUser) return false;
   if (authDialog.hidden === false) return true;
   if (authPromptRememberedOnDevice()) return false;
-
-  try {
-    if (sessionStorage.getItem(AUTH_PROMPT_SESSION_KEY) === "shown") return false;
-    sessionStorage.setItem(AUTH_PROMPT_SESSION_KEY, "shown");
-  } catch {
-    // If session storage is unavailable, still show the first-run prompt.
-  }
 
   openAuthDialog({ startup: true });
   return true;
@@ -7220,8 +7944,8 @@ async function initThree() {
   } catch (error) {
     console.warn("Three.js failed to load; using fallback renderer.", error);
     renderStatus.textContent = "Canvas 3D preview";
-    threeCanvas.hidden = true;
-    fallbackCanvas.hidden = false;
+    three.ready = false;
+    syncPreviewCanvasVisibility();
     clear3dPipeLabels();
     renderFallbackPreview();
   }
@@ -7291,8 +8015,7 @@ function setupThree(THREE, OrbitControls) {
   applyThreeNavigationMode(three.navigationMode);
 
   three.ready = true;
-  threeCanvas.hidden = false;
-  fallbackCanvas.hidden = true;
+  syncPreviewCanvasVisibility();
   renderStatus.textContent = "Three.js viewport";
   resizeThree();
   update3dPreview();
@@ -7303,6 +8026,7 @@ function setupThree(THREE, OrbitControls) {
 function animateThree() {
   if (!three.ready) return;
   three.animationFrame = requestAnimationFrame(animateThree);
+  syncPreviewCanvasVisibility();
   three.controls.update();
   three.renderer.render(three.scene, three.camera);
   update3dLabelPositions();
@@ -7391,6 +8115,7 @@ function updateThreeSceneStyle(style) {
 }
 
 function update3dPreview() {
+  syncPreviewCanvasVisibility();
   if (!three.ready) {
     clear3dPipeLabels();
     renderFallbackPreview();
@@ -8451,7 +9176,7 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
   largeDirection.normalize();
   smallDirection.normalize();
   placementDirection.normalize();
-  const modelLength = Math.max(0.08, reducer.lengthMm / 1000);
+  const modelLength = reducerModelLengthMetres(reducer);
   const halfLength = modelLength * 0.5;
   const startsAtJoint = reducerStartsAtJoint(reducer);
   const startsAfterBend = reducer.kind === "bend";
@@ -8464,8 +9189,14 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     start = joint.clone().addScaledVector(placementDirection, offset);
     end = start.clone().addScaledVector(placementDirection, modelLength);
   } else if (startsAtJoint) {
-    start = joint.clone().addScaledVector(smallDirection, 0.015);
+    const offset = clampNumber(
+      teeReducerStartOffsetMetres(reducer),
+      0.015,
+      Math.max(0.015, placementLength - modelLength),
+    );
+    start = joint.clone().addScaledVector(smallDirection, offset);
     end = joint.clone().addScaledVector(smallDirection, modelLength);
+    end.addScaledVector(smallDirection, offset);
   } else {
     start = joint.clone().addScaledVector(largeDirection, halfLength);
     end = joint.clone().addScaledVector(smallDirection, halfLength);
@@ -8487,6 +9218,9 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     const axis = end.clone().sub(start);
     if (axis.length() > 0.0001) {
       axis.normalize();
+      const shoulderTube = clampNumber(Math.max(startRadius, endRadius) * 0.045, 0.004, 0.018);
+      group.add(torusRing(start, axis, startRadius * 1.01, shoulderTube, material, 8, 44));
+      group.add(torusRing(end, axis, endRadius * 1.01, shoulderTube, material, 8, 44));
       const edgeMaterial = new THREE.LineBasicMaterial({
         color: material?.color?.getHex?.() ?? 0x7a4dc2,
         transparent: true,
@@ -14202,7 +14936,7 @@ function drawReportRunTable(ctx, x, y, width, quantities) {
 
     const size = pipeSizeForSegment(segment);
     const values = [
-      `${pointLabel(segment.from)}-${pointLabel(segment.to)}`,
+      cutRunLabel(segment),
       `${size.nb}`,
       `${formatLength(quantity.centrelineMm)}`,
       `${formatLength(quantity.bendTakeoffMm)}`,
@@ -15428,8 +16162,12 @@ function editContextSegmentLength() {
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
 
+  const offsetMeta = segmentOffsetMeta(hit.segment);
   const currentLength = Math.round(pointLength(hit.segment.vector));
-  const text = window.prompt("Pipe length mm", String(currentLength));
+  const text = window.prompt(
+    offsetMeta ? "Offset set mm" : "Pipe length mm",
+    String(offsetMeta ? offsetMeta.setMm : currentLength),
+  );
   if (text === null) return;
 
   selectSingleSegment(hit.segment.index);
@@ -15437,7 +16175,21 @@ function editContextSegmentLength() {
   state.activePoint = state.selectedPoint;
   state.selectedFitting = null;
   state.selectedNote = null;
-  setSelectedSegmentLength(text);
+  if (offsetMeta) {
+    const setMm = normalizeLength(text);
+    const travelMm = offsetTravelLengthMm(setMm, offsetMeta.angleDeg);
+    setSelectedSegmentLength(travelMm, {
+      edgeMeta: {
+        offsetSetMm: setMm,
+        offsetTravelMm: travelMm,
+        offsetAngleDeg: offsetMeta.angleDeg,
+        offsetPlane: offsetMeta.plane,
+        offsetDirection: offsetMeta.direction,
+      },
+    });
+  } else {
+    setSelectedSegmentLength(text);
+  }
 }
 
 function editContextSegmentAngle() {
@@ -16030,6 +16782,8 @@ drawCanvas.addEventListener("pointermove", (event) => {
       ? "Box select"
       : state.activeTool === "tee" && hit
       ? `Tee on run ${hit.segment.index + 1}`
+      : state.activeTool === "select" && hit
+      ? `Run ${hit.segment.index + 1} - hold Shift for multi-select`
       : hit
       ? `Run ${hit.segment.index + 1} / ${Math.round(hit.t * 100)}%`
       : "No run";
@@ -16442,6 +17196,8 @@ document.addEventListener("pointerdown", (event) => {
 
 window.addEventListener("resize", () => {
   closeDrawingContextMenu();
+  applyPreviewFloatBounds();
+  schedulePreviewStabilize();
   redrawLoadPlanIfOpen();
   if (!isTabletLayout()) {
     showMobilePanel("drawing");
@@ -16468,6 +17224,8 @@ setupAuthDialog();
 setupProjectDialog();
 setupToolSettingsDialog();
 setupPanelFullscreen();
+setupFloatingPreviewPanel();
+setupHealthIssueClicks();
 setupTouchSelectionGuards();
 setupLoadPlanner();
 registerServiceWorker();
