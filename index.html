@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=152" />
+    <link rel="stylesheet" href="./styles.css?v=158" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -91,6 +91,10 @@
         <path d="M9 14 4 9l5-5" />
         <path d="M4 9h10a6 6 0 0 1 0 12h-4" />
       </symbol>
+      <symbol id="icon-redo" viewBox="0 0 24 24">
+        <path d="m15 14 5-5-5-5" />
+        <path d="M20 9H10a6 6 0 0 0 0 12h4" />
+      </symbol>
       <symbol id="icon-reset" viewBox="0 0 24 24">
         <path d="M3 12a9 9 0 1 0 3-6.7" />
         <path d="M3 3v6h6" />
@@ -128,6 +132,11 @@
         <circle cx="8" cy="10" r="2" />
         <path d="m21 15-5-5L5 19" />
       </symbol>
+      <symbol id="icon-hide" viewBox="0 0 24 24">
+        <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z" />
+        <circle cx="12" cy="12" r="2.5" />
+        <path d="M4 4 20 20" />
+      </symbol>
       <symbol id="icon-user" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="4" />
         <path d="M4 21c1.4-4 4.1-6 8-6s6.6 2 8 6" />
@@ -158,9 +167,16 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.52</span>
+            <span class="version-badge" id="appVersionBadge">v1.58</span>
           </div>
         </div>
+
+        <nav class="mode-switcher" aria-label="Workflow mode">
+          <button class="active" data-app-mode="draw" type="button" aria-pressed="true">Draw</button>
+          <button data-app-mode="edit" type="button" aria-pressed="false">Edit</button>
+          <button data-app-mode="review" type="button" aria-pressed="false">Review</button>
+          <button data-app-mode="export" type="button" aria-pressed="false">Export</button>
+        </nav>
 
         <div class="topbar-settings" aria-label="Project defaults and drawing overlays">
           <span class="project-readout" id="projectReadout">No project set</span>
@@ -314,55 +330,59 @@
       <main class="workspace">
         <aside class="tool-rail" aria-label="Drawing tools">
           <div class="tool-grid" role="toolbar" aria-label="Drawing tools">
-            <button class="tool-button active" data-tool="draw" type="button" title="Draw pipe" aria-label="Draw pipe">
+            <button class="tool-button active" data-tool="draw" data-mode-tools="draw" type="button" title="Draw pipe" aria-label="Draw pipe">
               <svg><use href="#icon-draw"></use></svg>
               <span>Draw</span>
             </button>
-            <button class="tool-button" data-tool="select" type="button" title="Select. Hold Shift while clicking runs to select multiple." aria-label="Select. Hold Shift while clicking runs to select multiple.">
+            <button class="tool-button" data-tool="select" data-mode-tools="edit review export" type="button" title="Select. Hold Shift while clicking runs to select multiple." aria-label="Select. Hold Shift while clicking runs to select multiple.">
               <svg><use href="#icon-select"></use></svg>
               <span>Select</span>
             </button>
-            <button class="tool-button" id="undoButton" data-side-tool="undo" type="button" title="Undo last action" aria-label="Undo last action">
+            <button class="tool-button" id="undoButton" data-side-tool="undo" data-mode-tools="draw edit" type="button" title="Undo last action" aria-label="Undo last action">
               <svg><use href="#icon-undo"></use></svg>
               <span>Undo</span>
             </button>
-            <button class="tool-button" data-tool="boxSelect" type="button" title="Box select multiple pipe runs" aria-label="Box select multiple pipe runs">
+            <button class="tool-button" id="redoButton" data-side-tool="redo" data-mode-tools="draw edit" type="button" title="Redo last undone action" aria-label="Redo last undone action">
+              <svg><use href="#icon-redo"></use></svg>
+              <span>Redo</span>
+            </button>
+            <button class="tool-button" data-tool="boxSelect" data-mode-tools="edit review" type="button" title="Box select multiple pipe runs" aria-label="Box select multiple pipe runs">
               <svg><use href="#icon-box-select"></use></svg>
               <span>Box Select</span>
             </button>
-            <button class="tool-button" data-tool="flange" type="button" title="Place flange" aria-label="Place flange">
+            <button class="tool-button" data-tool="flange" data-mode-tools="edit" type="button" title="Place flange" aria-label="Place flange">
               <svg><use href="#icon-flange"></use></svg>
               <span>Flange</span>
             </button>
-            <button class="tool-button" data-tool="rollGroove" type="button" title="Place roll groove" aria-label="Place roll groove">
+            <button class="tool-button" data-tool="rollGroove" data-mode-tools="edit" type="button" title="Place roll groove" aria-label="Place roll groove">
               <svg><use href="#icon-groove"></use></svg>
               <span>Groove</span>
             </button>
-            <button class="tool-button" data-tool="reducer" type="button" title="Place reducer" aria-label="Place reducer">
+            <button class="tool-button" data-tool="reducer" data-mode-tools="edit" type="button" title="Place reducer" aria-label="Place reducer">
               <svg><use href="#icon-reducer"></use></svg>
               <span>Reducer</span>
             </button>
-            <button class="tool-button" data-tool="tee" type="button" title="Create tee point" aria-label="Create tee point">
+            <button class="tool-button" data-tool="tee" data-mode-tools="edit" type="button" title="Create tee point" aria-label="Create tee point">
               <svg><use href="#icon-tee"></use></svg>
               <span>Tee</span>
             </button>
-            <button class="tool-button" data-tool="branch" type="button" title="Create branch point" aria-label="Create branch point">
+            <button class="tool-button" data-tool="branch" data-mode-tools="edit" type="button" title="Create branch point" aria-label="Create branch point">
               <svg><use href="#icon-tee"></use></svg>
               <span>Branch</span>
             </button>
-            <button class="tool-button" data-tool="weld" type="button" title="Place weld" aria-label="Place weld">
+            <button class="tool-button" data-tool="weld" data-mode-tools="edit" type="button" title="Place weld" aria-label="Place weld">
               <svg><use href="#icon-weld"></use></svg>
               <span>Weld</span>
             </button>
-            <button class="tool-button" data-tool="valve" type="button" title="Place valve" aria-label="Place valve">
+            <button class="tool-button" data-tool="valve" data-mode-tools="edit" type="button" title="Place valve" aria-label="Place valve">
               <svg><use href="#icon-valve"></use></svg>
               <span>Valve</span>
             </button>
-            <button class="tool-button" data-tool="note" type="button" title="Place note" aria-label="Place note">
+            <button class="tool-button" data-tool="note" data-mode-tools="draw edit review" type="button" title="Place note" aria-label="Place note">
               <svg><use href="#icon-note"></use></svg>
               <span>Note</span>
             </button>
-            <button class="tool-button danger" id="deleteButton" data-side-tool="delete" type="button" title="Delete selection" aria-label="Delete selection">
+            <button class="tool-button danger" id="deleteButton" data-side-tool="delete" data-mode-tools="edit" type="button" title="Delete selection" aria-label="Delete selection">
               <svg><use href="#icon-trash"></use></svg>
               <span>Delete</span>
             </button>
@@ -585,6 +605,18 @@
                 <svg><use href="#icon-fullscreen"></use></svg>
                 <span>Full</span>
               </button>
+              <button class="icon-button compact labeled" id="previewFloatButton" type="button" title="Float 3D preview over drawing" aria-label="Float 3D preview over drawing" aria-pressed="false">
+                <svg><use href="#icon-sample"></use></svg>
+                <span>Float</span>
+              </button>
+              <button class="icon-button compact labeled" id="previewMinimizeButton" type="button" title="Minimize 3D preview" aria-label="Minimize 3D preview" aria-pressed="false">
+                <span class="button-sign" aria-hidden="true">-</span>
+                <span>Min</span>
+              </button>
+              <button class="icon-button compact labeled" id="previewHideButton" type="button" title="Hide 3D preview" aria-label="Hide 3D preview">
+                <svg><use href="#icon-hide"></use></svg>
+                <span>Hide</span>
+              </button>
               <label class="preview-label-toggle">
                 <input id="previewLabelToggle" type="checkbox" checked />
                 <span>3D labels</span>
@@ -601,6 +633,11 @@
           <div class="preview-float-resize" id="previewFloatResize" aria-hidden="true"></div>
         </section>
       </main>
+
+      <button class="preview-show-button" id="previewShowButton" type="button" hidden>
+        <svg><use href="#icon-sample"></use></svg>
+        <span>Show 3D</span>
+      </button>
 
       <div class="mobile-panel-scrim" id="mobilePanelScrim" hidden></div>
       <nav class="mobile-panel-dock" aria-label="Tablet panels">
@@ -766,6 +803,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=152"></script>
+    <script defer src="./app.js?v=158"></script>
   </body>
 </html>

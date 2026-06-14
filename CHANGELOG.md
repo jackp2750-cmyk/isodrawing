@@ -1,6 +1,50 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.52`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.58`.
+
+## v1.58 - Cleaner Floating 3D Controls
+
+- Added Minimize and Hide controls to the floating 3D preview.
+- Added a Show 3D restore button when the preview is hidden.
+- Cleaned up the floating preview header by hiding less important labels and tightening the controls.
+- Collapsed the preview column while the 3D model is hidden so the drawing stays roomy.
+- Bumped app cache to `spoolmate-v106`.
+
+## v1.57 - Redo Button
+
+- Added a Redo button directly under Undo in the side tool rail.
+- Added redo support for undoable drawing actions, fittings, sockets, notes and snapshot-based edits.
+- Added keyboard redo shortcuts with `Ctrl+Y` and `Ctrl+Shift+Z`.
+- Bumped app cache to `spoolmate-v105`.
+
+## v1.56 - Floating 3D Preview
+
+- Added a Float/Dock control to the 3D preview header.
+- Made the 3D preview float by default to reduce startup clutter, while remembering Dock/Float choice on the device.
+- Let the 3D preview float, drag and resize from the normal drawing screen, not only when the drawing is fullscreen.
+- Collapsed the fixed preview column while floating so the drawing and inspector have more room.
+- Bumped app cache to `spoolmate-v104`.
+
+## v1.55 - Shift 45 Draw Snap
+
+- Added a Draw-mode shortcut where holding Shift swaps the draw snap guides from straight axes to 45 degree angled axes.
+- Shift-drawn angled runs store offset set/travel metadata so the cut list and dimension logic can read them as 45 degree offsets.
+- Added Shift-click support on the exact run axis buttons for quick 45 degree offset runs.
+- Bumped app cache to `spoolmate-v103`.
+
+## v1.54 - Workflow Modes And Touch Polish
+
+- Added Draw, Edit, Review and Export workflow modes to simplify the visible side tools.
+- Made the active workflow mode save on the device.
+- Increased touch long-press timing and target sizes for iPad and Android use.
+- Bumped app cache to `spoolmate-v102`.
+
+## v1.53 - Offset Set Dimensions
+
+- Added a dedicated C/C set dimension for angled offset runs, including 45 degree offsets.
+- The offset set dimension uses the stored offset set value, while the angled run still keeps the calculated travel length for cut length.
+- Offset set dimensions participate in the red dimension collision layout and can be dragged out like other run dimensions.
+- Bumped app cache to `spoolmate-v101`.
 
 ## v1.52 - Clickable Drawing Checks
 

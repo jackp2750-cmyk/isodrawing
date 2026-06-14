@@ -16,6 +16,12 @@ const previewMoveButton = document.querySelector("#previewMoveButton");
 const previewResetButton = document.querySelector("#previewResetButton");
 const drawingFullscreenButton = document.querySelector("#drawingFullscreenButton");
 const previewFullscreenButton = document.querySelector("#previewFullscreenButton");
+const previewFloatButton = document.querySelector("#previewFloatButton");
+const previewMinimizeButton = document.querySelector("#previewMinimizeButton");
+const previewHideButton = document.querySelector("#previewHideButton");
+const previewShowButton = document.querySelector("#previewShowButton");
+const undoButton = document.querySelector("#undoButton");
+const redoButton = document.querySelector("#redoButton");
 const loadPlanButton = document.querySelector("#loadPlanButton");
 const previewFloatResize = document.querySelector("#previewFloatResize");
 const loadPlanDialog = document.querySelector("#loadPlanDialog");
@@ -120,6 +126,7 @@ const toolSettingsList = document.querySelector("#toolSettingsList");
 const toolSettingsDoneButton = document.querySelector("#toolSettingsDoneButton");
 const toolSettingsResetButton = document.querySelector("#toolSettingsResetButton");
 const themeChoiceButtons = [...document.querySelectorAll("[data-theme-choice]")];
+const appModeButtons = [...document.querySelectorAll("[data-app-mode]")];
 const themeColorMeta = document.querySelector("meta[name='theme-color']");
 const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
@@ -144,8 +151,10 @@ const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
+const APP_MODE_KEY = "spoolmate-app-mode-v1";
+const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.52";
+const APP_VERSION = "v1.58";
 const APP_BUILD_DATE = "2026-06-14";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -181,11 +190,26 @@ const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
 const PROJECT_STATUSES = new Set(["draft", "checked", "issued", "fabricated"]);
-const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select", "undo"]);
+const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select", "undo", "redo"]);
+const HISTORY_LIMIT = 80;
+const APP_MODES = new Set(["draw", "edit", "review", "export"]);
+const APP_MODE_DEFAULT_TOOL = {
+  draw: "draw",
+  edit: "select",
+  review: "select",
+  export: "select",
+};
+const APP_MODE_DEFAULT_TAB = {
+  draw: "properties",
+  edit: "properties",
+  review: "checks",
+  export: "bom",
+};
 const SIDE_TOOL_DETAILS = {
   draw: ["Draw", "Create pipe runs from points"],
   select: ["Select", "Pick, edit and drag items"],
   undo: ["Undo", "Step back one change"],
+  redo: ["Redo", "Bring back the last undone change"],
   boxSelect: ["Box Select", "Select multiple pipe runs"],
   flange: ["Flange", "Place single or double flanges"],
   rollGroove: ["Groove", "Place roll grooves"],
@@ -330,8 +354,9 @@ const FLANGE_BOLT_COUNTS = [
   { maxNb: 150, count: 8 },
   { maxNb: 300, count: 12 },
 ];
-const TOUCH_CONTEXT_PRESS_MS = 560;
-const TOUCH_CONTEXT_MOVE_LIMIT = 14;
+const SHIFT_ANGLE_SNAP_DEGREES = 45;
+const TOUCH_CONTEXT_PRESS_MS = 760;
+const TOUCH_CONTEXT_MOVE_LIMIT = 22;
 const DRAW_COMMIT_MOVE_LIMIT = 8;
 const SOCKET_SIZE_NB = 15;
 const MAX_SOCKET_COUNT = 24;
@@ -380,11 +405,13 @@ const axisByKey = new Map(AXES.map((axis) => [axis.key, axis]));
 let nextFittingId = 1;
 let nextNoteId = 1;
 let state = loadState() ?? blankState();
+let appMode = loadAppMode();
 let noteDrag = null;
 let socketDrag = null;
 let dimensionDrag = null;
 let dimensionHitTargets = [];
 let boxSelectDrag = null;
+let shiftAngleSnap = false;
 let touchContextPress = null;
 let pendingDraw = null;
 let activeTouchPointers = new Map();
@@ -396,6 +423,9 @@ let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
 let previewFloatDrag = null;
 let previewFloatBounds = null;
+let previewFloatManual = loadPreviewFloatPreference();
+let previewPanelMinimized = false;
+let previewPanelHidden = false;
 let healthHighlight = null;
 let healthHighlightAnimationFrame = 0;
 let startupProjectPromptPending = false;
@@ -639,6 +669,7 @@ function blankState(options = {}) {
     revisionHistory: [],
     projectInfo: defaultProjectInfo(),
     history: [],
+    redoHistory: [],
   };
 }
 
@@ -766,6 +797,7 @@ function stateFromPayload(payload, options = {}) {
     revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
+    redoHistory: [],
   };
 }
 
@@ -1266,6 +1298,10 @@ function normalizeDimensionStyle(value) {
   return DIMENSION_STYLES.has(value) ? value : "labels";
 }
 
+function normalizeAppMode(value) {
+  return APP_MODES.has(value) ? value : "draw";
+}
+
 function isLineDimensionStyle(value = state.dimensionStyle) {
   const style = normalizeDimensionStyle(value);
   return style === "redline" || style === "numbered" || style === "chain";
@@ -1738,10 +1774,12 @@ function drawEndpointGuides(ctx, projection) {
   ctx.setLineDash([4, 8]);
   ctx.lineCap = "round";
 
-  for (const axis of AXES) {
-    const endScreen = projectIso(addPoints(start, axis.vector, state.stepLength), projection);
+  const guideAxes = shiftAngleSnap ? shiftAngleSnapAxes() : AXES;
+  const guideLength = shiftAngleSnap ? offsetTravelLengthMm(state.stepLength, SHIFT_ANGLE_SNAP_DEGREES) : state.stepLength;
+  for (const axis of guideAxes) {
+    const endScreen = projectIso(addPoints(start, axis.vector, guideLength), projection);
     ctx.strokeStyle = axis.color;
-    ctx.globalAlpha = 0.28;
+    ctx.globalAlpha = axis.shiftAngle ? 0.22 : 0.28;
     drawLine(ctx, startScreen, endScreen);
     ctx.globalAlpha = 0.74;
     ctx.beginPath();
@@ -1856,6 +1894,7 @@ function drawSpool2d(ctx, projection) {
     for (const item of dimensionSegments) {
       drawDimension(ctx, item.segment, item.start, item.end, dimensionLayout);
     }
+    drawOffsetSetDimensions(ctx, projection, segmentListForDraw, dimensionLayout);
     if (isLineDimensionStyle()) {
       drawSocketPositionDimensions(ctx, projection, segmentListForDraw, dimensionLayout);
     }
@@ -2442,6 +2481,114 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   layoutState.lines.push(...layout.lines);
   addDimensionHitTarget({
     type: "segment",
+    segmentIndex: segment.index,
+    bounds: layout.bounds,
+    lines: layout.lines,
+    normal,
+    side: layout.side,
+    offset: layout.offset,
+    baseOffset,
+  });
+  ctx.restore();
+}
+
+function offsetSetDimensionPoints(segment) {
+  const meta = segmentOffsetMeta(segment);
+  if (!meta) return null;
+
+  const setEnd = { ...segment.start };
+  if (meta.plane === "xy") {
+    setEnd.y = segment.end.y;
+  } else {
+    setEnd.z = segment.end.z;
+  }
+
+  if (pointLength(subtractPoints(setEnd, segment.start)) < 1) return null;
+  return {
+    meta,
+    start: segment.start,
+    end: setEnd,
+  };
+}
+
+function drawOffsetSetDimensions(ctx, projection, segmentData, dimensionLayout = []) {
+  for (const segment of segmentData) {
+    const points = offsetSetDimensionPoints(segment);
+    if (!points) continue;
+    drawOffsetSetDimension(ctx, segment, projectIso(points.start, projection), projectIso(points.end, projection), points.meta, dimensionLayout);
+  }
+}
+
+function drawOffsetSetDimension(ctx, segment, start, end, meta, dimensionLayout = []) {
+  const layoutState = Array.isArray(dimensionLayout)
+    ? { labels: dimensionLayout, lines: [], pipes: [] }
+    : dimensionLayout;
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const screenLength = Math.hypot(dx, dy);
+  if (screenLength < 10) return;
+
+  const along = { x: dx / screenLength, y: dy / screenLength };
+  const baseNormal = { x: -along.y, y: along.x };
+  const pipeGap = 13;
+  const fullText = `C/C ${formatLength(meta.setMm)} mm`;
+  const legendText = `Run ${segment.index + 1}: offset C/C ${formatLength(meta.setMm)} mm / travel ${formatLength(meta.travelMm)} mm / ${formatAngle(meta.angleDeg)} deg`;
+  const text = dimensionLabelText(layoutState, fullText, legendText, "O");
+  const baseOffset = Math.min(104, Math.max(58, screenLength * 0.14));
+  const manualOffset = dimensionOffsetForSegment(segment.index);
+  let labelAngle = Math.atan2(along.y, along.x);
+  if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
+    labelAngle += Math.PI;
+  }
+
+  ctx.save();
+  ctx.font = "950 12px Inter, system-ui, sans-serif";
+  const metrics = ctx.measureText(text);
+  const labelWidth = metrics.width + 22;
+  const labelHeight = 24;
+  const layout = redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWidth, labelHeight, labelAngle, layoutState, segment.index, {
+    manual: manualOffset.offset > 0.5 ? manualOffset : null,
+  });
+  const { lineStart, lineEnd, midpoint, normal } = layout;
+  const { extensionStart, extensionEnd } = layout;
+  const lineAngle = Math.atan2(lineEnd.y - lineStart.y, lineEnd.x - lineStart.x);
+  const palette = dimensionLinePalette();
+
+  ctx.shadowColor = palette.shadow;
+  ctx.shadowBlur = 3;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
+  for (const stroke of [
+    { color: palette.halo, width: 6 },
+    { color: palette.line, width: 2.4 },
+  ]) {
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.width;
+    drawLine(ctx, lineStart, lineEnd);
+    drawLine(ctx, extensionStart, lineStart);
+    drawLine(ctx, extensionEnd, lineEnd);
+    drawArrowHead(ctx, lineStart, lineAngle, stroke.width);
+    drawArrowHead(ctx, lineEnd, lineAngle + Math.PI, stroke.width);
+  }
+
+  ctx.shadowColor = "transparent";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.translate(midpoint.x, midpoint.y);
+  ctx.rotate(labelAngle);
+  roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
+  ctx.fillStyle = palette.fill;
+  ctx.fill();
+  ctx.strokeStyle = palette.border;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = palette.text;
+  ctx.fillText(text, 0, 0.5);
+  layoutState.labels.push(layout.bounds);
+  layoutState.lines.push(...layout.lines);
+  addDimensionHitTarget({
+    type: "offset-set",
     segmentIndex: segment.index,
     bounds: layout.bounds,
     lines: layout.lines,
@@ -3499,7 +3646,107 @@ function unprojectIsoAtZ(pointer, z = 0, snap = false) {
   };
 }
 
-function getSnappedCandidate(pointer) {
+function shiftAngleLabel(axisName, sign) {
+  return `${sign > 0 ? "+" : "-"}${axisName.toUpperCase()}`;
+}
+
+function shiftAngleSnapAxes() {
+  const angle = SHIFT_ANGLE_SNAP_DEGREES;
+  const radians = angle * Math.PI / 180;
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  const planes = [
+    { key: "xy", primary: "x", secondary: "y", color: "#13a8c8" },
+    { key: "xz", primary: "x", secondary: "z", color: "#d66b42" },
+    { key: "yz", primary: "y", secondary: "z", color: "#7c8dff" },
+  ];
+  const axes = [];
+
+  for (const plane of planes) {
+    for (const primarySign of [-1, 1]) {
+      for (const secondarySign of [-1, 1]) {
+        const vector = { x: 0, y: 0, z: 0 };
+        vector[plane.primary] = primarySign * cos;
+        vector[plane.secondary] = secondarySign * sin;
+        axes.push({
+          key: `${plane.key}-${primarySign > 0 ? "p" : "n"}${secondarySign > 0 ? "p" : "n"}`,
+          label: `${shiftAngleLabel(plane.primary, primarySign)} / ${shiftAngleLabel(plane.secondary, secondarySign)} ${angle} deg`,
+          vector,
+          color: plane.color,
+          shiftAngle: true,
+          shiftPlane: plane.key,
+          shiftDirection: secondarySign,
+          shiftAngleDeg: angle,
+        });
+      }
+    }
+  }
+
+  return axes;
+}
+
+function shiftAngleEdgeMeta(axis, travelMm) {
+  if (!axis?.shiftAngle) return {};
+  const angle = Number(axis.shiftAngleDeg) || SHIFT_ANGLE_SNAP_DEGREES;
+  const radians = angle * Math.PI / 180;
+  const travel = Math.max(1, Math.round(Number(travelMm) || 0));
+  return {
+    offsetSetMm: Math.max(1, Math.round(travel * Math.sin(radians))),
+    offsetTravelMm: travel,
+    offsetAngleDeg: angle,
+    offsetPlane: axis.shiftPlane,
+    offsetDirection: Number(axis.shiftDirection) < 0 ? -1 : 1,
+  };
+}
+
+function preferredShiftPlaneForPrimaryAxis(primaryAxis) {
+  const currentPlane = normalizeAnglePlane(state.anglePlane);
+  if (currentPlane.includes(primaryAxis)) return currentPlane;
+  if (primaryAxis === "z") return "xz";
+  return "xy";
+}
+
+function shiftAngleAxisFromBaseAxis(axis) {
+  const key = String(axis?.key ?? "");
+  const primary = key[0];
+  if (!["x", "y", "z"].includes(primary)) return null;
+
+  const sign = key[1] === "n" ? -1 : 1;
+  const plane = preferredShiftPlaneForPrimaryAxis(primary);
+  const secondary = [...plane].find((axisName) => axisName !== primary) ?? (primary === "z" ? "x" : "z");
+  const angle = SHIFT_ANGLE_SNAP_DEGREES;
+  const radians = angle * Math.PI / 180;
+  const vector = { x: 0, y: 0, z: 0 };
+  vector[primary] = sign * Math.cos(radians);
+  vector[secondary] = sign * Math.sin(radians);
+
+  return {
+    key: `${axis.key}-shift-${plane}`,
+    label: `${shiftAngleLabel(primary, sign)} / ${shiftAngleLabel(secondary, sign)} ${angle} deg`,
+    vector,
+    color: axis.color,
+    shiftAngle: true,
+    shiftPlane: plane,
+    shiftDirection: sign,
+    shiftAngleDeg: angle,
+  };
+}
+
+function addShiftAngleRun(axis) {
+  const angledAxis = shiftAngleAxisFromBaseAxis(axis);
+  if (!angledAxis) return false;
+  const travelMm = offsetTravelLengthMm(state.stepLength, SHIFT_ANGLE_SNAP_DEGREES);
+  addRun(angledAxis, travelMm, { edgeMeta: shiftAngleEdgeMeta(angledAxis, travelMm) });
+  return true;
+}
+
+function shouldUseShiftAngleSnap(event) {
+  return state.activeTool === "draw" && Boolean(event?.shiftKey || shiftAngleSnap);
+}
+
+function getSnappedCandidate(pointer, options = {}) {
+  const useShiftAngle = options.shiftAngle === true;
+  const snapAxes = useShiftAngle ? shiftAngleSnapAxes() : AXES;
   const start = activePoint();
   const startScreen = projectIso(start);
   const delta = {
@@ -3509,16 +3756,18 @@ function getSnappedCandidate(pointer) {
   const distance = Math.hypot(delta.x, delta.y);
 
   if (distance < 10) {
-    const axis = axisByKey.get("xp");
+    const axis = useShiftAngle ? snapAxes.find((candidateAxis) => candidateAxis.key === "xy-pp") ?? snapAxes[0] : axisByKey.get("xp");
+    const length = useShiftAngle ? offsetTravelLengthMm(state.stepLength, SHIFT_ANGLE_SNAP_DEGREES) : state.stepLength;
     return {
-      point: addPoints(start, axis.vector, state.stepLength),
+      point: addPoints(start, axis.vector, length),
       axis,
-      length: state.stepLength,
+      length,
+      edgeMeta: shiftAngleEdgeMeta(axis, length),
     };
   }
 
   let best = null;
-  for (const axis of AXES) {
+  for (const axis of snapAxes) {
     const axisScreen = projectIso(addPoints(start, axis.vector));
     const projected = {
       x: axisScreen.x - startScreen.x,
@@ -3545,7 +3794,32 @@ function getSnappedCandidate(pointer) {
     point,
     axis: best.axis,
     length,
+    edgeMeta: shiftAngleEdgeMeta(best.axis, length),
   };
+}
+
+function setShiftAngleSnap(active) {
+  const next = active === true && state.activeTool === "draw";
+  if (shiftAngleSnap === next) return;
+  shiftAngleSnap = next;
+  if (state.activeTool !== "draw") return;
+
+  if (state.pointer) {
+    const candidate = getSnappedCandidate(state.pointer, { shiftAngle: shiftAngleSnap });
+    state.previewCandidate = candidate;
+    if (pendingDraw) {
+      pendingDraw.candidate = candidate;
+    }
+  }
+  const candidate = state.previewCandidate;
+  cursorReadout.textContent = shiftAngleSnap
+    ? candidate?.axis?.shiftAngle
+      ? `${candidate.axis.label} / ${formatPoint(candidate.point)}`
+      : "Shift: 45 deg draw"
+    : candidate
+    ? formatPoint(candidate.point)
+    : formatPoint(activePoint());
+  drawIso();
 }
 
 function findNearestSegment(pointer) {
@@ -3854,7 +4128,7 @@ function addRunToPoint(from, next, options = {}) {
     state.selectedPoint = to;
     state.activePoint = to;
     state.previewCandidate = null;
-    state.history.push({ type: "snapshot", snapshot });
+    recordHistory({ type: "snapshot", snapshot });
     updateAll();
     return;
   }
@@ -3868,7 +4142,7 @@ function addRunToPoint(from, next, options = {}) {
   state.selectedPoint = to;
   state.activePoint = to;
   state.previewCandidate = null;
-  state.history.push({ type: "edge", pointIndex: to, edgeIndex: state.edges.length - 1 });
+  recordHistory({ type: "edge", pointIndex: to, edgeIndex: state.edges.length - 1 });
   updateAll();
 }
 
@@ -5325,7 +5599,7 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   selectSingleSegment(segmentIndex);
   state.selectedNote = null;
   nextFittingId += 1;
-  state.history.push({ type: "fitting" });
+  recordHistory({ type: "fitting" });
   updateAll();
 }
 
@@ -5350,7 +5624,7 @@ function placeSocketFittings(segmentIndex, positions) {
   state.selectedFitting = fittingIds[fittingIds.length - 1];
   selectSingleSegment(segmentIndex);
   state.selectedNote = null;
-  state.history.push({ type: "fittings", fittingIds });
+  recordHistory({ type: "fittings", fittingIds });
   updateAll();
 }
 
@@ -5368,7 +5642,7 @@ function placeNote(point, textOverride = null) {
   state.selectedFitting = null;
   clearSelectedSegments();
   nextNoteId += 1;
-  state.history.push({ type: "note", noteId: note.id });
+  recordHistory({ type: "note", noteId: note.id });
   updateAll();
 }
 
@@ -5380,9 +5654,53 @@ function createUndoSnapshot() {
   };
 }
 
+function cloneHistoryEntries(entries) {
+  try {
+    return JSON.parse(JSON.stringify(Array.isArray(entries) ? entries : []));
+  } catch {
+    return [];
+  }
+}
+
+function createHistorySnapshot() {
+  return {
+    payload: statePayload(),
+    history: cloneHistoryEntries(state.history),
+    nextFittingId,
+    nextNoteId,
+  };
+}
+
+function redoStack() {
+  return Array.isArray(state.redoHistory) ? state.redoHistory : [];
+}
+
+function clearRedoHistory() {
+  state.redoHistory = [];
+}
+
+function recordHistory(entry) {
+  state.history = [...(Array.isArray(state.history) ? state.history : []), entry].slice(-HISTORY_LIMIT);
+  clearRedoHistory();
+}
+
+function restoreHistorySnapshot(snapshot) {
+  const restored = stateFromPayload(snapshot?.payload);
+  if (!restored) return false;
+  state = restored;
+  state.history = cloneHistoryEntries(snapshot.history).slice(-HISTORY_LIMIT);
+  state.redoHistory = [];
+  nextFittingId = Number(snapshot?.nextFittingId) || nextFittingId;
+  nextNoteId = Number(snapshot?.nextNoteId) || nextNoteId;
+  return true;
+}
+
 function undo() {
+  const redoSnapshot = createHistorySnapshot();
   const last = state.history.pop();
   if (!last) return;
+  const nextRedoHistory = [...redoStack(), redoSnapshot].slice(-HISTORY_LIMIT);
+  let changed = false;
 
   if (last.type === "snapshot") {
     const remainingHistory = state.history;
@@ -5390,8 +5708,10 @@ function undo() {
     if (restored) {
       state = restored;
       state.history = remainingHistory;
+      state.redoHistory = nextRedoHistory;
       nextFittingId = Number(last.snapshot?.nextFittingId) || nextFittingId;
       nextNoteId = Number(last.snapshot?.nextNoteId) || nextNoteId;
+      changed = true;
     }
   } else if (last.type === "edge" && state.points.length > 1) {
     state.edges.splice(last.edgeIndex, 1);
@@ -5412,19 +5732,44 @@ function undo() {
     clearSelectedSegments();
     state.selectedPoint = Math.max(0, last.pointIndex - 1);
     state.activePoint = state.selectedPoint;
+    changed = true;
   } else if (last.type === "fitting") {
     state.fittings.pop();
     state.selectedFitting = null;
+    changed = true;
   } else if (last.type === "fittings") {
     const fittingIds = new Set(last.fittingIds ?? []);
     state.fittings = state.fittings.filter((fitting) => !fittingIds.has(fitting.id));
     state.selectedFitting = null;
+    changed = true;
   } else if (last.type === "note") {
     state.notes = state.notes.filter((note) => note.id !== last.noteId);
     state.selectedNote = null;
+    changed = true;
   }
 
+  if (!changed) {
+    state.history.push(last);
+    return;
+  }
+
+  state.redoHistory = nextRedoHistory;
   updateAll();
+}
+
+function redo() {
+  const stack = redoStack();
+  const snapshot = stack.pop();
+  if (!snapshot) return;
+  const remainingRedoHistory = stack.slice(-HISTORY_LIMIT);
+  if (!restoreHistorySnapshot(snapshot)) return;
+  state.redoHistory = remainingRedoHistory;
+  updateAll();
+}
+
+function updateHistoryButtons() {
+  if (undoButton) undoButton.disabled = !(Array.isArray(state.history) && state.history.length);
+  if (redoButton) redoButton.disabled = !redoStack().length;
 }
 
 function deleteSelection() {
@@ -5470,7 +5815,10 @@ function deleteSegmentsByIndex(indexes) {
 }
 
 function setTool(tool) {
-  if (tool && !isSideToolVisible(tool)) {
+  if (tool && !isSideToolAvailable(tool)) {
+    tool = defaultToolForMode(appMode);
+  }
+  if (tool && !isSideToolAvailable(tool)) {
     tool = "draw";
   }
   if (tool !== "boxSelect") {
@@ -5478,6 +5826,9 @@ function setTool(tool) {
   }
   cancelDimensionDrag({ redraw: false });
   state.activeTool = tool;
+  if (tool !== "draw") {
+    shiftAngleSnap = false;
+  }
   state.previewCandidate = null;
   document.querySelectorAll("[data-tool]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tool === tool);
@@ -6678,16 +7029,35 @@ function isSideToolVisible(id, visibility = readSideToolVisibility()) {
   return ALWAYS_VISIBLE_SIDE_TOOLS.has(id) || visibility[id] !== false;
 }
 
+function sideToolButtonForId(id) {
+  return sideToolButtons.find((button) => sideToolIdForButton(button) === id) ?? null;
+}
+
+function isSideToolAllowedInMode(id, mode = appMode) {
+  const button = sideToolButtonForId(id);
+  const modes = button?.dataset.modeTools;
+  if (!modes) return true;
+  return modes.split(/\s+/).filter(Boolean).includes(normalizeAppMode(mode));
+}
+
+function isSideToolAvailable(id, visibility = readSideToolVisibility(), mode = appMode) {
+  return isSideToolVisible(id, visibility) && isSideToolAllowedInMode(id, mode);
+}
+
+function defaultToolForMode(mode = appMode) {
+  return APP_MODE_DEFAULT_TOOL[normalizeAppMode(mode)] ?? "draw";
+}
+
 function applySideToolVisibility(options = {}) {
   const visibility = readSideToolVisibility();
   for (const button of sideToolButtons) {
     const id = sideToolIdForButton(button);
     if (!id) continue;
-    button.hidden = !isSideToolVisible(id, visibility);
+    button.hidden = !isSideToolAvailable(id, visibility, appMode);
   }
 
-  if (options.keepActive !== true && state.activeTool && !isSideToolVisible(state.activeTool, visibility)) {
-    setTool("draw");
+  if (options.keepActive !== true && state.activeTool && !isSideToolAvailable(state.activeTool, visibility, appMode)) {
+    setTool(defaultToolForMode(appMode));
   }
 }
 
@@ -6707,7 +7077,7 @@ function renderToolSettingsOptions() {
       <input type="checkbox" data-tool-setting-id="${escapeHtml(id)}" ${isSideToolVisible(id, visibility) ? "checked" : ""} ${locked ? "disabled" : ""} />
       <span class="tool-setting-copy">
         <strong>${escapeHtml(sideToolLabel(id))}</strong>
-        <small>${escapeHtml(locked ? "Always available" : sideToolDetail(id))}</small>
+        <small>${escapeHtml(locked ? "Built-in workflow tool" : sideToolDetail(id))}</small>
       </span>
     `;
     toolSettingsList.append(row);
@@ -6756,6 +7126,47 @@ function setupToolSettingsDialog() {
   applySideToolVisibility({ keepActive: true });
 }
 
+function applyAppMode(mode, options = {}) {
+  const normalized = normalizeAppMode(mode);
+  appMode = normalized;
+  document.body.dataset.appMode = normalized;
+
+  for (const button of appModeButtons) {
+    const active = button.dataset.appMode === normalized;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
+
+  if (options.persist !== false) {
+    storeAppMode(normalized);
+  }
+
+  applySideToolVisibility({ keepActive: true });
+  const activeAvailable = state.activeTool && isSideToolAvailable(state.activeTool);
+  if (options.keepTool === true && activeAvailable) {
+    drawIso();
+  } else {
+    setTool(defaultToolForMode(normalized));
+  }
+
+  if (options.activateTab !== false) {
+    activateInspectorTab(APP_MODE_DEFAULT_TAB[normalized] ?? "properties");
+  }
+
+  if ((normalized === "review" || normalized === "export") && isTabletLayout()) {
+    showMobilePanel("inspector");
+  }
+
+  closeDrawingContextMenu();
+}
+
+function setupAppModes() {
+  for (const button of appModeButtons) {
+    button.addEventListener("click", () => applyAppMode(button.dataset.appMode));
+  }
+  applyAppMode(appMode, { persist: false, activateTab: false, keepTool: true });
+}
+
 function browserFullscreenElement() {
   return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
 }
@@ -6789,7 +7200,7 @@ function panelFullscreenActive(panel) {
 function schedulePanelFullscreenResize() {
   requestAnimationFrame(() => {
     drawIso();
-    applyPreviewFloatBounds();
+    updatePreviewFloatingState();
     forcePreviewRender();
   });
 }
@@ -6815,7 +7226,7 @@ function updatePanelFullscreenState() {
   document.body.classList.toggle("has-panel-fullscreen", Boolean(appFullscreenPanel || native));
   document.body.classList.toggle("drawing-panel-fullscreen", drawingFullscreen);
   document.body.classList.toggle("preview-panel-fullscreen", previewFullscreen);
-  applyPreviewFloatBounds();
+  updatePreviewFloatingState();
   setFullscreenButtonState(drawingFullscreenButton, drawingFullscreen);
   setFullscreenButtonState(previewFullscreenButton, previewFullscreen);
   syncDrawingContextMenuHost();
@@ -6876,9 +7287,78 @@ function setupPanelFullscreen() {
 function previewFloatingActive() {
   return Boolean(
     previewPanel &&
-      document.body.classList.contains("drawing-panel-fullscreen") &&
+      !previewPanelHidden &&
+      (previewFloatManual || document.body.classList.contains("drawing-panel-fullscreen")) &&
       !panelFullscreenActive(previewPanel),
   );
+}
+
+function setPreviewFloatButtonState() {
+  if (!previewFloatButton) return;
+  const active = previewFloatingActive();
+  previewFloatButton.setAttribute("aria-pressed", String(active));
+  previewFloatButton.title = active ? "Dock 3D preview" : "Float 3D preview over drawing";
+  previewFloatButton.setAttribute("aria-label", previewFloatButton.title);
+  const label = previewFloatButton.querySelector("span");
+  if (label) label.textContent = active ? "Dock" : "Float";
+}
+
+function setPreviewMinimizeButtonState() {
+  if (!previewMinimizeButton) return;
+  previewMinimizeButton.setAttribute("aria-pressed", String(previewPanelMinimized));
+  previewMinimizeButton.title = previewPanelMinimized ? "Restore 3D preview" : "Minimize 3D preview";
+  previewMinimizeButton.setAttribute("aria-label", previewMinimizeButton.title);
+  const label = previewMinimizeButton.querySelector("span:last-child");
+  if (label) label.textContent = previewPanelMinimized ? "Restore" : "Min";
+}
+
+function updatePreviewVisibilityControls() {
+  if (previewPanel) previewPanel.hidden = previewPanelHidden;
+  if (previewShowButton) previewShowButton.hidden = !previewPanelHidden;
+  document.body.classList.toggle("preview-panel-hidden", previewPanelHidden);
+  document.body.classList.toggle("preview-panel-minimized", previewPanelMinimized && !previewPanelHidden);
+  setPreviewMinimizeButtonState();
+}
+
+function updatePreviewFloatingState() {
+  const active = previewFloatingActive();
+  document.body.classList.toggle("preview-panel-floating", active);
+  updatePreviewVisibilityControls();
+  setPreviewFloatButtonState();
+  applyPreviewFloatBounds();
+  refreshPreviewAfterLayoutChange();
+}
+
+function togglePreviewFloating() {
+  if (!previewPanel || panelFullscreenActive(previewPanel)) return;
+  previewPanelHidden = false;
+  previewFloatManual = !previewFloatManual;
+  storePreviewFloatPreference(previewFloatManual);
+  if (previewFloatManual) {
+    showMobilePanel("drawing");
+  }
+  updatePreviewFloatingState();
+}
+
+function togglePreviewMinimized() {
+  if (!previewPanel || previewPanelHidden || panelFullscreenActive(previewPanel)) return;
+  if (!previewFloatingActive()) {
+    previewFloatManual = true;
+    storePreviewFloatPreference(true);
+  }
+  previewPanelMinimized = !previewPanelMinimized;
+  updatePreviewFloatingState();
+}
+
+function setPreviewHidden(hidden) {
+  previewPanelHidden = hidden === true;
+  if (previewPanelHidden) {
+    previewPanelMinimized = false;
+  } else if (!previewFloatingActive()) {
+    previewFloatManual = true;
+    storePreviewFloatPreference(true);
+  }
+  updatePreviewFloatingState();
 }
 
 function defaultPreviewFloatBounds() {
@@ -6944,7 +7424,7 @@ function applyPreviewFloatBounds() {
   previewPanel.style.right = "auto";
   previewPanel.style.bottom = "auto";
   previewPanel.style.width = `${previewFloatBounds.width}px`;
-  previewPanel.style.height = `${previewFloatBounds.height}px`;
+  previewPanel.style.height = previewPanelMinimized ? "auto" : `${previewFloatBounds.height}px`;
 }
 
 function previewFloatHandleAllowed(event) {
@@ -7031,11 +7511,16 @@ function finishPreviewFloatDrag(event) {
 
 function setupFloatingPreviewPanel() {
   const previewBar = previewPanel?.querySelector(".panel-bar");
+  previewFloatButton?.addEventListener("click", togglePreviewFloating);
+  previewMinimizeButton?.addEventListener("click", togglePreviewMinimized);
+  previewHideButton?.addEventListener("click", () => setPreviewHidden(true));
+  previewShowButton?.addEventListener("click", () => setPreviewHidden(false));
   previewBar?.addEventListener("pointerdown", beginPreviewFloatMove);
   previewFloatResize?.addEventListener("pointerdown", beginPreviewFloatResize);
   window.addEventListener("pointermove", updatePreviewFloatDrag);
   window.addEventListener("pointerup", finishPreviewFloatDrag);
   window.addEventListener("pointercancel", finishPreviewFloatDrag);
+  updatePreviewFloatingState();
 }
 
 function isGestureSurfaceTarget(target) {
@@ -7059,8 +7544,60 @@ function setupTouchSelectionGuards() {
   }
 }
 
+function updateTouchComfortClass() {
+  document.body.classList.toggle("touch-comfort", isTabletLayout());
+}
+
+function setupTouchComfort() {
+  updateTouchComfortClass();
+  const mediaQueries = [
+    window.matchMedia?.("(max-width: 1024px)"),
+    window.matchMedia?.("(pointer: coarse)"),
+    window.matchMedia?.("(hover: none)"),
+  ].filter(Boolean);
+  for (const mediaQuery of mediaQueries) {
+    mediaQuery.addEventListener?.("change", updateTouchComfortClass);
+  }
+  window.addEventListener("resize", updateTouchComfortClass);
+}
+
 function normalizeAppTheme(value) {
   return value === "dark" ? "dark" : "light";
+}
+
+function loadAppMode() {
+  try {
+    return normalizeAppMode(localStorage.getItem(APP_MODE_KEY));
+  } catch {
+    return "draw";
+  }
+}
+
+function storeAppMode(mode) {
+  try {
+    localStorage.setItem(APP_MODE_KEY, normalizeAppMode(mode));
+  } catch (error) {
+    console.warn("Could not save workflow mode.", error);
+  }
+}
+
+function loadPreviewFloatPreference() {
+  try {
+    const saved = localStorage.getItem(PREVIEW_FLOAT_KEY);
+    if (saved === "false") return false;
+    if (saved === "true") return true;
+  } catch {
+    // Default below keeps first use cleaner if local storage is not available.
+  }
+  return true;
+}
+
+function storePreviewFloatPreference(active) {
+  try {
+    localStorage.setItem(PREVIEW_FLOAT_KEY, active ? "true" : "false");
+  } catch (error) {
+    console.warn("Could not save 3D preview float preference.", error);
+  }
 }
 
 function loadAppTheme() {
@@ -7187,6 +7724,7 @@ function updateControls() {
   liftingAngleSelect.value = String(normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees));
   liftingAngleSelect.disabled = !state.showLiftingPoints;
   updateWorkflowControls();
+  updateHistoryButtons();
   setTool(state.activeTool);
 }
 
@@ -7287,6 +7825,11 @@ function showMobilePanel(panel = "drawing") {
   let normalized = panel === "inspector" || panel === "preview" ? panel : "drawing";
   if (!isTabletLayout()) {
     normalized = "drawing";
+  }
+  if (normalized === "preview" && previewPanelHidden) {
+    previewPanelHidden = false;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
   }
   const sheetOpen = normalized !== "drawing";
 
@@ -15635,6 +16178,7 @@ function startTouchContextPress(event, pointer) {
   cancelTouchContextPress();
   const hasHit = hasContextHit(pointer);
   if (!hasHit) return false;
+  cursorReadout.textContent = "Hold still for actions";
   touchContextPress = {
     pointerId: event.pointerId,
     pointer,
@@ -15819,7 +16363,7 @@ function startPendingDraw(event, pointer) {
     clearSelectedSegments();
   }
 
-  const candidate = getSnappedCandidate(pointer);
+  const candidate = getSnappedCandidate(pointer, { shiftAngle: shouldUseShiftAngleSnap(event) });
   if (!candidate) return false;
 
   cancelPendingDraw();
@@ -15833,7 +16377,9 @@ function startPendingDraw(event, pointer) {
   };
   state.previewCandidate = candidate;
   state.pointer = pointer;
-  cursorReadout.textContent = pointHit ? "Drag to draw from point" : formatPoint(candidate.point);
+  cursorReadout.textContent = candidate.axis?.shiftAngle
+    ? `${candidate.axis.label} / drag to draw`
+    : pointHit ? "Drag to draw from point" : formatPoint(candidate.point);
   try {
     drawCanvas.setPointerCapture(event.pointerId);
   } catch {
@@ -15849,7 +16395,7 @@ function updatePendingDraw(event) {
   if (pinchGesture) return false;
 
   const pointer = pointerPosition(event);
-  const candidate = getSnappedCandidate(pointer);
+  const candidate = getSnappedCandidate(pointer, { shiftAngle: shouldUseShiftAngleSnap(event) });
   if (!candidate) return false;
 
   const moved = Math.hypot(
@@ -15860,7 +16406,9 @@ function updatePendingDraw(event) {
   pendingDraw.candidate = candidate;
   state.previewCandidate = candidate;
   state.pointer = pointer;
-  cursorReadout.textContent = formatPoint(candidate.point);
+  cursorReadout.textContent = candidate.axis?.shiftAngle
+    ? `${candidate.axis.label} / ${formatPoint(candidate.point)}`
+    : formatPoint(candidate.point);
   drawIso();
   event.preventDefault();
   return true;
@@ -15874,7 +16422,7 @@ function finishPendingDraw(event) {
   cancelPendingDraw({ redraw: false });
 
   if (shouldCommit) {
-    addRun(candidate.axis, candidate.length);
+    addRun(candidate.axis, candidate.length, { edgeMeta: candidate.edgeMeta });
   } else if (startedOnPoint !== null) {
     state.selectedPoint = startedOnPoint;
     state.activePoint = startedOnPoint;
@@ -16758,9 +17306,11 @@ drawCanvas.addEventListener("pointermove", (event) => {
   state.pointer = pointer;
 
   if (state.activeTool === "draw") {
-    state.previewCandidate = getSnappedCandidate(pointer);
+    state.previewCandidate = getSnappedCandidate(pointer, { shiftAngle: shouldUseShiftAngleSnap(event) });
     if (state.previewCandidate) {
-      cursorReadout.textContent = formatPoint(state.previewCandidate.point);
+      cursorReadout.textContent = state.previewCandidate.axis?.shiftAngle
+        ? `${state.previewCandidate.axis.label} / ${formatPoint(state.previewCandidate.point)}`
+        : formatPoint(state.previewCandidate.point);
     }
   } else {
     const noteHit = findNearestNote(pointer);
@@ -16943,9 +17493,10 @@ document.querySelectorAll("[data-tool]").forEach((button) => {
 });
 
 document.querySelectorAll("[data-axis]").forEach((button) => {
-  button.addEventListener("click", () => {
+  button.addEventListener("click", (event) => {
     const axis = axisByKey.get(button.dataset.axis);
     if (!axis) return;
+    if (event.shiftKey && addShiftAngleRun(axis)) return;
     addRun(axis, state.stepLength);
   });
 });
@@ -17098,7 +17649,8 @@ document.querySelector("#sampleButton").addEventListener("click", () => {
   updateAll();
 });
 
-document.querySelector("#undoButton").addEventListener("click", undo);
+undoButton?.addEventListener("click", undo);
+redoButton?.addEventListener("click", redo);
 document.querySelector("#resetButton").addEventListener("click", startNewDrawing);
 healthCheckButton?.addEventListener("click", showHealthPanel);
 newRevisionButton?.addEventListener("click", createNextRevision);
@@ -17137,7 +17689,15 @@ document.querySelector("#zoomOutButton").addEventListener("click", () => {
 
 document.addEventListener("keydown", (event) => {
   const isEnterKey = event.key === "Enter" || event.code === "NumpadEnter";
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+  if (event.key === "Shift" && !isEditingField(event.target)) {
+    setShiftAngleSnap(true);
+  }
+  const key = event.key.toLowerCase();
+  const controlOrMeta = event.ctrlKey || event.metaKey;
+  if (controlOrMeta && (key === "y" || (key === "z" && event.shiftKey))) {
+    event.preventDefault();
+    redo();
+  } else if (controlOrMeta && key === "z") {
     event.preventDefault();
     undo();
   } else if (isEnterKey && !isEditingField(event.target) && (state.activeTool === "draw" || pendingDraw)) {
@@ -17183,6 +17743,12 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+document.addEventListener("keyup", (event) => {
+  if (event.key === "Shift") {
+    setShiftAngleSnap(false);
+  }
+});
+
 function isEditingField(target) {
   if (!(target instanceof HTMLElement)) return false;
   return target.matches("input, select, textarea") || target.isContentEditable;
@@ -17196,13 +17762,14 @@ document.addEventListener("pointerdown", (event) => {
 
 window.addEventListener("resize", () => {
   closeDrawingContextMenu();
-  applyPreviewFloatBounds();
+  updatePreviewFloatingState();
   schedulePreviewStabilize();
   redrawLoadPlanIfOpen();
   if (!isTabletLayout()) {
     showMobilePanel("drawing");
   }
 });
+window.addEventListener("blur", () => setShiftAngleSnap(false));
 document.addEventListener("scroll", handleDocumentScrollForContextMenu, true);
 
 const resizeObserver = new ResizeObserver(() => {
@@ -17217,6 +17784,7 @@ resizeObserver.observe(previewStage);
 
 setupCollapsibleControls();
 setupInspectorTabs();
+setupAppModes();
 setupMobilePanels();
 setupAppTheme();
 setupActionMenu();
@@ -17226,6 +17794,7 @@ setupToolSettingsDialog();
 setupPanelFullscreen();
 setupFloatingPreviewPanel();
 setupHealthIssueClicks();
+setupTouchComfort();
 setupTouchSelectionGuards();
 setupLoadPlanner();
 registerServiceWorker();

@@ -256,6 +256,44 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
   justify-content: center;
 }
 
+.mode-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 4px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--panel-strong);
+  box-shadow: var(--button-shadow);
+}
+
+.mode-switcher button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+  white-space: nowrap;
+}
+
+.mode-switcher button:hover,
+.mode-switcher button:focus-visible {
+  color: var(--teal-strong);
+  background: var(--button-active);
+}
+
+.mode-switcher button.active {
+  background: var(--button-selected);
+  color: #fff;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18),
+    0 8px 16px rgba(8, 125, 115, 0.2);
+}
+
 .topbar-toggles,
 .topbar-settings {
   display: inline-flex;
@@ -674,6 +712,17 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
   box-shadow: var(--button-shadow);
 }
 
+.icon-button:disabled,
+.primary-button:disabled,
+.tool-button:disabled,
+.axis-grid button:disabled,
+.angle-grid button:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .icon-button {
   width: 42px;
   height: 42px;
@@ -762,6 +811,35 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .preview-float-resize {
   display: none;
+}
+
+.preview-show-button {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 164;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--button-border);
+  border-radius: 999px;
+  background: var(--button-selected);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  box-shadow: 0 14px 34px rgba(18, 28, 31, 0.2);
+}
+
+.preview-show-button[hidden] {
+  display: none;
+}
+
+.preview-show-button svg {
+  width: 18px;
+  height: 18px;
 }
 
 .canvas-frame {
@@ -3056,8 +3134,22 @@ body.auth-gate-open .app-shell {
     display: none;
   }
 
+  .mode-switcher {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: space-between;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mode-switcher button {
+    flex: 1 1 0;
+    min-width: 72px;
+  }
+
   .topbar-actions {
     grid-column: 2;
+    grid-row: 1;
     min-width: 0;
     flex-wrap: nowrap;
     justify-content: flex-end;
@@ -3377,6 +3469,38 @@ body.auth-gate-open .app-shell {
     font-size: 12px;
   }
 
+  body.touch-comfort .drawing-panel {
+    padding-bottom: 150px;
+  }
+
+  body.touch-comfort .tool-rail {
+    height: 92px;
+  }
+
+  body.touch-comfort .tool-button {
+    min-width: 88px;
+    min-height: 74px;
+    flex-basis: 88px;
+  }
+
+  body.touch-comfort .mobile-panel-dock button,
+  body.touch-comfort .icon-button.labeled,
+  body.touch-comfort .primary-button {
+    min-height: 46px;
+  }
+
+  body.touch-comfort .drawing-context-menu {
+    z-index: 240;
+    width: min(390px, calc(100vw - 16px));
+    max-height: calc(100dvh - 76px);
+    padding: 10px;
+  }
+
+  body.touch-comfort .drawing-context-item {
+    min-height: 60px;
+    padding: 12px 14px;
+  }
+
   .project-dialog-backdrop {
     align-items: end;
     padding: 10px;
@@ -3501,7 +3625,17 @@ body.drawing-panel-fullscreen .drawing-panel.panel-fullscreen {
   width: calc(100vw - 86px);
 }
 
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) {
+body.preview-panel-floating:not(.preview-panel-fullscreen) .workspace {
+  grid-template-columns: 86px minmax(520px, 1fr) minmax(320px, 360px);
+  grid-template-areas: "tools draw controls";
+}
+
+body.preview-panel-hidden:not(.preview-panel-fullscreen) .workspace {
+  grid-template-columns: 86px minmax(520px, 1fr) minmax(320px, 360px);
+  grid-template-areas: "tools draw controls";
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
   position: fixed;
   right: 18px;
   bottom: 18px;
@@ -3516,10 +3650,10 @@ body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) {
   max-height: calc(100dvh - 36px);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  border: 1px solid rgba(0, 128, 128, 0.36);
-  border-radius: 12px;
+  border: 1px solid rgba(0, 128, 128, 0.32);
+  border-radius: 10px;
   background: var(--panel-strong);
-  box-shadow: 0 18px 48px rgba(18, 28, 31, 0.26);
+  box-shadow: 0 18px 42px rgba(18, 28, 31, 0.22);
   opacity: 1;
   pointer-events: auto;
   transform: none;
@@ -3529,36 +3663,91 @@ body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) {
   overflow: hidden;
 }
 
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .panel-bar {
-  min-height: 50px;
-  padding: 8px 10px;
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .panel-bar {
+  min-height: 46px;
+  display: grid;
+  grid-template-columns: minmax(86px, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
   cursor: move;
   touch-action: none;
   user-select: none;
 }
 
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .bar-title {
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-title {
   padding-top: 0;
 }
 
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .bar-actions {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding-bottom: 2px;
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-title span {
+  font-size: 13px;
 }
 
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .bar-actions button,
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .bar-actions label,
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .bar-actions .pill {
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-title small,
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-panel-mode span,
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-label-toggle,
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .pill {
+  display: none;
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-actions {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-bottom: 1px;
+  scrollbar-width: thin;
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-panel-mode select {
+  min-height: 34px;
+  max-width: 142px;
+  font-size: 12px;
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-nav {
+  gap: 3px;
+  padding: 3px;
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-nav button {
+  min-height: 30px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .icon-button.compact.labeled {
+  min-width: 58px;
+  height: 34px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-actions button,
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-actions label,
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-actions .pill {
   cursor: default;
 }
 
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .preview-stage {
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-stage {
   height: auto;
   min-height: 0;
 }
 
-body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .preview-float-resize {
+body.preview-panel-minimized .preview-panel:not(.panel-fullscreen) {
+  height: auto !important;
+  min-height: 0;
+}
+
+body.preview-panel-minimized .preview-panel:not(.panel-fullscreen) .preview-stage,
+body.preview-panel-minimized .preview-panel:not(.panel-fullscreen) .preview-float-resize,
+body.preview-panel-minimized .preview-panel:not(.panel-fullscreen) .preview-panel-mode,
+body.preview-panel-minimized .preview-panel:not(.panel-fullscreen) .preview-nav,
+body.preview-panel-minimized .preview-panel:not(.panel-fullscreen) #previewFullscreenButton {
+  display: none;
+}
+
+body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-float-resize {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -3574,12 +3763,12 @@ body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .preview-flo
     linear-gradient(135deg, transparent 0 62%, rgba(0, 128, 128, 0.4) 63% 68%, transparent 69%);
 }
 
-body.drawing-panel-fullscreen .preview-panel.preview-floating-dragging,
-body.drawing-panel-fullscreen .preview-panel.preview-floating-resizing {
+body.preview-panel-floating .preview-panel.preview-floating-dragging,
+body.preview-panel-floating .preview-panel.preview-floating-resizing {
   box-shadow: 0 22px 56px rgba(18, 28, 31, 0.34);
 }
 
-body.drawing-panel-fullscreen .preview-panel.preview-floating-dragging .panel-bar {
+body.preview-panel-floating .preview-panel.preview-floating-dragging .panel-bar {
   cursor: grabbing;
 }
 
@@ -3660,7 +3849,7 @@ body .preview-panel:fullscreen {
     height: calc(100dvh - 84px);
   }
 
-  body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) {
+  body.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
     right: 10px;
     bottom: 94px;
     width: min(420px, calc(100vw - 20px));
@@ -3670,6 +3859,12 @@ body .preview-panel:fullscreen {
     max-width: calc(100vw - 20px);
     max-height: calc(100dvh - 104px);
     border-radius: 12px;
+  }
+
+  .preview-show-button {
+    right: 10px;
+    bottom: 66px;
+    min-height: 46px;
   }
 }
 
@@ -3781,6 +3976,7 @@ body .preview-panel:fullscreen {
 
 :root[data-theme="dark"] .theme-tabs,
 :root[data-theme="dark"] .auth-mode-tabs,
+:root[data-theme="dark"] .mode-switcher,
 :root[data-theme="dark"] .preview-nav,
 :root[data-theme="dark"] .inspector-tabs {
   border-color: var(--line-strong);
@@ -3790,6 +3986,7 @@ body .preview-panel:fullscreen {
 
 :root[data-theme="dark"] .theme-tabs button.active,
 :root[data-theme="dark"] .auth-mode-tabs button.active,
+:root[data-theme="dark"] .mode-switcher button.active,
 :root[data-theme="dark"] .preview-nav button.active,
 :root[data-theme="dark"] .inspector-tabs button.active,
 :root[data-theme="dark"] .action-menu-toggle[aria-expanded="true"],
@@ -3802,6 +3999,7 @@ body .preview-panel:fullscreen {
 
 :root[data-theme="dark"] .icon-button,
 :root[data-theme="dark"] .primary-button,
+:root[data-theme="dark"] .mode-switcher button,
 :root[data-theme="dark"] .project-library-action,
 :root[data-theme="dark"] .workflow-actions button,
 :root[data-theme="dark"] .revision-actions button,
@@ -3818,6 +4016,8 @@ body .preview-panel:fullscreen {
 }
 
 :root[data-theme="dark"] .icon-button:hover,
+:root[data-theme="dark"] .mode-switcher button:hover,
+:root[data-theme="dark"] .mode-switcher button:focus-visible,
 :root[data-theme="dark"] .project-library-action:hover,
 :root[data-theme="dark"] .workflow-actions button:hover,
 :root[data-theme="dark"] .revision-actions button:hover,
@@ -3835,6 +4035,14 @@ body .preview-panel:fullscreen {
   border-color: rgba(19, 216, 255, 0.72);
   background: linear-gradient(180deg, #009dff, #005bd6);
   color: #fff;
+}
+
+:root[data-theme="dark"] .mode-switcher button.active {
+  background: linear-gradient(180deg, #00b8ff, #0064dc);
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(19, 216, 255, 0.22),
+    0 0 18px rgba(0, 120, 255, 0.34);
 }
 
 :root[data-theme="dark"] .icon-button.danger,
@@ -4068,7 +4276,7 @@ body .preview-panel:fullscreen {
   background: var(--panel);
 }
 
-:root[data-theme="dark"] body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) {
+:root[data-theme="dark"] body.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
   border-color: rgba(19, 216, 255, 0.48);
   background: rgba(7, 16, 24, 0.96);
   box-shadow:
@@ -4076,12 +4284,20 @@ body .preview-panel:fullscreen {
     0 0 0 1px rgba(0, 120, 255, 0.2);
 }
 
-:root[data-theme="dark"] body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .panel-bar {
+:root[data-theme="dark"] body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .panel-bar {
   background: linear-gradient(135deg, rgba(0, 120, 255, 0.16), rgba(7, 16, 24, 0.96) 62%);
 }
 
-:root[data-theme="dark"] body.drawing-panel-fullscreen .preview-panel:not(.panel-fullscreen) .preview-float-resize {
+:root[data-theme="dark"] body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .preview-float-resize {
   background:
     linear-gradient(135deg, transparent 0 46%, rgba(19, 216, 255, 0.82) 47% 52%, transparent 53%),
     linear-gradient(135deg, transparent 0 62%, rgba(0, 120, 255, 0.66) 63% 68%, transparent 69%);
+}
+
+:root[data-theme="dark"] .preview-show-button {
+  border-color: rgba(19, 216, 255, 0.62);
+  background: linear-gradient(180deg, #00aaff, #0063dc);
+  box-shadow:
+    0 16px 38px rgba(0, 0, 0, 0.44),
+    0 0 20px rgba(0, 120, 255, 0.24);
 }
