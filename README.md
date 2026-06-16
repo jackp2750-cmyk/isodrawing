@@ -60,6 +60,10 @@ Android:
 
 Each device keeps its own browser storage. Use the Import and Export project buttons to move spool jobs between PC, iPad, and phone.
 
+## Touch Help
+
+On iPad or phone, tap **Select**, then press and hold on a pipe run, fitting or note to open its action menu. To change a flange, press and hold directly on the flange marker, choose **Flange standard**, then pick the required type. The app also has a built-in **Menu > Help** panel with iPad/phone, Draw, Edit, Review, Export and Account instructions.
+
 ## Current features
 
 - Draw snapped isometric pipe runs by clicking on the drawing canvas.

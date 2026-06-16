@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=158" />
+    <link rel="stylesheet" href="./styles.css?v=166" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -86,6 +86,15 @@
         <path d="M8 8h8" />
         <path d="M8 12h8" />
         <path d="M8 16h5" />
+      </symbol>
+      <symbol id="icon-measure" viewBox="0 0 24 24">
+        <path d="M4 17 17 4" />
+        <path d="m4 13 4 4" />
+        <path d="m7 10 4 4" />
+        <path d="m10 7 4 4" />
+        <path d="m13 4 4 4" />
+        <path d="M3 18h6" />
+        <path d="M15 6h6" />
       </symbol>
       <symbol id="icon-undo" viewBox="0 0 24 24">
         <path d="M9 14 4 9l5-5" />
@@ -158,6 +167,11 @@
         <path d="M4 15v5h5" />
         <path d="M20 15v5h-5" />
       </symbol>
+      <symbol id="icon-help" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M9.5 9a2.7 2.7 0 0 1 5.1 1.2c0 1.9-2.6 2.2-2.6 4" />
+        <path d="M12 18h.01" />
+      </symbol>
     </svg>
 
     <div class="app-shell">
@@ -167,7 +181,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.58</span>
+            <span class="version-badge" id="appVersionBadge">v1.66</span>
           </div>
         </div>
 
@@ -321,6 +335,10 @@
                   <svg><use href="#icon-settings"></use></svg>
                   <span>Defaults</span>
                 </button>
+                <button class="icon-button labeled" id="helpButton" type="button" title="Open help" aria-label="Open SpoolMate help">
+                  <svg><use href="#icon-help"></use></svg>
+                  <span>Help</span>
+                </button>
               </section>
             </div>
           </div>
@@ -381,6 +399,10 @@
             <button class="tool-button" data-tool="note" data-mode-tools="draw edit review" type="button" title="Place note" aria-label="Place note">
               <svg><use href="#icon-note"></use></svg>
               <span>Note</span>
+            </button>
+            <button class="tool-button" data-tool="measure" data-mode-tools="draw edit review" type="button" title="Measure between two picked points" aria-label="Measure between two picked points">
+              <svg><use href="#icon-measure"></use></svg>
+              <span>Measure</span>
             </button>
             <button class="tool-button danger" id="deleteButton" data-side-tool="delete" data-mode-tools="edit" type="button" title="Delete selection" aria-label="Delete selection">
               <svg><use href="#icon-trash"></use></svg>
@@ -483,6 +505,25 @@
                 <select id="flangeModeSelect">
                   <option value="single">Single flange</option>
                   <option value="double">Double flange</option>
+                </select>
+              </label>
+              <label class="field">
+                <span>Default flange standard</span>
+                <select id="flangeStandardSelect">
+                  <option value="ansi150">ANSI 150</option>
+                  <option value="ansi300">ANSI 300</option>
+                  <option value="ansi600">ANSI 600</option>
+                  <option value="tableD">AS 2129 Table D</option>
+                  <option value="tableE">AS 2129 Table E</option>
+                  <option value="tableF">AS 2129 Table F</option>
+                  <option value="tableH">AS 2129 Table H</option>
+                  <option value="pn10">PN 10</option>
+                  <option value="pn16">PN 16</option>
+                  <option value="pn25">PN 25</option>
+                  <option value="pn40">PN 40</option>
+                  <option value="din10">DIN PN 10</option>
+                  <option value="din16">DIN PN 16</option>
+                  <option value="jis10k">JIS 10K</option>
                 </select>
               </label>
             </section>
@@ -793,6 +834,224 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop" id="helpDialog" hidden>
+        <section class="project-dialog-card help-card" aria-label="SpoolMate help">
+          <div class="project-dialog-header">
+            <div>
+              <strong>SpoolMate help</strong>
+              <small>Quick instructions for PC, iPad and phone workflows.</small>
+            </div>
+          </div>
+          <div class="help-tabs" role="tablist" aria-label="Help sections">
+            <button class="active" data-help-tab="touch" type="button" role="tab" aria-selected="true">iPad / phone</button>
+            <button data-help-tab="draw" type="button" role="tab" aria-selected="false">Draw</button>
+            <button data-help-tab="edit" type="button" role="tab" aria-selected="false">Edit</button>
+            <button data-help-tab="review" type="button" role="tab" aria-selected="false">Review</button>
+            <button data-help-tab="export" type="button" role="tab" aria-selected="false">Export</button>
+            <button data-help-tab="account" type="button" role="tab" aria-selected="false">Account</button>
+          </div>
+          <div class="help-content">
+            <section class="help-panel active" data-help-panel="touch">
+              <h2>Using iPad or phone</h2>
+              <div class="help-grid">
+                <article>
+                  <strong>Change a flange</strong>
+                  <p>Tap Select, zoom in if needed, then press and hold directly on the flange marker until the menu opens. Tap Flange standard, then pick Table E, PN 16, ANSI 150 or another type.</p>
+                </article>
+                <article>
+                  <strong>Add fittings</strong>
+                  <p>Press and hold on a pipe run or pipe end. Use Add fitting for flanges, roll grooves, reducers and sockets.</p>
+                </article>
+                <article>
+                  <strong>Move sockets and dimensions</strong>
+                  <p>With Select active, drag a socket along the pipe. Drag red dimension labels away from clashes when red line dimensions are on.</p>
+                </article>
+                <article>
+                  <strong>3D view</strong>
+                  <p>Drag to rotate. Use Move for panning, Reset to return the camera, and Hide or Minimize when the drawing needs more room.</p>
+                </article>
+                <article>
+                  <strong>If the menu does not open</strong>
+                  <p>Make sure Select is active, keep your finger still for the long press, and press on the fitting or pipe itself rather than empty paper.</p>
+                </article>
+                <article>
+                  <strong>Open Help quickly</strong>
+                  <p>Tap Menu, then Help. On iPad or phone, Help opens to this touch section first.</p>
+                </article>
+              </div>
+            </section>
+            <section class="help-panel" data-help-panel="draw">
+              <h2>Draw mode</h2>
+              <div class="help-grid">
+                <article>
+                  <strong>Draw pipe runs</strong>
+                  <p>Pick Draw, then drag from the active point. On PC, press Enter to stop drawing and return to Select.</p>
+                </article>
+                <article>
+                  <strong>Exact lengths</strong>
+                  <p>Set Next run mm, then use +X, -X, +Y, -Y, +Z or -Z for exact centre-to-centre runs.</p>
+                </article>
+                <article>
+                  <strong>45 degree offsets</strong>
+                  <p>Enter the offset set in Next run / offset set mm. For 45 degrees, SpoolMate calculates travel as set x 1.414 and stores both values.</p>
+                </article>
+                <article>
+                  <strong>Project details</strong>
+                  <p>New drawings ask for job and spool details. These print at the top right of the drawing and export sheets.</p>
+                </article>
+                <article>
+                  <strong>Offset measurements</strong>
+                  <p>Turn Dimensions on. The angled run shows the travel C/C, and red-line dimensions also show the offset set C/C between centres.</p>
+                </article>
+                <article>
+                  <strong>Measure tool</strong>
+                  <p>Pick Measure, click or tap the first point, then click or tap the second point. SpoolMate leaves that measurement marked on the plan.</p>
+                </article>
+                <article>
+                  <strong>Undo and redo</strong>
+                  <p>Use Undo or Redo in the side tools if a run, fitting or note was placed wrong.</p>
+                </article>
+              </div>
+            </section>
+            <section class="help-panel" data-help-panel="edit">
+              <h2>Edit and fittings</h2>
+              <div class="help-grid">
+                <article>
+                  <strong>Select and multi-select</strong>
+                  <p>Pick Select, then tap or click a run. Hold Shift on PC to add more runs, or use Box Select to lasso a group.</p>
+                </article>
+                <article>
+                  <strong>Pipe size changes</strong>
+                  <p>Right-click or long-press a run, choose Change pipe size, then pick from the NB list. Size changes add reducers where needed.</p>
+                </article>
+                <article>
+                  <strong>Flanges and grooves</strong>
+                  <p>Right-click or long-press a pipe end to add a single flange, double flange or roll groove. Existing flanges can be changed from the flange pick menu.</p>
+                </article>
+                <article>
+                  <strong>Sockets</strong>
+                  <p>Right-click or long-press a run, choose Add sockets, then use the picture menu to pick socket size, quantity and spacing.</p>
+                </article>
+                <article>
+                  <strong>Tee or branch</strong>
+                  <p>A tee splits the pipe and adds tee takeoff and weight. A branch is treated as a welded pipe into the side of the main run.</p>
+                </article>
+                <article>
+                  <strong>Reducers</strong>
+                  <p>Reducers are added when pipe sizes change. If a bend reducer lands on the wrong side, right-click or long-press it and move it to the other side.</p>
+                </article>
+                <article>
+                  <strong>Notes</strong>
+                  <p>Use Note to type drawing notes. With Select active, drag notes to clean up the drawing.</p>
+                </article>
+                <article>
+                  <strong>Flange defaults</strong>
+                  <p>Set the default single/double flange and standard in Angles and fittings before placing several flanges.</p>
+                </article>
+              </div>
+            </section>
+            <section class="help-panel" data-help-panel="review">
+              <h2>Review mode</h2>
+              <div class="help-grid">
+                <article>
+                  <strong>Checks</strong>
+                  <p>Open Check from the Menu to find missing project details, estimated weights, tiny runs and other issues. Tap an issue to highlight the area.</p>
+                </article>
+                <article>
+                  <strong>Cut list and takeoff</strong>
+                  <p>Use Cut List and Weights to see pipe cut lengths, bend deductions, fittings, flange types, tee counts and estimated weight.</p>
+                </article>
+                <article>
+                  <strong>Lifting points</strong>
+                  <p>Turn Lifting points on from the top bar. Change sling angle to see suggested lug points and dimensions update.</p>
+                </article>
+                <article>
+                  <strong>Lock edits</strong>
+                  <p>Set a drawing to Checked or Issued, then use Lock edits when you want to stop accidental changes.</p>
+                </article>
+                <article>
+                  <strong>Dimension styles</strong>
+                  <p>Pipe labels are compact. Red C/C lines are best for fabrication review. Numbered list reduces clutter on busy drawings.</p>
+                </article>
+                <article>
+                  <strong>Takeoff list</strong>
+                  <p>The takeoff list groups pipes and fittings by size and type, including flange standards, tees, bends, reducers, sockets and roll grooves.</p>
+                </article>
+                <article>
+                  <strong>Weight notes</strong>
+                  <p>Atlas table weights are used where available. Estimated or adjusted weights should be checked before ordering or lifting.</p>
+                </article>
+                <article>
+                  <strong>Defaults</strong>
+                  <p>Use Menu, Defaults to save your usual material, NB size, dimensions, lifting and preview settings on that device.</p>
+                </article>
+              </div>
+            </section>
+            <section class="help-panel" data-help-panel="export">
+              <h2>Export mode</h2>
+              <div class="help-grid">
+                <article>
+                  <strong>Fab PDF</strong>
+                  <p>Exports the drawing with centre-to-centre dimensions, cut list, weight summary, takeoff list and project details.</p>
+                </article>
+                <article>
+                  <strong>3D image</strong>
+                  <p>Use Export 3D for a preview image. Turn pipe labels on or off from the 3D preview controls before exporting.</p>
+                </article>
+                <article>
+                  <strong>Project file</strong>
+                  <p>Export Project file when you need to send a drawing that can be imported back into SpoolMate later.</p>
+                </article>
+                <article>
+                  <strong>Read-only share</strong>
+                  <p>Use Share to create a shop/client copy that can be viewed without changing the live project.</p>
+                </article>
+                <article>
+                  <strong>Clean export drawings</strong>
+                  <p>Before exporting, turn off 3D pipe labels if the model is too busy and drag red dimensions away from overlaps.</p>
+                </article>
+                <article>
+                  <strong>Fab sheet contents</strong>
+                  <p>The fabrication sheet includes centre-to-centre measurements, cut lengths, bend deductions, weights and a fitting takeoff.</p>
+                </article>
+              </div>
+            </section>
+            <section class="help-panel" data-help-panel="account">
+              <h2>Account and cloud</h2>
+              <div class="help-grid">
+                <article>
+                  <strong>Guest mode</strong>
+                  <p>Continue as guest keeps drawings on that device/browser. Use Save and Open for local project folders.</p>
+                </article>
+                <article>
+                  <strong>Sign in</strong>
+                  <p>Signing in lets projects save to your cloud account and makes them available on other devices.</p>
+                </article>
+                <article>
+                  <strong>Team workspace</strong>
+                  <p>Company accounts let a team share projects and comments while drawings are being worked on.</p>
+                </article>
+                <article>
+                  <strong>Updates</strong>
+                  <p>If a newer version is available, SpoolMate will tell you to refresh or reload so the latest app files are used.</p>
+                </article>
+                <article>
+                  <strong>Local versus cloud</strong>
+                  <p>Local saves stay on the current browser. Cloud saves are the better choice when you want the same jobs on PC, iPad and phone.</p>
+                </article>
+                <article>
+                  <strong>Team notes</strong>
+                  <p>Project comments are for simple workshop notes while a spool is being drawn, checked or revised.</p>
+                </article>
+              </div>
+            </section>
+          </div>
+          <div class="project-dialog-actions">
+            <button class="primary-button" id="helpCloseButton" type="button">Done</button>
+          </div>
+        </section>
+      </div>
+
     </div>
 
     <script type="importmap">
@@ -803,6 +1062,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=158"></script>
+    <script defer src="./app.js?v=166"></script>
   </body>
 </html>

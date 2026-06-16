@@ -54,6 +54,7 @@ const pipeSizeSelect = document.querySelector("#pipeSizeSelect");
 const pipeSizeReadout = document.querySelector("#pipeSizeReadout");
 const noteTextInput = document.querySelector("#noteTextInput");
 const flangeModeSelect = document.querySelector("#flangeModeSelect");
+const flangeStandardSelect = document.querySelector("#flangeStandardSelect");
 const dimensionToggle = document.querySelector("#dimensionToggle");
 const dimensionStyleSelect = document.querySelector("#dimensionStyleSelect");
 const liftingToggle = document.querySelector("#liftingToggle");
@@ -131,6 +132,11 @@ const themeColorMeta = document.querySelector("meta[name='theme-color']");
 const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
 const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
+const helpButton = document.querySelector("#helpButton");
+const helpDialog = document.querySelector("#helpDialog");
+const helpCloseButton = document.querySelector("#helpCloseButton");
+const helpTabButtons = [...document.querySelectorAll("[data-help-tab]")];
+const helpPanels = [...document.querySelectorAll("[data-help-panel]")];
 const projectDialogInputs = {
   jobNumber: document.querySelector("#projectDialogJobNumber"),
   spoolNumber: document.querySelector("#projectDialogSpoolNumber"),
@@ -154,8 +160,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.58";
-const APP_BUILD_DATE = "2026-06-14";
+const APP_VERSION = "v1.66";
+const APP_BUILD_DATE = "2026-06-15";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -181,6 +187,107 @@ const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
 const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer", "socket"]);
 const FLANGE_MODES = new Set(["single", "double"]);
+const FLANGE_STANDARDS = {
+  ansi150: {
+    label: "ANSI 150",
+    shortLabel: "ANSI 150",
+    weightFactor: 1,
+    radiusFactor: 1,
+    thicknessFactor: 1,
+  },
+  ansi300: {
+    label: "ANSI 300",
+    shortLabel: "ANSI 300",
+    weightFactor: 1.42,
+    radiusFactor: 1.14,
+    thicknessFactor: 1.24,
+  },
+  ansi600: {
+    label: "ANSI 600",
+    shortLabel: "ANSI 600",
+    weightFactor: 1.92,
+    radiusFactor: 1.26,
+    thicknessFactor: 1.48,
+  },
+  tableD: {
+    label: "AS 2129 Table D",
+    shortLabel: "Table D",
+    weightFactor: 0.86,
+    radiusFactor: 0.96,
+    thicknessFactor: 0.9,
+  },
+  tableE: {
+    label: "AS 2129 Table E",
+    shortLabel: "Table E",
+    weightFactor: 1,
+    radiusFactor: 1,
+    thicknessFactor: 1,
+  },
+  tableF: {
+    label: "AS 2129 Table F",
+    shortLabel: "Table F",
+    weightFactor: 1.16,
+    radiusFactor: 1.06,
+    thicknessFactor: 1.12,
+  },
+  tableH: {
+    label: "AS 2129 Table H",
+    shortLabel: "Table H",
+    weightFactor: 1.48,
+    radiusFactor: 1.14,
+    thicknessFactor: 1.3,
+  },
+  pn10: {
+    label: "PN 10",
+    shortLabel: "PN 10",
+    weightFactor: 0.86,
+    radiusFactor: 0.96,
+    thicknessFactor: 0.92,
+  },
+  pn16: {
+    label: "PN 16",
+    shortLabel: "PN 16",
+    weightFactor: 1,
+    radiusFactor: 1,
+    thicknessFactor: 1,
+  },
+  pn25: {
+    label: "PN 25",
+    shortLabel: "PN 25",
+    weightFactor: 1.14,
+    radiusFactor: 1.06,
+    thicknessFactor: 1.08,
+  },
+  pn40: {
+    label: "PN 40",
+    shortLabel: "PN 40",
+    weightFactor: 1.28,
+    radiusFactor: 1.12,
+    thicknessFactor: 1.14,
+  },
+  din10: {
+    label: "DIN PN 10",
+    shortLabel: "DIN 10",
+    weightFactor: 0.86,
+    radiusFactor: 0.96,
+    thicknessFactor: 0.92,
+  },
+  din16: {
+    label: "DIN PN 16",
+    shortLabel: "DIN 16",
+    weightFactor: 0.94,
+    radiusFactor: 1.02,
+    thicknessFactor: 0.96,
+  },
+  jis10k: {
+    label: "JIS 10K",
+    shortLabel: "JIS 10K",
+    weightFactor: 0.92,
+    radiusFactor: 0.98,
+    thicknessFactor: 0.96,
+  },
+};
+const FLANGE_STANDARD_KEYS = new Set(Object.keys(FLANGE_STANDARDS));
 const END_FITTING_SNAP_TOLERANCE = 0.015;
 const ROLL_GROOVE_SETBACK_MM = 10;
 const ROLL_GROOVE_VISUAL_WIDTH_MM = 24;
@@ -219,6 +326,7 @@ const SIDE_TOOL_DETAILS = {
   weld: ["Weld", "Place weld markers"],
   valve: ["Valve", "Place butterfly valves"],
   note: ["Note", "Add text notes"],
+  measure: ["Measure", "Click two points to mark a measurement"],
   delete: ["Delete", "Delete the selected item"],
 };
 const LOAD_PLAN_TRAYS = {
@@ -362,6 +470,17 @@ const SOCKET_SIZE_NB = 15;
 const MAX_SOCKET_COUNT = 24;
 const DEFAULT_SOCKET_SPACING_MM = 150;
 const SOCKET_ROTATION_STEP_DEG = 90;
+const SOCKET_SIZE_CHOICES_NB = [15, 20, 25, 32, 40, 50];
+const SOCKET_COUNT_CHOICES = [1, 2, 3, 4, 6];
+const SOCKET_SPACING_CHOICES = [
+  { key: "click", label: "At click", detail: "Place from right-click spot" },
+  { key: "even", label: "Even", detail: "Space along this section" },
+  { key: "100", label: "100 mm", detail: "C/C spacing" },
+  { key: "150", label: "150 mm", detail: "C/C spacing" },
+  { key: "200", label: "200 mm", detail: "C/C spacing" },
+  { key: "250", label: "250 mm", detail: "C/C spacing" },
+  { key: "300", label: "300 mm", detail: "C/C spacing" },
+];
 
 const drawingContextMenu = document.createElement("div");
 drawingContextMenu.className = "drawing-context-menu";
@@ -404,6 +523,7 @@ const axisByKey = new Map(AXES.map((axis) => [axis.key, axis]));
 
 let nextFittingId = 1;
 let nextNoteId = 1;
+let nextMeasurementId = 1;
 let state = loadState() ?? blankState();
 let appMode = loadAppMode();
 let noteDrag = null;
@@ -411,6 +531,7 @@ let socketDrag = null;
 let dimensionDrag = null;
 let dimensionHitTargets = [];
 let boxSelectDrag = null;
+let measurementDraft = null;
 let shiftAngleSnap = false;
 let touchContextPress = null;
 let pendingDraw = null;
@@ -531,6 +652,7 @@ function sampleState() {
     angleDegrees: 45,
     anglePlane: "xy",
     flangeMode: "single",
+    flangeStandard: "ansi150",
     previewMode: "carbon",
     show3dLabels: true,
     gridScale: 42,
@@ -583,6 +705,7 @@ function normalizeDrawingDefaults(defaults = {}) {
     angleDegrees: normalizeAngle(defaults.angleDegrees ?? base.angleDegrees),
     anglePlane: normalizeAnglePlane(defaults.anglePlane ?? base.anglePlane),
     flangeMode: normalizeFlangeMode(defaults.flangeMode ?? base.flangeMode),
+    flangeStandard: normalizeFlangeStandard(defaults.flangeStandard ?? base.flangeStandard),
     previewMode: normalizePreviewMode(defaults.previewMode ?? base.previewMode),
     show3dLabels: defaults.show3dLabels !== false,
     gridScale: clampNumber(Number(defaults.gridScale) || base.gridScale, 24, 72),
@@ -609,6 +732,7 @@ function drawingDefaultsFromState(source = state) {
     angleDegrees: source?.angleDegrees,
     anglePlane: source?.anglePlane,
     flangeMode: source?.flangeMode,
+    flangeStandard: source?.flangeStandard,
     previewMode: source?.previewMode,
     show3dLabels: source?.show3dLabels !== false,
     gridScale: source?.gridScale,
@@ -638,9 +762,11 @@ function blankState(options = {}) {
     selectedSegments: [],
     selectedFitting: null,
     selectedNote: null,
+    selectedMeasurement: null,
     selectedPoint: 0,
     activePoint: 0,
     notes: [],
+    measurements: [],
     nodeTypes: {},
     reducerSideOverrides: {},
     dimensionOffsets: {},
@@ -653,6 +779,7 @@ function blankState(options = {}) {
     angleDegrees: defaults.angleDegrees,
     anglePlane: defaults.anglePlane,
     flangeMode: defaults.flangeMode,
+    flangeStandard: defaults.flangeStandard,
     previewMode: defaults.previewMode,
     show3dLabels: defaults.show3dLabels,
     gridScale: defaults.gridScale,
@@ -702,18 +829,21 @@ function statePayload(options = {}) {
       t: normalizeFittingPosition(fitting.type, fitting.t),
     })),
     notes: state.notes,
+    measurements: normalizeMeasurements(state.measurements),
     nodeTypes: normalizeNodeTypes(state.nodeTypes, state.points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length),
     dimensionOffsets: normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length),
     activePoint: state.activePoint,
     selectedPoint: state.selectedPoint,
     selectedSegments: selectedSegmentIndexes(),
+    selectedMeasurement: state.selectedMeasurement,
     pipeSizeNb: state.pipeSizeNb,
     pipeSpec: normalizePipeSpec(state.pipeSpec),
     stepLength: state.stepLength,
     angleDegrees: state.angleDegrees,
     anglePlane: state.anglePlane,
     flangeMode: state.flangeMode,
+    flangeStandard: normalizeFlangeStandard(state.flangeStandard),
     previewMode: state.previewMode,
     show3dLabels: state.show3dLabels !== false,
     gridScale: state.gridScale,
@@ -769,6 +899,7 @@ function stateFromPayload(payload, options = {}) {
     edges,
     fittings: normalizeFittings(saved.fittings, edges.length),
     notes: normalizeNotes(saved.notes),
+    measurements: normalizeMeasurements(saved.measurements),
     nodeTypes: normalizeNodeTypes(saved.nodeTypes, points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(saved.reducerSideOverrides, points.length),
     dimensionOffsets: normalizeDimensionOffsets(saved.dimensionOffsets, edges.length),
@@ -778,11 +909,13 @@ function stateFromPayload(payload, options = {}) {
     angleDegrees: normalizeAngle(saved.angleDegrees),
     anglePlane: normalizeAnglePlane(saved.anglePlane),
     flangeMode: applyNewDefaults ? "single" : normalizeFlangeMode(saved.flangeMode),
+    flangeStandard: applyNewDefaults ? "ansi150" : normalizeFlangeStandard(saved.flangeStandard),
     previewMode: normalizePreviewMode(saved.previewMode),
     show3dLabels: saved.show3dLabels !== false,
     selectedSegments,
     activePoint: Number.isInteger(saved.activePoint) && saved.activePoint >= 0 && saved.activePoint < points.length ? saved.activePoint : points.length - 1,
     selectedPoint: Number.isInteger(saved.selectedPoint) && saved.selectedPoint >= 0 && saved.selectedPoint < points.length ? saved.selectedPoint : null,
+    selectedMeasurement: Number.isInteger(saved.selectedMeasurement) ? saved.selectedMeasurement : null,
     gridScale: Number(saved.gridScale) || 42,
     showDimensions: saved.showDimensions !== false,
     dimensionStyle: normalizeDimensionStyle(saved.dimensionStyle),
@@ -820,6 +953,8 @@ function setNextIdsFromState(sourceState) {
     Math.max(0, ...sourceState.fittings.map((fitting) => Number(fitting.id) || 0)) + 1;
   nextNoteId =
     Math.max(0, ...sourceState.notes.map((note) => Number(note.id) || 0)) + 1;
+  nextMeasurementId =
+    Math.max(0, ...(sourceState.measurements ?? []).map((measurement) => Number(measurement.id) || 0)) + 1;
 }
 
 function normalizeNodeTypes(nodeTypes, pointCount) {
@@ -1006,6 +1141,7 @@ function normalizeFittings(fittings, edgeCount) {
 
       if (type === "flange") {
         normalized.flangeMode = normalizeFlangeMode(fitting.flangeMode);
+        normalized.flangeStandard = normalizeFlangeStandard(fitting.flangeStandard);
       }
       if (type === "socket") {
         normalized.socketSizeNb = normalizePipeSize(fitting.socketSizeNb ?? SOCKET_SIZE_NB);
@@ -1124,7 +1260,7 @@ function hasProjectInfo(info = state.projectInfo) {
 }
 
 function hasDrawingContent() {
-  return Boolean(state.edges.length || state.fittings.length || state.notes.length);
+  return Boolean(state.edges.length || state.fittings.length || state.notes.length || state.measurements?.length);
 }
 
 function projectDisplayName(info = state.projectInfo) {
@@ -1270,6 +1406,18 @@ function normalizeNotes(notes) {
     .filter((note) => note.text.trim());
 }
 
+function normalizeMeasurements(measurements) {
+  if (!Array.isArray(measurements)) return [];
+  return measurements
+    .map((measurement) => ({
+      id: Number(measurement.id) || nextMeasurementId++,
+      start: clonePoint(measurement.start ?? {}),
+      end: clonePoint(measurement.end ?? {}),
+      label: String(measurement.label ?? "").trim().slice(0, 64),
+    }))
+    .filter((measurement) => pointLength(subtractPoints(measurement.end, measurement.start)) >= 1);
+}
+
 function normalizePipeSize(value) {
   const requested = Number(value);
   return PIPE_SIZES.some((size) => size.nb === requested) ? requested : 25;
@@ -1288,6 +1436,38 @@ function normalizePipeSpec(value) {
 
 function normalizeFlangeMode(value) {
   return FLANGE_MODES.has(value) ? value : "double";
+}
+
+function normalizeFlangeStandard(value) {
+  return FLANGE_STANDARD_KEYS.has(value) ? value : "ansi150";
+}
+
+function flangeStandardInfo(value) {
+  return FLANGE_STANDARDS[normalizeFlangeStandard(value)] ?? FLANGE_STANDARDS.ansi150;
+}
+
+function flangeStandardLabel(value) {
+  return flangeStandardInfo(value).label;
+}
+
+function flangeStandardKeyFromText(value) {
+  const text = String(value ?? "").trim().toLowerCase().replace(/[\s_-]+/g, "");
+  if (!text) return null;
+  if (text.includes("tabled") || text.includes("as2129d")) return "tableD";
+  if (text.includes("tablee") || text.includes("as2129e")) return "tableE";
+  if (text.includes("tablef") || text.includes("as2129f")) return "tableF";
+  if (text.includes("tableh") || text.includes("as2129h")) return "tableH";
+  if (text.includes("din10")) return "din10";
+  if (text.includes("din16")) return "din16";
+  if (text.includes("pn10")) return "pn10";
+  if (text.includes("pn16")) return "pn16";
+  if (text.includes("pn25")) return "pn25";
+  if (text.includes("pn40") || text.includes("class40")) return "pn40";
+  if (text.includes("jis10k") || text.includes("jis")) return "jis10k";
+  if (text.includes("300")) return "ansi300";
+  if (text.includes("600")) return "ansi600";
+  if (text.includes("ansi") || text.includes("asme") || text.includes("150")) return "ansi150";
+  return FLANGE_STANDARD_KEYS.has(text) ? text : null;
 }
 
 function normalizePreviewMode(value) {
@@ -1335,6 +1515,10 @@ function normalizeLiftingSlingAngle(value) {
 
 function fittingFlangeMode(fitting) {
   return normalizeFlangeMode(fitting?.flangeMode);
+}
+
+function fittingFlangeStandard(fitting) {
+  return normalizeFlangeStandard(fitting?.flangeStandard);
 }
 
 function fittingSocketSizeNb(fitting) {
@@ -1696,6 +1880,7 @@ function drawIso() {
   drawEndpointGuides(ctx, projection);
   resetDimensionHitTargets();
   drawSpool2d(ctx, projection);
+  drawMeasurements2d(ctx, projection);
   drawNotes2d(ctx, projection);
   if (state.showLiftingPoints) {
     drawSuggestedLugs2d(ctx, projection);
@@ -2361,6 +2546,89 @@ function drawNotes2d(ctx, projection) {
   ctx.restore();
 }
 
+function drawMeasurements2d(ctx, projection) {
+  const measurements = Array.isArray(state.measurements) ? state.measurements : [];
+  if (!measurements.length && !measurementDraft) return;
+
+  ctx.save();
+  for (const measurement of measurements) {
+    drawMeasurement2d(ctx, projection, measurement, state.selectedMeasurement === measurement.id);
+  }
+
+  if (measurementDraft && state.pointer) {
+    const picked = measurePointFromPointer(state.pointer);
+    const previewMeasurement = {
+      id: 0,
+      start: measurementDraft.start,
+      end: picked.point,
+      label: "",
+    };
+    if (measurementLengthMm(previewMeasurement) >= 1) {
+      drawMeasurement2d(ctx, projection, previewMeasurement, true, { preview: true });
+    }
+  }
+  ctx.restore();
+}
+
+function drawMeasurement2d(ctx, projection, measurement, selected = false, options = {}) {
+  const start = projectIso(measurement.start, projection);
+  const end = projectIso(measurement.end, projection);
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const screenLength = Math.hypot(dx, dy);
+  if (screenLength < 8) return;
+
+  const along = { x: dx / screenLength, y: dy / screenLength };
+  const normal = { x: -along.y, y: along.x };
+  const midpoint = { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 };
+  const label = measurementLabel(measurement);
+  const tick = 8;
+  const color = selected ? "#0f766e" : "#c1121f";
+  const labelFill = selected ? "rgba(216, 241, 237, 0.96)" : "rgba(255, 253, 248, 0.96)";
+  let labelAngle = Math.atan2(dy, dx);
+  if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
+    labelAngle += Math.PI;
+  }
+
+  ctx.save();
+  ctx.setLineDash(options.preview ? [8, 5] : []);
+  ctx.lineCap = "butt";
+  ctx.lineJoin = "miter";
+  for (const stroke of [
+    { color: "rgba(255, 253, 248, 0.92)", width: 5 },
+    { color, width: selected ? 3 : 2 },
+  ]) {
+    ctx.strokeStyle = stroke.color;
+    ctx.lineWidth = stroke.width;
+    drawLine(ctx, start, end);
+    for (const point of [start, end]) {
+      drawLine(
+        ctx,
+        { x: point.x + normal.x * tick, y: point.y + normal.y * tick },
+        { x: point.x - normal.x * tick, y: point.y - normal.y * tick },
+      );
+    }
+  }
+  ctx.setLineDash([]);
+
+  ctx.font = "950 12px Inter, system-ui, sans-serif";
+  const labelWidth = ctx.measureText(label).width + 22;
+  const labelHeight = 24;
+  ctx.translate(midpoint.x + normal.x * 18, midpoint.y + normal.y * 18);
+  ctx.rotate(labelAngle);
+  roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
+  ctx.fillStyle = labelFill;
+  ctx.fill();
+  ctx.strokeStyle = selected ? "rgba(15, 118, 110, 0.55)" : "rgba(193, 18, 31, 0.28)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, 0, 0.5);
+  ctx.restore();
+}
+
 function roundRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -2508,6 +2776,7 @@ function offsetSetDimensionPoints(segment) {
     meta,
     start: segment.start,
     end: setEnd,
+    travelEnd: segment.end,
   };
 }
 
@@ -2515,11 +2784,19 @@ function drawOffsetSetDimensions(ctx, projection, segmentData, dimensionLayout =
   for (const segment of segmentData) {
     const points = offsetSetDimensionPoints(segment);
     if (!points) continue;
-    drawOffsetSetDimension(ctx, segment, projectIso(points.start, projection), projectIso(points.end, projection), points.meta, dimensionLayout);
+    drawOffsetSetDimension(
+      ctx,
+      segment,
+      projectIso(points.start, projection),
+      projectIso(points.end, projection),
+      points.meta,
+      dimensionLayout,
+      projectIso(points.travelEnd, projection),
+    );
   }
 }
 
-function drawOffsetSetDimension(ctx, segment, start, end, meta, dimensionLayout = []) {
+function drawOffsetSetDimension(ctx, segment, start, end, meta, dimensionLayout = [], travelEnd = null) {
   const layoutState = Array.isArray(dimensionLayout)
     ? { labels: dimensionLayout, lines: [], pipes: [] }
     : dimensionLayout;
@@ -2573,6 +2850,32 @@ function drawOffsetSetDimension(ctx, segment, start, end, meta, dimensionLayout 
   }
 
   ctx.shadowColor = "transparent";
+  const witnessDistance = travelEnd ? Math.hypot(travelEnd.x - end.x, travelEnd.y - end.y) : 0;
+  if (witnessDistance > 8) {
+    ctx.setLineDash([5, 5]);
+    for (const stroke of [
+      { color: palette.halo, width: 5 },
+      { color: "rgba(31, 42, 47, 0.58)", width: 1.7 },
+    ]) {
+      ctx.strokeStyle = stroke.color;
+      ctx.lineWidth = stroke.width;
+      drawLine(ctx, end, travelEnd);
+    }
+    ctx.setLineDash([]);
+  }
+
+  for (const point of [start, end]) {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+    ctx.fillStyle = palette.fill;
+    ctx.fill();
+    ctx.strokeStyle = palette.line;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    drawLine(ctx, { x: point.x - 7, y: point.y }, { x: point.x + 7, y: point.y });
+    drawLine(ctx, { x: point.x, y: point.y - 7 }, { x: point.x, y: point.y + 7 });
+  }
+
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   ctx.translate(midpoint.x, midpoint.y);
@@ -3610,6 +3913,10 @@ function isTabletLayout() {
   return Boolean(window.matchMedia?.("(max-width: 1024px)")?.matches || isCoarseInput());
 }
 
+function isPhoneLayout() {
+  return Boolean(window.matchMedia?.("(max-width: 640px)")?.matches);
+}
+
 function isTouchLikeEvent(event) {
   return event.pointerType === "touch" || event.pointerType === "pen" || (!event.pointerType && isCoarseInput());
 }
@@ -3874,6 +4181,39 @@ function findNearestNote(pointer) {
   return nearest && nearest.distance <= hitLimit(38, 56) ? nearest : null;
 }
 
+function findNearestMeasurement(pointer) {
+  const projection = getProjection();
+  let nearest = null;
+  const measurements = Array.isArray(state.measurements) ? state.measurements : [];
+
+  for (const measurement of measurements) {
+    const start = projectIso(measurement.start, projection);
+    const end = projectIso(measurement.end, projection);
+    const hit = distanceToSegment(pointer, start, end);
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const screenLength = Math.hypot(dx, dy) || 1;
+    const normal = { x: -dy / screenLength, y: dx / screenLength };
+    const labelCenter = {
+      x: (start.x + end.x) * 0.5 + normal.x * 18,
+      y: (start.y + end.y) * 0.5 + normal.y * 18,
+    };
+    const labelWidth = Math.max(54, measurementLabel(measurement).length * 7.4 + 22);
+    const labelHeight = 24;
+    const labelHit =
+      pointer.x >= labelCenter.x - labelWidth * 0.5 - 10 &&
+      pointer.x <= labelCenter.x + labelWidth * 0.5 + 10 &&
+      pointer.y >= labelCenter.y - labelHeight * 0.5 - 10 &&
+      pointer.y <= labelCenter.y + labelHeight * 0.5 + 10;
+    const distance = labelHit ? 0 : hit.distance;
+    if (!nearest || distance < nearest.distance) {
+      nearest = { measurement, distance };
+    }
+  }
+
+  return nearest && nearest.distance <= hitLimit(16, 30) ? nearest : null;
+}
+
 function findNearestFitting(pointer) {
   const projection = getProjection();
   const segmentByIndex = new Map(segments().map((segment) => [segment.index, segment]));
@@ -4125,6 +4465,7 @@ function addRunToPoint(from, next, options = {}) {
     selectSingleSegment(state.edges.length - 1);
     state.selectedFitting = null;
     state.selectedNote = null;
+    state.selectedMeasurement = null;
     state.selectedPoint = to;
     state.activePoint = to;
     state.previewCandidate = null;
@@ -4139,6 +4480,7 @@ function addRunToPoint(from, next, options = {}) {
   selectSingleSegment(state.edges.length - 1);
   state.selectedFitting = null;
   state.selectedNote = null;
+  state.selectedMeasurement = null;
   state.selectedPoint = to;
   state.activePoint = to;
   state.previewCandidate = null;
@@ -4765,7 +5107,11 @@ function fittingWeightOverride(fitting) {
 function fittingWeightSource(fitting, segment = null) {
   if (fitting?.type === "rollGroove") return "zero weight";
   if (fittingWeightOverride(fitting) !== null) return "manual";
-  return atlasFittingWeightKg(fitting, segment) === null ? "estimated" : "Atlas table";
+  if (atlasFittingWeightKg(fitting, segment) === null) return "estimated";
+  if (fitting?.type === "flange" && fittingFlangeStandard(fitting) !== "ansi150") {
+    return "Atlas table adjusted";
+  }
+  return "Atlas table";
 }
 
 function fittingWeightKg(fitting, segment) {
@@ -4790,7 +5136,8 @@ function atlasFittingWeightKg(fitting, segment) {
   if (fitting.type === "flange") {
     const single = ATLAS_FLANGE_WEIGHTS[size.nb];
     if (!Number.isFinite(single)) return null;
-    return fittingFlangeMode(fitting) === "single" ? single : single * 2;
+    const adjusted = single * (flangeStandardInfo(fittingFlangeStandard(fitting)).weightFactor || 1);
+    return fittingFlangeMode(fitting) === "single" ? adjusted : adjusted * 2;
   }
 
   if (fitting.type === "reducer") {
@@ -4809,7 +5156,7 @@ function estimatedFittingWeightKg(fitting, segment) {
   const scale = Math.max(0.12, Math.pow(size.od / 60.3, 2));
 
   if (fitting.type === "flange") {
-    const single = Math.max(0.4, scale * 2.2);
+    const single = Math.max(0.4, scale * 2.2) * (flangeStandardInfo(fittingFlangeStandard(fitting)).weightFactor || 1);
     return fittingFlangeMode(fitting) === "single" ? single : single * 2.12;
   }
   if (fitting.type === "valve") return Math.max(0.6, scale * 5.6);
@@ -5034,12 +5381,14 @@ function takeoffCountRows(quantities = quantitySummary()) {
     const type = item.fitting?.type;
     if (type === "flange") {
       const mode = fittingFlangeMode(item.fitting);
+      const standard = fittingFlangeStandard(item.fitting);
+      const standardLabel = flangeStandardLabel(standard);
       const row = add(
-        `flange:${size.nb}`,
-        `Flange NB ${size.nb}`,
+        `flange:${standard}:${size.nb}`,
+        `${standardLabel} flange NB ${size.nb}`,
         mode === "double" ? 2 : 1,
         item.weightKg,
-        "physical flange plates",
+        `${mode === "double" ? "double set" : "single"} / physical flange plates`,
         40,
       );
       if (mode === "double") row.doubleFlangeSets += 1;
@@ -5576,6 +5925,7 @@ function splitSegmentAt(segmentIndex, t) {
   state.activePoint = splitIndex;
   clearSelectedSegments();
   state.selectedFitting = null;
+  state.selectedMeasurement = null;
   return splitIndex;
 }
 
@@ -5589,6 +5939,7 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   };
   if (type === "flange") {
     fitting.flangeMode = normalizeFlangeMode(options.flangeMode ?? state.flangeMode);
+    fitting.flangeStandard = normalizeFlangeStandard(options.flangeStandard ?? state.flangeStandard);
   } else if (type === "socket") {
     fitting.socketSizeNb = normalizePipeSize(options.socketSizeNb ?? SOCKET_SIZE_NB);
     fitting.socketAngle = normalizeSocketAngle(options.socketAngle);
@@ -5598,22 +5949,25 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   state.selectedFitting = nextFittingId;
   selectSingleSegment(segmentIndex);
   state.selectedNote = null;
+  state.selectedMeasurement = null;
   nextFittingId += 1;
   recordHistory({ type: "fitting" });
   updateAll();
 }
 
-function placeSocketFittings(segmentIndex, positions) {
+function placeSocketFittings(segmentIndex, positions, options = {}) {
   if (!ensureDrawingEditable("add sockets")) return;
   const fittingIds = [];
+  const socketSizeNb = normalizePipeSize(options.socketSizeNb ?? SOCKET_SIZE_NB);
+  const socketAngle = normalizeSocketAngle(options.socketAngle);
   for (const t of positions) {
     const fitting = {
       id: nextFittingId,
       type: "socket",
       segmentIndex,
       t: normalizeFittingPosition("socket", t),
-      socketSizeNb: SOCKET_SIZE_NB,
-      socketAngle: 0,
+      socketSizeNb,
+      socketAngle,
     };
     state.fittings.push(fitting);
     fittingIds.push(fitting.id);
@@ -5624,6 +5978,7 @@ function placeSocketFittings(segmentIndex, positions) {
   state.selectedFitting = fittingIds[fittingIds.length - 1];
   selectSingleSegment(segmentIndex);
   state.selectedNote = null;
+  state.selectedMeasurement = null;
   recordHistory({ type: "fittings", fittingIds });
   updateAll();
 }
@@ -5640,9 +5995,77 @@ function placeNote(point, textOverride = null) {
   state.notes.push(note);
   state.selectedNote = nextNoteId;
   state.selectedFitting = null;
+  state.selectedMeasurement = null;
   clearSelectedSegments();
   nextNoteId += 1;
   recordHistory({ type: "note", noteId: note.id });
+  updateAll();
+}
+
+function measurementLengthMm(measurement) {
+  return pointLength(subtractPoints(measurement.end, measurement.start));
+}
+
+function measurementLabel(measurement) {
+  const label = String(measurement?.label ?? "").trim();
+  return label || `${formatLength(measurementLengthMm(measurement))} mm`;
+}
+
+function measurePointFromPointer(pointer) {
+  const pointHit = findNearestPoint(pointer);
+  if (pointHit) return { point: clonePoint(pointHit.point), label: `Point ${pointHit.index + 1}` };
+
+  const segmentHit = findNearestSegment(pointer);
+  if (segmentHit) {
+    return {
+      point: lerpPoint(segmentHit.segment.start, segmentHit.segment.end, segmentHit.t),
+      label: `Run ${segmentHit.segment.index + 1}`,
+    };
+  }
+
+  return { point: unprojectIsoGround(pointer), label: "Iso paper" };
+}
+
+function beginOrFinishMeasurement(pointer) {
+  if (!ensureDrawingEditable("add measurements")) return;
+  const picked = measurePointFromPointer(pointer);
+  if (!measurementDraft) {
+    measurementDraft = { start: picked.point, startLabel: picked.label };
+    state.selectedMeasurement = null;
+    state.selectedFitting = null;
+    state.selectedNote = null;
+    state.selectedPoint = null;
+    clearSelectedSegments();
+    cursorReadout.textContent = `Measure from ${picked.label}`;
+    drawIso();
+    return;
+  }
+
+  const start = measurementDraft.start;
+  const end = picked.point;
+  measurementDraft = null;
+  if (pointLength(subtractPoints(end, start)) < 1) {
+    cursorReadout.textContent = "Pick a second point further away";
+    drawIso();
+    return;
+  }
+
+  const snapshot = createUndoSnapshot();
+  const measurement = {
+    id: nextMeasurementId,
+    start,
+    end,
+    label: "",
+  };
+  state.measurements.push(measurement);
+  state.selectedMeasurement = measurement.id;
+  state.selectedFitting = null;
+  state.selectedNote = null;
+  state.selectedPoint = null;
+  clearSelectedSegments();
+  nextMeasurementId += 1;
+  recordHistory({ type: "snapshot", snapshot });
+  cursorReadout.textContent = `Measured ${measurementLabel(measurement)}`;
   updateAll();
 }
 
@@ -5651,6 +6074,7 @@ function createUndoSnapshot() {
     payload: statePayload(),
     nextFittingId,
     nextNoteId,
+    nextMeasurementId,
   };
 }
 
@@ -5668,6 +6092,7 @@ function createHistorySnapshot() {
     history: cloneHistoryEntries(state.history),
     nextFittingId,
     nextNoteId,
+    nextMeasurementId,
   };
 }
 
@@ -5692,6 +6117,7 @@ function restoreHistorySnapshot(snapshot) {
   state.redoHistory = [];
   nextFittingId = Number(snapshot?.nextFittingId) || nextFittingId;
   nextNoteId = Number(snapshot?.nextNoteId) || nextNoteId;
+  nextMeasurementId = Number(snapshot?.nextMeasurementId) || nextMeasurementId;
   return true;
 }
 
@@ -5711,6 +6137,7 @@ function undo() {
       state.redoHistory = nextRedoHistory;
       nextFittingId = Number(last.snapshot?.nextFittingId) || nextFittingId;
       nextNoteId = Number(last.snapshot?.nextNoteId) || nextNoteId;
+      nextMeasurementId = Number(last.snapshot?.nextMeasurementId) || nextMeasurementId;
       changed = true;
     }
   } else if (last.type === "edge" && state.points.length > 1) {
@@ -5746,6 +6173,10 @@ function undo() {
     state.notes = state.notes.filter((note) => note.id !== last.noteId);
     state.selectedNote = null;
     changed = true;
+  } else if (last.type === "measurement") {
+    state.measurements = (state.measurements ?? []).filter((measurement) => measurement.id !== last.measurementId);
+    state.selectedMeasurement = null;
+    changed = true;
   }
 
   if (!changed) {
@@ -5775,15 +6206,28 @@ function updateHistoryButtons() {
 function deleteSelection() {
   if (!ensureDrawingEditable("delete items")) return;
   if (state.selectedNote) {
+    const snapshot = createUndoSnapshot();
     state.notes = state.notes.filter((note) => note.id !== state.selectedNote);
     state.selectedNote = null;
+    recordHistory({ type: "snapshot", snapshot });
+    updateAll();
+    return;
+  }
+
+  if (state.selectedMeasurement) {
+    const snapshot = createUndoSnapshot();
+    state.measurements = (state.measurements ?? []).filter((measurement) => measurement.id !== state.selectedMeasurement);
+    state.selectedMeasurement = null;
+    recordHistory({ type: "snapshot", snapshot });
     updateAll();
     return;
   }
 
   if (state.selectedFitting) {
+    const snapshot = createUndoSnapshot();
     state.fittings = state.fittings.filter((fitting) => fitting.id !== state.selectedFitting);
     state.selectedFitting = null;
+    recordHistory({ type: "snapshot", snapshot });
     updateAll();
     return;
   }
@@ -5799,6 +6243,7 @@ function deleteSegmentsByIndex(indexes) {
   const selectedSegments = normalizeSelectedSegments(indexes, state.edges.length).sort((a, b) => b - a);
   if (!selectedSegments.length) return false;
 
+  const snapshot = createUndoSnapshot();
   for (const removedEdgeIndex of selectedSegments) {
     state.edges.splice(removedEdgeIndex, 1);
     reindexDimensionOffsetsAfterSegmentRemoval(removedEdgeIndex);
@@ -5810,6 +6255,8 @@ function deleteSegmentsByIndex(indexes) {
   }
   clearSelectedSegments();
   state.selectedFitting = null;
+  state.selectedMeasurement = null;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
   return true;
 }
@@ -5824,6 +6271,9 @@ function setTool(tool) {
   if (tool !== "boxSelect") {
     cancelBoxSelect({ redraw: false });
   }
+  if (tool !== "measure") {
+    measurementDraft = null;
+  }
   cancelDimensionDrag({ redraw: false });
   state.activeTool = tool;
   if (tool !== "draw") {
@@ -5835,6 +6285,8 @@ function setTool(tool) {
   });
   if (tool === "select") {
     cursorReadout.textContent = "Select - hold Shift to pick multiple runs";
+  } else if (tool === "measure") {
+    cursorReadout.textContent = "Measure - pick first point";
   }
   drawIso();
 }
@@ -6770,6 +7222,8 @@ function updatePropertiesPanel() {
       ? [["delete-fitting", "Delete", "danger"]]
       : [
           ["set-fitting-weight", "Set weight"],
+          ...(fitting.fitting.type === "flange" ? [["change-flange-standard", "Flange type"]] : []),
+          ...(fitting.fitting.type === "socket" ? [["change-socket-size", "Socket size"]] : []),
           ...(fitting.weightSource === "manual" ? [["clear-fitting-weight", "Clear manual"]] : []),
           ["delete-fitting", "Delete", "danger"],
         ];
@@ -6801,6 +7255,26 @@ function updatePropertiesPanel() {
         [
           ["edit-note", "Edit note"],
           ["delete-note", "Delete", "danger"],
+        ],
+      );
+      return;
+    }
+  }
+
+  if (state.selectedMeasurement) {
+    const measurement = (state.measurements ?? []).find((item) => item.id === state.selectedMeasurement);
+    if (measurement) {
+      renderProperties(
+        "Measurement",
+        [
+          ["Length", `${formatLength(measurementLengthMm(measurement))} mm`],
+          ["From", formatPointCompact(measurement.start)],
+          ["To", formatPointCompact(measurement.end)],
+          ["Label", measurement.label || "Auto length"],
+        ],
+        [
+          ["edit-measurement-label", "Edit label"],
+          ["delete-measurement", "Delete", "danger"],
         ],
       );
       return;
@@ -6914,9 +7388,13 @@ function renderProperties(title, rows, actions) {
 function handlePropertyAction(action) {
   if (action === "set-fitting-weight") setSelectedFittingWeight();
   if (action === "clear-fitting-weight") clearSelectedFittingWeight();
+  if (action === "change-flange-standard") promptSelectedFlangeStandard();
+  if (action === "change-socket-size") promptSelectedSocketSize();
   if (action === "delete-fitting") deleteSelectedFitting();
   if (action === "edit-note") editSelectedNote();
   if (action === "delete-note") deleteSelectedNote();
+  if (action === "edit-measurement-label") editSelectedMeasurementLabel();
+  if (action === "delete-measurement") deleteSelectedMeasurement();
   if (action === "edit-run-length") editSelectedRunLength();
   if (action === "delete-run") deleteSegmentsByIndex(selectedSegmentIndexes());
   if (action === "mark-point-branch") setSelectedPointConnectionType("branch");
@@ -6948,10 +7426,24 @@ function clearSelectedFittingWeight() {
   updateAll();
 }
 
+function promptSelectedFlangeStandard() {
+  const data = selectedFittingData();
+  if (!data || data.fitting.type !== "flange") return;
+  openSelectedFlangeStandardMenu(data.fitting.id);
+}
+
+function promptSelectedSocketSize() {
+  const data = selectedFittingData();
+  if (!data || data.fitting.type !== "socket") return;
+  openSelectedSocketSizeMenu(data.fitting.id);
+}
+
 function deleteSelectedFitting() {
   if (!state.selectedFitting) return;
+  const snapshot = createUndoSnapshot();
   state.fittings = state.fittings.filter((fitting) => fitting.id !== state.selectedFitting);
   state.selectedFitting = null;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -6962,8 +7454,33 @@ function editSelectedNote() {
 
 function deleteSelectedNote() {
   if (!state.selectedNote) return;
+  const snapshot = createUndoSnapshot();
   state.notes = state.notes.filter((note) => note.id !== state.selectedNote);
   state.selectedNote = null;
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function editSelectedMeasurementLabel() {
+  const measurement = (state.measurements ?? []).find((item) => item.id === state.selectedMeasurement);
+  if (!measurement) return;
+
+  const text = window.prompt("Measurement label. Leave blank to use the measured length.", measurement.label || "");
+  if (text === null) return;
+  const nextLabel = String(text).trim().slice(0, 64);
+  if (nextLabel === measurement.label) return;
+  const snapshot = createUndoSnapshot();
+  measurement.label = nextLabel;
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function deleteSelectedMeasurement() {
+  if (!state.selectedMeasurement) return;
+  const snapshot = createUndoSnapshot();
+  state.measurements = (state.measurements ?? []).filter((measurement) => measurement.id !== state.selectedMeasurement);
+  state.selectedMeasurement = null;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -7545,7 +8062,11 @@ function setupTouchSelectionGuards() {
 }
 
 function updateTouchComfortClass() {
-  document.body.classList.toggle("touch-comfort", isTabletLayout());
+  const touchMode = isTabletLayout();
+  const phoneMode = isPhoneLayout();
+  document.body.classList.toggle("touch-comfort", touchMode);
+  document.body.classList.toggle("phone-layout", phoneMode);
+  document.body.classList.toggle("mobile-touch-layout", touchMode);
 }
 
 function setupTouchComfort() {
@@ -7691,6 +8212,51 @@ function setupActionMenu() {
   });
 }
 
+function helpSectionForCurrentMode() {
+  if (isCoarseInput()) return "touch";
+  if (appMode === "draw") return "draw";
+  if (appMode === "edit") return "edit";
+  if (appMode === "review") return "review";
+  if (appMode === "export") return "export";
+  return "touch";
+}
+
+function setHelpTab(section) {
+  const key = helpPanels.some((panel) => panel.dataset.helpPanel === section) ? section : "touch";
+  for (const button of helpTabButtons) {
+    const active = button.dataset.helpTab === key;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  }
+  for (const panel of helpPanels) {
+    panel.classList.toggle("active", panel.dataset.helpPanel === key);
+  }
+}
+
+function openHelpDialog(section = helpSectionForCurrentMode()) {
+  if (!helpDialog) return;
+  setHelpTab(section);
+  helpDialog.hidden = false;
+  closeActionMenu();
+}
+
+function closeHelpDialog() {
+  if (helpDialog) helpDialog.hidden = true;
+}
+
+function setupHelpDialog() {
+  helpButton?.addEventListener("click", () => openHelpDialog());
+  helpCloseButton?.addEventListener("click", closeHelpDialog);
+  helpDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === helpDialog) {
+      closeHelpDialog();
+    }
+  });
+  for (const button of helpTabButtons) {
+    button.addEventListener("click", () => setHelpTab(button.dataset.helpTab));
+  }
+}
+
 function setPreviewMode(value) {
   state.previewMode = normalizePreviewMode(value);
   if (previewModeSelect) previewModeSelect.value = state.previewMode;
@@ -7700,7 +8266,22 @@ function setPreviewMode(value) {
   persistState();
 }
 
+function populateFlangeStandardOptions() {
+  if (!flangeStandardSelect || flangeStandardSelect.dataset.populated === "true") return;
+  const currentValue = normalizeFlangeStandard(flangeStandardSelect.value || state.flangeStandard);
+  flangeStandardSelect.innerHTML = "";
+  for (const [key, info] of Object.entries(FLANGE_STANDARDS)) {
+    const option = document.createElement("option");
+    option.value = key;
+    option.textContent = info.label;
+    flangeStandardSelect.append(option);
+  }
+  flangeStandardSelect.value = currentValue;
+  flangeStandardSelect.dataset.populated = "true";
+}
+
 function updateControls() {
+  populateFlangeStandardOptions();
   if (appVersionBadge) {
     appVersionBadge.textContent = APP_VERSION;
     appVersionBadge.title = `SpoolMate ${APP_VERSION} build ${APP_BUILD_DATE}`;
@@ -7712,6 +8293,7 @@ function updateControls() {
   anglePlaneSelect.value = state.anglePlane;
   pipeSpecSelect.value = normalizePipeSpec(state.pipeSpec);
   flangeModeSelect.value = normalizeFlangeMode(state.flangeMode);
+  if (flangeStandardSelect) flangeStandardSelect.value = normalizeFlangeStandard(state.flangeStandard);
   const previewMode = normalizePreviewMode(state.previewMode);
   if (previewModeSelect) previewModeSelect.value = previewMode;
   if (previewModePanelSelect) previewModePanelSelect.value = previewMode;
@@ -8832,10 +9414,10 @@ function rebuildThreeSpool() {
 
     if (fitting.type === "flange") {
       if (style.lineDrawing) {
-        group.add(outlineFlangeMarker(position, direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), flangeMaterial));
+        group.add(outlineFlangeMarker(position, direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), fittingFlangeStandard(fitting), flangeMaterial));
       } else {
         group.add(
-          flangeAssembly(position, direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), {
+          flangeAssembly(position, direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), fittingFlangeStandard(fitting), {
             flange: flangeMaterial,
             bolt: boltMaterial,
             gasket: gasketMaterial,
@@ -9285,15 +9867,21 @@ function outlineRollGrooveMarker(position, direction, radius, material, width = 
   return group;
 }
 
-function outlineFlangeMarker(position, direction, radius, nominalBore, flangeMode, material) {
+function outlineFlangeMarker(position, direction, radius, nominalBore, flangeMode, flangeStandard, material) {
   const THREE = three.module;
   const group = new THREE.Group();
   const axis = direction.clone().normalize();
   const boltCount = boltCountForNb(nominalBore);
   const isSingle = normalizeFlangeMode(flangeMode) === "single";
-  const plateThickness = clampNumber(radius * 0.42, 0.045, 0.14);
+  const standardInfo = flangeStandardInfo(flangeStandard);
+  const radiusFactor = standardInfo.radiusFactor || 1;
+  const thicknessFactor = standardInfo.thicknessFactor || 1;
+  const plateThickness = clampNumber(radius * 0.42 * thicknessFactor, 0.045, 0.16);
   const gasketThickness = clampNumber(plateThickness * 0.32, 0.018, 0.038);
   const plateOffset = plateThickness * 0.62 + gasketThickness * 0.5;
+  const outerRadius = radius * 2.15 * radiusFactor;
+  const boltCircleRadius = radius * 1.58 * radiusFactor;
+  const boltHoleRadius = clampNumber(radius * 0.15 * Math.sqrt(radiusFactor), 0.018, 0.055);
   const plateCenters = isSingle
     ? [position.clone()]
     : [-1, 1].map((side) => position.clone().addScaledVector(axis, side * plateOffset));
@@ -9302,18 +9890,18 @@ function outlineFlangeMarker(position, direction, radius, nominalBore, flangeMod
     group.add(outlineFlangePlate(
       plateCenter,
       axis,
-      radius * 2.15,
+      outerRadius,
       radius * 1.07,
       plateThickness,
       boltCount,
-      radius * 1.58,
-      clampNumber(radius * 0.15, 0.018, 0.05),
+      boltCircleRadius,
+      boltHoleRadius,
       material,
     ));
   }
 
   if (!isSingle) {
-    group.add(outlineRing(position, axis, radius * 1.82, material));
+    group.add(outlineRing(position, axis, radius * 1.82 * radiusFactor, material));
     group.add(outlineRing(position, axis, radius * 1.05, material));
   }
 
@@ -10054,19 +10642,22 @@ function torusRing(position, direction, radius, tubeRadius, material, radialSegm
   return ring;
 }
 
-function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode, materials) {
+function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode, flangeStandard, materials) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
   const boltCount = boltCountForNb(nominalBore);
   const isSingle = normalizeFlangeMode(flangeMode) === "single";
-  const plateThickness = clampNumber(pipeRadius * 0.42, 0.045, 0.14);
+  const standardInfo = flangeStandardInfo(flangeStandard);
+  const radiusFactor = standardInfo.radiusFactor || 1;
+  const thicknessFactor = standardInfo.thicknessFactor || 1;
+  const plateThickness = clampNumber(pipeRadius * 0.42 * thicknessFactor, 0.045, 0.16);
   const gasketThickness = clampNumber(plateThickness * 0.32, 0.018, 0.038);
   const plateOffset = plateThickness * 0.62 + gasketThickness * 0.5;
   const totalHalfDepth = isSingle ? plateThickness * 0.58 : plateOffset + plateThickness * 0.52;
-  const outerRadius = pipeRadius * 2.15;
+  const outerRadius = pipeRadius * 2.15 * radiusFactor;
   const innerRadius = pipeRadius * 1.07;
-  const boltCircleRadius = pipeRadius * 1.58;
-  const boltHoleRadius = clampNumber(pipeRadius * 0.15, 0.018, 0.05);
+  const boltCircleRadius = pipeRadius * 1.58 * radiusFactor;
+  const boltHoleRadius = clampNumber(pipeRadius * 0.15 * Math.sqrt(radiusFactor), 0.018, 0.055);
   const boltBodyRadius = boltHoleRadius * 0.62;
   const boltHeadRadius = boltHoleRadius * 1.18;
   const boltHeadDepth = clampNumber(plateThickness * 0.26, 0.018, 0.04);
@@ -14775,6 +15366,133 @@ function capture3dPreviewImage() {
   }
 }
 
+function capture3dReportViews() {
+  try {
+    if (three.ready && three.module && three.scene) {
+      rebuildThreeSpool();
+      const views = [
+        {
+          title: "Isometric",
+          direction: [-1.35, -1.25, 0.95],
+          up: [-0.45, -0.45, 1],
+        },
+        {
+          title: "Plan",
+          direction: [0, 0, 1],
+          up: [0, 1, 0],
+        },
+        {
+          title: "Side",
+          direction: [-1.1, 0.08, 0.46],
+          up: [0, 0, 1],
+        },
+      ].map((view) => capture3dReportView(view)).filter(Boolean);
+
+      if (views.length) return views;
+    }
+  } catch (error) {
+    console.warn("Could not capture offscreen 3D model views.", error);
+  }
+
+  const fallback = capture3dPreviewImage();
+  return fallback ? [{ title: "Model", dataUrl: fallback, width: 960, height: 640 }] : [];
+}
+
+function capture3dReportView(config) {
+  const THREE = three.module;
+  const width = 960;
+  const height = 640;
+  const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    preserveDrawingBuffer: true,
+    alpha: false,
+  });
+
+  renderer.setPixelRatio(1);
+  renderer.setSize(width, height, false);
+  if (THREE.SRGBColorSpace) renderer.outputColorSpace = THREE.SRGBColorSpace;
+  if (THREE.ACESFilmicToneMapping) renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = three.renderer?.toneMappingExposure ?? 1.05;
+
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.01, 1000);
+  const box = reportSpoolBounds3d(THREE);
+  fitReportCameraToBox(camera, box, width / height, config);
+  renderer.render(three.scene, camera);
+  const dataUrl = renderer.domElement.toDataURL("image/png");
+  renderer.dispose();
+
+  return {
+    title: config.title,
+    dataUrl,
+    width,
+    height,
+  };
+}
+
+function reportSpoolBounds3d(THREE) {
+  const box = new THREE.Box3();
+  if (three.spoolGroup && three.spoolGroup.children.length) {
+    box.setFromObject(three.spoolGroup);
+  }
+
+  if (box.isEmpty()) {
+    box.setFromCenterAndSize(new THREE.Vector3(0, 0, 0), new THREE.Vector3(4, 4, 4));
+  }
+  return box;
+}
+
+function fitReportCameraToBox(camera, box, aspect, config) {
+  const THREE = three.module;
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+  const maxDim = Math.max(size.x, size.y, size.z, 1.5);
+  const direction = new THREE.Vector3(...config.direction).normalize();
+  const up = new THREE.Vector3(...config.up).normalize();
+
+  if (Math.abs(direction.dot(up)) > 0.94) {
+    up.set(0, 1, 0);
+  }
+
+  camera.position.copy(center).addScaledVector(direction, maxDim * 4 + 6);
+  camera.up.copy(up);
+  camera.lookAt(center);
+  camera.near = 0.01;
+  camera.far = maxDim * 12 + 100;
+  camera.updateMatrixWorld();
+
+  const corners = [
+    [box.min.x, box.min.y, box.min.z],
+    [box.min.x, box.min.y, box.max.z],
+    [box.min.x, box.max.y, box.min.z],
+    [box.min.x, box.max.y, box.max.z],
+    [box.max.x, box.min.y, box.min.z],
+    [box.max.x, box.min.y, box.max.z],
+    [box.max.x, box.max.y, box.min.z],
+    [box.max.x, box.max.y, box.max.z],
+  ].map((coords) => new THREE.Vector3(...coords).applyMatrix4(camera.matrixWorldInverse));
+
+  const minX = Math.min(...corners.map((corner) => corner.x));
+  const maxX = Math.max(...corners.map((corner) => corner.x));
+  const minY = Math.min(...corners.map((corner) => corner.y));
+  const maxY = Math.max(...corners.map((corner) => corner.y));
+  const midX = (minX + maxX) * 0.5;
+  const midY = (minY + maxY) * 0.5;
+  let viewWidth = Math.max(0.8, (maxX - minX) * 1.18);
+  let viewHeight = Math.max(0.8, (maxY - minY) * 1.18);
+
+  if (viewWidth / viewHeight < aspect) {
+    viewWidth = viewHeight * aspect;
+  } else {
+    viewHeight = viewWidth / aspect;
+  }
+
+  camera.left = midX - viewWidth * 0.5;
+  camera.right = midX + viewWidth * 0.5;
+  camera.top = midY + viewHeight * 0.5;
+  camera.bottom = midY - viewHeight * 0.5;
+  camera.updateProjectionMatrix();
+}
+
 function projectExportHtml(payload, reportImage, modelImage = "", options = {}) {
   const project = normalizeProjectInfo(payload.state?.projectInfo);
   const title = projectDisplayName(project);
@@ -14916,10 +15634,10 @@ async function exportFabSheetPdf() {
     },
   ];
 
-  const modelImage = capture3dPreviewImage();
-  if (modelImage) {
+  const modelViews = capture3dReportViews();
+  if (modelViews.length) {
     try {
-      const modelCanvas = await buildModelReportCanvas(modelImage);
+      const modelCanvas = await buildModelReportCanvas(modelViews);
       pages.push({
         dataUrl: modelCanvas.toDataURL("image/jpeg", 0.92),
         width: modelCanvas.width,
@@ -14934,8 +15652,14 @@ async function exportFabSheetPdf() {
   downloadBytes(pdfBytes, `${name}-fab-sheet.pdf`, "application/pdf");
 }
 
-async function buildModelReportCanvas(modelImage) {
-  const image = await loadReportImage(modelImage);
+async function buildModelReportCanvas(modelViews) {
+  const views = (Array.isArray(modelViews) ? modelViews : [{ title: "Model", dataUrl: modelViews }])
+    .filter((view) => view?.dataUrl)
+    .slice(0, 3);
+  const loadedViews = await Promise.all(views.map(async (view) => ({
+    ...view,
+    image: await loadReportImage(view.dataUrl),
+  })));
   const canvas = document.createElement("canvas");
   canvas.width = 1800;
   canvas.height = 1240;
@@ -14955,19 +15679,73 @@ async function buildModelReportCanvas(modelImage) {
 
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 24px Inter, system-ui, sans-serif";
-  ctx.fillText("3D model preview", area.x + 24, area.y + 42);
+  ctx.fillText(loadedViews.length > 1 ? "3D model views" : "3D model preview", area.x + 24, area.y + 42);
   ctx.font = "800 14px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#607174";
   ctx.fillText(`${pipeSpec().label} / ${projectStatusLabel()} / ${formatMass(quantitySummary().totalWeightKg)} kg estimated`, area.x + 24, area.y + 66);
 
-  const imageArea = {
-    x: area.x + 36,
-    y: area.y + 92,
-    width: area.width - 72,
-    height: area.height - 124,
+  if (loadedViews.length <= 1) {
+    drawModelViewCard(ctx, loadedViews[0], {
+      x: area.x + 36,
+      y: area.y + 92,
+      width: area.width - 72,
+      height: area.height - 124,
+    });
+    return canvas;
+  }
+
+  const gap = 26;
+  const top = area.y + 92;
+  const bottom = area.y + area.height - 30;
+  const left = {
+    x: area.x + 30,
+    y: top,
+    width: Math.round((area.width - gap - 72) * 0.62),
+    height: bottom - top,
   };
-  drawContainedImage(ctx, image, imageArea);
+  const right = {
+    x: left.x + left.width + gap,
+    y: top,
+    width: area.x + area.width - 30 - (left.x + left.width + gap),
+    height: bottom - top,
+  };
+  const smallHeight = Math.floor((right.height - gap) * 0.5);
+
+  drawModelViewCard(ctx, loadedViews[0], left);
+  drawModelViewCard(ctx, loadedViews[1], {
+    x: right.x,
+    y: right.y,
+    width: right.width,
+    height: smallHeight,
+  });
+  drawModelViewCard(ctx, loadedViews[2] ?? loadedViews[0], {
+    x: right.x,
+    y: right.y + smallHeight + gap,
+    width: right.width,
+    height: right.height - smallHeight - gap,
+  });
   return canvas;
+}
+
+function drawModelViewCard(ctx, view, area) {
+  if (!view?.image) return;
+
+  roundRect(ctx, area.x, area.y, area.width, area.height, 8);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.14)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  ctx.fillStyle = "#31454c";
+  ctx.font = "900 17px Inter, system-ui, sans-serif";
+  ctx.fillText(view.title || "Model", area.x + 18, area.y + 30);
+  drawContainedImage(ctx, view.image, {
+    x: area.x + 16,
+    y: area.y + 46,
+    width: area.width - 32,
+    height: area.height - 62,
+  });
 }
 
 function loadReportImage(src) {
@@ -15168,11 +15946,13 @@ function drawReportDrawing(ctx, area) {
     selectedSegment: state.selectedSegment,
     selectedFitting: state.selectedFitting,
     selectedNote: state.selectedNote,
+    selectedMeasurement: state.selectedMeasurement,
     selectedPoint: state.selectedPoint,
     hoveredSegment: state.hoveredSegment,
     activeTool: state.activeTool,
     previewCandidate: state.previewCandidate,
     pointer: state.pointer,
+    measurementDraft,
   };
 
   const scale = reportIsoScale(area.width, area.height);
@@ -15185,11 +15965,13 @@ function drawReportDrawing(ctx, area) {
     state.selectedSegment = null;
     state.selectedFitting = null;
     state.selectedNote = null;
+    state.selectedMeasurement = null;
     state.selectedPoint = null;
     state.hoveredSegment = null;
     state.activeTool = "select";
     state.previewCandidate = null;
     state.pointer = null;
+    measurementDraft = null;
 
     ctx.save();
     roundRect(ctx, area.x, area.y, area.width, area.height, 10);
@@ -15202,6 +15984,7 @@ function drawReportDrawing(ctx, area) {
     ctx.translate(area.x, area.y);
     drawGrid(ctx, area.width, area.height, projection);
     drawSpool2d(ctx, projection);
+    drawMeasurements2d(ctx, projection);
     drawNotes2d(ctx, projection);
     if (state.showLiftingPoints) {
       drawSuggestedLugs2d(ctx, projection);
@@ -15222,11 +16005,13 @@ function drawReportDrawing(ctx, area) {
     state.selectedSegment = saved.selectedSegment;
     state.selectedFitting = saved.selectedFitting;
     state.selectedNote = saved.selectedNote;
+    state.selectedMeasurement = saved.selectedMeasurement;
     state.selectedPoint = saved.selectedPoint;
     state.hoveredSegment = saved.hoveredSegment;
     state.activeTool = saved.activeTool;
     state.previewCandidate = saved.previewCandidate;
     state.pointer = saved.pointer;
+    measurementDraft = saved.measurementDraft;
   }
 }
 
@@ -15254,7 +16039,8 @@ function reportProjection(width, height, scale) {
 }
 
 function reportRelevantPoints() {
-  return [...state.points, ...state.notes.map((note) => note.point)];
+  const measurementPoints = (state.measurements ?? []).flatMap((measurement) => [measurement.start, measurement.end]);
+  return [...state.points, ...state.notes.map((note) => note.point), ...measurementPoints];
 }
 
 function drawReportTakeoff(ctx, area, quantities) {
@@ -15664,6 +16450,7 @@ function contextTargetFromPointer(pointer) {
   const endpointHit = endpointSegmentHitForPoint(pointHit);
   const fittingHit = findNearestFitting(pointer);
   const reducerHit = findNearestAutoReducer(pointer);
+  const measurementHit = findNearestMeasurement(pointer);
   const pipeHit = endpointHit ?? fittingHit?.segmentHit ?? reducerHit?.segmentHit ?? segmentHit;
   const noteHit = findNearestNote(pointer);
   const notePoint = noteHit?.note.point ?? pointHit?.point ?? (
@@ -15674,6 +16461,7 @@ function contextTargetFromPointer(pointer) {
     segmentHit: pipeHit,
     fittingHit,
     reducerHit,
+    measurementHit,
     pointHit,
     endpointHit,
     noteHit,
@@ -15704,6 +16492,7 @@ function endpointSegmentHitForPoint(pointHit) {
 }
 
 function renderDrawingContextMenu() {
+  setDrawingContextMenuVariant(null);
   drawingContextMenu.innerHTML = "";
   const actions = [];
   const target = drawingContextTarget;
@@ -15743,13 +16532,13 @@ function renderDrawingContextMenu() {
     actions.push(
       {
         label: "Add single flange",
-        detail: target.endpointHit ? "Flush on pipe end" : "One flanged plate",
-        action: () => placeContextFitting("flange", { flangeMode: "single" }),
+        detail: target.endpointHit ? `Flush on pipe end / ${flangeStandardLabel(state.flangeStandard)}` : `One flanged plate / ${flangeStandardLabel(state.flangeStandard)}`,
+        action: () => placeContextFitting("flange", { flangeMode: "single", flangeStandard: state.flangeStandard }),
       },
       {
         label: "Add double flange",
-        detail: target.endpointHit ? "Flush on pipe end" : "Two plates and gasket",
-        action: () => placeContextFitting("flange", { flangeMode: "double" }),
+        detail: target.endpointHit ? `Flush on pipe end / ${flangeStandardLabel(state.flangeStandard)}` : `Two plates and gasket / ${flangeStandardLabel(state.flangeStandard)}`,
+        action: () => placeContextFitting("flange", { flangeMode: "double", flangeStandard: state.flangeStandard }),
       },
       {
         label: "Add roll groove",
@@ -15762,9 +16551,10 @@ function renderDrawingContextMenu() {
         action: () => placeContextFitting("reducer"),
       },
       {
-        label: "Add 1/2 sockets",
-        detail: "Choose count and spacing",
-        action: () => addContextSockets(),
+        label: "Add sockets",
+        detail: "Choose size, count and spacing",
+        action: () => renderSocketSetupMenu(),
+        keepOpen: true,
       },
     );
 
@@ -15805,7 +16595,7 @@ function renderDrawingContextMenu() {
     if (fittingData.fitting.type !== "rollGroove") {
       actions.push({
         label: "Set fitting weight",
-        detail: `${formatMass(weightKg)} kg ${fittingWeightSource(fittingData.fitting)}`,
+        detail: `${formatMass(weightKg)} kg ${fittingWeightSource(fittingData.fitting, fittingData.segment)}`,
         action: () => setContextFittingWeight(),
       });
 
@@ -15818,7 +16608,22 @@ function renderDrawingContextMenu() {
       }
     }
 
+    if (target.fittingHit.fitting.type === "flange") {
+      actions.push({
+        label: "Change flange standard",
+        detail: flangeStandardLabel(fittingFlangeStandard(target.fittingHit.fitting)),
+        action: () => setContextFlangeStandard(),
+        keepOpen: true,
+      });
+    }
+
     if (target.fittingHit.fitting.type === "socket") {
+      actions.push({
+        label: "Change socket size",
+        detail: `NB ${fittingSocketSizeNb(target.fittingHit.fitting)}`,
+        action: () => setContextSocketSize(),
+        keepOpen: true,
+      });
       actions.push({
         label: "Spin socket 90 deg",
         detail: `Current ${formatAngle(fittingSocketAngle(target.fittingHit.fitting))} deg around pipe`,
@@ -15849,7 +16654,22 @@ function renderDrawingContextMenu() {
     });
   }
 
-  if (target?.pointHit && !target.endpointHit && !target.segmentHit && !target.noteHit) {
+  if (target?.measurementHit) {
+    actions.push({
+      label: "Edit measurement label",
+      detail: measurementLabel(target.measurementHit.measurement),
+      action: () => editContextMeasurementLabel(),
+    });
+
+    actions.push({
+      label: "Delete measurement",
+      detail: "Remove this manual measure mark",
+      danger: true,
+      action: () => deleteContextMeasurement(),
+    });
+  }
+
+  if (target?.pointHit && !target.endpointHit && !target.segmentHit && !target.noteHit && !target.measurementHit) {
     if (!pointConnections.length && state.points.length > 1) {
       actions.push({
         label: "Delete point",
@@ -15875,6 +16695,7 @@ function appendDrawingContextActions(actions) {
     button.type = "button";
     button.className = "drawing-context-item";
     if (action.danger) button.classList.add("danger");
+    if (action.active) button.classList.add("active");
     button.setAttribute("role", "menuitem");
 
     const label = document.createElement("span");
@@ -15893,6 +16714,10 @@ function appendDrawingContextActions(actions) {
   }
 }
 
+function setDrawingContextMenuVariant(variant) {
+  drawingContextMenu.classList.toggle("socket-setup-menu", variant === "socket-setup");
+}
+
 function addDrawingContextHeader(titleText, detailText) {
   const header = document.createElement("div");
   header.className = "drawing-context-header";
@@ -15904,9 +16729,64 @@ function addDrawingContextHeader(titleText, detailText) {
   drawingContextMenu.append(header);
 }
 
+function addDrawingContextSubheading(text) {
+  const title = document.createElement("div");
+  title.className = "drawing-context-subheading";
+  title.textContent = text;
+  drawingContextMenu.append(title);
+}
+
+function appendContextChoiceGrid(items) {
+  const grid = document.createElement("div");
+  grid.className = "drawing-context-choice-grid";
+  for (const item of items) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "drawing-context-choice";
+    if (item.active) button.classList.add("active");
+
+    const label = document.createElement("span");
+    label.textContent = item.label;
+    button.append(label);
+    if (item.detail) {
+      const detail = document.createElement("small");
+      detail.textContent = item.detail;
+      button.append(detail);
+    }
+
+    button.addEventListener("click", () => {
+      item.action();
+      if (!item.keepOpen) closeDrawingContextMenu();
+    });
+    grid.append(button);
+  }
+  drawingContextMenu.append(grid);
+  return grid;
+}
+
 function renderMobileDrawingContextMenu(target) {
+  setDrawingContextMenuVariant(null);
   drawingContextMenu.innerHTML = "";
   const actions = [];
+
+  if (target?.measurementHit) {
+    addDrawingContextHeader("Measurement", measurementLabel(target.measurementHit.measurement));
+    actions.push(
+      {
+        label: "Edit label",
+        detail: "Custom text or blank for auto length",
+        action: () => editContextMeasurementLabel(),
+      },
+      {
+        label: "Delete measurement",
+        detail: "Remove this measure mark",
+        danger: true,
+        action: () => deleteContextMeasurement(),
+      },
+    );
+    appendDrawingContextActions(actions);
+    return;
+  }
 
   if (target?.noteHit) {
     addDrawingContextHeader("Text note", "Quick note actions");
@@ -15930,7 +16810,21 @@ function renderMobileDrawingContextMenu(target) {
   if (target?.fittingHit) {
     const fitting = target.fittingHit.fitting;
     addDrawingContextHeader(`${fittingActionLabel(fitting.type)} fitting`, "Quick fitting actions");
+    if (fitting.type === "flange") {
+      actions.push({
+        label: "Flange standard",
+        detail: flangeStandardLabel(fittingFlangeStandard(fitting)),
+        action: () => setContextFlangeStandard(),
+        keepOpen: true,
+      });
+    }
     if (fitting.type === "socket") {
+      actions.push({
+        label: "Socket size",
+        detail: `NB ${fittingSocketSizeNb(fitting)}`,
+        action: () => setContextSocketSize(),
+        keepOpen: true,
+      });
       actions.push({
         label: "Spin socket 90 deg",
         detail: `${formatAngle(fittingSocketAngle(fitting))} deg now`,
@@ -16046,13 +16940,13 @@ function renderMobileFittingMenu() {
     },
     {
       label: "Single flange",
-      detail: target?.endpointHit ? "Flush on pipe end" : "One flanged plate",
-      action: () => placeContextFitting("flange", { flangeMode: "single" }),
+      detail: target?.endpointHit ? `Flush on pipe end / ${flangeStandardLabel(state.flangeStandard)}` : `One plate / ${flangeStandardLabel(state.flangeStandard)}`,
+      action: () => placeContextFitting("flange", { flangeMode: "single", flangeStandard: state.flangeStandard }),
     },
     {
       label: "Double flange",
-      detail: target?.endpointHit ? "Flush on pipe end" : "Two plates and gasket",
-      action: () => placeContextFitting("flange", { flangeMode: "double" }),
+      detail: target?.endpointHit ? `Flush on pipe end / ${flangeStandardLabel(state.flangeStandard)}` : `Two plates / ${flangeStandardLabel(state.flangeStandard)}`,
+      action: () => placeContextFitting("flange", { flangeMode: "double", flangeStandard: state.flangeStandard }),
     },
     {
       label: "Roll groove",
@@ -16065,15 +16959,17 @@ function renderMobileFittingMenu() {
       action: () => placeContextFitting("reducer"),
     },
     {
-      label: "1/2 sockets",
-      detail: "Choose count and spacing",
-      action: () => addContextSockets(),
+      label: "Sockets",
+      detail: "Choose size, count and spacing",
+      action: () => renderSocketSetupMenu(),
+      keepOpen: true,
     },
   ]);
   clampDrawingContextMenuToViewport();
 }
 
 function renderContextPipeSizeMenu() {
+  setDrawingContextMenuVariant(null);
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
 
@@ -16168,7 +17064,7 @@ function handleDocumentScrollForContextMenu(event) {
 
 function hasContextHit(pointer) {
   const target = contextTargetFromPointer(pointer);
-  return Boolean(target.segmentHit || target.fittingHit || target.pointHit || target.noteHit);
+  return Boolean(target.segmentHit || target.fittingHit || target.pointHit || target.noteHit || target.measurementHit);
 }
 
 function startTouchContextPress(event, pointer) {
@@ -16195,7 +17091,7 @@ function startTouchContextPress(event, pointer) {
     }, TOUCH_CONTEXT_PRESS_MS),
   };
 
-  return false;
+  return isPhoneLayout();
 }
 
 function updateTouchContextPress(event) {
@@ -16344,6 +17240,12 @@ function finishTouchContextPress(event) {
     return true;
   }
 
+  if (isPhoneLayout()) {
+    selectContextHitOnTouch(press.pointer, event);
+    event.preventDefault();
+    return true;
+  }
+
   return false;
 }
 
@@ -16360,6 +17262,7 @@ function startPendingDraw(event, pointer) {
     state.activePoint = pointHit.index;
     state.selectedFitting = null;
     state.selectedNote = null;
+    state.selectedMeasurement = null;
     clearSelectedSegments();
   }
 
@@ -16379,7 +17282,9 @@ function startPendingDraw(event, pointer) {
   state.pointer = pointer;
   cursorReadout.textContent = candidate.axis?.shiftAngle
     ? `${candidate.axis.label} / drag to draw`
-    : pointHit ? "Drag to draw from point" : formatPoint(candidate.point);
+    : pointHit
+    ? isPhoneLayout() ? "Drag from point, or tap nearby then tap direction" : "Drag to draw from point"
+    : isPhoneLayout() ? "Drag or tap to draw" : formatPoint(candidate.point);
   try {
     drawCanvas.setPointerCapture(event.pointerId);
   } catch {
@@ -16417,7 +17322,8 @@ function updatePendingDraw(event) {
 function finishPendingDraw(event) {
   if (!pendingDraw || pendingDraw.pointerId !== event.pointerId) return false;
   const candidate = pendingDraw.candidate;
-  const shouldCommit = pendingDraw.moved && candidate;
+  const allowPhoneTapCommit = isPhoneLayout() && isTouchLikeEvent(event) && candidate && pendingDraw.startedOnPoint === null;
+  const shouldCommit = Boolean(candidate && (pendingDraw.moved || allowPhoneTapCommit));
   const startedOnPoint = pendingDraw.startedOnPoint;
   cancelPendingDraw({ redraw: false });
 
@@ -16505,33 +17411,227 @@ function placeContextFitting(type, options = {}) {
   placeFitting(type, hit.segment.index, hit.t, options);
 }
 
-function addContextSockets() {
-  if (!ensureDrawingEditable("add sockets")) return;
-  const hit = drawingContextTarget?.segmentHit;
-  if (!hit) return;
-
-  const countText = window.prompt("How many 1/2 inch sockets?", "1");
-  if (countText === null) return;
-
-  const count = Math.round(Number(countText));
-  if (!Number.isInteger(count) || count < 1 || count > MAX_SOCKET_COUNT) {
-    window.alert(`Enter a socket count from 1 to ${MAX_SOCKET_COUNT}.`);
-    return;
-  }
-
-  const evenSpaced = count > 1
-    ? window.confirm("Evenly space the sockets along this pipe section?\nOK = even spaced\nCancel = grouped around the right-click spot")
-    : false;
-  const positions = socketPositionsForContext(hit, count, evenSpaced);
-  if (!positions.length) return;
-  placeSocketFittings(hit.segment.index, positions);
+function openSelectedFlangeStandardMenu(fittingId) {
+  syncDrawingContextMenuHost();
+  renderFlangeStandardMenu(fittingId, { fromInspector: true });
+  positionDrawingContextMenu(Math.max(10, window.innerWidth * 0.5 - 165), Math.max(10, window.innerHeight * 0.22));
 }
 
-function socketPositionsForContext(hit, count, evenSpaced) {
+function renderFlangeStandardMenu(fittingId, options = {}) {
+  setDrawingContextMenuVariant(null);
+  const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "flange");
+  if (!fitting) return;
+  drawingContextMenu.innerHTML = "";
+  addDrawingContextHeader("Flange standard", "Pick the flange family");
+  appendDrawingContextActions([{
+    label: options.fromInspector ? "Close" : "Back",
+    detail: options.fromInspector ? "Return to drawing" : "Return to fitting actions",
+    action: () => {
+      if (!options.fromInspector) {
+        renderDrawingContextMenu();
+        clampDrawingContextMenuToViewport();
+      }
+    },
+    keepOpen: !options.fromInspector,
+  }]);
+  addDrawingContextSubheading("Common flange types");
+  const current = fittingFlangeStandard(fitting);
+  appendContextChoiceGrid(Object.entries(FLANGE_STANDARDS).map(([key, info]) => ({
+    label: info.label,
+    detail: key === current ? "Current" : info.shortLabel,
+    active: key === current,
+    action: () => setFlangeStandardForFitting(fitting.id, key),
+  })));
+  clampDrawingContextMenuToViewport();
+}
+
+function setFlangeStandardForFitting(fittingId, standard) {
+  if (!ensureDrawingEditable("change flange standard")) return;
+  const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "flange");
+  if (!fitting) return;
+  fitting.flangeStandard = normalizeFlangeStandard(standard);
+  state.selectedFitting = fitting.id;
+  updateAll();
+}
+
+function socketSizeChoiceLabel(nb) {
+  const size = pipeSizeByNb(nb);
+  return `NB ${size.nb}`;
+}
+
+function socketSizeChoiceDetail(nb) {
+  const size = pipeSizeByNb(nb);
+  return `${size.nps} socket`;
+}
+
+function socketMenuSettings(options = {}) {
+  return {
+    socketSizeNb: normalizePipeSize(options.socketSizeNb ?? SOCKET_SIZE_NB),
+    count: Math.max(1, Math.min(MAX_SOCKET_COUNT, Math.round(Number(options.count) || 1))),
+    spacingKey: String(options.spacingKey ?? "150"),
+  };
+}
+
+function socketSpacingOptionsFromKey(spacingKey) {
+  if (spacingKey === "even") return { evenSpaced: true, spacingMm: null };
+  const spacingMm = Number(spacingKey);
+  return {
+    evenSpaced: false,
+    spacingMm: Number.isFinite(spacingMm) && spacingMm > 0 ? spacingMm : DEFAULT_SOCKET_SPACING_MM,
+  };
+}
+
+function socketSpacingLabel(settings) {
+  if (settings.count <= 1) return "single socket";
+  if (settings.spacingKey === "even") return "even spacing";
+  return `${Number(settings.spacingKey) || DEFAULT_SOCKET_SPACING_MM} mm C/C`;
+}
+
+function socketPreviewElement(settings) {
+  const preview = document.createElement("div");
+  preview.className = "drawing-context-preview";
+  const visibleCount = Math.min(settings.count, 6);
+  const markers = Array.from({ length: visibleCount }, (_, index) => {
+    const x = visibleCount === 1 ? 130 : 58 + (144 * index) / (visibleCount - 1);
+    const extra = settings.count > visibleCount && index === visibleCount - 1 ? `<text x="${x + 16}" y="24">+${settings.count - visibleCount}</text>` : "";
+    return `
+      <g>
+        <line x1="${x}" y1="32" x2="${x}" y2="13" />
+        <circle cx="${x}" cy="13" r="7" />
+        ${extra}
+      </g>
+    `;
+  }).join("");
+  preview.innerHTML = `
+    <svg viewBox="0 0 260 66" aria-hidden="true">
+      <line class="socket-preview-pipe" x1="22" y1="38" x2="238" y2="38" />
+      ${markers}
+      <text x="22" y="60">${socketSizeChoiceLabel(settings.socketSizeNb)} x ${settings.count}</text>
+      <text x="238" y="60" text-anchor="end">${socketSpacingLabel(settings)}</text>
+    </svg>
+  `;
+  return preview;
+}
+
+function socketSetupActionRow(hit, settings) {
+  const row = document.createElement("div");
+  row.className = "socket-setup-actions";
+
+  const back = document.createElement("button");
+  back.type = "button";
+  back.className = "socket-setup-back";
+  back.innerHTML = "<span>Back</span><small>Pipe actions</small>";
+  back.addEventListener("click", () => {
+    if (isCoarseInput()) renderMobileDrawingContextMenu(drawingContextTarget);
+    else renderDrawingContextMenu();
+    clampDrawingContextMenuToViewport();
+  });
+
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = "socket-setup-add";
+  add.innerHTML = `<span>Add ${settings.count} ${socketSizeChoiceLabel(settings.socketSizeNb)}</span><small>${socketSpacingLabel(settings)}</small>`;
+  add.addEventListener("click", () => {
+    const positions = socketPositionsForContext(hit, settings.count, socketSpacingOptionsFromKey(settings.spacingKey));
+    if (!positions.length) return;
+    placeSocketFittings(hit.segment.index, positions, { socketSizeNb: settings.socketSizeNb });
+    closeDrawingContextMenu();
+  });
+
+  row.append(back, add);
+  return row;
+}
+
+function renderSocketSetupMenu(options = {}) {
+  const hit = drawingContextTarget?.segmentHit;
+  if (!hit) return;
+  const settings = socketMenuSettings(options);
+  setDrawingContextMenuVariant("socket-setup");
+  drawingContextMenu.innerHTML = "";
+  addDrawingContextHeader("Add sockets", "Pick the socket layout");
+  drawingContextMenu.append(socketSetupActionRow(hit, settings));
+  drawingContextMenu.append(socketPreviewElement(settings));
+
+  addDrawingContextSubheading("Socket size");
+  appendContextChoiceGrid(SOCKET_SIZE_CHOICES_NB.map((nb) => ({
+    label: socketSizeChoiceLabel(nb),
+    detail: socketSizeChoiceDetail(nb),
+    active: nb === settings.socketSizeNb,
+    keepOpen: true,
+    action: () => renderSocketSetupMenu({ ...settings, socketSizeNb: nb }),
+  }))).classList.add("socket-size-grid");
+
+  addDrawingContextSubheading("How many");
+  appendContextChoiceGrid(SOCKET_COUNT_CHOICES.map((count) => ({
+    label: String(count),
+    detail: count === 1 ? "socket" : "sockets",
+    active: count === settings.count,
+    keepOpen: true,
+    action: () => renderSocketSetupMenu({ ...settings, count }),
+  }))).classList.add("socket-count-grid");
+
+  addDrawingContextSubheading("Spacing");
+  appendContextChoiceGrid(SOCKET_SPACING_CHOICES.map((choice) => ({
+    label: choice.label,
+    detail: choice.detail,
+    active: choice.key === settings.spacingKey,
+    keepOpen: true,
+    action: () => renderSocketSetupMenu({ ...settings, spacingKey: choice.key }),
+  }))).classList.add("socket-spacing-grid");
+  clampDrawingContextMenuToViewport();
+}
+
+function openSelectedSocketSizeMenu(fittingId) {
+  syncDrawingContextMenuHost();
+  renderSocketSizeMenu(fittingId, { fromInspector: true });
+  positionDrawingContextMenu(Math.max(10, window.innerWidth * 0.5 - 165), Math.max(10, window.innerHeight * 0.22));
+}
+
+function renderSocketSizeMenu(fittingId, options = {}) {
+  setDrawingContextMenuVariant(null);
+  const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "socket");
+  if (!fitting) return;
+  const settings = socketMenuSettings({ socketSizeNb: fittingSocketSizeNb(fitting), count: 1, spacingKey: "150" });
+  drawingContextMenu.innerHTML = "";
+  addDrawingContextHeader("Socket size", "Pick the socket NB");
+  appendDrawingContextActions([{
+    label: options.fromInspector ? "Close" : "Back",
+    detail: options.fromInspector ? "Return to drawing" : "Return to fitting actions",
+    action: () => {
+      if (!options.fromInspector) {
+        renderDrawingContextMenu();
+        clampDrawingContextMenuToViewport();
+      }
+    },
+    keepOpen: !options.fromInspector,
+  }]);
+  drawingContextMenu.append(socketPreviewElement(settings));
+  addDrawingContextSubheading("Socket size");
+  appendContextChoiceGrid(SOCKET_SIZE_CHOICES_NB.map((nb) => ({
+    label: socketSizeChoiceLabel(nb),
+    detail: socketSizeChoiceDetail(nb),
+    active: nb === fittingSocketSizeNb(fitting),
+    action: () => setSocketSizeForFitting(fitting.id, nb),
+  })));
+  clampDrawingContextMenuToViewport();
+}
+
+function setSocketSizeForFitting(fittingId, socketSizeNb) {
+  if (!ensureDrawingEditable("change socket size")) return;
+  const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "socket");
+  if (!fitting) return;
+  fitting.socketSizeNb = normalizePipeSize(socketSizeNb);
+  state.selectedFitting = fitting.id;
+  updateAll();
+}
+
+function socketPositionsForContext(hit, count, options = {}) {
   const lengthMm = Math.max(1, pointLength(hit.segment.vector));
   const endMarginT = clampNumber(50 / lengthMm, 0.04, 0.18);
   const minT = endMarginT;
   const maxT = 1 - endMarginT;
+  const evenSpaced = typeof options === "boolean" ? options : options.evenSpaced === true;
+  const spacingMm = typeof options === "object" ? Number(options.spacingMm) : NaN;
 
   if (count === 1) {
     return [clampNumber(hit.t, minT, maxT)];
@@ -16541,13 +17641,8 @@ function socketPositionsForContext(hit, count, evenSpaced) {
     return evenlySpacedSocketPositions(count, minT, maxT);
   }
 
-  const spacingText = window.prompt("Socket spacing mm centre-to-centre", String(DEFAULT_SOCKET_SPACING_MM));
-  if (spacingText === null) return [];
-
-  const spacingMm = Number(spacingText);
   if (!Number.isFinite(spacingMm) || spacingMm <= 0) {
-    window.alert("Enter a valid socket spacing in mm.");
-    return [];
+    return evenlySpacedSocketPositions(count, minT, maxT);
   }
 
   const stepT = spacingMm / lengthMm;
@@ -16572,13 +17667,13 @@ function fittingActionLabel(type) {
   if (type === "valve") return "valve";
   if (type === "weld") return "weld";
   if (type === "reducer") return "reducer";
-  if (type === "socket") return "1/2 socket";
+  if (type === "socket") return "socket";
   return "fitting";
 }
 
 function fittingModeText(fittingData) {
   const fitting = fittingData?.fitting ?? fittingData;
-  if (fitting?.type === "flange") return fittingFlangeMode(fitting);
+  if (fitting?.type === "flange") return `${fittingFlangeMode(fitting)} / ${flangeStandardLabel(fittingFlangeStandard(fitting))}`;
   if (fitting?.type === "rollGroove") return "0 kg roll groove";
   if (fitting?.type === "socket") return `NB ${fittingSocketSizeNb(fitting)} socket / ${formatAngle(fittingSocketAngle(fitting))} deg`;
   return fittingData?.weightSource ?? "estimated";
@@ -16604,8 +17699,10 @@ function deleteContextFitting() {
   const fitting = drawingContextTarget?.fittingHit?.fitting;
   if (!fitting) return;
 
+  const snapshot = createUndoSnapshot();
   state.fittings = state.fittings.filter((item) => item.id !== fitting.id);
   state.selectedFitting = null;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -16655,6 +17752,20 @@ function clearContextFittingWeight() {
   updateAll();
 }
 
+function setContextFlangeStandard() {
+  if (!ensureDrawingEditable("change flange standard")) return;
+  const fitting = drawingContextTarget?.fittingHit?.fitting;
+  if (!fitting || fitting.type !== "flange") return;
+  renderFlangeStandardMenu(fitting.id);
+}
+
+function setContextSocketSize() {
+  if (!ensureDrawingEditable("change socket size")) return;
+  const fitting = drawingContextTarget?.fittingHit?.fitting;
+  if (!fitting || fitting.type !== "socket") return;
+  renderSocketSizeMenu(fitting.id);
+}
+
 function rotateContextSocket() {
   if (!ensureDrawingEditable("spin socket")) return;
   const fitting = drawingContextTarget?.fittingHit?.fitting;
@@ -16669,8 +17780,38 @@ function deleteContextNote() {
   const note = drawingContextTarget?.noteHit?.note;
   if (!note) return;
 
+  const snapshot = createUndoSnapshot();
   state.notes = state.notes.filter((item) => item.id !== note.id);
   state.selectedNote = null;
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function editContextMeasurementLabel() {
+  if (!ensureDrawingEditable("edit measurement")) return;
+  const measurement = drawingContextTarget?.measurementHit?.measurement;
+  if (!measurement) return;
+
+  state.selectedMeasurement = measurement.id;
+  const text = window.prompt("Measurement label. Leave blank to use the measured length.", measurement.label || "");
+  if (text === null) return;
+  const nextLabel = String(text).trim().slice(0, 64);
+  if (nextLabel === measurement.label) return;
+  const snapshot = createUndoSnapshot();
+  measurement.label = nextLabel;
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function deleteContextMeasurement() {
+  if (!ensureDrawingEditable("delete measurement")) return;
+  const measurement = drawingContextTarget?.measurementHit?.measurement;
+  if (!measurement) return;
+
+  const snapshot = createUndoSnapshot();
+  state.measurements = (state.measurements ?? []).filter((item) => item.id !== measurement.id);
+  state.selectedMeasurement = null;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17315,6 +18456,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
   } else {
     const noteHit = findNearestNote(pointer);
     const dimensionHit = state.activeTool === "select" ? findNearestDimensionTarget(pointer) : null;
+    const measurementHit = state.activeTool === "select" ? findNearestMeasurement(pointer) : null;
     const pointHit = findNearestPoint(pointer);
     const hit = findNearestSegment(pointer);
     state.hoveredSegment = hit ? hit.segment.index : null;
@@ -17322,8 +18464,14 @@ drawCanvas.addEventListener("pointermove", (event) => {
       ? "Text note"
       : dimensionHit
       ? "Drag dimension"
+      : measurementHit
+      ? "Measurement - Delete to remove"
       : pointHit
       ? `Point ${pointHit.index + 1} / tee start`
+      : state.activeTool === "measure" && measurementDraft
+      ? "Pick second measurement point"
+      : state.activeTool === "measure"
+      ? "Pick first measurement point"
       : state.activeTool === "note"
       ? "Click to place note"
       : state.activeTool === "boxSelect" && hit
@@ -17375,6 +18523,12 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     return;
   }
 
+  if (state.activeTool === "measure") {
+    beginOrFinishMeasurement(pointer);
+    event.preventDefault();
+    return;
+  }
+
   if (state.activeTool === "note") {
     const text = promptNoteText(noteTextInput.value);
     if (text !== null) {
@@ -17414,6 +18568,18 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     return;
   }
 
+  const measurementHit = findNearestMeasurement(pointer);
+  if (measurementHit && state.activeTool === "select") {
+    state.selectedMeasurement = measurementHit.measurement.id;
+    state.selectedNote = null;
+    state.selectedFitting = null;
+    state.selectedPoint = null;
+    clearSelectedSegments();
+    updateAll({ save: false });
+    showMobilePanel("inspector");
+    return;
+  }
+
   const pointHit = findNearestPoint(pointer);
   if (pointHit && state.activeTool === "select") {
     state.selectedPoint = pointHit.index;
@@ -17421,6 +18587,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     clearSelectedSegments();
     state.selectedFitting = null;
     state.selectedNote = null;
+    state.selectedMeasurement = null;
     updateAll({ save: false });
     showMobilePanel("inspector");
     return;
@@ -17431,6 +18598,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
   chooseSegmentFromPointer(event, hit.segment.index);
   state.selectedNote = null;
+  state.selectedMeasurement = null;
   state.selectedPoint = hit.t < 0.5 ? hit.segment.from : hit.segment.to;
   state.activePoint = state.selectedPoint;
   const fittingAtHit = state.fittings.find((fitting) => {
@@ -17605,6 +18773,11 @@ flangeModeSelect.addEventListener("change", () => {
   persistState();
 });
 
+flangeStandardSelect?.addEventListener("change", () => {
+  state.flangeStandard = normalizeFlangeStandard(flangeStandardSelect.value);
+  persistState();
+});
+
 previewModeSelect?.addEventListener("change", () => setPreviewMode(previewModeSelect.value));
 previewModePanelSelect?.addEventListener("change", () => setPreviewMode(previewModePanelSelect.value));
 previewLabelToggle?.addEventListener("change", () => {
@@ -17704,6 +18877,7 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     stopDrawingMode();
   } else if ((event.key === "Delete" || event.key === "Backspace") && !isEditingField(event.target)) {
+    event.preventDefault();
     deleteSelection();
   } else if (event.key === "Escape") {
     if (actionMenuOpen()) {
@@ -17730,13 +18904,25 @@ document.addEventListener("keydown", (event) => {
       closeToolSettingsDialog();
       return;
     }
+    if (helpDialog && !helpDialog.hidden) {
+      closeHelpDialog();
+      return;
+    }
     if (projectJobQuickPick && !projectJobQuickPick.hidden) {
       closeProjectJobPicker();
+      return;
+    }
+    if (measurementDraft) {
+      measurementDraft = null;
+      state.pointer = null;
+      cursorReadout.textContent = "Measurement cancelled";
+      drawIso();
       return;
     }
     closeDrawingContextMenu();
     closeProjectLibrary();
     state.selectedFitting = null;
+    state.selectedMeasurement = null;
     clearSelectedSegments();
     setTool("draw");
     updateAll({ save: false });
@@ -17791,6 +18977,7 @@ setupActionMenu();
 setupAuthDialog();
 setupProjectDialog();
 setupToolSettingsDialog();
+setupHelpDialog();
 setupPanelFullscreen();
 setupFloatingPreviewPanel();
 setupHealthIssueClicks();

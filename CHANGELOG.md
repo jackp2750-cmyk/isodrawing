@@ -1,6 +1,70 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.58`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.66`.
+
+## v1.66 - Phone Layout Detection
+
+- Made phone layout detection width-based so Android-sized browsers reliably get the phone UI layer.
+- Bumped app cache to `spoolmate-v114`.
+
+## v1.65 - Android Phone Touch Pass
+
+- Added a dedicated phone layout for coarse-pointer Android screens.
+- Stopped the floating 3D preview from covering the drawing on phones; it now opens as a 3D bottom sheet from the mobile dock.
+- Made long-press actions on phones wait until finger-up, so a short tap selects and a long press opens actions without also dragging/selecting underneath.
+- Added forgiving phone tap-to-draw support while keeping drag-to-draw.
+- Tightened phone topbar, drawing controls, bottom tools and context menus for smaller screens.
+- Bumped app cache to `spoolmate-v113`.
+
+## v1.64 - Fab Sheet Views And Measure Undo
+
+- Fixed Undo/Redo for manual measurements, including add, relabel and delete paths.
+- Added undo snapshots for selected note, fitting, measurement and run deletes so keyboard and menu deletes behave consistently.
+- Fab sheet PDF export now builds its own cropped 3D model page with isometric, plan and side views, even when the live 3D preview is minimized.
+- Made offset C/C dimensions clearer with projection witness marks from the angled travel run.
+- Bumped app cache to `spoolmate-v112`.
+
+## v1.63 - Compact Socket Picker
+
+- Reworked the Add sockets menu into a compact picker so it fits without needing to scroll on normal screens.
+- Moved the Add sockets action to the top of the picker beside Back.
+- Tightened the socket preview, size choices, quantity choices and spacing choices into denser grids.
+- Bumped app cache to `spoolmate-v111`.
+
+## v1.62 - Help Updates And Measure Tool
+
+- Added more built-in Help notes for offsets, reducers, branches, dimensions, takeoff, exports and cloud/local saves.
+- Added a Measure side tool for clicking two points and marking the measured length on the drawing.
+- Measurements save with the project, appear on the fab drawing export and can be selected, relabelled or deleted.
+- Clarified 45 degree offset measurements: set input, calculated travel and offset C/C.
+- Bumped app cache to `spoolmate-v110`.
+
+## v1.61 - Built-In Help
+
+- Added a Help button to the main Menu.
+- Added a built-in help dialog with sections for iPad/phone, Draw, Edit, Review, Export and Account workflows.
+- Documented touch gestures for changing flanges: Select, long-press the flange marker, then choose Flange standard.
+- Added fitting/socket instructions to make the new pick menus easier to discover.
+- Bumped app cache to `spoolmate-v109`.
+
+## v1.60 - Flange and Socket Pick Menus
+
+- Added more common flange standards including ANSI 300/600, AS 2129 Table D/E/F/H, PN 10/16/25/40, DIN PN 10/16 and JIS 10K.
+- Populated the default flange standard dropdown from the same shared flange list used by fittings.
+- Replaced typed flange-standard changes with a right-click/inspector pick menu.
+- Added a visual socket setup menu with a small socket layout sketch.
+- Added menu choices for socket size, count and spacing presets such as 150 mm C/C.
+- Replaced typed socket-size changes with a socket-size pick menu.
+- Bumped app cache to `spoolmate-v108`.
+
+## v1.59 - Flange Standards and Socket Spacing
+
+- Added selectable flange standards: ANSI 150, PN 40 and DIN 16.
+- Added a default flange standard control and right-click/inspector editing for existing flanges.
+- Split flange takeoff rows by standard and adjusted PN/DIN visual sizing and weight estimates.
+- Expanded socket placement to choose socket size, count and centre-to-centre spacing.
+- Added socket size editing for existing socket fittings.
+- Bumped app cache to `spoolmate-v107`.
 
 ## v1.58 - Cleaner Floating 3D Controls
 
