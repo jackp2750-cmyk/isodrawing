@@ -1,51 +1,114 @@
 # SpoolMate
 
-A static prototype for drawing pipe spools in a 2D isometric view and exporting clearer 3D-style images.
+Current app version: `v1.70`
 
-See [`CHANGELOG.md`](CHANGELOG.md) for the update log through the current app version.
+SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
-## Run
+See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 
-Open `index.html` in a browser.
+## What It Does
 
-No build step is required. The 3D viewport tries to load Three.js from a CDN; if that is unavailable, the app keeps working with the built-in canvas 3D preview.
+- Draw 2D isometric pipe runs in millimetres.
+- Add exact X, Y and Z runs, plus angled offset runs.
+- Hold Shift while drawing to use 45 degree offset snap guides.
+- Edit run length, angle, pipe size and fitting details from the inspector or right-click/long-press menus.
+- Select one run, multiple runs with Shift, or multiple runs with box select.
+- Add reducers, tees, branches, sockets, welds, flanges, valves and roll grooves.
+- Pick common flange standards from menus, including ANSI, PN, DIN, JIS and AS 2129 Table types.
+- Pick socket size, quantity and spacing from a visual socket menu.
+- Work with Carbon Sch 40 and Stainless Sch 10S pipe data up to NB 300.
+- Show pipe size labels, red centre-to-centre dimensions, numbered dimensions or chain-style dimensions.
+- Drag red dimension labels away from clashes.
+- Add manual measurements by clicking two points on the drawing.
+- Add and drag text notes.
+- Estimate cut lengths, bend deductions, fitting takeoffs and weights.
+- Show drawing checks and click many check warnings to highlight the issue on the drawing.
+- Calculate centre of gravity and optional suggested lifting lug points.
+- Preview the spool in 3D with realistic, workshop, carbon, stainless, painted, transparent, outline and CAD-style views.
+- Float, hide, minimize or fullscreen the 3D preview.
+- Export fabrication PDF sheets, 3D images and project files.
+- Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
+- Use accounts, trials/licences, company/team projects and project comments through Supabase.
+- Install as a Progressive Web App on iPad, Android and desktop when hosted over HTTPS.
 
-For PWA testing, serve the folder over `http://localhost` instead of opening `index.html` as a `file://` URL. Service workers cannot run from `file://`.
+## Important Files
+
+- `index.html` - app shell and UI markup.
+- `app.js` - drawing logic, 3D model generation, project storage, Supabase/cloud logic and exports.
+- `styles.css` - light/dark themes, desktop/tablet/phone layout and drawing UI styling.
+- `manifest.webmanifest` - PWA install metadata.
+- `sw.js` - service worker app-shell cache.
+- `icons/` - SpoolMate app icons and logo assets.
+- `supabase-setup.sql` - database tables, policies and helper functions for cloud accounts/team projects.
+- `CHANGELOG.md` - current update log.
+
+## Running Locally
+
+For a quick local check, open `index.html` in a browser.
+
+For the closest real app behaviour, serve the folder over local HTTP. This lets browser features behave more like GitHub Pages or another hosted site.
 
 ```powershell
 python -m http.server 8000
 ```
 
-Then open `http://localhost:8000`.
+Then open:
 
-## Install On iPad Or Android
+```text
+http://localhost:8000
+```
 
-SpoolMate is set up as a Progressive Web App with:
+There is no build step and no npm install required. Three.js and Supabase JS are loaded from CDN URLs in `index.html` / `app.js`, so the 3D preview and cloud login need internet access.
+
+## Hosting
+
+The app can be hosted as static files. GitHub Pages works well.
+
+Upload these files and folders to the repository root:
+
+- `index.html`
+- `app.js`
+- `styles.css`
+- `manifest.webmanifest`
+- `sw.js`
+- `CHANGELOG.md`
+- `README.md`
+- `icons/`
+
+In GitHub Pages, set the source to:
+
+- Branch: `main`
+- Folder: `/ (root)`
+
+Your app URL will look like:
+
+```text
+https://YOUR-GITHUB-USERNAME.github.io/YOUR-REPO-NAME/
+```
+
+## Updating A Hosted Copy
+
+When you change the app, upload the changed root files to GitHub again. The app uses a service worker cache, so version numbers matter.
+
+For an app-code update, make sure these stay in sync:
+
+- `APP_VERSION` in `app.js`
+- `styles.css?v=...` and `app.js?v=...` in `index.html`
+- `CACHE_NAME` and cached file query strings in `sw.js`
+- the top of `CHANGELOG.md`
+
+If a phone or tablet still shows an old version, close the app fully and reopen it, or refresh the browser page. Android/Chrome may need a hard refresh or site-data clear if it is holding an old service worker cache.
+
+## Installing On iPad Or Android
+
+The app is set up as a PWA with:
 
 - `manifest.webmanifest`
 - `sw.js`
-- app icons in `icons/`
+- icons in `icons/`
 - offline app-shell caching
 
-To install it on devices, host this folder on HTTPS using Netlify, Cloudflare Pages, GitHub Pages, Vercel, or similar.
-
-### Quick Local Network Test
-
-1. On the PC, open PowerShell in this folder.
-2. Run `python -m http.server 8000`.
-3. Find the PC IP address with `ipconfig`.
-4. On the iPad/Android device, open `http://YOUR-PC-IP:8000`.
-
-This is only for testing on the same Wi-Fi network. It is not installable as a proper PWA unless served from HTTPS or localhost.
-
-### Simple Hosting With Netlify
-
-1. Go to Netlify.
-2. Create a new site using drag-and-drop deploy.
-3. Drop this whole project folder into Netlify.
-4. Open the Netlify HTTPS URL on the iPad or Android phone.
-
-### Install On Device
+For install prompts to work properly, host it over HTTPS.
 
 iPad:
 
@@ -56,40 +119,43 @@ iPad:
 Android:
 
 1. Open the HTTPS app URL in Chrome.
-2. Tap Install app, or Add to Home screen.
+2. Tap Install app or Add to Home screen.
 
-Each device keeps its own browser storage. Use the Import and Export project buttons to move spool jobs between PC, iPad, and phone.
+The current layout has specific desktop, iPad/tablet and Android phone behaviour. On phones, the 3D preview opens as a bottom sheet so it does not cover the drawing.
 
-## Touch Help
+## Local Storage Vs Cloud
 
-On iPad or phone, tap **Select**, then press and hold on a pipe run, fitting or note to open its action menu. To change a flange, press and hold directly on the flange marker, choose **Flange standard**, then pick the required type. The app also has a built-in **Menu > Help** panel with iPad/phone, Draw, Edit, Review, Export and Account instructions.
+SpoolMate can run without accounts. In guest/local mode:
 
-## Current features
+- Projects save in that browser on that device.
+- Export/import project files are the easiest way to move drawings between devices.
+- Clearing browser site data can remove local projects.
 
-- Draw snapped isometric pipe runs by clicking on the drawing canvas.
-- Each click adds a straight run from the current yellow endpoint toward the closest isometric axis.
-- Add precise X, Y, and Z runs with millimetre lengths.
-- Add angled runs in X-Y, X-Z, or Y-Z planes.
-- Select a run and edit its section length in millimetres.
-- Select a run and nominate its own carbon steel NB size.
-- Shift/Ctrl-click runs to multi-select them, then change all selected pipe sizes together.
-- Scale 3D pipe, elbows, nodes, fittings, and fallback preview widths by nominated NB size.
-- Place flanges with bolt-hole detail, valves, weld bands, and reducers on existing runs.
-- Right-click the drawing to edit pipe length, bend angle, pipe size, add single flanges, double flanges, reducers, and text notes at the picked spot.
-- Press Enter while drawing to stop drawing and return to selection.
-- Create tee points on existing pipe sections and draw new branch runs from them.
-- Show tee connections as tee bodies and draw open pipe ends with flush cut caps.
-- Place text notes on the isometric drawing.
-- Label every pipe section size and length in the 3D preview.
-- Switch the 3D preview between carbon steel, red review, ghosted, and red outline views.
-- Collapse or expand each middle control section.
-- Select common carbon steel NB pipe sizes up to NB 300.
-- Estimate Schedule 40 / Standard Weight pipe cut lengths, bend take-offs, and carbon steel pipe weight from Atlas Steels data.
-- Show bend take-off notes for each bend.
-- Show pipe lengths in mm and bend angle labels.
-- Render smooth rounded elbows in the isometric drawing and 3D preview.
-- View the same spool in a carbon-steel styled 3D preview.
-- Export PNG images of the 3D preview and the isometric drawing.
-- Save the current spool in browser local storage.
-- Install as a PWA when hosted on HTTPS.
-- Export and import project files between devices.
+With Supabase configured:
+
+- Users can create accounts and sign in.
+- A trial/licence profile is created in Supabase.
+- Projects can save to the cloud and be opened on other devices.
+- Company/team workspaces can share projects.
+- Team members can leave comments on a project.
+
+## Supabase Setup
+
+Run `supabase-setup.sql` in the Supabase SQL Editor for the Supabase project used by the app.
+
+In Supabase Auth settings:
+
+- Set the Site URL to the hosted SpoolMate URL.
+- Add the same hosted SpoolMate URL as a Redirect URL.
+- Keep using the public anon/publishable key in the frontend. Do not put a service-role key in `app.js`.
+
+For a different Supabase project, update these constants near the top of `app.js`:
+
+```js
+const SUPABASE_URL = "...";
+const SUPABASE_PUBLISHABLE_KEY = "...";
+```
+
+## Safety Notes
+
+SpoolMate is a fabrication aid, not a certified engineering package. Always verify cut lengths, weights, lifting/lug positions, materials and fitting selections before fabrication or lifting.

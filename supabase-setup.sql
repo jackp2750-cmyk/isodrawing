@@ -1,4 +1,4 @@
--- IsoSpool Studio cloud project storage and simple licence setup.
+-- SpoolMate cloud project storage and simple licence setup.
 -- Paste this into Supabase SQL Editor, then run it once for your project.
 
 create extension if not exists pgcrypto;

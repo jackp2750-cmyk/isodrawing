@@ -1,6 +1,36 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.66`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.70`.
+
+## v1.70 - Pre-Demo Stability Pass
+
+- Fixed Undo/Redo button refresh after drawing exact runs.
+- Fixed Redo restore by deep-cloning history snapshots instead of keeping live drawing references.
+- Raised project/help/settings dialogs above the floating 3D panel so canvas layers cannot intercept dialog buttons.
+- Smoke-tested desktop exact-run drawing, Undo/Redo, Menu, Help and Side tools.
+- Smoke-tested phone touch drawing, mobile panel switching and Menu.
+- Bumped app cache to `spoolmate-v118`.
+
+## v1.69 - Option Menu Polish And Undo Consistency
+
+- Added clear helper text to option menus so pipe sizes, flange types and socket sizes show whether choices apply immediately.
+- Clarified that the socket layout picker updates the preview first, then needs Apply sockets to pipe.
+- Made drawing-edit options undoable, including pipe size changes, length and bend edits, fitting weights, flange/socket changes, socket spin, reducer side, tee/branch toggles and dragged notes/sockets/dimensions.
+- Clarified that Side tools settings save immediately.
+- Bumped app cache to `spoolmate-v117`.
+
+## v1.68 - Clear Socket Apply Action
+
+- Added a clear Apply sockets to pipe action to the socket setup menu.
+- Kept a sticky apply button visible at the bottom of the socket picker while scrolling.
+- Bumped app cache to `spoolmate-v116`.
+
+## v1.67 - README Refresh And Socket Preview Scale
+
+- Rewrote the README so it matches the current SpoolMate app, cloud setup, PWA install flow and feature set.
+- Updated the socket setup preview to use a fixed 1000 mm sample pipe.
+- Made socket preview markers scale by the selected socket NB and show spacing/count differences more clearly.
+- Bumped app cache to `spoolmate-v115`.
 
 ## v1.66 - Phone Layout Detection
 

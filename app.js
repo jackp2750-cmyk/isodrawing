@@ -160,8 +160,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.66";
-const APP_BUILD_DATE = "2026-06-15";
+const APP_VERSION = "v1.70";
+const APP_BUILD_DATE = "2026-06-16";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -469,6 +469,7 @@ const DRAW_COMMIT_MOVE_LIMIT = 8;
 const SOCKET_SIZE_NB = 15;
 const MAX_SOCKET_COUNT = 24;
 const DEFAULT_SOCKET_SPACING_MM = 150;
+const SOCKET_PREVIEW_PIPE_MM = 1000;
 const SOCKET_ROTATION_STEP_DEG = 90;
 const SOCKET_SIZE_CHOICES_NB = [15, 20, 25, 32, 40, 50];
 const SOCKET_COUNT_CHOICES = [1, 2, 3, 4, 6];
@@ -4544,6 +4545,7 @@ function setSelectedSegmentLength(length, options = {}) {
   if (!segment) return;
 
   const normalizedLength = normalizeLength(length);
+  const snapshot = createUndoSnapshot();
   const anchorIndex =
     state.selectedPoint === segment.to ? segment.to :
     state.selectedPoint === segment.from ? segment.from :
@@ -4575,6 +4577,7 @@ function setSelectedSegmentLength(length, options = {}) {
   }
   state.activePoint = targetIndex;
   state.selectedPoint = targetIndex;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -4590,6 +4593,7 @@ function editSegmentBendAngle(segment, anchorIndex, bendAngleValue) {
   const segmentVector = subtractPoints(target, anchor);
   const newDirection = segmentDirectionForBend(referenceVector, segmentVector, normalizeBendAngle(bendAngleValue));
   const newTarget = addPoints(anchor, newDirection, pointLength(segmentVector));
+  const snapshot = createUndoSnapshot();
 
   rotateSegmentSide(segment, anchorIndex, targetIndex, newTarget);
   selectSingleSegment(segment.index);
@@ -4597,6 +4601,7 @@ function editSegmentBendAngle(segment, anchorIndex, bendAngleValue) {
   state.activePoint = targetIndex;
   state.selectedFitting = null;
   state.selectedNote = null;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
   return true;
 }
@@ -6071,11 +6076,15 @@ function beginOrFinishMeasurement(pointer) {
 
 function createUndoSnapshot() {
   return {
-    payload: statePayload(),
+    payload: cloneStatePayload(),
     nextFittingId,
     nextNoteId,
     nextMeasurementId,
   };
+}
+
+function cloneStatePayload() {
+  return JSON.parse(JSON.stringify(statePayload()));
 }
 
 function cloneHistoryEntries(entries) {
@@ -6088,7 +6097,7 @@ function cloneHistoryEntries(entries) {
 
 function createHistorySnapshot() {
   return {
-    payload: statePayload(),
+    payload: cloneStatePayload(),
     history: cloneHistoryEntries(state.history),
     nextFittingId,
     nextNoteId,
@@ -7091,20 +7100,25 @@ function updatePipeSizeControls() {
 }
 
 function setPipeSizeForSegments(indexes, pipeSizeNb) {
-  state.pipeSizeNb = pipeSizeNb;
+  const previousDefault = state.pipeSizeNb;
   const selected = normalizeSelectedSegments(indexes, state.edges.length);
   if (!selected.length) {
+    state.pipeSizeNb = pipeSizeNb;
     updateAll();
     return;
   }
   if (!ensureDrawingEditable("change pipe sizes")) return;
 
+  const changed = selected.some((segmentIndex) => normalizePipeSize(state.edges[segmentIndex]?.pipeSizeNb ?? previousDefault) !== pipeSizeNb);
+  const snapshot = changed ? createUndoSnapshot() : null;
+  state.pipeSizeNb = pipeSizeNb;
   for (const segmentIndex of selected) {
     if (state.edges[segmentIndex]) {
       state.edges[segmentIndex].pipeSizeNb = pipeSizeNb;
     }
   }
   setSelectedSegments(selected);
+  if (snapshot) recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -7415,14 +7429,21 @@ function setSelectedFittingWeight() {
     return;
   }
 
-  data.fitting.weightKg = Math.round(weightKg * 10) / 10;
+  const nextWeight = Math.round(weightKg * 10) / 10;
+  if (fittingWeightOverride(data.fitting) === nextWeight) return;
+  const snapshot = createUndoSnapshot();
+  data.fitting.weightKg = nextWeight;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
 function clearSelectedFittingWeight() {
   const data = selectedFittingData();
   if (!data) return;
+  if (fittingWeightOverride(data.fitting) === null) return;
+  const snapshot = createUndoSnapshot();
   delete data.fitting.weightKg;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -7496,7 +7517,11 @@ function setSelectedPointConnectionType(type) {
   if (state.selectedPoint === null || !state.points[state.selectedPoint]) return;
   const connected = segments().filter((segment) => segment.from === state.selectedPoint || segment.to === state.selectedPoint);
   if (connected.length < 3) return;
-  setNodeConnectionType(state.selectedPoint, type);
+  if (nodeConnectionType(state.selectedPoint) === type) return;
+  const snapshot = createUndoSnapshot();
+  setNodeConnectionType(state.selectedPoint, type, { update: false });
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
 }
 
 function sideToolIdForButton(button) {
@@ -8324,6 +8349,7 @@ function updateAll(options = {}) {
   updateBackupSummary();
   renderProjectComments();
   updateSelectionControls();
+  updateHistoryButtons();
   updatePipeSizeControls();
   updatePropertiesPanel();
   update3dPreview();
@@ -16736,6 +16762,13 @@ function addDrawingContextSubheading(text) {
   drawingContextMenu.append(title);
 }
 
+function addDrawingContextHint(text) {
+  const hint = document.createElement("div");
+  hint.className = "drawing-context-hint";
+  hint.textContent = text;
+  drawingContextMenu.append(hint);
+}
+
 function appendContextChoiceGrid(items) {
   const grid = document.createElement("div");
   grid.className = "drawing-context-choice-grid";
@@ -17004,6 +17037,7 @@ function renderContextPipeSizeMenu() {
     clampDrawingContextMenuToViewport();
   });
   drawingContextMenu.append(backButton);
+  addDrawingContextHint("Tap a size to apply it to the selected run. Use Undo if it was the wrong one.");
 
   for (const size of PIPE_SIZES) {
     const button = document.createElement("button");
@@ -17422,7 +17456,7 @@ function renderFlangeStandardMenu(fittingId, options = {}) {
   const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "flange");
   if (!fitting) return;
   drawingContextMenu.innerHTML = "";
-  addDrawingContextHeader("Flange standard", "Pick the flange family");
+  addDrawingContextHeader("Flange standard", "Pick one to apply to this flange");
   appendDrawingContextActions([{
     label: options.fromInspector ? "Close" : "Back",
     detail: options.fromInspector ? "Return to drawing" : "Return to fitting actions",
@@ -17434,6 +17468,7 @@ function renderFlangeStandardMenu(fittingId, options = {}) {
     },
     keepOpen: !options.fromInspector,
   }]);
+  addDrawingContextHint("Tap a flange type to apply it now. Existing flange count stays the same.");
   addDrawingContextSubheading("Common flange types");
   const current = fittingFlangeStandard(fitting);
   appendContextChoiceGrid(Object.entries(FLANGE_STANDARDS).map(([key, info]) => ({
@@ -17449,8 +17484,12 @@ function setFlangeStandardForFitting(fittingId, standard) {
   if (!ensureDrawingEditable("change flange standard")) return;
   const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "flange");
   if (!fitting) return;
-  fitting.flangeStandard = normalizeFlangeStandard(standard);
+  const nextStandard = normalizeFlangeStandard(standard);
+  if (fittingFlangeStandard(fitting) === nextStandard) return;
+  const snapshot = createUndoSnapshot();
+  fitting.flangeStandard = nextStandard;
   state.selectedFitting = fitting.id;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17483,34 +17522,82 @@ function socketSpacingOptionsFromKey(spacingKey) {
 
 function socketSpacingLabel(settings) {
   if (settings.count <= 1) return "single socket";
+  if (settings.spacingKey === "click") return `from click / ${DEFAULT_SOCKET_SPACING_MM} mm C/C`;
   if (settings.spacingKey === "even") return "even spacing";
   return `${Number(settings.spacingKey) || DEFAULT_SOCKET_SPACING_MM} mm C/C`;
+}
+
+function socketPreviewPositions(settings) {
+  const count = Math.max(1, Math.min(MAX_SOCKET_COUNT, Math.round(Number(settings.count) || 1)));
+  if (count === 1) return [SOCKET_PREVIEW_PIPE_MM * 0.5];
+
+  if (settings.spacingKey === "even") {
+    return Array.from({ length: count }, (_, index) => ((index + 1) / (count + 1)) * SOCKET_PREVIEW_PIPE_MM);
+  }
+
+  const spacingMm = settings.spacingKey === "click"
+    ? DEFAULT_SOCKET_SPACING_MM
+    : Number(settings.spacingKey) || DEFAULT_SOCKET_SPACING_MM;
+  const spanMm = spacingMm * (count - 1);
+  const firstMm = SOCKET_PREVIEW_PIPE_MM * 0.5 - spanMm * 0.5;
+  return Array.from({ length: count }, (_, index) => firstMm + index * spacingMm);
 }
 
 function socketPreviewElement(settings) {
   const preview = document.createElement("div");
   preview.className = "drawing-context-preview";
-  const visibleCount = Math.min(settings.count, 6);
-  const markers = Array.from({ length: visibleCount }, (_, index) => {
-    const x = visibleCount === 1 ? 130 : 58 + (144 * index) / (visibleCount - 1);
-    const extra = settings.count > visibleCount && index === visibleCount - 1 ? `<text x="${x + 16}" y="24">+${settings.count - visibleCount}</text>` : "";
+  const socketSize = pipeSizeByNb(settings.socketSizeNb);
+  const positions = socketPreviewPositions(settings);
+  const pipeStart = 20;
+  const pipeEnd = 240;
+  const pipeY = 43;
+  const scale = (pipeEnd - pipeStart) / SOCKET_PREVIEW_PIPE_MM;
+  const socketRadius = clampNumber(5.8 + Math.sqrt(socketSize.od) * 0.55, 8, 13);
+  const stemWidth = clampNumber(socketRadius * 0.46, 4, 7);
+  const markers = positions.map((positionMm) => {
+    const x = pipeStart + positionMm * scale;
+    const outside = positionMm < 0 || positionMm > SOCKET_PREVIEW_PIPE_MM;
     return `
-      <g>
-        <line x1="${x}" y1="32" x2="${x}" y2="13" />
-        <circle cx="${x}" cy="13" r="7" />
-        ${extra}
+      <g class="socket-preview-socket${outside ? " outside" : ""}">
+        <line x1="${x}" y1="${pipeY}" x2="${x}" y2="${21 + socketRadius * 0.35}" style="stroke-width:${stemWidth}" />
+        <circle cx="${x}" cy="${16 + socketRadius * 0.1}" r="${socketRadius}" style="stroke-width:${Math.max(4, stemWidth - 0.5)}" />
       </g>
     `;
   }).join("");
+  const warning = positions.some((positionMm) => positionMm < 0 || positionMm > SOCKET_PREVIEW_PIPE_MM)
+    ? '<text class="socket-preview-warning" x="130" y="91" text-anchor="middle">pattern longer than 1m sample</text>'
+    : "";
   preview.innerHTML = `
-    <svg viewBox="0 0 260 66" aria-hidden="true">
-      <line class="socket-preview-pipe" x1="22" y1="38" x2="238" y2="38" />
+    <svg viewBox="-34 0 328 96" aria-hidden="true">
+      <line class="socket-preview-pipe" x1="${pipeStart}" y1="${pipeY}" x2="${pipeEnd}" y2="${pipeY}" />
       ${markers}
-      <text x="22" y="60">${socketSizeChoiceLabel(settings.socketSizeNb)} x ${settings.count}</text>
-      <text x="238" y="60" text-anchor="end">${socketSpacingLabel(settings)}</text>
+      <line class="socket-preview-dim" x1="${pipeStart}" y1="68" x2="${pipeEnd}" y2="68" />
+      <line class="socket-preview-tick" x1="${pipeStart}" y1="62" x2="${pipeStart}" y2="74" />
+      <line class="socket-preview-tick" x1="${pipeStart + (pipeEnd - pipeStart) * 0.5}" y1="64" x2="${pipeStart + (pipeEnd - pipeStart) * 0.5}" y2="72" />
+      <line class="socket-preview-tick" x1="${pipeEnd}" y1="62" x2="${pipeEnd}" y2="74" />
+      <text class="socket-preview-scale" x="130" y="82" text-anchor="middle">1000 mm sample pipe</text>
+      ${warning}
+      <text x="${pipeStart}" y="10">${socketSizeChoiceLabel(settings.socketSizeNb)} ${socketSize.nps} x ${settings.count}</text>
+      <text x="${pipeEnd}" y="10" text-anchor="end">${socketSpacingLabel(settings)}</text>
     </svg>
   `;
   return preview;
+}
+
+function applySocketSetupToPipe(hit, settings) {
+  const positions = socketPositionsForContext(hit, settings.count, socketSpacingOptionsFromKey(settings.spacingKey));
+  if (!positions.length) return;
+  placeSocketFittings(hit.segment.index, positions, { socketSizeNb: settings.socketSizeNb });
+  closeDrawingContextMenu();
+}
+
+function socketSetupApplyButton(hit, settings, className = "socket-setup-add") {
+  const add = document.createElement("button");
+  add.type = "button";
+  add.className = className;
+  add.innerHTML = `<span>Apply sockets to pipe</span><small>${settings.count} x ${socketSizeChoiceLabel(settings.socketSizeNb)} / ${socketSpacingLabel(settings)}</small>`;
+  add.addEventListener("click", () => applySocketSetupToPipe(hit, settings));
+  return add;
 }
 
 function socketSetupActionRow(hit, settings) {
@@ -17527,18 +17614,16 @@ function socketSetupActionRow(hit, settings) {
     clampDrawingContextMenuToViewport();
   });
 
-  const add = document.createElement("button");
-  add.type = "button";
-  add.className = "socket-setup-add";
-  add.innerHTML = `<span>Add ${settings.count} ${socketSizeChoiceLabel(settings.socketSizeNb)}</span><small>${socketSpacingLabel(settings)}</small>`;
-  add.addEventListener("click", () => {
-    const positions = socketPositionsForContext(hit, settings.count, socketSpacingOptionsFromKey(settings.spacingKey));
-    if (!positions.length) return;
-    placeSocketFittings(hit.segment.index, positions, { socketSizeNb: settings.socketSizeNb });
-    closeDrawingContextMenu();
-  });
+  const add = socketSetupApplyButton(hit, settings);
 
   row.append(back, add);
+  return row;
+}
+
+function socketSetupApplyBar(hit, settings) {
+  const row = document.createElement("div");
+  row.className = "socket-setup-apply-bar";
+  row.append(socketSetupApplyButton(hit, settings, "socket-setup-add socket-setup-add-wide"));
   return row;
 }
 
@@ -17548,9 +17633,10 @@ function renderSocketSetupMenu(options = {}) {
   const settings = socketMenuSettings(options);
   setDrawingContextMenuVariant("socket-setup");
   drawingContextMenu.innerHTML = "";
-  addDrawingContextHeader("Add sockets", "Pick the socket layout");
+  addDrawingContextHeader("Add sockets", "Pick layout, then press Apply");
   drawingContextMenu.append(socketSetupActionRow(hit, settings));
   drawingContextMenu.append(socketPreviewElement(settings));
+  addDrawingContextHint("The picture is a 1000 mm sample pipe. Change the options below, then press Apply sockets to pipe.");
 
   addDrawingContextSubheading("Socket size");
   appendContextChoiceGrid(SOCKET_SIZE_CHOICES_NB.map((nb) => ({
@@ -17578,6 +17664,7 @@ function renderSocketSetupMenu(options = {}) {
     keepOpen: true,
     action: () => renderSocketSetupMenu({ ...settings, spacingKey: choice.key }),
   }))).classList.add("socket-spacing-grid");
+  drawingContextMenu.append(socketSetupApplyBar(hit, settings));
   clampDrawingContextMenuToViewport();
 }
 
@@ -17593,7 +17680,7 @@ function renderSocketSizeMenu(fittingId, options = {}) {
   if (!fitting) return;
   const settings = socketMenuSettings({ socketSizeNb: fittingSocketSizeNb(fitting), count: 1, spacingKey: "150" });
   drawingContextMenu.innerHTML = "";
-  addDrawingContextHeader("Socket size", "Pick the socket NB");
+  addDrawingContextHeader("Socket size", "Pick one to apply to this socket");
   appendDrawingContextActions([{
     label: options.fromInspector ? "Close" : "Back",
     detail: options.fromInspector ? "Return to drawing" : "Return to fitting actions",
@@ -17606,6 +17693,7 @@ function renderSocketSizeMenu(fittingId, options = {}) {
     keepOpen: !options.fromInspector,
   }]);
   drawingContextMenu.append(socketPreviewElement(settings));
+  addDrawingContextHint("Tap a socket size to apply it now.");
   addDrawingContextSubheading("Socket size");
   appendContextChoiceGrid(SOCKET_SIZE_CHOICES_NB.map((nb) => ({
     label: socketSizeChoiceLabel(nb),
@@ -17620,8 +17708,12 @@ function setSocketSizeForFitting(fittingId, socketSizeNb) {
   if (!ensureDrawingEditable("change socket size")) return;
   const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "socket");
   if (!fitting) return;
-  fitting.socketSizeNb = normalizePipeSize(socketSizeNb);
+  const nextSize = normalizePipeSize(socketSizeNb);
+  if (fittingSocketSizeNb(fitting) === nextSize) return;
+  const snapshot = createUndoSnapshot();
+  fitting.socketSizeNb = nextSize;
   state.selectedFitting = fitting.id;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17711,6 +17803,7 @@ function toggleContextBendReducerSide() {
   const reducer = drawingContextTarget?.reducerHit?.reducer;
   if (!reducer || reducer.kind !== "bend") return;
 
+  const snapshot = createUndoSnapshot();
   state.reducerSideOverrides = normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length);
   const current = reducerSideForNode(reducer.nodeIndex);
   if (current === "large") {
@@ -17718,6 +17811,7 @@ function toggleContextBendReducerSide() {
   } else {
     state.reducerSideOverrides[reducer.nodeIndex] = "large";
   }
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17737,8 +17831,12 @@ function setContextFittingWeight() {
     return;
   }
 
-  hit.fitting.weightKg = Math.round(weightKg * 10) / 10;
+  const nextWeight = Math.round(weightKg * 10) / 10;
+  if (fittingWeightOverride(hit.fitting) === nextWeight) return;
+  const snapshot = createUndoSnapshot();
+  hit.fitting.weightKg = nextWeight;
   state.selectedFitting = hit.fitting.id;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17746,9 +17844,12 @@ function clearContextFittingWeight() {
   if (!ensureDrawingEditable("clear fitting weight")) return;
   const fitting = drawingContextTarget?.fittingHit?.fitting;
   if (!fitting) return;
+  if (fittingWeightOverride(fitting) === null) return;
 
+  const snapshot = createUndoSnapshot();
   delete fitting.weightKg;
   state.selectedFitting = fitting.id;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17770,8 +17871,10 @@ function rotateContextSocket() {
   if (!ensureDrawingEditable("spin socket")) return;
   const fitting = drawingContextTarget?.fittingHit?.fitting;
   if (!fitting || fitting.type !== "socket") return;
+  const snapshot = createUndoSnapshot();
   fitting.socketAngle = normalizeSocketAngle(fittingSocketAngle(fitting) + SOCKET_ROTATION_STEP_DEG);
   state.selectedFitting = fitting.id;
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17823,11 +17926,13 @@ function deleteContextPoint() {
   const connected = segments().filter((segment) => segment.from === pointHit.index || segment.to === pointHit.index);
   if (connected.length) return;
 
+  const snapshot = createUndoSnapshot();
   state.points.splice(pointHit.index, 1);
   reindexNodeTypesAfterPointRemoval(pointHit.index);
   reindexReducerSideOverridesAfterPointRemoval(pointHit.index);
   state.selectedPoint = null;
   state.activePoint = Math.max(0, Math.min(state.activePoint, state.points.length - 1));
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17837,13 +17942,17 @@ function setContextPointConnectionType(type) {
   if (!pointHit) return;
   const connected = segments().filter((segment) => segment.from === pointHit.index || segment.to === pointHit.index);
   if (connected.length < 3) return;
+  if (nodeConnectionType(pointHit.index) === type) return;
 
+  const snapshot = createUndoSnapshot();
   state.selectedPoint = pointHit.index;
   state.activePoint = pointHit.index;
   clearSelectedSegments();
   state.selectedFitting = null;
   state.selectedNote = null;
-  setNodeConnectionType(pointHit.index, type);
+  setNodeConnectionType(pointHit.index, type, { update: false });
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
 }
 
 function editContextSegmentLength() {
@@ -17927,11 +18036,15 @@ function editContextNote(note) {
   if (!ensureDrawingEditable("edit note")) return;
   const text = promptNoteText(note.text);
   if (text === null) return;
-  note.text = text.slice(0, 80);
+  const nextText = text.slice(0, 80);
+  if (nextText === note.text) return;
+  const snapshot = createUndoSnapshot();
+  note.text = nextText;
   noteTextInput.value = note.text;
   state.selectedNote = note.id;
   state.selectedFitting = null;
   clearSelectedSegments();
+  recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
@@ -17948,6 +18061,7 @@ function beginDimensionDrag(event, target, pointer) {
   dimensionDrag = {
     pointerId: event.pointerId,
     segmentIndex: target.segmentIndex,
+    snapshot: createUndoSnapshot(),
     startPointer: { ...pointer },
     normal: { ...target.normal },
     side: Number(target.side) < 0 ? -1 : 1,
@@ -18004,10 +18118,12 @@ function finishDimensionDrag(event) {
     // Ignore browsers that have already released capture.
   }
   const moved = dimensionDrag.moved;
+  const snapshot = dimensionDrag.snapshot;
   dimensionDrag = null;
   state.pointer = null;
   cursorReadout.textContent = formatPoint(activePoint());
   if (moved) {
+    recordHistory({ type: "snapshot", snapshot });
     updateAll();
   } else {
     drawIso();
@@ -18035,6 +18151,7 @@ function beginNoteDrag(event, noteHit, pointer) {
   noteDrag = {
     pointerId: event.pointerId,
     note,
+    snapshot: createUndoSnapshot(),
     z: Number(note.point.z) || 0,
     offset: {
       x: pointer.x - anchor.x,
@@ -18084,10 +18201,17 @@ function finishNoteDrag(event) {
   } catch {
     // Ignore browsers that have already released capture.
   }
+  const moved = noteDrag.moved;
+  const snapshot = noteDrag.snapshot;
   noteDrag = null;
   state.pointer = null;
   cursorReadout.textContent = formatPoint(activePoint());
-  updateAll();
+  if (moved) {
+    recordHistory({ type: "snapshot", snapshot });
+    updateAll();
+  } else {
+    updateAll({ save: false });
+  }
   event?.preventDefault?.();
   return true;
 }
@@ -18101,6 +18225,7 @@ function beginSocketDrag(event, fittingHit, pointer) {
     pointerId: event.pointerId,
     fittingId: fitting.id,
     segmentIndex: segment.index,
+    snapshot: createUndoSnapshot(),
     moved: false,
   };
   state.selectedFitting = fitting.id;
@@ -18155,10 +18280,12 @@ function finishSocketDrag(event) {
     // Ignore browsers that have already released capture.
   }
   const moved = socketDrag.moved;
+  const snapshot = socketDrag.snapshot;
   socketDrag = null;
   state.pointer = null;
   cursorReadout.textContent = formatPoint(activePoint());
   if (moved) {
+    recordHistory({ type: "snapshot", snapshot });
     updateAll();
   } else {
     updateAll({ save: false });
