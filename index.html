@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=171" />
+    <link rel="stylesheet" href="./styles.css?v=174" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -181,7 +181,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.71</span>
+            <span class="version-badge" id="appVersionBadge">v1.74</span>
           </div>
         </div>
 
@@ -286,6 +286,10 @@
             <div class="action-menu-groups">
               <section class="action-menu-group">
                 <h2>Project</h2>
+                <button class="icon-button labeled" id="homeDashboardButton" type="button" title="Open SpoolMate dashboard" aria-label="Open SpoolMate dashboard">
+                  <svg><use href="#icon-settings"></use></svg>
+                  <span>Dashboard</span>
+                </button>
                 <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
                   <svg><use href="#icon-sample"></use></svg>
                   <span>Sample</span>
@@ -380,11 +384,11 @@
               <svg><use href="#icon-reducer"></use></svg>
               <span>Reducer</span>
             </button>
-            <button class="tool-button" data-tool="tee" data-mode-tools="edit" type="button" title="Create tee point" aria-label="Create tee point">
+            <button class="tool-button" data-tool="tee" data-mode-tools="draw edit" type="button" title="Draw tee point" aria-label="Draw tee point">
               <svg><use href="#icon-tee"></use></svg>
               <span>Tee</span>
             </button>
-            <button class="tool-button" data-tool="branch" data-mode-tools="edit" type="button" title="Create branch point" aria-label="Create branch point">
+            <button class="tool-button" data-tool="branch" data-mode-tools="draw edit" type="button" title="Draw branch weld point" aria-label="Draw branch weld point">
               <svg><use href="#icon-tee"></use></svg>
               <span>Branch</span>
             </button>
@@ -744,6 +748,60 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop home-dashboard-backdrop" id="homeDashboardDialog" hidden>
+        <section class="project-dialog-card home-dashboard-card" aria-label="SpoolMate dashboard">
+          <div class="home-dashboard-head">
+            <div class="home-dashboard-brand-lockup">
+              <img src="./icons/spoolmate-mark.png" alt="" />
+              <div>
+                <strong>SpoolMate dashboard</strong>
+                <small id="homeDashboardSubtitle">Choose what you want to do.</small>
+              </div>
+            </div>
+            <button class="icon-button labeled" id="homeDashboardCloseButton" type="button">Go to drawing</button>
+          </div>
+          <div class="home-dashboard-account" id="homeDashboardAccount">Guest mode - local projects only</div>
+          <div class="home-dashboard-stats" id="homeDashboardStats">0 saved spools on this device</div>
+          <div class="home-dashboard-grid">
+            <button class="home-dashboard-action primary" id="homeDashboardContinueButton" type="button">
+              <svg><use href="#icon-draw"></use></svg>
+              <strong>Continue drawing</strong>
+              <span>Return to the spool on screen.</span>
+            </button>
+            <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
+              <svg><use href="#icon-reset"></use></svg>
+              <strong>New spool</strong>
+              <span>Start a fresh drawing with job details.</span>
+            </button>
+            <button class="home-dashboard-action" id="homeDashboardJobsButton" type="button">
+              <svg><use href="#icon-sample"></use></svg>
+              <strong>Jobs</strong>
+              <span>Open saved spools by job or team.</span>
+            </button>
+            <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
+              <svg><use href="#icon-sample"></use></svg>
+              <strong>Sample</strong>
+              <span>Load the example spool.</span>
+            </button>
+            <button class="home-dashboard-action" id="homeDashboardAccountButton" type="button">
+              <svg><use href="#icon-user"></use></svg>
+              <strong>Account</strong>
+              <span>Sign in, licences and teams.</span>
+            </button>
+            <button class="home-dashboard-action" id="homeDashboardToolsButton" type="button">
+              <svg><use href="#icon-settings"></use></svg>
+              <strong>Side tools</strong>
+              <span>Choose which drawing tools show.</span>
+            </button>
+            <button class="home-dashboard-action" id="homeDashboardHelpButton" type="button">
+              <svg><use href="#icon-help"></use></svg>
+              <strong>Help</strong>
+              <span>See touch, right-click and drawing tips.</span>
+            </button>
+          </div>
+        </section>
+      </div>
+
       <div class="project-dialog-backdrop" id="authDialog" hidden>
         <form class="project-dialog-card auth-card" id="authDialogForm">
           <div class="project-dialog-header">
@@ -948,7 +1006,7 @@
                 </article>
                 <article>
                   <strong>Tee or branch</strong>
-                  <p>A tee splits the pipe and adds tee takeoff and weight. A branch is treated as a welded pipe into the side of the main run.</p>
+                  <p>Use the Tee or Branch tools while in Draw mode. A tee splits the pipe and adds tee takeoff and weight. A branch is treated as a welded pipe into the side of the main run.</p>
                 </article>
                 <article>
                   <strong>Reducers</strong>
@@ -1076,6 +1134,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=171"></script>
+    <script defer src="./app.js?v=174"></script>
   </body>
 </html>

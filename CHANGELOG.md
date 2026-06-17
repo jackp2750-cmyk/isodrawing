@@ -1,6 +1,29 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.71`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.74`.
+
+## v1.74 - Reliable Job Folder Toggle
+
+- Replaced native saved-job folder toggles with explicit app-controlled open/closed state.
+- Fixed collapsed job rows so tapping the plus/minus reliably shows or hides the spool drawings.
+- Kept spool open/delete clicks separate from folder expand clicks.
+- Bumped app cache to `spoolmate-v122`.
+
+## v1.73 - Tee And Branch Draw Flow
+
+- Made Tee and Branch available directly in Draw mode as well as Edit mode.
+- Kept drawing workflow smooth by returning to the Draw tool after placing a tee or branch point.
+- Updated branch hover feedback so the canvas says Branch on run instead of generic run text.
+- Bumped app cache to `spoolmate-v121`.
+
+## v1.72 - Startup Dashboard
+
+- Added a proper startup dashboard after sign-in or Continue as guest.
+- Dashboard actions now include Continue drawing, New spool, Jobs, Sample, Account, Side tools and Help.
+- Added a Menu > Dashboard action so the home dashboard can be reopened later.
+- Made the Jobs dashboard shell self-healing if cached/uploaded HTML is missing the new search toolbar.
+- Widened the Jobs modal and gave folder expand controls more space.
+- Bumped app cache to `spoolmate-v120`.
 
 ## v1.71 - Job Dashboard
 

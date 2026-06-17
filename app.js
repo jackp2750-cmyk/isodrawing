@@ -72,6 +72,7 @@ const healthCheckButton = document.querySelector("#healthCheckButton");
 const newRevisionButton = document.querySelector("#newRevisionButton");
 const shareReadOnlyButton = document.querySelector("#shareReadOnlyButton");
 const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
+const homeDashboardButton = document.querySelector("#homeDashboardButton");
 const accountButton = document.querySelector("#accountButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
@@ -109,13 +110,25 @@ const newDrawingDialog = document.querySelector("#newDrawingDialog");
 const newDrawingCancelButton = document.querySelector("#newDrawingCancelButton");
 const newDrawingDiscardButton = document.querySelector("#newDrawingDiscardButton");
 const newDrawingSaveButton = document.querySelector("#newDrawingSaveButton");
+let homeDashboardDialog = document.querySelector("#homeDashboardDialog");
+let homeDashboardSubtitle = document.querySelector("#homeDashboardSubtitle");
+let homeDashboardAccount = document.querySelector("#homeDashboardAccount");
+let homeDashboardStats = document.querySelector("#homeDashboardStats");
+let homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
+let homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
+let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
+let homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
+let homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
+let homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
+let homeDashboardHelpButton = document.querySelector("#homeDashboardHelpButton");
 const projectLibraryDialog = document.querySelector("#projectLibraryDialog");
 const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
-const projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
-const projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
-const projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
-const projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
+let projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
+let projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+let projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
+let projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
 const healthSummary = document.querySelector("#healthSummary");
 const bomSummary = document.querySelector("#bomSummary");
 const workflowSummary = document.querySelector("#workflowSummary");
@@ -163,7 +176,7 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.71";
+const APP_VERSION = "v1.74";
 const APP_BUILD_DATE = "2026-06-17";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -8607,7 +8620,7 @@ function closeAuthDialog() {
   if (authDialog) authDialog.hidden = true;
   if (startupProjectPromptPending) {
     startupProjectPromptPending = false;
-    window.setTimeout(() => promptForProjectDetails(), 150);
+    window.setTimeout(() => openHomeDashboard({ startup: true }), 150);
   }
 }
 
@@ -8645,7 +8658,7 @@ async function runStartupPrompts() {
   await initSupabase();
   if (await maybeOpenProjectFromUrl()) return;
   if (maybeOpenStartupAuthPrompt()) return;
-  promptForProjectDetails();
+  openHomeDashboard({ startup: true });
 }
 
 function maybeOpenStartupAuthPrompt() {
@@ -8824,8 +8837,220 @@ async function signOutFromSupabase() {
   }
 }
 
+function ensureHomeDashboardShell() {
+  if (!homeDashboardDialog) {
+    const shell = document.createElement("div");
+    shell.className = "project-dialog-backdrop home-dashboard-backdrop";
+    shell.id = "homeDashboardDialog";
+    shell.hidden = true;
+    shell.innerHTML = `
+      <section class="project-dialog-card home-dashboard-card" aria-label="SpoolMate dashboard">
+        <div class="home-dashboard-head">
+          <div class="home-dashboard-brand-lockup">
+            <img src="./icons/spoolmate-mark.png" alt="" />
+            <div>
+              <strong>SpoolMate dashboard</strong>
+              <small id="homeDashboardSubtitle">Choose what you want to do.</small>
+            </div>
+          </div>
+          <button class="icon-button labeled" id="homeDashboardCloseButton" type="button">Go to drawing</button>
+        </div>
+        <div class="home-dashboard-account" id="homeDashboardAccount">Guest mode - local projects only</div>
+        <div class="home-dashboard-stats" id="homeDashboardStats">0 saved spools on this device</div>
+        <div class="home-dashboard-grid">
+          <button class="home-dashboard-action primary" id="homeDashboardContinueButton" type="button">
+            <svg><use href="#icon-draw"></use></svg>
+            <strong>Continue drawing</strong>
+            <span>Return to the spool on screen.</span>
+          </button>
+          <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
+            <svg><use href="#icon-reset"></use></svg>
+            <strong>New spool</strong>
+            <span>Start a fresh drawing with job details.</span>
+          </button>
+          <button class="home-dashboard-action" id="homeDashboardJobsButton" type="button">
+            <svg><use href="#icon-sample"></use></svg>
+            <strong>Jobs</strong>
+            <span>Open saved spools by job or team.</span>
+          </button>
+          <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
+            <svg><use href="#icon-sample"></use></svg>
+            <strong>Sample</strong>
+            <span>Load the example spool.</span>
+          </button>
+          <button class="home-dashboard-action" id="homeDashboardAccountButton" type="button">
+            <svg><use href="#icon-user"></use></svg>
+            <strong>Account</strong>
+            <span>Sign in, licences and teams.</span>
+          </button>
+          <button class="home-dashboard-action" id="homeDashboardToolsButton" type="button">
+            <svg><use href="#icon-settings"></use></svg>
+            <strong>Side tools</strong>
+            <span>Choose which drawing tools show.</span>
+          </button>
+          <button class="home-dashboard-action" id="homeDashboardHelpButton" type="button">
+            <svg><use href="#icon-help"></use></svg>
+            <strong>Help</strong>
+            <span>See touch, right-click and drawing tips.</span>
+          </button>
+        </div>
+      </section>
+    `;
+    document.querySelector(".app-shell")?.append(shell);
+  }
+
+  homeDashboardDialog = document.querySelector("#homeDashboardDialog");
+  homeDashboardSubtitle = document.querySelector("#homeDashboardSubtitle");
+  homeDashboardAccount = document.querySelector("#homeDashboardAccount");
+  homeDashboardStats = document.querySelector("#homeDashboardStats");
+  homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
+  homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+  homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
+  homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
+  homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
+  homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
+  homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
+  homeDashboardHelpButton = document.querySelector("#homeDashboardHelpButton");
+}
+
+function setupHomeDashboard() {
+  ensureHomeDashboardShell();
+  homeDashboardButton?.addEventListener("click", () => {
+    closeActionMenu();
+    openHomeDashboard();
+  });
+  homeDashboardCloseButton?.addEventListener("click", closeHomeDashboard);
+  homeDashboardContinueButton?.addEventListener("click", closeHomeDashboard);
+  homeDashboardNewButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    startNewDrawing().catch((error) => {
+      console.warn("Start new drawing failed.", error);
+      window.alert(error?.message || "Start new drawing failed.");
+    });
+  });
+  homeDashboardJobsButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    openBrowserProject().catch((error) => {
+      console.warn("Open jobs failed.", error);
+      window.alert(error?.message || "Open jobs failed.");
+    });
+  });
+  homeDashboardSampleButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    loadSampleDrawing();
+  });
+  homeDashboardAccountButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    openAuthDialog();
+  });
+  homeDashboardToolsButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    openToolSettingsDialog();
+  });
+  homeDashboardHelpButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    openHelpDialog();
+  });
+  homeDashboardDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === homeDashboardDialog) {
+      closeHomeDashboard();
+    }
+  });
+}
+
+function openHomeDashboard(options = {}) {
+  ensureHomeDashboardShell();
+  if (!homeDashboardDialog) {
+    if (options.startup) promptForProjectDetails();
+    return;
+  }
+  updateHomeDashboard();
+  homeDashboardDialog.hidden = false;
+  document.body.classList.add("home-dashboard-open");
+  homeDashboardContinueButton?.focus();
+}
+
+function closeHomeDashboard() {
+  if (homeDashboardDialog) homeDashboardDialog.hidden = true;
+  document.body.classList.remove("home-dashboard-open");
+}
+
+function updateHomeDashboard() {
+  const localProjects = loadSavedBrowserProjects();
+  const cloudCount = Array.isArray(cloudProjectCache) ? cloudProjectCache.length : null;
+  const useCloudCount = Boolean(cloudUser && hasActiveCloudLicense() && cloudCount !== null);
+  const savedCount = useCloudCount ? cloudCount : localProjects.length;
+  const savedLabel = `${savedCount} saved spool${savedCount === 1 ? "" : "s"}`;
+
+  if (homeDashboardSubtitle) {
+    homeDashboardSubtitle.textContent = hasDrawingContent()
+      ? "Choose what to do with the drawing on screen."
+      : "Choose what you want to do.";
+  }
+
+  if (homeDashboardAccount) {
+    const team = activeCompanyIsApproved() ? ` / ${activeCompany.name}` : "";
+    homeDashboardAccount.textContent = cloudUser
+      ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}${team}`
+      : "Guest mode - local projects only on this device";
+  }
+
+  if (homeDashboardStats) {
+    const scope = cloudUser && hasActiveCloudLicense()
+      ? cloudCount === null
+        ? "Open Jobs to refresh cloud projects."
+        : "Cloud project list loaded."
+      : "Browser storage only.";
+    homeDashboardStats.textContent = `${savedLabel}. ${scope}`;
+  }
+}
+
+function ensureProjectLibraryDashboardShell() {
+  const card = projectLibraryDialog?.querySelector(".project-library-card");
+  if (!card || !projectLibraryList) return;
+
+  if (!card.querySelector(".project-dialog-header")) {
+    const header = document.createElement("div");
+    header.className = "project-dialog-header";
+    const headerText = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = "Job dashboard";
+    projectLibrarySubtitle = document.createElement("small");
+    projectLibrarySubtitle.id = "projectLibrarySubtitle";
+    projectLibrarySubtitle.textContent = "Search a job, open a folder, then tap a spool drawing.";
+    headerText.append(title, projectLibrarySubtitle);
+    header.append(headerText);
+    card.insertBefore(header, projectLibraryList);
+  }
+
+  if (!projectLibrarySearchInput || !projectLibraryNewButton || !projectLibrarySaveButton) {
+    const toolbar = document.createElement("div");
+    toolbar.className = "project-dashboard-toolbar";
+    toolbar.setAttribute("aria-label", "Job dashboard tools");
+    toolbar.innerHTML = `
+      <label class="project-dashboard-search">
+        <span>Search jobs, spools or clients</span>
+        <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client or status" autocomplete="off" />
+      </label>
+      <button class="icon-button labeled" id="projectLibraryNewButton" type="button">
+        <svg><use href="#icon-reset"></use></svg>
+        <span>New spool</span>
+      </button>
+      <button class="primary-button" id="projectLibrarySaveButton" type="button">
+        <svg><use href="#icon-export"></use></svg>
+        <span>Save current</span>
+      </button>
+    `;
+    card.insertBefore(toolbar, projectLibraryList);
+    projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+    projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
+    projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
+  }
+}
+
 function setupProjectDialog() {
   if (!projectDialogForm || !projectDialogCancelButton) return;
+  ensureProjectLibraryDashboardShell();
 
   projectDialogForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -8915,6 +9140,13 @@ function setupProjectDialog() {
     }
   });
   projectLibraryList?.addEventListener("click", (event) => {
+    const folderToggle = event.target.closest("[data-project-folder-toggle]");
+    if (folderToggle) {
+      toggleProjectFolder(folderToggle.closest(".project-folder"));
+      event.preventDefault();
+      return;
+    }
+
     const deleteButton = event.target.closest("[data-delete-project-id]");
     if (deleteButton) {
       if (deleteButton.dataset.projectSource === "cloud") {
@@ -12758,6 +12990,7 @@ async function saveBrowserProject(options = {}) {
 }
 
 async function openBrowserProject(options = {}) {
+  ensureProjectLibraryDashboardShell();
   if (!options.keepSearch) {
     projectLibrarySearch = "";
     if (projectLibrarySearchInput) projectLibrarySearchInput.value = "";
@@ -12791,6 +13024,7 @@ async function openBrowserProject(options = {}) {
 
 function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
+  ensureProjectLibraryDashboardShell();
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
   projectLibraryProjects = Array.isArray(projects) ? [...projects] : [];
   const filteredProjects = filterProjectLibraryProjects(projectLibraryProjects);
@@ -12829,12 +13063,16 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
 
   const folders = projectFolders(filteredProjects);
   for (const [folderIndex, folder] of folders.entries()) {
-    const details = document.createElement("details");
-    details.className = "project-folder";
-    details.open = folder.active || folderIndex === 0;
+    const section = document.createElement("section");
+    section.className = "project-folder";
+    const open = folder.active || folderIndex === 0;
+    section.classList.toggle("open", open);
 
-    const summary = document.createElement("summary");
+    const summary = document.createElement("button");
+    summary.type = "button";
     summary.className = "project-folder-summary";
+    summary.dataset.projectFolderToggle = "true";
+    summary.setAttribute("aria-expanded", String(open));
 
     const folderMain = document.createElement("div");
     folderMain.className = "project-folder-main";
@@ -12852,18 +13090,29 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     count.textContent = `${folder.projects.length} spool${folder.projects.length === 1 ? "" : "s"}`;
 
     summary.append(folderMain, count);
-    details.append(summary);
+    section.append(summary);
 
     const drawings = document.createElement("div");
     drawings.className = "project-folder-drawings";
+    drawings.hidden = !open;
 
     for (const project of folder.projects) {
       drawings.append(projectLibraryRow(project));
     }
 
-    details.append(drawings);
-    projectLibraryList.append(details);
+    section.append(drawings);
+    projectLibraryList.append(section);
   }
+}
+
+function toggleProjectFolder(folder, forceOpen = null) {
+  if (!folder) return;
+  const open = forceOpen === null ? !folder.classList.contains("open") : Boolean(forceOpen);
+  folder.classList.toggle("open", open);
+  const toggle = folder.querySelector("[data-project-folder-toggle]");
+  const drawings = folder.querySelector(".project-folder-drawings");
+  toggle?.setAttribute("aria-expanded", String(open));
+  if (drawings) drawings.hidden = !open;
 }
 
 function filterProjectLibraryProjects(projects) {
@@ -15289,6 +15538,15 @@ async function startNewDrawing() {
   updateControls();
   updateAll({ save: false });
   await promptForProjectDetails({ force: true, defaults: nextProjectDefaults });
+}
+
+function loadSampleDrawing() {
+  state = sampleState();
+  nextFittingId = 5;
+  nextNoteId = 2;
+  three.userMovedCamera = false;
+  updateControls();
+  updateAll();
 }
 
 function openNewDrawingDialog() {
@@ -18679,8 +18937,8 @@ drawCanvas.addEventListener("pointermove", (event) => {
       ? `Box select / run ${hit.segment.index + 1}`
       : state.activeTool === "boxSelect"
       ? "Box select"
-      : state.activeTool === "tee" && hit
-      ? `Tee on run ${hit.segment.index + 1}`
+      : (state.activeTool === "tee" || state.activeTool === "branch") && hit
+      ? `${state.activeTool === "branch" ? "Branch" : "Tee"} on run ${hit.segment.index + 1}`
       : state.activeTool === "select" && hit
       ? `Run ${hit.segment.index + 1} - hold Shift for multi-select`
       : hit
@@ -19014,14 +19272,7 @@ projectCommentInput?.addEventListener("keydown", (event) => {
   }
 });
 
-document.querySelector("#sampleButton").addEventListener("click", () => {
-  state = sampleState();
-  nextFittingId = 5;
-  nextNoteId = 2;
-  three.userMovedCamera = false;
-  updateControls();
-  updateAll();
-});
+document.querySelector("#sampleButton").addEventListener("click", loadSampleDrawing);
 
 undoButton?.addEventListener("click", undo);
 redoButton?.addEventListener("click", redo);
@@ -19176,6 +19427,7 @@ setupMobilePanels();
 setupAppTheme();
 setupActionMenu();
 setupAuthDialog();
+setupHomeDashboard();
 setupProjectDialog();
 setupToolSettingsDialog();
 setupHelpDialog();

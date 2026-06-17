@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v1.71`
+Current app version: `v1.74`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -13,7 +13,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Hold Shift while drawing to use 45 degree offset snap guides.
 - Edit run length, angle, pipe size and fitting details from the inspector or right-click/long-press menus.
 - Select one run, multiple runs with Shift, or multiple runs with box select.
-- Add reducers, tees, branches, sockets, welds, flanges, valves and roll grooves.
+- Add reducers, sockets, welds, flanges, valves and roll grooves, with Tee and Branch available directly in Draw mode.
 - Pick common flange standards from menus, including ANSI, PN, DIN, JIS and AS 2129 Table types.
 - Pick socket size, quantity and spacing from a visual socket menu.
 - Work with Carbon Sch 40 and Stainless Sch 10S pipe data up to NB 300.
@@ -28,6 +28,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Float, hide, minimize or fullscreen the 3D preview.
 - Export fabrication PDF sheets, 3D images and project files.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
+- Use the startup dashboard to continue drawing, start a new spool, open jobs, load the sample, manage account settings or open help.
 - Open the Job dashboard to search jobs, group spools by job/client, and quickly save or start a new spool.
 - Use accounts, trials/licences, company/team projects and project comments through Supabase.
 - Install as a Progressive Web App on iPad, Android and desktop when hosted over HTTPS.
