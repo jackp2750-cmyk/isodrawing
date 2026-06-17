@@ -1,6 +1,13 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.74`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.75`.
+
+## v1.75 - Reliable Enter To Stop Drawing
+
+- Fixed Enter/Numpad Enter so it stops drawing from the main app even after focus has been on controls such as run length inputs.
+- Kept Enter normal inside blocking dialogs, dashboards, search fields and text-entry fields.
+- Made Select available in Draw mode so stopping drawing can switch to Select instead of falling back to Draw.
+- Bumped app cache to `spoolmate-v123`.
 
 ## v1.74 - Reliable Job Folder Toggle
 

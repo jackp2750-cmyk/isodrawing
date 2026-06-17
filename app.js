@@ -176,8 +176,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.74";
-const APP_BUILD_DATE = "2026-06-17";
+const APP_VERSION = "v1.75";
+const APP_BUILD_DATE = "2026-06-18";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -19325,7 +19325,7 @@ document.addEventListener("keydown", (event) => {
   } else if (controlOrMeta && key === "z") {
     event.preventDefault();
     undo();
-  } else if (isEnterKey && !isEditingField(event.target) && (state.activeTool === "draw" || pendingDraw)) {
+  } else if (isEnterKey && shouldStopDrawingOnEnter(event.target)) {
     event.preventDefault();
     stopDrawingMode();
   } else if ((event.key === "Delete" || event.key === "Backspace") && !isEditingField(event.target)) {
@@ -19379,7 +19379,7 @@ document.addEventListener("keydown", (event) => {
     setTool("draw");
     updateAll({ save: false });
   }
-});
+}, true);
 
 document.addEventListener("keyup", (event) => {
   if (event.key === "Shift") {
@@ -19390,6 +19390,34 @@ document.addEventListener("keyup", (event) => {
 function isEditingField(target) {
   if (!(target instanceof HTMLElement)) return false;
   return target.matches("input, select, textarea") || target.isContentEditable;
+}
+
+function shouldStopDrawingOnEnter(target) {
+  if (!(state.activeTool === "draw" || pendingDraw)) return false;
+  if (keyboardBlockingOverlayOpen()) return false;
+  if (!(target instanceof HTMLElement)) return true;
+  if (target.isContentEditable || target instanceof HTMLTextAreaElement) return false;
+  if (target instanceof HTMLInputElement) {
+    const textTypes = new Set(["", "text", "search", "email", "password", "tel", "url"]);
+    if (textTypes.has(target.type.toLowerCase())) return false;
+  }
+  return true;
+}
+
+function keyboardBlockingOverlayOpen() {
+  return Boolean(
+    actionMenuOpen() ||
+    (projectDialog && !projectDialog.hidden) ||
+    (newDrawingDialog && !newDrawingDialog.hidden) ||
+    (authDialog && !authDialog.hidden) ||
+    (homeDashboardDialog && !homeDashboardDialog.hidden) ||
+    (projectLibraryDialog && !projectLibraryDialog.hidden) ||
+    (toolSettingsDialog && !toolSettingsDialog.hidden) ||
+    (helpDialog && !helpDialog.hidden) ||
+    (loadPlanDialog && !loadPlanDialog.hidden) ||
+    (projectJobQuickPick && !projectJobQuickPick.hidden) ||
+    !drawingContextMenu.hidden,
+  );
 }
 
 document.addEventListener("pointerdown", (event) => {
