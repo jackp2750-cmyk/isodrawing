@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=170" />
+    <link rel="stylesheet" href="./styles.css?v=171" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -181,7 +181,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.70</span>
+            <span class="version-badge" id="appVersionBadge">v1.71</span>
           </div>
         </div>
 
@@ -261,9 +261,9 @@
             <svg><use href="#icon-export"></use></svg>
             <span>Save</span>
           </button>
-          <button class="icon-button labeled" id="openBrowserProjectButton" type="button" title="Open saved project" aria-label="Open saved project">
+          <button class="icon-button labeled" id="openBrowserProjectButton" type="button" title="Open job dashboard" aria-label="Open job dashboard">
             <svg><use href="#icon-sample"></use></svg>
-            <span>Open</span>
+            <span>Jobs</span>
           </button>
           <button class="icon-button labeled" id="accountButton" type="button" title="Sign in for cloud projects" aria-label="Account and cloud sync">
             <svg><use href="#icon-user"></use></svg>
@@ -804,12 +804,26 @@
       </div>
 
       <div class="project-dialog-backdrop" id="projectLibraryDialog" hidden>
-        <section class="project-dialog-card project-library-card" aria-label="Saved projects">
+        <section class="project-dialog-card project-library-card" aria-label="Job dashboard">
           <div class="project-dialog-header">
             <div>
-              <strong>Saved projects</strong>
-              <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Open a project folder, then tap a spool drawing.</small>
+              <strong>Job dashboard</strong>
+              <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Search a job, open a folder, then tap a spool drawing.</small>
             </div>
+          </div>
+          <div class="project-dashboard-toolbar" aria-label="Job dashboard tools">
+            <label class="project-dashboard-search">
+              <span>Search jobs, spools or clients</span>
+              <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client or status" autocomplete="off" />
+            </label>
+            <button class="icon-button labeled" id="projectLibraryNewButton" type="button">
+              <svg><use href="#icon-reset"></use></svg>
+              <span>New spool</span>
+            </button>
+            <button class="primary-button" id="projectLibrarySaveButton" type="button">
+              <svg><use href="#icon-export"></use></svg>
+              <span>Save current</span>
+            </button>
           </div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
           <div class="project-dialog-actions">
@@ -1062,6 +1076,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=170"></script>
+    <script defer src="./app.js?v=171"></script>
   </body>
 </html>

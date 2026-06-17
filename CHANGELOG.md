@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.70`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.71`.
+
+## v1.71 - Job Dashboard
+
+- Changed the top Open action to Jobs so saved work is opened from a clearer job dashboard.
+- Added dashboard search for job number, spool number, client, status and drawn-by fields.
+- Added quick New spool and Save current actions inside the dashboard.
+- Kept saved spools grouped by job/client with status counts and clearer matching-result counts.
+- Bumped app cache to `spoolmate-v119`.
 
 ## v1.70 - Pre-Demo Stability Pass
 

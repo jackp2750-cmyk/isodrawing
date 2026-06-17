@@ -113,6 +113,9 @@ const projectLibraryDialog = document.querySelector("#projectLibraryDialog");
 const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
 const projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
+const projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+const projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
+const projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
 const healthSummary = document.querySelector("#healthSummary");
 const bomSummary = document.querySelector("#bomSummary");
 const workflowSummary = document.querySelector("#workflowSummary");
@@ -160,8 +163,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.70";
-const APP_BUILD_DATE = "2026-06-16";
+const APP_VERSION = "v1.71";
+const APP_BUILD_DATE = "2026-06-17";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -572,6 +575,8 @@ let projectCommentsBusy = false;
 let currentCloudProjectOwnerId = null;
 let currentCloudProjectCompanyId = null;
 let projectLibrarySource = "browser";
+let projectLibrarySearch = "";
+let projectLibraryProjects = [];
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
 let currentLoadPlan = null;
@@ -8885,6 +8890,25 @@ function setupProjectDialog() {
   });
 
   projectLibraryCloseButton?.addEventListener("click", closeProjectLibrary);
+  projectLibrarySearchInput?.addEventListener("input", () => {
+    projectLibrarySearch = projectLibrarySearchInput.value;
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  });
+  projectLibraryNewButton?.addEventListener("click", () => {
+    closeProjectLibrary();
+    startNewDrawing();
+  });
+  projectLibrarySaveButton?.addEventListener("click", () => {
+    saveBrowserProject({ silent: true })
+      .then((saved) => {
+        if (saved) return openBrowserProject({ keepSearch: true });
+        return null;
+      })
+      .catch((error) => {
+        console.warn("Save project failed.", error);
+        window.alert(error?.message || "Save project failed.");
+      });
+  });
   projectLibraryDialog?.addEventListener("pointerdown", (event) => {
     if (event.target === projectLibraryDialog) {
       closeProjectLibrary();
@@ -12733,7 +12757,11 @@ async function saveBrowserProject(options = {}) {
   return true;
 }
 
-async function openBrowserProject() {
+async function openBrowserProject(options = {}) {
+  if (!options.keepSearch) {
+    projectLibrarySearch = "";
+    if (projectLibrarySearchInput) projectLibrarySearchInput.value = "";
+  }
   const useCloud = Boolean(cloudUser && hasActiveCloudLicense());
   let projects = [];
   if (useCloud) {
@@ -12764,16 +12792,22 @@ async function openBrowserProject() {
 function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
+  projectLibraryProjects = Array.isArray(projects) ? [...projects] : [];
+  const filteredProjects = filterProjectLibraryProjects(projectLibraryProjects);
+  const query = projectLibrarySearch.trim();
+  if (projectLibrarySearchInput && projectLibrarySearchInput.value !== projectLibrarySearch) {
+    projectLibrarySearchInput.value = projectLibrarySearch;
+  }
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = projectLibrarySource === "cloud"
       ? activeCompanyIsApproved()
-        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Open a project folder, then tap a spool drawing.`
-        : "Projects are saved to your SpoolMate cloud account. Open a project folder, then tap a spool drawing."
-      : "Projects are saved on this device/browser. Open a project folder, then tap a spool drawing.";
+        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Search a job, open a folder, then tap a spool drawing.`
+        : "Projects are saved to your SpoolMate cloud account. Search a job, open a folder, then tap a spool drawing."
+      : "Projects are saved on this device/browser. Search a job, open a folder, then tap a spool drawing.";
   }
   projectLibraryList.innerHTML = "";
 
-  if (!projects.length) {
+  if (!projectLibraryProjects.length) {
     const empty = document.createElement("div");
     empty.className = "project-library-empty";
     empty.textContent = projectLibrarySource === "cloud"
@@ -12783,9 +12817,17 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     return;
   }
 
-  projectLibraryList.append(projectDashboardCard(projects));
+  projectLibraryList.append(projectDashboardCard(filteredProjects, { totalCount: projectLibraryProjects.length, query }));
 
-  const folders = projectFolders(projects);
+  if (!filteredProjects.length) {
+    const empty = document.createElement("div");
+    empty.className = "project-library-empty";
+    empty.textContent = `No saved spools match "${query}".`;
+    projectLibraryList.append(empty);
+    return;
+  }
+
+  const folders = projectFolders(filteredProjects);
   for (const [folderIndex, folder] of folders.entries()) {
     const details = document.createElement("details");
     details.className = "project-folder";
@@ -12824,7 +12866,35 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   }
 }
 
-function projectDashboardCard(projects) {
+function filterProjectLibraryProjects(projects) {
+  const query = projectLibrarySearch.trim().toLowerCase();
+  if (!query) return projects;
+  return projects.filter((project) => projectLibrarySearchText(project).includes(query));
+}
+
+function projectLibrarySearchText(project) {
+  const info = normalizeProjectInfo(project.projectInfo);
+  const savedState = project.state?.state && typeof project.state.state === "object" ? project.state.state : project.state;
+  const status = projectStatusLabel(savedState?.projectStatus);
+  const scope = project.companyId ? companyNameForId(project.companyId) : project.source === "cloud" ? "personal cloud" : "browser";
+  return [
+    project.name,
+    info.jobNumber,
+    info.spoolNumber,
+    info.client,
+    info.revision,
+    info.drawnBy,
+    status,
+    scope,
+    savedProjectSpoolTitle(project),
+    savedProjectDetailLine(project),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function projectDashboardCard(projects, options = {}) {
   const card = document.createElement("div");
   card.className = "project-dashboard-card";
   const counts = projects.reduce((summary, project) => {
@@ -12833,10 +12903,14 @@ function projectDashboardCard(projects) {
     summary[status] = (summary[status] ?? 0) + 1;
     return summary;
   }, {});
+  const totalCount = options.totalCount ?? projects.length;
+  const resultText = options.query && totalCount !== projects.length
+    ? `${projects.length} matching of ${totalCount} saved spool${totalCount === 1 ? "" : "s"}`
+    : `${projects.length} saved spool${projects.length === 1 ? "" : "s"}`;
   card.innerHTML = `
     <div>
       <strong>${projectLibrarySource === "cloud" ? activeCompanyIsApproved() ? `${escapeHtml(activeCompany.name)} dashboard` : "Cloud dashboard" : "Browser dashboard"}</strong>
-      <span>${projects.length} saved spool${projects.length === 1 ? "" : "s"}</span>
+      <span>${escapeHtml(resultText)}</span>
     </div>
     <div class="project-dashboard-stats">
       ${[...PROJECT_STATUSES].map((status) => `
@@ -13095,7 +13169,7 @@ function openSavedBrowserProject(projectId) {
   const record = loadSavedBrowserProjects().find((project) => project.id === projectId);
   if (!record) {
     window.alert("That saved project was not found.");
-    renderProjectLibrary();
+    renderProjectLibrary(loadSavedBrowserProjects(), { source: "browser" });
     return;
   }
 
@@ -13144,7 +13218,7 @@ function deleteSavedBrowserProject(projectId) {
     updateControls();
     persistState();
   }
-  renderProjectLibrary();
+  renderProjectLibrary(loadSavedBrowserProjects(), { source: "browser" });
 }
 
 function withTemporaryState(tempState, callback) {
