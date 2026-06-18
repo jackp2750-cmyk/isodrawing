@@ -1,6 +1,27 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.75`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.79`.
+
+## v1.79 - Interactive Tool Tutorial
+
+- Turned the tutorial into an interactive coach that highlights the real app control for each step.
+- Added safe Try buttons that switch tools, focus run/angle inputs, show dimension styles, open 3D controls and show the Checks tab.
+- Added a non-blocking tutorial spotlight so users can still see and interact with the drawing tools while learning.
+- Bumped app cache to `spoolmate-v127`.
+
+## v1.78 - Saved Job Folder Reliability
+
+- Made Job dashboard saved-spool folders remember their open/minimized state across rerenders.
+- Replaced the decorative folder plus/minus with a real button element so tapping the minimized folder control is more reliable on touch devices.
+- Stopped folder, open and delete clicks from bubbling into each other inside the saved spool list.
+- Bumped app cache to `spoolmate-v126`.
+
+## v1.76 - Built-In Tutorial
+
+- Added a step-by-step SpoolMate tutorial covering dashboard setup, drawing, fittings, dimensions, review and export.
+- Added Tutorial buttons to the startup dashboard and main menu so new users can find it quickly on desktop, iPad and phone.
+- Styled the tutorial for light and dark themes with compact mobile layout and progress dots.
+- Bumped app cache to `spoolmate-v124`.
 
 ## v1.75 - Reliable Enter To Stop Drawing
 

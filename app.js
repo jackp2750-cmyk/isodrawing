@@ -118,6 +118,7 @@ let homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton
 let homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
 let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
 let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
+let homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
 let homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
 let homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
 let homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
@@ -148,6 +149,15 @@ const themeColorMeta = document.querySelector("meta[name='theme-color']");
 const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
 const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
+const tutorialButton = document.querySelector("#tutorialButton");
+const tutorialDialog = document.querySelector("#tutorialDialog");
+const tutorialProgress = document.querySelector("#tutorialProgress");
+const tutorialStepCard = document.querySelector("#tutorialStepCard");
+const tutorialCloseButton = document.querySelector("#tutorialCloseButton");
+const tutorialPrevButton = document.querySelector("#tutorialPrevButton");
+const tutorialActionButton = document.querySelector("#tutorialActionButton");
+const tutorialNextButton = document.querySelector("#tutorialNextButton");
+const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
 const helpButton = document.querySelector("#helpButton");
 const helpDialog = document.querySelector("#helpDialog");
 const helpCloseButton = document.querySelector("#helpCloseButton");
@@ -169,6 +179,7 @@ const sideToolButtons = [...document.querySelectorAll(".tool-rail [data-tool], .
 const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
+const PROJECT_LIBRARY_FOLDER_STATE_KEY = "isospool-project-library-folder-state-v1";
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
@@ -176,7 +187,7 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.75";
+const APP_VERSION = "v1.79";
 const APP_BUILD_DATE = "2026-06-18";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -345,6 +356,145 @@ const SIDE_TOOL_DETAILS = {
   measure: ["Measure", "Click two points to mark a measurement"],
   delete: ["Delete", "Delete the selected item"],
 };
+const TUTORIAL_STEPS = [
+  {
+    kicker: "Start",
+    title: "Start from the dashboard or Jobs",
+    body: "The Jobs button opens saved spools grouped by job. The dashboard is the quick starting point for new users, samples, jobs, account and help.",
+    target: "#openBrowserProjectButton",
+    action: "focusJobs",
+    actionLabel: "Find Jobs",
+    items: [
+      "Tap Jobs to open saved local or cloud spools.",
+      "Use Dashboard from Menu when you want the big start screen.",
+      "Use Sample when teaching someone without touching a real job.",
+    ],
+  },
+  {
+    kicker: "Draw",
+    title: "Pick Draw to create pipe runs",
+    body: "Draw is the main tool for building the centreline. Drag from the active point on the isometric paper, or use exact runs from the inspector.",
+    target: '[data-tool="draw"]',
+    mode: "draw",
+    action: "drawTool",
+    actionLabel: "Select Draw",
+    items: [
+      "Click or drag from a point to add the next pipe run.",
+      "Press Enter when finished drawing to return to Select.",
+      "Use Undo and Redo whenever a run lands wrong.",
+    ],
+  },
+  {
+    kicker: "Exact Runs",
+    title: "Use millimetre run lengths",
+    body: "The exact run controls let users type the next run length, then add X, Y or Z runs without guessing on the grid.",
+    target: "#stepLengthInput",
+    mode: "draw",
+    action: "focusLength",
+    actionLabel: "Focus Length",
+    items: [
+      "Lengths are in millimetres.",
+      "Use +X, +Y and +Z for precise straight runs.",
+      "Use the selected run field to edit an existing pipe section.",
+    ],
+  },
+  {
+    kicker: "Angles",
+    title: "Teach offsets and 45 degree work",
+    body: "Angles are controlled from the inspector. Users can type an angle, pick a plane and add positive or negative angled runs.",
+    target: "#angleInput",
+    mode: "draw",
+    action: "focusAngle",
+    actionLabel: "Focus Angle",
+    items: [
+      "Hold Shift while drawing to use 45 degree snap guides.",
+      "45 degree travel uses the offset multiplier in the cut calculations.",
+      "The centre-to-centre offset dimension is shown for offset runs.",
+    ],
+  },
+  {
+    kicker: "Select",
+    title: "Select and edit existing pipe",
+    body: "Select is how users pick pipe runs, points, notes, fittings and measurements. Holding Shift selects more than one run.",
+    target: '[data-tool="select"]',
+    mode: "draw",
+    action: "selectTool",
+    actionLabel: "Select Tool",
+    items: [
+      "Click a run to edit its length or pipe size.",
+      "Hold Shift while clicking runs to select multiple.",
+      "Use box select in Edit mode for bigger changes.",
+    ],
+  },
+  {
+    kicker: "Fittings",
+    title: "Add tees, branches and fittings",
+    body: "Tee and Branch are available while drawing. Other fittings can be added from Edit mode or by right-clicking/long-pressing a run or point.",
+    target: '[data-tool="tee"]',
+    mode: "draw",
+    action: "teeTool",
+    actionLabel: "Select Tee",
+    items: [
+      "Tee adds tee takeoff and fitting weight.",
+      "Branch is a welded pipe into the side of a larger pipe.",
+      "Changing pipe size can add reducers when the connection needs one.",
+    ],
+  },
+  {
+    kicker: "Measure",
+    title: "Measure any two points",
+    body: "The Measure tool lets users click two points and leave a measurement on the drawing without changing the pipe.",
+    target: '[data-tool="measure"]',
+    mode: "draw",
+    action: "measureTool",
+    actionLabel: "Select Measure",
+    items: [
+      "Use it for quick checks and extra site dimensions.",
+      "Measurements are separate from pipe runs.",
+      "Undo removes a manual measurement if it was placed wrong.",
+    ],
+  },
+  {
+    kicker: "Dimensions",
+    title: "Choose the clearest dimension style",
+    body: "Dimensions can be pipe labels, red centre-to-centre lines, numbered dimensions or chain dimensions depending on how busy the spool is.",
+    target: "#dimensionStyleSelect",
+    action: "focusDimensions",
+    actionLabel: "Show Styles",
+    items: [
+      "Red C/C lines are good for fabrication checking.",
+      "Drag red dimension labels away from clashes.",
+      "Use numbered or chain dimensions when labels get crowded.",
+    ],
+  },
+  {
+    kicker: "3D",
+    title: "Use the 3D preview to explain the spool",
+    body: "The 3D preview makes the pipe clearer for people who do not read isometric drawings every day.",
+    target: "#previewModePanelSelect",
+    action: "showPreview",
+    actionLabel: "Show 3D",
+    items: [
+      "Switch between realistic, stainless, outline and CAD styles.",
+      "Use Rotate for spinning the model.",
+      "Use Move for pan-style navigation.",
+    ],
+  },
+  {
+    kicker: "Review",
+    title: "Check before saving or issuing",
+    body: "The Checks, Cut List, Weights and BOM tabs turn the drawing into fabrication information.",
+    target: '[data-inspector-tab="checks"]',
+    mode: "review",
+    action: "showChecks",
+    actionLabel: "Open Checks",
+    items: [
+      "Checks can highlight issues directly on the drawing.",
+      "Cut List and BOM show what needs to be made and ordered.",
+      "Verify estimated weights and lifting details before fabrication or lifting.",
+    ],
+  },
+];
 const LOAD_PLAN_TRAYS = {
   medium: { key: "medium", label: "3460 x 2040 mm tray", lengthMm: 3460, widthMm: 2040 },
   long: { key: "long", label: "4490 x 2040 mm tray", lengthMm: 4490, widthMm: 2040 },
@@ -556,6 +706,8 @@ let activeTouchPointers = new Map();
 let pinchGesture = null;
 let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
+let tutorialStepIndex = 0;
+let tutorialHighlightedElement = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
@@ -590,6 +742,7 @@ let currentCloudProjectCompanyId = null;
 let projectLibrarySource = "browser";
 let projectLibrarySearch = "";
 let projectLibraryProjects = [];
+let projectLibraryFolderOpenState = readProjectLibraryFolderOpenState();
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
 let currentLoadPlan = null;
@@ -8264,6 +8417,246 @@ function helpSectionForCurrentMode() {
   return "touch";
 }
 
+function currentTutorialStep() {
+  return TUTORIAL_STEPS[tutorialStepIndex] ?? TUTORIAL_STEPS[0];
+}
+
+function tutorialTargetForStep(step = currentTutorialStep()) {
+  if (!step?.target) return null;
+  try {
+    return document.querySelector(step.target);
+  } catch {
+    return null;
+  }
+}
+
+function tutorialTargetLabel(target, step = currentTutorialStep()) {
+  const text = target?.textContent?.replace(/\s+/g, " ").trim();
+  return text || step?.actionLabel || step?.title || "this control";
+}
+
+function clearTutorialTarget() {
+  tutorialHighlightedElement?.classList.remove("tutorial-focus-target");
+  tutorialHighlightedElement = null;
+  if (tutorialSpotlight) {
+    tutorialSpotlight.hidden = true;
+  }
+}
+
+function tutorialTargetIsVisible(target) {
+  if (!target || target.hidden || target.closest("[hidden]")) return false;
+  const rect = target.getBoundingClientRect();
+  const style = window.getComputedStyle(target);
+  return rect.width > 0 && rect.height > 0 && style.display !== "none" && style.visibility !== "hidden";
+}
+
+function positionTutorialCardNear(rect) {
+  if (!tutorialDialog || !rect) return;
+  const horizontal = rect.left + rect.width / 2 < window.innerWidth / 2 ? "right" : "left";
+  const vertical = rect.top + rect.height / 2 < window.innerHeight / 2 ? "bottom" : "top";
+  tutorialDialog.dataset.cardX = horizontal;
+  tutorialDialog.dataset.cardY = vertical;
+}
+
+function syncTutorialTarget(options = {}) {
+  if (!tutorialDialog || tutorialDialog.hidden) return;
+  const step = currentTutorialStep();
+  clearTutorialTarget();
+  const target = tutorialTargetForStep(step);
+  if (!target) {
+    delete tutorialDialog.dataset.cardX;
+    delete tutorialDialog.dataset.cardY;
+    return;
+  }
+
+  if (options.scroll !== false) {
+    target.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+  }
+  window.requestAnimationFrame(() => {
+    if (!tutorialDialog || tutorialDialog.hidden) return;
+    if (!tutorialTargetIsVisible(target)) return;
+    const rect = target.getBoundingClientRect();
+    tutorialHighlightedElement = target;
+    target.classList.add("tutorial-focus-target");
+    positionTutorialCardNear(rect);
+    if (tutorialSpotlight) {
+      tutorialSpotlight.hidden = false;
+      tutorialSpotlight.style.setProperty("--spotlight-x", `${Math.max(8, rect.left - 8)}px`);
+      tutorialSpotlight.style.setProperty("--spotlight-y", `${Math.max(8, rect.top - 8)}px`);
+      tutorialSpotlight.style.setProperty("--spotlight-w", `${rect.width + 16}px`);
+      tutorialSpotlight.style.setProperty("--spotlight-h", `${rect.height + 16}px`);
+    }
+  });
+}
+
+function prepareTutorialStep(step = currentTutorialStep()) {
+  closeActionMenu();
+  closeHomeDashboard();
+  closeProjectLibrary();
+  closeHelpDialog();
+  closeToolSettingsDialog();
+  closeDrawingContextMenu();
+
+  if (step.mode && normalizeAppMode(step.mode) !== appMode) {
+    applyAppMode(step.mode, { activateTab: false, keepTool: true });
+  }
+  if (step.action === "showChecks") {
+    applyAppMode("review", { keepTool: true });
+    activateInspectorTab("checks");
+    showMobilePanel("inspector");
+  }
+}
+
+function renderTutorialStep() {
+  if (!tutorialStepCard || !tutorialProgress || !tutorialPrevButton || !tutorialNextButton) return;
+  const step = currentTutorialStep();
+  prepareTutorialStep(step);
+  const stepNumber = tutorialStepIndex + 1;
+  const target = tutorialTargetForStep(step);
+  const targetText = tutorialTargetLabel(target, step);
+  tutorialProgress.innerHTML = `
+    <span>Step ${stepNumber} of ${TUTORIAL_STEPS.length}</span>
+    <div class="tutorial-dots" aria-hidden="true">
+      ${TUTORIAL_STEPS.map((_, index) => `<i class="${index === tutorialStepIndex ? "active" : ""}"></i>`).join("")}
+    </div>
+  `;
+  tutorialStepCard.innerHTML = `
+    <small>${escapeHtml(step.kicker)}</small>
+    <h2>${escapeHtml(step.title)}</h2>
+    <p>${escapeHtml(step.body)}</p>
+    <div class="tutorial-target-note">Highlighted: ${escapeHtml(targetText)}</div>
+    <ul>
+      ${step.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+    </ul>
+  `;
+  tutorialPrevButton.disabled = tutorialStepIndex === 0;
+  tutorialNextButton.textContent = tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? "Done" : "Next";
+  if (tutorialActionButton) {
+    tutorialActionButton.hidden = !step.action;
+    tutorialActionButton.textContent = step.actionLabel || "Try it";
+  }
+  syncTutorialTarget();
+}
+
+function focusTutorialTarget(step = currentTutorialStep()) {
+  const target = tutorialTargetForStep(step);
+  if (!target) return;
+  target.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+  if (typeof target.focus === "function") {
+    target.focus({ preventScroll: true });
+  }
+  if (target instanceof HTMLInputElement && (target.type === "text" || target.type === "number" || target.type === "search")) {
+    target.select();
+  }
+  syncTutorialTarget();
+}
+
+function runTutorialStepAction() {
+  const step = currentTutorialStep();
+  switch (step.action) {
+    case "drawTool":
+      applyAppMode("draw", { activateTab: false, keepTool: true });
+      setTool("draw");
+      break;
+    case "selectTool":
+      applyAppMode("draw", { activateTab: false, keepTool: true });
+      setTool("select");
+      break;
+    case "teeTool":
+      applyAppMode("draw", { activateTab: false, keepTool: true });
+      setTool("tee");
+      break;
+    case "measureTool":
+      applyAppMode("draw", { activateTab: false, keepTool: true });
+      setTool("measure");
+      break;
+    case "focusLength":
+      applyAppMode("draw", { activateTab: false, keepTool: true });
+      activateInspectorTab("properties");
+      showMobilePanel("inspector");
+      focusTutorialTarget(step);
+      break;
+    case "focusAngle":
+      applyAppMode("draw", { activateTab: false, keepTool: true });
+      activateInspectorTab("properties");
+      showMobilePanel("inspector");
+      focusTutorialTarget(step);
+      break;
+    case "focusDimensions":
+      if (dimensionToggle && !dimensionToggle.checked) {
+        dimensionToggle.checked = true;
+        state.showDimensions = true;
+        dimensionStyleSelect.disabled = false;
+        updateAll();
+      }
+      focusTutorialTarget(step);
+      break;
+    case "showPreview":
+      previewPanelHidden = false;
+      previewPanelMinimized = false;
+      updatePreviewFloatingState();
+      showMobilePanel("preview");
+      focusTutorialTarget(step);
+      break;
+    case "showChecks":
+      applyAppMode("review", { keepTool: true });
+      activateInspectorTab("checks");
+      showMobilePanel("inspector");
+      focusTutorialTarget(step);
+      break;
+    case "focusJobs":
+    default:
+      focusTutorialTarget(step);
+      break;
+  }
+  window.setTimeout(syncTutorialTarget, 120);
+}
+
+function openTutorialDialog(index = 0) {
+  if (!tutorialDialog) return;
+  tutorialStepIndex = clampNumber(Math.round(Number(index) || 0), 0, TUTORIAL_STEPS.length - 1);
+  tutorialDialog.hidden = false;
+  document.body.classList.add("tutorial-running");
+  renderTutorialStep();
+  tutorialNextButton?.focus();
+}
+
+function closeTutorialDialog() {
+  if (tutorialDialog) tutorialDialog.hidden = true;
+  document.body.classList.remove("tutorial-running");
+  clearTutorialTarget();
+}
+
+function tutorialNextStep() {
+  if (tutorialStepIndex >= TUTORIAL_STEPS.length - 1) {
+    closeTutorialDialog();
+    return;
+  }
+  tutorialStepIndex += 1;
+  renderTutorialStep();
+}
+
+function tutorialPreviousStep() {
+  tutorialStepIndex = Math.max(0, tutorialStepIndex - 1);
+  renderTutorialStep();
+}
+
+function updateTutorialCoachPosition() {
+  if (tutorialDialog && !tutorialDialog.hidden) {
+    syncTutorialTarget({ scroll: false });
+  }
+}
+
+function setupTutorialDialog() {
+  tutorialButton?.addEventListener("click", () => openTutorialDialog());
+  tutorialCloseButton?.addEventListener("click", closeTutorialDialog);
+  tutorialPrevButton?.addEventListener("click", tutorialPreviousStep);
+  tutorialActionButton?.addEventListener("click", runTutorialStepAction);
+  tutorialNextButton?.addEventListener("click", tutorialNextStep);
+  window.addEventListener("resize", updateTutorialCoachPosition);
+  window.addEventListener("scroll", updateTutorialCoachPosition, true);
+}
+
 function setHelpTab(section) {
   const key = helpPanels.some((panel) => panel.dataset.helpPanel === section) ? section : "touch";
   for (const button of helpTabButtons) {
@@ -8873,6 +9266,11 @@ function ensureHomeDashboardShell() {
             <strong>Jobs</strong>
             <span>Open saved spools by job or team.</span>
           </button>
+          <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
+            <svg><use href="#icon-help"></use></svg>
+            <strong>Tutorial</strong>
+            <span>Walk through the main workflow.</span>
+          </button>
           <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
             <svg><use href="#icon-sample"></use></svg>
             <strong>Sample</strong>
@@ -8899,6 +9297,21 @@ function ensureHomeDashboardShell() {
     document.querySelector(".app-shell")?.append(shell);
   }
 
+  const dashboardGrid = document.querySelector(".home-dashboard-grid");
+  if (dashboardGrid && !document.querySelector("#homeDashboardTutorialButton")) {
+    const tutorialAction = document.createElement("button");
+    tutorialAction.className = "home-dashboard-action";
+    tutorialAction.id = "homeDashboardTutorialButton";
+    tutorialAction.type = "button";
+    tutorialAction.innerHTML = `
+      <svg><use href="#icon-help"></use></svg>
+      <strong>Tutorial</strong>
+      <span>Walk through the main workflow.</span>
+    `;
+    const sampleAction = document.querySelector("#homeDashboardSampleButton");
+    dashboardGrid.insertBefore(tutorialAction, sampleAction ?? null);
+  }
+
   homeDashboardDialog = document.querySelector("#homeDashboardDialog");
   homeDashboardSubtitle = document.querySelector("#homeDashboardSubtitle");
   homeDashboardAccount = document.querySelector("#homeDashboardAccount");
@@ -8907,6 +9320,7 @@ function ensureHomeDashboardShell() {
   homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
   homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
   homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
+  homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
   homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
   homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
   homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
@@ -8934,6 +9348,10 @@ function setupHomeDashboard() {
       console.warn("Open jobs failed.", error);
       window.alert(error?.message || "Open jobs failed.");
     });
+  });
+  homeDashboardTutorialButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    openTutorialDialog();
   });
   homeDashboardSampleButton?.addEventListener("click", () => {
     closeHomeDashboard();
@@ -9144,11 +9562,14 @@ function setupProjectDialog() {
     if (folderToggle) {
       toggleProjectFolder(folderToggle.closest(".project-folder"));
       event.preventDefault();
+      event.stopPropagation();
       return;
     }
 
     const deleteButton = event.target.closest("[data-delete-project-id]");
     if (deleteButton) {
+      event.preventDefault();
+      event.stopPropagation();
       if (deleteButton.dataset.projectSource === "cloud") {
         deleteSavedCloudProject(deleteButton.dataset.deleteProjectId).catch((error) => {
           console.warn("Could not delete cloud project.", error);
@@ -9162,6 +9583,8 @@ function setupProjectDialog() {
 
     const openTarget = event.target.closest("[data-open-project-id]");
     if (openTarget) {
+      event.preventDefault();
+      event.stopPropagation();
       if (openTarget.dataset.projectSource === "cloud") {
         openSavedCloudProject(openTarget.dataset.openProjectId).catch((error) => {
           console.warn("Could not open cloud project.", error);
@@ -13022,6 +13445,46 @@ async function openBrowserProject(options = {}) {
   }
 }
 
+function readProjectLibraryFolderOpenState() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(PROJECT_LIBRARY_FOLDER_STATE_KEY));
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return new Map();
+    return new Map(
+      Object.entries(raw)
+        .filter(([, open]) => typeof open === "boolean")
+        .slice(-240)
+    );
+  } catch {
+    return new Map();
+  }
+}
+
+function storeProjectLibraryFolderOpenState() {
+  try {
+    localStorage.setItem(PROJECT_LIBRARY_FOLDER_STATE_KEY, JSON.stringify(Object.fromEntries(projectLibraryFolderOpenState)));
+  } catch (error) {
+    console.warn("Could not save job folder state.", error);
+  }
+}
+
+function projectLibraryFolderStateKey(folderKey, source = projectLibrarySource) {
+  return `${source || "browser"}::${folderKey}`;
+}
+
+function projectLibraryFolderOpenPreference(folderKey) {
+  return projectLibraryFolderOpenState.get(projectLibraryFolderStateKey(folderKey));
+}
+
+function rememberProjectLibraryFolderOpen(folderKey, open) {
+  if (!folderKey) return;
+  projectLibraryFolderOpenState.set(projectLibraryFolderStateKey(folderKey), Boolean(open));
+  if (projectLibraryFolderOpenState.size > 240) {
+    const oldestKey = projectLibraryFolderOpenState.keys().next().value;
+    projectLibraryFolderOpenState.delete(oldestKey);
+  }
+  storeProjectLibraryFolderOpenState();
+}
+
 function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
   ensureProjectLibraryDashboardShell();
@@ -13065,7 +13528,9 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   for (const [folderIndex, folder] of folders.entries()) {
     const section = document.createElement("section");
     section.className = "project-folder";
-    const open = folder.active || folderIndex === 0;
+    section.dataset.projectFolderKey = folder.key;
+    const openPreference = projectLibraryFolderOpenPreference(folder.key);
+    const open = typeof openPreference === "boolean" ? openPreference : folder.active || folderIndex === 0;
     section.classList.toggle("open", open);
 
     const summary = document.createElement("button");
@@ -13073,6 +13538,8 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     summary.className = "project-folder-summary";
     summary.dataset.projectFolderToggle = "true";
     summary.setAttribute("aria-expanded", String(open));
+    summary.setAttribute("aria-label", `${open ? "Hide" : "Show"} ${folder.title} saved spools`);
+    summary.title = `${open ? "Hide" : "Show"} saved spools`;
 
     const folderMain = document.createElement("div");
     folderMain.className = "project-folder-main";
@@ -13089,7 +13556,13 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     count.className = "project-folder-count";
     count.textContent = `${folder.projects.length} spool${folder.projects.length === 1 ? "" : "s"}`;
 
-    summary.append(folderMain, count);
+    const toggleIcon = document.createElement("span");
+    toggleIcon.className = "project-folder-toggle-icon";
+    toggleIcon.dataset.projectFolderIcon = "true";
+    toggleIcon.setAttribute("aria-hidden", "true");
+    toggleIcon.textContent = open ? "-" : "+";
+
+    summary.append(folderMain, count, toggleIcon);
     section.append(summary);
 
     const drawings = document.createElement("div");
@@ -13110,9 +13583,15 @@ function toggleProjectFolder(folder, forceOpen = null) {
   const open = forceOpen === null ? !folder.classList.contains("open") : Boolean(forceOpen);
   folder.classList.toggle("open", open);
   const toggle = folder.querySelector("[data-project-folder-toggle]");
+  const title = folder.querySelector(".project-folder-main strong")?.textContent || "saved spools";
+  const toggleIcon = folder.querySelector("[data-project-folder-icon]");
   const drawings = folder.querySelector(".project-folder-drawings");
   toggle?.setAttribute("aria-expanded", String(open));
+  toggle?.setAttribute("aria-label", `${open ? "Hide" : "Show"} ${title} saved spools`);
+  if (toggle) toggle.title = `${open ? "Hide" : "Show"} saved spools`;
+  if (toggleIcon) toggleIcon.textContent = open ? "-" : "+";
   if (drawings) drawings.hidden = !open;
+  rememberProjectLibraryFolderOpen(folder.dataset.projectFolderKey, open);
 }
 
 function filterProjectLibraryProjects(projects) {
@@ -19360,6 +19839,10 @@ document.addEventListener("keydown", (event) => {
       closeHelpDialog();
       return;
     }
+    if (tutorialDialog && !tutorialDialog.hidden) {
+      closeTutorialDialog();
+      return;
+    }
     if (projectJobQuickPick && !projectJobQuickPick.hidden) {
       closeProjectJobPicker();
       return;
@@ -19414,6 +19897,7 @@ function keyboardBlockingOverlayOpen() {
     (projectLibraryDialog && !projectLibraryDialog.hidden) ||
     (toolSettingsDialog && !toolSettingsDialog.hidden) ||
     (helpDialog && !helpDialog.hidden) ||
+    (tutorialDialog && !tutorialDialog.hidden) ||
     (loadPlanDialog && !loadPlanDialog.hidden) ||
     (projectJobQuickPick && !projectJobQuickPick.hidden) ||
     !drawingContextMenu.hidden,
@@ -19458,6 +19942,7 @@ setupAuthDialog();
 setupHomeDashboard();
 setupProjectDialog();
 setupToolSettingsDialog();
+setupTutorialDialog();
 setupHelpDialog();
 setupPanelFullscreen();
 setupFloatingPreviewPanel();

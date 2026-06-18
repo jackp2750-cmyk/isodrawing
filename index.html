@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=175" />
+    <link rel="stylesheet" href="./styles.css?v=179" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -181,7 +181,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.75</span>
+            <span class="version-badge" id="appVersionBadge">v1.79</span>
           </div>
         </div>
 
@@ -289,6 +289,10 @@
                 <button class="icon-button labeled" id="homeDashboardButton" type="button" title="Open SpoolMate dashboard" aria-label="Open SpoolMate dashboard">
                   <svg><use href="#icon-settings"></use></svg>
                   <span>Dashboard</span>
+                </button>
+                <button class="icon-button labeled" id="tutorialButton" type="button" title="Open SpoolMate tutorial" aria-label="Open SpoolMate tutorial">
+                  <svg><use href="#icon-help"></use></svg>
+                  <span>Tutorial</span>
                 </button>
                 <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
                   <svg><use href="#icon-sample"></use></svg>
@@ -778,6 +782,11 @@
               <strong>Jobs</strong>
               <span>Open saved spools by job or team.</span>
             </button>
+            <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
+              <svg><use href="#icon-help"></use></svg>
+              <strong>Tutorial</strong>
+              <span>Walk through the main workflow.</span>
+            </button>
             <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
               <svg><use href="#icon-sample"></use></svg>
               <strong>Sample</strong>
@@ -902,6 +911,26 @@
           <div class="project-dialog-actions tool-settings-actions">
             <button class="icon-button labeled" id="toolSettingsResetButton" type="button">Show all</button>
             <button class="primary-button" id="toolSettingsDoneButton" type="button">Done</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop tutorial-backdrop" id="tutorialDialog" hidden>
+        <div class="tutorial-spotlight" id="tutorialSpotlight" aria-hidden="true"></div>
+        <section class="project-dialog-card tutorial-card" aria-label="SpoolMate tutorial">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Interactive tutorial</strong>
+              <small>Follow the highlight, try the tool, then move to the next step.</small>
+            </div>
+          </div>
+          <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
+          <article class="tutorial-step-card" id="tutorialStepCard"></article>
+          <div class="project-dialog-actions tutorial-actions">
+            <button class="icon-button labeled" id="tutorialCloseButton" type="button">Close</button>
+            <button class="icon-button labeled" id="tutorialPrevButton" type="button">Back</button>
+            <button class="icon-button labeled" id="tutorialActionButton" type="button">Try it</button>
+            <button class="primary-button" id="tutorialNextButton" type="button">Next</button>
           </div>
         </section>
       </div>
@@ -1134,6 +1163,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=175"></script>
+    <script defer src="./app.js?v=179"></script>
   </body>
 </html>

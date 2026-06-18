@@ -2466,6 +2466,165 @@ body.auth-gate-open .app-shell {
   line-height: 1.45;
 }
 
+.tutorial-card {
+  width: min(680px, calc(100vw - 28px));
+  max-height: calc(100dvh - 32px);
+  overflow: hidden;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.tutorial-backdrop {
+  z-index: 620;
+  display: block;
+  padding: 0;
+  pointer-events: none;
+  background: transparent;
+}
+
+.tutorial-backdrop .tutorial-card {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  width: min(440px, calc(100vw - 28px));
+  max-height: min(72dvh, 620px);
+  pointer-events: auto;
+}
+
+.tutorial-backdrop[data-card-x="left"] .tutorial-card {
+  right: auto;
+  left: 18px;
+}
+
+.tutorial-backdrop[data-card-y="top"] .tutorial-card {
+  top: 18px;
+  bottom: auto;
+}
+
+.tutorial-spotlight {
+  position: fixed;
+  left: var(--spotlight-x, 16px);
+  top: var(--spotlight-y, 16px);
+  z-index: 621;
+  width: var(--spotlight-w, 120px);
+  height: var(--spotlight-h, 52px);
+  border: 3px solid #13d8ff;
+  border-radius: 12px;
+  pointer-events: none;
+  box-shadow:
+    0 0 0 9999px rgba(3, 11, 18, 0.18),
+    0 0 28px rgba(19, 216, 255, 0.52),
+    inset 0 0 16px rgba(19, 216, 255, 0.14);
+  transition:
+    left 0.16s ease,
+    top 0.16s ease,
+    width 0.16s ease,
+    height 0.16s ease;
+}
+
+.tutorial-focus-target {
+  outline: 3px solid rgba(19, 216, 255, 0.72) !important;
+  outline-offset: 3px;
+  box-shadow:
+    0 0 0 5px rgba(19, 216, 255, 0.16),
+    0 0 22px rgba(19, 216, 255, 0.34) !important;
+}
+
+.tutorial-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.tutorial-dots {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tutorial-dots i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  opacity: 0.72;
+  transition:
+    width 0.15s ease,
+    background 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.tutorial-dots i.active {
+  width: 24px;
+  background: var(--teal);
+  opacity: 1;
+}
+
+.tutorial-step-card {
+  display: grid;
+  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(247, 252, 250, 0.9);
+}
+
+.tutorial-step-card small {
+  color: var(--teal-strong);
+  font-size: 11px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.tutorial-step-card h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 1.12;
+}
+
+.tutorial-step-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.tutorial-target-note {
+  padding: 9px 10px;
+  border: 1px solid rgba(8, 125, 115, 0.24);
+  border-radius: 8px;
+  background: rgba(216, 241, 237, 0.76);
+  color: var(--teal-strong);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.tutorial-step-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 850;
+  line-height: 1.45;
+}
+
+.tutorial-actions {
+  grid-template-columns: auto auto auto auto;
+  justify-content: end;
+}
+
 .team-workspace-panel {
   display: grid;
   gap: 12px;
@@ -3341,12 +3500,7 @@ body.auth-gate-open .app-shell {
   text-align: left;
 }
 
-.project-folder-summary::-webkit-details-marker {
-  display: none;
-}
-
-.project-folder-summary::before {
-  content: "+";
+.project-folder-toggle-icon {
   width: 28px;
   height: 28px;
   display: inline-grid;
@@ -3362,8 +3516,8 @@ body.auth-gate-open .app-shell {
   font-weight: 950;
 }
 
-.project-folder.open .project-folder-summary::before {
-  content: "-";
+.project-folder-summary::-webkit-details-marker {
+  display: none;
 }
 
 .project-folder-main {
@@ -4135,6 +4289,47 @@ body.auth-gate-open .app-shell {
 
   .help-grid article {
     min-height: 0;
+  }
+
+  .tutorial-card {
+    width: 100%;
+    max-height: min(86dvh, 820px);
+  }
+
+  .tutorial-backdrop .tutorial-card,
+  .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  .tutorial-backdrop[data-card-y="top"] .tutorial-card {
+    inset: auto 10px 10px 10px;
+    width: auto;
+    max-height: min(58dvh, 560px);
+  }
+
+  .tutorial-spotlight {
+    box-shadow:
+      0 0 0 9999px rgba(3, 11, 18, 0.1),
+      0 0 22px rgba(19, 216, 255, 0.44),
+      inset 0 0 14px rgba(19, 216, 255, 0.14);
+  }
+
+  .tutorial-progress {
+    display: grid;
+    gap: 8px;
+  }
+
+  .tutorial-step-card {
+    padding: 14px;
+  }
+
+  .tutorial-step-card h2 {
+    font-size: 20px;
+  }
+
+  .tutorial-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .tutorial-actions .primary-button {
+    grid-column: 1 / -1;
   }
 }
 
@@ -5017,6 +5212,31 @@ body .preview-panel:fullscreen {
 
 :root[data-theme="dark"] .help-grid article strong {
   color: #6be6ff;
+}
+
+:root[data-theme="dark"] .tutorial-step-card {
+  border-color: rgba(19, 216, 255, 0.2);
+  background: linear-gradient(180deg, rgba(10, 32, 49, 0.94), rgba(7, 19, 29, 0.96));
+  box-shadow: inset 0 0 0 1px rgba(0, 132, 255, 0.08);
+}
+
+:root[data-theme="dark"] .tutorial-step-card small {
+  color: #6be6ff;
+}
+
+:root[data-theme="dark"] .tutorial-target-note {
+  border-color: rgba(19, 216, 255, 0.28);
+  background: rgba(0, 132, 255, 0.12);
+  color: #8eefff;
+}
+
+:root[data-theme="dark"] .tutorial-dots i {
+  background: rgba(203, 224, 235, 0.26);
+}
+
+:root[data-theme="dark"] .tutorial-dots i.active {
+  background: #13d8ff;
+  box-shadow: 0 0 16px rgba(19, 216, 255, 0.34);
 }
 
 :root[data-theme="dark"] .control-section,
