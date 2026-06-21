@@ -74,6 +74,7 @@ const newRevisionButton = document.querySelector("#newRevisionButton");
 const shareReadOnlyButton = document.querySelector("#shareReadOnlyButton");
 const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
 const homeDashboardButton = document.querySelector("#homeDashboardButton");
+const drawingAssistantButton = document.querySelector("#drawingAssistantButton");
 const accountButton = document.querySelector("#accountButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
@@ -163,6 +164,22 @@ const tutorialPrevButton = document.querySelector("#tutorialPrevButton");
 const tutorialActionButton = document.querySelector("#tutorialActionButton");
 const tutorialNextButton = document.querySelector("#tutorialNextButton");
 const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
+const drawingAssistantDialog = document.querySelector("#drawingAssistantDialog");
+const drawingAssistantCloseButton = document.querySelector("#drawingAssistantCloseButton");
+const drawingAssistantFileInput = document.querySelector("#drawingAssistantFileInput");
+const drawingAssistantCanvas = document.querySelector("#drawingAssistantCanvas");
+const drawingAssistantPdfFrame = document.querySelector("#drawingAssistantPdfFrame");
+const drawingAssistantEmpty = document.querySelector("#drawingAssistantEmpty");
+const drawingAssistantStatus = document.querySelector("#drawingAssistantStatus");
+const drawingAssistantModeButtons = [...document.querySelectorAll("[data-drawing-assistant-mode]")];
+const drawingAssistantScaleInput = document.querySelector("#drawingAssistantScaleInput");
+const drawingAssistantApplyScaleButton = document.querySelector("#drawingAssistantApplyScaleButton");
+const drawingAssistantClearScaleButton = document.querySelector("#drawingAssistantClearScaleButton");
+const drawingAssistantUndoPointButton = document.querySelector("#drawingAssistantUndoPointButton");
+const drawingAssistantClearButton = document.querySelector("#drawingAssistantClearButton");
+const drawingAssistantSegments = document.querySelector("#drawingAssistantSegments");
+const drawingAssistantSampleButton = document.querySelector("#drawingAssistantSampleButton");
+const drawingAssistantBuildButton = document.querySelector("#drawingAssistantBuildButton");
 const helpButton = document.querySelector("#helpButton");
 const helpDialog = document.querySelector("#helpDialog");
 const helpCloseButton = document.querySelector("#helpCloseButton");
@@ -193,7 +210,7 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.04";
+const APP_VERSION = "v2.05";
 const APP_BUILD_DATE = "2026-06-21";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -765,6 +782,7 @@ let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
 let tutorialStepIndex = 0;
 let tutorialHighlightedElement = null;
+let drawingAssistantState = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
@@ -17967,6 +17985,505 @@ function loadSampleDrawing() {
   updateAll();
 }
 
+function defaultDrawingAssistantState() {
+  return {
+    mode: "scale",
+    fileKind: "",
+    fileName: "",
+    objectUrl: "",
+    image: null,
+    points: [],
+    segments: [],
+    scalePoints: [],
+    mmPerPx: null,
+  };
+}
+
+function ensureDrawingAssistantState() {
+  if (!drawingAssistantState) drawingAssistantState = defaultDrawingAssistantState();
+  return drawingAssistantState;
+}
+
+function openDrawingAssistantDialog() {
+  if (!drawingAssistantDialog) return;
+  closeActionMenu();
+  closeHomeDashboard();
+  closeProjectLibrary();
+  closeHelpDialog();
+  closeToolSettingsDialog();
+  ensureDrawingAssistantState();
+  drawingAssistantDialog.hidden = false;
+  setDrawingAssistantMode(drawingAssistantState.mode || "scale");
+  renderDrawingAssistantSegments();
+  updateDrawingAssistantStatus();
+  window.requestAnimationFrame(renderDrawingAssistant);
+}
+
+function closeDrawingAssistantDialog() {
+  if (drawingAssistantDialog) drawingAssistantDialog.hidden = true;
+}
+
+function setDrawingAssistantMode(mode) {
+  const nextMode = mode === "trace" ? "trace" : "scale";
+  ensureDrawingAssistantState().mode = nextMode;
+  drawingAssistantModeButtons.forEach((button) => {
+    const active = button.dataset.drawingAssistantMode === nextMode;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  updateDrawingAssistantStatus();
+  renderDrawingAssistant();
+}
+
+function drawingAssistantCanvasInfo() {
+  if (!drawingAssistantCanvas) return null;
+  const rect = drawingAssistantCanvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const width = Math.max(320, rect.width || 900);
+  const height = Math.max(240, rect.height || 560);
+  const pixelWidth = Math.round(width * dpr);
+  const pixelHeight = Math.round(height * dpr);
+  if (drawingAssistantCanvas.width !== pixelWidth || drawingAssistantCanvas.height !== pixelHeight) {
+    drawingAssistantCanvas.width = pixelWidth;
+    drawingAssistantCanvas.height = pixelHeight;
+  }
+  const ctx = drawingAssistantCanvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, width, height };
+}
+
+function drawingAssistantImageRect(width, height) {
+  const image = drawingAssistantState?.image;
+  if (!image) return null;
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight);
+  const drawWidth = image.naturalWidth * scale;
+  const drawHeight = image.naturalHeight * scale;
+  return {
+    x: (width - drawWidth) * 0.5,
+    y: (height - drawHeight) * 0.5,
+    width: drawWidth,
+    height: drawHeight,
+  };
+}
+
+function renderDrawingAssistant() {
+  if (!drawingAssistantCanvas || !drawingAssistantDialog || drawingAssistantDialog.hidden) return;
+  const assistant = ensureDrawingAssistantState();
+  const info = drawingAssistantCanvasInfo();
+  if (!info) return;
+  const { ctx, width, height } = info;
+  ctx.clearRect(0, 0, width, height);
+
+  const hasFile = Boolean(assistant.fileKind);
+  if (drawingAssistantEmpty) drawingAssistantEmpty.hidden = hasFile || assistant.points.length > 0;
+  if (drawingAssistantPdfFrame) {
+    drawingAssistantPdfFrame.hidden = assistant.fileKind !== "pdf";
+  }
+
+  if (assistant.fileKind === "image" && assistant.image) {
+    ctx.fillStyle = "#0b1218";
+    ctx.fillRect(0, 0, width, height);
+    const rect = drawingAssistantImageRect(width, height);
+    if (rect) {
+      ctx.drawImage(assistant.image, rect.x, rect.y, rect.width, rect.height);
+      ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+      ctx.fillRect(rect.x, rect.y, rect.width, rect.height);
+    }
+  } else if (assistant.fileKind !== "pdf") {
+    ctx.fillStyle = isDarkAppTheme() ? "rgba(6, 16, 24, 0.88)" : "rgba(251, 250, 244, 0.88)";
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  drawDrawingAssistantScale(ctx, assistant);
+  drawDrawingAssistantTrace(ctx, assistant);
+}
+
+function drawDrawingAssistantScale(ctx, assistant) {
+  if (!assistant.scalePoints.length) return;
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "#f97316";
+  ctx.fillStyle = "#f97316";
+  ctx.lineWidth = 3;
+  if (assistant.scalePoints.length === 2) {
+    drawLine(ctx, assistant.scalePoints[0], assistant.scalePoints[1]);
+    const midpoint = {
+      x: (assistant.scalePoints[0].x + assistant.scalePoints[1].x) * 0.5,
+      y: (assistant.scalePoints[0].y + assistant.scalePoints[1].y) * 0.5,
+    };
+    drawAssistantLabel(ctx, midpoint, `${formatLength(Number(drawingAssistantScaleInput?.value) || 0)} mm scale`, "#f97316");
+  }
+  assistant.scalePoints.forEach((point, index) => {
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    drawAssistantLabel(ctx, { x: point.x + 12, y: point.y - 12 }, `S${index + 1}`, "#f97316");
+  });
+  ctx.restore();
+}
+
+function drawDrawingAssistantTrace(ctx, assistant) {
+  const points = assistant.points;
+  if (!points.length) return;
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = "#13d8ff";
+  ctx.fillStyle = "#13d8ff";
+  if (points.length > 1) {
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (const point of points.slice(1)) ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+  }
+
+  points.forEach((point, index) => {
+    ctx.beginPath();
+    ctx.fillStyle = index === points.length - 1 ? "#ffd46b" : "#13d8ff";
+    ctx.strokeStyle = "#06202a";
+    ctx.lineWidth = 3;
+    ctx.arc(point.x, point.y, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    drawAssistantLabel(ctx, { x: point.x + 12, y: point.y - 12 }, String(index + 1), "#06202a");
+  });
+
+  assistant.segments.forEach((segment, index) => {
+    const start = points[index];
+    const end = points[index + 1];
+    if (!start || !end) return;
+    const midpoint = { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 };
+    drawAssistantLabel(ctx, midpoint, `${axisLabel(segment.axis)} ${formatLength(segment.lengthMm)} mm`, "#0f766e");
+  });
+  ctx.restore();
+}
+
+function drawAssistantLabel(ctx, point, text, color = "#0f766e") {
+  ctx.save();
+  ctx.font = "900 12px Inter, system-ui, sans-serif";
+  const value = String(text ?? "");
+  const width = ctx.measureText(value).width + 12;
+  const height = 22;
+  const x = point.x - width * 0.5;
+  const y = point.y - height * 0.5;
+  roundRect(ctx, x, y, width, height, 6);
+  ctx.fillStyle = "rgba(255, 255, 255, 0.92)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.18)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "center";
+  ctx.fillText(value, point.x, point.y + 1);
+  ctx.restore();
+}
+
+function drawingAssistantPointer(event) {
+  const rect = drawingAssistantCanvas.getBoundingClientRect();
+  return {
+    x: event.clientX - rect.left,
+    y: event.clientY - rect.top,
+  };
+}
+
+function handleDrawingAssistantPointer(event) {
+  if (!drawingAssistantDialog || drawingAssistantDialog.hidden || event.button !== 0) return;
+  const assistant = ensureDrawingAssistantState();
+  const point = drawingAssistantPointer(event);
+  if (assistant.mode === "scale") {
+    assistant.scalePoints = [...assistant.scalePoints, point].slice(-2);
+    updateDrawingAssistantStatus();
+    renderDrawingAssistant();
+    event.preventDefault();
+    return;
+  }
+
+  assistant.points.push(point);
+  if (assistant.points.length > 1) {
+    const previous = assistant.points[assistant.points.length - 2];
+    assistant.segments.push({
+      axis: guessDrawingAssistantAxis(previous, point),
+      lengthMm: drawingAssistantMeasuredLength(previous, point),
+      manual: false,
+    });
+  }
+  updateDrawingAssistantStatus();
+  renderDrawingAssistantSegments();
+  renderDrawingAssistant();
+  event.preventDefault();
+}
+
+function guessDrawingAssistantAxis(start, end) {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  if (Math.abs(dy) > Math.abs(dx) * 1.35) return dy < 0 ? "zp" : "zn";
+  if (Math.abs(dx) > Math.abs(dy) * 1.15) return dx >= 0 ? "xp" : "xn";
+  return dx >= 0 ? "yp" : "yn";
+}
+
+function axisLabel(axisKey) {
+  return axisByKey.get(axisKey)?.label ?? "+X";
+}
+
+function drawingAssistantMeasuredLength(start, end) {
+  const distancePx = Math.hypot(end.x - start.x, end.y - start.y);
+  const mmPerPx = Number(ensureDrawingAssistantState().mmPerPx);
+  return normalizeLength(Number.isFinite(mmPerPx) && mmPerPx > 0 ? distancePx * mmPerPx : 1000);
+}
+
+function updateDrawingAssistantStatus() {
+  if (!drawingAssistantStatus) return;
+  const assistant = ensureDrawingAssistantState();
+  const file = assistant.fileName ? `${assistant.fileName}. ` : "";
+  const scale = assistant.mmPerPx ? `Scale ${assistant.mmPerPx.toFixed(2)} mm/px. ` : "Scale not set. ";
+  const trace = assistant.points.length
+    ? `${assistant.points.length} point${assistant.points.length === 1 ? "" : "s"} traced / ${assistant.segments.length} run${assistant.segments.length === 1 ? "" : "s"}.`
+    : assistant.mode === "scale"
+    ? "Click two points on a known dimension."
+    : "Click centreline points in run order.";
+  drawingAssistantStatus.textContent = `${file}${scale}${trace}`;
+}
+
+function renderDrawingAssistantSegments() {
+  if (!drawingAssistantSegments) return;
+  const assistant = ensureDrawingAssistantState();
+  if (!assistant.segments.length) {
+    drawingAssistantSegments.innerHTML = `<div class="drawing-assistant-placeholder">No traced pipe legs yet. Switch to Trace and click points along the pipe centreline.</div>`;
+    return;
+  }
+
+  drawingAssistantSegments.innerHTML = assistant.segments.map((segment, index) => `
+    <div class="drawing-assistant-leg" data-assistant-leg="${index}">
+      <strong>Leg ${index + 1}</strong>
+      <label>
+        Axis
+        <select data-assistant-axis="${index}">
+          ${AXES.map((axis) => `<option value="${axis.key}"${axis.key === segment.axis ? " selected" : ""}>${axis.label}</option>`).join("")}
+        </select>
+      </label>
+      <label>
+        Length mm
+        <input data-assistant-length="${index}" type="number" min="${MIN_LENGTH_MM}" max="${MAX_LENGTH_MM}" step="${LENGTH_INCREMENT_MM}" value="${Math.round(segment.lengthMm)}" />
+      </label>
+      <small>${segment.manual ? "Typed from drawing." : assistant.mmPerPx ? "Estimated from picked scale." : "Enter the drawing measurement manually."}</small>
+    </div>
+  `).join("");
+
+  drawingAssistantSegments.querySelectorAll("[data-assistant-axis]").forEach((select) => {
+    select.addEventListener("change", () => {
+      const index = Number(select.dataset.assistantAxis);
+      if (!assistant.segments[index]) return;
+      assistant.segments[index].axis = select.value;
+      renderDrawingAssistant();
+    });
+  });
+  drawingAssistantSegments.querySelectorAll("[data-assistant-length]").forEach((input) => {
+    input.addEventListener("input", () => {
+      const index = Number(input.dataset.assistantLength);
+      if (!assistant.segments[index]) return;
+      assistant.segments[index].lengthMm = normalizeLength(input.value);
+      assistant.segments[index].manual = true;
+      renderDrawingAssistant();
+    });
+  });
+}
+
+function applyDrawingAssistantScale() {
+  const assistant = ensureDrawingAssistantState();
+  if (assistant.scalePoints.length < 2) {
+    window.alert("Pick two points on a known dimension first.");
+    return;
+  }
+  const distanceMm = normalizeLength(drawingAssistantScaleInput?.value);
+  const pixelDistance = Math.hypot(
+    assistant.scalePoints[1].x - assistant.scalePoints[0].x,
+    assistant.scalePoints[1].y - assistant.scalePoints[0].y,
+  );
+  if (pixelDistance < 4) {
+    window.alert("Those scale points are too close together.");
+    return;
+  }
+  assistant.mmPerPx = distanceMm / pixelDistance;
+  assistant.segments = assistant.segments.map((segment, index) => {
+    if (segment.manual) return segment;
+    const start = assistant.points[index];
+    const end = assistant.points[index + 1];
+    return start && end ? { ...segment, lengthMm: drawingAssistantMeasuredLength(start, end) } : segment;
+  });
+  setDrawingAssistantMode("trace");
+  updateDrawingAssistantStatus();
+  renderDrawingAssistantSegments();
+  renderDrawingAssistant();
+}
+
+function clearDrawingAssistantScalePicks() {
+  const assistant = ensureDrawingAssistantState();
+  assistant.scalePoints = [];
+  renderDrawingAssistant();
+  updateDrawingAssistantStatus();
+}
+
+function undoDrawingAssistantPoint() {
+  const assistant = ensureDrawingAssistantState();
+  if (!assistant.points.length) return;
+  assistant.points.pop();
+  assistant.segments.pop();
+  renderDrawingAssistantSegments();
+  renderDrawingAssistant();
+  updateDrawingAssistantStatus();
+}
+
+function clearDrawingAssistantTrace() {
+  const assistant = ensureDrawingAssistantState();
+  assistant.points = [];
+  assistant.segments = [];
+  renderDrawingAssistantSegments();
+  renderDrawingAssistant();
+  updateDrawingAssistantStatus();
+}
+
+function loadDrawingAssistantDemoTrace() {
+  const assistant = ensureDrawingAssistantState();
+  assistant.fileKind = "";
+  assistant.fileName = "Demo trace";
+  assistant.image = null;
+  assistant.points = [
+    { x: 130, y: 360 },
+    { x: 305, y: 260 },
+    { x: 470, y: 330 },
+    { x: 470, y: 165 },
+    { x: 640, y: 165 },
+  ];
+  assistant.mmPerPx = 12;
+  assistant.scalePoints = [
+    { x: 130, y: 410 },
+    { x: 380, y: 410 },
+  ];
+  if (drawingAssistantScaleInput) drawingAssistantScaleInput.value = "3000";
+  assistant.segments = [
+    { axis: "xp", lengthMm: 3000, manual: true },
+    { axis: "yp", lengthMm: 2500, manual: true },
+    { axis: "zp", lengthMm: 1800, manual: true },
+    { axis: "xp", lengthMm: 2200, manual: true },
+  ];
+  if (drawingAssistantPdfFrame) {
+    drawingAssistantPdfFrame.hidden = true;
+    drawingAssistantPdfFrame.removeAttribute("src");
+  }
+  setDrawingAssistantMode("trace");
+  renderDrawingAssistantSegments();
+  renderDrawingAssistant();
+  updateDrawingAssistantStatus();
+}
+
+async function loadDrawingAssistantFile(file) {
+  if (!file) return;
+  const assistant = ensureDrawingAssistantState();
+  if (assistant.objectUrl) URL.revokeObjectURL(assistant.objectUrl);
+  assistant.objectUrl = URL.createObjectURL(file);
+  assistant.fileName = file.name;
+  assistant.points = [];
+  assistant.segments = [];
+  assistant.scalePoints = [];
+  assistant.mmPerPx = null;
+  assistant.image = null;
+
+  if (file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf")) {
+    assistant.fileKind = "pdf";
+    if (drawingAssistantPdfFrame) {
+      drawingAssistantPdfFrame.src = assistant.objectUrl;
+      drawingAssistantPdfFrame.hidden = false;
+    }
+    setDrawingAssistantMode("scale");
+    renderDrawingAssistantSegments();
+    renderDrawingAssistant();
+    updateDrawingAssistantStatus();
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    window.alert("Please upload an image, screenshot, photo or PDF.");
+    return;
+  }
+
+  assistant.fileKind = "image";
+  if (drawingAssistantPdfFrame) {
+    drawingAssistantPdfFrame.hidden = true;
+    drawingAssistantPdfFrame.removeAttribute("src");
+  }
+  const image = new Image();
+  await new Promise((resolve, reject) => {
+    image.addEventListener("load", resolve, { once: true });
+    image.addEventListener("error", reject, { once: true });
+    image.src = assistant.objectUrl;
+  });
+  assistant.image = image;
+  setDrawingAssistantMode("scale");
+  renderDrawingAssistantSegments();
+  renderDrawingAssistant();
+  updateDrawingAssistantStatus();
+}
+
+function buildSpoolFromDrawingAssistant() {
+  if (!ensureDrawingEditable("build a spool from an imported drawing")) return;
+  const assistant = ensureDrawingAssistantState();
+  if (assistant.points.length < 2 || assistant.segments.length < 1) {
+    window.alert("Trace at least two centreline points first.");
+    return;
+  }
+  if (assistant.segments.length !== assistant.points.length - 1) {
+    window.alert("The traced points and pipe legs do not line up yet.");
+    return;
+  }
+  const invalid = assistant.segments.find((segment) => !axisByKey.has(segment.axis) || !Number.isFinite(Number(segment.lengthMm)));
+  if (invalid) {
+    window.alert("Check every leg has an axis and length.");
+    return;
+  }
+  if (hasDrawingContent()) {
+    const replace = window.confirm("Replace the current spool geometry with this imported trace?");
+    if (!replace) return;
+  }
+
+  const snapshot = createUndoSnapshot();
+  const points = [{ x: 0, y: 0, z: 0 }];
+  for (const segment of assistant.segments) {
+    const axis = axisByKey.get(segment.axis);
+    const previous = points[points.length - 1];
+    points.push(addPoints(previous, axis.vector, normalizeLength(segment.lengthMm)));
+  }
+  state.points = points;
+  state.edges = assistant.segments.map((segment, index) => ({
+    from: index,
+    to: index + 1,
+    pipeSizeNb: normalizePipeSize(state.pipeSizeNb),
+  }));
+  state.fittings = [];
+  state.notes = [];
+  state.measurements = [];
+  state.nodeTypes = {};
+  state.reducerSideOverrides = {};
+  state.dimensionOffsets = {};
+  state.activePoint = points.length - 1;
+  state.selectedPoint = points.length - 1;
+  state.selectedFitting = null;
+  state.selectedNote = null;
+  state.selectedMeasurement = null;
+  clearSelectedSegments();
+  state.previewCandidate = null;
+  state.pointer = null;
+  state.projectInfoPrompted = state.projectInfoPrompted === true || hasProjectInfo();
+  setNextIdsFromState(state);
+  recordHistory({ type: "snapshot", snapshot });
+  three.userMovedCamera = false;
+  updateControls();
+  updateAll();
+  closeDrawingAssistantDialog();
+}
+
 function openNewDrawingDialog() {
   if (!newDrawingDialog || !newDrawingCancelButton || !newDrawingDiscardButton || !newDrawingSaveButton) {
     const saveFirst = window.confirm("Save this drawing before starting a new one?");
@@ -21816,6 +22333,25 @@ projectFileInput.addEventListener("change", () => {
   importProjectFile(projectFileInput.files?.[0]);
   projectFileInput.value = "";
 });
+drawingAssistantButton?.addEventListener("click", openDrawingAssistantDialog);
+drawingAssistantCloseButton?.addEventListener("click", closeDrawingAssistantDialog);
+drawingAssistantCanvas?.addEventListener("pointerdown", handleDrawingAssistantPointer);
+drawingAssistantModeButtons.forEach((button) => {
+  button.addEventListener("click", () => setDrawingAssistantMode(button.dataset.drawingAssistantMode));
+});
+drawingAssistantFileInput?.addEventListener("change", () => {
+  loadDrawingAssistantFile(drawingAssistantFileInput.files?.[0]).catch((error) => {
+    console.warn("Drawing assistant file failed.", error);
+    window.alert("Could not load that drawing.");
+  });
+  drawingAssistantFileInput.value = "";
+});
+drawingAssistantApplyScaleButton?.addEventListener("click", applyDrawingAssistantScale);
+drawingAssistantClearScaleButton?.addEventListener("click", clearDrawingAssistantScalePicks);
+drawingAssistantUndoPointButton?.addEventListener("click", undoDrawingAssistantPoint);
+drawingAssistantClearButton?.addEventListener("click", clearDrawingAssistantTrace);
+drawingAssistantSampleButton?.addEventListener("click", loadDrawingAssistantDemoTrace);
+drawingAssistantBuildButton?.addEventListener("click", buildSpoolFromDrawingAssistant);
 document.querySelector("#export3dButton").addEventListener("click", export3dImage);
 document.querySelector("#exportReportButton").addEventListener("click", exportIsoImage);
 document.querySelector("#exportIsoButton").addEventListener("click", exportIsoImage);
@@ -21870,6 +22406,10 @@ document.addEventListener("keydown", (event) => {
     }
     if (toolSettingsDialog && !toolSettingsDialog.hidden) {
       closeToolSettingsDialog();
+      return;
+    }
+    if (drawingAssistantDialog && !drawingAssistantDialog.hidden) {
+      closeDrawingAssistantDialog();
       return;
     }
     if (helpDialog && !helpDialog.hidden) {
@@ -21952,6 +22492,7 @@ window.addEventListener("resize", () => {
   updatePreviewFloatingState();
   schedulePreviewStabilize();
   redrawLoadPlanIfOpen();
+  renderDrawingAssistant();
   if (!isTabletLayout()) {
     showMobilePanel("drawing");
   }
@@ -21964,10 +22505,12 @@ const resizeObserver = new ResizeObserver(() => {
   renderFallbackPreview();
   resizeThree();
   redrawLoadPlanIfOpen();
+  renderDrawingAssistant();
 });
 
 resizeObserver.observe(drawCanvas.parentElement);
 resizeObserver.observe(previewStage);
+if (drawingAssistantCanvas?.parentElement) resizeObserver.observe(drawingAssistantCanvas.parentElement);
 
 setupCollapsibleControls();
 setupInspectorTabs();

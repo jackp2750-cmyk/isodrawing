@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=204" />
+    <link rel="stylesheet" href="./styles.css?v=205" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -188,7 +188,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v2.04</span>
+            <span class="version-badge" id="appVersionBadge">v2.05</span>
           </div>
         </div>
 
@@ -322,6 +322,10 @@
                   <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
                     <svg><use href="#icon-sample"></use></svg>
                     <span>Import</span>
+                  </button>
+                  <button class="icon-button labeled" id="drawingAssistantButton" type="button" title="Trace a supplied drawing into a spool" aria-label="Open drawing import assistant">
+                    <svg><use href="#icon-measure"></use></svg>
+                    <span>Drawing assistant</span>
                   </button>
                 </section>
                 <section class="action-menu-group">
@@ -975,6 +979,66 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop" id="drawingAssistantDialog" hidden>
+        <section class="project-dialog-card drawing-assistant-card" aria-label="Drawing import assistant">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Drawing import assistant</strong>
+              <small>Upload a normal drawing, set one known dimension, trace the centreline, then build a SpoolMate spool.</small>
+            </div>
+            <button class="icon-button compact labeled" id="drawingAssistantCloseButton" type="button">Close</button>
+          </div>
+          <div class="drawing-assistant-layout">
+            <div class="drawing-assistant-workbench">
+              <div class="drawing-assistant-stage" id="drawingAssistantStage">
+                <iframe id="drawingAssistantPdfFrame" title="Uploaded PDF drawing" hidden></iframe>
+                <canvas id="drawingAssistantCanvas"></canvas>
+                <div class="drawing-assistant-empty" id="drawingAssistantEmpty">
+                  <strong>No drawing loaded</strong>
+                  <span>Upload a photo, image, screenshot or PDF to start tracing.</span>
+                </div>
+              </div>
+              <div class="drawing-assistant-status" id="drawingAssistantStatus">Upload a drawing, then pick Scale or Trace.</div>
+            </div>
+            <aside class="drawing-assistant-controls">
+              <label class="field">
+                <span>Upload drawing</span>
+                <input id="drawingAssistantFileInput" type="file" accept="image/*,.pdf,application/pdf" />
+              </label>
+              <div class="drawing-assistant-mode-row" role="group" aria-label="Assistant mode">
+                <button class="active" data-drawing-assistant-mode="scale" type="button">Scale</button>
+                <button data-drawing-assistant-mode="trace" type="button">Trace</button>
+              </div>
+              <section class="drawing-assistant-section">
+                <h2>Scale</h2>
+                <p>Click two points on a known measurement, enter the distance, then apply scale.</p>
+                <label class="field">
+                  <span>Known distance mm</span>
+                  <input id="drawingAssistantScaleInput" type="number" min="1" step="1" value="1000" />
+                </label>
+                <div class="drawing-assistant-button-row">
+                  <button class="icon-button labeled" id="drawingAssistantApplyScaleButton" type="button">Apply scale</button>
+                  <button class="icon-button labeled" id="drawingAssistantClearScaleButton" type="button">Clear picks</button>
+                </div>
+              </section>
+              <section class="drawing-assistant-section">
+                <h2>Trace centreline</h2>
+                <p>Click pipe centre points in order. Set each leg direction and confirm the measured length before building.</p>
+                <div class="drawing-assistant-button-row">
+                  <button class="icon-button labeled" id="drawingAssistantUndoPointButton" type="button">Undo point</button>
+                  <button class="icon-button labeled danger" id="drawingAssistantClearButton" type="button">Clear trace</button>
+                </div>
+                <div class="drawing-assistant-segments" id="drawingAssistantSegments" aria-live="polite"></div>
+              </section>
+            </aside>
+          </div>
+          <div class="project-dialog-actions drawing-assistant-actions">
+            <button class="icon-button labeled" id="drawingAssistantSampleButton" type="button">Demo trace</button>
+            <button class="primary-button" id="drawingAssistantBuildButton" type="button">Build spool from trace</button>
+          </div>
+        </section>
+      </div>
+
       <div class="project-dialog-backdrop tutorial-backdrop" id="tutorialDialog" hidden>
         <div class="tutorial-spotlight" id="tutorialSpotlight" aria-hidden="true"></div>
         <section class="project-dialog-card tutorial-card" aria-label="SpoolMate tutorial">
@@ -1223,6 +1287,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=204"></script>
+    <script defer src="./app.js?v=205"></script>
   </body>
 </html>

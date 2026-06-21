@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.04`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.05`.
+
+## v2.05 - Drawing Import Assistant
+
+- Added a side feature for uploading a supplied drawing, screenshot, photo or PDF and tracing it into a SpoolMate centreline.
+- Added scale calibration from two picked points on a known measurement.
+- Added editable traced leg rows for axis direction and millimetre length before building the spool.
+- Added a demo trace and one-click build flow for testing the assistant.
+- Bumped app cache to `spoolmate-v153`.
 
 ## v2.04 - Tighter Fab Sheet Drawing Crop
 

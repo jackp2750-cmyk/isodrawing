@@ -3362,6 +3362,228 @@ body.auth-gate-open .app-shell {
   justify-content: end;
 }
 
+.drawing-assistant-card {
+  width: min(1240px, calc(100vw - 28px));
+  height: min(82dvh, 820px);
+  max-height: min(82dvh, 820px);
+  box-sizing: border-box;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+
+.drawing-assistant-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(310px, 360px);
+  gap: 14px;
+}
+
+.drawing-assistant-workbench,
+.drawing-assistant-controls {
+  min-height: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.drawing-assistant-workbench {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.drawing-assistant-stage {
+  position: relative;
+  min-height: 0;
+  border: 1px solid rgba(8, 125, 115, 0.24);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(8, 125, 115, 0.06), rgba(19, 216, 255, 0.04)),
+    #fbfaf4;
+  overflow: hidden;
+}
+
+.drawing-assistant-stage iframe,
+.drawing-assistant-stage canvas,
+.drawing-assistant-empty {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.drawing-assistant-stage iframe {
+  border: 0;
+  background: #fff;
+  pointer-events: none;
+}
+
+.drawing-assistant-stage canvas {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.drawing-assistant-empty {
+  display: grid;
+  place-content: center;
+  gap: 6px;
+  padding: 24px;
+  text-align: center;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.drawing-assistant-empty[hidden] {
+  display: none;
+}
+
+.drawing-assistant-empty strong {
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 950;
+}
+
+.drawing-assistant-empty span {
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.drawing-assistant-status {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid rgba(8, 125, 115, 0.18);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.drawing-assistant-controls {
+  align-content: start;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.drawing-assistant-mode-row,
+.drawing-assistant-button-row,
+.drawing-assistant-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.drawing-assistant-mode-row button {
+  min-height: 38px;
+  flex: 1 1 120px;
+  border: 1px solid var(--button-border);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.drawing-assistant-mode-row button.active {
+  border-color: var(--teal);
+  background: var(--button-selected);
+  color: #fff;
+}
+
+.drawing-assistant-section {
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid rgba(8, 125, 115, 0.18);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.drawing-assistant-section h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.drawing-assistant-section p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 820;
+  line-height: 1.4;
+}
+
+.drawing-assistant-segments {
+  display: grid;
+  gap: 8px;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.drawing-assistant-placeholder {
+  padding: 10px;
+  border: 1px dashed rgba(8, 125, 115, 0.28);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 850;
+  line-height: 1.35;
+}
+
+.drawing-assistant-leg {
+  display: grid;
+  grid-template-columns: auto minmax(72px, 0.8fr) minmax(96px, 1fr);
+  gap: 8px;
+  align-items: end;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+}
+
+.drawing-assistant-leg strong {
+  align-self: center;
+  color: var(--teal-strong);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.drawing-assistant-leg label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.drawing-assistant-leg select,
+.drawing-assistant-leg input {
+  min-width: 0;
+  height: 34px;
+  border: 1px solid var(--input-border);
+  border-radius: 7px;
+  background: var(--input-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 850;
+  padding: 0 8px;
+}
+
+.drawing-assistant-leg small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 820;
+}
+
+.drawing-assistant-actions {
+  justify-content: flex-end;
+}
+
 .team-workspace-panel {
   display: grid;
   gap: 12px;
@@ -5787,6 +6009,33 @@ body.auth-gate-open .app-shell {
   .tutorial-actions .primary-button {
     grid-column: 1 / -1;
   }
+
+  .drawing-assistant-card {
+    width: 100%;
+    height: min(86dvh, 760px);
+    max-height: min(86dvh, 760px);
+    box-sizing: border-box;
+  }
+
+  .drawing-assistant-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .drawing-assistant-stage {
+    min-height: 42dvh;
+  }
+
+  .drawing-assistant-controls {
+    max-height: 34dvh;
+  }
+
+  .drawing-assistant-leg {
+    grid-template-columns: 1fr;
+  }
+
+  .drawing-assistant-actions {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 540px) {
@@ -6780,6 +7029,33 @@ body .preview-panel:fullscreen {
 :root[data-theme="dark"] .tutorial-dots i.active {
   background: #13d8ff;
   box-shadow: 0 0 16px rgba(19, 216, 255, 0.34);
+}
+
+:root[data-theme="dark"] .drawing-assistant-stage {
+  border-color: rgba(19, 216, 255, 0.24);
+  background:
+    linear-gradient(135deg, rgba(19, 216, 255, 0.08), rgba(0, 132, 255, 0.05)),
+    #061018;
+}
+
+:root[data-theme="dark"] .drawing-assistant-status,
+:root[data-theme="dark"] .drawing-assistant-section,
+:root[data-theme="dark"] .drawing-assistant-leg,
+:root[data-theme="dark"] .drawing-assistant-placeholder {
+  border-color: rgba(19, 216, 255, 0.2);
+  background: rgba(8, 24, 36, 0.86);
+}
+
+:root[data-theme="dark"] .drawing-assistant-mode-row button {
+  border-color: rgba(19, 216, 255, 0.22);
+  background: #0a1722;
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .drawing-assistant-mode-row button.active {
+  border-color: #13d8ff;
+  background: linear-gradient(180deg, #03a9ff, #0066d6);
+  color: #fff;
 }
 
 :root[data-theme="dark"] .control-section,
