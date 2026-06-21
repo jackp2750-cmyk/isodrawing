@@ -56,6 +56,7 @@ const noteTextInput = document.querySelector("#noteTextInput");
 const flangeModeSelect = document.querySelector("#flangeModeSelect");
 const flangeStandardSelect = document.querySelector("#flangeStandardSelect");
 const dimensionToggle = document.querySelector("#dimensionToggle");
+const drawingDetailSelect = document.querySelector("#drawingDetailSelect");
 const dimensionStyleSelect = document.querySelector("#dimensionStyleSelect");
 const liftingToggle = document.querySelector("#liftingToggle");
 const liftingAngleSelect = document.querySelector("#liftingAngleSelect");
@@ -128,6 +129,10 @@ const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
 let projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
 let projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+let projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButton");
+let projectLibraryGuideSlot = document.querySelector("#projectLibraryGuideSlot");
+let projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
+let projectLibraryReportSlot = document.querySelector("#projectLibraryReportSlot");
 let projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
 let projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
 const healthSummary = document.querySelector("#healthSummary");
@@ -182,13 +187,14 @@ const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const PROJECT_LIBRARY_FOLDER_STATE_KEY = "isospool-project-library-folder-state-v1";
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
+const NUMBERED_DIMENSION_DEFAULT_KEY = "spoolmate-numbered-dimension-default-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v1.79";
-const APP_BUILD_DATE = "2026-06-18";
+const APP_VERSION = "v2.03";
+const APP_BUILD_DATE = "2026-06-21";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -320,10 +326,36 @@ const ROLL_GROOVE_SETBACK_MM = 10;
 const ROLL_GROOVE_VISUAL_WIDTH_MM = 24;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
+const DRAWING_DETAIL_MODES = new Set(["clean", "fab", "sizes", "callouts", "full"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
-const PROJECT_STATUSES = new Set(["draft", "checked", "issued", "fabricated"]);
+const PROJECT_STATUS_FLOW = [
+  ["draft", "Draft"],
+  ["readycheck", "Ready to check"],
+  ["checked", "Checked"],
+  ["issued", "Issued"],
+  ["cutting", "Cutting"],
+  ["fitup", "Fit-up"],
+  ["welded", "Welded"],
+  ["finish", "Paint / finish"],
+  ["complete", "Complete"],
+];
+const PROJECT_STATUSES = new Set(PROJECT_STATUS_FLOW.map(([key]) => key));
+const PROJECT_STATUS_LABELS = Object.fromEntries(PROJECT_STATUS_FLOW);
+const PROJECT_STATUS_ALIASES = {
+  fabricated: "complete",
+  ready: "readycheck",
+  readytocheck: "readycheck",
+  fit: "fitup",
+  "fit-up": "fitup",
+  fitup: "fitup",
+  painted: "finish",
+  painting: "finish",
+  finished: "finish",
+  workshop: "issued",
+};
+const PRODUCTION_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select", "undo", "redo"]);
 const HISTORY_LIMIT = 80;
 const APP_MODES = new Set(["draw", "edit", "review", "export"]);
@@ -364,6 +396,7 @@ const TUTORIAL_STEPS = [
     target: "#openBrowserProjectButton",
     action: "focusJobs",
     actionLabel: "Find Jobs",
+    demo: "jobs",
     items: [
       "Tap Jobs to open saved local or cloud spools.",
       "Use Dashboard from Menu when you want the big start screen.",
@@ -378,6 +411,7 @@ const TUTORIAL_STEPS = [
     mode: "draw",
     action: "drawTool",
     actionLabel: "Select Draw",
+    demo: "draw",
     items: [
       "Click or drag from a point to add the next pipe run.",
       "Press Enter when finished drawing to return to Select.",
@@ -392,6 +426,7 @@ const TUTORIAL_STEPS = [
     mode: "draw",
     action: "focusLength",
     actionLabel: "Focus Length",
+    demo: "exact",
     items: [
       "Lengths are in millimetres.",
       "Use +X, +Y and +Z for precise straight runs.",
@@ -406,6 +441,7 @@ const TUTORIAL_STEPS = [
     mode: "draw",
     action: "focusAngle",
     actionLabel: "Focus Angle",
+    demo: "offset",
     items: [
       "Hold Shift while drawing to use 45 degree snap guides.",
       "45 degree travel uses the offset multiplier in the cut calculations.",
@@ -420,6 +456,7 @@ const TUTORIAL_STEPS = [
     mode: "draw",
     action: "selectTool",
     actionLabel: "Select Tool",
+    demo: "select",
     items: [
       "Click a run to edit its length or pipe size.",
       "Hold Shift while clicking runs to select multiple.",
@@ -434,10 +471,26 @@ const TUTORIAL_STEPS = [
     mode: "draw",
     action: "teeTool",
     actionLabel: "Select Tee",
+    demo: "tee",
     items: [
       "Tee adds tee takeoff and fitting weight.",
       "Branch is a welded pipe into the side of a larger pipe.",
       "Changing pipe size can add reducers when the connection needs one.",
+    ],
+  },
+  {
+    kicker: "Sockets",
+    title: "Add and rotate sockets",
+    body: "Sockets are added from the pipe context menu. Right-click on PC, or long-press on iPad and phone, then choose Add sockets and pick the size, count and spacing.",
+    target: '[data-tool="select"]',
+    mode: "draw",
+    action: "selectTool",
+    actionLabel: "Use Select",
+    demo: "sockets",
+    items: [
+      "Right-click or long-press a pipe run, then choose Add sockets.",
+      "Pick socket size, how many sockets and the spacing, then press Apply.",
+      "Right-click or long-press a socket later to spin it 90 degrees, or drag it along the pipe in Select.",
     ],
   },
   {
@@ -448,6 +501,7 @@ const TUTORIAL_STEPS = [
     mode: "draw",
     action: "measureTool",
     actionLabel: "Select Measure",
+    demo: "measure",
     items: [
       "Use it for quick checks and extra site dimensions.",
       "Measurements are separate from pipe runs.",
@@ -461,6 +515,7 @@ const TUTORIAL_STEPS = [
     target: "#dimensionStyleSelect",
     action: "focusDimensions",
     actionLabel: "Show Styles",
+    demo: "dimensions",
     items: [
       "Red C/C lines are good for fabrication checking.",
       "Drag red dimension labels away from clashes.",
@@ -474,6 +529,7 @@ const TUTORIAL_STEPS = [
     target: "#previewModePanelSelect",
     action: "showPreview",
     actionLabel: "Show 3D",
+    demo: "preview",
     items: [
       "Switch between realistic, stainless, outline and CAD styles.",
       "Use Rotate for spinning the model.",
@@ -488,6 +544,7 @@ const TUTORIAL_STEPS = [
     mode: "review",
     action: "showChecks",
     actionLabel: "Open Checks",
+    demo: "review",
     items: [
       "Checks can highlight issues directly on the drawing.",
       "Cut List and BOM show what needs to be made and ordered.",
@@ -743,6 +800,12 @@ let projectLibrarySource = "browser";
 let projectLibrarySearch = "";
 let projectLibraryProjects = [];
 let projectLibraryFolderOpenState = readProjectLibraryFolderOpenState();
+let projectLibraryOpenFolderKey = "";
+let projectLibraryLastActivation = { key: "", at: 0 };
+let projectLibraryDrag = null;
+let projectLibraryGuideVisible = false;
+let projectLibraryReportVisible = false;
+let projectLibraryReportPeriod = "daily";
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
 let currentLoadPlan = null;
@@ -764,6 +827,9 @@ let three = {
   navigationMode: "orbit",
   userMovedCamera: false,
   modelCenter: null,
+  interacting: false,
+  interactionTimer: 0,
+  labelFrameSkip: 0,
 };
 let loadPlanThree = {
   ready: false,
@@ -828,8 +894,9 @@ function sampleState() {
     previewMode: "carbon",
     show3dLabels: true,
     gridScale: 42,
+    drawingDetail: "callouts",
     showDimensions: true,
-    dimensionStyle: "labels",
+    dimensionStyle: "numbered",
     showLiftingPoints: false,
     liftingSlingAngleDegrees: 60,
     projectId: null,
@@ -839,6 +906,8 @@ function sampleState() {
     checkedAt: "",
     locked: false,
     revisionHistory: [],
+    productionInfo: defaultProductionInfo(),
+    productionMessages: [],
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -861,8 +930,9 @@ function hardCodedDrawingDefaults() {
     previewMode: "carbon",
     show3dLabels: true,
     gridScale: 42,
+    drawingDetail: "callouts",
     showDimensions: true,
-    dimensionStyle: "labels",
+    dimensionStyle: "numbered",
     showLiftingPoints: false,
     liftingSlingAngleDegrees: 60,
   };
@@ -881,6 +951,7 @@ function normalizeDrawingDefaults(defaults = {}) {
     previewMode: normalizePreviewMode(defaults.previewMode ?? base.previewMode),
     show3dLabels: defaults.show3dLabels !== false,
     gridScale: clampNumber(Number(defaults.gridScale) || base.gridScale, 24, 72),
+    drawingDetail: normalizeDrawingDetail(defaults.drawingDetail ?? base.drawingDetail),
     showDimensions: defaults.showDimensions !== false,
     dimensionStyle: normalizeDimensionStyle(defaults.dimensionStyle ?? base.dimensionStyle),
     showLiftingPoints: defaults.showLiftingPoints === true,
@@ -888,10 +959,48 @@ function normalizeDrawingDefaults(defaults = {}) {
   };
 }
 
+function numberedDimensionDefaultApplied() {
+  try {
+    return localStorage.getItem(NUMBERED_DIMENSION_DEFAULT_KEY) === "true";
+  } catch {
+    return true;
+  }
+}
+
+function markNumberedDimensionDefaultApplied() {
+  try {
+    localStorage.setItem(NUMBERED_DIMENSION_DEFAULT_KEY, "true");
+  } catch {
+    // Defaults still work without localStorage; the marker only prevents repeat migration.
+  }
+}
+
+function shouldUseNumberedDimensionDefault(rawDefaults) {
+  if (!rawDefaults || typeof rawDefaults !== "object") return true;
+  return rawDefaults.dimensionStyle === undefined || normalizeDimensionStyle(rawDefaults.dimensionStyle) === "labels";
+}
+
+function applyNumberedDimensionDefault(target) {
+  if (!target || typeof target !== "object") return target;
+  target.drawingDetail = "callouts";
+  target.showDimensions = true;
+  target.dimensionStyle = "numbered";
+  return target;
+}
+
 function readUserDrawingDefaults() {
   try {
-    return normalizeDrawingDefaults(JSON.parse(localStorage.getItem(USER_DRAWING_DEFAULTS_KEY)) ?? {});
+    const rawDefaults = JSON.parse(localStorage.getItem(USER_DRAWING_DEFAULTS_KEY)) ?? {};
+    const defaults = normalizeDrawingDefaults(rawDefaults);
+    const alreadyApplied = numberedDimensionDefaultApplied();
+    if (!alreadyApplied && shouldUseNumberedDimensionDefault(rawDefaults)) {
+      markNumberedDimensionDefaultApplied();
+      return normalizeDrawingDefaults(applyNumberedDimensionDefault({ ...defaults }));
+    }
+    if (!alreadyApplied) markNumberedDimensionDefaultApplied();
+    return defaults;
   } catch {
+    markNumberedDimensionDefaultApplied();
     return normalizeDrawingDefaults();
   }
 }
@@ -908,6 +1017,7 @@ function drawingDefaultsFromState(source = state) {
     previewMode: source?.previewMode,
     show3dLabels: source?.show3dLabels !== false,
     gridScale: source?.gridScale,
+    drawingDetail: normalizeDrawingDetail(source?.drawingDetail),
     showDimensions: source?.showDimensions,
     dimensionStyle: source?.dimensionStyle,
     showLiftingPoints: source?.showLiftingPoints,
@@ -955,6 +1065,7 @@ function blankState(options = {}) {
     previewMode: defaults.previewMode,
     show3dLabels: defaults.show3dLabels,
     gridScale: defaults.gridScale,
+    drawingDetail: defaults.drawingDetail,
     showDimensions: defaults.showDimensions,
     dimensionStyle: defaults.dimensionStyle,
     showLiftingPoints: defaults.showLiftingPoints,
@@ -966,6 +1077,8 @@ function blankState(options = {}) {
     checkedAt: "",
     locked: false,
     revisionHistory: [],
+    productionInfo: defaultProductionInfo(),
+    productionMessages: [],
     projectInfo: defaultProjectInfo(),
     history: [],
     redoHistory: [],
@@ -981,6 +1094,13 @@ function loadState() {
       const restored = stateFromPayload(saved, { legacyUnits, applyNewDefaults });
       if (!restored) continue;
 
+      const alreadyApplied = numberedDimensionDefaultApplied();
+      if (!alreadyApplied && shouldUseNumberedDimensionDefault(saved)) {
+        applyNumberedDimensionDefault(restored);
+        markNumberedDimensionDefaultApplied();
+      } else if (!alreadyApplied) {
+        markNumberedDimensionDefaultApplied();
+      }
       setNextIdsFromState(restored);
       return restored;
     } catch {
@@ -1019,6 +1139,7 @@ function statePayload(options = {}) {
     previewMode: state.previewMode,
     show3dLabels: state.show3dLabels !== false,
     gridScale: state.gridScale,
+    drawingDetail: normalizeDrawingDetail(state.drawingDetail),
     showDimensions: state.showDimensions,
     dimensionStyle: normalizeDimensionStyle(state.dimensionStyle),
     showLiftingPoints: state.showLiftingPoints,
@@ -1030,6 +1151,8 @@ function statePayload(options = {}) {
     checkedAt: String(state.checkedAt ?? "").trim(),
     locked: state.locked === true,
     revisionHistory: options.includeRevisionHistory === false ? [] : normalizeRevisionHistory(state.revisionHistory),
+    productionInfo: normalizeProductionInfo(state.productionInfo),
+    productionMessages: normalizeProductionMessages(state.productionMessages),
     projectInfo: normalizeProjectInfo(state.projectInfo),
   };
 }
@@ -1064,6 +1187,11 @@ function stateFromPayload(payload, options = {}) {
   });
   const edges = normalizeEdges(saved.edges, points.length);
   const selectedSegments = normalizeSelectedSegments(saved.selectedSegments, edges.length);
+  const savedShowDimensions = saved.showDimensions !== false;
+  const savedDimensionStyle = normalizeDimensionStyle(saved.dimensionStyle);
+  const savedDrawingDetail = saved.drawingDetail
+    ? normalizeDrawingDetail(saved.drawingDetail)
+    : drawingDetailFromDimensionSettings(savedShowDimensions, savedDimensionStyle);
 
   return {
     ...blankState({ userDefaults: false }),
@@ -1089,8 +1217,9 @@ function stateFromPayload(payload, options = {}) {
     selectedPoint: Number.isInteger(saved.selectedPoint) && saved.selectedPoint >= 0 && saved.selectedPoint < points.length ? saved.selectedPoint : null,
     selectedMeasurement: Number.isInteger(saved.selectedMeasurement) ? saved.selectedMeasurement : null,
     gridScale: Number(saved.gridScale) || 42,
-    showDimensions: saved.showDimensions !== false,
-    dimensionStyle: normalizeDimensionStyle(saved.dimensionStyle),
+    drawingDetail: savedDrawingDetail,
+    showDimensions: savedShowDimensions,
+    dimensionStyle: savedDimensionStyle,
     showLiftingPoints: applyNewDefaults ? false : saved.showLiftingPoints === true,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(saved.liftingSlingAngleDegrees),
     projectId: normalizeProjectId(saved.projectId),
@@ -1100,6 +1229,8 @@ function stateFromPayload(payload, options = {}) {
     checkedAt: String(saved.checkedAt ?? "").trim(),
     locked: saved.locked === true,
     revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
+    productionInfo: normalizeProductionInfo(saved.productionInfo),
+    productionMessages: normalizeProductionMessages(saved.productionMessages),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
     redoHistory: [],
@@ -1339,6 +1470,21 @@ function defaultProjectInfo() {
   return { ...PROJECT_INFO_DEFAULT };
 }
 
+function defaultProductionInfo() {
+  return {
+    assignee: "",
+    dueDate: "",
+    dueTime: "",
+    priority: "normal",
+    hold: false,
+    holdReason: "",
+    completedAt: "",
+    removeAfter: "",
+    lastUpdatedBy: "",
+    lastUpdatedAt: "",
+  };
+}
+
 function normalizeProjectInfo(info) {
   const source = info && typeof info === "object" ? info : {};
   return Object.fromEntries(
@@ -1347,6 +1493,99 @@ function normalizeProjectInfo(info) {
       String(source[key] ?? "").trim().slice(0, key === "client" ? 56 : 32),
     ]),
   );
+}
+
+function normalizeProductionPriority(value) {
+  const priority = String(value ?? "normal").trim().toLowerCase();
+  return PRODUCTION_PRIORITIES.has(priority) ? priority : "normal";
+}
+
+function productionPriorityLabel(value) {
+  const priority = normalizeProductionPriority(value);
+  if (priority === "low") return "Low";
+  if (priority === "high") return "High";
+  if (priority === "urgent") return "Urgent";
+  return "Normal";
+}
+
+function normalizeProductionDueDate(value) {
+  const text = String(value ?? "").trim().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(text) ? text : "";
+}
+
+function normalizeProductionDueTime(value) {
+  const text = String(value ?? "").trim().slice(0, 5);
+  return /^\d{2}:\d{2}$/.test(text) ? text : "";
+}
+
+function formatProductionDate(value) {
+  const date = normalizeProductionDueDate(value);
+  if (!date) return "";
+  const parsed = new Date(`${date}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? date : parsed.toLocaleDateString();
+}
+
+function formatProductionDue(production) {
+  const info = normalizeProductionInfo(production);
+  if (!info.dueDate) return "";
+  return `${formatProductionDate(info.dueDate)}${info.dueTime ? ` ${info.dueTime}` : ""}`;
+}
+
+function isoDaysFromNow(days) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString();
+}
+
+function activeProductionMessages(messages) {
+  const now = Date.now();
+  return normalizeProductionMessages(messages).filter((message) => {
+    if (!message.removeAfter) return true;
+    const removeTime = new Date(message.removeAfter).getTime();
+    return Number.isNaN(removeTime) || removeTime > now;
+  });
+}
+
+function normalizeProductionInfo(info) {
+  const source = info && typeof info === "object" ? info : {};
+  return {
+    assignee: String(source.assignee ?? "").trim().slice(0, 80),
+    dueDate: normalizeProductionDueDate(source.dueDate),
+    dueTime: normalizeProductionDueTime(source.dueTime),
+    priority: normalizeProductionPriority(source.priority),
+    hold: source.hold === true,
+    holdReason: String(source.holdReason ?? "").trim().slice(0, 140),
+    completedAt: String(source.completedAt ?? "").trim(),
+    removeAfter: String(source.removeAfter ?? "").trim(),
+    lastUpdatedBy: String(source.lastUpdatedBy ?? "").trim().slice(0, 80),
+    lastUpdatedAt: String(source.lastUpdatedAt ?? "").trim(),
+  };
+}
+
+function normalizeProductionMessages(messages) {
+  if (!Array.isArray(messages)) return [];
+  const now = Date.now();
+  return messages
+    .map((message) => {
+      const body = String(message?.body ?? "").trim().slice(0, 240);
+      if (!body) return null;
+      const removeAfter = String(message?.removeAfter ?? "").trim();
+      if (removeAfter) {
+        const removeTime = new Date(removeAfter).getTime();
+        if (!Number.isNaN(removeTime) && removeTime < now) return null;
+      }
+      return {
+        id: String(message?.id ?? "").trim().slice(0, 80) || `msg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        body,
+        author: String(message?.author ?? "").trim().slice(0, 80),
+        createdAt: String(message?.createdAt ?? "").trim() || new Date().toISOString(),
+        completed: message?.completed === true,
+        completedAt: String(message?.completedAt ?? "").trim(),
+        removeAfter,
+      };
+    })
+    .filter(Boolean)
+    .slice(-40);
 }
 
 function nextSpoolNumber(value) {
@@ -1446,16 +1685,24 @@ function projectDisplayName(info = state.projectInfo) {
 }
 
 function normalizeProjectStatus(value) {
-  const status = String(value ?? "draft").trim().toLowerCase();
+  const raw = String(value ?? "draft").trim().toLowerCase();
+  const compact = raw.replace(/[\s_-]+/g, "");
+  const status = PROJECT_STATUS_ALIASES[raw] ?? PROJECT_STATUS_ALIASES[compact] ?? compact;
   return PROJECT_STATUSES.has(status) ? status : "draft";
 }
 
 function projectStatusLabel(value = state.projectStatus) {
   const status = normalizeProjectStatus(value);
-  if (status === "checked") return "Checked";
-  if (status === "issued") return "Issued";
-  if (status === "fabricated") return "Fabricated";
-  return "Draft";
+  return PROJECT_STATUS_LABELS[status] ?? "Draft";
+}
+
+function projectStatusIndex(value) {
+  const status = normalizeProjectStatus(value);
+  return PROJECT_STATUS_FLOW.findIndex(([key]) => key === status);
+}
+
+function projectStatusAtLeast(value, minimum) {
+  return projectStatusIndex(value) >= projectStatusIndex(minimum);
 }
 
 function normalizeRevisionHistory(history) {
@@ -1646,6 +1893,18 @@ function normalizePreviewMode(value) {
   return PREVIEW_MODES.has(value) ? value : "carbon";
 }
 
+function normalizeDrawingDetail(value) {
+  return DRAWING_DETAIL_MODES.has(value) ? value : "full";
+}
+
+function drawingDetailFromDimensionSettings(showDimensions = state.showDimensions, dimensionStyle = state.dimensionStyle) {
+  if (showDimensions === false) return "clean";
+  const style = normalizeDimensionStyle(dimensionStyle);
+  if (style === "numbered") return "callouts";
+  if (style === "redline" || style === "chain") return "fab";
+  return "full";
+}
+
 function normalizeDimensionStyle(value) {
   return DIMENSION_STYLES.has(value) ? value : "labels";
 }
@@ -1657,6 +1916,45 @@ function normalizeAppMode(value) {
 function isLineDimensionStyle(value = state.dimensionStyle) {
   const style = normalizeDimensionStyle(value);
   return style === "redline" || style === "numbered" || style === "chain";
+}
+
+function activeDrawingDetail() {
+  return normalizeDrawingDetail(state.drawingDetail ?? drawingDetailFromDimensionSettings(state.showDimensions, state.dimensionStyle));
+}
+
+function drawingDimensionsVisible() {
+  const detail = activeDrawingDetail();
+  return state.showDimensions !== false && detail !== "clean" && detail !== "sizes";
+}
+
+function drawingPipeSizeLabelsVisible() {
+  const detail = activeDrawingDetail();
+  return detail === "sizes" || detail === "callouts" || detail === "full";
+}
+
+function drawingPipeSizeLabelMode() {
+  return activeDrawingDetail() === "full" ? "all" : "compact";
+}
+
+function applyDrawingDetailPreset(value) {
+  const detail = normalizeDrawingDetail(value);
+  state.drawingDetail = detail;
+  if (detail === "clean") {
+    state.showDimensions = false;
+    state.dimensionStyle = "labels";
+  } else if (detail === "fab") {
+    state.showDimensions = true;
+    state.dimensionStyle = "redline";
+  } else if (detail === "sizes") {
+    state.showDimensions = false;
+    state.dimensionStyle = "labels";
+  } else if (detail === "callouts") {
+    state.showDimensions = true;
+    state.dimensionStyle = "numbered";
+  } else {
+    state.showDimensions = true;
+    state.dimensionStyle = "redline";
+  }
 }
 
 function dimensionLinePalette() {
@@ -2166,6 +2464,30 @@ function drawAxis(ctx, from, to, color, label) {
   ctx.restore();
 }
 
+function drawingPipePalette() {
+  if (isDarkAppTheme()) {
+    return {
+      pipe: "#2bd4e4",
+      selected: "#ff8a5c",
+      hovered: "#4fc3ff",
+      highlight: "rgba(229, 253, 255, 0.88)",
+      shadow: "rgba(16, 216, 255, 0.18)",
+      tee: "#2bd4e4",
+      branch: "#ff8a5c",
+    };
+  }
+
+  return {
+    pipe: "#1f5f68",
+    selected: "#b95436",
+    hovered: "#2563eb",
+    highlight: "#fffdf8",
+    shadow: "rgba(31, 42, 47, 0.12)",
+    tee: "#1f5f68",
+    branch: "#b95436",
+  };
+}
+
 function worldBounds(padding = 0) {
   const xs = state.points.map((point) => point.x / MM_PER_GRID);
   const ys = state.points.map((point) => point.y / MM_PER_GRID);
@@ -2197,14 +2519,15 @@ function dimensionViewport(ctx, padding = 18) {
   };
 }
 
-function drawSpool2d(ctx, projection) {
+function drawSpool2d(ctx, projection, options = {}) {
   const pipeWidth = 4;
   const segmentListForDraw = segments();
   const connections = nodeConnections(segmentListForDraw);
+  const viewport = options.viewport ?? dimensionViewport(ctx, 18);
   const dimensionLayout = {
     labels: [],
     lines: [],
-    viewport: dimensionViewport(ctx, 18),
+    viewport,
     pipes: segmentListForDraw.map((segment) => ({
       index: segment.index,
       start: projectIso(segment.start, projection),
@@ -2215,6 +2538,7 @@ function drawSpool2d(ctx, projection) {
   ctx.save();
   ctx.lineCap = "butt";
   ctx.lineJoin = "round";
+  const palette = drawingPipePalette();
 
   for (const segment of segmentListForDraw) {
     const start = projectIso(segment.start, projection);
@@ -2222,16 +2546,16 @@ function drawSpool2d(ctx, projection) {
     const selected = isSegmentSelected(segment.index);
     const hovered = state.hoveredSegment === segment.index;
 
-    ctx.shadowColor = "rgba(31, 42, 47, 0.12)";
+    ctx.shadowColor = palette.shadow;
     ctx.shadowBlur = 4;
     ctx.shadowOffsetY = 2;
-    ctx.strokeStyle = selected ? "#b95436" : hovered ? "#2563eb" : "#1f5f68";
+    ctx.strokeStyle = selected ? palette.selected : hovered ? palette.hovered : palette.pipe;
     ctx.lineWidth = selected || hovered ? 7 : pipeWidth;
     drawLine(ctx, start, end);
 
     if (selected || hovered) {
       ctx.shadowColor = "transparent";
-      ctx.strokeStyle = "#fffdf8";
+      ctx.strokeStyle = palette.highlight;
       ctx.lineWidth = 2;
       drawLine(ctx, start, end);
     }
@@ -2240,7 +2564,7 @@ function drawSpool2d(ctx, projection) {
 
   drawFlushEndCaps2d(ctx, projection, segmentListForDraw, connections, pipeWidth);
 
-  if (state.showDimensions) {
+  if (drawingDimensionsVisible()) {
     const dimensionSegments = segmentListForDraw
       .map((segment) => ({
         segment,
@@ -2257,11 +2581,11 @@ function drawSpool2d(ctx, projection) {
     }
   }
 
-  if (state.showDimensions) {
+  if (drawingDimensionsVisible()) {
     drawBendAngles(ctx, projection);
   }
 
-  if (state.showDimensions) {
+  if (drawingPipeSizeLabelsVisible()) {
     drawPipeSizeLabels2d(ctx, projection, segmentListForDraw, dimensionLayout);
   }
 
@@ -2371,6 +2695,7 @@ function healthTargetPointIndexes(target) {
 
 function healthTargetSegmentIndexes(target) {
   if (!target) return [];
+  if (target.pointOnly === true) return [];
   const values = [];
   if (Number.isInteger(target.segmentIndex)) values.push(target.segmentIndex);
   if (Array.isArray(target.segmentIndexes)) values.push(...target.segmentIndexes);
@@ -2538,12 +2863,13 @@ function drawFlushEndCaps2d(ctx, projection, segmentData, connections, pipeWidth
   ctx.save();
   ctx.shadowColor = "transparent";
   ctx.lineCap = "butt";
+  const palette = drawingPipePalette();
 
   for (const segment of segmentData) {
     const selected = isSegmentSelected(segment.index);
     const hovered = state.hoveredSegment === segment.index;
     const width = selected || hovered ? 7 : pipeWidth;
-    const color = selected ? "#b95436" : hovered ? "#2563eb" : "#1f5f68";
+    const color = selected ? palette.selected : hovered ? palette.hovered : palette.pipe;
 
     for (const [nodeIndex, otherIndex] of [[segment.from, segment.to], [segment.to, segment.from]]) {
       if ((connections.get(nodeIndex)?.length ?? 0) !== 1) continue;
@@ -2570,7 +2896,8 @@ function drawTeeMarkers2d(ctx, projection, segmentData, connections, pipeWidth) 
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
 
   ctx.save();
-  ctx.shadowColor = "rgba(31, 42, 47, 0.12)";
+  const palette = drawingPipePalette();
+  ctx.shadowColor = palette.shadow;
   ctx.shadowBlur = 3;
   ctx.lineCap = "butt";
   ctx.lineJoin = "round";
@@ -2582,8 +2909,8 @@ function drawTeeMarkers2d(ctx, projection, segmentData, connections, pipeWidth) 
     if (nodeConnectionType(nodeIndex) === "branch") {
       const info = branchNodeInfo(nodeIndex, connected, segmentData);
       const branchEntries = info?.branchEntries?.length ? info.branchEntries : [];
-      ctx.shadowColor = "rgba(31, 42, 47, 0.14)";
-      ctx.strokeStyle = "#b95436";
+      ctx.shadowColor = palette.shadow;
+      ctx.strokeStyle = palette.branch;
       ctx.lineWidth = Math.max(3, pipeWidth * 0.42);
 
       for (const entry of branchEntries) {
@@ -2606,8 +2933,8 @@ function drawTeeMarkers2d(ctx, projection, segmentData, connections, pipeWidth) 
       }
 
       ctx.shadowColor = "transparent";
-      ctx.fillStyle = "#fffdf8";
-      ctx.strokeStyle = "#b95436";
+      ctx.fillStyle = isDarkAppTheme() ? "#061018" : "#fffdf8";
+      ctx.strokeStyle = palette.branch;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(joint.x, joint.y, Math.max(4, pipeWidth * 0.45), 0, Math.PI * 2);
@@ -2616,7 +2943,7 @@ function drawTeeMarkers2d(ctx, projection, segmentData, connections, pipeWidth) 
       continue;
     }
 
-    ctx.strokeStyle = "#1f5f68";
+    ctx.strokeStyle = palette.tee;
     ctx.lineWidth = pipeWidth + 4;
 
     for (const connection of connected) {
@@ -2632,7 +2959,7 @@ function drawTeeMarkers2d(ctx, projection, segmentData, connections, pipeWidth) 
     }
 
     ctx.shadowColor = "transparent";
-    ctx.strokeStyle = "rgba(255, 253, 248, 0.82)";
+    ctx.strokeStyle = palette.highlight;
     ctx.lineWidth = 2;
     for (const connection of connected) {
       const other = projectIso(state.points[connection.other], projection);
@@ -2861,7 +3188,10 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
   const legendText = segmentOffsetMeta(segment)
     ? `Run ${segment.index + 1}: ${offsetDimensionText(segment)} / factor ${offsetTravelMultiplier(segment.offsetAngleDeg).toFixed(3)}`
     : `Run ${segment.index + 1}: C/C ${fullText}`;
-  const text = dimensionLabelText(layoutState, fullText, legendText, "D");
+  const text = dimensionLabelText(layoutState, fullText, legendText, "D", {
+    type: "segment",
+    segmentIndex: segment.index,
+  });
   const baseOffset = Math.min(64, Math.max(42, screenLength * 0.065));
   const manualOffset = dimensionOffsetForSegment(segment.index);
   let labelAngle = Math.atan2(along.y, along.x);
@@ -2982,7 +3312,10 @@ function drawOffsetSetDimension(ctx, segment, start, end, meta, dimensionLayout 
   const pipeGap = 13;
   const fullText = `C/C ${formatLength(meta.setMm)} mm`;
   const legendText = `Run ${segment.index + 1}: offset C/C ${formatLength(meta.setMm)} mm / travel ${formatLength(meta.travelMm)} mm / ${formatAngle(meta.angleDeg)} deg`;
-  const text = dimensionLabelText(layoutState, fullText, legendText, "O");
+  const text = dimensionLabelText(layoutState, fullText, legendText, "O", {
+    type: "offset-set",
+    segmentIndex: segment.index,
+  });
   const baseOffset = Math.min(104, Math.max(58, screenLength * 0.14));
   const manualOffset = dimensionOffsetForSegment(segment.index);
   let labelAngle = Math.atan2(along.y, along.x);
@@ -3075,6 +3408,62 @@ function drawOffsetSetDimension(ctx, segment, start, end, meta, dimensionLayout 
   ctx.restore();
 }
 
+function compactPipeSizeLabelIndexes(segmentData) {
+  const byIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  const byNode = new Map();
+  for (const segment of segmentData) {
+    for (const nodeIndex of [segment.from, segment.to]) {
+      const list = byNode.get(nodeIndex) ?? [];
+      list.push(segment);
+      byNode.set(nodeIndex, list);
+    }
+  }
+
+  const selected = new Set();
+  const visited = new Set();
+  for (const segment of segmentData) {
+    if (visited.has(segment.index)) continue;
+    const nb = pipeSizeForSegment(segment).nb;
+    const group = [];
+    const stack = [segment.index];
+    visited.add(segment.index);
+    while (stack.length) {
+      const index = stack.pop();
+      const current = byIndex.get(index);
+      if (!current) continue;
+      group.push(current);
+      for (const nodeIndex of [current.from, current.to]) {
+        for (const next of byNode.get(nodeIndex) ?? []) {
+          if (visited.has(next.index)) continue;
+          if (pipeSizeForSegment(next).nb !== nb) continue;
+          visited.add(next.index);
+          stack.push(next.index);
+        }
+      }
+    }
+    const best = group.sort((first, second) => pointLength(second.vector) - pointLength(first.vector))[0];
+    if (best) selected.add(best.index);
+  }
+
+  for (const connected of byNode.values()) {
+    const sizes = new Map();
+    for (const segment of connected) {
+      const nb = pipeSizeForSegment(segment).nb;
+      const current = sizes.get(nb);
+      if (!current || pointLength(segment.vector) > pointLength(current.vector)) {
+        sizes.set(nb, segment);
+      }
+    }
+    if (sizes.size > 1) {
+      for (const segment of sizes.values()) {
+        selected.add(segment.index);
+      }
+    }
+  }
+
+  return selected;
+}
+
 function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []) {
   const layoutState = Array.isArray(dimensionLayout)
     ? { labels: dimensionLayout, pipes: [] }
@@ -3082,6 +3471,7 @@ function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []
   const labels = layoutState.labels ?? [];
   const pipes = layoutState.pipes ?? [];
   const viewport = layoutState.viewport ?? dimensionViewport(ctx, 18);
+  const compactLabels = drawingPipeSizeLabelMode() === "compact" ? compactPipeSizeLabelIndexes(segmentData) : null;
 
   ctx.save();
   ctx.font = "900 10.5px Inter, system-ui, sans-serif";
@@ -3089,6 +3479,7 @@ function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []
   ctx.textBaseline = "middle";
 
   for (const segment of segmentData) {
+    if (compactLabels && !compactLabels.has(segment.index)) continue;
     const start = projectIso(segment.start, projection);
     const end = projectIso(segment.end, projection);
     const dx = end.x - start.x;
@@ -3148,13 +3539,14 @@ function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []
   ctx.restore();
 }
 
-function dimensionLabelText(layoutState, displayText, legendText, prefix = "D") {
+function dimensionLabelText(layoutState, displayText, legendText, prefix = "D", target = {}) {
   if (normalizeDimensionStyle(state.dimensionStyle) !== "numbered") return displayText;
   layoutState.numberedItems ??= [];
   const code = `${prefix}${layoutState.numberedItems.length + 1}`;
   layoutState.numberedItems.push({
     code,
     text: legendText,
+    target,
   });
   return code;
 }
@@ -3164,7 +3556,7 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   const items = dimensionLayout?.numberedItems ?? [];
   if (!items.length) return;
 
-  const viewport = dimensionViewport(ctx, 12);
+  const viewport = dimensionLayout?.viewport ?? dimensionViewport(ctx, 12);
   const maxItems = 18;
   const visibleItems = items.slice(0, maxItems);
   const overflowCount = items.length - visibleItems.length;
@@ -3173,7 +3565,7 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   ctx.font = "900 11px Inter, system-ui, sans-serif";
   const maxTextWidth = Math.min(210, Math.max(118, (viewport.right - viewport.left) * 0.36));
   const lineHeight = 16;
-  const titleHeight = 21;
+  const titleHeight = 36;
   const columns = visibleItems.length > 9 && viewport.right - viewport.left > 560 ? 2 : 1;
   const rows = Math.ceil((visibleItems.length + (overflowCount > 0 ? 1 : 0)) / columns);
   const colWidth = maxTextWidth + 36;
@@ -3200,6 +3592,9 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
   ctx.fillText("Dimension key", x + padding, y + padding + 10);
+  ctx.fillStyle = "#4b6468";
+  ctx.font = "850 9.5px Inter, system-ui, sans-serif";
+  ctx.fillText(fitCanvasText(ctx, "Select: tap/click D/O rows to edit C/C", cardWidth - padding * 2), x + padding, y + padding + 25);
 
   ctx.font = "850 10.5px Inter, system-ui, sans-serif";
   const listItems = overflowCount > 0
@@ -3211,10 +3606,40 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
     const row = columns > 1 ? index % rows : index;
     const itemX = x + padding + column * (colWidth + gap);
     const itemY = y + padding + titleHeight + row * lineHeight + 10;
+    const rowBounds = {
+      left: itemX - 4,
+      right: itemX + colWidth - 6,
+      top: itemY - lineHeight + 3,
+      bottom: itemY + 4,
+    };
+    const editableKey = item.target?.type === "segment" || item.target?.type === "offset-set";
+    if (editableKey && item.code !== "...") {
+      ctx.fillStyle = "rgba(19, 216, 255, 0.08)";
+      roundRect(ctx, rowBounds.left, rowBounds.top, rowBounds.right - rowBounds.left, rowBounds.bottom - rowBounds.top, 5);
+      ctx.fill();
+    }
+    if (item.code !== "..." && editableKey && Number.isInteger(item.target?.segmentIndex)) {
+      addDimensionHitTarget({
+        type: "dimension-key",
+        sourceType: item.target.type,
+        segmentIndex: item.target.segmentIndex,
+        code: item.code,
+        bounds: rowBounds,
+        lines: [],
+      });
+    }
     ctx.fillStyle = item.code === "..." ? "#657579" : "#c1121f";
     ctx.fillText(item.code, itemX, itemY);
     ctx.fillStyle = "#263538";
-    ctx.fillText(fitCanvasText(ctx, item.text, maxTextWidth), itemX + 28, itemY);
+    const showEditTag = editableKey && item.code !== "..." && colWidth > 138;
+    const itemTextWidth = showEditTag ? Math.max(72, maxTextWidth - 34) : maxTextWidth;
+    ctx.fillText(fitCanvasText(ctx, item.text, itemTextWidth), itemX + 28, itemY);
+    if (showEditTag) {
+      ctx.fillStyle = "#0f766e";
+      ctx.font = "900 8.5px Inter, system-ui, sans-serif";
+      ctx.fillText("edit", rowBounds.right - 24, itemY);
+      ctx.font = "850 10.5px Inter, system-ui, sans-serif";
+    }
   });
 
   ctx.restore();
@@ -3232,21 +3657,53 @@ function fitCanvasText(ctx, text, maxWidth) {
 
 function drawSocketPositionDimensions(ctx, projection, segmentData, dimensionLayout = []) {
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
-  const socketFittings = state.fittings
-    .filter((fitting) => fitting.type === "socket")
-    .sort((first, second) => first.segmentIndex - second.segmentIndex || first.t - second.t);
+  const socketsBySegment = new Map();
+  for (const fitting of state.fittings.filter((item) => item.type === "socket")) {
+    if (!segmentByIndex.has(fitting.segmentIndex)) continue;
+    if (!socketsBySegment.has(fitting.segmentIndex)) socketsBySegment.set(fitting.segmentIndex, []);
+    socketsBySegment.get(fitting.segmentIndex).push(fitting);
+  }
 
-  for (const [socketIndex, fitting] of socketFittings.entries()) {
-    const segment = segmentByIndex.get(fitting.segmentIndex);
+  let dimensionIndex = 0;
+  const sortedGroups = [...socketsBySegment.entries()].sort(([firstIndex], [secondIndex]) => firstIndex - secondIndex);
+  for (const [segmentIndex, socketFittings] of sortedGroups) {
+    const segment = segmentByIndex.get(segmentIndex);
     if (!segment) continue;
-    const start = projectIso(segment.start, projection);
-    const socketPoint = projectIso(lerpPoint(segment.start, segment.end, fitting.t), projection);
-    const distanceMm = pointLength(subtractPoints(lerpPoint(segment.start, segment.end, fitting.t), segment.start));
-    drawRedSocketPositionDimension(ctx, start, socketPoint, segment.index, distanceMm, socketIndex, dimensionLayout);
+    const orderedSockets = socketFittings
+      .map((fitting) => ({
+        fitting,
+        worldPoint: lerpPoint(segment.start, segment.end, fitting.t),
+        distanceFromStart: pointLength(subtractPoints(lerpPoint(segment.start, segment.end, fitting.t), segment.start)),
+      }))
+      .sort((first, second) => first.fitting.t - second.fitting.t);
+
+    let previousPoint = segment.start;
+    let previousDistance = 0;
+    for (const [socketIndex, socket] of orderedSockets.entries()) {
+      const start = projectIso(previousPoint, projection);
+      const socketPoint = projectIso(socket.worldPoint, projection);
+      const distanceMm = socketIndex === 0
+        ? socket.distanceFromStart
+        : Math.max(0, socket.distanceFromStart - previousDistance);
+      drawRedSocketPositionDimension(
+        ctx,
+        start,
+        socketPoint,
+        segment.index,
+        distanceMm,
+        dimensionIndex,
+        dimensionLayout,
+        socket.fitting,
+        socketIndex > 0,
+      );
+      previousPoint = socket.worldPoint;
+      previousDistance = socket.distanceFromStart;
+      dimensionIndex += 1;
+    }
   }
 }
 
-function drawRedSocketPositionDimension(ctx, start, socketPoint, segmentIndex, distanceMm, socketIndex, dimensionLayout = []) {
+function drawRedSocketPositionDimension(ctx, start, socketPoint, segmentIndex, distanceMm, socketIndex, dimensionLayout = [], fitting = null, isCentreToCentre = false) {
   const layoutState = Array.isArray(dimensionLayout)
     ? { labels: dimensionLayout, lines: [], pipes: [] }
     : dimensionLayout;
@@ -3259,8 +3716,14 @@ function drawRedSocketPositionDimension(ctx, start, socketPoint, segmentIndex, d
   const baseNormal = { x: -along.y, y: along.x };
   const pipeGap = 11;
   const tick = 5;
-  const fullText = `1/2" SOCK ${formatLength(distanceMm)} mm`;
-  const text = dimensionLabelText(layoutState, fullText, `Run ${segmentIndex + 1}: ${fullText}`, "S");
+  const socketLabel = socketSizeChoiceLabel(fittingSocketSizeNb(fitting));
+  const fullText = isCentreToCentre
+    ? `${socketLabel} SOCK C/C ${formatLength(distanceMm)} mm`
+    : `${socketLabel} SOCK ${formatLength(distanceMm)} mm`;
+  const text = dimensionLabelText(layoutState, fullText, `Run ${segmentIndex + 1}: ${fullText}`, "S", {
+    type: "socket",
+    segmentIndex,
+  });
   const baseOffset = Math.min(92, Math.max(56, screenLength * 0.08)) + (socketIndex % 3) * 18;
   let labelAngle = Math.atan2(along.y, along.x);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
@@ -4423,7 +4886,8 @@ function findNearestDimensionTarget(pointer) {
       return Math.min(best, hit.distance);
     }, Infinity);
     const distance = labelHit ? 0 : lineDistance;
-    if (distance <= hitLimit(12, 22) && (!nearest || distance < nearest.distance)) {
+    const preferTarget = target.type === "dimension-key" && nearest?.type !== "dimension-key";
+    if (distance <= hitLimit(12, 22) && (!nearest || distance < nearest.distance || (distance === nearest.distance && preferTarget))) {
       nearest = { ...target, distance };
     }
   }
@@ -6725,20 +7189,18 @@ function drawingHealthItems() {
   if (!project.jobNumber) items.push(healthIssue("error", "Job number missing", "Add a job number before issuing the drawing.", { type: "project", field: "jobNumber" }));
   if (!project.spoolNumber) items.push(healthIssue("error", "Spool number missing", "Add a spool number so the shop can identify this spool.", { type: "project", field: "spoolNumber" }));
   if (!segmentData.length) {
-    items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting."));
+    items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting.", { type: "tool", tool: "draw" }));
   }
 
   const connections = nodeConnections(segmentData);
   const openEnds = [];
   const openEndPointIndexes = [];
-  const openEndSegmentIndexes = [];
   for (const [pointIndex, connected] of connections.entries()) {
     if (connected.length !== 1) continue;
     const segment = segmentData.find((item) => item.index === connected[0].segmentIndex);
     if (segment && !endpointHasFinish(segment, pointIndex)) {
       openEnds.push(`${pointLabel(pointIndex)} on run ${segment.index + 1}`);
       openEndPointIndexes.push(pointIndex);
-      openEndSegmentIndexes.push(segment.index);
     }
   }
   if (openEnds.length) {
@@ -6749,7 +7211,7 @@ function drawingHealthItems() {
       {
         type: "open-ends",
         pointIndexes: openEndPointIndexes,
-        segmentIndexes: openEndSegmentIndexes,
+        pointOnly: true,
       },
     ));
   }
@@ -6823,10 +7285,20 @@ function healthIssueClickable(item) {
   return Boolean(item?.target);
 }
 
+function projectFieldLabel(field) {
+  if (field === "jobNumber") return "job number";
+  if (field === "spoolNumber") return "spool number";
+  if (field === "revision") return "revision";
+  if (field === "drawnBy") return "drawn by";
+  if (field === "client") return "client / area";
+  return "project details";
+}
+
 function healthIssueTargetHint(item) {
   if (!healthIssueClickable(item)) return "";
-  if (item.target.type === "project") return "Open project details";
+  if (item.target.type === "project") return `Edit ${projectFieldLabel(item.target.field)}`;
   if (item.target.type === "dimensions") return "Turn dimensions on";
+  if (item.target.type === "tool") return "Open Draw tool";
   return "Show on drawing";
 }
 
@@ -6870,34 +7342,50 @@ function setupHealthIssueClicks() {
     const index = Number(row.dataset.healthIndex);
     const item = drawingHealthItems()[index];
     if (!item?.target) return;
-    focusHealthIssue(item);
+    focusHealthIssue(item).catch((error) => {
+      console.warn("Could not focus health issue.", error);
+      window.alert(error?.message || "Could not open that check.");
+    });
   });
 }
 
-function focusHealthIssue(item) {
+async function focusHealthIssue(item) {
   const target = item?.target;
   if (!target) return;
 
   if (target.type === "project") {
-    promptForProjectDetails();
+    await editProjectDetailsFromHealth(target.field);
     return;
   }
 
   if (target.type === "dimensions") {
+    applyAppMode("draw", { keepTool: true, activateTab: false });
     state.showDimensions = true;
     state.dimensionStyle = normalizeDimensionStyle(state.dimensionStyle);
     healthHighlight = null;
+    updateControls();
     updateAll();
+    dimensionToggle?.focus();
+    if (isTabletLayout()) showMobilePanel("drawing");
+    return;
+  }
+
+  if (target.type === "tool") {
+    applyAppMode("draw", { keepTool: true, activateTab: false });
+    setTool(target.tool || "draw");
+    drawCanvas?.focus?.();
     return;
   }
 
   const segmentIndexes = healthTargetSegmentIndexes(target);
   const pointIndexes = healthTargetPointIndexes(target);
+  applyAppMode("edit", { keepTool: true, activateTab: false });
   setSelectedSegments(segmentIndexes);
   state.selectedPoint = pointIndexes[0] ?? null;
   state.selectedFitting = null;
   state.selectedNote = null;
   state.activeTool = "select";
+  activateInspectorTab("properties");
   startHealthIssueHighlight(target, item.title);
   updateControls();
   updateSelectionControls();
@@ -6968,11 +7456,72 @@ function updateBomSummary() {
 function currentWorkflowRows() {
   const checked = state.checkedAt ? `${new Date(state.checkedAt).toLocaleString()} by ${state.checkedBy || "unknown"}` : "Not checked";
   return [
-    ["Status", projectStatusLabel()],
+    ["Stage", projectStatusLabel()],
     ["Lock", state.locked ? "Locked" : "Editable"],
     ["Checked", checked],
     ["Health", healthSummaryText()],
   ];
+}
+
+function productionAssigneeChoices() {
+  const choices = new Set();
+  const project = normalizeProjectInfo(state.projectInfo);
+  const production = normalizeProductionInfo(state.productionInfo);
+  if (production.assignee) choices.add(production.assignee);
+  if (cloudUser?.email) choices.add(cloudUser.email);
+  if (project.drawnBy) choices.add(project.drawnBy);
+  for (const member of companyMembers) {
+    if (member.status === "approved" && member.email) {
+      choices.add(member.email);
+    }
+  }
+  return [...choices].slice(0, 24);
+}
+
+function productionWorkflowCardHtml() {
+  const production = normalizeProductionInfo(state.productionInfo);
+  const lastUpdated = production.lastUpdatedAt
+    ? `${new Date(production.lastUpdatedAt).toLocaleString()}${production.lastUpdatedBy ? ` by ${production.lastUpdatedBy}` : ""}`
+    : "Not updated yet";
+  const assigneeOptions = productionAssigneeChoices()
+    .map((choice) => `<option value="${escapeHtml(choice)}"></option>`)
+    .join("");
+
+  return `
+    <div class="workflow-card production-workflow-card">
+      <strong>Production allocation</strong>
+      <div class="production-grid">
+        <label class="field">
+          <span>Assigned to</span>
+          <input data-production-field="assignee" list="productionAssigneeOptions" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Unassigned" />
+        </label>
+        <datalist id="productionAssigneeOptions">${assigneeOptions}</datalist>
+        <label class="field">
+          <span>Due date</span>
+          <input data-production-field="dueDate" type="date" value="${escapeHtml(production.dueDate)}" />
+        </label>
+        <label class="field">
+          <span>Due time</span>
+          <input data-production-field="dueTime" type="time" value="${escapeHtml(production.dueTime)}" />
+        </label>
+        <label class="field">
+          <span>Priority</span>
+          <select data-production-field="priority">
+            ${[...PRODUCTION_PRIORITIES].map((priority) => `<option value="${priority}"${production.priority === priority ? " selected" : ""}>${escapeHtml(productionPriorityLabel(priority))}</option>`).join("")}
+          </select>
+        </label>
+        <label class="toggle production-hold-toggle">
+          <input data-production-field="hold" type="checkbox"${production.hold ? " checked" : ""} />
+          <span>On hold</span>
+        </label>
+        <label class="field production-hold-reason">
+          <span>Hold / shop note</span>
+          <input data-production-field="holdReason" type="text" maxlength="140" value="${escapeHtml(production.holdReason)}" placeholder="Reason, missing fitting, client hold..." />
+        </label>
+      </div>
+      <span class="production-updated">Last production update: ${escapeHtml(lastUpdated)}</span>
+    </div>
+  `;
 }
 
 function updateWorkflowSummary() {
@@ -6991,6 +7540,7 @@ function updateWorkflowSummary() {
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
       <button type="button" data-workflow-action="save-defaults">Save defaults</button>
     </div>
+    ${productionWorkflowCardHtml()}
     <div class="revision-card">
       <strong>Revision history</strong>
       ${history.length ? `<ul class="revision-list">${history.map((entry) => `
@@ -7011,6 +7561,10 @@ function updateWorkflowSummary() {
   workflowSummary.querySelectorAll("[data-restore-revision]").forEach((button) => {
     button.addEventListener("click", () => restoreRevision(button.dataset.restoreRevision));
   });
+  workflowSummary.querySelectorAll("[data-production-field]").forEach((field) => {
+    const eventName = field.dataset.productionField === "assignee" || field.dataset.productionField === "holdReason" ? "input" : "change";
+    field.addEventListener(eventName, () => handleProductionFieldChange(field));
+  });
 }
 
 function handleWorkflowAction(action) {
@@ -7018,6 +7572,21 @@ function handleWorkflowAction(action) {
   if (action === "new-revision") createNextRevision();
   if (action === "share-readonly") shareReadOnlyProject();
   if (action === "save-defaults") saveCurrentSettingsAsDefaults();
+}
+
+function handleProductionFieldChange(field) {
+  const key = field?.dataset?.productionField;
+  if (!key) return;
+  const previous = normalizeProductionInfo(state.productionInfo);
+  const value = field.type === "checkbox" ? field.checked : field.value;
+  state.productionInfo = normalizeProductionInfo({
+    ...previous,
+    [key]: value,
+    lastUpdatedBy: checkerName(),
+    lastUpdatedAt: new Date().toISOString(),
+  });
+  updateProjectReadout();
+  persistState();
 }
 
 function checkerName() {
@@ -7679,9 +8248,13 @@ function deleteSelectedMeasurement() {
 function editSelectedRunLength() {
   const segment = selectedSegmentData();
   if (!segment) return;
-  const text = window.prompt("Pipe length mm", String(Math.round(pointLength(segment.vector))));
-  if (text === null) return;
-  setSelectedSegmentLength(text);
+  editSegmentLengthFromDimensionSource(segment, {
+    sourceType: "segment",
+    anchorPointIndex:
+      state.selectedPoint === segment.to || state.selectedPoint === segment.from
+        ? state.selectedPoint
+        : segment.from,
+  });
 }
 
 function setSelectedPointConnectionType(type) {
@@ -8507,6 +9080,195 @@ function prepareTutorialStep(step = currentTutorialStep()) {
   }
 }
 
+function tutorialDemoMarkup(kind) {
+  if (!kind) return "";
+  const demos = {
+    jobs: `
+      <div class="tutorial-demo tutorial-demo-jobs" aria-label="Animated demo showing a job opening into a spool list">
+        <div class="tutorial-demo-title">Demo: open a saved job</div>
+        <div class="tutorial-demo-window">
+          <div class="tutorial-demo-job-card">Job 121 <span>14 spools</span></div>
+          <div class="tutorial-demo-job-card ghost">Job n1318 <span>2 spools</span></div>
+          <div class="tutorial-demo-spool-list">
+            <strong>Job 121</strong>
+            <span>Spool 001</span>
+            <span>Spool 002</span>
+          </div>
+          <i class="tutorial-demo-pointer"></i>
+        </div>
+        <div class="tutorial-demo-caption">Tap a job, then pick the spool drawing.</div>
+      </div>
+    `,
+    draw: `
+      <div class="tutorial-demo tutorial-demo-draw" aria-label="Animated demo showing a pipe run being drawn">
+        <div class="tutorial-demo-title">Demo: draw a centreline</div>
+        <svg viewBox="0 0 320 150" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 120 L80 75 L160 120 L240 75 L320 120 M0 75 L80 30 L160 75 L240 30 L320 75 M0 30 L80 -15 M80 165 L320 30" />
+          <path class="demo-pipe base" d="M55 108 L145 58 L235 108" />
+          <path class="demo-pipe draw-line" d="M55 108 L145 58 L235 108" />
+          <circle class="demo-point" cx="55" cy="108" r="6" />
+          <circle class="demo-point end" cx="235" cy="108" r="6" />
+          <circle class="demo-cursor" cx="55" cy="108" r="7" />
+        </svg>
+        <div class="tutorial-demo-caption">Drag or click from the active point to build the run.</div>
+      </div>
+    `,
+    exact: `
+      <div class="tutorial-demo tutorial-demo-exact" aria-label="Animated demo showing an exact 1000 millimetre run">
+        <div class="tutorial-demo-title">Demo: exact run length</div>
+        <div class="tutorial-demo-controls">
+          <span class="demo-input">1000 mm</span>
+          <span class="demo-button">+X</span>
+        </div>
+        <svg viewBox="0 0 320 120" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 98 L80 52 L160 98 L240 52 L320 98 M0 52 L80 6 L160 52 L240 6 L320 52" />
+          <path class="demo-pipe base" d="M60 84 L245 84" />
+          <path class="demo-pipe draw-line exact-line" d="M60 84 L245 84" />
+          <text x="142" y="62" class="demo-label">1,000 mm</text>
+        </svg>
+        <div class="tutorial-demo-caption">Type the length, then choose the direction.</div>
+      </div>
+    `,
+    offset: `
+      <div class="tutorial-demo tutorial-demo-offset" aria-label="Animated demo showing a 45 degree offset">
+        <div class="tutorial-demo-title">Demo: 45 offset</div>
+        <svg viewBox="0 0 320 155" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 120 L80 75 L160 120 L240 75 L320 120 M0 75 L80 30 L160 75 L240 30 L320 75" />
+          <path class="demo-pipe base" d="M55 116 L125 116 L195 46 L265 46" />
+          <path class="demo-pipe draw-line offset-line" d="M55 116 L125 116 L195 46 L265 46" />
+          <path class="demo-measure-line" d="M125 132 L195 62" />
+          <text x="134" y="102" class="demo-label rotate-up">C/C offset</text>
+          <text x="170" y="40" class="demo-angle">45</text>
+        </svg>
+        <div class="tutorial-demo-caption">The travel piece is calculated from the set and angle.</div>
+      </div>
+    `,
+    select: `
+      <div class="tutorial-demo tutorial-demo-select" aria-label="Animated demo showing multiple pipes selected">
+        <div class="tutorial-demo-title">Demo: select and edit</div>
+        <svg viewBox="0 0 320 135" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 105 L80 60 L160 105 L240 60 L320 105 M0 60 L80 15 L160 60 L240 15 L320 60" />
+          <path class="demo-pipe select-one" d="M55 98 L145 48" />
+          <path class="demo-pipe select-two" d="M145 48 L235 98" />
+          <path class="demo-select-box" d="M43 35 L205 35 L205 112 L43 112 Z" />
+          <text x="212" y="48" class="demo-label">Shift select</text>
+        </svg>
+        <div class="tutorial-demo-caption">Select one run, or hold Shift to add more.</div>
+      </div>
+    `,
+    tee: `
+      <div class="tutorial-demo tutorial-demo-tee" aria-label="Animated demo showing a tee added to a pipe">
+        <div class="tutorial-demo-title">Demo: make a tee</div>
+        <svg viewBox="0 0 320 165" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 130 L80 85 L160 130 L240 85 L320 130 M0 85 L80 40 L160 85 L240 40 L320 85" />
+          <path class="demo-pipe base" d="M48 118 L270 58" />
+          <circle class="demo-tap" cx="154" cy="89" r="10" />
+          <path class="demo-pipe branch-line" d="M154 89 L154 32" />
+          <circle class="demo-tee-node" cx="154" cy="89" r="13" />
+          <path class="demo-fitting-tee" d="M137 93 L170 84 M154 89 L154 32" />
+          <text x="42" y="36" class="demo-step demo-step-one">1. Pick Tee</text>
+          <text x="178" y="38" class="demo-step demo-step-two">2. Tap run</text>
+          <text x="180" y="112" class="demo-step demo-step-three">3. Draw branch</text>
+        </svg>
+        <div class="tutorial-demo-caption">Pick Tee, tap the main run, then draw the branch from the new point.</div>
+      </div>
+    `,
+    sockets: `
+      <div class="tutorial-demo tutorial-demo-sockets" aria-label="Animated demo showing sockets added from the pipe right click menu">
+        <div class="tutorial-demo-title">Demo: add sockets</div>
+        <svg viewBox="0 0 320 170" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 128 L80 82 L160 128 L240 82 L320 128 M0 82 L80 36 L160 82 L240 36 L320 82" />
+          <path class="demo-pipe base" d="M48 120 L270 58" />
+          <path class="demo-pipe socket-host" d="M48 120 L270 58" />
+          <circle class="demo-context-click" cx="150" cy="91" r="10" />
+          <g class="demo-context-menu">
+            <rect x="166" y="24" width="103" height="72" rx="8" />
+            <text x="178" y="47">Add sockets</text>
+            <text x="178" y="68">2 sockets</text>
+            <text x="178" y="88">150 mm C/C</text>
+          </g>
+          <g class="demo-socket-one">
+            <line x1="128" y1="97" x2="128" y2="48" />
+            <circle cx="128" cy="40" r="12" />
+          </g>
+          <g class="demo-socket-two">
+            <line x1="182" y1="82" x2="182" y2="33" />
+            <circle cx="182" cy="25" r="12" />
+          </g>
+          <path class="demo-socket-dim" d="M128 116 L182 101" />
+          <text x="130" y="133" class="demo-dim-text demo-socket-dim-text">150 mm</text>
+          <path class="demo-socket-rotate" d="M206 42 C226 26 253 34 260 58" />
+          <text x="215" y="81" class="demo-label">Spin 90 deg</text>
+          <text x="46" y="34" class="demo-step demo-step-one">1. Right-click pipe</text>
+          <text x="46" y="52" class="demo-step demo-step-two">2. Pick layout</text>
+          <text x="46" y="70" class="demo-step demo-step-three">3. Rotate later</text>
+        </svg>
+        <div class="tutorial-demo-caption">Right-click a pipe, choose Add sockets, apply the layout, then right-click a socket to spin it 90 degrees.</div>
+      </div>
+    `,
+    measure: `
+      <div class="tutorial-demo tutorial-demo-measure" aria-label="Animated demo showing a manual measurement placed between two points">
+        <div class="tutorial-demo-title">Demo: manual measure</div>
+        <svg viewBox="0 0 320 140" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 110 L80 65 L160 110 L240 65 L320 110 M0 65 L80 20 L160 65 L240 20 L320 65" />
+          <path class="demo-pipe base" d="M60 98 L250 45" />
+          <circle class="demo-click a" cx="60" cy="98" r="7" />
+          <circle class="demo-click b" cx="250" cy="45" r="7" />
+          <path class="demo-measure-line measure-grow" d="M60 118 L250 65" />
+          <text x="132" y="78" class="demo-label rotate-up">2,450 mm</text>
+        </svg>
+        <div class="tutorial-demo-caption">Click two points and SpoolMate leaves the measurement on the plan.</div>
+      </div>
+    `,
+    dimensions: `
+      <div class="tutorial-demo tutorial-demo-dimensions" aria-label="Animated demo showing a red dimension label being moved away from pipe">
+        <div class="tutorial-demo-title">Demo: clear dimensions</div>
+        <svg viewBox="0 0 320 145" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 115 L80 70 L160 115 L240 70 L320 115 M0 70 L80 25 L160 70 L240 25 L320 70" />
+          <path class="demo-pipe base" d="M50 104 L250 48" />
+          <path class="demo-dim-line" d="M62 126 L262 70" />
+          <rect class="demo-dim-label" x="128" y="74" width="76" height="28" rx="8" />
+          <text x="139" y="93" class="demo-dim-text">5,400 mm</text>
+        </svg>
+        <div class="tutorial-demo-caption">Drag a red label further out when the drawing gets busy.</div>
+      </div>
+    `,
+    preview: `
+      <div class="tutorial-demo tutorial-demo-preview" aria-label="Animated demo showing a small 3D spool preview">
+        <div class="tutorial-demo-title">Demo: spin the 3D view</div>
+        <svg viewBox="0 0 320 150" role="img" aria-hidden="true">
+          <g class="demo-model">
+            <ellipse class="demo-3d-end" cx="70" cy="92" rx="14" ry="8" />
+            <path class="demo-3d-pipe" d="M70 92 L168 55" />
+            <path class="demo-3d-pipe" d="M168 55 Q198 46 220 72" />
+            <path class="demo-3d-pipe" d="M220 72 L265 108" />
+            <ellipse class="demo-3d-end" cx="265" cy="108" rx="14" ry="8" />
+          </g>
+          <path class="demo-orbit" d="M90 126 C150 146 232 138 270 104" />
+          <text x="112" y="34" class="demo-label">Rotate / Move</text>
+        </svg>
+        <div class="tutorial-demo-caption">Use the 3D preview to explain the spool before fab.</div>
+      </div>
+    `,
+    review: `
+      <div class="tutorial-demo tutorial-demo-review" aria-label="Animated demo showing a check warning highlighting a pipe">
+        <div class="tutorial-demo-title">Demo: review checks</div>
+        <div class="tutorial-demo-review-grid">
+          <span class="demo-check ok">Cut list ready</span>
+          <span class="demo-check warn">Reducer missing</span>
+          <span class="demo-check ok">Weight calculated</span>
+        </div>
+        <svg viewBox="0 0 320 95" role="img" aria-hidden="true">
+          <path class="demo-pipe base" d="M58 62 L145 28 L252 68" />
+          <circle class="demo-review-ring" cx="145" cy="28" r="18" />
+        </svg>
+        <div class="tutorial-demo-caption">Click a check warning to highlight where to look.</div>
+      </div>
+    `,
+  };
+  return demos[kind] ?? "";
+}
+
 function renderTutorialStep() {
   if (!tutorialStepCard || !tutorialProgress || !tutorialPrevButton || !tutorialNextButton) return;
   const step = currentTutorialStep();
@@ -8524,6 +9286,7 @@ function renderTutorialStep() {
     <small>${escapeHtml(step.kicker)}</small>
     <h2>${escapeHtml(step.title)}</h2>
     <p>${escapeHtml(step.body)}</p>
+    ${tutorialDemoMarkup(step.demo)}
     <div class="tutorial-target-note">Highlighted: ${escapeHtml(targetText)}</div>
     <ul>
       ${step.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
@@ -8735,6 +9498,8 @@ function updateControls() {
   if (previewModePanelSelect) previewModePanelSelect.value = previewMode;
   if (previewLabelToggle) previewLabelToggle.checked = state.show3dLabels !== false;
   updatePipeSizeControls();
+  state.drawingDetail = normalizeDrawingDetail(state.drawingDetail);
+  if (drawingDetailSelect) drawingDetailSelect.value = activeDrawingDetail();
   dimensionToggle.checked = state.showDimensions;
   dimensionStyleSelect.value = normalizeDimensionStyle(state.dimensionStyle);
   dimensionStyleSelect.disabled = !state.showDimensions;
@@ -9426,6 +10191,18 @@ function updateHomeDashboard() {
 function ensureProjectLibraryDashboardShell() {
   const card = projectLibraryDialog?.querySelector(".project-library-card");
   if (!card || !projectLibraryList) return;
+  if (projectLibraryGuideButton && !card.contains(projectLibraryGuideButton)) {
+    projectLibraryGuideButton = null;
+  }
+  if (projectLibraryGuideSlot && !card.contains(projectLibraryGuideSlot)) {
+    projectLibraryGuideSlot = null;
+  }
+  if (projectLibraryReportButton && !card.contains(projectLibraryReportButton)) {
+    projectLibraryReportButton = null;
+  }
+  if (projectLibraryReportSlot && !card.contains(projectLibraryReportSlot)) {
+    projectLibraryReportSlot = null;
+  }
 
   if (!card.querySelector(".project-dialog-header")) {
     const header = document.createElement("div");
@@ -9435,10 +10212,37 @@ function ensureProjectLibraryDashboardShell() {
     title.textContent = "Job dashboard";
     projectLibrarySubtitle = document.createElement("small");
     projectLibrarySubtitle.id = "projectLibrarySubtitle";
-    projectLibrarySubtitle.textContent = "Search a job, open a folder, then tap a spool drawing.";
+    projectLibrarySubtitle.textContent = "Use the production board or open a job folder, then tap a spool drawing.";
     headerText.append(title, projectLibrarySubtitle);
     header.append(headerText);
     card.insertBefore(header, projectLibraryList);
+  }
+
+  const existingToolbar = card.querySelector(".project-dashboard-toolbar");
+  if (existingToolbar && !projectLibraryGuideButton) {
+    const guideButton = document.createElement("a");
+    guideButton.className = "icon-button labeled";
+    guideButton.id = "projectLibraryGuideButton";
+    guideButton.href = "#projectJobsGuide";
+    guideButton.setAttribute("role", "button");
+    guideButton.innerHTML = `
+      <svg><use href="#icon-help"></use></svg>
+      <span>Guide</span>
+    `;
+    existingToolbar.insertBefore(guideButton, projectLibraryNewButton ?? projectLibrarySaveButton ?? null);
+    projectLibraryGuideButton = guideButton;
+  }
+  if (existingToolbar && !projectLibraryReportButton) {
+    const reportButton = document.createElement("button");
+    reportButton.className = "icon-button labeled";
+    reportButton.id = "projectLibraryReportButton";
+    reportButton.type = "button";
+    reportButton.innerHTML = `
+      <svg><use href="#icon-report"></use></svg>
+      <span>Report</span>
+    `;
+    existingToolbar.insertBefore(reportButton, projectLibraryNewButton ?? projectLibrarySaveButton ?? null);
+    projectLibraryReportButton = reportButton;
   }
 
   if (!projectLibrarySearchInput || !projectLibraryNewButton || !projectLibrarySaveButton) {
@@ -9448,8 +10252,16 @@ function ensureProjectLibraryDashboardShell() {
     toolbar.innerHTML = `
       <label class="project-dashboard-search">
         <span>Search jobs, spools or clients</span>
-        <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client or status" autocomplete="off" />
+        <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client, assignee or status" autocomplete="off" />
       </label>
+      <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
+        <svg><use href="#icon-help"></use></svg>
+        <span>Guide</span>
+      </a>
+      <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
+        <svg><use href="#icon-report"></use></svg>
+        <span>Report</span>
+      </button>
       <button class="icon-button labeled" id="projectLibraryNewButton" type="button">
         <svg><use href="#icon-reset"></use></svg>
         <span>New spool</span>
@@ -9459,11 +10271,92 @@ function ensureProjectLibraryDashboardShell() {
         <span>Save current</span>
       </button>
     `;
-    card.insertBefore(toolbar, projectLibraryList);
+    card.insertBefore(toolbar, card.querySelector("#projectLibraryGuideSlot") ?? projectLibraryList);
     projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+    projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButton");
+    projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
     projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
     projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
   }
+  projectLibraryGuideSlot = document.querySelector("#projectLibraryGuideSlot");
+  projectLibraryReportSlot = document.querySelector("#projectLibraryReportSlot");
+  ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryReportSlot();
+  bindProjectLibraryGuideButton();
+  bindProjectLibraryReportButton();
+}
+
+function bindProjectLibraryGuideButton() {
+  if (!projectLibraryGuideButton || projectLibraryGuideButton.dataset.guideBound === "true") return;
+  projectLibraryGuideButton.dataset.guideBound = "true";
+  if (projectLibraryGuideButton.tagName === "A") {
+    projectLibraryGuideButton.setAttribute("href", "#projectJobsGuide");
+    projectLibraryGuideButton.setAttribute("role", "button");
+  }
+  projectLibraryGuideButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    showProjectLibraryGuide();
+  });
+}
+
+function ensureProjectLibraryGuideSlot() {
+  const card = projectLibraryDialog?.querySelector(".project-library-card");
+  if (!card || !projectLibraryList) return null;
+  if (projectLibraryGuideSlot && !card.contains(projectLibraryGuideSlot)) {
+    projectLibraryGuideSlot = null;
+  }
+  let slot = projectLibraryGuideSlot || card.querySelector("#projectLibraryGuideSlot");
+  if (!slot) {
+    slot = document.createElement("div");
+    slot.className = "project-library-guide-slot";
+    slot.id = "projectLibraryGuideSlot";
+    card.insertBefore(slot, projectLibraryList);
+  } else if (slot.nextElementSibling !== projectLibraryList) {
+    card.insertBefore(slot, projectLibraryList);
+  }
+  projectLibraryGuideSlot = slot;
+  let guide = slot.querySelector("#projectJobsGuide");
+  if (!guide) {
+    guide = projectLibraryGuideCard();
+    slot.append(guide);
+  } else {
+    guide.classList.add("project-guide-card");
+    guide.open = true;
+    bindProjectLibraryGuideCard(guide);
+  }
+  slot.hidden = !projectLibraryGuideVisible;
+  return guide;
+}
+
+function bindProjectLibraryReportButton() {
+  if (!projectLibraryReportButton || projectLibraryReportButton.dataset.reportBound === "true") return;
+  projectLibraryReportButton.dataset.reportBound = "true";
+  projectLibraryReportButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    showProjectLibraryReport();
+  });
+}
+
+function ensureProjectLibraryReportSlot() {
+  const card = projectLibraryDialog?.querySelector(".project-library-card");
+  if (!card || !projectLibraryList) return null;
+  if (projectLibraryReportSlot && !card.contains(projectLibraryReportSlot)) {
+    projectLibraryReportSlot = null;
+  }
+  let slot = projectLibraryReportSlot || card.querySelector("#projectLibraryReportSlot");
+  if (!slot) {
+    slot = document.createElement("div");
+    slot.className = "project-library-report-slot";
+    slot.id = "projectLibraryReportSlot";
+    card.insertBefore(slot, projectLibraryList);
+  } else if (slot.nextElementSibling !== projectLibraryList) {
+    card.insertBefore(slot, projectLibraryList);
+  }
+  projectLibraryReportSlot = slot;
+  slot.hidden = !projectLibraryReportVisible;
+  return slot;
 }
 
 function setupProjectDialog() {
@@ -9535,6 +10428,7 @@ function setupProjectDialog() {
   projectLibraryCloseButton?.addEventListener("click", closeProjectLibrary);
   projectLibrarySearchInput?.addEventListener("input", () => {
     projectLibrarySearch = projectLibrarySearchInput.value;
+    projectLibraryOpenFolderKey = "";
     renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
   });
   projectLibraryNewButton?.addEventListener("click", () => {
@@ -9557,44 +10451,227 @@ function setupProjectDialog() {
       closeProjectLibrary();
     }
   });
-  projectLibraryList?.addEventListener("click", (event) => {
-    const folderToggle = event.target.closest("[data-project-folder-toggle]");
-    if (folderToggle) {
-      toggleProjectFolder(folderToggle.closest(".project-folder"));
+  projectLibraryDialog?.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const libraryAction = target?.closest("[data-project-library-action]");
+    if (libraryAction) {
       event.preventDefault();
       event.stopPropagation();
+      handleProjectLibraryAction(libraryAction);
       return;
     }
-
-    const deleteButton = event.target.closest("[data-delete-project-id]");
-    if (deleteButton) {
-      event.preventDefault();
-      event.stopPropagation();
-      if (deleteButton.dataset.projectSource === "cloud") {
-        deleteSavedCloudProject(deleteButton.dataset.deleteProjectId).catch((error) => {
-          console.warn("Could not delete cloud project.", error);
-          updateCloudStatus("Cloud delete failed", "warning");
-        });
-      } else {
-        deleteSavedBrowserProject(deleteButton.dataset.deleteProjectId);
-      }
-      return;
-    }
-
-    const openTarget = event.target.closest("[data-open-project-id]");
-    if (openTarget) {
-      event.preventDefault();
-      event.stopPropagation();
-      if (openTarget.dataset.projectSource === "cloud") {
-        openSavedCloudProject(openTarget.dataset.openProjectId).catch((error) => {
-          console.warn("Could not open cloud project.", error);
-          updateCloudStatus("Cloud open failed", "warning");
-        });
-      } else {
-        openSavedBrowserProject(openTarget.dataset.openProjectId);
-      }
-    }
+    if (!target?.closest("#projectLibraryGuideButton")) return;
+    event.preventDefault();
+    event.stopPropagation();
+    showProjectLibraryGuide();
   });
+  projectLibraryList?.addEventListener("click", handleProjectLibraryActivation);
+  projectLibraryList?.addEventListener("change", handleProjectLibraryFieldChange);
+  projectLibraryList?.addEventListener("dragstart", handleProjectLibraryDragStart);
+  projectLibraryList?.addEventListener("dragover", handleProjectLibraryDragOver);
+  projectLibraryList?.addEventListener("dragleave", handleProjectLibraryDragLeave);
+  projectLibraryList?.addEventListener("drop", handleProjectLibraryDrop);
+  projectLibraryList?.addEventListener("dragend", handleProjectLibraryDragEnd);
+  projectLibraryList?.addEventListener("pointerup", (event) => {
+    if (event.pointerType === "mouse") return;
+    handleProjectLibraryActivation(event);
+  });
+  projectLibraryList?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    handleProjectLibraryActivation(event);
+  });
+}
+
+function handleProjectLibraryActivation(event) {
+  const target = event.target instanceof Element ? event.target : null;
+  if (!target) return;
+
+  const productionAction = target.closest("[data-production-action]");
+  if (productionAction) {
+    event.preventDefault();
+    event.stopPropagation();
+    const actionKey = [
+      "production",
+      productionAction.dataset.productionAction,
+      productionAction.dataset.projectId,
+      productionAction.dataset.messageId,
+    ].filter(Boolean).join(":");
+    if (shouldSkipProjectLibraryActivation(actionKey)) return;
+    handleProjectLibraryProductionAction(productionAction).catch((error) => {
+      console.warn("Production action failed.", error);
+      window.alert(error?.message || "Could not update production board.");
+    });
+    return;
+  }
+
+  const folderBack = target.closest("[data-project-folder-back]");
+  if (folderBack) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (shouldSkipProjectLibraryActivation("folder-back")) return;
+    closeProjectLibraryFolder();
+    return;
+  }
+
+  const folderOpen = target.closest("[data-project-folder-open]");
+  if (folderOpen) {
+    const folderKey = folderOpen.dataset.projectFolderOpen ?? "";
+    event.preventDefault();
+    event.stopPropagation();
+    if (shouldSkipProjectLibraryActivation(`folder:${folderKey}`)) return;
+    openProjectLibraryFolder(folderKey);
+    return;
+  }
+
+  const deleteButton = target.closest("[data-delete-project-id]");
+  if (deleteButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (shouldSkipProjectLibraryActivation(`delete:${deleteButton.dataset.deleteProjectId ?? ""}`)) return;
+    if (deleteButton.dataset.projectSource === "cloud") {
+      deleteSavedCloudProject(deleteButton.dataset.deleteProjectId).catch((error) => {
+        console.warn("Could not delete cloud project.", error);
+        updateCloudStatus("Cloud delete failed", "warning");
+      });
+    } else {
+      deleteSavedBrowserProject(deleteButton.dataset.deleteProjectId);
+    }
+    return;
+  }
+
+  const openTarget = target.closest("[data-open-project-id]");
+  if (!openTarget) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (shouldSkipProjectLibraryActivation(`open:${openTarget.dataset.openProjectId ?? ""}`)) return;
+  if (openTarget.dataset.projectSource === "cloud") {
+    openSavedCloudProject(openTarget.dataset.openProjectId).catch((error) => {
+      console.warn("Could not open cloud project.", error);
+      updateCloudStatus("Cloud open failed", "warning");
+    });
+  } else {
+    openSavedBrowserProject(openTarget.dataset.openProjectId);
+  }
+}
+
+function handleProjectLibraryAction(actionElement) {
+  const action = actionElement?.dataset?.projectLibraryAction;
+  if (action === "hide-guide") {
+    hideProjectLibraryGuide();
+    return;
+  }
+  if (action === "show-report") {
+    showProjectLibraryReport();
+    return;
+  }
+  if (action === "hide-report") {
+    hideProjectLibraryReport();
+    return;
+  }
+  if (action === "report-period") {
+    const period = actionElement.dataset.reportPeriod === "weekly" ? "weekly" : "daily";
+    setProjectLibraryReportPeriod(period);
+    return;
+  }
+  if (action === "copy-report") {
+    copyProjectLibraryReport();
+  }
+}
+
+function handleProjectLibraryFieldChange(event) {
+  const target = event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement ? event.target : null;
+  if (!target?.dataset.productionField) return;
+  const projectId = target.dataset.projectId;
+  if (!projectId) return;
+
+  const field = target.dataset.productionField;
+  const value = target.type === "checkbox" ? target.checked : target.value;
+  const updates = {};
+  if (field === "status") {
+    updates.status = value;
+  } else {
+    updates.productionInfo = { [field]: value };
+  }
+
+  updateSavedProjectWorkflow(projectId, updates).catch((error) => {
+    console.warn("Production field update failed.", error);
+    window.alert(error?.message || "Could not update production field.");
+  });
+}
+
+async function handleProjectLibraryProductionAction(actionButton) {
+  const projectId = actionButton.dataset.projectId;
+  if (!projectId) return;
+  const action = actionButton.dataset.productionAction;
+  if (action === "add-message") {
+    const card = actionButton.closest(".production-spool-card");
+    const input = card?.querySelector("[data-production-message-input]");
+    const body = String(input?.value ?? "").trim();
+    if (!body) return;
+    await updateSavedProjectWorkflow(projectId, { addMessage: body });
+    return;
+  }
+  if (action === "complete-message") {
+    await updateSavedProjectWorkflow(projectId, { completeMessageId: actionButton.dataset.messageId });
+    return;
+  }
+  if (action === "complete-spool") {
+    await updateSavedProjectWorkflow(projectId, { status: "complete" });
+  }
+}
+
+function handleProjectLibraryDragStart(event) {
+  const card = event.target instanceof Element ? event.target.closest(".production-spool-card") : null;
+  if (!card) return;
+  projectLibraryDrag = {
+    projectId: card.dataset.productionProjectId,
+    source: card.dataset.projectSource ?? projectLibrarySource,
+  };
+  card.classList.add("dragging");
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", projectLibraryDrag.projectId ?? "");
+}
+
+function handleProjectLibraryDragOver(event) {
+  const lane = event.target instanceof Element ? event.target.closest("[data-production-drop-status]") : null;
+  if (!lane || !projectLibraryDrag?.projectId) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+  lane.classList.add("drag-over");
+}
+
+function handleProjectLibraryDragLeave(event) {
+  const lane = event.target instanceof Element ? event.target.closest("[data-production-drop-status]") : null;
+  if (!lane) return;
+  if (event.relatedTarget instanceof Node && lane.contains(event.relatedTarget)) return;
+  lane.classList.remove("drag-over");
+}
+
+function handleProjectLibraryDrop(event) {
+  const lane = event.target instanceof Element ? event.target.closest("[data-production-drop-status]") : null;
+  if (!lane || !projectLibraryDrag?.projectId) return;
+  event.preventDefault();
+  lane.classList.remove("drag-over");
+  const nextStatus = lane.dataset.productionDropStatus;
+  updateSavedProjectWorkflow(projectLibraryDrag.projectId, { status: nextStatus }).catch((error) => {
+    console.warn("Production drag update failed.", error);
+    window.alert(error?.message || "Could not move that spool.");
+  });
+}
+
+function handleProjectLibraryDragEnd() {
+  projectLibraryList?.querySelectorAll(".production-spool-card.dragging").forEach((card) => card.classList.remove("dragging"));
+  projectLibraryList?.querySelectorAll(".production-lane.drag-over").forEach((lane) => lane.classList.remove("drag-over"));
+  projectLibraryDrag = null;
+}
+
+function shouldSkipProjectLibraryActivation(key) {
+  const now = Date.now();
+  if (projectLibraryLastActivation.key === key && now - projectLibraryLastActivation.at < 500) {
+    return true;
+  }
+  projectLibraryLastActivation = { key, at: now };
+  return false;
 }
 
 function setupLoadPlanner() {
@@ -9700,8 +10777,12 @@ function promptForAppUpdate(worker) {
 }
 
 function appVersionNumber(value) {
-  const match = String(value ?? "").match(/\d+/);
-  return match ? Number(match[0]) : 0;
+  const parts = String(value ?? "")
+    .match(/\d+/g)
+    ?.map((part) => Number(part))
+    .filter((part) => Number.isFinite(part)) ?? [];
+  const [major = 0, minor = 0, patch = 0] = parts;
+  return major * 1_000_000 + minor * 1_000 + patch;
 }
 
 async function latestAvailableAppVersion() {
@@ -9826,27 +10907,32 @@ function setupThree(THREE, OrbitControls) {
 
   three.controls = new OrbitControls(three.camera, three.renderer.domElement);
   three.controls.enableDamping = true;
-  three.controls.dampingFactor = 0.16;
+  three.controls.dampingFactor = 0.075;
   three.controls.screenSpacePanning = true;
   three.controls.enablePan = true;
   three.controls.enableZoom = true;
-  three.controls.rotateSpeed = 0.48;
-  three.controls.panSpeed = 0.7;
-  three.controls.zoomSpeed = 0.72;
-  three.controls.minZoom = 0.35;
-  three.controls.maxZoom = 8;
+  three.controls.rotateSpeed = 0.58;
+  three.controls.panSpeed = 0.92;
+  three.controls.zoomSpeed = 0.86;
+  three.controls.keyPanSpeed = 10;
+  three.controls.minZoom = 0.28;
+  three.controls.maxZoom = 10;
+  if ("zoomToCursor" in three.controls) {
+    three.controls.zoomToCursor = true;
+  }
   three.controls.addEventListener("start", () => {
     three.userMovedCamera = true;
-    previewStage?.classList.add("preview-interacting");
+    setThreePreviewInteracting(true);
   });
   three.controls.addEventListener("end", () => {
-    previewStage?.classList.remove("preview-interacting");
+    setThreePreviewInteracting(false);
   });
+  threeCanvas?.addEventListener("contextmenu", (event) => event.preventDefault());
   applyThreeNavigationMode(three.navigationMode);
 
   three.ready = true;
   syncPreviewCanvasVisibility();
-  renderStatus.textContent = "Three.js viewport";
+  renderStatus.textContent = "Drag rotate / middle pan / wheel zoom";
   resizeThree();
   update3dPreview();
   redrawLoadPlanIfOpen();
@@ -9860,6 +10946,22 @@ function animateThree() {
   three.controls.update();
   three.renderer.render(three.scene, three.camera);
   update3dLabelPositions();
+}
+
+function setThreePreviewInteracting(active) {
+  window.clearTimeout(three.interactionTimer);
+  if (active) {
+    three.interacting = true;
+    three.labelFrameSkip = 0;
+    previewStage?.classList.add("preview-interacting");
+    return;
+  }
+
+  three.interactionTimer = window.setTimeout(() => {
+    three.interacting = false;
+    previewStage?.classList.remove("preview-interacting");
+    update3dLabelPositions({ force: true });
+  }, 220);
 }
 
 function setThreeNavigationMode(mode) {
@@ -9897,7 +10999,7 @@ function applyThreeNavigationMode(mode = three.navigationMode) {
   three.controls.touches = mode === "pan"
     ? {
         ONE: THREE.TOUCH.PAN,
-        TWO: THREE.TOUCH.DOLLY_ROTATE,
+        TWO: THREE.TOUCH.DOLLY_PAN,
       }
     : {
         ONE: THREE.TOUCH.ROTATE,
@@ -9975,6 +11077,40 @@ function fittingRenderPosition(fitting, start, end, renderedSegment, pipeRadius)
   }
 
   return start.clone().lerp(end, t);
+}
+
+function fittingEndpointSide(fitting) {
+  const t = normalizeFittingPosition(fitting?.type, fitting?.t);
+  if (t <= 0.000001) return "start";
+  if (t >= 0.999999) return "end";
+  return null;
+}
+
+function flangePlateThicknessForRadius(pipeRadius, flangeStandard) {
+  const standardInfo = flangeStandardInfo(flangeStandard);
+  const thicknessFactor = standardInfo.thicknessFactor || 1;
+  return clampNumber(pipeRadius * 0.42 * thicknessFactor, 0.045, 0.16);
+}
+
+function flangeRenderTransform(fitting, position, direction, pipeRadius) {
+  const endpointSide = fittingEndpointSide(fitting);
+  if (!endpointSide) {
+    return {
+      position,
+      direction,
+      endMount: false,
+    };
+  }
+
+  const outward = endpointSide === "start"
+    ? direction.clone().multiplyScalar(-1)
+    : direction.clone();
+  const plateThickness = flangePlateThicknessForRadius(pipeRadius, fittingFlangeStandard(fitting));
+  return {
+    position: position.clone().addScaledVector(outward, plateThickness * 0.5),
+    direction: outward,
+    endMount: true,
+  };
 }
 
 function rebuildThreeSpool() {
@@ -10118,14 +11254,24 @@ function rebuildThreeSpool() {
     const position = fittingRenderPosition(fitting, start, end, renderedSegments.get(segment.index), radius);
 
     if (fitting.type === "flange") {
+      const flangeTransform = flangeRenderTransform(fitting, position, direction, radius);
       if (style.lineDrawing) {
-        group.add(outlineFlangeMarker(position, direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), fittingFlangeStandard(fitting), flangeMaterial));
+        group.add(outlineFlangeMarker(
+          flangeTransform.position,
+          flangeTransform.direction,
+          radius,
+          pipeSizeForSegment(segment).nb,
+          fittingFlangeMode(fitting),
+          fittingFlangeStandard(fitting),
+          flangeMaterial,
+        ));
       } else {
         group.add(
-          flangeAssembly(position, direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), fittingFlangeStandard(fitting), {
+          flangeAssembly(flangeTransform.position, flangeTransform.direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), fittingFlangeStandard(fitting), {
             flange: flangeMaterial,
             bolt: boltMaterial,
             gasket: gasketMaterial,
+            endMount: flangeTransform.endMount,
           }),
         );
       }
@@ -10580,8 +11726,7 @@ function outlineFlangeMarker(position, direction, radius, nominalBore, flangeMod
   const isSingle = normalizeFlangeMode(flangeMode) === "single";
   const standardInfo = flangeStandardInfo(flangeStandard);
   const radiusFactor = standardInfo.radiusFactor || 1;
-  const thicknessFactor = standardInfo.thicknessFactor || 1;
-  const plateThickness = clampNumber(radius * 0.42 * thicknessFactor, 0.045, 0.16);
+  const plateThickness = flangePlateThicknessForRadius(radius, flangeStandard);
   const gasketThickness = clampNumber(plateThickness * 0.32, 0.018, 0.038);
   const plateOffset = plateThickness * 0.62 + gasketThickness * 0.5;
   const outerRadius = radius * 2.15 * radiusFactor;
@@ -11352,10 +12497,10 @@ function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode
   const axis = direction.clone().normalize();
   const boltCount = boltCountForNb(nominalBore);
   const isSingle = normalizeFlangeMode(flangeMode) === "single";
+  const endMount = isSingle && materials?.endMount === true;
   const standardInfo = flangeStandardInfo(flangeStandard);
   const radiusFactor = standardInfo.radiusFactor || 1;
-  const thicknessFactor = standardInfo.thicknessFactor || 1;
-  const plateThickness = clampNumber(pipeRadius * 0.42 * thicknessFactor, 0.045, 0.16);
+  const plateThickness = flangePlateThicknessForRadius(pipeRadius, flangeStandard);
   const gasketThickness = clampNumber(plateThickness * 0.32, 0.018, 0.038);
   const plateOffset = plateThickness * 0.62 + gasketThickness * 0.5;
   const totalHalfDepth = isSingle ? plateThickness * 0.58 : plateOffset + plateThickness * 0.52;
@@ -11387,9 +12532,17 @@ function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode
   }
 
   if (isSingle) {
+    if (endMount) {
+      const neckStart = position.clone().addScaledVector(axis, -plateThickness * 0.52);
+      const neckEnd = position.clone().addScaledVector(axis, plateThickness * 0.2);
+      const neck = cylinderBetween(neckStart, neckEnd, pipeRadius * 1.035, materials.flange, 32);
+      neck.castShadow = true;
+      neck.receiveShadow = true;
+      group.add(neck);
+    }
     group.add(
       flangePlate(
-        position,
+        endMount ? position.clone().addScaledVector(axis, plateThickness * 0.08) : position,
         axis,
         pipeRadius * 1.38,
         pipeRadius * 1.06,
@@ -11438,13 +12591,15 @@ function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode
     const radialOffset = basis.u.clone().multiplyScalar(Math.cos(angle) * boltCircleRadius)
       .add(basis.v.clone().multiplyScalar(Math.sin(angle) * boltCircleRadius));
     const boltCenter = position.clone().add(radialOffset);
-    const boltStart = boltCenter.clone().addScaledVector(axis, -totalHalfDepth - boltHeadDepth);
-    const boltEnd = boltCenter.clone().addScaledVector(axis, totalHalfDepth + boltHeadDepth);
+    const boltInDepth = endMount ? plateThickness * 0.48 : totalHalfDepth + boltHeadDepth;
+    const boltOutDepth = totalHalfDepth + boltHeadDepth;
+    const boltStart = boltCenter.clone().addScaledVector(axis, -boltInDepth);
+    const boltEnd = boltCenter.clone().addScaledVector(axis, boltOutDepth);
     const bolt = cylinderBetween(boltStart, boltEnd, boltBodyRadius, materials.bolt, 12);
     bolt.castShadow = true;
     group.add(bolt);
 
-    for (const side of [-1, 1]) {
+    for (const side of endMount ? [1] : [-1, 1]) {
       const headCenter = boltCenter.clone().addScaledVector(axis, side * (totalHalfDepth + boltHeadDepth * 0.42));
       const head = cylinderBetween(
         headCenter.clone().addScaledVector(axis, -side * boltHeadDepth * 0.45),
@@ -11650,8 +12805,12 @@ function pipePreviewLabelLines(segment) {
   return [`NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule}`];
 }
 
-function update3dLabelPositions() {
+function update3dLabelPositions(options = {}) {
   if (!three.ready || state.show3dLabels === false || !three.labels.length) return;
+  if (three.interacting && options.force !== true) {
+    three.labelFrameSkip = (three.labelFrameSkip + 1) % 6;
+    if (three.labelFrameSkip !== 0) return;
+  }
 
   const rect = previewStage.getBoundingClientRect();
   for (const label of three.labels) {
@@ -13414,21 +14573,37 @@ async function saveBrowserProject(options = {}) {
 
 async function openBrowserProject(options = {}) {
   ensureProjectLibraryDashboardShell();
+  projectLibraryGuideVisible = false;
+  projectLibraryReportVisible = false;
+  ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryReportSlot();
   if (!options.keepSearch) {
     projectLibrarySearch = "";
     if (projectLibrarySearchInput) projectLibrarySearchInput.value = "";
   }
+  if (!options.keepFolder) {
+    projectLibraryOpenFolderKey = "";
+  }
   const useCloud = Boolean(cloudUser && hasActiveCloudLicense());
+  projectLibrarySource = useCloud ? "cloud" : "browser";
+  if (projectLibrarySubtitle) {
+    projectLibrarySubtitle.textContent = useCloud
+      ? "Loading cloud saved spools. The list will appear here."
+      : "Loading saved spools from this device/browser.";
+  }
+  renderProjectLibraryMessage(useCloud ? "Loading cloud saved spools..." : "Loading saved spools...");
+  showProjectLibraryDialog();
+
   let projects = [];
   if (useCloud) {
     try {
       updateCloudStatus("Loading cloud...", "");
-      projects = await loadSavedCloudProjects();
+      projects = await promiseWithTimeout(loadSavedCloudProjects(), 12000, "Cloud projects took too long to load.");
       updateCloudStatus();
     } catch (error) {
       console.warn("Could not load cloud projects.", error);
       updateCloudStatus("Cloud load failed", "warning");
-      window.alert("Cloud projects could not be loaded. Showing projects saved in this browser instead.");
+      renderProjectLibraryMessage("Cloud projects could not be loaded. Showing projects saved in this browser instead.");
       projects = loadSavedBrowserProjects();
     }
   } else {
@@ -13438,9 +14613,8 @@ async function openBrowserProject(options = {}) {
   projects = projects
     .sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt)));
   renderProjectLibrary(projects, { source: useCloud && projects.every((project) => project.source === "cloud") ? "cloud" : "browser" });
-  if (projectLibraryDialog) {
-    projectLibraryDialog.hidden = false;
-  } else if (!projects.length) {
+  showProjectLibraryDialog();
+  if (!projectLibraryDialog && !projects.length) {
     window.alert(useCloud ? "No cloud projects saved yet." : "No saved projects in this browser yet.");
   }
 }
@@ -13485,22 +14659,58 @@ function rememberProjectLibraryFolderOpen(folderKey, open) {
   storeProjectLibraryFolderOpenState();
 }
 
+function showProjectLibraryDialog() {
+  if (projectLibraryDialog) {
+    projectLibraryDialog.hidden = false;
+  }
+}
+
+function renderProjectLibraryMessage(message) {
+  if (!projectLibraryList) return;
+  ensureProjectLibraryDashboardShell();
+  ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryReportSlot();
+  projectLibraryList.innerHTML = "";
+  const notice = document.createElement("div");
+  notice.className = "project-library-empty";
+  notice.textContent = message;
+  projectLibraryList.append(notice);
+}
+
+function promiseWithTimeout(promise, timeoutMs, message = "Timed out") {
+  return new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error(message)), timeoutMs);
+    promise
+      .then((value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      });
+  });
+}
+
 function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
   ensureProjectLibraryDashboardShell();
+  ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryReportSlot();
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
   projectLibraryProjects = Array.isArray(projects) ? [...projects] : [];
   const filteredProjects = filterProjectLibraryProjects(projectLibraryProjects);
   const query = projectLibrarySearch.trim();
+  if (projectLibraryReportVisible) renderProjectLibraryReport(filteredProjects);
   if (projectLibrarySearchInput && projectLibrarySearchInput.value !== projectLibrarySearch) {
     projectLibrarySearchInput.value = projectLibrarySearch;
   }
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = projectLibrarySource === "cloud"
       ? activeCompanyIsApproved()
-        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Search a job, open a folder, then tap a spool drawing.`
-        : "Projects are saved to your SpoolMate cloud account. Search a job, open a folder, then tap a spool drawing."
-      : "Projects are saved on this device/browser. Search a job, open a folder, then tap a spool drawing.";
+        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Use the production board or open a job folder.`
+        : "Projects are saved to your SpoolMate cloud account. Use the production board or open a job folder."
+      : "Projects are saved on this device/browser. Use the production board or open a job folder.";
   }
   projectLibraryList.innerHTML = "";
 
@@ -13514,6 +14724,15 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     return;
   }
 
+  if (projectLibraryOpenFolderKey) {
+    const openFolder = projectFolders(projectLibraryProjects).find((folder) => folder.key === projectLibraryOpenFolderKey);
+    if (openFolder) {
+      renderProjectLibraryFolderWindow(openFolder);
+      return;
+    }
+    projectLibraryOpenFolderKey = "";
+  }
+
   projectLibraryList.append(projectDashboardCard(filteredProjects, { totalCount: projectLibraryProjects.length, query }));
 
   if (!filteredProjects.length) {
@@ -13524,22 +14743,20 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     return;
   }
 
+  projectLibraryList.append(projectProductionBoard(filteredProjects));
+
   const folders = projectFolders(filteredProjects);
-  for (const [folderIndex, folder] of folders.entries()) {
+  for (const folder of folders) {
     const section = document.createElement("section");
     section.className = "project-folder";
     section.dataset.projectFolderKey = folder.key;
-    const openPreference = projectLibraryFolderOpenPreference(folder.key);
-    const open = typeof openPreference === "boolean" ? openPreference : folder.active || folderIndex === 0;
-    section.classList.toggle("open", open);
 
     const summary = document.createElement("button");
     summary.type = "button";
-    summary.className = "project-folder-summary";
-    summary.dataset.projectFolderToggle = "true";
-    summary.setAttribute("aria-expanded", String(open));
-    summary.setAttribute("aria-label", `${open ? "Hide" : "Show"} ${folder.title} saved spools`);
-    summary.title = `${open ? "Hide" : "Show"} saved spools`;
+    summary.className = "project-folder-summary project-folder-launcher";
+    summary.dataset.projectFolderOpen = folder.key;
+    summary.setAttribute("aria-label", `Open ${folder.title} saved spools`);
+    summary.title = "Open this job";
 
     const folderMain = document.createElement("div");
     folderMain.className = "project-folder-main";
@@ -13556,26 +14773,66 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     count.className = "project-folder-count";
     count.textContent = `${folder.projects.length} spool${folder.projects.length === 1 ? "" : "s"}`;
 
-    const toggleIcon = document.createElement("span");
-    toggleIcon.className = "project-folder-toggle-icon";
-    toggleIcon.dataset.projectFolderIcon = "true";
-    toggleIcon.setAttribute("aria-hidden", "true");
-    toggleIcon.textContent = open ? "-" : "+";
+    const openIcon = document.createElement("span");
+    openIcon.className = "project-folder-toggle-icon";
+    openIcon.setAttribute("aria-hidden", "true");
+    openIcon.textContent = "Open";
 
-    summary.append(folderMain, count, toggleIcon);
+    summary.append(folderMain, count, openIcon);
     section.append(summary);
-
-    const drawings = document.createElement("div");
-    drawings.className = "project-folder-drawings";
-    drawings.hidden = !open;
-
-    for (const project of folder.projects) {
-      drawings.append(projectLibraryRow(project));
-    }
-
-    section.append(drawings);
     projectLibraryList.append(section);
   }
+}
+
+function renderProjectLibraryFolderWindow(folder) {
+  if (!projectLibraryList) return;
+  projectLibraryList.innerHTML = "";
+  if (projectLibrarySubtitle) {
+    projectLibrarySubtitle.textContent = `${folder.title} is open. Pick a spool drawing, or go back to all jobs.`;
+  }
+
+  const windowCard = document.createElement("section");
+  windowCard.className = "project-job-window";
+  windowCard.dataset.projectFolderKey = folder.key;
+
+  const header = document.createElement("div");
+  header.className = "project-job-window-header";
+
+  const copy = document.createElement("div");
+  copy.className = "project-job-window-title";
+  const title = document.createElement("strong");
+  title.textContent = folder.title;
+  const meta = document.createElement("span");
+  meta.textContent = `${folder.projects.length} spool${folder.projects.length === 1 ? "" : "s"} / ${folder.meta}`;
+  copy.append(title, meta);
+
+  const backButton = document.createElement("button");
+  backButton.type = "button";
+  backButton.className = "project-library-action";
+  backButton.dataset.projectFolderBack = "true";
+  backButton.textContent = "Back to jobs";
+
+  header.append(copy, backButton);
+  windowCard.append(header);
+
+  const drawings = document.createElement("div");
+  drawings.className = "project-job-window-spools";
+  for (const project of folder.projects) {
+    drawings.append(projectLibraryRow(project));
+  }
+  windowCard.append(drawings);
+  projectLibraryList.append(windowCard);
+}
+
+function openProjectLibraryFolder(folderKey) {
+  if (!folderKey) return;
+  projectLibraryOpenFolderKey = folderKey;
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function closeProjectLibraryFolder() {
+  projectLibraryOpenFolderKey = "";
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
 function toggleProjectFolder(folder, forceOpen = null) {
@@ -13594,6 +14851,667 @@ function toggleProjectFolder(folder, forceOpen = null) {
   rememberProjectLibraryFolderOpen(folder.dataset.projectFolderKey, open);
 }
 
+function savedProjectState(project) {
+  return project?.state?.state && typeof project.state.state === "object" ? project.state.state : project?.state;
+}
+
+function savedProjectProductionInfo(project) {
+  return normalizeProductionInfo(savedProjectState(project)?.productionInfo);
+}
+
+function savedProjectProductionMessages(project) {
+  return activeProductionMessages(savedProjectState(project)?.productionMessages);
+}
+
+function productionPriorityRank(value) {
+  const priority = normalizeProductionPriority(value);
+  if (priority === "urgent") return 0;
+  if (priority === "high") return 1;
+  if (priority === "normal") return 2;
+  return 3;
+}
+
+function sortedProductionProjects(projects) {
+  return [...projects].sort((first, second) => {
+    const firstInfo = savedProjectProductionInfo(first);
+    const secondInfo = savedProjectProductionInfo(second);
+    if (firstInfo.hold !== secondInfo.hold) return firstInfo.hold ? -1 : 1;
+    const priority = productionPriorityRank(firstInfo.priority) - productionPriorityRank(secondInfo.priority);
+    if (priority !== 0) return priority;
+    const firstDue = `${firstInfo.dueDate || "9999-99-99"} ${firstInfo.dueTime || "99:99"}`;
+    const secondDue = `${secondInfo.dueDate || "9999-99-99"} ${secondInfo.dueTime || "99:99"}`;
+    if (firstDue !== secondDue) return firstDue.localeCompare(secondDue);
+    return String(second.updatedAt).localeCompare(String(first.updatedAt));
+  });
+}
+
+function cloneProjectDrawingState(project) {
+  try {
+    return JSON.parse(JSON.stringify(project?.state ?? {}));
+  } catch {
+    return null;
+  }
+}
+
+function drawingStateTarget(payload) {
+  return payload?.state && typeof payload.state === "object" ? payload.state : payload;
+}
+
+function projectRecordWithState(project, nextDrawingState, updatedAt = new Date().toISOString()) {
+  return {
+    ...project,
+    updatedAt,
+    state: nextDrawingState,
+    projectInfo: normalizeProjectInfo(project.projectInfo),
+    name: project.name || projectDisplayName(project.projectInfo),
+  };
+}
+
+function syncCurrentStateFromProjectState(projectId, targetState) {
+  if (state.projectId !== projectId || !targetState) return;
+  state.projectStatus = normalizeProjectStatus(targetState.projectStatus);
+  state.productionInfo = normalizeProductionInfo(targetState.productionInfo);
+  state.productionMessages = normalizeProductionMessages(targetState.productionMessages);
+  updateControls();
+  updateAll();
+}
+
+async function persistProjectWorkflowUpdate(project, nextDrawingState, updatedAt) {
+  const source = project.source ?? projectLibrarySource;
+  const nextRecord = projectRecordWithState(project, nextDrawingState, updatedAt);
+
+  if (source === "cloud") {
+    if (!(await ensureSupabaseClient()) || !cloudUser || !hasActiveCloudLicense()) {
+      window.alert("Sign in with an active licence to update cloud production items.");
+      return false;
+    }
+    updateCloudStatus("Updating production...", "");
+    const { error } = await supabaseClient
+      .from(CLOUD_PROJECTS_TABLE)
+      .update({
+        name: nextRecord.name,
+        project_info: nextRecord.projectInfo,
+        drawing_state: nextDrawingState,
+        updated_at: updatedAt,
+      })
+      .eq("id", project.id);
+    if (error) throw error;
+    cloudProjectCache = null;
+    updateCloudStatus("Production updated", "");
+    window.setTimeout(() => updateCloudStatus(), 1500);
+  } else {
+    const projects = loadSavedBrowserProjects();
+    const nextProjects = projects.map((item) => item.id === project.id ? nextRecord : item);
+    storeSavedBrowserProjects(nextProjects);
+  }
+
+  projectLibraryProjects = projectLibraryProjects.map((item) => item.id === project.id ? nextRecord : item);
+  syncCurrentStateFromProjectState(project.id, drawingStateTarget(nextDrawingState));
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  return true;
+}
+
+async function updateSavedProjectWorkflow(projectId, updates = {}) {
+  const project = projectLibraryProjects.find((item) => item.id === projectId);
+  if (!project) return false;
+  const nextDrawingState = cloneProjectDrawingState(project);
+  const targetState = drawingStateTarget(nextDrawingState);
+  if (!targetState) return false;
+
+  const now = new Date().toISOString();
+  const nextProduction = normalizeProductionInfo({
+    ...targetState.productionInfo,
+    ...(updates.productionInfo ?? {}),
+    lastUpdatedBy: checkerName(),
+    lastUpdatedAt: now,
+  });
+
+  if (updates.status !== undefined) {
+    const nextStatus = normalizeProjectStatus(updates.status);
+    targetState.projectStatus = nextStatus;
+    if (projectStatusAtLeast(nextStatus, "checked") && !targetState.checkedAt) {
+      targetState.checkedAt = now;
+      targetState.checkedBy = checkerName();
+    }
+    if (nextStatus === "complete") {
+      nextProduction.completedAt = nextProduction.completedAt || now;
+      nextProduction.removeAfter = nextProduction.removeAfter || isoDaysFromNow(7);
+    } else {
+      nextProduction.completedAt = "";
+      nextProduction.removeAfter = "";
+    }
+  }
+
+  let messages = normalizeProductionMessages(targetState.productionMessages);
+  if (updates.addMessage) {
+    const body = String(updates.addMessage).trim().slice(0, 240);
+    if (body) {
+      messages.push({
+        id: `msg-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        body,
+        author: checkerName(),
+        createdAt: now,
+        completed: false,
+        completedAt: "",
+        removeAfter: "",
+      });
+    }
+  }
+  if (updates.completeMessageId) {
+    messages = messages.map((message) => message.id === updates.completeMessageId
+      ? {
+          ...message,
+          completed: true,
+          completedAt: now,
+          removeAfter: message.removeAfter || isoDaysFromNow(7),
+        }
+      : message);
+  }
+
+  targetState.productionInfo = normalizeProductionInfo(nextProduction);
+  targetState.productionMessages = normalizeProductionMessages(messages);
+  targetState.projectStatus = normalizeProjectStatus(targetState.projectStatus);
+
+  return persistProjectWorkflowUpdate(project, nextDrawingState, now);
+}
+
+function showProjectLibraryGuide() {
+  projectLibraryGuideVisible = true;
+  projectLibraryReportVisible = false;
+  if (projectLibraryOpenFolderKey) {
+    projectLibraryOpenFolderKey = "";
+  }
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  const guide = ensureProjectLibraryGuideSlot();
+  if (!guide) {
+    window.alert("The Jobs guide is at the top of the Job dashboard.");
+    return;
+  }
+  guide.open = true;
+  guide.scrollIntoView({ behavior: "smooth", block: "start" });
+  guide.classList.add("attention");
+  window.setTimeout(() => guide.classList.remove("attention"), 1400);
+}
+
+function hideProjectLibraryGuide() {
+  projectLibraryGuideVisible = false;
+  ensureProjectLibraryGuideSlot();
+}
+
+function bindProjectLibraryGuideCard(details) {
+  if (!details || details.dataset.guideCardBound === "true") return details;
+  details.dataset.guideCardBound = "true";
+  return details;
+}
+
+function projectLibraryGuideCard() {
+  const details = document.createElement("details");
+  details.className = "project-guide-card";
+  details.id = "projectJobsGuide";
+  details.setAttribute("aria-label", "Jobs board guide");
+  details.open = true;
+  bindProjectLibraryGuideCard(details);
+
+  const summary = document.createElement("summary");
+  summary.textContent = "How to use this Jobs board";
+  details.append(summary);
+
+  const content = document.createElement("div");
+  content.className = "project-guide-content";
+  content.innerHTML = `
+    <ol>
+      <li>
+        <strong>Save each spool first.</strong>
+        <span>Use Save current so the spool appears in the job list and production board.</span>
+      </li>
+      <li>
+        <strong>Move the spool through stages.</strong>
+        <span>Drag a card to another stage, or use the Stage menu on the card. You can also change the open drawing from the top Status menu.</span>
+      </li>
+      <li>
+        <strong>Allocate the work.</strong>
+        <span>Use the card fields for Assigned, Due, Priority and Hold. The same details are also in Review &gt; Checks &gt; Workflow.</span>
+      </li>
+      <li>
+        <strong>Use messages for yard notes.</strong>
+        <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
+      </li>
+    </ol>
+    <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
+    <div class="project-guide-actions">
+      <button type="button" data-project-library-action="hide-guide">Hide guide</button>
+    </div>
+  `;
+  details.append(content);
+  return details;
+}
+
+function showProjectLibraryReport() {
+  projectLibraryReportVisible = true;
+  projectLibraryGuideVisible = false;
+  if (projectLibraryOpenFolderKey) {
+    projectLibraryOpenFolderKey = "";
+  }
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  const slot = ensureProjectLibraryReportSlot();
+  if (!slot) {
+    window.alert("The Jobs report could not be shown.");
+    return;
+  }
+  renderProjectLibraryReport();
+  slot.hidden = false;
+  slot.scrollIntoView({ behavior: "smooth", block: "start" });
+  slot.classList.add("attention");
+  window.setTimeout(() => slot.classList.remove("attention"), 1400);
+}
+
+function hideProjectLibraryReport() {
+  projectLibraryReportVisible = false;
+  ensureProjectLibraryReportSlot();
+}
+
+function setProjectLibraryReportPeriod(period) {
+  projectLibraryReportPeriod = period === "weekly" ? "weekly" : "daily";
+  projectLibraryReportVisible = true;
+  renderProjectLibraryReport();
+}
+
+function projectLibraryReportSourceProjects(projects = null) {
+  if (Array.isArray(projects)) return projects;
+  return filterProjectLibraryProjects(projectLibraryProjects);
+}
+
+function projectLibraryReportPeriodRange(period = projectLibraryReportPeriod) {
+  const now = new Date();
+  const activityStart = new Date(now);
+  activityStart.setHours(0, 0, 0, 0);
+  if (period === "weekly") {
+    activityStart.setDate(activityStart.getDate() - 6);
+  }
+  const activityEnd = new Date(now);
+  const dueEnd = new Date(now);
+  dueEnd.setHours(23, 59, 59, 999);
+  if (period === "weekly") {
+    dueEnd.setDate(dueEnd.getDate() + 6);
+  }
+  return {
+    now,
+    activityStart,
+    activityEnd,
+    dueEnd,
+    title: period === "weekly" ? "Weekly job progression" : "Daily job progression",
+    activityLabel: period === "weekly" ? "last 7 days" : "today",
+    dueLabel: period === "weekly" ? "next 7 days" : "today",
+  };
+}
+
+function projectReportDate(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return null;
+  const date = new Date(text);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function projectReportDueDate(production) {
+  const info = normalizeProductionInfo(production);
+  if (!info.dueDate) return null;
+  const date = new Date(`${info.dueDate}T${info.dueTime || "23:59"}:00`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function projectReportActivityDate(project) {
+  const savedState = savedProjectState(project);
+  const production = normalizeProductionInfo(savedState?.productionInfo);
+  const dates = [
+    projectReportDate(production.lastUpdatedAt),
+    projectReportDate(production.completedAt),
+    projectReportDate(savedState?.checkedAt),
+    projectReportDate(project.updatedAt),
+  ].filter(Boolean);
+  if (!dates.length) return null;
+  return new Date(Math.max(...dates.map((date) => date.getTime())));
+}
+
+function projectReportDateInRange(date, start, end) {
+  if (!date) return false;
+  const time = date.getTime();
+  return time >= start.getTime() && time <= end.getTime();
+}
+
+function projectReportProjectLabel(project) {
+  const info = normalizeProjectInfo(project.projectInfo);
+  const job = info.jobNumber ? `Job ${info.jobNumber}` : "No job";
+  return `${job} / ${savedProjectSpoolTitle(project)}`;
+}
+
+function projectReportProjectLine(project) {
+  const savedState = savedProjectState(project);
+  const production = normalizeProductionInfo(savedState?.productionInfo);
+  const parts = [
+    projectStatusLabel(savedState?.projectStatus),
+    production.assignee ? `Assigned ${production.assignee}` : "Unassigned",
+    production.dueDate ? `Due ${formatProductionDue(production)}` : "",
+    production.hold ? "HOLD" : "",
+  ].filter(Boolean);
+  return `${projectReportProjectLabel(project)} - ${parts.join(" / ")}`;
+}
+
+function projectLibraryReportData(projects = null) {
+  const range = projectLibraryReportPeriodRange();
+  const sourceProjects = projectLibraryReportSourceProjects(projects);
+  const visibleProjects = sourceProjects.filter((project) => !productionProjectHidden(project));
+  const stageCounts = visibleProjects.reduce((summary, project) => {
+    const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+    summary[status] = (summary[status] ?? 0) + 1;
+    return summary;
+  }, {});
+  const todayStart = new Date(range.now);
+  todayStart.setHours(0, 0, 0, 0);
+
+  const enriched = visibleProjects.map((project) => {
+    const savedState = savedProjectState(project);
+    const production = normalizeProductionInfo(savedState?.productionInfo);
+    const status = normalizeProjectStatus(savedState?.projectStatus);
+    return {
+      project,
+      savedState,
+      production,
+      status,
+      activityDate: projectReportActivityDate(project),
+      dueDate: projectReportDueDate(production),
+    };
+  });
+
+  const updated = enriched
+    .filter((item) => projectReportDateInRange(item.activityDate, range.activityStart, range.activityEnd))
+    .sort((first, second) => (second.activityDate?.getTime() ?? 0) - (first.activityDate?.getTime() ?? 0));
+  const completed = enriched.filter((item) => {
+    if (item.status !== "complete") return false;
+    const completedAt = projectReportDate(item.production.completedAt) ?? item.activityDate;
+    return projectReportDateInRange(completedAt, range.activityStart, range.activityEnd);
+  });
+  const dueSoon = enriched
+    .filter((item) => item.status !== "complete" && item.dueDate && item.dueDate.getTime() <= range.dueEnd.getTime())
+    .sort((first, second) => (first.dueDate?.getTime() ?? 0) - (second.dueDate?.getTime() ?? 0));
+  const overdue = enriched.filter((item) => item.status !== "complete" && item.dueDate && item.dueDate.getTime() < todayStart.getTime());
+  const onHold = enriched.filter((item) => item.production.hold);
+  const assignees = new Map();
+  for (const item of enriched.filter((entry) => entry.status !== "complete")) {
+    const name = item.production.assignee || "Unassigned";
+    const current = assignees.get(name) ?? { name, count: 0, due: 0, hold: 0, urgent: 0 };
+    current.count += 1;
+    if (item.dueDate && item.dueDate.getTime() <= range.dueEnd.getTime()) current.due += 1;
+    if (item.production.hold) current.hold += 1;
+    if (item.production.priority === "urgent") current.urgent += 1;
+    assignees.set(name, current);
+  }
+
+  return {
+    range,
+    visibleProjects,
+    stageCounts,
+    updated,
+    completed,
+    dueSoon,
+    overdue,
+    onHold,
+    assignees: [...assignees.values()].sort((first, second) => second.count - first.count || first.name.localeCompare(second.name)),
+  };
+}
+
+function renderProjectLibraryReport(projects = null) {
+  if (!projectLibraryReportSlot) return;
+  const data = projectLibraryReportData(projects);
+  const total = data.visibleProjects.length;
+  const period = projectLibraryReportPeriod;
+  projectLibraryReportSlot.hidden = !projectLibraryReportVisible;
+  projectLibraryReportSlot.innerHTML = `
+    <section class="project-report-card" aria-label="Job progression report">
+      <div class="project-report-head">
+        <div>
+          <strong>${escapeHtml(data.range.title)}</strong>
+          <span>${escapeHtml(total)} spool${total === 1 ? "" : "s"} in the current dashboard / updated ${escapeHtml(data.range.activityLabel)} / due ${escapeHtml(data.range.dueLabel)}</span>
+        </div>
+        <div class="project-report-actions">
+          <button type="button" class="${period === "daily" ? "active" : ""}" data-project-library-action="report-period" data-report-period="daily">Daily</button>
+          <button type="button" class="${period === "weekly" ? "active" : ""}" data-project-library-action="report-period" data-report-period="weekly">Weekly</button>
+          <button type="button" data-project-library-action="copy-report">Copy</button>
+          <button type="button" data-project-library-action="hide-report">Hide</button>
+        </div>
+      </div>
+      <div class="project-report-stats">
+        <div><b>${data.updated.length}</b><span>Updated ${escapeHtml(data.range.activityLabel)}</span></div>
+        <div><b>${data.completed.length}</b><span>Completed ${escapeHtml(data.range.activityLabel)}</span></div>
+        <div><b>${data.dueSoon.length}</b><span>Due ${escapeHtml(data.range.dueLabel)}</span></div>
+        <div><b>${data.overdue.length}</b><span>Overdue</span></div>
+        <div><b>${data.onHold.length}</b><span>On hold</span></div>
+      </div>
+      <div class="project-report-grid">
+        <section>
+          <strong>Stages</strong>
+          <ul>
+            ${PROJECT_STATUS_FLOW.map(([status, label]) => `<li><span>${escapeHtml(label)}</span><b>${data.stageCounts[status] ?? 0}</b></li>`).join("")}
+          </ul>
+        </section>
+        <section>
+          <strong>Recent progress</strong>
+          <ul>
+            ${data.updated.slice(0, 8).map((item) => `<li><span>${escapeHtml(projectReportProjectLine(item.project))}</span><small>${escapeHtml(item.activityDate ? item.activityDate.toLocaleString() : "not dated")}</small></li>`).join("") || "<li><span>No production updates in this period.</span></li>"}
+          </ul>
+        </section>
+        <section>
+          <strong>Due and overdue</strong>
+          <ul>
+            ${data.dueSoon.slice(0, 8).map((item) => `<li class="${item.dueDate && item.dueDate < new Date() ? "overdue" : ""}"><span>${escapeHtml(projectReportProjectLine(item.project))}</span><small>${escapeHtml(item.dueDate ? item.dueDate.toLocaleString() : "")}</small></li>`).join("") || "<li><span>No spools due in this period.</span></li>"}
+          </ul>
+        </section>
+        <section>
+          <strong>People</strong>
+          <ul>
+            ${data.assignees.slice(0, 8).map((item) => `<li><span>${escapeHtml(item.name)}</span><small>${item.count} active / ${item.due} due / ${item.hold} hold / ${item.urgent} urgent</small></li>`).join("") || "<li><span>No active assignees yet.</span></li>"}
+          </ul>
+        </section>
+      </div>
+    </section>
+  `;
+}
+
+function projectLibraryReportText(projects = null) {
+  const data = projectLibraryReportData(projects);
+  const total = data.visibleProjects.length;
+  const lines = [
+    `SpoolMate ${data.range.title}`,
+    `Generated ${data.range.now.toLocaleString()}`,
+    `Scope: ${projectLibrarySource === "cloud" ? activeCompanyIsApproved() ? activeCompany.name : "Cloud" : "Browser"}${projectLibrarySearch.trim() ? ` / search "${projectLibrarySearch.trim()}"` : ""}`,
+    "",
+    `Total spools: ${total}`,
+    `Updated ${data.range.activityLabel}: ${data.updated.length}`,
+    `Completed ${data.range.activityLabel}: ${data.completed.length}`,
+    `Due ${data.range.dueLabel}: ${data.dueSoon.length}`,
+    `Overdue: ${data.overdue.length}`,
+    `On hold: ${data.onHold.length}`,
+    "",
+    "Stage count:",
+    ...PROJECT_STATUS_FLOW.map(([status, label]) => `- ${label}: ${data.stageCounts[status] ?? 0}`),
+    "",
+    "Recent progress:",
+    ...(data.updated.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)} (${item.activityDate ? item.activityDate.toLocaleString() : "not dated"})`)),
+    ...(data.updated.length ? [] : ["- No production updates in this period."]),
+    "",
+    "Due and overdue:",
+    ...(data.dueSoon.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)} (${item.dueDate ? item.dueDate.toLocaleString() : "not dated"})`)),
+    ...(data.dueSoon.length ? [] : ["- No spools due in this period."]),
+    "",
+    "People:",
+    ...(data.assignees.slice(0, 12).map((item) => `- ${item.name}: ${item.count} active, ${item.due} due, ${item.hold} hold, ${item.urgent} urgent`)),
+    ...(data.assignees.length ? [] : ["- No active assignees yet."]),
+  ];
+  return lines.join("\n");
+}
+
+async function copyProjectLibraryReport() {
+  const text = projectLibraryReportText();
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+    await navigator.clipboard.writeText(text);
+    window.alert("Jobs report copied.");
+  } catch (error) {
+    console.warn("Could not copy report.", error);
+    window.prompt("Copy this Jobs report:", text);
+  }
+}
+
+function projectProductionBoard(projects) {
+  const section = document.createElement("section");
+  section.className = "production-board-card";
+
+  const header = document.createElement("div");
+  header.className = "production-board-header";
+  const title = document.createElement("strong");
+  title.textContent = "Production board";
+  const meta = document.createElement("span");
+  meta.textContent = "Move spools through the stages from the status menu, then assign due dates in Workflow.";
+  header.append(title, meta);
+  section.append(header);
+
+  const lanes = document.createElement("div");
+  lanes.className = "production-board-lanes";
+
+  for (const [status, label] of PROJECT_STATUS_FLOW) {
+    const stageProjects = sortedProductionProjects(projects.filter((project) => {
+      if (productionProjectHidden(project)) return false;
+      return normalizeProjectStatus(savedProjectState(project)?.projectStatus) === status;
+    }));
+    const lane = document.createElement("section");
+    lane.className = "production-lane";
+    lane.dataset.productionStatus = status;
+    lane.dataset.productionDropStatus = status;
+
+    const laneHeader = document.createElement("div");
+    laneHeader.className = "production-lane-header";
+    const laneTitle = document.createElement("strong");
+    laneTitle.textContent = label;
+    const count = document.createElement("span");
+    count.textContent = String(stageProjects.length);
+    laneHeader.append(laneTitle, count);
+    lane.append(laneHeader);
+
+    const visibleProjects = stageProjects.slice(0, 6);
+    if (!visibleProjects.length) {
+      const empty = document.createElement("span");
+      empty.className = "production-lane-empty";
+      empty.textContent = "No spools";
+      lane.append(empty);
+    } else {
+      for (const project of visibleProjects) {
+        lane.append(projectProductionCard(project));
+      }
+      if (stageProjects.length > visibleProjects.length) {
+        const more = document.createElement("span");
+        more.className = "production-lane-more";
+        more.textContent = `${stageProjects.length - visibleProjects.length} more in job folders`;
+        lane.append(more);
+      }
+    }
+
+    lanes.append(lane);
+  }
+
+  section.append(lanes);
+  return section;
+}
+
+function productionProjectHidden(project) {
+  const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+  const production = savedProjectProductionInfo(project);
+  if (status !== "complete" || !production.removeAfter) return false;
+  const removeTime = new Date(production.removeAfter).getTime();
+  return !Number.isNaN(removeTime) && removeTime < Date.now();
+}
+
+function projectProductionCard(project) {
+  const savedState = savedProjectState(project);
+  const production = savedProjectProductionInfo(project);
+  const messages = savedProjectProductionMessages(project);
+  const activeMessage = [...messages].reverse().find((message) => !message.completed) ?? null;
+  const status = normalizeProjectStatus(savedState?.projectStatus);
+  const card = document.createElement("article");
+  card.className = "production-spool-card";
+  card.classList.toggle("urgent", production.priority === "urgent");
+  card.classList.toggle("hold", production.hold);
+  card.classList.toggle("complete", status === "complete");
+  card.draggable = true;
+  card.dataset.productionProjectId = project.id;
+  card.dataset.projectSource = project.source ?? projectLibrarySource;
+  card.dataset.productionStatus = status;
+
+  const parts = [
+    production.assignee ? `To ${production.assignee}` : "Unassigned",
+    production.dueDate ? `Due ${formatProductionDue(production)}` : "No due date",
+    productionPriorityLabel(production.priority),
+  ];
+  if (production.hold) parts.unshift(production.holdReason ? `Hold: ${production.holdReason}` : "On hold");
+  if (status === "complete" && production.removeAfter) parts.push(`Hides ${new Date(production.removeAfter).toLocaleDateString()}`);
+
+  card.innerHTML = `
+    <div class="production-card-head">
+      <button type="button" class="production-card-title" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
+        <strong>${escapeHtml(savedProjectSpoolTitle(project))}</strong>
+        <span>${escapeHtml(savedProjectDetailLine(project))}</span>
+      </button>
+      <span class="production-drag-handle" aria-hidden="true">Drag</span>
+    </div>
+    <small class="production-card-meta">${escapeHtml(parts.join(" / "))}</small>
+    <div class="production-card-fields">
+      <label>
+        <span>Stage</span>
+        <select data-production-field="status" data-project-id="${escapeHtml(project.id)}">
+          ${PROJECT_STATUS_FLOW.map(([key, label]) => `<option value="${key}"${status === key ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}
+        </select>
+      </label>
+      <label>
+        <span>Assigned</span>
+        <input data-production-field="assignee" data-project-id="${escapeHtml(project.id)}" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Who" />
+      </label>
+      <label>
+        <span>Due</span>
+        <input data-production-field="dueDate" data-project-id="${escapeHtml(project.id)}" type="date" value="${escapeHtml(production.dueDate)}" />
+      </label>
+      <label>
+        <span>Time</span>
+        <input data-production-field="dueTime" data-project-id="${escapeHtml(project.id)}" type="time" value="${escapeHtml(production.dueTime)}" />
+      </label>
+      <label>
+        <span>Priority</span>
+        <select data-production-field="priority" data-project-id="${escapeHtml(project.id)}">
+          ${[...PRODUCTION_PRIORITIES].map((priority) => `<option value="${priority}"${production.priority === priority ? " selected" : ""}>${escapeHtml(productionPriorityLabel(priority))}</option>`).join("")}
+        </select>
+      </label>
+      <label class="production-inline-toggle">
+        <input data-production-field="hold" data-project-id="${escapeHtml(project.id)}" type="checkbox"${production.hold ? " checked" : ""} />
+        <span>Hold</span>
+      </label>
+    </div>
+    <div class="production-message-panel">
+      ${activeMessage ? `
+        <div class="production-active-message">
+          <span>${escapeHtml(activeMessage.body)}</span>
+          <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(activeMessage.id)}">Done</button>
+        </div>
+      ` : ""}
+      <div class="production-message-compose">
+        <input data-production-message-input data-project-id="${escapeHtml(project.id)}" type="text" maxlength="240" placeholder="Message / yard note" />
+        <button type="button" data-production-action="add-message" data-project-id="${escapeHtml(project.id)}">Add</button>
+      </div>
+    </div>
+    <div class="production-card-actions">
+      <button type="button" data-production-action="complete-spool" data-project-id="${escapeHtml(project.id)}">Complete</button>
+      <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">Open</button>
+    </div>
+  `;
+  return card;
+}
+
 function filterProjectLibraryProjects(projects) {
   const query = projectLibrarySearch.trim().toLowerCase();
   if (!query) return projects;
@@ -13602,7 +15520,9 @@ function filterProjectLibraryProjects(projects) {
 
 function projectLibrarySearchText(project) {
   const info = normalizeProjectInfo(project.projectInfo);
-  const savedState = project.state?.state && typeof project.state.state === "object" ? project.state.state : project.state;
+  const savedState = savedProjectState(project);
+  const production = normalizeProductionInfo(savedState?.productionInfo);
+  const messages = activeProductionMessages(savedState?.productionMessages).map((message) => message.body).join(" ");
   const status = projectStatusLabel(savedState?.projectStatus);
   const scope = project.companyId ? companyNameForId(project.companyId) : project.source === "cloud" ? "personal cloud" : "browser";
   return [
@@ -13613,6 +15533,13 @@ function projectLibrarySearchText(project) {
     info.revision,
     info.drawnBy,
     status,
+    production.assignee,
+    production.dueDate,
+    production.dueTime,
+    productionPriorityLabel(production.priority),
+    production.hold ? "hold on hold" : "",
+    production.holdReason,
+    messages,
     scope,
     savedProjectSpoolTitle(project),
     savedProjectDetailLine(project),
@@ -13626,7 +15553,7 @@ function projectDashboardCard(projects, options = {}) {
   const card = document.createElement("div");
   card.className = "project-dashboard-card";
   const counts = projects.reduce((summary, project) => {
-    const savedState = project.state?.state && typeof project.state.state === "object" ? project.state.state : project.state;
+    const savedState = savedProjectState(project);
     const status = normalizeProjectStatus(savedState?.projectStatus);
     summary[status] = (summary[status] ?? 0) + 1;
     return summary;
@@ -13641,7 +15568,7 @@ function projectDashboardCard(projects, options = {}) {
       <span>${escapeHtml(resultText)}</span>
     </div>
     <div class="project-dashboard-stats">
-      ${[...PROJECT_STATUSES].map((status) => `
+      ${PROJECT_STATUS_FLOW.map(([status]) => `
         <div class="project-dashboard-stat">
           <b>${counts[status] ?? 0}</b>
           <small>${escapeHtml(projectStatusLabel(status))}</small>
@@ -13769,6 +15696,11 @@ function projectLibraryRow(project) {
     row.className = "project-library-row";
     row.classList.toggle("active", project.id === state.projectId);
     row.dataset.openProjectId = project.id;
+    row.dataset.projectSource = project.source ?? projectLibrarySource;
+    row.tabIndex = 0;
+    row.setAttribute("role", "button");
+    row.setAttribute("aria-label", `Open ${savedProjectSpoolTitle(project)}`);
+    row.title = "Open this spool";
 
     const main = document.createElement("div");
     main.className = "project-library-main";
@@ -13797,7 +15729,6 @@ function projectLibraryRow(project) {
     deleteButton.dataset.deleteProjectId = project.id;
     deleteButton.dataset.projectSource = project.source ?? projectLibrarySource;
 
-    row.dataset.projectSource = project.source ?? projectLibrarySource;
     openButton.dataset.projectSource = project.source ?? projectLibrarySource;
     row.append(main, openButton, deleteButton);
     return row;
@@ -13879,17 +15810,25 @@ function savedProjectDetailLine(project) {
 }
 
 function savedProjectMetaLine(project) {
-  const savedState = project.state?.state && typeof project.state.state === "object" ? project.state.state : project.state;
+  const savedState = savedProjectState(project);
+  const production = normalizeProductionInfo(savedState?.productionInfo);
   const runs = Array.isArray(savedState?.edges) ? savedState.edges.length : 0;
   const updated = project.updatedAt ? new Date(project.updatedAt).toLocaleString() : "not dated";
   const status = projectStatusLabel(savedState?.projectStatus);
   const locked = savedState?.locked ? " / locked" : "";
   const scope = project.companyId ? (companyNameForId(project.companyId) || "Team") : project.source === "cloud" ? "Personal cloud" : "";
   const scopeText = scope ? `${scope} - ` : "";
-  return `${scopeText}${status}${locked} - ${runs} run${runs === 1 ? "" : "s"} - saved ${updated}`;
+  const assignee = production.assignee ? ` - ${production.assignee}` : "";
+  const due = production.dueDate ? ` - due ${formatProductionDue(production)}` : "";
+  const hold = production.hold ? " - HOLD" : "";
+  return `${scopeText}${status}${locked}${hold}${assignee}${due} - ${runs} run${runs === 1 ? "" : "s"} - saved ${updated}`;
 }
 
 function closeProjectLibrary() {
+  projectLibraryGuideVisible = false;
+  projectLibraryReportVisible = false;
+  ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryReportSlot();
   if (projectLibraryDialog) projectLibraryDialog.hidden = true;
 }
 
@@ -16074,6 +18013,22 @@ async function promptForProjectDetails(options = {}) {
   updateAll();
 }
 
+async function editProjectDetailsFromHealth(field = "jobNumber") {
+  const normalizedField = Object.prototype.hasOwnProperty.call(projectDialogInputs, field) ? field : "jobNumber";
+  const info = await openProjectDetailsDialog({
+    title: "Fix project details",
+    action: "Save details",
+    defaults: state.projectInfo,
+    focusField: normalizedField,
+  });
+  if (!info) return;
+
+  state.projectInfo = info;
+  state.projectInfoPrompted = true;
+  updateControls();
+  updateAll();
+}
+
 function openProjectDetailsDialog(options = {}) {
   const fallback = () => Promise.resolve(promptProjectDetailsFallback(options.defaults));
   if (!projectDialog || !projectDialogForm || !projectDialogSubmitButton) return fallback();
@@ -16092,7 +18047,12 @@ function openProjectDetailsDialog(options = {}) {
   closeProjectJobPicker();
   updateProjectJobPickerButton();
   projectDialog.hidden = false;
-  projectDialogInputs.jobNumber?.focus();
+  const focusField = Object.prototype.hasOwnProperty.call(projectDialogInputs, options.focusField)
+    ? options.focusField
+    : "jobNumber";
+  const focusInput = projectDialogInputs[focusField] ?? projectDialogInputs.jobNumber;
+  focusInput?.focus();
+  focusInput?.select?.();
 
   return new Promise((resolve) => {
     projectDialogResolver = resolve;
@@ -16778,7 +18738,9 @@ function drawReportHeader(ctx, width) {
 function drawReportDrawing(ctx, area) {
   const saved = {
     gridScale: state.gridScale,
+    drawingDetail: state.drawingDetail,
     showDimensions: state.showDimensions,
+    dimensionStyle: state.dimensionStyle,
     selectedSegments: [...state.selectedSegments],
     selectedSegment: state.selectedSegment,
     selectedFitting: state.selectedFitting,
@@ -16796,8 +18758,16 @@ function drawReportDrawing(ctx, area) {
   const projection = reportProjection(area.width, area.height, scale);
 
   try {
+    const savedDimensionStyle = normalizeDimensionStyle(saved.dimensionStyle);
+    const reportDetail = savedDimensionStyle === "numbered" || normalizeDrawingDetail(saved.drawingDetail) === "callouts"
+      ? "callouts"
+      : normalizeDrawingDetail(saved.drawingDetail) === "fab"
+      ? "fab"
+      : "full";
     state.gridScale = scale;
+    state.drawingDetail = reportDetail;
     state.showDimensions = true;
+    state.dimensionStyle = reportDetail === "callouts" ? "numbered" : reportDetail === "fab" ? savedDimensionStyle : normalizeDimensionStyle(saved.dimensionStyle);
     state.selectedSegments = [];
     state.selectedSegment = null;
     state.selectedFitting = null;
@@ -16820,7 +18790,14 @@ function drawReportDrawing(ctx, area) {
     ctx.clip();
     ctx.translate(area.x, area.y);
     drawGrid(ctx, area.width, area.height, projection);
-    drawSpool2d(ctx, projection);
+    drawSpool2d(ctx, projection, {
+      viewport: {
+        left: 18,
+        top: 48,
+        right: Math.max(18, area.width - 18),
+        bottom: Math.max(48, area.height - 18),
+      },
+    });
     drawMeasurements2d(ctx, projection);
     drawNotes2d(ctx, projection);
     if (state.showLiftingPoints) {
@@ -16837,7 +18814,9 @@ function drawReportDrawing(ctx, area) {
     ctx.restore();
   } finally {
     state.gridScale = saved.gridScale;
+    state.drawingDetail = saved.drawingDetail;
     state.showDimensions = saved.showDimensions;
+    state.dimensionStyle = saved.dimensionStyle;
     state.selectedSegments = saved.selectedSegments;
     state.selectedSegment = saved.selectedSegment;
     state.selectedFitting = saved.selectedFitting;
@@ -18771,20 +20750,38 @@ function editContextSegmentLength() {
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
 
-  const offsetMeta = segmentOffsetMeta(hit.segment);
-  const currentLength = Math.round(pointLength(hit.segment.vector));
-  const text = window.prompt(
-    offsetMeta ? "Offset set mm" : "Pipe length mm",
-    String(offsetMeta ? offsetMeta.setMm : currentLength),
-  );
-  if (text === null) return;
+  editSegmentLengthFromDimensionSource(hit.segment, {
+    anchorPointIndex: hit.t < 0.5 ? hit.segment.from : hit.segment.to,
+    sourceType: "context",
+  });
+}
 
-  selectSingleSegment(hit.segment.index);
-  state.selectedPoint = hit.t < 0.5 ? hit.segment.from : hit.segment.to;
+function editSegmentLengthFromDimensionSource(segment, options = {}) {
+  if (!ensureDrawingEditable("edit length")) return false;
+  if (!segment) return false;
+
+  const offsetMeta = segmentOffsetMeta(segment);
+  const editSet = options.sourceType === "offset-set";
+  const currentLength = Math.round(pointLength(segment.vector));
+  const promptLabel = offsetMeta && editSet
+    ? "Offset set C/C mm"
+    : offsetMeta
+    ? "Offset travel C/C mm"
+    : "Pipe C/C length mm";
+  const currentValue = offsetMeta && editSet ? offsetMeta.setMm : currentLength;
+  const text = window.prompt(
+    promptLabel,
+    String(Math.round(currentValue)),
+  );
+  if (text === null) return false;
+
+  selectSingleSegment(segment.index);
+  state.selectedPoint = Number.isInteger(options.anchorPointIndex) ? options.anchorPointIndex : segment.from;
   state.activePoint = state.selectedPoint;
   state.selectedFitting = null;
   state.selectedNote = null;
-  if (offsetMeta) {
+  state.selectedMeasurement = null;
+  if (offsetMeta && editSet) {
     const setMm = normalizeLength(text);
     const travelMm = offsetTravelLengthMm(setMm, offsetMeta.angleDeg);
     setSelectedSegmentLength(travelMm, {
@@ -18799,6 +20796,8 @@ function editContextSegmentLength() {
   } else {
     setSelectedSegmentLength(text);
   }
+  showMobilePanel("inspector");
+  return true;
 }
 
 function editContextSegmentAngle() {
@@ -19385,6 +21384,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
   state.pointer = pointer;
 
   if (state.activeTool === "draw") {
+    drawCanvas.style.cursor = "crosshair";
     state.previewCandidate = getSnappedCandidate(pointer, { shiftAngle: shouldUseShiftAngleSnap(event) });
     if (state.previewCandidate) {
       cursorReadout.textContent = state.previewCandidate.axis?.shiftAngle
@@ -19397,11 +21397,20 @@ drawCanvas.addEventListener("pointermove", (event) => {
     const measurementHit = state.activeTool === "select" ? findNearestMeasurement(pointer) : null;
     const pointHit = findNearestPoint(pointer);
     const hit = findNearestSegment(pointer);
+    drawCanvas.style.cursor = dimensionHit
+      ? dimensionHit.type === "dimension-key"
+        ? "pointer"
+        : "grab"
+      : noteHit || measurementHit || pointHit || hit
+      ? "pointer"
+      : "";
     state.hoveredSegment = hit ? hit.segment.index : null;
     cursorReadout.textContent = noteHit
       ? "Text note"
       : dimensionHit
-      ? "Drag dimension"
+      ? dimensionHit.type === "dimension-key"
+        ? "Dimension key - click to edit C/C"
+        : "Drag dimension"
       : measurementHit
       ? "Measurement - Delete to remove"
       : pointHit
@@ -19434,6 +21443,7 @@ drawCanvas.addEventListener("pointerleave", () => {
   state.pointer = null;
   state.previewCandidate = null;
   state.hoveredSegment = null;
+  drawCanvas.style.cursor = "";
   cursorReadout.textContent = formatPoint(activePoint());
   drawIso();
 });
@@ -19502,6 +21512,15 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
   const dimensionHit = findNearestDimensionTarget(pointer);
   if (dimensionHit && state.activeTool === "select") {
+    if (dimensionHit.type === "dimension-key") {
+      const segment = segments().find((item) => item.index === dimensionHit.segmentIndex);
+      editSegmentLengthFromDimensionSource(segment, {
+        sourceType: dimensionHit.sourceType,
+        anchorPointIndex: segment?.from,
+      });
+      event.preventDefault();
+      return;
+    }
     beginDimensionDrag(event, dimensionHit, pointer);
     return;
   }
@@ -19667,7 +21686,7 @@ pipeSizeSelect.addEventListener("change", () => {
 projectStatusSelect?.addEventListener("change", () => {
   const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
   state.projectStatus = nextStatus;
-  if (nextStatus === "checked" && !state.checkedAt) {
+  if (projectStatusAtLeast(nextStatus, "checked") && !state.checkedAt) {
     state.checkedAt = new Date().toISOString();
     state.checkedBy = checkerName();
   }
@@ -19684,14 +21703,27 @@ projectLockToggle?.addEventListener("change", () => {
   updateAll();
 });
 
+drawingDetailSelect?.addEventListener("change", () => {
+  applyDrawingDetailPreset(drawingDetailSelect.value);
+  updateControls();
+  updateAll();
+});
+
 dimensionToggle.addEventListener("change", () => {
   state.showDimensions = dimensionToggle.checked;
+  state.drawingDetail = dimensionToggle.checked
+    ? drawingDetailFromDimensionSettings(true, state.dimensionStyle)
+    : "clean";
   dimensionStyleSelect.disabled = !state.showDimensions;
+  updateControls();
   updateAll();
 });
 
 dimensionStyleSelect.addEventListener("change", () => {
   state.dimensionStyle = normalizeDimensionStyle(dimensionStyleSelect.value);
+  state.showDimensions = true;
+  state.drawingDetail = drawingDetailFromDimensionSettings(true, state.dimensionStyle);
+  updateControls();
   updateAll();
 });
 

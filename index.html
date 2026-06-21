@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=179" />
+    <link rel="stylesheet" href="./styles.css?v=203" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -172,6 +172,13 @@
         <path d="M9.5 9a2.7 2.7 0 0 1 5.1 1.2c0 1.9-2.6 2.2-2.6 4" />
         <path d="M12 18h.01" />
       </symbol>
+      <symbol id="icon-report" viewBox="0 0 24 24">
+        <path d="M7 3h10l3 3v15H4V3Z" />
+        <path d="M17 3v4h4" />
+        <path d="M8 11h8" />
+        <path d="M8 15h8" />
+        <path d="M8 19h5" />
+      </symbol>
     </svg>
 
     <div class="app-shell">
@@ -181,7 +188,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v1.79</span>
+            <span class="version-badge" id="appVersionBadge">v2.03</span>
           </div>
         </div>
 
@@ -192,7 +199,7 @@
           <button data-app-mode="export" type="button" aria-pressed="false">Export</button>
         </nav>
 
-        <div class="topbar-settings" aria-label="Project defaults and drawing overlays">
+        <div class="topbar-settings" aria-label="Project defaults, drawing overlays and actions">
           <span class="project-readout" id="projectReadout">No project set</span>
           <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
             <button data-theme-choice="light" type="button" role="tab" aria-selected="false">Light</button>
@@ -202,9 +209,14 @@
             <span>Status</span>
             <select id="projectStatusSelect" aria-label="Drawing status">
               <option value="draft">Draft</option>
+              <option value="readycheck">Ready to check</option>
               <option value="checked">Checked</option>
               <option value="issued">Issued</option>
-              <option value="fabricated">Fabricated</option>
+              <option value="cutting">Cutting</option>
+              <option value="fitup">Fit-up</option>
+              <option value="welded">Welded</option>
+              <option value="finish">Paint / finish</option>
+              <option value="complete">Complete</option>
             </select>
           </label>
           <label class="toggle top-toggle">
@@ -227,12 +239,22 @@
             <input id="dimensionToggle" type="checkbox" checked />
             <span>Dimensions</span>
           </label>
+          <label class="dimension-style-field drawing-detail-field">
+            <span>Drawing detail</span>
+            <select id="drawingDetailSelect" aria-label="Drawing detail">
+              <option value="clean">Clean</option>
+              <option value="fab">Fab dims</option>
+              <option value="sizes">Sizes</option>
+              <option value="callouts">Callouts</option>
+              <option value="full">Full</option>
+            </select>
+          </label>
           <label class="dimension-style-field">
             <span>Dim style</span>
             <select id="dimensionStyleSelect" aria-label="Dimension style">
               <option value="labels">Pipe labels</option>
               <option value="redline">Red C/C lines</option>
-              <option value="numbered">Numbered list</option>
+              <option value="numbered" selected>Numbered list</option>
               <option value="chain">Chain dims</option>
             </select>
           </label>
@@ -250,104 +272,104 @@
               <option value="90">90 deg</option>
             </select>
           </label>
-        </div>
 
-        <div class="topbar-actions" aria-label="Project actions">
-          <button class="icon-button labeled danger" id="resetButton" type="button" title="Reset spool" aria-label="Reset spool">
-            <svg><use href="#icon-reset"></use></svg>
-            <span>New</span>
-          </button>
-          <button class="icon-button labeled" id="saveBrowserProjectButton" type="button" title="Save project in this browser" aria-label="Save project in this browser">
-            <svg><use href="#icon-export"></use></svg>
-            <span>Save</span>
-          </button>
-          <button class="icon-button labeled" id="openBrowserProjectButton" type="button" title="Open job dashboard" aria-label="Open job dashboard">
-            <svg><use href="#icon-sample"></use></svg>
-            <span>Jobs</span>
-          </button>
-          <button class="icon-button labeled" id="accountButton" type="button" title="Sign in for cloud projects" aria-label="Account and cloud sync">
-            <svg><use href="#icon-user"></use></svg>
-            <span id="accountButtonLabel">Account</span>
-          </button>
-          <span class="cloud-status-pill" id="cloudSyncStatus">Local only</span>
-          <input id="projectFileInput" type="file" accept=".html,text/html,.json,application/json" hidden />
-          <button class="icon-button labeled action-menu-toggle" id="actionMenuButton" type="button" aria-expanded="false" aria-controls="actionMenuPanel">
-            <svg><use href="#icon-settings"></use></svg>
-            <span>Menu</span>
-          </button>
-          <div class="action-menu-panel" id="actionMenuPanel" hidden>
-            <div class="action-menu-header">
-              <div>
-                <strong>Menu</strong>
-                <span>Project, review, export and setup tools</span>
+          <div class="topbar-actions" aria-label="Project actions">
+            <button class="icon-button labeled danger" id="resetButton" type="button" title="Reset spool" aria-label="Reset spool">
+              <svg><use href="#icon-reset"></use></svg>
+              <span>New</span>
+            </button>
+            <button class="icon-button labeled" id="saveBrowserProjectButton" type="button" title="Save project in this browser" aria-label="Save project in this browser">
+              <svg><use href="#icon-export"></use></svg>
+              <span>Save</span>
+            </button>
+            <button class="icon-button labeled" id="openBrowserProjectButton" type="button" title="Open job dashboard" aria-label="Open job dashboard">
+              <svg><use href="#icon-sample"></use></svg>
+              <span>Jobs</span>
+            </button>
+            <button class="icon-button labeled" id="accountButton" type="button" title="Sign in for cloud projects" aria-label="Account and cloud sync">
+              <svg><use href="#icon-user"></use></svg>
+              <span id="accountButtonLabel">Account</span>
+            </button>
+            <span class="cloud-status-pill" id="cloudSyncStatus">Local only</span>
+            <input id="projectFileInput" type="file" accept=".html,text/html,.json,application/json" hidden />
+            <button class="icon-button labeled action-menu-toggle" id="actionMenuButton" type="button" aria-expanded="false" aria-controls="actionMenuPanel">
+              <svg><use href="#icon-settings"></use></svg>
+              <span>Menu</span>
+            </button>
+            <div class="action-menu-panel" id="actionMenuPanel" hidden>
+              <div class="action-menu-header">
+                <div>
+                  <strong>Menu</strong>
+                  <span>Project, review, export and setup tools</span>
+                </div>
+                <button class="icon-button compact labeled" id="actionMenuCloseButton" type="button">Close</button>
               </div>
-              <button class="icon-button compact labeled" id="actionMenuCloseButton" type="button">Close</button>
-            </div>
-            <div class="action-menu-groups">
-              <section class="action-menu-group">
-                <h2>Project</h2>
-                <button class="icon-button labeled" id="homeDashboardButton" type="button" title="Open SpoolMate dashboard" aria-label="Open SpoolMate dashboard">
-                  <svg><use href="#icon-settings"></use></svg>
-                  <span>Dashboard</span>
-                </button>
-                <button class="icon-button labeled" id="tutorialButton" type="button" title="Open SpoolMate tutorial" aria-label="Open SpoolMate tutorial">
-                  <svg><use href="#icon-help"></use></svg>
-                  <span>Tutorial</span>
-                </button>
-                <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
-                  <svg><use href="#icon-sample"></use></svg>
-                  <span>Sample</span>
-                </button>
-                <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
-                  <svg><use href="#icon-sample"></use></svg>
-                  <span>Import</span>
-                </button>
-              </section>
-              <section class="action-menu-group">
-                <h2>Review</h2>
-                <button class="icon-button labeled" id="healthCheckButton" type="button" title="Run drawing health check" aria-label="Run drawing health check">
-                  <svg><use href="#icon-select"></use></svg>
-                  <span>Check</span>
-                </button>
-                <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
-                  <svg><use href="#icon-reset"></use></svg>
-                  <span>Revision</span>
-                </button>
-                <button class="icon-button labeled" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
-                  <svg><use href="#icon-export"></use></svg>
-                  <span>Share</span>
-                </button>
-              </section>
-              <section class="action-menu-group">
-                <h2>Export</h2>
-                <button class="primary-button" id="export3dButton" type="button">
-                  <svg><use href="#icon-export"></use></svg>
-                  Export 3D
-                </button>
-                <button class="primary-button" id="exportReportButton" type="button" title="Export fabrication sheet PDF" aria-label="Export fabrication sheet PDF">
-                  <svg><use href="#icon-export"></use></svg>
-                  Fab PDF
-                </button>
-                <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
-                  <svg><use href="#icon-export"></use></svg>
-                  <span>Project file</span>
-                </button>
-              </section>
-              <section class="action-menu-group">
-                <h2>Setup</h2>
-                <button class="icon-button labeled" id="toolSettingsButton" type="button" title="Choose side tools" aria-label="Choose side tools">
-                  <svg><use href="#icon-settings"></use></svg>
-                  <span>Side tools</span>
-                </button>
-                <button class="icon-button labeled" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
-                  <svg><use href="#icon-settings"></use></svg>
-                  <span>Defaults</span>
-                </button>
-                <button class="icon-button labeled" id="helpButton" type="button" title="Open help" aria-label="Open SpoolMate help">
-                  <svg><use href="#icon-help"></use></svg>
-                  <span>Help</span>
-                </button>
-              </section>
+              <div class="action-menu-groups">
+                <section class="action-menu-group">
+                  <h2>Project</h2>
+                  <button class="icon-button labeled" id="homeDashboardButton" type="button" title="Open SpoolMate dashboard" aria-label="Open SpoolMate dashboard">
+                    <svg><use href="#icon-settings"></use></svg>
+                    <span>Dashboard</span>
+                  </button>
+                  <button class="icon-button labeled" id="tutorialButton" type="button" title="Open SpoolMate tutorial" aria-label="Open SpoolMate tutorial">
+                    <svg><use href="#icon-help"></use></svg>
+                    <span>Tutorial</span>
+                  </button>
+                  <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
+                    <svg><use href="#icon-sample"></use></svg>
+                    <span>Sample</span>
+                  </button>
+                  <button class="icon-button labeled" id="importProjectButton" type="button" title="Import spool project" aria-label="Import spool project">
+                    <svg><use href="#icon-sample"></use></svg>
+                    <span>Import</span>
+                  </button>
+                </section>
+                <section class="action-menu-group">
+                  <h2>Review</h2>
+                  <button class="icon-button labeled" id="healthCheckButton" type="button" title="Run drawing health check" aria-label="Run drawing health check">
+                    <svg><use href="#icon-select"></use></svg>
+                    <span>Check</span>
+                  </button>
+                  <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
+                    <svg><use href="#icon-reset"></use></svg>
+                    <span>Revision</span>
+                  </button>
+                  <button class="icon-button labeled" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
+                    <svg><use href="#icon-export"></use></svg>
+                    <span>Share</span>
+                  </button>
+                </section>
+                <section class="action-menu-group">
+                  <h2>Export</h2>
+                  <button class="primary-button" id="export3dButton" type="button">
+                    <svg><use href="#icon-export"></use></svg>
+                    Export 3D
+                  </button>
+                  <button class="primary-button" id="exportReportButton" type="button" title="Export fabrication sheet PDF" aria-label="Export fabrication sheet PDF">
+                    <svg><use href="#icon-export"></use></svg>
+                    Fab PDF
+                  </button>
+                  <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
+                    <svg><use href="#icon-export"></use></svg>
+                    <span>Project file</span>
+                  </button>
+                </section>
+                <section class="action-menu-group">
+                  <h2>Setup</h2>
+                  <button class="icon-button labeled" id="toolSettingsButton" type="button" title="Choose side tools" aria-label="Choose side tools">
+                    <svg><use href="#icon-settings"></use></svg>
+                    <span>Side tools</span>
+                  </button>
+                  <button class="icon-button labeled" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
+                    <svg><use href="#icon-settings"></use></svg>
+                    <span>Defaults</span>
+                  </button>
+                  <button class="icon-button labeled" id="helpButton" type="button" title="Open help" aria-label="Open SpoolMate help">
+                    <svg><use href="#icon-help"></use></svg>
+                    <span>Help</span>
+                  </button>
+                </section>
+              </div>
             </div>
           </div>
         </div>
@@ -648,7 +670,7 @@
               <div class="preview-nav" aria-label="3D navigation">
                 <button class="active" id="previewRotateButton" type="button" aria-pressed="true">Rotate</button>
                 <button id="previewMoveButton" type="button" aria-pressed="false">Move</button>
-                <button id="previewResetButton" type="button">Reset</button>
+                <button id="previewResetButton" type="button" title="Fit spool to view">Fit</button>
               </div>
               <button class="icon-button compact labeled" id="previewFullscreenButton" type="button" title="View 3D full screen" aria-label="View 3D full screen" aria-pressed="false">
                 <svg><use href="#icon-fullscreen"></use></svg>
@@ -875,14 +897,22 @@
           <div class="project-dialog-header">
             <div>
               <strong>Job dashboard</strong>
-              <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Search a job, open a folder, then tap a spool drawing.</small>
+              <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Use the production board or open a job folder, then tap a spool drawing.</small>
             </div>
           </div>
           <div class="project-dashboard-toolbar" aria-label="Job dashboard tools">
             <label class="project-dashboard-search">
               <span>Search jobs, spools or clients</span>
-              <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client or status" autocomplete="off" />
+              <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client, assignee or status" autocomplete="off" />
             </label>
+            <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
+              <svg><use href="#icon-help"></use></svg>
+              <span>Guide</span>
+            </a>
+            <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
+              <svg><use href="#icon-report"></use></svg>
+              <span>Report</span>
+            </button>
             <button class="icon-button labeled" id="projectLibraryNewButton" type="button">
               <svg><use href="#icon-reset"></use></svg>
               <span>New spool</span>
@@ -892,6 +922,36 @@
               <span>Save current</span>
             </button>
           </div>
+          <div class="project-library-guide-slot" id="projectLibraryGuideSlot" hidden>
+            <details class="project-guide-card" id="projectJobsGuide" aria-label="Jobs board guide" open>
+              <summary>How to use this Jobs board</summary>
+              <div class="project-guide-content">
+                <ol>
+                  <li>
+                    <strong>Save each spool first.</strong>
+                    <span>Use Save current so the spool appears in the job list and production board.</span>
+                  </li>
+                  <li>
+                    <strong>Move the spool through stages.</strong>
+                    <span>Drag a card to another stage, or use the Stage menu on the card. You can also change the open drawing from the top Status menu.</span>
+                  </li>
+                  <li>
+                    <strong>Allocate the work.</strong>
+                    <span>Use the card fields for Assigned, Due, Priority and Hold. The same details are also in Review &gt; Checks &gt; Workflow.</span>
+                  </li>
+                  <li>
+                    <strong>Use messages for yard notes.</strong>
+                    <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
+                  </li>
+                </ol>
+                <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
+                <div class="project-guide-actions">
+                  <button type="button" data-project-library-action="hide-guide">Hide guide</button>
+                </div>
+              </div>
+            </details>
+          </div>
+          <div class="project-library-report-slot" id="projectLibraryReportSlot" hidden></div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
           <div class="project-dialog-actions">
             <button class="icon-button labeled" id="projectLibraryCloseButton" type="button">Close</button>
@@ -969,7 +1029,7 @@
                 </article>
                 <article>
                   <strong>3D view</strong>
-                  <p>Drag to rotate. Use Move for panning, Reset to return the camera, and Hide or Minimize when the drawing needs more room.</p>
+                  <p>Drag to rotate, middle mouse or Move to pan, wheel or pinch to zoom, and Fit to centre the whole spool.</p>
                 </article>
                 <article>
                   <strong>If the menu does not open</strong>
@@ -1072,7 +1132,7 @@
                 </article>
                 <article>
                   <strong>Dimension styles</strong>
-                  <p>Pipe labels are compact. Red C/C lines are best for fabrication review. Numbered list reduces clutter on busy drawings.</p>
+                  <p>Use Drawing detail first: Clean, Fab dims, Sizes, Callouts or Full. Use Dim style when you want to fine tune the dimension format.</p>
                 </article>
                 <article>
                   <strong>Takeoff list</strong>
@@ -1163,6 +1223,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=179"></script>
+    <script defer src="./app.js?v=203"></script>
   </body>
 </html>

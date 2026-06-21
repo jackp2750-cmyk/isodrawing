@@ -1,6 +1,177 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v1.79`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.03`.
+
+## v2.03 - Editable Dimension Key Clarity
+
+- Added an instruction line to the numbered dimension key explaining that `D/O` rows can be tapped/clicked in Select mode to edit C/C values.
+- Highlighted editable dimension key rows and added a small `edit` marker so the feature is visible on the drawing.
+- Changed the canvas cursor over editable dimension key rows to a pointer.
+- Bumped app cache to `spoolmate-v151`.
+
+## v2.02 - Socket Tutorial Step
+
+- Added a dedicated tutorial step for sockets showing the right-click/long-press flow, socket count/spacing selection and 90 degree socket rotation.
+- Added a compact animated socket demo that works in light and dark themes.
+- Bumped app cache to `spoolmate-v150`.
+
+## v2.01 - Editable Numbered Dimension Key
+
+- Made numbered dimension key rows clickable in Select mode so `D` rows edit pipe C/C travel and `O` rows edit offset set C/C.
+- Kept red dimension labels draggable for moving dimensions away from the pipe, separate from editing the measurement value.
+- Changed fresh-install, sample and old saved label defaults to use numbered dimensions with callouts.
+- Bumped app cache to `spoolmate-v149`.
+
+## v2.00 - Unified Top Toolbar
+
+- Moved New, Save, Jobs, Account, trial status and Menu into the main top settings toolbar so the header reads as one command strip instead of a separate right-side button island.
+- Compactly sized the project action buttons and kept the overflow menu anchored to the action cluster.
+- Adjusted tablet and phone header rules so the action cluster stays reachable inside the scrollable top strip.
+- Updated the app version comparison so future `v2.x` releases still prompt users to refresh correctly.
+- Bumped app cache to `spoolmate-v148`.
+
+## v1.99 - Dark Pipe Contrast And End Flange Preview
+
+- Brightened the 2D pipe colour in dark mode so pipe runs, tee markers and end caps stand out from the dark iso grid.
+- Changed 3D end flanges so single flanges mount outward from the pipe end instead of straddling the pipe like a mid-run fitting.
+- Bumped app cache to `spoolmate-v147`.
+
+## v1.98 - Jobs Menu Scroll Fix
+
+- Restored scrolling inside the Jobs dashboard by giving the Jobs dialog a fixed internal grid height.
+- Made the saved-jobs list the dedicated vertical scroll area with touch-friendly scrolling on iPad and phone.
+- Bumped app cache to `spoolmate-v146`.
+
+## v1.97 - Socket Chain Dimensions
+
+- Changed socket position dimensions so a socket group measures from the pipe start/bend to the first socket, then centre-to-centre between following sockets.
+- Added `SOCK C/C` wording to the between-socket labels so the fabrication mark-out is clearer.
+- Bumped app cache to `spoolmate-v145`.
+
+## v1.96 - Quieter Corner Branding
+
+- Slimmed the top-left SpoolMate branding so it reads more like corner background branding instead of another control card.
+- Hid the header subtitle, reduced the logo/version badge size and softened the dark-mode glow.
+- Tightened the iPad and phone header breakpoints so the brand takes less room from working controls.
+- Bumped app cache to `spoolmate-v144`.
+
+## v1.95 - Jobs Reports And On-Demand Guide
+
+- Changed the Jobs guide so it is hidden by default and only appears when the `Guide` button is pressed.
+- Added a `Report` button to the Job dashboard with daily and weekly production snapshots.
+- Jobs reports summarize stage counts, recently updated spools, completed spools, due/overdue work, hold items and assignee workload.
+- Added a `Copy` action for pasting the daily/weekly report into messages, emails or handover notes.
+- Bumped app cache to `spoolmate-v143`.
+
+## v1.94 - Static Jobs Guide Link
+
+- Made the Jobs `Guide` control a real in-dialog link to the guide panel, so it still has a working target if scripts or dynamic rendering are delayed.
+- Moved the Jobs guide into a permanent slot above the job list instead of recreating it inside the list.
+- Kept direct and dialog-level click handlers so the Guide button opens, scrolls to and highlights the guide.
+- Bumped app cache to `spoolmate-v142`.
+
+## v1.93 - Interactive Production Board
+
+- Fixed the Jobs `Guide` button by handling it from the whole Jobs dialog, so it still works if the toolbar is rebuilt or cached.
+- Made production cards draggable between stage lanes on desktop.
+- Added quick card controls for stage, assignee, due date, due time, priority and hold.
+- Added short production messages on cards, with `Done` marking messages complete and setting them to be cleaned up after one week.
+- Added a `Complete` card action that moves the spool to Complete and sets it to hide from the board after one week.
+- Bumped app cache to `spoolmate-v141`.
+
+## v1.92 - Visible Jobs Guide Button
+
+- Added a clear `Guide` button to the Job dashboard toolbar.
+- The Guide button opens the Jobs guide, returns from an open job folder if needed, scrolls to the guide and briefly highlights it.
+- Prevented older cached toolbar markup from creating duplicate job toolbars when the Guide button is injected.
+- Bumped app cache to `spoolmate-v140`.
+
+## v1.91 - Jobs Board Guide
+
+- Added a collapsible `How to use this Jobs board` guide inside the Job dashboard, with its open/closed state remembered on the device.
+- The guide explains saving spools, changing production stages, assigning work in Workflow, and using board cards/job folders to open spools.
+- Shows the guide even when there are no saved spools yet so first-time users know the intended flow.
+- Bumped app cache to `spoolmate-v139`.
+
+## v1.90 - Production Workflow Board
+
+- Expanded drawing status into a production flow: Draft, Ready to check, Checked, Issued, Cutting, Fit-up, Welded, Paint / finish and Complete.
+- Added production allocation fields to the Workflow panel: assignee, due date, priority, hold flag and hold note.
+- Added a production board to the Job dashboard so saved spools are grouped by production stage with assignee and due-date details.
+- Kept old `Fabricated` saved statuses compatible by mapping them to Complete.
+- Bumped app cache to `spoolmate-v138`.
+
+## v1.89 - Compact Two-Column Tool Rail
+
+- Changed the vertical drawing tool rail to a compact two-column grid so more tools fit without scrolling.
+- Slightly widened the rail and aligned full-screen drawing mode with the same tool width.
+- Tightened tool button spacing, text and icons while keeping the phone bottom tool strip touch-friendly.
+- Bumped app cache to `spoolmate-v137`.
+
+## v1.88 - Smoother 3D Navigation
+
+- Tuned the Three.js orbit controls for smoother damping, pan speed and zoom speed.
+- Added zoom-to-cursor support when the browser's Three.js controls support it.
+- Kept middle mouse as pan, wheel/pinch as zoom, and updated touch Move mode for easier two-finger pan/zoom.
+- Renamed the 3D Reset control to Fit and kept it as a fit-to-spool camera command.
+- Faded and throttled 3D label updates while moving the model so rotation and panning feel lighter.
+- Bumped app cache to `spoolmate-v136`.
+
+## v1.87 - Drawing Detail Presets
+
+- Added a `Drawing detail` top-bar menu with Clean, Fab dims, Sizes, Callouts and Full presets to reduce drawing clutter.
+- Made compact pipe-size labelling show one label per same-size run plus both sides of size changes instead of repeating every section.
+- Fixed numbered dimension legends on fabrication sheets by keeping the legend inside the exported drawing viewport.
+- Bumped app cache to `spoolmate-v135`.
+
+## v1.86 - Tutorial Demo Panel Height
+
+- Reserved full card height for tutorial demo panels so animated examples cannot be clipped down to just their title row.
+- Synced the Tee demo card height with its taller SVG animation on desktop and touch layouts.
+- Bumped app cache to `spoolmate-v134`.
+
+## v1.85 - Tutorial Demo Visibility
+
+- Gave tutorial demo animations a fixed responsive drawing height so the SVG examples do not collapse inside the tutorial card.
+- Made the Tee demo slightly taller on desktop and touch layouts so the branch animation is visible.
+- Bumped app cache to `spoolmate-v133`.
+
+## v1.84 - Floating 3D Header Wrap
+
+- Made the floating 3D preview header wrap its controls instead of clipping the right-hand menu buttons.
+- Slightly tightened the floating 3D preview button and view-select sizing so narrow preview windows remain usable.
+- Bumped app cache to `spoolmate-v132`.
+
+## v1.83 - Clickable Check Fixes
+
+- Made project detail check rows open the Project details dialog and focus the exact missing field.
+- Made drawing-target checks switch into Edit/Select mode before highlighting the issue.
+- Changed open-end checks to highlight only the actual open endpoint instead of also marking the pipe run.
+- Added a Draw-tool shortcut for the "No pipe runs drawn" check.
+- Bumped app cache to `spoolmate-v131`.
+
+## v1.82 - Tutorial Demo Animations
+
+- Added compact looping tutorial demos so users can watch key actions before trying them.
+- Added animated examples for opening jobs, drawing runs, exact lengths, offsets, selecting runs, making tees, manual measuring, clearing dimensions, 3D preview and review checks.
+- Added a clear Tee demo showing: pick Tee, tap the main run, then draw the branch from the new point.
+- Styled the demo panels for dark mode and smaller touch screens.
+- Bumped app cache to `spoolmate-v130`.
+
+## v1.81 - Job Window Picker
+
+- Replaced expandable/minimized saved-job folders with a focused job window: tap a job, then pick a spool from that job only.
+- Added a Back to jobs button inside the job window so the saved spool picker is clearer on iPad and phone.
+- Kept spool open/delete actions inside the job window and preserved touch, mouse and keyboard activation.
+- Bumped app cache to `spoolmate-v129`.
+
+## v1.80 - Jobs Dashboard Opens Immediately
+
+- Made the Jobs dashboard appear immediately with a loading message before cloud/local spool loading finishes.
+- Added a cloud load timeout so a slow cloud request falls back to browser-saved spools instead of looking like nothing happened.
+- Made saved spool rows respond to click, touch pointer-up and keyboard activation.
+- Added duplicate tap protection so mobile taps do not open and then instantly close a saved job folder.
+- Bumped app cache to `spoolmate-v128`.
 
 ## v1.79 - Interactive Tool Tutorial
 
