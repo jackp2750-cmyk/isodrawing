@@ -1,6 +1,12 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.03`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.04`.
+
+## v2.04 - Tighter Fab Sheet Drawing Crop
+
+- Increased the fab sheet/PDF drawing scale so the actual spool fills more of the drawing panel.
+- Reduced export-only padding around the isometric drawing while keeping room for the title and dimension key.
+- Bumped app cache to `spoolmate-v152`.
 
 ## v2.03 - Editable Dimension Key Clarity
 

@@ -193,7 +193,7 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.03";
+const APP_VERSION = "v2.04";
 const APP_BUILD_DATE = "2026-06-21";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -18839,7 +18839,10 @@ function reportIsoScale(width, height) {
   const maxY = Math.max(...rawPoints.map((point) => point.y));
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
-  return Math.min(82, Math.max(6, Math.min((width - 120) / spanX, (height - 130) / spanY)));
+  const reservedTop = 88;
+  const paddingX = 44;
+  const paddingBottom = 46;
+  return Math.min(132, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
 }
 
 function reportProjection(width, height, scale) {
@@ -18848,9 +18851,11 @@ function reportProjection(width, height, scale) {
   const maxX = Math.max(...rawPoints.map((point) => point.x));
   const minY = Math.min(...rawPoints.map((point) => point.y));
   const maxY = Math.max(...rawPoints.map((point) => point.y));
+  const reservedTop = 88;
+  const paddingBottom = 46;
   return {
     offsetX: width * 0.5 - (minX + maxX) * 0.5,
-    offsetY: height * 0.55 - (minY + maxY) * 0.5,
+    offsetY: reservedTop + (height - reservedTop - paddingBottom) * 0.52 - (minY + maxY) * 0.5,
   };
 }
 
