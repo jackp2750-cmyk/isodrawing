@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.05`
+Current app version: `v2.17`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -17,7 +17,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Pick common flange standards from menus, including ANSI, PN, DIN, JIS and AS 2129 Table types.
 - Pick socket size, quantity and spacing from a visual socket menu.
 - Work with Carbon Sch 40 and Stainless Sch 10S pipe data up to NB 300.
-- Show pipe size labels, red centre-to-centre dimensions, numbered dimensions or chain-style dimensions.
+- Show pipe size labels, red centre-to-centre dimensions, numbered dimension keys or chain-style dimensions.
+- Use the numbered dimension key as the default readable dimension view, with editable `D/O` rows for centre-to-centre values.
 - Drag red dimension labels away from clashes.
 - Add manual measurements by clicking two points on the drawing.
 - Add and drag text notes.

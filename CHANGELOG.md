@@ -1,6 +1,84 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.05`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.17`.
+
+## v2.17 - Flange End-Fitting Split Fix
+
+- Fixed tee/branch splitting so flanges and roll grooves are no longer pushed 4% in from the pipe end when a run is split.
+- Changed flange and roll groove placement to snap to the nearest run end by design, rather than relying on a short distance threshold.
+- Migrated existing flange/groove positions to true endpoint values during normal app updates.
+- Made inspector, weight and COG positions use the displayed endpoint location for flanges and roll grooves.
+- Bumped app cache to `spoolmate-v165`.
+
+## v2.16 - Tee-Side Flange Placement
+
+- Made endpoint fitting placement keep the original right-click position so endpoint snaps can use screen distance as well as pipe distance.
+- Allowed deliberate flange/groove snaps at tee and branch points when the point itself is clicked.
+- Made the 3D flange and roll groove renderer respect tee and branch visual clearance, so endpoint fittings sit at the edge of the tee/branch body instead of floating or burying into it.
+- Bumped app cache to `spoolmate-v164`.
+
+## v2.15 - Endpoint Flange Snap Fix
+
+- Added a physical end-snap rule so flanges and roll grooves within 150 mm of an open pipe end are treated as endpoint fittings.
+- Made right-click fitting placement and direct Flange/Groove tool clicks snap to open pipe endpoints consistently.
+- Updated open-end checks to recognise snapped endpoint flanges and grooves.
+- Bumped app cache to `spoolmate-v163`.
+
+## v2.14 - 3D Flange Anchor Fix
+
+- Anchored endpoint flanges to the rendered 3D pipe endpoint after bend and reducer trims are applied.
+- Kept single end flanges flush with the visible pipe instead of allowing them to float off trimmed pipe ends.
+- Bumped app cache to `spoolmate-v162`.
+
+## v2.13 - Note Callout Polish
+
+- Split drawing notes into a fixed arrow anchor and a separately draggable text label.
+- Replaced the browser note prompt with a SpoolMate note editor dialog.
+- Added note text colour choices and a default note colour selector in the Notes panel.
+- Included dragged note labels in drawing bounds so exports are less likely to crop them.
+- Bumped app cache to `spoolmate-v161`.
+
+## v2.12 - Menu Reliability Fix
+
+- Made the Menu button respond to pointer release as well as normal clicks so touch devices and overlay-heavy states can still open it.
+- Raised the top bar above the floating 3D preview so the preview cannot intercept taps on Menu or cover the opened menu.
+- Bumped app cache to `spoolmate-v160`.
+
+## v2.11 - Tutorial Clarity Pass
+
+- Expanded the interactive tutorial with clearer feature steps for tees/branches, end fittings, pipe-size reducers and fab sheet exports.
+- Added new mini demos for flanges/grooves/reducers, automatic reducers and fab PDF output.
+- Minimized the 3D preview automatically while the tutorial is running, then restored the user's previous preview layout when the tutorial closes.
+- Updated tutorial wording so the mini demo, highlighted control and Try it button flow is clearer.
+- Bumped app cache to `spoolmate-v159`.
+
+## v2.10 - Tablet and Mobile Layout Pass
+
+- Reworked the top settings strip so it wraps into usable controls instead of acting like a horizontal slider.
+- Added a separate tablet layout class so iPad can use a touch-first layout without inheriting every phone rule.
+- Simplified phone top controls by hiding lower-priority setup items and giving the remaining controls larger tap zones.
+- Enlarged mobile drawing tool buttons and bottom tool rails for Android/iPad touch use.
+- Kept drawing tools visible in full-screen drawing mode and hid the mobile panel dock there to prevent overlap.
+- Bumped app cache to `spoolmate-v158`.
+
+## v2.07 - 3D Model Trust Pass
+
+- Tightened roll groove geometry so end grooves read as narrow bands close to the pipe end instead of wide sleeves.
+- Anchored endpoint flanges to the true spool end so bend/reducer pipe trimming cannot make a flange appear separated from the pipe.
+- Added render-length limiting for automatic reducers so reducers cannot visually overpower short pipe sections.
+- Made reducer trimming use the same length as the rendered reducer mesh.
+- Reduced bulky 3D tee centre spheres and added branch rings for clearer tee joins.
+- Slimmed welded branch collars so branches read more like pipe welded into a main run.
+- Bumped app cache to `spoolmate-v155`.
+
+## v2.06 - Interface and Dimension Cleanup
+
+- Split the main header into a compact settings group and a separate action group for New, Save, Jobs, Account and Menu.
+- Renamed dimension controls to make the default numbered key workflow clearer.
+- Added an on-drawing hint when numbered dimensions are active, showing that `D/O` rows can be selected to edit centre-to-centre values.
+- Improved the numbered dimension key contrast in dark mode.
+- Tightened fabrication sheet/PDF drawing crop so the spool uses more of the drawing frame.
+- Bumped app cache to `spoolmate-v154`.
 
 ## v2.05 - Drawing Import Assistant
 

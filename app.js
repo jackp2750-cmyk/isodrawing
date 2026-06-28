@@ -53,6 +53,7 @@ const pipeSpecSelect = document.querySelector("#pipeSpecSelect");
 const pipeSizeSelect = document.querySelector("#pipeSizeSelect");
 const pipeSizeReadout = document.querySelector("#pipeSizeReadout");
 const noteTextInput = document.querySelector("#noteTextInput");
+const noteColorInput = document.querySelector("#noteColorInput");
 const flangeModeSelect = document.querySelector("#flangeModeSelect");
 const flangeStandardSelect = document.querySelector("#flangeStandardSelect");
 const dimensionToggle = document.querySelector("#dimensionToggle");
@@ -164,6 +165,12 @@ const tutorialPrevButton = document.querySelector("#tutorialPrevButton");
 const tutorialActionButton = document.querySelector("#tutorialActionButton");
 const tutorialNextButton = document.querySelector("#tutorialNextButton");
 const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
+const noteDialog = document.querySelector("#noteDialog");
+const noteDialogTitle = document.querySelector("#noteDialogTitle");
+const noteDialogText = document.querySelector("#noteDialogText");
+const noteDialogColourButtons = [...document.querySelectorAll("[data-note-colour]")];
+const noteDialogCancelButton = document.querySelector("#noteDialogCancelButton");
+const noteDialogSaveButton = document.querySelector("#noteDialogSaveButton");
 const drawingAssistantDialog = document.querySelector("#drawingAssistantDialog");
 const drawingAssistantCloseButton = document.querySelector("#drawingAssistantCloseButton");
 const drawingAssistantFileInput = document.querySelector("#drawingAssistantFileInput");
@@ -210,8 +217,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.05";
-const APP_BUILD_DATE = "2026-06-21";
+const APP_VERSION = "v2.17";
+const APP_BUILD_DATE = "2026-06-28";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -340,7 +347,7 @@ const FLANGE_STANDARDS = {
 const FLANGE_STANDARD_KEYS = new Set(Object.keys(FLANGE_STANDARDS));
 const END_FITTING_SNAP_TOLERANCE = 0.015;
 const ROLL_GROOVE_SETBACK_MM = 10;
-const ROLL_GROOVE_VISUAL_WIDTH_MM = 24;
+const ROLL_GROOVE_VISUAL_WIDTH_MM = 18;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
 const DRAWING_DETAIL_MODES = new Set(["clean", "fab", "sizes", "callouts", "full"]);
@@ -482,17 +489,46 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Fittings",
-    title: "Add tees, branches and fittings",
-    body: "Tee and Branch are available while drawing. Other fittings can be added from Edit mode or by right-clicking/long-pressing a run or point.",
+    title: "Add tees and branches while drawing",
+    body: "Tee and Branch stay close to the normal drawing workflow. Pick the tool, tap the main run and draw the new branch from the point SpoolMate creates.",
     target: '[data-tool="tee"]',
     mode: "draw",
     action: "teeTool",
     actionLabel: "Select Tee",
     demo: "tee",
     items: [
-      "Tee adds tee takeoff and fitting weight.",
-      "Branch is a welded pipe into the side of a larger pipe.",
-      "Changing pipe size can add reducers when the connection needs one.",
+      "Tee splits the main run and adds tee takeoff and fitting weight.",
+      "Branch is a welded pipe into the side of a larger pipe, so it does not split the main pipe cut.",
+      "Use Branch when the smaller pipe is cut into the bigger pipe instead of using a tee fitting.",
+    ],
+  },
+  {
+    kicker: "End Fittings",
+    title: "Add flanges, grooves and reducers",
+    body: "End fittings can be added from the side tools or from the right-click/long-press menu on a pipe end or run.",
+    target: '[data-tool="flange"]',
+    mode: "edit",
+    action: "flangeTool",
+    actionLabel: "Select Flange",
+    demo: "fittings",
+    items: [
+      "Single flange is the default, but double flange is still available.",
+      "Flange standard is picked from the menu, including Table E, PN and ANSI options.",
+      "Roll grooves sit close to the pipe end and add no weight.",
+    ],
+  },
+  {
+    kicker: "Pipe Size",
+    title: "Change pipe size from menus",
+    body: "Pipe NB is chosen from the pipe-size menu. When connected pipe sizes change, SpoolMate adds reducers where the connection needs one.",
+    target: "#pipeSizeSelect",
+    action: "focusPipeSize",
+    actionLabel: "Open Pipe Size",
+    demo: "reducer",
+    items: [
+      "Use the top Pipe NB menu for the next run size.",
+      "Right-click or long-press selected pipe to change existing sizes from the list.",
+      "Reducers are added for size changes on normal pipe and tee connections. Branches are treated as welded into the main pipe.",
     ],
   },
   {
@@ -556,7 +592,7 @@ const TUTORIAL_STEPS = [
   {
     kicker: "Review",
     title: "Check before saving or issuing",
-    body: "The Checks, Cut List, Weights and BOM tabs turn the drawing into fabrication information.",
+    body: "The Checks, Cut List, Weights and BOM tabs turn the drawing into fabrication information before anyone starts cutting pipe.",
     target: '[data-inspector-tab="checks"]',
     mode: "review",
     action: "showChecks",
@@ -566,6 +602,21 @@ const TUTORIAL_STEPS = [
       "Checks can highlight issues directly on the drawing.",
       "Cut List and BOM show what needs to be made and ordered.",
       "Verify estimated weights and lifting details before fabrication or lifting.",
+    ],
+  },
+  {
+    kicker: "Export",
+    title: "Send a fab sheet or 3D image",
+    body: "Export mode is where the drawing becomes paperwork for the workshop: PDF fab sheets, 3D images and project files that can be opened again later.",
+    target: "#exportReportButton",
+    mode: "export",
+    action: "focusExport",
+    actionLabel: "Open Export",
+    demo: "export",
+    items: [
+      "Fab PDF includes the drawing, dimension key, cut list, weights and takeoff list.",
+      "Export 3D gives a clean model image for explaining the spool.",
+      "Project export is the backup file if someone needs to import the spool later.",
     ],
   },
 ];
@@ -722,6 +773,52 @@ const SOCKET_SPACING_CHOICES = [
   { key: "250", label: "250 mm", detail: "C/C spacing" },
   { key: "300", label: "300 mm", detail: "C/C spacing" },
 ];
+const NOTE_LABEL_DEFAULT_OFFSET = { x: 104, y: -44 };
+const DEFAULT_NOTE_COLOUR = "teal";
+const NOTE_COLOURS = [
+  {
+    key: "teal",
+    label: "Teal",
+    line: "#0f766e",
+    fill: "rgba(216, 241, 237, 0.96)",
+    border: "rgba(15, 118, 110, 0.46)",
+    text: "#143f43",
+  },
+  {
+    key: "blue",
+    label: "Blue",
+    line: "#2563eb",
+    fill: "rgba(219, 234, 254, 0.96)",
+    border: "rgba(37, 99, 235, 0.45)",
+    text: "#17356b",
+  },
+  {
+    key: "red",
+    label: "Red",
+    line: "#c1121f",
+    fill: "rgba(255, 232, 234, 0.96)",
+    border: "rgba(193, 18, 31, 0.45)",
+    text: "#74202a",
+  },
+  {
+    key: "amber",
+    label: "Amber",
+    line: "#b7791f",
+    fill: "rgba(255, 244, 214, 0.96)",
+    border: "rgba(183, 121, 31, 0.45)",
+    text: "#66410f",
+  },
+  {
+    key: "white",
+    label: "White",
+    line: "#475569",
+    fill: "rgba(248, 250, 252, 0.97)",
+    border: "rgba(71, 85, 105, 0.36)",
+    text: "#263d45",
+  },
+];
+const NOTE_COLOUR_KEYS = new Set(NOTE_COLOURS.map((colour) => colour.key));
+const noteColourByKey = new Map(NOTE_COLOURS.map((colour) => [colour.key, colour]));
 
 const drawingContextMenu = document.createElement("div");
 drawingContextMenu.className = "drawing-context-menu";
@@ -780,8 +877,11 @@ let activeTouchPointers = new Map();
 let pinchGesture = null;
 let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
+let noteDialogResolver = null;
+let noteDialogColour = DEFAULT_NOTE_COLOUR;
 let tutorialStepIndex = 0;
 let tutorialHighlightedElement = null;
+let tutorialPreviewRestoreState = null;
 let drawingAssistantState = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
@@ -791,6 +891,7 @@ let previewFloatBounds = null;
 let previewFloatManual = loadPreviewFloatPreference();
 let previewPanelMinimized = false;
 let previewPanelHidden = false;
+let actionMenuPointerToggle = false;
 let healthHighlight = null;
 let healthHighlightAnimationFrame = 0;
 let startupProjectPromptPending = false;
@@ -1796,8 +1897,19 @@ function normalizeFittingPosition(type, value) {
   return clampNumber(fallback, 0.04, 0.96);
 }
 
-function fittingDisplayT(segment, fitting) {
+function endpointSnappedFittingTForLength(fitting, lengthMm) {
   const t = normalizeFittingPosition(fitting?.type, fitting?.t);
+  if (fitting?.type !== "flange" && fitting?.type !== "rollGroove") return t;
+  return t <= 0.5 ? 0 : 1;
+}
+
+function endpointSnappedFittingT(segment, fitting) {
+  const lengthMm = pointLength(segment?.vector ?? { x: 0, y: 0, z: 0 });
+  return endpointSnappedFittingTForLength(fitting, lengthMm);
+}
+
+function fittingDisplayT(segment, fitting) {
+  const t = endpointSnappedFittingT(segment, fitting);
   if (fitting?.type !== "rollGroove") return t;
   if (!segment) return t;
   const lengthMm = pointLength(segment?.vector);
@@ -1813,9 +1925,13 @@ function fittingDisplayPoint(segment, fitting) {
 }
 
 function normalizeStateFittingPositions() {
+  const segmentByIndex = new Map(segments().map((segment) => [segment.index, segment]));
   for (const fitting of state.fittings) {
     const current = Number(fitting.t);
-    const normalized = normalizeFittingPosition(fitting.type, fitting.t);
+    const segment = segmentByIndex.get(fitting.segmentIndex);
+    const normalized = isEndpointFittingType(fitting.type) && segment
+      ? endpointSnappedFittingT(segment, fitting)
+      : normalizeFittingPosition(fitting.type, fitting.t);
     if (!Number.isFinite(current) || Math.abs(normalized - current) > 0.000001) {
       fitting.t = normalized;
     }
@@ -1832,14 +1948,46 @@ function normalizeSelectedSegments(values, edgeCount) {
     );
 }
 
+function normalizeNoteColour(value) {
+  return NOTE_COLOUR_KEYS.has(value) ? value : DEFAULT_NOTE_COLOUR;
+}
+
+function noteColourStyle(value) {
+  return noteColourByKey.get(normalizeNoteColour(value)) ?? noteColourByKey.get(DEFAULT_NOTE_COLOUR);
+}
+
+function defaultNoteLabelPoint(anchorPoint, projection = getProjection()) {
+  const anchor = projectIso(anchorPoint, projection);
+  return unprojectIsoAtZ(
+    {
+      x: anchor.x + NOTE_LABEL_DEFAULT_OFFSET.x,
+      y: anchor.y + NOTE_LABEL_DEFAULT_OFFSET.y,
+    },
+    Number(anchorPoint.z) || 0,
+    false,
+  );
+}
+
+function noteLabelPoint(note, projection = getProjection()) {
+  if (!note.labelPoint) {
+    note.labelPoint = defaultNoteLabelPoint(note.point, projection);
+  }
+  return note.labelPoint;
+}
+
 function normalizeNotes(notes) {
   if (!Array.isArray(notes)) return [];
   return notes
-    .map((note) => ({
-      id: Number(note.id) || nextNoteId++,
-      text: String(note.text ?? "").slice(0, 80),
-      point: clonePoint(note.point ?? {}),
-    }))
+    .map((note) => {
+      const point = clonePoint(note.point ?? {});
+      return {
+        id: Number(note.id) || nextNoteId++,
+        text: String(note.text ?? "").slice(0, 80),
+        point,
+        labelPoint: note.labelPoint ? clonePoint(note.labelPoint) : null,
+        colour: normalizeNoteColour(note.colour ?? note.color),
+      };
+    })
     .filter((note) => note.text.trim());
 }
 
@@ -3035,29 +3183,50 @@ function drawNotes2d(ctx, projection) {
 
   for (const note of state.notes) {
     const point = projectIso(note.point, projection);
+    const labelPoint = projectIso(noteLabelPoint(note, projection), projection);
     const text = note.text.trim();
     const metrics = ctx.measureText(text);
     const selected = state.selectedNote === note.id;
+    const colour = noteColourStyle(note.colour);
     const paddingX = 8;
-    const width = metrics.width + paddingX * 2;
+    const width = Math.max(44, Math.min(280, metrics.width + paddingX * 2));
     const height = 24;
-    const x = point.x + 10;
-    const y = point.y - 18;
+    const x = labelPoint.x - width / 2;
+    const y = labelPoint.y - height / 2;
+    const labelCenter = { x: labelPoint.x, y: labelPoint.y };
+    const dx = labelCenter.x - point.x;
+    const dy = labelCenter.y - point.y;
+    const lineLength = Math.hypot(dx, dy) || 1;
+    const edgeInset = {
+      x: dx / lineLength * Math.min(width / 2, Math.max(10, width * 0.42)),
+      y: dy / lineLength * Math.min(height / 2, 10),
+    };
+    const labelEdge = {
+      x: labelCenter.x - edgeInset.x,
+      y: labelCenter.y - edgeInset.y,
+    };
 
-    ctx.strokeStyle = selected ? "#0f766e" : "rgba(31, 42, 47, 0.28)";
-    ctx.fillStyle = selected ? "rgba(216, 241, 237, 0.96)" : "rgba(255, 253, 248, 0.94)";
+    ctx.strokeStyle = selected ? colour.line : colour.border;
+    ctx.fillStyle = colour.fill;
     ctx.lineWidth = selected ? 2 : 1;
-    roundRect(ctx, x, y - height / 2, width, height, 6);
+    roundRect(ctx, x, y, width, height, 6);
     ctx.fill();
     ctx.stroke();
 
     ctx.beginPath();
     ctx.moveTo(point.x, point.y);
-    ctx.lineTo(x, y);
+    ctx.lineTo(labelEdge.x, labelEdge.y);
+    ctx.strokeStyle = colour.line;
+    ctx.lineWidth = selected ? 2.2 : 1.5;
     ctx.stroke();
 
-    ctx.fillStyle = "#263d45";
-    ctx.fillText(text, x + paddingX, y + 1);
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, selected ? 4.5 : 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = colour.line;
+    ctx.fill();
+
+    ctx.fillStyle = colour.text;
+    ctx.fillText(text, x + paddingX, labelCenter.y + 1);
   }
 
   ctx.restore();
@@ -3575,6 +3744,7 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   if (!items.length) return;
 
   const viewport = dimensionLayout?.viewport ?? dimensionViewport(ctx, 12);
+  const dark = isDarkAppTheme();
   const maxItems = 18;
   const visibleItems = items.slice(0, maxItems);
   const overflowCount = items.length - visibleItems.length;
@@ -3594,25 +3764,25 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   const x = viewport.right - cardWidth;
   const y = viewport.top;
 
-  ctx.shadowColor = "rgba(31, 42, 47, 0.14)";
-  ctx.shadowBlur = 10;
+  ctx.shadowColor = dark ? "rgba(0, 0, 0, 0.42)" : "rgba(31, 42, 47, 0.14)";
+  ctx.shadowBlur = dark ? 14 : 10;
   ctx.shadowOffsetY = 4;
   roundRect(ctx, x, y, cardWidth, cardHeight, 8);
-  ctx.fillStyle = "rgba(255, 253, 248, 0.94)";
+  ctx.fillStyle = dark ? "rgba(6, 18, 28, 0.94)" : "rgba(255, 253, 248, 0.94)";
   ctx.fill();
   ctx.shadowColor = "transparent";
-  ctx.strokeStyle = "rgba(193, 18, 31, 0.2)";
+  ctx.strokeStyle = dark ? "rgba(19, 216, 255, 0.34)" : "rgba(193, 18, 31, 0.2)";
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  ctx.fillStyle = "#7f1d1d";
+  ctx.fillStyle = dark ? "#dffbff" : "#7f1d1d";
   ctx.font = "950 11px Inter, system-ui, sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
-  ctx.fillText("Dimension key", x + padding, y + padding + 10);
-  ctx.fillStyle = "#4b6468";
+  ctx.fillText("Dimension key - editable", x + padding, y + padding + 10);
+  ctx.fillStyle = dark ? "rgba(203, 224, 235, 0.78)" : "#4b6468";
   ctx.font = "850 9.5px Inter, system-ui, sans-serif";
-  ctx.fillText(fitCanvasText(ctx, "Select: tap/click D/O rows to edit C/C", cardWidth - padding * 2), x + padding, y + padding + 25);
+  ctx.fillText(fitCanvasText(ctx, "Select mode: click D/O rows to change C/C", cardWidth - padding * 2), x + padding, y + padding + 25);
 
   ctx.font = "850 10.5px Inter, system-ui, sans-serif";
   const listItems = overflowCount > 0
@@ -3632,7 +3802,7 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
     };
     const editableKey = item.target?.type === "segment" || item.target?.type === "offset-set";
     if (editableKey && item.code !== "...") {
-      ctx.fillStyle = "rgba(19, 216, 255, 0.08)";
+      ctx.fillStyle = dark ? "rgba(19, 216, 255, 0.14)" : "rgba(19, 216, 255, 0.08)";
       roundRect(ctx, rowBounds.left, rowBounds.top, rowBounds.right - rowBounds.left, rowBounds.bottom - rowBounds.top, 5);
       ctx.fill();
     }
@@ -3646,14 +3816,15 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
         lines: [],
       });
     }
-    ctx.fillStyle = item.code === "..." ? "#657579" : "#c1121f";
+    ctx.fillStyle = item.code === "..." ? (dark ? "#7f93a4" : "#657579") : (dark ? "#ff8a8a" : "#c1121f");
     ctx.fillText(item.code, itemX, itemY);
-    ctx.fillStyle = "#263538";
+    ctx.fillStyle = dark ? "#ecfeff" : "#263538";
     const showEditTag = editableKey && item.code !== "..." && colWidth > 138;
     const itemTextWidth = showEditTag ? Math.max(72, maxTextWidth - 34) : maxTextWidth;
     ctx.fillText(fitCanvasText(ctx, item.text, itemTextWidth), itemX + 28, itemY);
     if (showEditTag) {
       ctx.fillStyle = "#0f766e";
+      if (dark) ctx.fillStyle = "#13d8ff";
       ctx.font = "900 8.5px Inter, system-ui, sans-serif";
       ctx.fillText("edit", rowBounds.right - 24, itemY);
       ctx.font = "850 10.5px Inter, system-ui, sans-serif";
@@ -4814,11 +4985,11 @@ function findNearestNote(pointer) {
   const projection = getProjection();
   let nearest = null;
   for (const note of state.notes) {
-    const screen = projectIso(note.point, projection);
+    const screen = projectIso(noteLabelPoint(note, projection), projection);
     const labelWidth = Math.max(42, Math.min(280, String(note.text ?? "").length * 7.2 + 16));
     const labelHeight = 24;
-    const labelLeft = screen.x + 10;
-    const labelTop = screen.y - 18 - labelHeight * 0.5;
+    const labelLeft = screen.x - labelWidth * 0.5;
+    const labelTop = screen.y - labelHeight * 0.5;
     const inLabel =
       pointer.x >= labelLeft - 8 &&
       pointer.x <= labelLeft + labelWidth + 8 &&
@@ -5186,7 +5357,7 @@ function selectedFittingData() {
   return {
     fitting,
     segment,
-    point: lerpPoint(segment.start, segment.end, fitting.t),
+    point: fittingDisplayPoint(segment, fitting),
     weightKg: fittingWeightKg(fitting, segment),
     weightSource: fittingWeightSource(fitting, segment),
   };
@@ -5837,7 +6008,7 @@ function fittingQuantities(segmentData = segments()) {
       return {
         fitting,
         segment,
-        point: lerpPoint(segment.start, segment.end, fitting.t),
+        point: fittingDisplayPoint(segment, fitting),
         weightKg: fittingWeightKg(fitting, segment),
         weightSource: fittingWeightSource(fitting, segment),
       };
@@ -6198,6 +6369,22 @@ function reducerModelLengthMetres(reducer) {
   return Math.max(0.08, (Number(reducer?.lengthMm) || 0) / 1000);
 }
 
+function reducerRenderLengthMetres(reducer) {
+  const nominalLength = reducerModelLengthMetres(reducer);
+  const segmentLengths = [reducer?.largeSegment, reducer?.smallSegment]
+    .map((segment) => pointLength(segment?.vector ?? { x: 0, y: 0, z: 0 }) / 1000)
+    .filter((length) => Number.isFinite(length) && length > 0);
+  const placementLength = reducer?.kind === "inline"
+    ? Math.min(...segmentLengths)
+    : pointLength(reducerPlacementSegment(reducer)?.vector ?? { x: 0, y: 0, z: 0 }) / 1000;
+  if (!Number.isFinite(placementLength) || placementLength <= 0) return nominalLength;
+
+  const maxShare = reducer?.kind === "tee" ? 0.48 : reducer?.kind === "inline" ? 0.44 : 0.58;
+  const minimumVisibleLength = 0.035;
+  const maxLength = Math.max(minimumVisibleLength, placementLength * maxShare);
+  return clampNumber(nominalLength, minimumVisibleLength, maxLength);
+}
+
 function teeReducerStartOffsetMetres(reducer) {
   if (!reducerStartsAtJoint(reducer)) return 0;
   const coreRadius = Math.max(
@@ -6258,7 +6445,7 @@ function computeAutoReducerRenderTrims(reducers) {
   };
 
   for (const reducer of reducers) {
-    const modelLength = reducerModelLengthMetres(reducer);
+    const modelLength = reducerRenderLengthMetres(reducer);
     if (reducer.kind === "bend") {
       addTrim(reducerPlacementSegment(reducer), reducer.nodeIndex, modelLength);
     } else if (reducerStartsAtJoint(reducer)) {
@@ -6564,18 +6751,26 @@ function splitSegmentAt(segmentIndex, t) {
   );
   reindexDimensionOffsetsAfterSegmentSplit(segmentIndex);
 
+  const normalizedSplitFittingT = (fitting, localT) => {
+    if (isEndpointFittingType(fitting.type)) {
+      return localT <= 0.5 ? 0 : 1;
+    }
+    return Math.max(0.04, Math.min(0.96, localT));
+  };
+
   state.fittings = state.fittings.map((fitting) => {
     if (fitting.segmentIndex < segmentIndex) return fitting;
     if (fitting.segmentIndex > segmentIndex) {
       return { ...fitting, segmentIndex: fitting.segmentIndex + 1 };
     }
-    if (fitting.t <= t) {
-      return { ...fitting, t: Math.max(0.04, Math.min(0.96, fitting.t / t)) };
+    const fittingT = normalizeFittingPosition(fitting.type, fitting.t);
+    if (fittingT <= t) {
+      return { ...fitting, t: normalizedSplitFittingT(fitting, fittingT / t) };
     }
     return {
       ...fitting,
       segmentIndex: segmentIndex + 1,
-      t: Math.max(0.04, Math.min(0.96, (fitting.t - t) / (1 - t))),
+      t: normalizedSplitFittingT(fitting, (fittingT - t) / (1 - t)),
     };
   });
 
@@ -6589,11 +6784,12 @@ function splitSegmentAt(segmentIndex, t) {
 
 function placeFitting(type, segmentIndex, t, options = {}) {
   if (!ensureDrawingEditable("add fittings")) return;
+  const normalizedT = normalizeFittingPosition(type, t);
   const fitting = {
     id: nextFittingId,
     type,
     segmentIndex,
-    t: normalizeFittingPosition(type, t),
+    t: isEndpointFittingType(type) ? (normalizedT <= 0.5 ? 0 : 1) : normalizedT,
   };
   if (type === "flange") {
     fitting.flangeMode = normalizeFlangeMode(options.flangeMode ?? state.flangeMode);
@@ -6643,12 +6839,17 @@ function placeSocketFittings(segmentIndex, positions, options = {}) {
 
 function placeNote(point, textOverride = null) {
   if (!ensureDrawingEditable("add notes")) return;
-  const text = String(textOverride ?? noteTextInput.value).trim() || "NOTE";
+  const noteOptions = textOverride && typeof textOverride === "object" ? textOverride : { text: textOverride };
+  const text = String(noteOptions.text ?? noteTextInput.value).trim() || "NOTE";
+  const colour = normalizeNoteColour(noteOptions.colour ?? noteOptions.color ?? noteColorInput?.value);
   noteTextInput.value = text.slice(0, 80);
+  if (noteColorInput) noteColorInput.value = colour;
   const note = {
     id: nextNoteId,
     text: text.slice(0, 80),
     point,
+    labelPoint: defaultNoteLabelPoint(point),
+    colour,
   };
   state.notes.push(note);
   state.selectedNote = nextNoteId;
@@ -7158,7 +7359,7 @@ function endpointHasFinish(segment, pointIndex) {
   return state.fittings.some((fitting) =>
     fitting.segmentIndex === segment.index &&
     (fitting.type === "flange" || fitting.type === "rollGroove") &&
-    Math.abs(normalizeFittingPosition(fitting.type, fitting.t) - endpointT) < 0.001,
+    Math.abs(fittingDisplayT(segment, fitting) - endpointT) < 0.001,
   );
 }
 
@@ -8020,9 +8221,10 @@ function updatePropertiesPanel() {
         "Text note",
         [
           ["Text", note.text],
-          ["X", `${formatLength(note.point.x)} mm`],
-          ["Y", `${formatLength(note.point.y)} mm`],
-          ["Z", `${formatLength(note.point.z)} mm`],
+          ["Colour", noteColourStyle(note.colour).label],
+          ["Arrow X", `${formatLength(note.point.x)} mm`],
+          ["Arrow Y", `${formatLength(note.point.y)} mm`],
+          ["Arrow Z", `${formatLength(note.point.z)} mm`],
         ],
         [
           ["edit-note", "Edit note"],
@@ -8851,7 +9053,9 @@ function setupTouchSelectionGuards() {
 function updateTouchComfortClass() {
   const touchMode = isTabletLayout();
   const phoneMode = isPhoneLayout();
+  const tabletMode = touchMode && !phoneMode;
   document.body.classList.toggle("touch-comfort", touchMode);
+  document.body.classList.toggle("tablet-layout", tabletMode);
   document.body.classList.toggle("phone-layout", phoneMode);
   document.body.classList.toggle("mobile-touch-layout", touchMode);
 }
@@ -8980,15 +9184,39 @@ function toggleActionMenu() {
   }
 }
 
+function handleActionMenuToggle(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  toggleActionMenu();
+}
+
 function setupActionMenu() {
+  actionMenuButton?.addEventListener("pointerup", (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+    actionMenuPointerToggle = true;
+    handleActionMenuToggle(event);
+    window.setTimeout(() => {
+      actionMenuPointerToggle = false;
+    }, 500);
+  });
   actionMenuButton?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    toggleActionMenu();
+    if (actionMenuPointerToggle) {
+      event.preventDefault();
+      event.stopPropagation();
+      actionMenuPointerToggle = false;
+      return;
+    }
+    handleActionMenuToggle(event);
   });
   actionMenuCloseButton?.addEventListener("click", closeActionMenu);
   actionMenuPanel?.addEventListener("click", (event) => {
     const actionButton = event.target.closest("button");
     if (!actionButton || actionButton === actionMenuCloseButton) return;
+    if (actionButton === tutorialButton) {
+      event.preventDefault();
+      openTutorialDialog();
+      return;
+    }
     window.setTimeout(closeActionMenu, 80);
   });
   document.addEventListener("pointerdown", (event) => {
@@ -9080,6 +9308,41 @@ function syncTutorialTarget(options = {}) {
   });
 }
 
+function minimizePreviewForTutorial() {
+  if (!previewPanel) return;
+  if (!tutorialPreviewRestoreState) {
+    tutorialPreviewRestoreState = {
+      hidden: previewPanelHidden,
+      minimized: previewPanelMinimized,
+      floatManual: previewFloatManual,
+      floatBounds: previewFloatBounds ? { ...previewFloatBounds } : null,
+      mobilePanel: document.body.dataset.mobilePanel || "drawing",
+    };
+  }
+  if (previewPanelHidden) return;
+  previewPanelMinimized = true;
+  updatePreviewFloatingState();
+  if (isTabletLayout()) {
+    showMobilePanel("drawing");
+  }
+}
+
+function restorePreviewAfterTutorial() {
+  if (!tutorialPreviewRestoreState) return;
+  const restore = tutorialPreviewRestoreState;
+  tutorialPreviewRestoreState = null;
+  previewPanelHidden = restore.hidden;
+  previewPanelMinimized = restore.minimized;
+  previewFloatManual = restore.floatManual;
+  previewFloatBounds = restore.floatBounds ? { ...restore.floatBounds } : null;
+  storePreviewFloatPreference(previewFloatManual);
+  updatePreviewFloatingState();
+  if (isTabletLayout() && restore.mobilePanel) {
+    showMobilePanel(restore.mobilePanel);
+  }
+  schedulePreviewStabilize();
+}
+
 function prepareTutorialStep(step = currentTutorialStep()) {
   closeActionMenu();
   closeHomeDashboard();
@@ -9087,6 +9350,10 @@ function prepareTutorialStep(step = currentTutorialStep()) {
   closeHelpDialog();
   closeToolSettingsDialog();
   closeDrawingContextMenu();
+
+  if (document.body.classList.contains("tutorial-running") && step.action !== "showPreview") {
+    minimizePreviewForTutorial();
+  }
 
   if (step.mode && normalizeAppMode(step.mode) !== appMode) {
     applyAppMode(step.mode, { activateTab: false, keepTool: true });
@@ -9191,6 +9458,49 @@ function tutorialDemoMarkup(kind) {
         <div class="tutorial-demo-caption">Pick Tee, tap the main run, then draw the branch from the new point.</div>
       </div>
     `,
+    fittings: `
+      <div class="tutorial-demo tutorial-demo-fittings" aria-label="Animated demo showing flange, roll groove and reducer fittings">
+        <div class="tutorial-demo-title">Demo: end fittings</div>
+        <svg viewBox="0 0 320 160" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 126 L80 80 L160 126 L240 80 L320 126 M0 80 L80 34 L160 80 L240 34 L320 80" />
+          <path class="demo-pipe base" d="M54 108 L258 50" />
+          <path class="demo-pipe draw-line exact-line" d="M54 108 L258 50" />
+          <g class="demo-flange-fitting">
+            <line x1="54" y1="108" x2="42" y2="121" />
+            <rect x="24" y="112" width="42" height="18" rx="4" />
+            <circle cx="32" cy="117" r="2.5" />
+            <circle cx="58" cy="125" r="2.5" />
+          </g>
+          <g class="demo-roll-groove">
+            <line x1="236" y1="56" x2="250" y2="52" />
+            <line x1="244" y1="54" x2="258" y2="50" />
+          </g>
+          <g class="demo-manual-reducer">
+            <path d="M132 88 L172 69" />
+            <path d="M126 77 L178 58" />
+          </g>
+          <text x="28" y="44" class="demo-step demo-step-one">Flange end</text>
+          <text x="186" y="36" class="demo-step demo-step-two">Groove near end</text>
+          <text x="116" y="128" class="demo-step demo-step-three">Reducer on run</text>
+        </svg>
+        <div class="tutorial-demo-caption">Use the side tool or right-click/long-press where the fitting belongs.</div>
+      </div>
+    `,
+    reducer: `
+      <div class="tutorial-demo tutorial-demo-reducer" aria-label="Animated demo showing a pipe size change with a reducer">
+        <div class="tutorial-demo-title">Demo: pipe size change</div>
+        <svg viewBox="0 0 320 145" role="img" aria-hidden="true">
+          <path class="demo-grid" d="M0 112 L80 66 L160 112 L240 66 L320 112 M0 66 L80 20 L160 66 L240 20 L320 66" />
+          <path class="demo-pipe demo-pipe-large" d="M48 98 L138 72" />
+          <path class="demo-reducer-body" d="M134 57 L196 50 L196 79 L134 88 Z" />
+          <path class="demo-pipe demo-pipe-small" d="M196 65 L278 42" />
+          <text x="48" y="44" class="demo-label">NB 100</text>
+          <text x="224" y="31" class="demo-label">NB 50</text>
+          <text x="136" y="116" class="demo-dim-text demo-reducer-note">Reducer added</text>
+        </svg>
+        <div class="tutorial-demo-caption">Changing pipe size keeps the smaller pipe smaller and inserts a reducer at the connection.</div>
+      </div>
+    `,
     sockets: `
       <div class="tutorial-demo tutorial-demo-sockets" aria-label="Animated demo showing sockets added from the pipe right click menu">
         <div class="tutorial-demo-title">Demo: add sockets</div>
@@ -9283,6 +9593,30 @@ function tutorialDemoMarkup(kind) {
         <div class="tutorial-demo-caption">Click a check warning to highlight where to look.</div>
       </div>
     `,
+    export: `
+      <div class="tutorial-demo tutorial-demo-export" aria-label="Animated demo showing a fabrication PDF sheet being exported">
+        <div class="tutorial-demo-title">Demo: fab sheet output</div>
+        <div class="demo-export-sheet">
+          <div class="demo-export-page">
+            <strong>FAB PDF</strong>
+            <svg viewBox="0 0 220 92" role="img" aria-hidden="true">
+              <path class="demo-grid" d="M0 78 L45 52 L90 78 L135 52 L180 78 L225 52 M0 52 L45 26 L90 52 L135 26 L180 52" />
+              <path class="demo-pipe" d="M30 72 L96 34 L156 72" />
+              <path class="demo-dim-line" d="M30 84 L156 84" />
+              <text x="74" y="78" class="demo-dim-text">D1</text>
+            </svg>
+            <div class="demo-export-rows">
+              <span>Cut list</span>
+              <span>Weights</span>
+              <span>Takeoff</span>
+            </div>
+          </div>
+          <i class="demo-export-arrow"></i>
+          <div class="demo-export-button">Fab PDF</div>
+        </div>
+        <div class="tutorial-demo-caption">Use Fab PDF for the shop sheet, or Export 3D for a clear model image.</div>
+      </div>
+    `,
   };
   return demos[kind] ?? "";
 }
@@ -9347,9 +9681,16 @@ function runTutorialStepAction() {
       applyAppMode("draw", { activateTab: false, keepTool: true });
       setTool("tee");
       break;
+    case "flangeTool":
+      applyAppMode("edit", { activateTab: false, keepTool: true });
+      setTool("flange");
+      break;
     case "measureTool":
       applyAppMode("draw", { activateTab: false, keepTool: true });
       setTool("measure");
+      break;
+    case "focusPipeSize":
+      focusTutorialTarget(step);
       break;
     case "focusLength":
       applyAppMode("draw", { activateTab: false, keepTool: true });
@@ -9385,6 +9726,11 @@ function runTutorialStepAction() {
       showMobilePanel("inspector");
       focusTutorialTarget(step);
       break;
+    case "focusExport":
+      applyAppMode("export", { keepTool: true });
+      showMobilePanel("drawing");
+      focusTutorialTarget(step);
+      break;
     case "focusJobs":
     default:
       focusTutorialTarget(step);
@@ -9398,6 +9744,7 @@ function openTutorialDialog(index = 0) {
   tutorialStepIndex = clampNumber(Math.round(Number(index) || 0), 0, TUTORIAL_STEPS.length - 1);
   tutorialDialog.hidden = false;
   document.body.classList.add("tutorial-running");
+  minimizePreviewForTutorial();
   renderTutorialStep();
   tutorialNextButton?.focus();
 }
@@ -9406,6 +9753,7 @@ function closeTutorialDialog() {
   if (tutorialDialog) tutorialDialog.hidden = true;
   document.body.classList.remove("tutorial-running");
   clearTutorialTarget();
+  restorePreviewAfterTutorial();
 }
 
 function tutorialNextStep() {
@@ -9521,6 +9869,7 @@ function updateControls() {
   dimensionToggle.checked = state.showDimensions;
   dimensionStyleSelect.value = normalizeDimensionStyle(state.dimensionStyle);
   dimensionStyleSelect.disabled = !state.showDimensions;
+  document.body.classList.toggle("numbered-dimensions-active", state.showDimensions !== false && normalizeDimensionStyle(state.dimensionStyle) === "numbered");
   liftingToggle.checked = state.showLiftingPoints;
   liftingAngleSelect.value = String(normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees));
   liftingAngleSelect.disabled = !state.showLiftingPoints;
@@ -11076,29 +11425,94 @@ function update3dPreview() {
   frameThreeCamera();
 }
 
-function fittingRenderPosition(fitting, start, end, renderedSegment, pipeRadius) {
-  const t = normalizeFittingPosition(fitting.type, fitting.t);
+function endpointRenderBasePoint(start, end, renderedSegment, side, clearanceMetres = 0) {
+  const axis = end.clone().sub(start);
+  if (axis.length() < 0.0001) return side === "start" ? start.clone() : end.clone();
+  axis.normalize();
+
+  const endpoint = side === "start" ? start : end;
+  const renderedEndpoint = side === "start"
+    ? (renderedSegment?.start ?? start)
+    : (renderedSegment?.end ?? end);
+  const existingOffset = side === "start"
+    ? renderedEndpoint.clone().sub(start).dot(axis)
+    : end.clone().sub(renderedEndpoint).dot(axis);
+  const offset = Math.max(existingOffset, Number(clearanceMetres) || 0);
+  return side === "start"
+    ? start.clone().addScaledVector(axis, offset)
+    : end.clone().addScaledVector(axis, -offset);
+}
+
+function nodeFittingClearanceMetres(nodeIndex, segment, connections, segmentByIndex, segmentData, style) {
+  const connected = connections.get(nodeIndex) ?? [];
+  if (connected.length < 3) return 0;
+
+  if (nodeConnectionType(nodeIndex) === "branch") {
+    const info = branchNodeInfo(nodeIndex, connected, segmentData);
+    const branchSegmentIndexes = new Set((info?.branchEntries ?? []).map((entry) => entry.segment.index));
+    if (!branchSegmentIndexes.has(segment.index)) return 0;
+    const radius = pipeRadiusMetres(segment);
+    return style?.lineDrawing
+      ? Math.max(radius * 3.1, 0.095)
+      : Math.max(radius * 2.25, 0.055);
+  }
+
+  const radii = connected
+    .map((connection) => segmentByIndex.get(connection.segmentIndex))
+    .filter(Boolean)
+    .map((connectedSegment) => pipeRadiusMetres(connectedSegment));
+  const coreRadius = Math.max(radiusForNode(nodeIndex, connections, segmentByIndex), ...radii);
+  return style?.lineDrawing
+    ? Math.max(coreRadius * 3.8, 0.2)
+    : Math.max(coreRadius * 3.0, 0.16);
+}
+
+function segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style) {
+  return {
+    start: nodeFittingClearanceMetres(segment.from, segment, connections, segmentByIndex, segmentData, style),
+    end: nodeFittingClearanceMetres(segment.to, segment, connections, segmentByIndex, segmentData, style),
+  };
+}
+
+function fittingRenderPosition(fitting, start, end, renderedSegment, pipeRadius, endpointClearances = null) {
   const axis = end.clone().sub(start);
   if (axis.length() < 0.0001) return start.clone();
+  const segmentLengthMm = axis.length() * 1000;
+  const t = endpointSnappedFittingTForLength(fitting, segmentLengthMm);
   axis.normalize();
 
   if (renderedSegment) {
+    const startBase = endpointRenderBasePoint(start, end, renderedSegment, "start", endpointClearances?.start);
+    const endBase = endpointRenderBasePoint(start, end, renderedSegment, "end", endpointClearances?.end);
+
+    if (fitting.type === "flange") {
+      if (t <= 0.000001) return startBase;
+      if (t >= 0.999999) return endBase;
+    }
+
     if (fitting.type === "rollGroove") {
       const renderedLength = renderedSegment.start.distanceTo(renderedSegment.end);
       const inset = Math.min(ROLL_GROOVE_SETBACK_MM / 1000, Math.max(0, renderedLength * 0.45));
-      if (t <= 0.000001) return renderedSegment.start.clone().addScaledVector(axis, inset);
-      if (t >= 0.999999) return renderedSegment.end.clone().addScaledVector(axis, -inset);
+      if (t <= 0.000001) return startBase.addScaledVector(axis, inset);
+      if (t >= 0.999999) return endBase.addScaledVector(axis, -inset);
     }
 
-    if (t <= 0.000001) return renderedSegment.start.clone();
-    if (t >= 0.999999) return renderedSegment.end.clone();
+    if (t <= 0.000001) return startBase;
+    if (t >= 0.999999) return endBase;
+  }
+
+  if (fitting.type === "flange") {
+    if (t <= 0.000001) return start.clone();
+    if (t >= 0.999999) return end.clone();
   }
 
   return start.clone().lerp(end, t);
 }
 
-function fittingEndpointSide(fitting) {
-  const t = normalizeFittingPosition(fitting?.type, fitting?.t);
+function fittingEndpointSide(fitting, segmentLengthMm = null) {
+  const t = Number.isFinite(segmentLengthMm)
+    ? endpointSnappedFittingTForLength(fitting, segmentLengthMm)
+    : normalizeFittingPosition(fitting?.type, fitting?.t);
   if (t <= 0.000001) return "start";
   if (t >= 0.999999) return "end";
   return null;
@@ -11110,8 +11524,8 @@ function flangePlateThicknessForRadius(pipeRadius, flangeStandard) {
   return clampNumber(pipeRadius * 0.42 * thicknessFactor, 0.045, 0.16);
 }
 
-function flangeRenderTransform(fitting, position, direction, pipeRadius) {
-  const endpointSide = fittingEndpointSide(fitting);
+function flangeRenderTransform(fitting, position, direction, pipeRadius, segmentLengthMm = null) {
+  const endpointSide = fittingEndpointSide(fitting, segmentLengthMm);
   if (!endpointSide) {
     return {
       position,
@@ -11269,10 +11683,11 @@ function rebuildThreeSpool() {
     const end = new THREE.Vector3(endModel.x, endModel.y, endModel.z);
     const direction = end.clone().sub(start).normalize();
     const radius = pipeRadiusMetres(segment);
-    const position = fittingRenderPosition(fitting, start, end, renderedSegments.get(segment.index), radius);
+    const endpointClearances = segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style);
+    const position = fittingRenderPosition(fitting, start, end, renderedSegments.get(segment.index), radius, endpointClearances);
 
     if (fitting.type === "flange") {
-      const flangeTransform = flangeRenderTransform(fitting, position, direction, radius);
+      const flangeTransform = flangeRenderTransform(fitting, position, direction, radius, start.distanceTo(end) * 1000);
       if (style.lineDrawing) {
         group.add(outlineFlangeMarker(
           flangeTransform.position,
@@ -11708,7 +12123,7 @@ function outlineRollGrooveMarker(position, direction, radius, material, width = 
   const group = new three.module.Group();
   const axis = direction.clone().normalize();
   const basis = radialBasis(axis);
-  const visualWidth = clampNumber(width, 0.018, 0.055);
+  const visualWidth = clampNumber(width, 0.016, 0.032);
   const grooveWidth = visualWidth * 0.42;
   const ringOffsets = [
     -visualWidth * 0.5,
@@ -12064,9 +12479,9 @@ function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
   const markerLength = clampNumber(
-    Math.max(ROLL_GROOVE_VISUAL_WIDTH_MM / 1000, pipeRadius * 0.12),
-    0.022,
-    0.05,
+    Math.max(ROLL_GROOVE_VISUAL_WIDTH_MM / 1000, pipeRadius * 0.075),
+    0.016,
+    0.03,
   );
   const grooveSpacing = markerLength * 0.38;
 
@@ -12175,7 +12590,7 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
   largeDirection.normalize();
   smallDirection.normalize();
   placementDirection.normalize();
-  const modelLength = reducerModelLengthMetres(reducer);
+  const modelLength = reducerRenderLengthMetres(reducer);
   const halfLength = modelLength * 0.5;
   const startsAtJoint = reducerStartsAtJoint(reducer);
   const startsAfterBend = reducer.kind === "bend";
@@ -12351,11 +12766,27 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
     group.add(branch);
   }
 
-  const core = new THREE.Mesh(new THREE.SphereGeometry(coreRadius * 0.96, 24, 16), material);
+  const core = new THREE.Mesh(new THREE.SphereGeometry(coreRadius * 0.64, 24, 16), material);
   core.position.copy(position);
   core.castShadow = true;
   core.receiveShadow = true;
   group.add(core);
+
+  if (mainPair) {
+    const ringTube = clampNumber(coreRadius * 0.045, 0.004, 0.014);
+    for (const entry of entries) {
+      if (mainPair.includes(entry)) continue;
+      group.add(torusRing(
+        position.clone().addScaledVector(entry.direction, entry.radius * 0.18),
+        entry.direction,
+        entry.radius * 1.02,
+        ringTube,
+        material,
+        8,
+        36,
+      ));
+    }
+  }
 
   return group;
 }
@@ -12416,11 +12847,11 @@ function branchNodeAssembly(nodeIndex, position, connected, modelPoints, segment
     if (direction.length() < 0.0001) continue;
     direction.normalize();
     const radius = pipeRadiusMetres(segment);
-    const collarLength = Math.max(radius * 2.8, 0.07);
+    const collarLength = Math.max(radius * 2.25, 0.055);
     const collar = cylinderBetween(
-      position.clone().addScaledVector(direction, -radius * 0.04),
+      position.clone().addScaledVector(direction, radius * 0.02),
       position.clone().addScaledVector(direction, collarLength),
-      radius * 1.02,
+      radius * 1.0,
       material,
       24,
     );
@@ -12429,10 +12860,10 @@ function branchNodeAssembly(nodeIndex, position, connected, modelPoints, segment
     group.add(collar);
 
     const ring = new THREE.Mesh(
-      new THREE.TorusGeometry(radius * 1.03, Math.max(radius * 0.055, 0.003), 8, 28),
+      new THREE.TorusGeometry(radius * 1.015, Math.max(radius * 0.045, 0.003), 8, 28),
       material,
     );
-    ring.position.copy(position).addScaledVector(direction, radius * 0.1);
+    ring.position.copy(position).addScaledVector(direction, radius * 0.08);
     ring.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction);
     ring.castShadow = true;
     ring.receiveShadow = true;
@@ -12459,8 +12890,8 @@ function outlineBranchMarker(nodeIndex, position, connected, modelPoints, segmen
     if (direction.length() < 0.0001) continue;
     direction.normalize();
     const radius = pipeRadiusMetres(segment);
-    const length = Math.max(radius * 3.6, 0.11);
-    const start = position.clone().addScaledVector(direction, radius * 0.12);
+    const length = Math.max(radius * 3.1, 0.095);
+    const start = position.clone().addScaledVector(direction, radius * 0.16);
     const end = position.clone().addScaledVector(direction, length);
     group.add(outlineRing(start, direction, radius * 1.03, material));
     group.add(outlinePipeBetween(start, end, radius, material, { endCap: true }));
@@ -19356,10 +19787,10 @@ function reportIsoScale(width, height) {
   const maxY = Math.max(...rawPoints.map((point) => point.y));
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
-  const reservedTop = 88;
-  const paddingX = 44;
-  const paddingBottom = 46;
-  return Math.min(132, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
+  const reservedTop = 58;
+  const paddingX = 24;
+  const paddingBottom = 28;
+  return Math.min(154, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
 }
 
 function reportProjection(width, height, scale) {
@@ -19378,7 +19809,11 @@ function reportProjection(width, height, scale) {
 
 function reportRelevantPoints() {
   const measurementPoints = (state.measurements ?? []).flatMap((measurement) => [measurement.start, measurement.end]);
-  return [...state.points, ...state.notes.map((note) => note.point), ...measurementPoints];
+  return [
+    ...state.points,
+    ...state.notes.flatMap((note) => [note.point, note.labelPoint].filter(Boolean)),
+    ...measurementPoints,
+  ];
 }
 
 function drawReportTakeoff(ctx, area, quantities) {
@@ -19796,6 +20231,7 @@ function contextTargetFromPointer(pointer) {
   );
 
   return {
+    pointer,
     segmentHit: pipeHit,
     fittingHit,
     reducerHit,
@@ -19827,6 +20263,39 @@ function endpointSegmentHitForPoint(pointHit) {
     t: segment.from === pointHit.index ? 0 : 1,
     endpointIndex: pointHit.index,
   };
+}
+
+function isEndpointFittingType(type) {
+  return type === "flange" || type === "rollGroove";
+}
+
+function snapEndpointFittingPlacementT(type, hit, pointer = null) {
+  const t = normalizeFittingPosition(type, hit?.t);
+  const segment = hit?.segment;
+  if (!isEndpointFittingType(type) || !segment) return t;
+
+  const lengthMm = pointLength(segment.vector);
+  if (!Number.isFinite(lengthMm) || lengthMm <= 0) return t;
+
+  const endpoints = [
+    { t: 0, point: segment.start, distanceMm: t * lengthMm },
+    { t: 1, point: segment.end, distanceMm: (1 - t) * lengthMm },
+  ];
+
+  if (pointer) {
+    const projection = getProjection();
+    return endpoints
+      .map((endpoint) => {
+        const screen = projectIso(endpoint.point, projection);
+        return {
+          ...endpoint,
+          screenDistance: Math.hypot(pointer.x - screen.x, pointer.y - screen.y),
+        };
+      })
+      .sort((a, b) => a.screenDistance - b.screenDistance)[0].t;
+  }
+
+  return endpoints.sort((a, b) => a.distanceMm - b.distanceMm)[0].t;
 }
 
 function renderDrawingContextMenu() {
@@ -20754,7 +21223,11 @@ function placeContextFitting(type, options = {}) {
   if (!ensureDrawingEditable("add fitting")) return;
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
-  placeFitting(type, hit.segment.index, hit.t, options);
+  const endpointHit = drawingContextTarget?.endpointHit;
+  const t = isEndpointFittingType(type) && endpointHit?.segment?.index === hit.segment.index
+    ? endpointHit.t
+    : snapEndpointFittingPlacementT(type, hit, drawingContextTarget?.pointer);
+  placeFitting(type, hit.segment.index, t, options);
 }
 
 function openSelectedFlangeStandardMenu(fittingId) {
@@ -21359,31 +21832,100 @@ function changeContextPipeSize() {
 function addContextNote(point) {
   if (!ensureDrawingEditable("add note")) return;
   if (!point) return;
-  const text = promptNoteText(noteTextInput.value);
-  if (text === null) return;
-  placeNote(point, text);
+  promptNoteDetails({ text: noteTextInput.value, colour: noteColorInput?.value, mode: "add" })
+    .then((details) => {
+      if (!details) return;
+      placeNote(point, details);
+    });
 }
 
 function editContextNote(note) {
   if (!ensureDrawingEditable("edit note")) return;
-  const text = promptNoteText(note.text);
-  if (text === null) return;
-  const nextText = text.slice(0, 80);
-  if (nextText === note.text) return;
-  const snapshot = createUndoSnapshot();
-  note.text = nextText;
-  noteTextInput.value = note.text;
-  state.selectedNote = note.id;
-  state.selectedFitting = null;
-  clearSelectedSegments();
-  recordHistory({ type: "snapshot", snapshot });
-  updateAll();
+  promptNoteDetails({ text: note.text, colour: note.colour, mode: "edit" })
+    .then((details) => {
+      if (!details) return;
+      const nextText = details.text.slice(0, 80);
+      const nextColour = normalizeNoteColour(details.colour);
+      if (nextText === note.text && nextColour === normalizeNoteColour(note.colour)) return;
+      const snapshot = createUndoSnapshot();
+      note.text = nextText;
+      note.colour = nextColour;
+      noteTextInput.value = note.text;
+      if (noteColorInput) noteColorInput.value = note.colour;
+      state.selectedNote = note.id;
+      state.selectedFitting = null;
+      clearSelectedSegments();
+      recordHistory({ type: "snapshot", snapshot });
+      updateAll();
+    });
 }
 
-function promptNoteText(defaultText) {
-  const text = window.prompt("Note text", defaultText || "FIELD NOTE");
-  if (text === null) return null;
-  return text.trim() || "NOTE";
+function promptNoteDetails(options = {}) {
+  const defaultText = String(options.text ?? "FIELD NOTE").slice(0, 80);
+  const defaultColour = normalizeNoteColour(options.colour ?? noteColorInput?.value);
+  if (!noteDialog || !noteDialogText || !noteDialogSaveButton) {
+    const text = window.prompt("Note text", defaultText || "FIELD NOTE");
+    if (text === null) return Promise.resolve(null);
+    return Promise.resolve({ text: text.replace(/\s+/g, " ").trim() || "NOTE", colour: defaultColour });
+  }
+  closeActionMenu();
+  closeDrawingContextMenu();
+  closeHelpDialog();
+  noteDialog.hidden = false;
+  noteDialogColour = defaultColour;
+  if (noteDialogTitle) noteDialogTitle.textContent = options.mode === "edit" ? "Edit text note" : "Add text note";
+  noteDialogText.value = defaultText || "FIELD NOTE";
+  noteDialogSaveButton.textContent = options.mode === "edit" ? "Save note" : "Add note";
+  updateNoteDialogColourButtons();
+  window.setTimeout(() => {
+    noteDialogText.focus();
+    noteDialogText.select();
+  }, 30);
+  return new Promise((resolve) => {
+    noteDialogResolver = resolve;
+  });
+}
+
+function updateNoteDialogColourButtons() {
+  for (const button of noteDialogColourButtons) {
+    const active = button.dataset.noteColour === noteDialogColour;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-checked", String(active));
+    button.setAttribute("role", "radio");
+  }
+}
+
+function closeNoteDialog(result = null) {
+  if (noteDialog) noteDialog.hidden = true;
+  const resolver = noteDialogResolver;
+  noteDialogResolver = null;
+  resolver?.(result);
+}
+
+function submitNoteDialog() {
+  if (!noteDialogText) return closeNoteDialog(null);
+  const text = noteDialogText.value.replace(/\s+/g, " ").trim() || "NOTE";
+  closeNoteDialog({ text: text.slice(0, 80), colour: normalizeNoteColour(noteDialogColour) });
+}
+
+function setupNoteDialog() {
+  noteDialogCancelButton?.addEventListener("click", () => closeNoteDialog(null));
+  noteDialogSaveButton?.addEventListener("click", submitNoteDialog);
+  noteDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === noteDialog) closeNoteDialog(null);
+  });
+  noteDialogText?.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      event.preventDefault();
+      submitNoteDialog();
+    }
+  });
+  for (const button of noteDialogColourButtons) {
+    button.addEventListener("click", () => {
+      noteDialogColour = normalizeNoteColour(button.dataset.noteColour);
+      updateNoteDialogColourButtons();
+    });
+  }
 }
 
 function beginDimensionDrag(event, target, pointer) {
@@ -21479,15 +22021,15 @@ function beginNoteDrag(event, noteHit, pointer) {
   const note = noteHit?.note;
   if (!note) return false;
 
-  const anchor = projectIso(note.point);
+  const label = projectIso(noteLabelPoint(note));
   noteDrag = {
     pointerId: event.pointerId,
     note,
     snapshot: createUndoSnapshot(),
-    z: Number(note.point.z) || 0,
+    z: Number(noteLabelPoint(note).z) || 0,
     offset: {
-      x: pointer.x - anchor.x,
-      y: pointer.y - anchor.y,
+      x: pointer.x - label.x,
+      y: pointer.y - label.y,
     },
     moved: false,
   };
@@ -21515,10 +22057,10 @@ function updateNoteDrag(event) {
     x: pointer.x - noteDrag.offset.x,
     y: pointer.y - noteDrag.offset.y,
   };
-  noteDrag.note.point = unprojectIsoAtZ(anchorPointer, noteDrag.z, false);
+  noteDrag.note.labelPoint = unprojectIsoAtZ(anchorPointer, noteDrag.z, false);
   noteDrag.moved = true;
   state.pointer = pointer;
-  cursorReadout.textContent = "Dragging note";
+  cursorReadout.textContent = "Dragging note text";
   drawIso();
   updatePropertiesPanel();
   event.preventDefault();
@@ -22000,10 +22542,12 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   }
 
   if (state.activeTool === "note") {
-    const text = promptNoteText(noteTextInput.value);
-    if (text !== null) {
-      placeNote(unprojectIsoGround(pointer), text);
-    }
+    const point = unprojectIsoGround(pointer);
+    promptNoteDetails({ text: noteTextInput.value, colour: noteColorInput?.value, mode: "add" })
+      .then((details) => {
+        if (details) placeNote(point, details);
+      });
+    event.preventDefault();
     return;
   }
 
@@ -22093,7 +22637,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   }
 
   if (FITTING_TOOLS.has(state.activeTool)) {
-    placeFitting(state.activeTool, hit.segment.index, hit.t);
+    placeFitting(state.activeTool, hit.segment.index, snapEndpointFittingPlacementT(state.activeTool, hit, pointer));
   }
 });
 
@@ -22408,6 +22952,10 @@ document.addEventListener("keydown", (event) => {
       closeToolSettingsDialog();
       return;
     }
+    if (noteDialog && !noteDialog.hidden) {
+      closeNoteDialog(null);
+      return;
+    }
     if (drawingAssistantDialog && !drawingAssistantDialog.hidden) {
       closeDrawingAssistantDialog();
       return;
@@ -22473,6 +23021,7 @@ function keyboardBlockingOverlayOpen() {
     (homeDashboardDialog && !homeDashboardDialog.hidden) ||
     (projectLibraryDialog && !projectLibraryDialog.hidden) ||
     (toolSettingsDialog && !toolSettingsDialog.hidden) ||
+    (noteDialog && !noteDialog.hidden) ||
     (helpDialog && !helpDialog.hidden) ||
     (tutorialDialog && !tutorialDialog.hidden) ||
     (loadPlanDialog && !loadPlanDialog.hidden) ||
@@ -22522,6 +23071,7 @@ setupAuthDialog();
 setupHomeDashboard();
 setupProjectDialog();
 setupToolSettingsDialog();
+setupNoteDialog();
 setupTutorialDialog();
 setupHelpDialog();
 setupPanelFullscreen();

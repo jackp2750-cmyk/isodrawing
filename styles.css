@@ -116,14 +116,15 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .topbar {
   position: relative;
-  z-index: 70;
+  z-index: 320;
   min-height: 64px;
   height: auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 10px 18px;
+  gap: 10px;
+  padding: 9px 14px;
   border-bottom: 1px solid #bfd7d0;
   background: #f7fcfa;
   backdrop-filter: blur(12px);
@@ -250,11 +251,17 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .topbar-actions {
   position: relative;
-  flex: 0 1 auto;
-  margin-left: auto;
-  padding-left: 8px;
-  border-left: 1px solid rgba(8, 125, 115, 0.18);
+  flex: 0 0 auto;
+  margin-left: 0;
+  padding: 6px;
+  border: 1px solid #bed8d1;
+  border-radius: 10px;
+  background: #e7f2ef;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
   row-gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .topbar-actions .icon-button.labeled {
@@ -265,15 +272,19 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 }
 
 .topbar-actions .cloud-status-pill {
-  min-height: 30px;
-  max-width: 190px;
+  display: none;
 }
 
 .topbar-settings {
+  width: 100%;
+  min-width: 0;
   flex: 1 1 auto;
   justify-content: flex-start;
   align-content: center;
-  row-gap: 8px;
+  row-gap: 6px;
+  flex-wrap: wrap;
+  overflow: visible;
+  scrollbar-width: none;
 }
 
 .mode-switcher {
@@ -319,8 +330,8 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 6px;
+  gap: 6px;
+  padding: 5px;
   border: 1px solid #bed8d1;
   border-radius: 9px;
   background: #e7f2ef;
@@ -333,7 +344,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .theme-tabs {
   display: inline-grid;
-  grid-template-columns: repeat(2, minmax(54px, 1fr));
+  grid-template-columns: repeat(2, minmax(46px, 1fr));
   gap: 4px;
   padding: 4px;
   border: 1px solid var(--line-strong);
@@ -344,7 +355,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .theme-tabs button {
   min-height: 30px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
@@ -361,7 +372,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .project-readout {
   min-height: 32px;
-  max-width: 230px;
+  max-width: 180px;
   display: inline-flex;
   align-items: center;
   padding: 0 10px;
@@ -493,7 +504,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0 8px;
+  padding: 0 7px;
   border: 1px solid #a9c9c1;
   border-radius: 7px;
   background: var(--button);
@@ -513,7 +524,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .top-field select {
   min-height: 26px;
-  max-width: 145px;
+  max-width: 136px;
   padding: 0 6px;
   border: 1px solid var(--line-strong);
   border-radius: 6px;
@@ -525,7 +536,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .top-toggle {
   min-height: 32px;
-  padding: 0 10px;
+  padding: 0 8px;
   border: 1px solid #b8d4cd;
   border-radius: 7px;
   background: var(--button);
@@ -558,7 +569,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 0 8px;
+  padding: 0 7px;
   border: 1px solid #b8d4cd;
   border-radius: 7px;
   background: var(--button);
@@ -581,7 +592,15 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 }
 
 .drawing-detail-field select {
-  max-width: 118px;
+  max-width: 102px;
+}
+
+.dimension-mode-field select {
+  max-width: 132px;
+}
+
+.topbar-secondary-control {
+  opacity: 0.86;
 }
 
 .dimension-style-field select:disabled {
@@ -693,12 +712,34 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 
 .bar-title {
   min-width: 0;
+  display: grid;
+  gap: 2px;
 }
 
 .bar-title span {
   display: block;
   font-weight: 800;
   font-size: 14px;
+}
+
+.dimension-edit-pill {
+  width: fit-content;
+  display: none;
+  align-items: center;
+  min-height: 20px;
+  padding: 0 8px;
+  border: 1px solid rgba(19, 216, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(232, 250, 246, 0.9);
+  color: #0f5f62;
+  font-size: 10px;
+  font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+body.numbered-dimensions-active .dimension-edit-pill {
+  display: inline-flex;
 }
 
 .icon-button,
@@ -1696,7 +1737,7 @@ button svg :is(path, line, polyline, polygon, rect, circle, ellipse) {
 }
 
 .top-size-readout {
-  max-width: 220px;
+  max-width: 190px;
   min-height: 32px;
   margin: 0;
   overflow: hidden;
@@ -2723,11 +2764,24 @@ body.auth-gate-open .app-shell {
   --tutorial-demo-svg-height: clamp(150px, 31vw, 205px);
 }
 
+.tutorial-demo-fittings,
+.tutorial-demo-reducer,
+.tutorial-demo-export {
+  --tutorial-demo-svg-height: clamp(140px, 29vw, 190px);
+}
+
 .tutorial-demo-tee svg,
 .tutorial-demo-sockets svg {
   height: var(--tutorial-demo-svg-height);
   min-height: 150px;
   max-height: 205px;
+}
+
+.tutorial-demo-fittings svg,
+.tutorial-demo-reducer svg {
+  height: var(--tutorial-demo-svg-height);
+  min-height: 140px;
+  max-height: 190px;
 }
 
 .tutorial-demo-window {
@@ -2888,6 +2942,85 @@ body.auth-gate-open .app-shell {
 .demo-fitting-tee {
   stroke: #8a55d6;
   stroke-width: 7;
+}
+
+.demo-flange-fitting,
+.demo-roll-groove,
+.demo-manual-reducer {
+  opacity: 0;
+  animation: demoFittingAppear 4.8s ease-in-out infinite;
+}
+
+.demo-flange-fitting {
+  transform-origin: 54px 108px;
+  animation-delay: 0.1s;
+}
+
+.demo-flange-fitting line,
+.demo-flange-fitting rect,
+.demo-flange-fitting circle {
+  fill: rgba(232, 250, 246, 0.98);
+  stroke: #0d6970;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.demo-flange-fitting circle {
+  fill: #13d8ff;
+  stroke-width: 2;
+}
+
+.demo-roll-groove {
+  animation-delay: 0.28s;
+}
+
+.demo-roll-groove line {
+  stroke: #e9f2f0;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.demo-manual-reducer {
+  animation-delay: 0.48s;
+}
+
+.demo-manual-reducer path {
+  fill: none;
+  stroke: #c96b47;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.demo-pipe-large,
+.demo-pipe-small {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: demoReducerSize 4.2s ease-in-out infinite;
+}
+
+.demo-pipe-large {
+  stroke: #0d6970;
+  stroke-width: 18;
+}
+
+.demo-pipe-small {
+  stroke: #0d6970;
+  stroke-width: 10;
+}
+
+.demo-reducer-body {
+  fill: rgba(13, 105, 112, 0.78);
+  stroke: #064c52;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  animation: demoReducerPulse 4.2s ease-in-out infinite;
+}
+
+.demo-reducer-note {
+  animation: demoFadeIn 4.2s ease-in-out infinite;
 }
 
 .demo-pipe.socket-host {
@@ -3139,6 +3272,93 @@ body.auth-gate-open .app-shell {
   animation: demoReviewRing 3s ease-in-out infinite;
 }
 
+.demo-export-sheet {
+  position: relative;
+  min-height: 168px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.demo-export-page {
+  display: grid;
+  gap: 7px;
+  min-height: 150px;
+  padding: 10px;
+  border: 1px solid rgba(8, 125, 115, 0.18);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 10px 18px rgba(31, 42, 47, 0.12);
+  transform-origin: center;
+  animation: demoExportPage 4.8s ease-in-out infinite;
+}
+
+.demo-export-page strong {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.demo-export-page svg {
+  height: 82px;
+  min-height: 82px;
+  max-height: 82px;
+  border-radius: 6px;
+}
+
+.demo-export-rows {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.demo-export-rows span {
+  min-height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  background: rgba(8, 125, 115, 0.12);
+  color: var(--teal-strong);
+  font-size: 10px;
+  font-weight: 950;
+}
+
+.demo-export-arrow {
+  width: 28px;
+  height: 3px;
+  border-radius: 999px;
+  background: #13d8ff;
+  position: relative;
+  animation: demoExportArrow 4.8s ease-in-out infinite;
+}
+
+.demo-export-arrow::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-top: 3px solid #13d8ff;
+  border-right: 3px solid #13d8ff;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.demo-export-button {
+  min-height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0 14px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 950;
+  box-shadow: 0 10px 18px rgba(0, 132, 255, 0.22);
+  animation: demoButtonTap 4.8s ease-in-out infinite;
+}
+
 @keyframes demoDrawLine {
   0%,
   16% { stroke-dashoffset: 360; }
@@ -3189,6 +3409,27 @@ body.auth-gate-open .app-shell {
   62% { opacity: 0; }
   76%,
   100% { opacity: 1; }
+}
+
+@keyframes demoFittingAppear {
+  0%,
+  42% { opacity: 0; transform: translateY(7px); }
+  58%,
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes demoReducerSize {
+  0%,
+  24% { opacity: 0.42; }
+  42%,
+  100% { opacity: 1; }
+}
+
+@keyframes demoReducerPulse {
+  0%,
+  34% { opacity: 0.38; transform: scaleX(0.82); }
+  52%,
+  100% { opacity: 1; transform: scaleX(1); }
 }
 
 @keyframes demoSocketClick {
@@ -3313,6 +3554,20 @@ body.auth-gate-open .app-shell {
   100% { opacity: 1; transform: scale(1); }
 }
 
+@keyframes demoExportPage {
+  0%,
+  32% { transform: translateX(-8px) scale(0.96); opacity: 0.82; }
+  58%,
+  100% { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+@keyframes demoExportArrow {
+  0%,
+  38% { opacity: 0.25; transform: translateX(-8px); }
+  62%,
+  100% { opacity: 1; transform: translateX(0); }
+}
+
 @keyframes demoJobFade {
   0%,
   45% { opacity: 1; transform: translateX(0); }
@@ -3360,6 +3615,85 @@ body.auth-gate-open .app-shell {
 .tutorial-actions {
   grid-template-columns: auto auto auto auto;
   justify-content: end;
+}
+
+.note-dialog-card {
+  width: min(460px, calc(100vw - 28px));
+}
+
+.note-dialog-text-field textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  font: 850 14px/1.4 Inter, system-ui, sans-serif;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.note-dialog-text-field textarea:focus {
+  border-color: var(--teal);
+  box-shadow:
+    0 0 0 3px rgba(8, 125, 115, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.note-colour-section {
+  display: grid;
+  gap: 8px;
+}
+
+.note-colour-section > span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.note-colour-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.note-colour-grid button {
+  min-width: 0;
+  min-height: 56px;
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  padding: 7px 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.note-colour-grid button.active,
+.note-colour-grid button[aria-checked="true"] {
+  border-color: var(--teal);
+  background: var(--button-selected);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(8, 125, 115, 0.12);
+}
+
+.note-colour-grid i {
+  width: 22px;
+  height: 22px;
+  display: block;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(31, 42, 47, 0.18);
+}
+
+.note-dialog-actions {
+  grid-template-columns: 1fr 1fr;
 }
 
 .drawing-assistant-card {
@@ -5298,6 +5632,7 @@ body.auth-gate-open .app-shell {
   .topbar {
     height: auto;
     min-height: 72px;
+    display: flex;
     align-items: flex-start;
     flex-direction: column;
     padding: 12px;
@@ -5378,13 +5713,13 @@ body.auth-gate-open .app-shell {
 
   .topbar {
     position: relative;
-    z-index: 70;
+    z-index: 320;
     min-height: 0;
     display: grid;
     grid-template-columns: minmax(104px, 128px) minmax(0, 1fr);
     align-items: center;
-    gap: 8px 10px;
-    padding: 8px 10px;
+    gap: 6px 8px;
+    padding: 6px 8px;
   }
 
   .brand {
@@ -5394,6 +5729,7 @@ body.auth-gate-open .app-shell {
     width: 100%;
     flex-basis: auto;
     grid-column: 1;
+    grid-row: 1;
   }
 
   .brand-mark {
@@ -5436,27 +5772,30 @@ body.auth-gate-open .app-shell {
     justify-content: space-between;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    padding: 3px;
   }
 
   .mode-switcher button {
     flex: 1 1 0;
     min-width: 72px;
+    min-height: 30px;
   }
 
   .topbar-actions {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+    width: 100%;
     min-width: 0;
-    order: -1;
+    order: 0;
     flex: 0 0 auto;
     margin-left: 0;
-    padding-left: 0;
-    padding-right: 8px;
-    border-left: 0;
-    border-right: 1px solid rgba(8, 125, 115, 0.18);
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 2px;
-    -webkit-overflow-scrolling: touch;
+    padding: 3px;
+    border: 1px solid rgba(8, 125, 115, 0.18);
+    border-radius: 9px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    overflow: visible;
   }
 
   .action-menu-panel {
@@ -5474,15 +5813,15 @@ body.auth-gate-open .app-shell {
   }
 
   .topbar-actions .icon-button.labeled {
-    min-width: 70px;
-    height: 38px;
-    min-height: 38px;
+    min-width: 64px;
+    height: 34px;
+    min-height: 34px;
     flex: 0 0 auto;
-    padding: 0 9px;
+    padding: 0 8px;
   }
 
   .topbar-actions .primary-button {
-    min-height: 38px;
+    min-height: 34px;
     flex: 0 0 auto;
     padding: 0 11px;
     white-space: nowrap;
@@ -5492,10 +5831,10 @@ body.auth-gate-open .app-shell {
     grid-column: 1 / -1;
     width: 100%;
     justify-content: flex-start;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding: 5px;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap;
+    overflow: visible;
+    padding: 6px;
+    gap: 6px;
   }
 
   .top-field,
@@ -5505,7 +5844,13 @@ body.auth-gate-open .app-shell {
   .top-size-readout,
   .project-readout {
     flex: 0 0 auto;
-    min-height: 38px;
+    min-height: 40px;
+  }
+
+  .dimension-edit-pill {
+    max-width: min(72vw, 340px);
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .top-field select,
@@ -5580,7 +5925,7 @@ body.auth-gate-open .app-shell {
     right: 0;
     bottom: 56px;
     z-index: 36;
-    height: 84px;
+    height: 92px;
     padding: 8px 10px;
     border-top: 1px solid var(--line);
     border-right: 0;
@@ -5601,9 +5946,9 @@ body.auth-gate-open .app-shell {
   }
 
   .tool-button {
-    min-width: 78px;
-    min-height: 66px;
-    flex: 0 0 78px;
+    min-width: 86px;
+    min-height: 74px;
+    flex: 0 0 86px;
     padding: 7px 6px;
   }
 
@@ -5702,9 +6047,18 @@ body.auth-gate-open .app-shell {
 
   .field input[type="number"],
   .field input[type="text"],
+  .note-dialog-text-field textarea,
   .field select {
     min-height: 46px;
     font-size: 16px;
+  }
+
+  .note-colour-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .note-colour-grid button {
+    min-height: 52px;
   }
 
   .axis-grid button,
@@ -5753,7 +6107,7 @@ body.auth-gate-open .app-shell {
   .drawing-context-menu {
     z-index: 70;
     width: min(360px, calc(100vw - 20px));
-    max-height: calc(100dvh - 96px);
+    max-height: calc(100dvh - 112px);
     overflow: auto;
     padding: 8px;
   }
@@ -5772,17 +6126,17 @@ body.auth-gate-open .app-shell {
   }
 
   body.touch-comfort .drawing-panel {
-    padding-bottom: 150px;
+    padding-bottom: 158px;
   }
 
   body.touch-comfort .tool-rail {
-    height: 92px;
+    height: 96px;
   }
 
   body.touch-comfort .tool-button {
-    min-width: 88px;
-    min-height: 74px;
-    flex-basis: 88px;
+    min-width: 92px;
+    min-height: 78px;
+    flex-basis: 92px;
   }
 
   body.touch-comfort .mobile-panel-dock button,
@@ -5983,15 +6337,29 @@ body.auth-gate-open .app-shell {
   }
 
   .tutorial-demo-tee,
-  .tutorial-demo-sockets {
+  .tutorial-demo-sockets,
+  .tutorial-demo-fittings,
+  .tutorial-demo-reducer,
+  .tutorial-demo-export {
     --tutorial-demo-svg-height: 145px;
   }
 
   .tutorial-demo-tee svg,
-  .tutorial-demo-sockets svg {
+  .tutorial-demo-sockets svg,
+  .tutorial-demo-fittings svg,
+  .tutorial-demo-reducer svg {
     height: var(--tutorial-demo-svg-height);
     min-height: 145px;
     max-height: 145px;
+  }
+
+  .demo-export-sheet {
+    min-height: 145px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .demo-export-arrow {
+    display: none;
   }
 
   .tutorial-demo-window {
@@ -6328,17 +6696,22 @@ body .preview-panel:fullscreen {
     right: 0;
     bottom: 0;
     width: auto;
-    height: 84px;
+    height: 96px;
     border-top: 1px solid var(--line);
     border-right: 0;
+    z-index: 180;
     box-shadow: 0 -12px 30px rgba(0, 0, 0, 0.22);
   }
 
   body.drawing-panel-fullscreen .drawing-panel.panel-fullscreen {
     left: 0;
-    bottom: 84px;
+    bottom: 96px;
     width: 100vw;
-    height: calc(100dvh - 84px);
+    height: calc(100dvh - 96px);
+  }
+
+  body.drawing-panel-fullscreen .mobile-panel-dock {
+    display: none;
   }
 
   body.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
@@ -6363,7 +6736,7 @@ body .preview-panel:fullscreen {
 @media (max-width: 640px) {
   body.phone-layout .topbar {
     grid-template-columns: minmax(82px, 98px) minmax(0, 1fr);
-    gap: 6px;
+    gap: 4px 6px;
     padding: 6px 8px;
   }
 
@@ -6388,7 +6761,8 @@ body .preview-panel:fullscreen {
   }
 
   body.phone-layout .mode-switcher {
-    grid-column: 1;
+    grid-column: 1 / -1;
+    width: 100%;
     gap: 3px;
     padding: 3px;
   }
@@ -6408,12 +6782,15 @@ body .preview-panel:fullscreen {
   }
 
   body.phone-layout .topbar-actions {
-    width: auto;
+    width: 100%;
+    flex-wrap: wrap;
     justify-content: flex-start;
+    overflow: visible;
   }
 
   body.phone-layout .topbar-actions .icon-button.labeled,
   body.phone-layout .topbar-actions .primary-button {
+    flex: 1 1 62px;
     min-width: 58px;
     height: 35px;
     min-height: 35px;
@@ -6421,7 +6798,12 @@ body .preview-panel:fullscreen {
     font-size: 11px;
   }
 
-  body.phone-layout .theme-tabs {
+  body.phone-layout .theme-tabs,
+  body.phone-layout .topbar-secondary-control,
+  body.phone-layout .drawing-detail-field,
+  body.phone-layout .dimension-mode-field,
+  body.phone-layout .top-field:has(#pipeSpecSelect),
+  body.phone-layout .top-size-readout {
     display: none;
   }
 
@@ -6434,24 +6816,25 @@ body .preview-panel:fullscreen {
   body.phone-layout .dimension-style-field,
   body.phone-layout .preview-mode-field,
   body.phone-layout .project-readout {
-    min-height: 34px;
+    min-height: 42px;
   }
 
   body.phone-layout .top-field,
   body.phone-layout .dimension-style-field {
     padding: 0 6px;
+    flex: 1 1 140px;
   }
 
   body.phone-layout .top-field select,
   body.phone-layout .dimension-style-field select,
   body.phone-layout .preview-mode-field select {
-    min-height: 30px;
-    max-width: 142px;
+    min-height: 34px;
+    max-width: 152px;
     font-size: 12px;
   }
 
   body.phone-layout .drawing-panel {
-    padding-bottom: 124px;
+    padding-bottom: 144px;
   }
 
   body.phone-layout .panel-bar {
@@ -6491,7 +6874,7 @@ body .preview-panel:fullscreen {
     right: 0;
     bottom: 52px;
     width: 100vw;
-    height: 72px;
+    height: 86px;
     padding: 6px 8px;
   }
 
@@ -6500,10 +6883,10 @@ body .preview-panel:fullscreen {
   }
 
   body.phone-layout .tool-button {
-    min-width: 62px;
-    min-height: 58px;
-    flex-basis: 62px;
-    padding: 5px 4px;
+    min-width: 74px;
+    min-height: 70px;
+    flex-basis: 74px;
+    padding: 6px 5px;
     gap: 3px;
   }
 
@@ -6513,7 +6896,7 @@ body .preview-panel:fullscreen {
   }
 
   body.phone-layout .tool-button span {
-    font-size: 10.5px;
+    font-size: 11px;
     line-height: 1.1;
   }
 
@@ -6618,6 +7001,21 @@ body .preview-panel:fullscreen {
 
   body.phone-layout .drawing-context-menu.socket-setup-menu {
     max-height: min(74dvh, 560px);
+  }
+
+  body.phone-layout.drawing-panel-fullscreen .tool-rail {
+    bottom: 0;
+    height: 86px;
+    z-index: 180;
+  }
+
+  body.phone-layout.drawing-panel-fullscreen .drawing-panel.panel-fullscreen {
+    bottom: 86px;
+    height: calc(100dvh - 86px);
+  }
+
+  body.phone-layout.drawing-panel-fullscreen .mobile-panel-dock {
+    display: none;
   }
 }
 
@@ -6995,6 +7393,50 @@ body .preview-panel:fullscreen {
   stroke: #6be6ff;
 }
 
+:root[data-theme="dark"] .demo-flange-fitting line,
+:root[data-theme="dark"] .demo-flange-fitting rect {
+  fill: #0a1722;
+  stroke: #6be6ff;
+}
+
+:root[data-theme="dark"] .demo-flange-fitting circle {
+  fill: #13d8ff;
+  stroke: #eef9ff;
+}
+
+:root[data-theme="dark"] .demo-roll-groove line {
+  stroke: #eef9ff;
+}
+
+:root[data-theme="dark"] .demo-manual-reducer path {
+  stroke: #ff9b7b;
+}
+
+:root[data-theme="dark"] .demo-pipe-large,
+:root[data-theme="dark"] .demo-pipe-small {
+  stroke: #67d8e8;
+}
+
+:root[data-theme="dark"] .demo-reducer-body {
+  fill: rgba(103, 216, 232, 0.72);
+  stroke: rgba(238, 249, 255, 0.72);
+}
+
+:root[data-theme="dark"] .demo-export-page {
+  border-color: rgba(19, 216, 255, 0.22);
+  background: #0a1722;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="dark"] .demo-export-page strong {
+  color: #eef9ff;
+}
+
+:root[data-theme="dark"] .demo-export-rows span {
+  background: rgba(19, 216, 255, 0.12);
+  color: #8eefff;
+}
+
 :root[data-theme="dark"] .demo-label,
 :root[data-theme="dark"] .demo-angle,
 :root[data-theme="dark"] .demo-step,
@@ -7029,6 +7471,33 @@ body .preview-panel:fullscreen {
 :root[data-theme="dark"] .tutorial-dots i.active {
   background: #13d8ff;
   box-shadow: 0 0 16px rgba(19, 216, 255, 0.34);
+}
+
+:root[data-theme="dark"] .note-dialog-text-field textarea {
+  border-color: rgba(19, 216, 255, 0.24);
+  background: rgba(5, 18, 29, 0.96);
+  color: #eef9ff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="dark"] .note-dialog-text-field textarea:focus {
+  border-color: #13d8ff;
+  box-shadow:
+    0 0 0 3px rgba(19, 216, 255, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+:root[data-theme="dark"] .note-colour-grid button {
+  border-color: rgba(19, 216, 255, 0.2);
+  background: rgba(9, 28, 43, 0.92);
+  color: #d9edf6;
+}
+
+:root[data-theme="dark"] .note-colour-grid button.active,
+:root[data-theme="dark"] .note-colour-grid button[aria-checked="true"] {
+  border-color: #13d8ff;
+  background: rgba(0, 132, 255, 0.22);
+  color: #eef9ff;
 }
 
 :root[data-theme="dark"] .drawing-assistant-stage {
@@ -7309,6 +7778,7 @@ body .preview-panel:fullscreen {
 }
 
 :root[data-theme="dark"] .panel-bar,
+:root[data-theme="dark"] .topbar-actions,
 :root[data-theme="dark"] .topbar-settings,
 :root[data-theme="dark"] .topbar-toggles,
 :root[data-theme="dark"] .mobile-panel-dock {
@@ -7316,6 +7786,13 @@ body .preview-panel:fullscreen {
     linear-gradient(180deg, rgba(0, 120, 255, 0.1), rgba(6, 17, 27, 0.94)),
     #071018;
   border-color: rgba(19, 216, 255, 0.22);
+}
+
+:root[data-theme="dark"] .dimension-edit-pill {
+  border-color: rgba(19, 216, 255, 0.46);
+  background: rgba(6, 27, 42, 0.9);
+  color: #dffbff;
+  box-shadow: 0 0 14px rgba(0, 174, 255, 0.12);
 }
 
 :root[data-theme="dark"] .control-section,

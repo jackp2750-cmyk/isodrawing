@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=205" />
+    <link rel="stylesheet" href="./styles.css?v=217" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -188,7 +188,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v2.05</span>
+            <span class="version-badge" id="appVersionBadge">v2.17</span>
           </div>
         </div>
 
@@ -205,7 +205,7 @@
             <button data-theme-choice="light" type="button" role="tab" aria-selected="false">Light</button>
             <button class="active" data-theme-choice="dark" type="button" role="tab" aria-selected="true">Dark</button>
           </div>
-          <label class="dimension-style-field">
+          <label class="dimension-style-field topbar-secondary-control">
             <span>Status</span>
             <select id="projectStatusSelect" aria-label="Drawing status">
               <option value="draft">Draft</option>
@@ -219,7 +219,7 @@
               <option value="complete">Complete</option>
             </select>
           </label>
-          <label class="toggle top-toggle">
+          <label class="toggle top-toggle topbar-secondary-control">
             <input id="projectLockToggle" type="checkbox" />
             <span>Lock edits</span>
           </label>
@@ -240,7 +240,7 @@
             <span>Dimensions</span>
           </label>
           <label class="dimension-style-field drawing-detail-field">
-            <span>Drawing detail</span>
+            <span>Detail</span>
             <select id="drawingDetailSelect" aria-label="Drawing detail">
               <option value="clean">Clean</option>
               <option value="fab">Fab dims</option>
@@ -249,20 +249,20 @@
               <option value="full">Full</option>
             </select>
           </label>
-          <label class="dimension-style-field">
-            <span>Dim style</span>
+          <label class="dimension-style-field dimension-mode-field">
+            <span>Dim view</span>
             <select id="dimensionStyleSelect" aria-label="Dimension style">
               <option value="labels">Pipe labels</option>
               <option value="redline">Red C/C lines</option>
-              <option value="numbered" selected>Numbered list</option>
+              <option value="numbered" selected>Numbered key</option>
               <option value="chain">Chain dims</option>
             </select>
           </label>
-          <label class="toggle top-toggle">
+          <label class="toggle top-toggle topbar-secondary-control">
             <input id="liftingToggle" type="checkbox" checked />
             <span>Lifting points</span>
           </label>
-          <label class="dimension-style-field">
+          <label class="dimension-style-field lifting-angle-field topbar-secondary-control">
             <span>Sling angle</span>
             <select id="liftingAngleSelect" aria-label="Sling angle from horizontal">
               <option value="30">30 deg</option>
@@ -272,8 +272,9 @@
               <option value="90">90 deg</option>
             </select>
           </label>
+        </div>
 
-          <div class="topbar-actions" aria-label="Project actions">
+        <div class="topbar-actions" aria-label="Project actions">
             <button class="icon-button labeled danger" id="resetButton" type="button" title="Reset spool" aria-label="Reset spool">
               <svg><use href="#icon-reset"></use></svg>
               <span>New</span>
@@ -375,7 +376,6 @@
                 </section>
               </div>
             </div>
-          </div>
         </div>
       </header>
 
@@ -450,6 +450,7 @@
             <div class="bar-title">
               <span>2D Iso Drawing - Draw Here</span>
               <small id="cursorReadout">0, 0, 0</small>
+              <span class="dimension-edit-pill" id="dimensionEditHint">Numbered key: Select D/O rows to edit C/C</span>
             </div>
             <div class="bar-actions">
               <button class="icon-button compact labeled" id="zoomOutButton" type="button" title="Zoom out" aria-label="Zoom out">
@@ -609,6 +610,16 @@
               <label class="field">
                 <span>Note text</span>
                 <input id="noteTextInput" type="text" value="FIELD NOTE" maxlength="80" />
+              </label>
+              <label class="field">
+                <span>Default note colour</span>
+                <select id="noteColorInput">
+                  <option value="teal">Teal</option>
+                  <option value="blue">Blue</option>
+                  <option value="red">Red</option>
+                  <option value="amber">Amber</option>
+                  <option value="white">White</option>
+                </select>
               </label>
             </section>
             <section class="control-section">
@@ -1045,7 +1056,7 @@
           <div class="project-dialog-header">
             <div>
               <strong>Interactive tutorial</strong>
-              <small>Follow the highlight, try the tool, then move to the next step.</small>
+              <small>Watch the mini demo, follow the highlight, then try the tool when you are ready.</small>
             </div>
           </div>
           <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
@@ -1055,6 +1066,35 @@
             <button class="icon-button labeled" id="tutorialPrevButton" type="button">Back</button>
             <button class="icon-button labeled" id="tutorialActionButton" type="button">Try it</button>
             <button class="primary-button" id="tutorialNextButton" type="button">Next</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop note-dialog-backdrop" id="noteDialog" hidden>
+        <section class="project-dialog-card note-dialog-card" aria-label="Text note editor">
+          <div class="project-dialog-header">
+            <div>
+              <strong id="noteDialogTitle">Text note</strong>
+              <small>Arrow point stays pinned. Drag the text later to clear the drawing.</small>
+            </div>
+          </div>
+          <label class="field note-dialog-text-field">
+            <span>Note text</span>
+            <textarea id="noteDialogText" maxlength="80" rows="3" placeholder="Type note for the drawing"></textarea>
+          </label>
+          <div class="note-colour-section">
+            <span>Text colour</span>
+            <div class="note-colour-grid" id="noteDialogColourGrid" role="radiogroup" aria-label="Text note colour">
+              <button type="button" data-note-colour="teal" aria-label="Teal note"><i style="background:#0f766e"></i><span>Teal</span></button>
+              <button type="button" data-note-colour="blue" aria-label="Blue note"><i style="background:#2563eb"></i><span>Blue</span></button>
+              <button type="button" data-note-colour="red" aria-label="Red note"><i style="background:#c1121f"></i><span>Red</span></button>
+              <button type="button" data-note-colour="amber" aria-label="Amber note"><i style="background:#b7791f"></i><span>Amber</span></button>
+              <button type="button" data-note-colour="white" aria-label="White note"><i style="background:#f8fafc"></i><span>White</span></button>
+            </div>
+          </div>
+          <div class="project-dialog-actions note-dialog-actions">
+            <button class="icon-button labeled" id="noteDialogCancelButton" type="button">Cancel</button>
+            <button class="primary-button" id="noteDialogSaveButton" type="button">Add note</button>
           </div>
         </section>
       </div>
@@ -1287,6 +1327,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=205"></script>
+    <script defer src="./app.js?v=217"></script>
   </body>
 </html>
