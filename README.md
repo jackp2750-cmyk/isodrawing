@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.17`
+Current app version: `v2.24`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -27,17 +27,20 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Calculate centre of gravity and optional suggested lifting lug points.
 - Preview the spool in 3D with realistic, workshop, carbon, stainless, painted, transparent, outline and CAD-style views.
 - Float, hide, minimize or fullscreen the 3D preview.
-- Export fabrication PDF sheets, 3D images and project files.
+- Export fabrication PDF sheets, 3D images and project files, including workshop, client/approval and take-off PDF styles.
 - Use the Drawing import assistant to upload a supplied drawing/photo/PDF, calibrate a known dimension and trace centreline runs into a SpoolMate spool.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
+- See cloud save confidence at a glance with saved, unsaved, saving, failed and conflict states.
 - Use the startup dashboard to continue drawing, start a new spool, open jobs, load the sample, manage account settings, open help or follow the interactive tool tutorial.
+- Pick tutorial topics from the tutorial menu instead of stepping through every feature in order.
 - Open the Job dashboard to search jobs, group spools by job/client, view the production board, and quickly save or start a new spool.
 - Use the built-in Jobs `Guide` button to show the in-window guide only when needed.
+- Use the Jobs `Comms` button for shared company messages and a combined view of active spool/yard notes.
 - Generate a daily or weekly Jobs report from the dashboard, including stage counts, due/overdue work, hold items, assignees and recent progress.
 - Assign saved spools to team members, set due dates, priority and hold notes, and move each spool through Draft, Ready to check, Checked, Issued, Cutting, Fit-up, Welded, Paint / finish and Complete stages.
 - Drag production cards between stages, or use the card controls to change stage, assignee, due date, due time, priority and hold.
 - Add short team/yard notes to production cards and mark notes done so they are cleaned up after one week.
-- Use accounts, trials/licences, company/team projects and project comments through Supabase.
+- Use accounts, trials/licences, company/team projects, project comments and owner/admin/member team permissions through Supabase.
 - Install as a Progressive Web App on iPad, Android and desktop when hosted over HTTPS.
 
 ## Important Files
@@ -147,6 +150,7 @@ With Supabase configured:
 - Projects can save to the cloud and be opened on other devices.
 - Company/team workspaces can share projects.
 - Team members can leave comments on a project.
+- Jobs Comms can share general team messages across an approved company.
 
 ## Supabase Setup
 

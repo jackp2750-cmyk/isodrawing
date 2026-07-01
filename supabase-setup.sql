@@ -60,6 +60,20 @@ create table if not exists public.project_comments (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.team_messages (
+  id uuid primary key default gen_random_uuid(),
+  company_id uuid not null references public.companies(id) on delete cascade,
+  author_id uuid not null references auth.users(id) on delete cascade,
+  author_email text,
+  body text not null check (char_length(trim(body)) between 1 and 500),
+  pinned boolean not null default false,
+  completed boolean not null default false,
+  completed_at timestamptz,
+  remove_after timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists companies_invite_code_idx
   on public.companies (invite_code);
 
@@ -77,6 +91,9 @@ create index if not exists spool_projects_company_updated_idx
 
 create index if not exists project_comments_project_created_idx
   on public.project_comments (project_id, created_at desc);
+
+create index if not exists team_messages_company_created_idx
+  on public.team_messages (company_id, completed, created_at desc);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -113,12 +130,18 @@ create trigger project_comments_set_updated_at
 before update on public.project_comments
 for each row execute function public.set_updated_at();
 
+drop trigger if exists team_messages_set_updated_at on public.team_messages;
+create trigger team_messages_set_updated_at
+before update on public.team_messages
+for each row execute function public.set_updated_at();
+
 -- Drop old helper/RPC versions first so this setup can repair earlier installs cleanly.
 -- Cascade only removes dependent RLS policies, which are recreated later in this file.
 drop function if exists public.create_company(text);
 drop function if exists public.join_company_by_code(text);
 drop function if exists public.is_company_member(uuid, uuid) cascade;
 drop function if exists public.is_company_admin(uuid, uuid) cascade;
+drop function if exists public.is_company_owner(uuid, uuid) cascade;
 drop function if exists public.has_active_license(uuid) cascade;
 
 create or replace function public.has_active_license(user_id uuid)
@@ -169,6 +192,23 @@ as $$
       and public.company_members.user_id = $2
       and company_members.status = 'approved'
       and company_members.role in ('owner', 'admin')
+  );
+$$;
+
+create or replace function public.is_company_owner(company_id uuid, user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.company_members
+    where public.company_members.company_id = $1
+      and public.company_members.user_id = $2
+      and company_members.status = 'approved'
+      and company_members.role = 'owner'
   );
 $$;
 
@@ -263,6 +303,7 @@ alter table public.companies enable row level security;
 alter table public.company_members enable row level security;
 alter table public.spool_projects enable row level security;
 alter table public.project_comments enable row level security;
+alter table public.team_messages enable row level security;
 
 drop policy if exists "Users can read their own profile" on public.profiles;
 create policy "Users can read their own profile"
@@ -340,12 +381,28 @@ with check (
 );
 
 drop policy if exists "Admins can update company memberships" on public.company_members;
-create policy "Admins can update company memberships"
+drop policy if exists "Owners can update company memberships" on public.company_members;
+drop policy if exists "Admins can approve company members" on public.company_members;
+
+create policy "Owners can update company memberships"
 on public.company_members
 for update
 to authenticated
-using (public.is_company_admin(company_id, (select auth.uid())))
-with check (public.is_company_admin(company_id, (select auth.uid())));
+using (public.is_company_owner(company_id, (select auth.uid())))
+with check (public.is_company_owner(company_id, (select auth.uid())));
+
+create policy "Admins can approve company members"
+on public.company_members
+for update
+to authenticated
+using (
+  public.is_company_admin(company_id, (select auth.uid()))
+  and role = 'member'
+)
+with check (
+  public.is_company_admin(company_id, (select auth.uid()))
+  and role = 'member'
+);
 
 drop policy if exists "Users can leave company memberships" on public.company_members;
 create policy "Users can leave company memberships"
@@ -354,7 +411,11 @@ for delete
 to authenticated
 using (
   user_id = (select auth.uid())
-  or public.is_company_admin(company_id, (select auth.uid()))
+  or public.is_company_owner(company_id, (select auth.uid()))
+  or (
+    public.is_company_admin(company_id, (select auth.uid()))
+    and role = 'member'
+  )
 );
 
 drop policy if exists "Users can read their own spool projects" on public.spool_projects;
@@ -398,7 +459,7 @@ using (
     owner_id = (select auth.uid())
     or (
       company_id is not null
-      and public.is_company_member(company_id, (select auth.uid()))
+      and public.is_company_admin(company_id, (select auth.uid()))
     )
   )
 )
@@ -408,7 +469,7 @@ with check (
     owner_id = (select auth.uid())
     or (
       company_id is not null
-      and public.is_company_member(company_id, (select auth.uid()))
+      and public.is_company_admin(company_id, (select auth.uid()))
     )
   )
 );
@@ -506,14 +567,77 @@ using (
   )
 );
 
+drop policy if exists "Approved members can read team messages" on public.team_messages;
+create policy "Approved members can read team messages"
+on public.team_messages
+for select
+to authenticated
+using (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_member(team_messages.company_id, (select auth.uid()))
+  and (
+    remove_after is null
+    or remove_after > now()
+  )
+);
+
+drop policy if exists "Approved members can add team messages" on public.team_messages;
+create policy "Approved members can add team messages"
+on public.team_messages
+for insert
+to authenticated
+with check (
+  author_id = (select auth.uid())
+  and public.has_active_license((select auth.uid()))
+  and public.is_company_member(team_messages.company_id, (select auth.uid()))
+);
+
+drop policy if exists "Authors and admins can update team messages" on public.team_messages;
+create policy "Authors and admins can update team messages"
+on public.team_messages
+for update
+to authenticated
+using (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_member(team_messages.company_id, (select auth.uid()))
+  and (
+    author_id = (select auth.uid())
+    or public.is_company_admin(team_messages.company_id, (select auth.uid()))
+  )
+)
+with check (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_member(team_messages.company_id, (select auth.uid()))
+  and (
+    author_id = (select auth.uid())
+    or public.is_company_admin(team_messages.company_id, (select auth.uid()))
+  )
+);
+
+drop policy if exists "Authors and admins can delete team messages" on public.team_messages;
+create policy "Authors and admins can delete team messages"
+on public.team_messages
+for delete
+to authenticated
+using (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_member(team_messages.company_id, (select auth.uid()))
+  and (
+    author_id = (select auth.uid())
+    or public.is_company_admin(team_messages.company_id, (select auth.uid()))
+  )
+);
+
 grant select, insert on public.profiles to authenticated;
 grant select, insert, update on public.companies to authenticated;
 grant select, insert, update, delete on public.company_members to authenticated;
 grant select, insert, update, delete on public.spool_projects to authenticated;
 grant select, insert, update, delete on public.project_comments to authenticated;
+grant select, insert, update, delete on public.team_messages to authenticated;
 grant execute on function public.has_active_license(uuid) to authenticated;
 grant execute on function public.is_company_member(uuid, uuid) to authenticated;
 grant execute on function public.is_company_admin(uuid, uuid) to authenticated;
+grant execute on function public.is_company_owner(uuid, uuid) to authenticated;
 grant execute on function public.create_company(text) to authenticated;
 grant execute on function public.join_company_by_code(text) to authenticated;
 

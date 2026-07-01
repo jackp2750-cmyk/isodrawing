@@ -1,6 +1,62 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.17`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.24`.
+
+## v2.24 - Team Roles and Fab Sheet Templates
+
+- Added owner/admin/member permission handling in the app: owners can change member roles, admins can approve users and manage shared team spools, and members get view/comment access on shared spools they do not own.
+- Made shared cloud spools read-only for members who should not edit them, including workflow controls, production board fields, drag/drop, undo/redo and drawing edits.
+- Tightened Supabase policies so team members can read/comment shared spools, project owners or company admins can edit cloud spools, admins can approve normal member requests, and owners control role changes.
+- Added fabrication PDF styles: Workshop cut sheet, Client / approval sheet and Fitting / take-off sheet.
+- Updated tutorial copy for team roles and PDF style selection.
+- Bumped app cache to `spoolmate-v172`.
+
+## v2.23 - Cloud Save Confidence
+
+- Made the cloud status pill visible so users can see Local only, Cloud ready, Not cloud saved, Unsaved changes, Saving to cloud, Saved, Cloud save failed and Cloud conflict states.
+- Stored lightweight browser-side cloud save metadata so the last cloud save time survives refreshes for the current project.
+- Added a remote updated-time check before cloud writes so autosave pauses on a newer cloud copy and manual Save asks before overwriting another device's changes.
+- Reset cloud confidence cleanly when opening browser/cloud projects, deleting the active cloud project, loading the sample or starting a new spool.
+- Bumped app cache to `spoolmate-v171`.
+
+## v2.22 - Menu Button Reliability
+
+- Reworked the Menu button toggle so touch/mouse pointer events no longer immediately double-toggle with the follow-up click.
+- Kept the top action strip from clipping the open Menu panel.
+- Raised the Menu panel above the floating preview and full-screen drawing layers.
+- Bumped app cache to `spoolmate-v170`.
+
+## v2.21 - Tutorial Clarity Fix
+
+- Fixed tutorial target labels so dropdowns no longer dump every menu option into the "Tool to try" callout.
+- Made tutorial target wording explicit for each topic, such as "Pipe NB menu" and "Dimension style menu".
+- Put the tutorial card above the spotlight layer so the glow no longer draws an empty box over the tutorial panel.
+- Strengthened tutorial light and dark mode contrast with solid card, menu, demo and callout backgrounds.
+- Bumped app cache to `spoolmate-v169`.
+
+## v2.20 - Larger Tutorial Layout
+
+- Made the interactive tutorial a larger centered learning panel so it feels calmer and less cramped.
+- Changed the tutorial into a two-column layout with the topic menu on the left and the current feature lesson/demo on the right.
+- Removed the desktop internal tutorial scroll areas by giving topics and content more room.
+- Added a smoother topic transition when switching tutorial sections.
+- Bumped app cache to `spoolmate-v168`.
+
+## v2.19 - Tutorial Topic Menu
+
+- Reworked the interactive tutorial into a clickable topic menu so users can jump straight to the feature they want to learn.
+- Added a Team Comms tutorial topic with a mini demo and an action that opens the Jobs Comms view.
+- Kept Next and Back for guided walkthroughs while replacing the old dot-only progress strip.
+- Added a small pattern for future feature work: each new feature should get a tutorial topic at the same time it is added.
+- Bumped app cache to `spoolmate-v167`.
+
+## v2.18 - Team Communication Dashboard
+
+- Added a Jobs `Comms` view for shared company messages and active spool/yard notes in one place.
+- Added Supabase `team_messages` setup with row-level security for approved company members.
+- Kept team communication responsive on tablet/phone so the Jobs dashboard does not become another cramped side panel.
+- Fixed the Jobs dashboard toolbar grid so Guide, Comms, Report, New spool and Save current all have defined space.
+- Bumped app cache to `spoolmate-v166`.
 
 ## v2.17 - Flange End-Fitting Split Fix
 

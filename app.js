@@ -73,6 +73,7 @@ const openBrowserProjectButton = document.querySelector("#openBrowserProjectButt
 const healthCheckButton = document.querySelector("#healthCheckButton");
 const newRevisionButton = document.querySelector("#newRevisionButton");
 const shareReadOnlyButton = document.querySelector("#shareReadOnlyButton");
+const fabSheetTemplateSelect = document.querySelector("#fabSheetTemplateSelect");
 const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
 const homeDashboardButton = document.querySelector("#homeDashboardButton");
 const drawingAssistantButton = document.querySelector("#drawingAssistantButton");
@@ -135,6 +136,8 @@ let projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButt
 let projectLibraryGuideSlot = document.querySelector("#projectLibraryGuideSlot");
 let projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
 let projectLibraryReportSlot = document.querySelector("#projectLibraryReportSlot");
+let projectLibraryCommsButton = document.querySelector("#projectLibraryCommsButton");
+let projectLibraryCommsSlot = document.querySelector("#projectLibraryCommsSlot");
 let projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
 let projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
 const healthSummary = document.querySelector("#healthSummary");
@@ -208,6 +211,8 @@ const sideToolButtons = [...document.querySelectorAll(".tool-rail [data-tool], .
 const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
+const CLOUD_SAVE_META_KEY = "spoolmate-cloud-save-meta-v1";
+const FAB_SHEET_TEMPLATE_KEY = "spoolmate-fab-sheet-template-v1";
 const PROJECT_LIBRARY_FOLDER_STATE_KEY = "isospool-project-library-folder-state-v1";
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
@@ -217,8 +222,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.17";
-const APP_BUILD_DATE = "2026-06-28";
+const APP_VERSION = "v2.24";
+const APP_BUILD_DATE = "2026-07-01";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -227,6 +232,7 @@ const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_COMPANIES_TABLE = "companies";
 const CLOUD_COMPANY_MEMBERS_TABLE = "company_members";
 const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
+const CLOUD_TEAM_MESSAGES_TABLE = "team_messages";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
 const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
@@ -380,6 +386,30 @@ const PROJECT_STATUS_ALIASES = {
   workshop: "issued",
 };
 const PRODUCTION_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
+const FAB_SHEET_TEMPLATES = {
+  workshop: {
+    label: "Workshop cut sheet",
+    shortLabel: "Workshop",
+    title: "Workshop fabrication cut sheet",
+    subtitle: "Centre-to-centre drawing, cut lengths, deductions, weights and take-off list",
+    filename: "workshop-fab-sheet",
+  },
+  client: {
+    label: "Client / approval sheet",
+    shortLabel: "Client",
+    title: "Client approval spool sheet",
+    subtitle: "Clean drawing, project details and estimated material summary",
+    filename: "client-approval-sheet",
+  },
+  takeoff: {
+    label: "Fitting / take-off sheet",
+    shortLabel: "Take-off",
+    title: "Fitting and take-off sheet",
+    subtitle: "Ordering view for pipe lengths, fittings, weights and fabrication notes",
+    filename: "takeoff-sheet",
+  },
+};
+const FAB_SHEET_TEMPLATE_KEYS = new Set(Object.keys(FAB_SHEET_TEMPLATES));
 const ALWAYS_VISIBLE_SIDE_TOOLS = new Set(["draw", "select", "undo", "redo"]);
 const HISTORY_LIMIT = 80;
 const APP_MODES = new Set(["draw", "edit", "review", "export"]);
@@ -415,9 +445,11 @@ const SIDE_TOOL_DETAILS = {
 const TUTORIAL_STEPS = [
   {
     kicker: "Start",
+    menuLabel: "Start / Jobs",
     title: "Start from the dashboard or Jobs",
     body: "The Jobs button opens saved spools grouped by job. The dashboard is the quick starting point for new users, samples, jobs, account and help.",
     target: "#openBrowserProjectButton",
+    targetLabel: "Jobs button",
     action: "focusJobs",
     actionLabel: "Find Jobs",
     demo: "jobs",
@@ -428,10 +460,29 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
+    kicker: "Team",
+    menuLabel: "Team comms",
+    title: "Communicate from the Jobs dashboard",
+    body: "Comms gives the team one shared place for general messages and active spool notes, so drawing changes and yard questions do not get buried inside one spool.",
+    target: "#openBrowserProjectButton",
+    targetLabel: "Jobs button, then Comms",
+    action: "showComms",
+    actionLabel: "Open Comms",
+    demo: "comms",
+    items: [
+      "Open Jobs, then use Comms for team-wide messages.",
+      "Active spool notes from production cards are shown in the same view.",
+      "Owners can promote admins. Admins can approve users and manage shared team spools.",
+      "Team messages are shared through Supabase for approved company members.",
+    ],
+  },
+  {
     kicker: "Draw",
+    menuLabel: "Draw pipe",
     title: "Pick Draw to create pipe runs",
     body: "Draw is the main tool for building the centreline. Drag from the active point on the isometric paper, or use exact runs from the inspector.",
     target: '[data-tool="draw"]',
+    targetLabel: "Draw tool",
     mode: "draw",
     action: "drawTool",
     actionLabel: "Select Draw",
@@ -444,9 +495,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Exact Runs",
+    menuLabel: "Exact runs",
     title: "Use millimetre run lengths",
     body: "The exact run controls let users type the next run length, then add X, Y or Z runs without guessing on the grid.",
     target: "#stepLengthInput",
+    targetLabel: "Next run / offset set mm",
     mode: "draw",
     action: "focusLength",
     actionLabel: "Focus Length",
@@ -459,9 +512,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Angles",
+    menuLabel: "Angles / offsets",
     title: "Teach offsets and 45 degree work",
     body: "Angles are controlled from the inspector. Users can type an angle, pick a plane and add positive or negative angled runs.",
     target: "#angleInput",
+    targetLabel: "Angle degrees input",
     mode: "draw",
     action: "focusAngle",
     actionLabel: "Focus Angle",
@@ -474,9 +529,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Select",
+    menuLabel: "Select / edit",
     title: "Select and edit existing pipe",
     body: "Select is how users pick pipe runs, points, notes, fittings and measurements. Holding Shift selects more than one run.",
     target: '[data-tool="select"]',
+    targetLabel: "Select tool",
     mode: "draw",
     action: "selectTool",
     actionLabel: "Select Tool",
@@ -489,9 +546,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Fittings",
+    menuLabel: "Tee / branch",
     title: "Add tees and branches while drawing",
     body: "Tee and Branch stay close to the normal drawing workflow. Pick the tool, tap the main run and draw the new branch from the point SpoolMate creates.",
     target: '[data-tool="tee"]',
+    targetLabel: "Tee tool",
     mode: "draw",
     action: "teeTool",
     actionLabel: "Select Tee",
@@ -504,9 +563,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "End Fittings",
+    menuLabel: "End fittings",
     title: "Add flanges, grooves and reducers",
     body: "End fittings can be added from the side tools or from the right-click/long-press menu on a pipe end or run.",
     target: '[data-tool="flange"]',
+    targetLabel: "Flange tool",
     mode: "edit",
     action: "flangeTool",
     actionLabel: "Select Flange",
@@ -519,9 +580,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Pipe Size",
+    menuLabel: "Pipe size",
     title: "Change pipe size from menus",
     body: "Pipe NB is chosen from the pipe-size menu. When connected pipe sizes change, SpoolMate adds reducers where the connection needs one.",
     target: "#pipeSizeSelect",
+    targetLabel: "Pipe NB menu",
     action: "focusPipeSize",
     actionLabel: "Open Pipe Size",
     demo: "reducer",
@@ -533,9 +596,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Sockets",
+    menuLabel: "Sockets",
     title: "Add and rotate sockets",
     body: "Sockets are added from the pipe context menu. Right-click on PC, or long-press on iPad and phone, then choose Add sockets and pick the size, count and spacing.",
     target: '[data-tool="select"]',
+    targetLabel: "Select tool and pipe context menu",
     mode: "draw",
     action: "selectTool",
     actionLabel: "Use Select",
@@ -548,9 +613,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Measure",
+    menuLabel: "Measure",
     title: "Measure any two points",
     body: "The Measure tool lets users click two points and leave a measurement on the drawing without changing the pipe.",
     target: '[data-tool="measure"]',
+    targetLabel: "Measure tool",
     mode: "draw",
     action: "measureTool",
     actionLabel: "Select Measure",
@@ -563,9 +630,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Dimensions",
+    menuLabel: "Dimensions",
     title: "Choose the clearest dimension style",
     body: "Dimensions can be pipe labels, red centre-to-centre lines, numbered dimensions or chain dimensions depending on how busy the spool is.",
     target: "#dimensionStyleSelect",
+    targetLabel: "Dimension style menu",
     action: "focusDimensions",
     actionLabel: "Show Styles",
     demo: "dimensions",
@@ -577,9 +646,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "3D",
+    menuLabel: "3D preview",
     title: "Use the 3D preview to explain the spool",
     body: "The 3D preview makes the pipe clearer for people who do not read isometric drawings every day.",
     target: "#previewModePanelSelect",
+    targetLabel: "3D view style menu",
     action: "showPreview",
     actionLabel: "Show 3D",
     demo: "preview",
@@ -591,9 +662,11 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Review",
+    menuLabel: "Checks",
     title: "Check before saving or issuing",
     body: "The Checks, Cut List, Weights and BOM tabs turn the drawing into fabrication information before anyone starts cutting pipe.",
     target: '[data-inspector-tab="checks"]',
+    targetLabel: "Checks tab",
     mode: "review",
     action: "showChecks",
     actionLabel: "Open Checks",
@@ -606,15 +679,18 @@ const TUTORIAL_STEPS = [
   },
   {
     kicker: "Export",
+    menuLabel: "Export",
     title: "Send a fab sheet or 3D image",
     body: "Export mode is where the drawing becomes paperwork for the workshop: PDF fab sheets, 3D images and project files that can be opened again later.",
     target: "#exportReportButton",
+    targetLabel: "Fab PDF export button",
     mode: "export",
     action: "focusExport",
     actionLabel: "Open Export",
     demo: "export",
     items: [
-      "Fab PDF includes the drawing, dimension key, cut list, weights and takeoff list.",
+      "Pick Workshop, Client or Take-off PDF style from the Export menu before pressing Fab PDF.",
+      "Workshop PDF includes the drawing, dimension key, cut list, weights and takeoff list.",
       "Export 3D gives a clean model image for explaining the spool.",
       "Project export is the backup file if someone needs to import the spool later.",
     ],
@@ -891,7 +967,7 @@ let previewFloatBounds = null;
 let previewFloatManual = loadPreviewFloatPreference();
 let previewPanelMinimized = false;
 let previewPanelHidden = false;
-let actionMenuPointerToggle = false;
+let actionMenuLastPointerToggleAt = -Infinity;
 let healthHighlight = null;
 let healthHighlightAnimationFrame = 0;
 let startupProjectPromptPending = false;
@@ -913,8 +989,20 @@ let companyMembers = [];
 let projectComments = [];
 let projectCommentsProjectId = null;
 let projectCommentsBusy = false;
+let teamMessages = [];
+let teamMessagesCompanyId = null;
+let teamMessagesBusy = false;
+let teamMessagesError = "";
 let currentCloudProjectOwnerId = null;
 let currentCloudProjectCompanyId = null;
+let cloudSaveDirty = false;
+let cloudSaveConflict = false;
+let cloudSaveError = "";
+let cloudLastSavedAt = "";
+let cloudLastRemoteUpdatedAt = "";
+let cloudSaveTrackedProjectId = null;
+let cloudDirtySuppressed = false;
+let cloudPermissionReadOnly = false;
 let projectLibrarySource = "browser";
 let projectLibrarySearch = "";
 let projectLibraryProjects = [];
@@ -924,7 +1012,9 @@ let projectLibraryLastActivation = { key: "", at: 0 };
 let projectLibraryDrag = null;
 let projectLibraryGuideVisible = false;
 let projectLibraryReportVisible = false;
+let projectLibraryCommsVisible = false;
 let projectLibraryReportPeriod = "daily";
+let fabSheetTemplate = loadFabSheetTemplate();
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
 let currentLoadPlan = null;
@@ -1285,6 +1375,7 @@ function persistState() {
   } catch (error) {
     console.warn("Could not save spool state in this browser.", error);
   }
+  markCloudSaveDirty();
   queueCloudAutosave();
 }
 
@@ -1619,6 +1710,28 @@ function normalizeProductionPriority(value) {
   return PRODUCTION_PRIORITIES.has(priority) ? priority : "normal";
 }
 
+function normalizeFabSheetTemplate(value) {
+  const template = String(value ?? "workshop").trim().toLowerCase();
+  return FAB_SHEET_TEMPLATE_KEYS.has(template) ? template : "workshop";
+}
+
+function loadFabSheetTemplate() {
+  try {
+    return normalizeFabSheetTemplate(localStorage.getItem(FAB_SHEET_TEMPLATE_KEY));
+  } catch {
+    return "workshop";
+  }
+}
+
+function storeFabSheetTemplate(value) {
+  fabSheetTemplate = normalizeFabSheetTemplate(value);
+  try {
+    localStorage.setItem(FAB_SHEET_TEMPLATE_KEY, fabSheetTemplate);
+  } catch {
+    // The current session still uses the selected template if storage is blocked.
+  }
+}
+
 function productionPriorityLabel(value) {
   const priority = normalizeProductionPriority(value);
   if (priority === "low") return "Low";
@@ -1780,6 +1893,32 @@ function normalizeProjectComment(row) {
     authorId: normalizeUuid(row.author_id),
     authorEmail: String(row.author_email ?? "").trim().slice(0, 120),
     body,
+    createdAt: String(row.created_at ?? ""),
+    updatedAt: String(row.updated_at ?? ""),
+  };
+}
+
+function normalizeTeamMessage(row) {
+  if (!row || typeof row !== "object") return null;
+  const id = normalizeUuid(row.id);
+  const companyId = normalizeUuid(row.company_id);
+  const body = String(row.body ?? "").trim().slice(0, 500);
+  if (!id || !companyId || !body) return null;
+  const removeAfter = String(row.remove_after ?? "").trim();
+  if (removeAfter) {
+    const removeTime = new Date(removeAfter).getTime();
+    if (!Number.isNaN(removeTime) && removeTime < Date.now()) return null;
+  }
+  return {
+    id,
+    companyId,
+    authorId: normalizeUuid(row.author_id),
+    authorEmail: String(row.author_email ?? "").trim().slice(0, 120),
+    body,
+    pinned: row.pinned === true,
+    completed: row.completed === true,
+    completedAt: String(row.completed_at ?? ""),
+    removeAfter,
     createdAt: String(row.created_at ?? ""),
     updatedAt: String(row.updated_at ?? ""),
   };
@@ -6985,6 +7124,10 @@ function restoreHistorySnapshot(snapshot) {
 }
 
 function undo() {
+  if (cloudPermissionReadOnly) {
+    ensureDrawingEditable("undo changes");
+    return;
+  }
   const redoSnapshot = createHistorySnapshot();
   const last = state.history.pop();
   if (!last) return;
@@ -7052,6 +7195,10 @@ function undo() {
 }
 
 function redo() {
+  if (cloudPermissionReadOnly) {
+    ensureDrawingEditable("redo changes");
+    return;
+  }
   const stack = redoStack();
   const snapshot = stack.pop();
   if (!snapshot) return;
@@ -7062,8 +7209,8 @@ function redo() {
 }
 
 function updateHistoryButtons() {
-  if (undoButton) undoButton.disabled = !(Array.isArray(state.history) && state.history.length);
-  if (redoButton) redoButton.disabled = !redoStack().length;
+  if (undoButton) undoButton.disabled = cloudPermissionReadOnly || !(Array.isArray(state.history) && state.history.length);
+  if (redoButton) redoButton.disabled = cloudPermissionReadOnly || !redoStack().length;
 }
 
 function deleteSelection() {
@@ -7699,6 +7846,7 @@ function productionAssigneeChoices() {
 
 function productionWorkflowCardHtml() {
   const production = normalizeProductionInfo(state.productionInfo);
+  const disabledAttr = cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : "";
   const lastUpdated = production.lastUpdatedAt
     ? `${new Date(production.lastUpdatedAt).toLocaleString()}${production.lastUpdatedBy ? ` by ${production.lastUpdatedBy}` : ""}`
     : "Not updated yet";
@@ -7712,30 +7860,30 @@ function productionWorkflowCardHtml() {
       <div class="production-grid">
         <label class="field">
           <span>Assigned to</span>
-          <input data-production-field="assignee" list="productionAssigneeOptions" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Unassigned" />
+          <input data-production-field="assignee" list="productionAssigneeOptions" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Unassigned"${disabledAttr} />
         </label>
         <datalist id="productionAssigneeOptions">${assigneeOptions}</datalist>
         <label class="field">
           <span>Due date</span>
-          <input data-production-field="dueDate" type="date" value="${escapeHtml(production.dueDate)}" />
+          <input data-production-field="dueDate" type="date" value="${escapeHtml(production.dueDate)}"${disabledAttr} />
         </label>
         <label class="field">
           <span>Due time</span>
-          <input data-production-field="dueTime" type="time" value="${escapeHtml(production.dueTime)}" />
+          <input data-production-field="dueTime" type="time" value="${escapeHtml(production.dueTime)}"${disabledAttr} />
         </label>
         <label class="field">
           <span>Priority</span>
-          <select data-production-field="priority">
+          <select data-production-field="priority"${disabledAttr}>
             ${[...PRODUCTION_PRIORITIES].map((priority) => `<option value="${priority}"${production.priority === priority ? " selected" : ""}>${escapeHtml(productionPriorityLabel(priority))}</option>`).join("")}
           </select>
         </label>
         <label class="toggle production-hold-toggle">
-          <input data-production-field="hold" type="checkbox"${production.hold ? " checked" : ""} />
+          <input data-production-field="hold" type="checkbox"${production.hold ? " checked" : ""}${disabledAttr} />
           <span>On hold</span>
         </label>
         <label class="field production-hold-reason">
           <span>Hold / shop note</span>
-          <input data-production-field="holdReason" type="text" maxlength="140" value="${escapeHtml(production.holdReason)}" placeholder="Reason, missing fitting, client hold..." />
+          <input data-production-field="holdReason" type="text" maxlength="140" value="${escapeHtml(production.holdReason)}" placeholder="Reason, missing fitting, client hold..."${disabledAttr} />
         </label>
       </div>
       <span class="production-updated">Last production update: ${escapeHtml(lastUpdated)}</span>
@@ -7754,8 +7902,8 @@ function updateWorkflowSummary() {
       </ul>
     </div>
     <div class="workflow-actions">
-      <button type="button" data-workflow-action="mark-checked">Mark checked</button>
-      <button type="button" data-workflow-action="new-revision">New revision</button>
+      <button type="button" data-workflow-action="mark-checked"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Mark checked</button>
+      <button type="button" data-workflow-action="new-revision"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>New revision</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
       <button type="button" data-workflow-action="save-defaults">Save defaults</button>
     </div>
@@ -7787,6 +7935,10 @@ function updateWorkflowSummary() {
 }
 
 function handleWorkflowAction(action) {
+  if (cloudPermissionReadOnly && (action === "mark-checked" || action === "new-revision")) {
+    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to change workflow status.");
+    return;
+  }
   if (action === "mark-checked") markDrawingChecked();
   if (action === "new-revision") createNextRevision();
   if (action === "share-readonly") shareReadOnlyProject();
@@ -7796,6 +7948,11 @@ function handleWorkflowAction(action) {
 function handleProductionFieldChange(field) {
   const key = field?.dataset?.productionField;
   if (!key) return;
+  if (cloudPermissionReadOnly) {
+    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to update production allocation.");
+    updateWorkflowSummary();
+    return;
+  }
   const previous = normalizeProductionInfo(state.productionInfo);
   const value = field.type === "checkbox" ? field.checked : field.value;
   state.productionInfo = normalizeProductionInfo({
@@ -7813,6 +7970,10 @@ function checkerName() {
 }
 
 function markDrawingChecked() {
+  if (cloudPermissionReadOnly) {
+    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to mark it checked.");
+    return;
+  }
   const issues = drawingHealthItems().filter((item) => item.severity === "error");
   if (issues.length) {
     const proceed = window.confirm(`${issues.length} health issue${issues.length === 1 ? "" : "s"} still need fixing. Mark checked anyway?`);
@@ -7872,6 +8033,10 @@ function addRevisionSnapshot(note = "Saved revision") {
 }
 
 function createNextRevision() {
+  if (cloudPermissionReadOnly) {
+    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to create a new revision.");
+    return;
+  }
   const project = normalizeProjectInfo(state.projectInfo);
   addRevisionSnapshot("Before new revision");
   state.projectInfo = normalizeProjectInfo({
@@ -7888,6 +8053,10 @@ function createNextRevision() {
 }
 
 function restoreRevision(revisionId) {
+  if (cloudPermissionReadOnly) {
+    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to restore revisions.");
+    return;
+  }
   const entry = normalizeRevisionHistory(state.revisionHistory).find((item) => item.id === revisionId);
   if (!entry?.state) return;
   const proceed = window.confirm(`Restore revision ${entry.revision || "-"}? The current drawing will be replaced.`);
@@ -8100,7 +8269,7 @@ function updateProjectReadout() {
   if (!projectReadout) return;
   const title = projectDisplayName();
   const status = projectStatusLabel();
-  const locked = state.locked ? " / Locked" : "";
+  const locked = cloudPermissionReadOnly ? " / View only" : state.locked ? " / Locked" : "";
   projectReadout.textContent = hasProjectInfo() ? title : "No project set";
   projectReadout.title = state.projectId
     ? `${title} - ${status}${locked} - saved in this browser`
@@ -8111,7 +8280,15 @@ function updateProjectReadout() {
 
 function updateWorkflowControls() {
   if (projectStatusSelect) projectStatusSelect.value = normalizeProjectStatus(state.projectStatus);
-  if (projectLockToggle) projectLockToggle.checked = state.locked === true;
+  if (projectStatusSelect) {
+    projectStatusSelect.disabled = cloudPermissionReadOnly;
+    projectStatusSelect.title = cloudPermissionReadOnly ? "Team members can view/comment only. Ask an owner/admin to issue or change status." : "";
+  }
+  if (projectLockToggle) {
+    projectLockToggle.checked = state.locked === true || cloudPermissionReadOnly;
+    projectLockToggle.disabled = cloudPermissionReadOnly;
+    projectLockToggle.title = cloudPermissionReadOnly ? "This cloud spool is view/comment only for your team role." : "";
+  }
 }
 
 function activateInspectorTab(name) {
@@ -8175,12 +8352,16 @@ function showHealthPanel() {
 }
 
 function drawingEditLocked() {
-  return state.locked === true;
+  return state.locked === true || cloudPermissionReadOnly;
 }
 
 function ensureDrawingEditable(action = "edit this drawing") {
   if (!drawingEditLocked()) return true;
-  window.alert(`This drawing is locked as ${projectStatusLabel()}. Unlock edits or create a new revision before you ${action}.`);
+  if (cloudPermissionReadOnly) {
+    window.alert(`This team spool is view/comment only for your role. Ask the project owner or a team admin before you ${action}.`);
+  } else {
+    window.alert(`This drawing is locked as ${projectStatusLabel()}. Unlock edits or create a new revision before you ${action}.`);
+  }
   showHealthPanel();
   return false;
 }
@@ -9168,12 +9349,14 @@ function openActionMenu() {
   if (!actionMenuPanel || !actionMenuButton) return;
   actionMenuPanel.hidden = false;
   actionMenuButton.setAttribute("aria-expanded", "true");
+  document.body.classList.add("action-menu-open");
 }
 
 function closeActionMenu() {
   if (!actionMenuPanel || !actionMenuButton) return;
   actionMenuPanel.hidden = true;
   actionMenuButton.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("action-menu-open");
 }
 
 function toggleActionMenu() {
@@ -9191,19 +9374,16 @@ function handleActionMenuToggle(event) {
 }
 
 function setupActionMenu() {
-  actionMenuButton?.addEventListener("pointerup", (event) => {
+  actionMenuButton?.addEventListener("pointerdown", (event) => {
     if (event.button !== undefined && event.button !== 0) return;
-    actionMenuPointerToggle = true;
+    actionMenuLastPointerToggleAt = performance.now();
     handleActionMenuToggle(event);
-    window.setTimeout(() => {
-      actionMenuPointerToggle = false;
-    }, 500);
   });
   actionMenuButton?.addEventListener("click", (event) => {
-    if (actionMenuPointerToggle) {
+    const justHandledPointer = performance.now() - actionMenuLastPointerToggleAt < 650;
+    if (justHandledPointer) {
       event.preventDefault();
       event.stopPropagation();
-      actionMenuPointerToggle = false;
       return;
     }
     handleActionMenuToggle(event);
@@ -9241,6 +9421,10 @@ function currentTutorialStep() {
 }
 
 function tutorialTargetForStep(step = currentTutorialStep()) {
+  if (step?.action === "showComms") {
+    const commsButton = document.querySelector("#projectLibraryCommsButton");
+    if (tutorialTargetIsVisible(commsButton)) return commsButton;
+  }
   if (!step?.target) return null;
   try {
     return document.querySelector(step.target);
@@ -9250,8 +9434,21 @@ function tutorialTargetForStep(step = currentTutorialStep()) {
 }
 
 function tutorialTargetLabel(target, step = currentTutorialStep()) {
+  if (step?.targetLabel) return step.targetLabel;
+  if (target instanceof HTMLSelectElement) {
+    return target.closest("label")?.querySelector("span")?.textContent?.replace(/\s+/g, " ").trim() ||
+      target.selectedOptions?.[0]?.textContent?.replace(/\s+/g, " ").trim() ||
+      step?.actionLabel ||
+      step?.title ||
+      "this menu";
+  }
+  const aria = target?.getAttribute?.("aria-label")?.replace(/\s+/g, " ").trim();
+  if (aria) return aria;
+  const title = target?.getAttribute?.("title")?.replace(/\s+/g, " ").trim();
+  if (title) return title;
   const text = target?.textContent?.replace(/\s+/g, " ").trim();
-  return text || step?.actionLabel || step?.title || "this control";
+  if (text && text.length <= 80) return text;
+  return step?.actionLabel || step?.title || "this control";
 }
 
 function clearTutorialTarget() {
@@ -9382,6 +9579,32 @@ function tutorialDemoMarkup(kind) {
           <i class="tutorial-demo-pointer"></i>
         </div>
         <div class="tutorial-demo-caption">Tap a job, then pick the spool drawing.</div>
+      </div>
+    `,
+    comms: `
+      <div class="tutorial-demo tutorial-demo-comms" aria-label="Animated demo showing team communication in the Jobs dashboard">
+        <div class="tutorial-demo-title">Demo: team comms</div>
+        <div class="tutorial-demo-comms-board">
+          <div class="demo-comms-toolbar">
+            <span>Jobs</span>
+            <strong>Comms</strong>
+            <span>Report</span>
+          </div>
+          <div class="demo-comms-panel">
+            <section>
+              <strong>General team messages</strong>
+              <p>Need spool 12 checked before lunch.</p>
+              <small>Shared with the company</small>
+            </section>
+            <section>
+              <strong>Active spool notes</strong>
+              <p>Spool 7: hold for revised flange.</p>
+              <small>Mark done when handled</small>
+            </section>
+          </div>
+          <i class="demo-comms-pulse"></i>
+        </div>
+        <div class="tutorial-demo-caption">Use Comms inside Jobs for team messages and open production notes.</div>
       </div>
     `,
     draw: `
@@ -9621,6 +9844,27 @@ function tutorialDemoMarkup(kind) {
   return demos[kind] ?? "";
 }
 
+function tutorialMenuLabel(step, index) {
+  return step?.menuLabel || step?.kicker || `Step ${index + 1}`;
+}
+
+function tutorialMenuMarkup() {
+  return `
+    <div class="tutorial-progress-head">
+      <span>Topic ${tutorialStepIndex + 1} of ${TUTORIAL_STEPS.length}</span>
+      <small>Pick a feature to learn, or use Next and Back.</small>
+    </div>
+    <div class="tutorial-topic-menu" role="tablist" aria-label="Tutorial topics">
+      ${TUTORIAL_STEPS.map((step, index) => `
+        <button type="button" role="tab" data-tutorial-step="${index}" aria-selected="${index === tutorialStepIndex ? "true" : "false"}" class="${index === tutorialStepIndex ? "active" : ""}">
+          <span>${escapeHtml(tutorialMenuLabel(step, index))}</span>
+          <small>${escapeHtml(step.kicker || `Step ${index + 1}`)}</small>
+        </button>
+      `).join("")}
+    </div>
+  `;
+}
+
 function renderTutorialStep() {
   if (!tutorialStepCard || !tutorialProgress || !tutorialPrevButton || !tutorialNextButton) return;
   const step = currentTutorialStep();
@@ -9628,21 +9872,20 @@ function renderTutorialStep() {
   const stepNumber = tutorialStepIndex + 1;
   const target = tutorialTargetForStep(step);
   const targetText = tutorialTargetLabel(target, step);
-  tutorialProgress.innerHTML = `
-    <span>Step ${stepNumber} of ${TUTORIAL_STEPS.length}</span>
-    <div class="tutorial-dots" aria-hidden="true">
-      ${TUTORIAL_STEPS.map((_, index) => `<i class="${index === tutorialStepIndex ? "active" : ""}"></i>`).join("")}
-    </div>
-  `;
+  tutorialProgress.innerHTML = tutorialMenuMarkup();
   tutorialStepCard.innerHTML = `
-    <small>${escapeHtml(step.kicker)}</small>
-    <h2>${escapeHtml(step.title)}</h2>
-    <p>${escapeHtml(step.body)}</p>
-    ${tutorialDemoMarkup(step.demo)}
-    <div class="tutorial-target-note">Highlighted: ${escapeHtml(targetText)}</div>
-    <ul>
-      ${step.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-    </ul>
+    <div class="tutorial-copy">
+      <small>${escapeHtml(step.kicker)} / topic ${stepNumber}</small>
+      <h2>${escapeHtml(step.title)}</h2>
+      <p>${escapeHtml(step.body)}</p>
+      <ul>
+        ${step.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+    </div>
+    <div class="tutorial-visual">
+      ${tutorialDemoMarkup(step.demo)}
+      <div class="tutorial-target-note"><strong>Tool to try</strong><span>${escapeHtml(targetText)}</span></div>
+    </div>
   `;
   tutorialPrevButton.disabled = tutorialStepIndex === 0;
   tutorialNextButton.textContent = tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? "Done" : "Next";
@@ -9651,6 +9894,16 @@ function renderTutorialStep() {
     tutorialActionButton.textContent = step.actionLabel || "Try it";
   }
   syncTutorialTarget();
+}
+
+function selectTutorialStep(index) {
+  const nextIndex = clampNumber(Math.round(Number(index) || 0), 0, TUTORIAL_STEPS.length - 1);
+  if (nextIndex === tutorialStepIndex) {
+    syncTutorialTarget();
+    return;
+  }
+  tutorialStepIndex = nextIndex;
+  renderTutorialStep();
 }
 
 function focusTutorialTarget(step = currentTutorialStep()) {
@@ -9731,6 +9984,23 @@ function runTutorialStepAction() {
       showMobilePanel("drawing");
       focusTutorialTarget(step);
       break;
+    case "showComms":
+      openBrowserProject({ keepSearch: true, keepFolder: true })
+        .then(() => {
+          showProjectLibraryComms();
+          window.setTimeout(() => {
+            const commsButton = document.querySelector("#projectLibraryCommsButton");
+            if (commsButton instanceof HTMLElement) {
+              commsButton.focus({ preventScroll: true });
+            }
+            syncTutorialTarget();
+          }, 180);
+        })
+        .catch((error) => {
+          console.warn("Could not open team comms from tutorial.", error);
+          focusTutorialTarget(step);
+        });
+      break;
     case "focusJobs":
     default:
       focusTutorialTarget(step);
@@ -9778,6 +10048,12 @@ function updateTutorialCoachPosition() {
 
 function setupTutorialDialog() {
   tutorialButton?.addEventListener("click", () => openTutorialDialog());
+  tutorialProgress?.addEventListener("click", (event) => {
+    const target = event.target instanceof Element ? event.target.closest("[data-tutorial-step]") : null;
+    if (!target) return;
+    event.preventDefault();
+    selectTutorialStep(target.dataset.tutorialStep);
+  });
   tutorialCloseButton?.addEventListener("click", closeTutorialDialog);
   tutorialPrevButton?.addEventListener("click", tutorialPreviousStep);
   tutorialActionButton?.addEventListener("click", runTutorialStepAction);
@@ -9859,6 +10135,7 @@ function updateControls() {
   pipeSpecSelect.value = normalizePipeSpec(state.pipeSpec);
   flangeModeSelect.value = normalizeFlangeMode(state.flangeMode);
   if (flangeStandardSelect) flangeStandardSelect.value = normalizeFlangeStandard(state.flangeStandard);
+  if (fabSheetTemplateSelect) fabSheetTemplateSelect.value = normalizeFabSheetTemplate(fabSheetTemplate);
   const previewMode = normalizePreviewMode(state.previewMode);
   if (previewModeSelect) previewModeSelect.value = previewMode;
   if (previewModePanelSelect) previewModePanelSelect.value = previewMode;
@@ -10067,6 +10344,16 @@ function setupAuthDialog() {
     const action = actionButton.dataset.teamMemberAction;
     reviewTeamMember(actionButton.dataset.teamMemberUserId, action === "approve").catch((error) => {
       console.warn("Team member update failed.", error);
+    });
+  });
+
+  teamMembersList?.addEventListener("change", (event) => {
+    const select = event.target instanceof HTMLSelectElement ? event.target : null;
+    if (!select?.dataset.teamMemberRole) return;
+    updateTeamMemberRole(select.dataset.teamMemberRole, select.value).catch((error) => {
+      console.warn("Team member role update failed.", error);
+      window.alert(error?.message || "Could not update team member role.");
+      loadTeamWorkspace({ silent: true }).catch(() => null);
     });
   });
 }
@@ -10570,6 +10857,12 @@ function ensureProjectLibraryDashboardShell() {
   if (projectLibraryReportSlot && !card.contains(projectLibraryReportSlot)) {
     projectLibraryReportSlot = null;
   }
+  if (projectLibraryCommsButton && !card.contains(projectLibraryCommsButton)) {
+    projectLibraryCommsButton = null;
+  }
+  if (projectLibraryCommsSlot && !card.contains(projectLibraryCommsSlot)) {
+    projectLibraryCommsSlot = null;
+  }
 
   if (!card.querySelector(".project-dialog-header")) {
     const header = document.createElement("div");
@@ -10611,8 +10904,20 @@ function ensureProjectLibraryDashboardShell() {
     existingToolbar.insertBefore(reportButton, projectLibraryNewButton ?? projectLibrarySaveButton ?? null);
     projectLibraryReportButton = reportButton;
   }
+  if (existingToolbar && !projectLibraryCommsButton) {
+    const commsButton = document.createElement("button");
+    commsButton.className = "icon-button labeled";
+    commsButton.id = "projectLibraryCommsButton";
+    commsButton.type = "button";
+    commsButton.innerHTML = `
+      <svg><use href="#icon-note"></use></svg>
+      <span>Comms</span>
+    `;
+    existingToolbar.insertBefore(commsButton, projectLibraryReportButton ?? projectLibraryNewButton ?? projectLibrarySaveButton ?? null);
+    projectLibraryCommsButton = commsButton;
+  }
 
-  if (!projectLibrarySearchInput || !projectLibraryNewButton || !projectLibrarySaveButton) {
+  if (!projectLibrarySearchInput || !projectLibraryNewButton || !projectLibrarySaveButton || !projectLibraryCommsButton) {
     const toolbar = document.createElement("div");
     toolbar.className = "project-dashboard-toolbar";
     toolbar.setAttribute("aria-label", "Job dashboard tools");
@@ -10625,6 +10930,10 @@ function ensureProjectLibraryDashboardShell() {
         <svg><use href="#icon-help"></use></svg>
         <span>Guide</span>
       </a>
+      <button class="icon-button labeled" id="projectLibraryCommsButton" type="button">
+        <svg><use href="#icon-note"></use></svg>
+        <span>Comms</span>
+      </button>
       <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
         <svg><use href="#icon-report"></use></svg>
         <span>Report</span>
@@ -10641,15 +10950,19 @@ function ensureProjectLibraryDashboardShell() {
     card.insertBefore(toolbar, card.querySelector("#projectLibraryGuideSlot") ?? projectLibraryList);
     projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
     projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButton");
+    projectLibraryCommsButton = document.querySelector("#projectLibraryCommsButton");
     projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
     projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
     projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
   }
   projectLibraryGuideSlot = document.querySelector("#projectLibraryGuideSlot");
+  projectLibraryCommsSlot = document.querySelector("#projectLibraryCommsSlot");
   projectLibraryReportSlot = document.querySelector("#projectLibraryReportSlot");
   ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryCommsSlot();
   ensureProjectLibraryReportSlot();
   bindProjectLibraryGuideButton();
+  bindProjectLibraryCommsButton();
   bindProjectLibraryReportButton();
 }
 
@@ -10664,6 +10977,16 @@ function bindProjectLibraryGuideButton() {
     event.preventDefault();
     event.stopPropagation();
     showProjectLibraryGuide();
+  });
+}
+
+function bindProjectLibraryCommsButton() {
+  if (!projectLibraryCommsButton || projectLibraryCommsButton.dataset.commsBound === "true") return;
+  projectLibraryCommsButton.dataset.commsBound = "true";
+  projectLibraryCommsButton.addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    showProjectLibraryComms();
   });
 }
 
@@ -10694,6 +11017,27 @@ function ensureProjectLibraryGuideSlot() {
   }
   slot.hidden = !projectLibraryGuideVisible;
   return guide;
+}
+
+function ensureProjectLibraryCommsSlot() {
+  const card = projectLibraryDialog?.querySelector(".project-library-card");
+  if (!card || !projectLibraryList) return null;
+  if (projectLibraryCommsSlot && !card.contains(projectLibraryCommsSlot)) {
+    projectLibraryCommsSlot = null;
+  }
+  let slot = projectLibraryCommsSlot || card.querySelector("#projectLibraryCommsSlot");
+  if (!slot) {
+    slot = document.createElement("div");
+    slot.className = "project-library-comms-slot";
+    slot.id = "projectLibraryCommsSlot";
+    card.insertBefore(slot, card.querySelector("#projectLibraryReportSlot") ?? projectLibraryList);
+  } else if (slot.nextElementSibling !== (projectLibraryReportSlot ?? projectLibraryList)) {
+    card.insertBefore(slot, projectLibraryReportSlot ?? projectLibraryList);
+  }
+  projectLibraryCommsSlot = slot;
+  slot.hidden = !projectLibraryCommsVisible;
+  if (projectLibraryCommsVisible) renderProjectLibraryComms(projectLibraryProjects);
+  return slot;
 }
 
 function bindProjectLibraryReportButton() {
@@ -10827,10 +11171,30 @@ function setupProjectDialog() {
       handleProjectLibraryAction(libraryAction);
       return;
     }
+    if (target?.closest("[data-production-action], [data-open-project-id]")) {
+      handleProjectLibraryActivation(event);
+      return;
+    }
     if (!target?.closest("#projectLibraryGuideButton")) return;
     event.preventDefault();
     event.stopPropagation();
     showProjectLibraryGuide();
+  });
+  projectLibraryDialog?.addEventListener("keydown", (event) => {
+    const target = event.target instanceof HTMLElement ? event.target : null;
+    if (!target?.matches("[data-team-message-input]")) return;
+    if (event.key !== "Enter" || event.shiftKey) return;
+    event.preventDefault();
+    const body = String(target.value ?? "").trim();
+    if (!body) return;
+    addTeamMessage(body)
+      .then(() => {
+        target.value = "";
+      })
+      .catch((error) => {
+        console.warn("Team message add failed.", error);
+        window.alert(error?.message || "Could not add team message.");
+      });
   });
   projectLibraryList?.addEventListener("click", handleProjectLibraryActivation);
   projectLibraryList?.addEventListener("change", handleProjectLibraryFieldChange);
@@ -10927,6 +11291,42 @@ function handleProjectLibraryAction(actionElement) {
     hideProjectLibraryGuide();
     return;
   }
+  if (action === "show-comms") {
+    showProjectLibraryComms();
+    return;
+  }
+  if (action === "hide-comms") {
+    hideProjectLibraryComms();
+    return;
+  }
+  if (action === "refresh-team-messages") {
+    loadTeamMessages().catch((error) => {
+      console.warn("Team messages refresh failed.", error);
+      window.alert(error?.message || "Could not refresh team messages.");
+    });
+    return;
+  }
+  if (action === "add-team-message") {
+    const input = projectLibraryCommsSlot?.querySelector("[data-team-message-input]");
+    const body = String(input?.value ?? "").trim();
+    if (!body) return;
+    addTeamMessage(body)
+      .then(() => {
+        if (input) input.value = "";
+      })
+      .catch((error) => {
+        console.warn("Team message add failed.", error);
+        window.alert(error?.message || "Could not add team message.");
+      });
+    return;
+  }
+  if (action === "complete-team-message") {
+    completeTeamMessage(actionElement.dataset.teamMessageId).catch((error) => {
+      console.warn("Team message complete failed.", error);
+      window.alert(error?.message || "Could not mark team message done.");
+    });
+    return;
+  }
   if (action === "show-report") {
     showProjectLibraryReport();
     return;
@@ -10990,6 +11390,11 @@ async function handleProjectLibraryProductionAction(actionButton) {
 function handleProjectLibraryDragStart(event) {
   const card = event.target instanceof Element ? event.target.closest(".production-spool-card") : null;
   if (!card) return;
+  const project = projectLibraryProjects.find((item) => item.id === card.dataset.productionProjectId);
+  if (project && !projectPermission(project).canEdit) {
+    event.preventDefault();
+    return;
+  }
   projectLibraryDrag = {
     projectId: card.dataset.productionProjectId,
     source: card.dataset.projectSource ?? projectLibrarySource,
@@ -14156,7 +14561,219 @@ function supabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 }
 
+function cloudSaveTimestampMs(value) {
+  const time = new Date(value).getTime();
+  return Number.isFinite(time) ? time : 0;
+}
+
+function formatCloudSaveTime(value, options = {}) {
+  const time = cloudSaveTimestampMs(value);
+  if (!time) return "";
+  const date = new Date(time);
+  return options.full
+    ? date.toLocaleString()
+    : date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function readCloudSaveMetaStore() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CLOUD_SAVE_META_KEY));
+    return raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeCloudSaveMetaStore(store) {
+  try {
+    const entries = Object.entries(store)
+      .filter(([id, meta]) => id && meta && typeof meta === "object")
+      .sort(([, first], [, second]) => {
+        const firstDate = String(first.savedAt ?? first.remoteUpdatedAt ?? "");
+        const secondDate = String(second.savedAt ?? second.remoteUpdatedAt ?? "");
+        return secondDate.localeCompare(firstDate);
+      })
+      .slice(0, 120);
+    localStorage.setItem(CLOUD_SAVE_META_KEY, JSON.stringify(Object.fromEntries(entries)));
+  } catch (error) {
+    console.warn("Could not store cloud save status.", error);
+  }
+}
+
+function resetCloudSaveTracking() {
+  cloudSaveDirty = false;
+  cloudSaveConflict = false;
+  cloudSaveError = "";
+  cloudLastSavedAt = "";
+  cloudLastRemoteUpdatedAt = "";
+  cloudSaveTrackedProjectId = normalizeProjectId(state.projectId);
+}
+
+function loadCloudSaveMetaForCurrentProject(projectId = state.projectId) {
+  const id = normalizeProjectId(projectId);
+  cloudSaveTrackedProjectId = id;
+  cloudSaveDirty = false;
+  cloudSaveConflict = false;
+  cloudSaveError = "";
+  if (!id) {
+    cloudLastSavedAt = "";
+    cloudLastRemoteUpdatedAt = "";
+    return;
+  }
+
+  const meta = readCloudSaveMetaStore()[id] ?? {};
+  cloudLastSavedAt = String(meta.savedAt ?? "");
+  cloudLastRemoteUpdatedAt = String(meta.remoteUpdatedAt ?? "");
+}
+
+function ensureCloudSaveTrackingProject() {
+  const id = normalizeProjectId(state.projectId);
+  if (id !== cloudSaveTrackedProjectId) loadCloudSaveMetaForCurrentProject(id);
+}
+
+function currentProjectHasCloudRecord() {
+  const id = normalizeProjectId(state.projectId);
+  if (!id) return false;
+  return Boolean(
+    normalizeUuid(currentCloudProjectOwnerId)
+      || normalizeUuid(currentCloudProjectCompanyId)
+      || cloudLastRemoteUpdatedAt
+      || cloudLastSavedAt
+      || (cloudProjectCache ?? []).some((project) => project.id === id)
+  );
+}
+
+function cloudSaveTitle(defaultTitle) {
+  const lines = [defaultTitle].filter(Boolean);
+  if (cloudUser?.email) lines.push(cloudUser.email);
+  if (cloudUser) lines.push(cloudLicenseText());
+  if (activeCompany && activeCompanyMembership?.status === "approved") lines.push(`Team: ${activeCompany.name}`);
+  if (state.projectId) lines.push(`Project: ${projectDisplayName()}`);
+  if (cloudLastSavedAt) lines.push(`Last cloud save: ${formatCloudSaveTime(cloudLastSavedAt, { full: true })}`);
+  if (cloudSaveDirty) lines.push("This drawing has changes waiting to save.");
+  if (cloudSaveConflict) lines.push("A newer cloud copy was detected. Press Save to choose whether to overwrite it.");
+  if (cloudSaveError) lines.push(cloudSaveError);
+  return lines.join("\n");
+}
+
+function markCloudSaveDirty() {
+  if (cloudDirtySuppressed) return;
+  ensureCloudSaveTrackingProject();
+  if (!hasDrawingContent()) {
+    cloudSaveDirty = false;
+    cloudSaveConflict = false;
+    cloudSaveError = "";
+    updateCloudStatus();
+    return;
+  }
+  if (!cloudUser || !hasActiveCloudLicense()) {
+    updateCloudStatus();
+    return;
+  }
+  cloudSaveDirty = true;
+  if (!cloudSaveConflict) cloudSaveError = "";
+  updateCloudStatus();
+}
+
+function markCloudSaveClean(remoteUpdatedAt, options = {}) {
+  const id = normalizeProjectId(state.projectId);
+  const updatedAt = String(remoteUpdatedAt || new Date().toISOString());
+  cloudSaveTrackedProjectId = id;
+  cloudSaveDirty = false;
+  cloudSaveConflict = false;
+  cloudSaveError = "";
+  cloudLastSavedAt = updatedAt;
+  cloudLastRemoteUpdatedAt = updatedAt;
+
+  if (id && options.writeMeta !== false) {
+    const store = readCloudSaveMetaStore();
+    store[id] = {
+      savedAt: cloudLastSavedAt,
+      remoteUpdatedAt: cloudLastRemoteUpdatedAt,
+      ownerId: normalizeUuid(currentCloudProjectOwnerId),
+      companyId: normalizeUuid(currentCloudProjectCompanyId),
+      name: projectDisplayName(),
+    };
+    writeCloudSaveMetaStore(store);
+  }
+  if (options.updateStatus !== false) updateCloudStatus();
+}
+
+function markCloudSaveFailed(error) {
+  cloudSaveError = error?.message ? `Cloud save failed: ${error.message}` : "Cloud save failed.";
+  updateCloudStatus("Cloud save failed", "error");
+}
+
+function remoteCloudProjectIsNewer(remoteUpdatedAt) {
+  const remoteTime = cloudSaveTimestampMs(remoteUpdatedAt);
+  const baselineTime = cloudSaveTimestampMs(cloudLastRemoteUpdatedAt || cloudLastSavedAt);
+  return Boolean(remoteTime && baselineTime && remoteTime > baselineTime + 1500);
+}
+
+async function fetchCloudProjectMeta(projectId = state.projectId) {
+  const id = normalizeProjectId(projectId);
+  if (!supabaseClient || !cloudUser || !id) return null;
+  const { data, error } = await supabaseClient
+    .from(CLOUD_PROJECTS_TABLE)
+    .select("id,owner_id,company_id,updated_at")
+    .eq("id", id)
+    .limit(1);
+  if (error) throw error;
+  const row = Array.isArray(data) ? data[0] : null;
+  if (!row) return null;
+  return {
+    id: normalizeProjectId(row.id),
+    ownerId: normalizeUuid(row.owner_id),
+    companyId: normalizeUuid(row.company_id),
+    updatedAt: String(row.updated_at ?? ""),
+  };
+}
+
+async function ensureCloudProjectCanOverwrite(options = {}) {
+  if (!currentProjectHasCloudRecord()) return true;
+  const remote = await fetchCloudProjectMeta();
+  if (!remote?.updatedAt) return true;
+
+  if (!cloudLastRemoteUpdatedAt && !cloudLastSavedAt) {
+    cloudLastRemoteUpdatedAt = remote.updatedAt;
+    return true;
+  }
+
+  if (!remoteCloudProjectIsNewer(remote.updatedAt)) {
+    cloudLastRemoteUpdatedAt = remote.updatedAt;
+    return true;
+  }
+
+  cloudSaveDirty = true;
+  cloudSaveConflict = true;
+  cloudSaveError = "";
+  const when = formatCloudSaveTime(remote.updatedAt, { full: true }) || "recently";
+  updateCloudStatus("Cloud newer copy", "conflict");
+  if (options.autosave) return false;
+
+  const overwrite = window.confirm(
+    `This spool was saved from another device at ${when}.\n\nOverwrite that cloud copy with this drawing?`
+  );
+  if (!overwrite) return false;
+
+  cloudSaveConflict = false;
+  cloudLastRemoteUpdatedAt = remote.updatedAt;
+  updateCloudStatus("Saving cloud...", "saving");
+  return true;
+}
+
+function withCloudDirtySuppressed(callback) {
+  const previous = cloudDirtySuppressed;
+  cloudDirtySuppressed = true;
+  try {
+    return callback();
+  } finally {
+    cloudDirtySuppressed = previous;
+  }
+}
+
 function updateCloudStatus(message = null, mode = "") {
+  ensureCloudSaveTrackingProject();
   const signedIn = Boolean(cloudUser);
   const active = signedIn && hasActiveCloudLicense();
   const teamSuffix = activeCompany && activeCompanyMembership?.status === "approved"
@@ -14164,20 +14781,51 @@ function updateCloudStatus(message = null, mode = "") {
     : activeCompany && activeCompanyMembership?.status === "pending"
     ? " / team pending"
     : "";
+  const hasCloudRecord = currentProjectHasCloudRecord();
   const defaultMessage = signedIn
     ? active
-      ? `${cloudLicenseText()}${teamSuffix}`
+      ? cloudAutosaveBusy
+        ? "Saving to cloud..."
+        : cloudSaveConflict
+        ? "Cloud conflict"
+        : cloudSaveError
+        ? "Cloud save failed"
+        : cloudSaveDirty
+        ? state.projectId
+          ? "Unsaved changes"
+          : "Not cloud saved"
+        : hasCloudRecord && cloudLastSavedAt
+        ? `Saved ${formatCloudSaveTime(cloudLastSavedAt)}`
+        : hasDrawingContent()
+        ? "Not cloud saved"
+        : "Cloud ready"
       : cloudProfile
       ? "Trial expired"
       : "Cloud setup needed"
     : "Local only";
   const text = message || defaultMessage;
+  const inferredMode = mode
+    || (message && /conflict|newer/i.test(message) ? "conflict" : "")
+    || (message && /failed|unavailable/i.test(message) ? "error" : "")
+    || (message && /saving|loading|connecting|resending|creating|signing/i.test(message) ? "saving" : "")
+    || (message && /saved|opened|resent/i.test(message) ? "saved" : "")
+    || (!signedIn || !active ? (signedIn ? "warning" : "local") : "")
+    || (cloudAutosaveBusy ? "saving" : "")
+    || (cloudSaveConflict ? "conflict" : "")
+    || (cloudSaveError ? "error" : "")
+    || (cloudSaveDirty ? "dirty" : "")
+    || (hasCloudRecord && cloudLastSavedAt ? "saved" : "signed-in");
 
   if (cloudSyncStatus) {
     cloudSyncStatus.textContent = text;
-    cloudSyncStatus.title = signedIn && cloudUser?.email ? cloudUser.email : "Not signed in";
-    cloudSyncStatus.classList.toggle("signed-in", signedIn && active && mode !== "warning");
-    cloudSyncStatus.classList.toggle("warning", mode === "warning" || (signedIn && !active));
+    cloudSyncStatus.title = cloudSaveTitle(signedIn && cloudUser?.email ? `${cloudUser.email}${teamSuffix}` : "Not signed in");
+    cloudSyncStatus.classList.toggle("signed-in", inferredMode === "signed-in");
+    cloudSyncStatus.classList.toggle("saving", inferredMode === "saving");
+    cloudSyncStatus.classList.toggle("saved", inferredMode === "saved");
+    cloudSyncStatus.classList.toggle("dirty", inferredMode === "dirty");
+    cloudSyncStatus.classList.toggle("conflict", inferredMode === "conflict");
+    cloudSyncStatus.classList.toggle("error", inferredMode === "error");
+    cloudSyncStatus.classList.toggle("warning", inferredMode === "warning");
   }
   if (accountButtonLabel) {
     accountButtonLabel.textContent = signedIn ? "Account" : "Sign in";
@@ -14237,6 +14885,75 @@ function activeCompanyCanAdmin() {
   return activeCompanyIsApproved() && ["owner", "admin"].includes(activeCompanyMembership?.role);
 }
 
+function activeCompanyCanManageRoles() {
+  return activeCompanyIsApproved() && activeCompanyMembership?.role === "owner";
+}
+
+function companyMembershipForCurrentUser(companyId) {
+  const id = normalizeUuid(companyId);
+  if (!id || !cloudUser) return null;
+  return cloudCompanyMemberships.find((member) => member.companyId === id && member.userId === cloudUser.id) ||
+    (activeCompanyMembership?.companyId === id ? activeCompanyMembership : null);
+}
+
+function currentUserIsCompanyMember(companyId) {
+  const membership = companyMembershipForCurrentUser(companyId);
+  return membership?.status === "approved";
+}
+
+function currentUserCanAdminCompany(companyId) {
+  const membership = companyMembershipForCurrentUser(companyId);
+  return membership?.status === "approved" && ["owner", "admin"].includes(membership.role);
+}
+
+function projectPermission(project, options = {}) {
+  const source = project?.source ?? options.source ?? projectLibrarySource;
+  if (source !== "cloud") {
+    return {
+      canView: true,
+      canComment: false,
+      canEdit: true,
+      canIssue: true,
+      canDelete: true,
+      label: "Local editable",
+    };
+  }
+
+  const ownerId = normalizeUuid(project?.ownerId);
+  const companyId = normalizeUuid(project?.companyId);
+  const ownsProject = Boolean(cloudUser?.id && ownerId === cloudUser.id);
+  const companyMember = currentUserIsCompanyMember(companyId);
+  const companyAdmin = currentUserCanAdminCompany(companyId);
+  const canEdit = ownsProject || companyAdmin;
+
+  return {
+    canView: ownsProject || companyMember,
+    canComment: ownsProject || companyMember,
+    canEdit,
+    canIssue: canEdit,
+    canDelete: ownsProject || companyAdmin,
+    label: canEdit
+      ? ownsProject
+        ? "Owner editable"
+        : "Team admin editable"
+      : companyMember
+      ? "Member view/comment"
+      : "Cloud read only",
+  };
+}
+
+function currentDrawingProjectPermission() {
+  if (!currentProjectHasCloudRecord()) return projectPermission({ source: "browser" });
+  return projectPermission({
+    source: "cloud",
+    id: state.projectId,
+    ownerId: currentCloudProjectOwnerId,
+    companyId: currentCloudProjectCompanyId,
+    projectInfo: state.projectInfo,
+    state: statePayload({ includeRevisionHistory: false }),
+  });
+}
+
 function companyNameForId(companyId) {
   const id = normalizeUuid(companyId);
   if (!id) return "";
@@ -14256,7 +14973,11 @@ function clearTeamWorkspace() {
   companyMembers = [];
   projectComments = [];
   projectCommentsProjectId = null;
+  teamMessages = [];
+  teamMessagesCompanyId = null;
+  teamMessagesError = "";
   renderTeamWorkspace();
+  renderProjectLibraryComms(projectLibraryProjects);
   renderProjectComments();
 }
 
@@ -14352,6 +15073,9 @@ async function loadTeamWorkspace(options = {}) {
     }
 
     companyMembers = activeCompany ? await loadCompanyMembers(activeCompany.id, memberships) : [];
+    if (projectLibraryCommsVisible && activeCompanyIsApproved()) {
+      await loadTeamMessages({ silent: true });
+    }
     renderTeamWorkspace();
     updateCloudStatus();
   } catch (error) {
@@ -14402,7 +15126,8 @@ function renderTeamWorkspace(errorMessage = "") {
       teamWorkspaceStatus.textContent = `Join request for ${activeCompany.name} was rejected.`;
     } else {
       const invite = activeCompany.inviteCode ? ` Invite code: ${activeCompany.inviteCode}.` : "";
-      teamWorkspaceStatus.textContent = `Using ${activeCompany.name} for shared cloud projects.${invite}`;
+      const roleText = activeCompanyMembership?.role ? ` Your role: ${activeCompanyMembership.role}.` : "";
+      teamWorkspaceStatus.textContent = `Using ${activeCompany.name} for shared cloud projects.${roleText}${invite}`;
     }
   }
 
@@ -14426,6 +15151,7 @@ function renderTeamWorkspace(errorMessage = "") {
   }
 
   const canAdmin = activeCompanyCanAdmin();
+  const canManageRoles = activeCompanyCanManageRoles();
   for (const member of members) {
     const row = document.createElement("div");
     row.className = "team-member-row";
@@ -14444,6 +15170,19 @@ function renderTeamWorkspace(errorMessage = "") {
 
     const actions = document.createElement("div");
     actions.className = "team-member-actions";
+    if (canManageRoles && member.status === "approved" && member.userId !== cloudUser?.id && member.role !== "owner") {
+      const roleSelect = document.createElement("select");
+      roleSelect.dataset.teamMemberRole = member.userId;
+      roleSelect.title = "Change this user's team role";
+      for (const [value, label] of [["member", "Member"], ["admin", "Admin"]]) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        option.selected = member.role === value;
+        roleSelect.append(option);
+      }
+      actions.append(roleSelect);
+    }
     if (canAdmin && member.status === "pending" && member.userId !== cloudUser?.id) {
       const approve = document.createElement("button");
       approve.type = "button";
@@ -14532,6 +15271,25 @@ async function reviewTeamMember(userId, approved) {
     window.alert(error?.message || "Could not update team member.");
     throw error;
   }
+  await loadTeamWorkspace({ silent: true });
+}
+
+async function updateTeamMemberRole(userId, role) {
+  if (!supabaseClient || !activeCompanyCanManageRoles()) {
+    window.alert("Only the team owner can change member roles.");
+    return;
+  }
+  const memberId = normalizeUuid(userId);
+  const nextRole = role === "admin" ? "admin" : "member";
+  if (!memberId || !activeCompany || memberId === cloudUser?.id) return;
+
+  const { error } = await supabaseClient
+    .from(CLOUD_COMPANY_MEMBERS_TABLE)
+    .update({ role: nextRole, status: "approved" })
+    .eq("company_id", activeCompany.id)
+    .eq("user_id", memberId)
+    .neq("role", "owner");
+  if (error) throw error;
   await loadTeamWorkspace({ silent: true });
 }
 
@@ -14676,6 +15434,113 @@ async function addProjectComment() {
   }
 }
 
+async function loadTeamMessages(options = {}) {
+  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !activeCompanyIsApproved()) {
+    teamMessages = [];
+    teamMessagesCompanyId = activeCompany?.id ?? null;
+    teamMessagesError = "";
+    renderProjectLibraryComms(projectLibraryProjects);
+    return [];
+  }
+
+  teamMessagesBusy = true;
+  teamMessagesError = "";
+  renderProjectLibraryComms(projectLibraryProjects);
+  try {
+    const { data, error } = await supabaseClient
+      .from(CLOUD_TEAM_MESSAGES_TABLE)
+      .select("id,company_id,author_id,author_email,body,pinned,completed,completed_at,remove_after,created_at,updated_at")
+      .eq("company_id", activeCompany.id)
+      .order("pinned", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(80);
+    if (error) throw error;
+    teamMessages = (data ?? []).map(normalizeTeamMessage).filter(Boolean);
+    teamMessagesCompanyId = activeCompany.id;
+    teamMessagesError = "";
+    renderProjectLibraryComms(projectLibraryProjects);
+    return teamMessages;
+  } catch (error) {
+    console.warn("Could not load team messages.", error);
+    teamMessages = [];
+    teamMessagesError = "Team messages could not be loaded. Run the latest Supabase setup SQL if this is the first time using team comms.";
+    if (!options.silent) window.alert(error?.message || "Could not load team messages. Run the latest Supabase setup SQL if this is the first time using team comms.");
+    renderProjectLibraryComms(projectLibraryProjects);
+    return [];
+  } finally {
+    teamMessagesBusy = false;
+    renderProjectLibraryComms(projectLibraryProjects);
+  }
+}
+
+async function addTeamMessage(bodyText = "") {
+  if (!(await ensureSupabaseClient()) || !cloudUser) return;
+  if (!activeCompanyIsApproved()) {
+    window.alert("Join or create an approved team before adding team messages.");
+    return;
+  }
+  if (!hasActiveCloudLicense()) {
+    window.alert("An active trial or licence is required for team messages.");
+    return;
+  }
+
+  const body = String(bodyText).trim().slice(0, 500);
+  if (!body) {
+    window.alert("Type the team message first.");
+    return;
+  }
+
+  teamMessagesBusy = true;
+  renderProjectLibraryComms(projectLibraryProjects);
+  try {
+    const { error } = await supabaseClient
+      .from(CLOUD_TEAM_MESSAGES_TABLE)
+      .insert({
+        company_id: activeCompany.id,
+        author_id: cloudUser.id,
+        author_email: cloudUser.email ?? "",
+        body,
+      });
+    if (error) throw error;
+    await loadTeamMessages({ silent: true });
+  } catch (error) {
+    console.warn("Could not add team message.", error);
+    window.alert(error?.message || "Could not add team message. Run the latest Supabase setup SQL if this is the first time using team comms.");
+  } finally {
+    teamMessagesBusy = false;
+    renderProjectLibraryComms(projectLibraryProjects);
+  }
+}
+
+async function completeTeamMessage(messageId) {
+  if (!(await ensureSupabaseClient()) || !cloudUser || !activeCompanyIsApproved()) return;
+  const id = normalizeUuid(messageId);
+  if (!id) return;
+
+  teamMessagesBusy = true;
+  renderProjectLibraryComms(projectLibraryProjects);
+  try {
+    const now = new Date().toISOString();
+    const { error } = await supabaseClient
+      .from(CLOUD_TEAM_MESSAGES_TABLE)
+      .update({
+        completed: true,
+        completed_at: now,
+        remove_after: isoDaysFromNow(7),
+      })
+      .eq("id", id)
+      .eq("company_id", activeCompany.id);
+    if (error) throw error;
+    await loadTeamMessages({ silent: true });
+  } catch (error) {
+    console.warn("Could not complete team message.", error);
+    window.alert(error?.message || "Could not mark team message done.");
+  } finally {
+    teamMessagesBusy = false;
+    renderProjectLibraryComms(projectLibraryProjects);
+  }
+}
+
 function cloudProjectRecord() {
   const projectInfo = normalizeProjectInfo(state.projectInfo);
   const id = normalizeProjectId(state.projectId) ?? createProjectId();
@@ -14746,6 +15611,8 @@ async function applyCloudSession(session) {
     cloudProfile = null;
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
+    cloudPermissionReadOnly = false;
+    resetCloudSaveTracking();
     clearTeamWorkspace();
     updateCloudStatus();
     return;
@@ -14753,6 +15620,7 @@ async function applyCloudSession(session) {
 
   cloudProfile = await ensureCloudProfile();
   await loadTeamWorkspace({ silent: true });
+  loadCloudSaveMetaForCurrentProject();
   updateCloudStatus();
   if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
     queueCloudAutosave();
@@ -14792,11 +15660,12 @@ async function ensureCloudProfile() {
 
 function queueCloudAutosave() {
   if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !state.projectId || !hasDrawingContent()) return;
+  if (cloudSaveConflict) return;
   window.clearTimeout(cloudAutosaveTimer);
   cloudAutosaveTimer = window.setTimeout(() => {
-    saveCloudProject({ silent: true }).catch((error) => {
+    saveCloudProject({ silent: true, autosave: true }).catch((error) => {
       console.warn("Cloud autosave failed.", error);
-      updateCloudStatus("Cloud save failed", "warning");
+      markCloudSaveFailed(error);
     });
   }, CLOUD_AUTOSAVE_DELAY_MS);
 }
@@ -14808,11 +15677,18 @@ async function saveCloudProject(options = {}) {
     if (!options.silent) window.alert("This account does not have an active trial or licence.");
     return false;
   }
+  if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
+    updateCloudStatus("View/comment only", "warning");
+    if (!options.silent) window.alert("This team spool is view/comment only for your role. Ask the owner or a team admin to save changes.");
+    return false;
+  }
   if (cloudAutosaveBusy) return false;
 
   cloudAutosaveBusy = true;
-  if (!options.silent) updateCloudStatus("Saving cloud...", "");
+  updateCloudStatus("Saving cloud...", "saving");
   try {
+    const canOverwrite = await ensureCloudProjectCanOverwrite({ autosave: options.autosave === true });
+    if (!canOverwrite) return false;
     const record = cloudProjectRecord();
     const { data, error } = await supabaseClient
       .from(CLOUD_PROJECTS_TABLE)
@@ -14827,9 +15703,13 @@ async function saveCloudProject(options = {}) {
       currentCloudProjectCompanyId = normalizeUuid(data.company_id);
       if (currentCloudProjectCompanyId) await activateCompanyFromId(currentCloudProjectCompanyId);
     }
-    updateCloudStatus("Cloud saved", "");
+    markCloudSaveClean(data?.updated_at, { updateStatus: false });
+    updateCloudStatus("Cloud saved", "saved");
     window.setTimeout(() => updateCloudStatus(), 1600);
     return true;
+  } catch (error) {
+    markCloudSaveFailed(error);
+    throw error;
   } finally {
     cloudAutosaveBusy = false;
   }
@@ -14880,15 +15760,18 @@ async function openSavedCloudProject(projectId, options = {}) {
   currentCloudProjectOwnerId = normalizeUuid(record.ownerId);
   currentCloudProjectCompanyId = normalizeUuid(record.companyId);
   if (record.companyId) await activateCompanyFromId(record.companyId);
-  if (options.readOnly) {
+  const permissions = projectPermission(record, { source: "cloud" });
+  cloudPermissionReadOnly = options.readOnly === true || !permissions.canEdit;
+  markCloudSaveClean(record.updatedAt, { updateStatus: false });
+  if (cloudPermissionReadOnly) {
     state.locked = true;
   }
   three.userMovedCamera = false;
   setNextIdsFromState(state);
   updateControls();
-  updateAll();
+  withCloudDirtySuppressed(() => updateAll());
   closeProjectLibrary();
-  updateCloudStatus("Cloud project opened", "");
+  updateCloudStatus("Cloud project opened", "saved");
   await loadProjectComments({ silent: true });
   window.setTimeout(() => updateCloudStatus(), 1600);
 }
@@ -14918,6 +15801,10 @@ async function deleteSavedCloudProject(projectId) {
     record = projects.find((project) => project.id === projectId);
   }
   if (!record) return;
+  if (!projectPermission(record, { source: "cloud" }).canDelete) {
+    window.alert("Only the project owner or a team admin can delete this cloud spool.");
+    return;
+  }
 
   const proceed = window.confirm(`Delete ${record.name || projectDisplayName(record.projectInfo)} from the cloud?`);
   if (!proceed) return;
@@ -14935,6 +15822,8 @@ async function deleteSavedCloudProject(projectId) {
     state.projectId = null;
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
+    cloudPermissionReadOnly = false;
+    resetCloudSaveTracking();
     projectComments = [];
     projectCommentsProjectId = null;
     updateControls();
@@ -14993,6 +15882,10 @@ function autoSaveCurrentBrowserProject() {
 }
 
 async function saveBrowserProject(options = {}) {
+  if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
+    window.alert("This team spool is view/comment only for your role. Ask the project owner or a team admin to save changes.");
+    return false;
+  }
   const info = await openProjectDetailsDialog({
     title: state.projectId ? "Save project" : cloudUser && hasActiveCloudLicense() ? "Save cloud project" : "Save as project",
     action: "Save project",
@@ -15010,7 +15903,7 @@ async function saveBrowserProject(options = {}) {
   const savedToCloud = cloudUser && hasActiveCloudLicense()
     ? await saveCloudProject({ silent: true }).catch((error) => {
         console.warn("Cloud save failed.", error);
-        updateCloudStatus("Cloud save failed", "warning");
+        markCloudSaveFailed(error);
         return false;
       })
     : false;
@@ -15023,8 +15916,10 @@ async function saveBrowserProject(options = {}) {
 async function openBrowserProject(options = {}) {
   ensureProjectLibraryDashboardShell();
   projectLibraryGuideVisible = false;
+  projectLibraryCommsVisible = false;
   projectLibraryReportVisible = false;
   ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryCommsSlot();
   ensureProjectLibraryReportSlot();
   if (!options.keepSearch) {
     projectLibrarySearch = "";
@@ -15118,6 +16013,7 @@ function renderProjectLibraryMessage(message) {
   if (!projectLibraryList) return;
   ensureProjectLibraryDashboardShell();
   ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryCommsSlot();
   ensureProjectLibraryReportSlot();
   projectLibraryList.innerHTML = "";
   const notice = document.createElement("div");
@@ -15145,11 +16041,13 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   if (!projectLibraryList) return;
   ensureProjectLibraryDashboardShell();
   ensureProjectLibraryGuideSlot();
+  ensureProjectLibraryCommsSlot();
   ensureProjectLibraryReportSlot();
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
   projectLibraryProjects = Array.isArray(projects) ? [...projects] : [];
   const filteredProjects = filterProjectLibraryProjects(projectLibraryProjects);
   const query = projectLibrarySearch.trim();
+  if (projectLibraryCommsVisible) renderProjectLibraryComms(filteredProjects);
   if (projectLibraryReportVisible) renderProjectLibraryReport(filteredProjects);
   if (projectLibrarySearchInput && projectLibrarySearchInput.value !== projectLibrarySearch) {
     projectLibrarySearchInput.value = projectLibrarySearch;
@@ -15374,6 +16272,10 @@ async function persistProjectWorkflowUpdate(project, nextDrawingState, updatedAt
       window.alert("Sign in with an active licence to update cloud production items.");
       return false;
     }
+    if (!projectPermission(project, { source: "cloud" }).canEdit) {
+      window.alert("Only the project owner or a team admin can update this cloud spool.");
+      return false;
+    }
     updateCloudStatus("Updating production...", "");
     const { error } = await supabaseClient
       .from(CLOUD_PROJECTS_TABLE)
@@ -15464,8 +16366,145 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
   return persistProjectWorkflowUpdate(project, nextDrawingState, now);
 }
 
+function showProjectLibraryComms() {
+  projectLibraryCommsVisible = true;
+  projectLibraryGuideVisible = false;
+  projectLibraryReportVisible = false;
+  if (projectLibraryOpenFolderKey) {
+    projectLibraryOpenFolderKey = "";
+  }
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  ensureProjectLibraryCommsSlot();
+  renderProjectLibraryComms(projectLibraryProjects);
+  if (projectLibrarySource === "cloud" && activeCompanyIsApproved()) {
+    loadTeamMessages({ silent: true }).catch((error) => {
+      console.warn("Team comms refresh failed.", error);
+      renderProjectLibraryComms(projectLibraryProjects, "Team messages could not be loaded.");
+    });
+  }
+  projectLibraryCommsSlot?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function hideProjectLibraryComms() {
+  projectLibraryCommsVisible = false;
+  ensureProjectLibraryCommsSlot();
+}
+
+function dashboardCommsItems(projects = projectLibraryProjects) {
+  return (Array.isArray(projects) ? projects : [])
+    .flatMap((project) => {
+      const messages = savedProjectProductionMessages(project)
+        .filter((message) => !message.completed)
+        .map((message) => ({
+          project,
+          message,
+          createdTime: new Date(message.createdAt).getTime() || 0,
+        }));
+      return messages;
+    })
+    .sort((first, second) => second.createdTime - first.createdTime)
+    .slice(0, 18);
+}
+
+function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessage = "") {
+  if (!projectLibraryCommsSlot) return;
+  projectLibraryCommsSlot.hidden = !projectLibraryCommsVisible;
+  if (!projectLibraryCommsVisible) return;
+
+  const activeErrorMessage = errorMessage || teamMessagesError;
+  const sourceLabel = projectLibrarySource === "cloud"
+    ? activeCompanyIsApproved()
+      ? activeCompany.name
+      : "Cloud"
+    : "Browser";
+  const spoolMessages = dashboardCommsItems(projects);
+  const cloudReady = Boolean(cloudUser && hasActiveCloudLicense() && activeCompanyIsApproved());
+  const visibleTeamMessages = (teamMessagesCompanyId === activeCompany?.id ? teamMessages : [])
+    .filter((message) => !message.completed || message.pinned)
+    .slice(0, 12);
+
+  projectLibraryCommsSlot.innerHTML = `
+    <section class="team-comms-card" aria-label="Team communication">
+      <div class="team-comms-head">
+        <div>
+          <strong>Team comms</strong>
+          <span>${escapeHtml(sourceLabel)} messages, active yard notes and spool actions in one place.</span>
+        </div>
+        <div class="team-comms-actions">
+          <button type="button" data-project-library-action="refresh-team-messages"${cloudReady ? "" : " disabled"}>Refresh</button>
+          <button type="button" data-project-library-action="hide-comms">Hide</button>
+        </div>
+      </div>
+      ${activeErrorMessage ? `<div class="team-comms-warning">${escapeHtml(activeErrorMessage)}</div>` : ""}
+      <div class="team-comms-layout">
+        <section class="team-comms-panel">
+          <div class="team-comms-panel-head">
+            <strong>General team messages</strong>
+            <span>${cloudReady ? teamMessagesBusy ? "Refreshing..." : "Shared with the active company" : "Cloud team required"}</span>
+          </div>
+          ${cloudReady ? `
+            <div class="team-comms-compose">
+              <input data-team-message-input type="text" maxlength="500" placeholder="Message for the team" />
+              <button type="button" data-project-library-action="add-team-message">Post</button>
+            </div>
+          ` : `
+            <div class="team-comms-empty">Sign in to an approved company team to post shared team messages.</div>
+          `}
+          <div class="team-comms-list">
+            ${visibleTeamMessages.length ? visibleTeamMessages.map(teamMessageHtml).join("") : `<div class="team-comms-empty">${cloudReady ? "No team messages yet." : "Team messages will appear here."}</div>`}
+          </div>
+        </section>
+        <section class="team-comms-panel">
+          <div class="team-comms-panel-head">
+            <strong>Active spool notes</strong>
+            <span>${spoolMessages.length} open message${spoolMessages.length === 1 ? "" : "s"} from production cards</span>
+          </div>
+          <div class="team-comms-list">
+            ${spoolMessages.length ? spoolMessages.map(spoolMessageHtml).join("") : `<div class="team-comms-empty">No active spool messages on this dashboard.</div>`}
+          </div>
+        </section>
+      </div>
+    </section>
+  `;
+}
+
+function teamMessageHtml(message) {
+  const meta = [
+    message.authorEmail || "Team member",
+    message.createdAt ? new Date(message.createdAt).toLocaleString() : "Just now",
+    message.pinned ? "Pinned" : "",
+  ].filter(Boolean).join(" / ");
+  return `
+    <article class="team-comms-message${message.completed ? " done" : ""}${message.pinned ? " pinned" : ""}">
+      <p>${escapeHtml(message.body)}</p>
+      <small>${escapeHtml(meta)}</small>
+      ${message.completed ? `<span class="team-comms-done">Done</span>` : `<button type="button" data-project-library-action="complete-team-message" data-team-message-id="${escapeHtml(message.id)}">Done</button>`}
+    </article>
+  `;
+}
+
+function spoolMessageHtml(item) {
+  const { project, message } = item;
+  const production = savedProjectProductionInfo(project);
+  const meta = [
+    savedProjectDetailLine(project),
+    message.author ? `By ${message.author}` : "",
+    message.createdAt ? new Date(message.createdAt).toLocaleString() : "",
+    production.assignee ? `To ${production.assignee}` : "",
+  ].filter(Boolean).join(" / ");
+  return `
+    <article class="team-comms-message spool-note">
+      <button type="button" class="team-comms-open" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">${escapeHtml(savedProjectSpoolTitle(project))}</button>
+      <p>${escapeHtml(message.body)}</p>
+      <small>${escapeHtml(meta)}</small>
+      <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(message.id)}">Done</button>
+    </article>
+  `;
+}
+
 function showProjectLibraryGuide() {
   projectLibraryGuideVisible = true;
+  projectLibraryCommsVisible = false;
   projectLibraryReportVisible = false;
   if (projectLibraryOpenFolderKey) {
     projectLibraryOpenFolderKey = "";
@@ -15525,6 +16564,10 @@ function projectLibraryGuideCard() {
         <strong>Use messages for yard notes.</strong>
         <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
       </li>
+      <li>
+        <strong>Open Comms for the team view.</strong>
+        <span>Use Comms to post general team messages and see all active spool notes in one place.</span>
+      </li>
     </ol>
     <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
     <div class="project-guide-actions">
@@ -15538,6 +16581,7 @@ function projectLibraryGuideCard() {
 function showProjectLibraryReport() {
   projectLibraryReportVisible = true;
   projectLibraryGuideVisible = false;
+  projectLibraryCommsVisible = false;
   if (projectLibraryOpenFolderKey) {
     projectLibraryOpenFolderKey = "";
   }
@@ -15562,6 +16606,7 @@ function hideProjectLibraryReport() {
 function setProjectLibraryReportPeriod(period) {
   projectLibraryReportPeriod = period === "weekly" ? "weekly" : "daily";
   projectLibraryReportVisible = true;
+  projectLibraryCommsVisible = false;
   renderProjectLibraryReport();
 }
 
@@ -15884,12 +16929,16 @@ function projectProductionCard(project) {
   const messages = savedProjectProductionMessages(project);
   const activeMessage = [...messages].reverse().find((message) => !message.completed) ?? null;
   const status = normalizeProjectStatus(savedState?.projectStatus);
+  const permission = projectPermission(project);
+  const canEdit = permission.canEdit;
+  const disabledAttr = canEdit ? "" : ' disabled title="View/comment only for your team role"';
   const card = document.createElement("article");
   card.className = "production-spool-card";
   card.classList.toggle("urgent", production.priority === "urgent");
   card.classList.toggle("hold", production.hold);
   card.classList.toggle("complete", status === "complete");
-  card.draggable = true;
+  card.classList.toggle("read-only", !canEdit);
+  card.draggable = canEdit;
   card.dataset.productionProjectId = project.id;
   card.dataset.projectSource = project.source ?? projectLibrarySource;
   card.dataset.productionStatus = status;
@@ -15901,6 +16950,7 @@ function projectProductionCard(project) {
   ];
   if (production.hold) parts.unshift(production.holdReason ? `Hold: ${production.holdReason}` : "On hold");
   if (status === "complete" && production.removeAfter) parts.push(`Hides ${new Date(production.removeAfter).toLocaleDateString()}`);
+  if (!canEdit) parts.push(permission.label);
 
   card.innerHTML = `
     <div class="production-card-head">
@@ -15908,36 +16958,36 @@ function projectProductionCard(project) {
         <strong>${escapeHtml(savedProjectSpoolTitle(project))}</strong>
         <span>${escapeHtml(savedProjectDetailLine(project))}</span>
       </button>
-      <span class="production-drag-handle" aria-hidden="true">Drag</span>
+      <span class="production-drag-handle" aria-hidden="true">${canEdit ? "Drag" : "View"}</span>
     </div>
     <small class="production-card-meta">${escapeHtml(parts.join(" / "))}</small>
     <div class="production-card-fields">
       <label>
         <span>Stage</span>
-        <select data-production-field="status" data-project-id="${escapeHtml(project.id)}">
+        <select data-production-field="status" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>
           ${PROJECT_STATUS_FLOW.map(([key, label]) => `<option value="${key}"${status === key ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}
         </select>
       </label>
       <label>
         <span>Assigned</span>
-        <input data-production-field="assignee" data-project-id="${escapeHtml(project.id)}" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Who" />
+        <input data-production-field="assignee" data-project-id="${escapeHtml(project.id)}" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Who"${disabledAttr} />
       </label>
       <label>
         <span>Due</span>
-        <input data-production-field="dueDate" data-project-id="${escapeHtml(project.id)}" type="date" value="${escapeHtml(production.dueDate)}" />
+        <input data-production-field="dueDate" data-project-id="${escapeHtml(project.id)}" type="date" value="${escapeHtml(production.dueDate)}"${disabledAttr} />
       </label>
       <label>
         <span>Time</span>
-        <input data-production-field="dueTime" data-project-id="${escapeHtml(project.id)}" type="time" value="${escapeHtml(production.dueTime)}" />
+        <input data-production-field="dueTime" data-project-id="${escapeHtml(project.id)}" type="time" value="${escapeHtml(production.dueTime)}"${disabledAttr} />
       </label>
       <label>
         <span>Priority</span>
-        <select data-production-field="priority" data-project-id="${escapeHtml(project.id)}">
+        <select data-production-field="priority" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>
           ${[...PRODUCTION_PRIORITIES].map((priority) => `<option value="${priority}"${production.priority === priority ? " selected" : ""}>${escapeHtml(productionPriorityLabel(priority))}</option>`).join("")}
         </select>
       </label>
       <label class="production-inline-toggle">
-        <input data-production-field="hold" data-project-id="${escapeHtml(project.id)}" type="checkbox"${production.hold ? " checked" : ""} />
+        <input data-production-field="hold" data-project-id="${escapeHtml(project.id)}" type="checkbox"${production.hold ? " checked" : ""}${disabledAttr} />
         <span>Hold</span>
       </label>
     </div>
@@ -15945,16 +16995,16 @@ function projectProductionCard(project) {
       ${activeMessage ? `
         <div class="production-active-message">
           <span>${escapeHtml(activeMessage.body)}</span>
-          <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(activeMessage.id)}">Done</button>
+          <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(activeMessage.id)}"${disabledAttr}>Done</button>
         </div>
       ` : ""}
       <div class="production-message-compose">
-        <input data-production-message-input data-project-id="${escapeHtml(project.id)}" type="text" maxlength="240" placeholder="Message / yard note" />
-        <button type="button" data-production-action="add-message" data-project-id="${escapeHtml(project.id)}">Add</button>
+        <input data-production-message-input data-project-id="${escapeHtml(project.id)}" type="text" maxlength="240" placeholder="${canEdit ? "Message / yard note" : "Use spool comments or team Comms"}"${disabledAttr} />
+        <button type="button" data-production-action="add-message" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add</button>
       </div>
     </div>
     <div class="production-card-actions">
-      <button type="button" data-production-action="complete-spool" data-project-id="${escapeHtml(project.id)}">Complete</button>
+      <button type="button" data-production-action="complete-spool" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Complete</button>
       <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">Open</button>
     </div>
   `;
@@ -16141,9 +17191,11 @@ function applyProjectJobChoice(choiceButton) {
 }
 
 function projectLibraryRow(project) {
+    const permission = projectPermission(project);
     const row = document.createElement("div");
     row.className = "project-library-row";
     row.classList.toggle("active", project.id === state.projectId);
+    row.classList.toggle("read-only", !permission.canEdit);
     row.dataset.openProjectId = project.id;
     row.dataset.projectSource = project.source ?? projectLibrarySource;
     row.tabIndex = 0;
@@ -16161,7 +17213,7 @@ function projectLibraryRow(project) {
     details.textContent = savedProjectDetailLine(project);
 
     const meta = document.createElement("span");
-    meta.textContent = savedProjectMetaLine(project);
+    meta.textContent = `${savedProjectMetaLine(project)}${project.source === "cloud" ? ` / ${permission.label}` : ""}`;
 
     main.append(title, details, meta);
 
@@ -16177,6 +17229,8 @@ function projectLibraryRow(project) {
     deleteButton.textContent = "Delete";
     deleteButton.dataset.deleteProjectId = project.id;
     deleteButton.dataset.projectSource = project.source ?? projectLibrarySource;
+    deleteButton.disabled = !permission.canDelete;
+    if (!permission.canDelete) deleteButton.title = "Only the project owner or a team admin can delete this cloud spool.";
 
     openButton.dataset.projectSource = project.source ?? projectLibrarySource;
     row.append(main, openButton, deleteButton);
@@ -16307,12 +17361,15 @@ function openSavedBrowserProject(projectId) {
   state.projectInfoPrompted = true;
   currentCloudProjectOwnerId = null;
   currentCloudProjectCompanyId = null;
+  cloudPermissionReadOnly = false;
+  loadCloudSaveMetaForCurrentProject(record.id);
   projectComments = [];
   projectCommentsProjectId = null;
   three.userMovedCamera = false;
   setNextIdsFromState(state);
   updateControls();
-  updateAll();
+  withCloudDirtySuppressed(() => updateAll());
+  updateCloudStatus();
   closeProjectLibrary();
 }
 
@@ -16329,6 +17386,8 @@ function deleteSavedBrowserProject(projectId) {
     state.projectId = null;
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
+    cloudPermissionReadOnly = false;
+    resetCloudSaveTracking();
     projectComments = [];
     projectCommentsProjectId = null;
     updateControls();
@@ -18397,6 +19456,8 @@ async function startNewDrawing() {
   state = blankState();
   currentCloudProjectOwnerId = null;
   currentCloudProjectCompanyId = null;
+  cloudPermissionReadOnly = false;
+  resetCloudSaveTracking();
   projectComments = [];
   projectCommentsProjectId = null;
   nextFittingId = 1;
@@ -18409,6 +19470,10 @@ async function startNewDrawing() {
 
 function loadSampleDrawing() {
   state = sampleState();
+  currentCloudProjectOwnerId = null;
+  currentCloudProjectCompanyId = null;
+  cloudPermissionReadOnly = false;
+  resetCloudSaveTracking();
   nextFittingId = 5;
   nextNoteId = 2;
   three.userMovedCamera = false;
@@ -18954,6 +20019,8 @@ async function promptForProjectDetails(options = {}) {
     state.projectId = createProjectId();
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
+    cloudPermissionReadOnly = false;
+    resetCloudSaveTracking();
     projectComments = [];
     projectCommentsProjectId = null;
   }
@@ -19322,6 +20389,11 @@ function importProjectFile(file) {
       }
 
       state = restored;
+      currentCloudProjectOwnerId = null;
+      currentCloudProjectCompanyId = null;
+      cloudPermissionReadOnly = false;
+      resetCloudSaveTracking();
+      projectComments = [];
       three.userMovedCamera = false;
       setNextIdsFromState(state);
       updateControls();
@@ -19365,12 +20437,14 @@ function exportIsoImage() {
 }
 
 function exportSpoolReportImage() {
-  downloadCanvas(buildSpoolReportCanvas(), "pipe-spool-cut-list.png");
+  const template = normalizeFabSheetTemplate(fabSheetTemplate);
+  downloadCanvas(buildSpoolReportCanvas(template), `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}.png`);
 }
 
 async function exportFabSheetPdf() {
   const { name } = exportedProjectPayload();
-  const reportCanvas = buildSpoolReportCanvas();
+  const template = normalizeFabSheetTemplate(fabSheetTemplate);
+  const reportCanvas = buildSpoolReportCanvas(template);
   const pages = [
     {
       dataUrl: reportCanvas.toDataURL("image/jpeg", 0.92),
@@ -19394,7 +20468,7 @@ async function exportFabSheetPdf() {
   }
 
   const pdfBytes = buildImagePdf(pages);
-  downloadBytes(pdfBytes, `${name}-fab-sheet.pdf`, "application/pdf");
+  downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}.pdf`, "application/pdf");
 }
 
 async function buildModelReportCanvas(modelViews) {
@@ -19602,7 +20676,14 @@ function dataUrlBytes(dataUrl) {
   return bytes;
 }
 
-function buildSpoolReportCanvas() {
+function buildSpoolReportCanvas(template = fabSheetTemplate) {
+  const normalizedTemplate = normalizeFabSheetTemplate(template);
+  if (normalizedTemplate === "client") return buildClientReportCanvas();
+  if (normalizedTemplate === "takeoff") return buildTakeoffReportCanvas();
+  return buildWorkshopReportCanvas();
+}
+
+function buildWorkshopReportCanvas() {
   const quantities = quantitySummary();
   const rowCount = Math.max(quantities.segments.length, 1);
   const bendCount = Math.max(quantities.elbows.length, 1);
@@ -19642,7 +20723,128 @@ function buildSpoolReportCanvas() {
   return canvas;
 }
 
-function drawReportHeader(ctx, width) {
+function buildClientReportCanvas() {
+  const quantities = quantitySummary();
+  const canvas = document.createElement("canvas");
+  canvas.width = 1800;
+  canvas.height = 1240;
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#f7f3e9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawReportHeader(ctx, canvas.width, FAB_SHEET_TEMPLATES.client);
+
+  const margin = 36;
+  const gutter = 28;
+  const reportWidth = 520;
+  const drawingArea = {
+    x: margin,
+    y: 150,
+    width: canvas.width - margin * 2 - gutter - reportWidth,
+    height: canvas.height - 186,
+  };
+  const reportArea = {
+    x: drawingArea.x + drawingArea.width + gutter,
+    y: drawingArea.y,
+    width: reportWidth,
+    height: drawingArea.height,
+  };
+
+  drawReportDrawing(ctx, drawingArea);
+  drawReportClientPanel(ctx, reportArea, quantities);
+  return canvas;
+}
+
+function buildTakeoffReportCanvas() {
+  const quantities = quantitySummary();
+  const rowCount = Math.max(quantities.segments.length, 1);
+  const bendCount = Math.max(quantities.elbows.length, 1);
+  const teeCount = Math.max(quantities.tees.length, 1);
+  const branchCount = Math.max(quantities.branches.length, 1);
+  const reducerCount = Math.max(quantities.reducers.length, 1);
+  const fittingCount = Math.max(quantities.fittings.length, 1);
+  const takeoffCount = Math.max(takeoffCountRows(quantities).length, 1);
+  const canvas = document.createElement("canvas");
+  canvas.width = 1800;
+  canvas.height = Math.max(1240, 720 + takeoffCount * 26 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = "#f7f3e9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawReportHeader(ctx, canvas.width, FAB_SHEET_TEMPLATES.takeoff);
+
+  drawReportTakeoff(ctx, {
+    x: 36,
+    y: 150,
+    width: canvas.width - 72,
+    height: canvas.height - 186,
+  }, quantities);
+  return canvas;
+}
+
+function drawReportClientPanel(ctx, area, quantities) {
+  const project = normalizeProjectInfo(state.projectInfo);
+  ctx.save();
+  roundRect(ctx, area.x, area.y, area.width, area.height, 10);
+  ctx.fillStyle = "#fffdf8";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.18)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const x = area.x + 24;
+  let y = area.y + 38;
+  ctx.fillStyle = "#1f3438";
+  ctx.font = "900 24px Inter, system-ui, sans-serif";
+  ctx.fillText("Approval summary", x, y);
+  y += 30;
+
+  const rows = [
+    ["Job", project.jobNumber || "-"],
+    ["Spool", project.spoolNumber || "-"],
+    ["Client / area", project.client || "-"],
+    ["Revision", project.revision || "-"],
+    ["Status", projectStatusLabel()],
+    ["Material", pipeSpec().label],
+    ["Pipe centreline", `${formatLength(quantities.centrelineMm)} mm`],
+    ["Estimated weight", `${formatMass(quantities.totalWeightKg)} kg`],
+    ["Fittings", `${quantities.fittings.length + quantities.elbows.length + quantities.tees.length + quantities.reducers.length} item${quantities.fittings.length + quantities.elbows.length + quantities.tees.length + quantities.reducers.length === 1 ? "" : "s"}`],
+  ];
+
+  for (const [label, value] of rows) {
+    roundRect(ctx, x, y, area.width - 48, 48, 8);
+    ctx.fillStyle = "#f3f6f4";
+    ctx.fill();
+    ctx.fillStyle = "#6a7475";
+    ctx.font = "800 12px Inter, system-ui, sans-serif";
+    ctx.fillText(label, x + 12, y + 18);
+    ctx.fillStyle = "#1f3438";
+    ctx.font = "900 16px Inter, system-ui, sans-serif";
+    ctx.fillText(String(value), x + 12, y + 39);
+    y += 58;
+  }
+
+  y += 10;
+  ctx.fillStyle = "#1f3438";
+  ctx.font = "900 18px Inter, system-ui, sans-serif";
+  ctx.fillText("Notes", x, y);
+  y += 26;
+  ctx.fillStyle = "#516169";
+  ctx.font = "800 13px Inter, system-ui, sans-serif";
+  drawWrappedReportText(
+    ctx,
+    "Client/approval view: drawing and material summary only. Workshop cut lengths, fitting weights and ordering take-off are available from the Workshop or Take-off PDF styles.",
+    x,
+    y,
+    area.width - 48,
+    18,
+  );
+  ctx.restore();
+}
+
+function drawReportHeader(ctx, width, options = {}) {
+  const title = options.title || "Pipe spool fabrication sheet";
+  const subtitle = options.subtitle || `Centre-to-centre drawing, cut lengths and estimated ${pipeSpec().material.toLowerCase()} weight`;
   const project = normalizeProjectInfo(state.projectInfo);
   const reference = [
     project.jobNumber ? `Job ${project.jobNumber}` : "",
@@ -19664,10 +20866,10 @@ function drawReportHeader(ctx, width) {
 
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 34px Inter, system-ui, sans-serif";
-  ctx.fillText("Pipe spool fabrication sheet", 220, 56);
+  ctx.fillText(title, 220, 56);
   ctx.font = "800 14px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
-  ctx.fillText(`Centre-to-centre drawing, cut lengths and estimated ${pipeSpec().material.toLowerCase()} weight`, 222, 82);
+  ctx.fillText(subtitle, 222, 82);
   if (reference) {
     ctx.fillText(reference, 222, 104);
   }
@@ -22521,6 +23723,16 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     return;
   }
+  const activeEditTool = state.activeTool === "measure" ||
+    state.activeTool === "note" ||
+    state.activeTool === "tee" ||
+    state.activeTool === "branch" ||
+    FITTING_TOOLS.has(state.activeTool);
+  if (activeEditTool && drawingEditLocked()) {
+    ensureDrawingEditable("change it");
+    event.preventDefault();
+    return;
+  }
   if (state.activeTool === "boxSelect") {
     beginBoxSelect(event, pointer);
     return;
@@ -22565,6 +23777,15 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
   const noteHit = findNearestNote(pointer);
   if (noteHit && state.activeTool === "select") {
+    if (drawingEditLocked()) {
+      state.selectedNote = noteHit.note.id;
+      state.selectedFitting = null;
+      state.selectedMeasurement = null;
+      clearSelectedSegments();
+      updateAll({ save: false });
+      showMobilePanel("inspector");
+      return;
+    }
     cancelTouchContextPress();
     beginNoteDrag(event, noteHit, pointer);
     return;
@@ -22572,12 +23793,26 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
   const fittingHit = findNearestFitting(pointer);
   if (fittingHit?.fitting?.type === "socket" && state.activeTool === "select") {
+    if (drawingEditLocked()) {
+      state.selectedFitting = fittingHit.fitting.id;
+      state.selectedNote = null;
+      state.selectedMeasurement = null;
+      clearSelectedSegments();
+      updateAll({ save: false });
+      showMobilePanel("inspector");
+      return;
+    }
     beginSocketDrag(event, fittingHit, pointer);
     return;
   }
 
   const dimensionHit = findNearestDimensionTarget(pointer);
   if (dimensionHit && state.activeTool === "select") {
+    if (drawingEditLocked()) {
+      ensureDrawingEditable("edit dimensions");
+      event.preventDefault();
+      return;
+    }
     if (dimensionHit.type === "dimension-key") {
       const segment = segments().find((item) => item.index === dimensionHit.segmentIndex);
       editSegmentLengthFromDimensionSource(segment, {
@@ -22750,6 +23985,11 @@ pipeSizeSelect.addEventListener("change", () => {
 });
 
 projectStatusSelect?.addEventListener("change", () => {
+  if (cloudPermissionReadOnly) {
+    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to change the drawing status.");
+    updateControls();
+    return;
+  }
   const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
   state.projectStatus = nextStatus;
   if (projectStatusAtLeast(nextStatus, "checked") && !state.checkedAt) {
@@ -22764,6 +24004,11 @@ projectStatusSelect?.addEventListener("change", () => {
 });
 
 projectLockToggle?.addEventListener("change", () => {
+  if (cloudPermissionReadOnly) {
+    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to unlock or edit it.");
+    updateControls();
+    return;
+  }
   state.locked = projectLockToggle.checked;
   updateControls();
   updateAll();
@@ -22899,6 +24144,10 @@ drawingAssistantBuildButton?.addEventListener("click", buildSpoolFromDrawingAssi
 document.querySelector("#export3dButton").addEventListener("click", export3dImage);
 document.querySelector("#exportReportButton").addEventListener("click", exportIsoImage);
 document.querySelector("#exportIsoButton").addEventListener("click", exportIsoImage);
+fabSheetTemplateSelect?.addEventListener("change", () => {
+  storeFabSheetTemplate(fabSheetTemplateSelect.value);
+  updateControls();
+});
 document.querySelector("#zoomInButton").addEventListener("click", () => {
   state.gridScale = Math.min(72, state.gridScale + 5);
   updateAll();

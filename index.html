@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "dark";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=217" />
+    <link rel="stylesheet" href="./styles.css?v=224" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -188,7 +188,7 @@
           <div>
             <strong>SpoolMate</strong>
             <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v2.17</span>
+            <span class="version-badge" id="appVersionBadge">v2.24</span>
           </div>
         </div>
 
@@ -346,6 +346,14 @@
                 </section>
                 <section class="action-menu-group">
                   <h2>Export</h2>
+                  <label class="fab-template-field">
+                    <span>PDF style</span>
+                    <select id="fabSheetTemplateSelect" aria-label="Fabrication PDF style">
+                      <option value="workshop">Workshop cut sheet</option>
+                      <option value="client">Client / approval sheet</option>
+                      <option value="takeoff">Fitting / take-off sheet</option>
+                    </select>
+                  </label>
                   <button class="primary-button" id="export3dButton" type="button">
                     <svg><use href="#icon-export"></use></svg>
                     Export 3D
@@ -924,6 +932,10 @@
               <svg><use href="#icon-help"></use></svg>
               <span>Guide</span>
             </a>
+            <button class="icon-button labeled" id="projectLibraryCommsButton" type="button">
+              <svg><use href="#icon-note"></use></svg>
+              <span>Comms</span>
+            </button>
             <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
               <svg><use href="#icon-report"></use></svg>
               <span>Report</span>
@@ -958,6 +970,10 @@
                     <strong>Use messages for yard notes.</strong>
                     <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
                   </li>
+                  <li>
+                    <strong>Open Comms for the team view.</strong>
+                    <span>Use Comms to post general team messages and see all active spool notes in one place.</span>
+                  </li>
                 </ol>
                 <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
                 <div class="project-guide-actions">
@@ -966,6 +982,7 @@
               </div>
             </details>
           </div>
+          <div class="project-library-comms-slot" id="projectLibraryCommsSlot" hidden></div>
           <div class="project-library-report-slot" id="projectLibraryReportSlot" hidden></div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
           <div class="project-dialog-actions">
@@ -1056,7 +1073,7 @@
           <div class="project-dialog-header">
             <div>
               <strong>Interactive tutorial</strong>
-              <small>Watch the mini demo, follow the highlight, then try the tool when you are ready.</small>
+              <small>Pick a topic, watch the mini demo, then try the highlighted tool when you are ready.</small>
             </div>
           </div>
           <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
@@ -1327,6 +1344,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=217"></script>
+    <script defer src="./app.js?v=224"></script>
   </body>
 </html>
