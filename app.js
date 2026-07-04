@@ -71,6 +71,12 @@ const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
 const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
 const healthCheckButton = document.querySelector("#healthCheckButton");
+const regressionChecklistButton = document.querySelector("#regressionChecklistButton");
+const regressionDialog = document.querySelector("#regressionDialog");
+const regressionCloseButton = document.querySelector("#regressionCloseButton");
+const regressionSummary = document.querySelector("#regressionSummary");
+const regressionSampleList = document.querySelector("#regressionSampleList");
+const regressionChecklist = document.querySelector("#regressionChecklist");
 const newRevisionButton = document.querySelector("#newRevisionButton");
 const shareReadOnlyButton = document.querySelector("#shareReadOnlyButton");
 const fabSheetTemplateSelect = document.querySelector("#fabSheetTemplateSelect");
@@ -78,6 +84,7 @@ const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
 const homeDashboardButton = document.querySelector("#homeDashboardButton");
 const drawingAssistantButton = document.querySelector("#drawingAssistantButton");
 const accountButton = document.querySelector("#accountButton");
+const accountMenuButton = document.querySelector("#accountMenuButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
 const authDialog = document.querySelector("#authDialog");
@@ -174,6 +181,23 @@ const noteDialogText = document.querySelector("#noteDialogText");
 const noteDialogColourButtons = [...document.querySelectorAll("[data-note-colour]")];
 const noteDialogCancelButton = document.querySelector("#noteDialogCancelButton");
 const noteDialogSaveButton = document.querySelector("#noteDialogSaveButton");
+const fieldInputDialog = document.querySelector("#fieldInputDialog");
+const fieldInputForm = document.querySelector("#fieldInputForm");
+const fieldInputTitle = document.querySelector("#fieldInputTitle");
+const fieldInputHelp = document.querySelector("#fieldInputHelp");
+const fieldInputLabel = document.querySelector("#fieldInputLabel");
+const fieldInputValue = document.querySelector("#fieldInputValue");
+const fieldInputTextArea = document.querySelector("#fieldInputTextArea");
+const fieldInputUnit = document.querySelector("#fieldInputUnit");
+const fieldInputCancelButton = document.querySelector("#fieldInputCancelButton");
+const fieldInputSubmitButton = document.querySelector("#fieldInputSubmitButton");
+const appToastStack = document.querySelector("#appToastStack");
+const appConfirmDialog = document.querySelector("#appConfirmDialog");
+const appConfirmTitle = document.querySelector("#appConfirmTitle");
+const appConfirmMessage = document.querySelector("#appConfirmMessage");
+const appConfirmIcon = document.querySelector("#appConfirmIcon");
+const appConfirmCancelButton = document.querySelector("#appConfirmCancelButton");
+const appConfirmOkButton = document.querySelector("#appConfirmOkButton");
 const drawingAssistantDialog = document.querySelector("#drawingAssistantDialog");
 const drawingAssistantCloseButton = document.querySelector("#drawingAssistantCloseButton");
 const drawingAssistantFileInput = document.querySelector("#drawingAssistantFileInput");
@@ -222,8 +246,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.24";
-const APP_BUILD_DATE = "2026-07-01";
+const APP_VERSION = "v2.39";
+const APP_BUILD_DATE = "2026-07-04";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -351,10 +375,10 @@ const FLANGE_STANDARDS = {
   },
 };
 const FLANGE_STANDARD_KEYS = new Set(Object.keys(FLANGE_STANDARDS));
-const END_FITTING_SNAP_TOLERANCE = 0.015;
 const ROLL_GROOVE_SETBACK_MM = 10;
 const ROLL_GROOVE_VISUAL_WIDTH_MM = 18;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
+const DRAW_STOP_TOOLS = new Set(["draw", "tee", "branch"]);
 const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
 const DRAWING_DETAIL_MODES = new Set(["clean", "fab", "sizes", "callouts", "full"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
@@ -369,7 +393,7 @@ const PROJECT_STATUS_FLOW = [
   ["fitup", "Fit-up"],
   ["welded", "Welded"],
   ["finish", "Paint / finish"],
-  ["complete", "Complete"],
+  ["complete", "Fabricated"],
 ];
 const PROJECT_STATUSES = new Set(PROJECT_STATUS_FLOW.map(([key]) => key));
 const PROJECT_STATUS_LABELS = Object.fromEntries(PROJECT_STATUS_FLOW);
@@ -386,6 +410,15 @@ const PROJECT_STATUS_ALIASES = {
   workshop: "issued",
 };
 const PRODUCTION_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
+const PRODUCTION_BOARD_FILTERS = {
+  active: "Active",
+  due: "Due soon",
+  overdue: "Overdue",
+  hold: "On hold",
+  mine: "Mine",
+  all: "All",
+};
+const PRODUCTION_BOARD_FILTER_KEYS = new Set(Object.keys(PRODUCTION_BOARD_FILTERS));
 const FAB_SHEET_TEMPLATES = {
   workshop: {
     label: "Workshop cut sheet",
@@ -402,9 +435,9 @@ const FAB_SHEET_TEMPLATES = {
     filename: "client-approval-sheet",
   },
   takeoff: {
-    label: "Fitting / take-off sheet",
-    shortLabel: "Take-off",
-    title: "Fitting and take-off sheet",
+    label: "Material order / take-off sheet",
+    shortLabel: "Order",
+    title: "Material order and take-off sheet",
     subtitle: "Ordering view for pipe lengths, fittings, weights and fabrication notes",
     filename: "takeoff-sheet",
   },
@@ -474,6 +507,24 @@ const TUTORIAL_STEPS = [
       "Active spool notes from production cards are shown in the same view.",
       "Owners can promote admins. Admins can approve users and manage shared team spools.",
       "Team messages are shared through Supabase for approved company members.",
+    ],
+  },
+  {
+    kicker: "Jobs",
+    menuLabel: "Production board",
+    title: "Run spools through production",
+    body: "The Jobs production board tracks each spool from Draft through checking, issuing and fabrication. Use filters for due work, holds and your own assigned spools.",
+    target: "#openBrowserProjectButton",
+    targetLabel: "Jobs button, then Production board",
+    action: "focusJobs",
+    actionLabel: "Open Jobs",
+    demo: "jobs",
+    items: [
+      "Use quick buttons on cards for Ready, Issued and Fabbed status changes.",
+      "Assign a person, due date, priority and hold reason directly on the card.",
+      "Team alerts show overdue, due today, assigned-to-you, ready-to-check and open note items.",
+      "Each spool keeps an activity history of production changes.",
+      "Use Daily or Weekly reports for handover and progress meetings.",
     ],
   },
   {
@@ -582,7 +633,7 @@ const TUTORIAL_STEPS = [
     kicker: "Pipe Size",
     menuLabel: "Pipe size",
     title: "Change pipe size from menus",
-    body: "Pipe NB is chosen from the pipe-size menu. When connected pipe sizes change, SpoolMate adds reducers where the connection needs one.",
+    body: "Pipe NB is chosen from the pipe-size menu. Size changes on normal runs and tee connections add reducers where needed. Branches stay as welded cut-ins without reducers.",
     target: "#pipeSizeSelect",
     targetLabel: "Pipe NB menu",
     action: "focusPipeSize",
@@ -591,7 +642,7 @@ const TUTORIAL_STEPS = [
     items: [
       "Use the top Pipe NB menu for the next run size.",
       "Right-click or long-press selected pipe to change existing sizes from the list.",
-      "Reducers are added for size changes on normal pipe and tee connections. Branches are treated as welded into the main pipe.",
+      "Reducers are added for size changes on normal pipe and tee connections. Branch welds stay cut into the main pipe with no reducer.",
     ],
   },
   {
@@ -689,7 +740,7 @@ const TUTORIAL_STEPS = [
     actionLabel: "Open Export",
     demo: "export",
     items: [
-      "Pick Workshop, Client or Take-off PDF style from the Export menu before pressing Fab PDF.",
+      "Pick Workshop, Client or Material order PDF style from the Export menu before pressing Fab PDF.",
       "Workshop PDF includes the drawing, dimension key, cut list, weights and takeoff list.",
       "Export 3D gives a clean model image for explaining the spool.",
       "Project export is the backup file if someone needs to import the spool later.",
@@ -954,6 +1005,8 @@ let pinchGesture = null;
 let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
 let noteDialogResolver = null;
+let fieldInputDialogResolver = null;
+let appConfirmDialogResolver = null;
 let noteDialogColour = DEFAULT_NOTE_COLOUR;
 let tutorialStepIndex = 0;
 let tutorialHighlightedElement = null;
@@ -966,7 +1019,7 @@ let previewFloatDrag = null;
 let previewFloatBounds = null;
 let previewFloatManual = loadPreviewFloatPreference();
 let previewPanelMinimized = false;
-let previewPanelHidden = false;
+let previewPanelHidden = true;
 let actionMenuLastPointerToggleAt = -Infinity;
 let healthHighlight = null;
 let healthHighlightAnimationFrame = 0;
@@ -1014,6 +1067,7 @@ let projectLibraryGuideVisible = false;
 let projectLibraryReportVisible = false;
 let projectLibraryCommsVisible = false;
 let projectLibraryReportPeriod = "daily";
+let projectLibraryBoardFilter = "active";
 let fabSheetTemplate = loadFabSheetTemplate();
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
@@ -1117,6 +1171,7 @@ function sampleState() {
     revisionHistory: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
+    productionActivity: [],
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -1288,6 +1343,7 @@ function blankState(options = {}) {
     revisionHistory: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
+    productionActivity: [],
     projectInfo: defaultProjectInfo(),
     history: [],
     redoHistory: [],
@@ -1362,6 +1418,7 @@ function statePayload(options = {}) {
     revisionHistory: options.includeRevisionHistory === false ? [] : normalizeRevisionHistory(state.revisionHistory),
     productionInfo: normalizeProductionInfo(state.productionInfo),
     productionMessages: normalizeProductionMessages(state.productionMessages),
+    productionActivity: normalizeProductionActivity(state.productionActivity),
     projectInfo: normalizeProjectInfo(state.projectInfo),
   };
 }
@@ -1441,6 +1498,7 @@ function stateFromPayload(payload, options = {}) {
     revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
     productionInfo: normalizeProductionInfo(saved.productionInfo),
     productionMessages: normalizeProductionMessages(saved.productionMessages),
+    productionActivity: normalizeProductionActivity(saved.productionActivity),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
     redoHistory: [],
@@ -1820,6 +1878,49 @@ function normalizeProductionMessages(messages) {
     .slice(-40);
 }
 
+function normalizeProductionActivity(entries) {
+  if (!Array.isArray(entries)) return [];
+  return entries
+    .map((entry) => {
+      const text = String(entry?.text ?? "").trim().slice(0, 220);
+      if (!text) return null;
+      return {
+        id: String(entry?.id ?? "").trim().slice(0, 80) || `act-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        type: String(entry?.type ?? "update").trim().slice(0, 32) || "update",
+        text,
+        actor: String(entry?.actor ?? "").trim().slice(0, 80),
+        createdAt: String(entry?.createdAt ?? "").trim() || new Date().toISOString(),
+      };
+    })
+    .filter(Boolean)
+    .slice(-80);
+}
+
+function productionActivityActor() {
+  return checkerName() || cloudUser?.email || "Team member";
+}
+
+function addProductionActivity(activity, type, text, createdAt = new Date().toISOString()) {
+  const body = String(text ?? "").trim();
+  if (!body) return normalizeProductionActivity(activity);
+  return normalizeProductionActivity([
+    ...normalizeProductionActivity(activity),
+    {
+      id: `act-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      type,
+      text: body,
+      actor: productionActivityActor(),
+      createdAt,
+    },
+  ]);
+}
+
+function formatProductionActivityTime(value) {
+  const date = new Date(String(value ?? ""));
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
 function nextSpoolNumber(value) {
   const text = String(value ?? "").trim();
   const match = text.match(/(\d+)(?!.*\d)/);
@@ -1897,6 +1998,226 @@ function normalizeProjectComment(row) {
     updatedAt: String(row.updated_at ?? ""),
   };
 }
+
+function regressionTeeReducerState() {
+  return {
+    ...blankState({ userDefaults: false }),
+    points: [
+      { x: 0, y: 0, z: 0 },
+      { x: 4000, y: 0, z: 0 },
+      { x: 8000, y: 0, z: 0 },
+      { x: 4000, y: 2600, z: 0 },
+      { x: 4000, y: 2600, z: 1800 },
+    ],
+    edges: [
+      { from: 0, to: 1, pipeSizeNb: 150 },
+      { from: 1, to: 2, pipeSizeNb: 150 },
+      { from: 1, to: 3, pipeSizeNb: 80 },
+      { from: 3, to: 4, pipeSizeNb: 80 },
+    ],
+    fittings: [
+      { id: 1, type: "flange", segmentIndex: 0, t: 0 },
+      { id: 2, type: "flange", segmentIndex: 1, t: 1 },
+      { id: 3, type: "rollGroove", segmentIndex: 3, t: 1 },
+    ],
+    notes: [
+      { id: 1, text: "TEE REDUCER CHECK", point: { x: 4300, y: 900, z: 0 }, colour: "blue" },
+    ],
+    activeTool: "select",
+    selectedSegments: [2],
+    selectedSegment: 2,
+    selectedPoint: 1,
+    activePoint: 4,
+    pipeSizeNb: 80,
+    pipeSpec: "carbon40",
+    flangeMode: "single",
+    flangeStandard: "ansi150",
+    previewMode: "carbon",
+    show3dLabels: true,
+    drawingDetail: "callouts",
+    showDimensions: true,
+    dimensionStyle: "numbered",
+    showLiftingPoints: false,
+    projectInfoPrompted: true,
+    projectStatus: "draft",
+    projectInfo: {
+      jobNumber: "TEST-KIT",
+      spoolNumber: "TEE-REDUCER",
+      revision: "A",
+      drawnBy: "",
+      client: "Regression sample",
+    },
+  };
+}
+
+function regressionBranchNoReducerState() {
+  return {
+    ...blankState({ userDefaults: false }),
+    points: [
+      { x: 0, y: 0, z: 0 },
+      { x: 4200, y: 0, z: 0 },
+      { x: 8400, y: 0, z: 0 },
+      { x: 4200, y: -2400, z: 0 },
+    ],
+    edges: [
+      { from: 0, to: 1, pipeSizeNb: 150 },
+      { from: 1, to: 2, pipeSizeNb: 150 },
+      { from: 1, to: 3, pipeSizeNb: 50 },
+    ],
+    fittings: [
+      { id: 1, type: "flange", segmentIndex: 0, t: 0 },
+      { id: 2, type: "flange", segmentIndex: 1, t: 1 },
+      { id: 3, type: "rollGroove", segmentIndex: 2, t: 1 },
+    ],
+    notes: [
+      { id: 1, text: "BRANCH - NO REDUCER", point: { x: 4550, y: -900, z: 0 }, colour: "amber" },
+    ],
+    nodeTypes: { 1: "branch" },
+    activeTool: "select",
+    selectedSegments: [2],
+    selectedSegment: 2,
+    selectedPoint: 1,
+    activePoint: 3,
+    pipeSizeNb: 50,
+    pipeSpec: "carbon40",
+    flangeMode: "single",
+    flangeStandard: "ansi150",
+    previewMode: "carbon",
+    show3dLabels: true,
+    drawingDetail: "callouts",
+    showDimensions: true,
+    dimensionStyle: "numbered",
+    showLiftingPoints: false,
+    projectInfoPrompted: true,
+    projectStatus: "draft",
+    projectInfo: {
+      jobNumber: "TEST-KIT",
+      spoolNumber: "BRANCH-WELD",
+      revision: "A",
+      drawnBy: "",
+      client: "Regression sample",
+    },
+  };
+}
+
+function regressionOffsetSocketsState() {
+  const travelMm = offsetTravelLengthMm(1000, 45);
+  return {
+    ...blankState({ userDefaults: false }),
+    points: [
+      { x: 0, y: 0, z: 0 },
+      { x: 3200, y: 0, z: 0 },
+      { x: 3200 + travelMm / Math.SQRT2, y: 0, z: travelMm / Math.SQRT2 },
+      { x: 6600, y: 0, z: 1000 },
+    ],
+    edges: [
+      { from: 0, to: 1, pipeSizeNb: 90 },
+      {
+        from: 1,
+        to: 2,
+        pipeSizeNb: 90,
+        offsetSetMm: 1000,
+        offsetTravelMm: travelMm,
+        offsetAngleDeg: 45,
+        offsetPlane: "xz",
+        offsetDirection: 1,
+      },
+      { from: 2, to: 3, pipeSizeNb: 90 },
+    ],
+    fittings: [
+      { id: 1, type: "rollGroove", segmentIndex: 0, t: 0 },
+      { id: 2, type: "rollGroove", segmentIndex: 2, t: 1 },
+      { id: 3, type: "socket", segmentIndex: 2, t: 0.28, socketSizeNb: 15, socketAngle: 0 },
+      { id: 4, type: "socket", segmentIndex: 2, t: 0.42, socketSizeNb: 15, socketAngle: 90 },
+      { id: 5, type: "socket", segmentIndex: 2, t: 0.56, socketSizeNb: 15, socketAngle: 180 },
+    ],
+    measurements: [
+      { id: 1, start: { x: 3200, y: 0, z: 0 }, end: { x: 6600, y: 0, z: 1000 }, label: "Offset C/C check" },
+    ],
+    notes: [
+      { id: 1, text: "45 OFFSET + SOCKETS", point: { x: 4400, y: 350, z: 800 }, colour: "teal" },
+    ],
+    activeTool: "select",
+    selectedSegments: [1],
+    selectedSegment: 1,
+    selectedPoint: 2,
+    activePoint: 3,
+    pipeSizeNb: 90,
+    pipeSpec: "carbon40",
+    flangeMode: "single",
+    flangeStandard: "ansi150",
+    previewMode: "stainless",
+    show3dLabels: true,
+    drawingDetail: "callouts",
+    showDimensions: true,
+    dimensionStyle: "numbered",
+    showLiftingPoints: false,
+    projectInfoPrompted: true,
+    projectStatus: "draft",
+    projectInfo: {
+      jobNumber: "TEST-KIT",
+      spoolNumber: "OFFSET-SOCKETS",
+      revision: "A",
+      drawnBy: "",
+      client: "Regression sample",
+    },
+  };
+}
+
+const REGRESSION_SAMPLES = [
+  {
+    key: "workshop",
+    title: "Workshop sample",
+    detail: "General drawing, reducers, flanges, valve, weld and cut list.",
+    build: sampleState,
+    checks: [
+      "End flanges sit flush on the pipe ends in 2D and 3D.",
+      "Different NB runs show reducers and correct size labels.",
+      "Cut list, BOM and weights populate without errors.",
+    ],
+  },
+  {
+    key: "teeReducer",
+    title: "Reducing tee",
+    detail: "NB 150 main run with NB 80 tee outlet.",
+    build: regressionTeeReducerState,
+    checks: [
+      "Connection is treated as a tee, not a bend.",
+      "Reducer is shown at the tee outlet and included in take-off.",
+      "3D preview keeps reducer smaller than the main pipe.",
+    ],
+  },
+  {
+    key: "branchNoReducer",
+    title: "Welded branch",
+    detail: "NB 50 branch cut into NB 150 main run.",
+    build: regressionBranchNoReducerState,
+    checks: [
+      "Connection is marked as Branch.",
+      "No reducer is added at the branch weld.",
+      "Cut list keeps the main run as one pipe through the branch.",
+    ],
+  },
+  {
+    key: "offsetSockets",
+    title: "45 offset and sockets",
+    detail: "Offset travel, manual measurement, roll grooves and socket rotation.",
+    build: regressionOffsetSocketsState,
+    checks: [
+      "45 degree offset shows C/C and set dimensions clearly.",
+      "Sockets show positions in sequence and rotate at 90 degree steps.",
+      "Roll grooves sit close to the pipe ends and add 0 kg.",
+    ],
+  },
+];
+
+const REGRESSION_MANUAL_CHECKS = [
+  "Press Enter while drawing to confirm drawing stops.",
+  "Right-click on PC or long-press on tablet/phone to confirm the action sheet opens cleanly.",
+  "Open 3D preview, change view style, rotate, move and fit the model.",
+  "Export Fab PDF and confirm the drawing is zoomed in, readable and includes cut list/BOM/weights.",
+  "On iPad/Android, confirm tool buttons are easy to tap and panels do not cover the drawing unexpectedly.",
+];
 
 function normalizeTeamMessage(row) {
   if (!row || typeof row !== "object") return null;
@@ -2029,9 +2350,7 @@ function normalizeFittingPosition(type, value) {
   const fallback = Number.isFinite(Number(value)) ? Number(value) : 0.5;
   if (type === "flange" || type === "rollGroove") {
     const clamped = clampNumber(fallback, 0, 1);
-    if (clamped <= END_FITTING_SNAP_TOLERANCE) return 0;
-    if (clamped >= 1 - END_FITTING_SNAP_TOLERANCE) return 1;
-    return clamped;
+    return clamped <= 0.5 ? 0 : 1;
   }
   return clampNumber(fallback, 0.04, 0.96);
 }
@@ -2065,6 +2384,11 @@ function fittingDisplayPoint(segment, fitting) {
 
 function normalizeStateFittingPositions() {
   const segmentByIndex = new Map(segments().map((segment) => [segment.index, segment]));
+  state.fittings = state.fittings.filter((fitting) =>
+    FITTING_TOOLS.has(fitting.type) &&
+    Number.isInteger(fitting.segmentIndex) &&
+    segmentByIndex.has(fitting.segmentIndex),
+  );
   for (const fitting of state.fittings) {
     const current = Number(fitting.t);
     const segment = segmentByIndex.get(fitting.segmentIndex);
@@ -2074,6 +2398,91 @@ function normalizeStateFittingPositions() {
     if (!Number.isFinite(current) || Math.abs(normalized - current) > 0.000001) {
       fitting.t = normalized;
     }
+  }
+}
+
+function normalizeEdgePipeSizesForState() {
+  state.pipeSizeNb = normalizePipeSize(state.pipeSizeNb);
+  state.edges = state.edges.map((edge) => ({
+    ...edge,
+    pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? state.pipeSizeNb),
+  }));
+}
+
+function bendReducerExistsAtNode(nodeIndex, connected, segmentByIndex) {
+  if (!Number.isInteger(nodeIndex) || connected.length !== 2) return false;
+  const joint = state.points[nodeIndex];
+  const firstSegment = segmentByIndex.get(connected[0].segmentIndex);
+  const secondSegment = segmentByIndex.get(connected[1].segmentIndex);
+  if (!joint || !firstSegment || !secondSegment) return false;
+
+  const firstVector = subtractPoints(state.points[connected[0].other], joint);
+  const secondVector = subtractPoints(state.points[connected[1].other], joint);
+  if (pointLength(firstVector) <= 0.001 || pointLength(secondVector) <= 0.001) return false;
+
+  const bend = Math.abs(180 - bendAngle(firstVector, secondVector));
+  if (bend < 0.5) return false;
+  return Boolean(autoReducerForConnection(nodeIndex, connected[0], connected[1], firstSegment, secondSegment, { bend }));
+}
+
+function branchMarkCanPersistAtNode(nodeIndex, connected) {
+  if (!Number.isInteger(nodeIndex) || connected.length < 2) return false;
+  if (connected.length >= 3) return true;
+
+  const joint = state.points[nodeIndex];
+  if (!joint || connected.length !== 2) return false;
+  const firstOther = state.points[connected[0].other];
+  const secondOther = state.points[connected[1].other];
+  if (!firstOther || !secondOther) return false;
+
+  const firstVector = subtractPoints(firstOther, joint);
+  const secondVector = subtractPoints(secondOther, joint);
+  if (pointLength(firstVector) <= 0.001 || pointLength(secondVector) <= 0.001) return false;
+
+  // A branch tool starts by splitting a straight main run, then the user draws the branch leg.
+  // Keep that branch intent on a straight split so it does not become a tee before the next click.
+  const straightness = Math.abs(180 - bendAngle(firstVector, secondVector));
+  return straightness < 2;
+}
+
+function normalizeConnectionTrustState() {
+  const segmentData = segments();
+  const connections = nodeConnections(segmentData);
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+
+  state.nodeTypes = normalizeNodeTypes(state.nodeTypes, state.points.length);
+  for (const key of Object.keys(state.nodeTypes)) {
+    const nodeIndex = Number(key);
+    const connected = connections.get(nodeIndex) ?? [];
+    if (state.nodeTypes[key] !== "branch" || !branchMarkCanPersistAtNode(nodeIndex, connected)) {
+      delete state.nodeTypes[key];
+    }
+  }
+
+  state.reducerSideOverrides = normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length);
+  for (const key of Object.keys(state.reducerSideOverrides)) {
+    const nodeIndex = Number(key);
+    const connected = connections.get(nodeIndex) ?? [];
+    if (!bendReducerExistsAtNode(nodeIndex, connected, segmentByIndex)) {
+      delete state.reducerSideOverrides[key];
+    }
+  }
+}
+
+function normalizeDrawingTrustState() {
+  normalizeEdgePipeSizesForState();
+  normalizeStateFittingPositions();
+  normalizeConnectionTrustState();
+  setSelectedSegments(selectedSegmentIndexes());
+
+  if (Number.isInteger(state.selectedFitting) && !state.fittings.some((fitting) => fitting.id === state.selectedFitting)) {
+    state.selectedFitting = null;
+  }
+  if (Number.isInteger(state.selectedPoint) && (state.selectedPoint < 0 || state.selectedPoint >= state.points.length)) {
+    state.selectedPoint = null;
+  }
+  if (!Number.isInteger(state.activePoint) || state.activePoint < 0 || state.activePoint >= state.points.length) {
+    state.activePoint = Math.max(0, state.points.length - 1);
   }
 }
 
@@ -2325,6 +2734,7 @@ function setSelectedSegments(indexes) {
   const selected = normalizeSelectedSegments(indexes, state.edges.length);
   state.selectedSegments = selected;
   state.selectedSegment = selected.length ? selected[selected.length - 1] : null;
+  syncDefaultPipeSizeFromSelection();
 }
 
 function clearSelectedSegments() {
@@ -2333,6 +2743,16 @@ function clearSelectedSegments() {
 
 function selectSingleSegment(index) {
   setSelectedSegments([index]);
+}
+
+function syncDefaultPipeSizeFromSelection() {
+  const selected = selectedSegmentsData();
+  if (!selected.length) return;
+
+  const sizes = [...new Set(selected.map((segment) => pipeSizeForSegment(segment).nb))];
+  if (sizes.length === 1) {
+    state.pipeSizeNb = normalizePipeSize(sizes[0]);
+  }
 }
 
 function toggleSelectedSegment(index) {
@@ -5413,6 +5833,7 @@ function addRunToPoint(from, next, options = {}) {
   if (!start || almostSamePoint(start, next)) {
     return;
   }
+  const runPipeSizeNb = normalizePipeSize(options.pipeSizeNb ?? state.pipeSizeNb);
   const edgeMeta = normalizeOffsetEdgeMeta(options.edgeMeta);
 
   const connection = findRunConnectionForNewSegment(from, next);
@@ -5425,7 +5846,7 @@ function addRunToPoint(from, next, options = {}) {
     if (connection.type === "segment") {
       setNodeConnectionType(to, "tee", { update: false });
     }
-    state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb, ...edgeMeta });
+    state.edges.push({ from, to, pipeSizeNb: runPipeSizeNb, ...edgeMeta });
     selectSingleSegment(state.edges.length - 1);
     state.selectedFitting = null;
     state.selectedNote = null;
@@ -5440,7 +5861,7 @@ function addRunToPoint(from, next, options = {}) {
 
   const to = state.points.length;
   state.points.push(next);
-  state.edges.push({ from, to, pipeSizeNb: state.pipeSizeNb, ...edgeMeta });
+  state.edges.push({ from, to, pipeSizeNb: runPipeSizeNb, ...edgeMeta });
   selectSingleSegment(state.edges.length - 1);
   state.selectedFitting = null;
   state.selectedNote = null;
@@ -5756,6 +6177,8 @@ function autoReducerTransitions(segmentData = segments()) {
   const reducers = [];
 
   for (const [nodeIndex, connected] of connections.entries()) {
+    if (nodeConnectionType(nodeIndex) === "branch") continue;
+
     if (connected.length >= 3) {
       reducers.push(...autoReducersForTeeNode(nodeIndex, connected, segmentData));
       continue;
@@ -6258,6 +6681,35 @@ function branchMergedCutSegments(segmentData = segments(), segmentTakeoffs = tak
 
 function cutRunLabel(segment) {
   return segment?.cutLabel ?? `${pointLabel(segment.from)}-${pointLabel(segment.to)}`;
+}
+
+function dimensionCodeForSegmentIndex(segmentIndex) {
+  const index = Number(segmentIndex);
+  return Number.isInteger(index) && index >= 0 ? `D${index + 1}` : "";
+}
+
+function cutRunDimensionIndexes(segment) {
+  const indexes = Array.isArray(segment?.mergedIndexes) && segment.mergedIndexes.length
+    ? segment.mergedIndexes
+    : [segment?.index];
+  return indexes.filter((index) => Number.isInteger(Number(index)) && Number(index) >= 0);
+}
+
+function cutRunDimensionLabel(segment) {
+  const codes = cutRunDimensionIndexes(segment)
+    .map(dimensionCodeForSegmentIndex)
+    .filter(Boolean);
+  return codes.length ? codes.join("+") : cutRunLabel(segment);
+}
+
+function cutRunDisplayTitle(segment) {
+  const direction = runLabelForVector(segment?.vector);
+  return `${cutRunDimensionLabel(segment)}${direction ? ` ${direction}` : ""} cut`;
+}
+
+function cutRunPointDetail(segment) {
+  const pointLabelText = cutRunLabel(segment);
+  return pointLabelText === cutRunDimensionLabel(segment) ? "" : pointLabelText;
 }
 
 function takeoffCountRows(quantities = quantitySummary()) {
@@ -7324,13 +7776,14 @@ function updateSegmentList() {
     row.dataset.segmentIndex = String(segment.index);
 
     const fittingCount = state.fittings.filter((fitting) => segmentIndexes.includes(fitting.segmentIndex)).length;
-    const indexLabel = segmentIndexes.length > 1 ? segmentIndexes.map((index) => index + 1).join("+") : String(segment.index + 1);
+    const indexLabel = cutRunDimensionLabel(segment);
+    const pointDetail = cutRunPointDetail(segment);
     row.innerHTML = `
-      <span class="segment-index">${indexLabel}</span>
+      <span class="segment-index">${escapeHtml(indexLabel)}</span>
       <span class="segment-main">
-        <strong>${cutRunLabel(segment)} ${runLabelForVector(segment.vector)} cut</strong>
+        <strong>${escapeHtml(cutRunDisplayTitle(segment))}</strong>
         <small>Cut ${formatLength(quantity.cutLengthMm)} mm / CL ${formatLength(quantity.centrelineMm)} mm / ${formatMass(quantity.pipeWeightKg)} kg</small>
-        <small>NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule} / deductions ${formatLength(quantity.bendTakeoffMm)} mm</small>
+        <small>${pointDetail ? `${escapeHtml(pointDetail)} / ` : ""}NB ${pipeSizeForSegment(segment).nb} ${escapeHtml(pipeSpec().schedule)} / deductions ${formatLength(quantity.bendTakeoffMm)} mm</small>
       </span>
       <span class="segment-fit">${fittingCount}</span>
     `;
@@ -7710,7 +8163,7 @@ function setupHealthIssueClicks() {
     if (!item?.target) return;
     focusHealthIssue(item).catch((error) => {
       console.warn("Could not focus health issue.", error);
-      window.alert(error?.message || "Could not open that check.");
+      showAppNotice(error?.message || "Could not open that check.");
     });
   });
 }
@@ -7891,6 +8344,21 @@ function productionWorkflowCardHtml() {
   `;
 }
 
+function productionActivityCardHtml() {
+  const activity = normalizeProductionActivity(state.productionActivity).slice(-8).reverse();
+  return `
+    <div class="workflow-card production-activity-card">
+      <strong>Activity history</strong>
+      ${activity.length ? `<ul class="production-activity-list">${activity.map((entry) => `
+        <li>
+          <span>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</span>
+          <strong>${escapeHtml(entry.text)}</strong>
+        </li>
+      `).join("")}</ul>` : "<span>No production activity recorded yet.</span>"}
+    </div>
+  `;
+}
+
 function updateWorkflowSummary() {
   if (!workflowSummary) return;
   const history = normalizeRevisionHistory(state.revisionHistory);
@@ -7908,6 +8376,7 @@ function updateWorkflowSummary() {
       <button type="button" data-workflow-action="save-defaults">Save defaults</button>
     </div>
     ${productionWorkflowCardHtml()}
+    ${productionActivityCardHtml()}
     <div class="revision-card">
       <strong>Revision history</strong>
       ${history.length ? `<ul class="revision-list">${history.map((entry) => `
@@ -7929,14 +8398,13 @@ function updateWorkflowSummary() {
     button.addEventListener("click", () => restoreRevision(button.dataset.restoreRevision));
   });
   workflowSummary.querySelectorAll("[data-production-field]").forEach((field) => {
-    const eventName = field.dataset.productionField === "assignee" || field.dataset.productionField === "holdReason" ? "input" : "change";
-    field.addEventListener(eventName, () => handleProductionFieldChange(field));
+    field.addEventListener("change", () => handleProductionFieldChange(field));
   });
 }
 
 function handleWorkflowAction(action) {
   if (cloudPermissionReadOnly && (action === "mark-checked" || action === "new-revision")) {
-    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to change workflow status.");
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change workflow status.");
     return;
   }
   if (action === "mark-checked") markDrawingChecked();
@@ -7949,45 +8417,80 @@ function handleProductionFieldChange(field) {
   const key = field?.dataset?.productionField;
   if (!key) return;
   if (cloudPermissionReadOnly) {
-    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to update production allocation.");
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to update production allocation.");
     updateWorkflowSummary();
     return;
   }
   const previous = normalizeProductionInfo(state.productionInfo);
   const value = field.type === "checkbox" ? field.checked : field.value;
+  const now = new Date().toISOString();
   state.productionInfo = normalizeProductionInfo({
     ...previous,
     [key]: value,
     lastUpdatedBy: checkerName(),
-    lastUpdatedAt: new Date().toISOString(),
+    lastUpdatedAt: now,
   });
+  const next = normalizeProductionInfo(state.productionInfo);
+  if (key === "assignee" && previous.assignee !== next.assignee) {
+    state.productionActivity = addProductionActivity(state.productionActivity, "assignee", `Assigned changed from ${previous.assignee || "Unassigned"} to ${next.assignee || "Unassigned"}.`, now);
+  }
+  if ((key === "dueDate" || key === "dueTime") && (previous.dueDate !== next.dueDate || previous.dueTime !== next.dueTime)) {
+    state.productionActivity = addProductionActivity(state.productionActivity, "due", `Due changed from ${formatProductionDue(previous) || "No due date"} to ${formatProductionDue(next) || "No due date"}.`, now);
+  }
+  if (key === "priority" && previous.priority !== next.priority) {
+    state.productionActivity = addProductionActivity(state.productionActivity, "priority", `Priority changed from ${productionPriorityLabel(previous.priority)} to ${productionPriorityLabel(next.priority)}.`, now);
+  }
+  if (key === "hold" && previous.hold !== next.hold) {
+    state.productionActivity = addProductionActivity(state.productionActivity, "hold", next.hold
+      ? `Put on hold${next.holdReason ? `: ${next.holdReason}` : "."}`
+      : "Hold removed.", now);
+  }
+  if (key === "holdReason" && previous.holdReason !== next.holdReason) {
+    state.productionActivity = addProductionActivity(state.productionActivity, "hold", `Hold reason changed from ${previous.holdReason || "none"} to ${next.holdReason || "none"}.`, now);
+  }
   updateProjectReadout();
   persistState();
+  updateWorkflowSummary();
 }
 
 function checkerName() {
   return cloudUser?.email || normalizeProjectInfo(state.projectInfo).drawnBy || "";
 }
 
-function markDrawingChecked() {
+async function markDrawingChecked() {
   if (cloudPermissionReadOnly) {
-    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to mark it checked.");
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to mark it checked.");
     return;
   }
   const issues = drawingHealthItems().filter((item) => item.severity === "error");
   if (issues.length) {
-    const proceed = window.confirm(`${issues.length} health issue${issues.length === 1 ? "" : "s"} still need fixing. Mark checked anyway?`);
+    const proceed = await confirmAppAction(`${issues.length} health issue${issues.length === 1 ? "" : "s"} still need fixing. Mark checked anyway?`, {
+      title: "Health issues remain",
+      confirmLabel: "Mark checked",
+      tone: "warning",
+    });
     if (!proceed) {
       showHealthPanel();
       return;
     }
   }
 
-  const name = window.prompt("Checked by", checkerName());
+  const name = await openFieldInputDialog({
+    title: "Mark drawing checked",
+    label: "Checked by",
+    value: checkerName(),
+    help: "This name will be recorded on the drawing history.",
+    submitLabel: "Mark checked",
+  });
   if (name === null) return;
+  const previousStatus = normalizeProjectStatus(state.projectStatus);
+  const now = new Date().toISOString();
   state.checkedBy = String(name).trim().slice(0, 64);
-  state.checkedAt = new Date().toISOString();
+  state.checkedAt = now;
   state.projectStatus = "checked";
+  if (previousStatus !== "checked") {
+    state.productionActivity = addProductionActivity(state.productionActivity, "status", `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel("checked")}.`, now);
+  }
   state.locked = true;
   updateControls();
   updateAll();
@@ -8034,7 +8537,7 @@ function addRevisionSnapshot(note = "Saved revision") {
 
 function createNextRevision() {
   if (cloudPermissionReadOnly) {
-    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to create a new revision.");
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to create a new revision.");
     return;
   }
   const project = normalizeProjectInfo(state.projectInfo);
@@ -8052,21 +8555,25 @@ function createNextRevision() {
   showHealthPanel();
 }
 
-function restoreRevision(revisionId) {
+async function restoreRevision(revisionId) {
   if (cloudPermissionReadOnly) {
-    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to restore revisions.");
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to restore revisions.");
     return;
   }
   const entry = normalizeRevisionHistory(state.revisionHistory).find((item) => item.id === revisionId);
   if (!entry?.state) return;
-  const proceed = window.confirm(`Restore revision ${entry.revision || "-"}? The current drawing will be replaced.`);
+  const proceed = await confirmAppAction(`Restore revision ${entry.revision || "-"}? The current drawing will be replaced.`, {
+    title: "Restore revision",
+    confirmLabel: "Restore",
+    tone: "warning",
+  });
   if (!proceed) return;
 
   addRevisionSnapshot("Before restore");
   const history = normalizeRevisionHistory(state.revisionHistory);
   const restored = stateFromPayload(entry.state);
   if (!restored) {
-    window.alert("That revision could not be restored.");
+    showAppNotice("That revision could not be restored.");
     return;
   }
   state = restored;
@@ -8082,7 +8589,7 @@ function restoreRevision(revisionId) {
 
 function saveCurrentSettingsAsDefaults() {
   persistUserDrawingDefaults();
-  window.alert("Current material, pipe size, dimensions, lifting, preview and drawing settings saved as your defaults.");
+  showAppNotice("Current material, pipe size, dimensions, lifting, preview and drawing settings saved as your defaults.");
 }
 
 function projectBackupKey(source = state) {
@@ -8176,15 +8683,19 @@ function updateBackupSummary() {
   });
 }
 
-function restoreProjectBackup(backupId) {
+async function restoreProjectBackup(backupId) {
   const backup = loadProjectBackups().find((item) => item.id === backupId);
   if (!backup?.state) return;
-  const proceed = window.confirm("Restore this backup? The current drawing will be replaced.");
+  const proceed = await confirmAppAction("Restore this backup? The current drawing will be replaced.", {
+    title: "Restore backup",
+    confirmLabel: "Restore",
+    tone: "warning",
+  });
   if (!proceed) return;
   createProjectBackup("before backup restore");
   const restored = stateFromPayload(backup.state);
   if (!restored) {
-    window.alert("That backup could not be restored.");
+    showAppNotice("That backup could not be restored.");
     return;
   }
   state = restored;
@@ -8358,9 +8869,9 @@ function drawingEditLocked() {
 function ensureDrawingEditable(action = "edit this drawing") {
   if (!drawingEditLocked()) return true;
   if (cloudPermissionReadOnly) {
-    window.alert(`This team spool is view/comment only for your role. Ask the project owner or a team admin before you ${action}.`);
+    showAppNotice(`This team spool is view/comment only for your role. Ask the project owner or a team admin before you ${action}.`);
   } else {
-    window.alert(`This drawing is locked as ${projectStatusLabel()}. Unlock edits or create a new revision before you ${action}.`);
+    showAppNotice(`This drawing is locked as ${projectStatusLabel()}. Unlock edits or create a new revision before you ${action}.`);
   }
   showHealthPanel();
   return false;
@@ -8556,17 +9067,27 @@ function handlePropertyAction(action) {
   if (action === "mark-point-tee") setSelectedPointConnectionType("tee");
 }
 
-function setSelectedFittingWeight() {
+async function setSelectedFittingWeight() {
   const data = selectedFittingData();
   if (!data) return;
   if (data.fitting.type === "rollGroove") return;
 
-  const text = window.prompt("Fitting weight kg", formatMass(data.weightKg));
+  const text = await openFieldInputDialog({
+    title: "Set fitting weight",
+    label: "Fitting weight",
+    value: formatMass(data.weightKg),
+    unit: "kg",
+    type: "number",
+    inputMode: "decimal",
+    min: "0",
+    help: "Use this when you want to override the estimated fitting weight.",
+    submitLabel: "Save weight",
+  });
   if (text === null) return;
 
   const weightKg = Number(text);
   if (!Number.isFinite(weightKg) || weightKg < 0) {
-    window.alert("Enter a valid fitting weight in kg.");
+    showAppNotice("Enter a valid fitting weight in kg.");
     return;
   }
 
@@ -8623,11 +9144,18 @@ function deleteSelectedNote() {
   updateAll();
 }
 
-function editSelectedMeasurementLabel() {
+async function editSelectedMeasurementLabel() {
   const measurement = (state.measurements ?? []).find((item) => item.id === state.selectedMeasurement);
   if (!measurement) return;
 
-  const text = window.prompt("Measurement label. Leave blank to use the measured length.", measurement.label || "");
+  const text = await openFieldInputDialog({
+    title: "Edit measurement label",
+    label: "Label",
+    value: measurement.label || "",
+    placeholder: measurementLabel(measurement),
+    help: "Leave blank to use the measured length automatically.",
+    submitLabel: "Save label",
+  });
   if (text === null) return;
   const nextLabel = String(text).trim().slice(0, 64);
   if (nextLabel === measurement.label) return;
@@ -9236,6 +9764,7 @@ function updateTouchComfortClass() {
   const phoneMode = isPhoneLayout();
   const tabletMode = touchMode && !phoneMode;
   document.body.classList.toggle("touch-comfort", touchMode);
+  document.body.classList.toggle("field-layout", touchMode);
   document.body.classList.toggle("tablet-layout", tabletMode);
   document.body.classList.toggle("phone-layout", phoneMode);
   document.body.classList.toggle("mobile-touch-layout", touchMode);
@@ -9296,9 +9825,9 @@ function storePreviewFloatPreference(active) {
 function loadAppTheme() {
   try {
     const saved = localStorage.getItem(APP_THEME_KEY);
-    return saved === "light" ? "light" : "dark";
+    return saved === "dark" ? "dark" : "light";
   } catch {
-    return "dark";
+    return "light";
   }
 }
 
@@ -9311,7 +9840,7 @@ function setAppTheme(theme, options = {}) {
   document.documentElement.dataset.theme = nextTheme;
   document.body?.setAttribute("data-theme", nextTheme);
   if (themeColorMeta) {
-    themeColorMeta.content = nextTheme === "dark" ? "#071018" : "#0f766e";
+    themeColorMeta.content = nextTheme === "dark" ? "#071018" : "#f6f8f7";
   }
   for (const button of themeChoiceButtons) {
     const active = button.dataset.themeChoice === nextTheme;
@@ -10157,7 +10686,7 @@ function updateControls() {
 
 function updateAll(options = {}) {
   const save = options.save !== false;
-  normalizeStateFittingPositions();
+  normalizeDrawingTrustState();
   drawIso();
   updateSegmentList();
   updateStats();
@@ -10290,6 +10819,10 @@ function setupAuthDialog() {
   accountButton?.addEventListener("click", () => {
     openAuthDialog();
   });
+  accountMenuButton?.addEventListener("click", () => {
+    closeActionMenu();
+    openAuthDialog();
+  });
 
   authSignInModeButton?.addEventListener("click", () => setAuthMode("signin"));
   authCreateModeButton?.addEventListener("click", () => setAuthMode("signup"));
@@ -10334,7 +10867,7 @@ function setupAuthDialog() {
   teamRefreshButton?.addEventListener("click", () => {
     loadTeamWorkspace().catch((error) => {
       console.warn("Team refresh failed.", error);
-      window.alert(error?.message || "Team refresh failed.");
+      showAppNotice(error?.message || "Team refresh failed.");
     });
   });
 
@@ -10352,7 +10885,7 @@ function setupAuthDialog() {
     if (!select?.dataset.teamMemberRole) return;
     updateTeamMemberRole(select.dataset.teamMemberRole, select.value).catch((error) => {
       console.warn("Team member role update failed.", error);
-      window.alert(error?.message || "Could not update team member role.");
+      showAppNotice(error?.message || "Could not update team member role.");
       loadTeamWorkspace({ silent: true }).catch(() => null);
     });
   });
@@ -10487,7 +11020,7 @@ function authCredentials() {
   const password = String(authPasswordInput?.value ?? "");
   if (!email) return null;
   if (password.length < 6) {
-    window.alert("Password must be at least 6 characters.");
+    showAppNotice("Password must be at least 6 characters.");
     return null;
   }
   return { email, password };
@@ -10496,7 +11029,7 @@ function authCredentials() {
 function authEmail() {
   const email = String(authEmailInput?.value ?? "").trim();
   if (!email || !email.includes("@")) {
-    window.alert("Enter a valid email address.");
+    showAppNotice("Enter a valid email address.");
     return null;
   }
   return email;
@@ -10528,7 +11061,7 @@ function showConfirmationResendState(email = authEmailInput?.value) {
 async function ensureSupabaseClient() {
   await initSupabase();
   if (!supabaseClient) {
-    window.alert("Cloud login is not available right now. Check your internet connection and Supabase setup.");
+    showAppNotice("Cloud login is not available right now. Check your internet connection and Supabase setup.");
     return false;
   }
   return true;
@@ -10557,7 +11090,7 @@ async function signInWithSupabase() {
       updateCloudStatus("Email not confirmed", "warning");
     } else {
       updateCloudStatus("Sign in failed", "warning");
-      window.alert(error?.message || "Sign in failed.");
+      showAppNotice(error?.message || "Sign in failed.");
     }
   } finally {
     authSignInButton.disabled = false;
@@ -10593,12 +11126,12 @@ async function signUpWithSupabase() {
       }
       if (authResendButton) authResendButton.hidden = false;
       updateCloudStatus("Check email", "");
-      window.alert("Account created. Check your email for the Supabase confirmation link, then sign in here.");
+      showAppNotice("Account created. Check your email for the Supabase confirmation link, then sign in here.");
     }
   } catch (error) {
     console.warn("Sign up failed.", error);
     updateCloudStatus("Sign up failed", "warning");
-    window.alert(error?.message || "Sign up failed.");
+    showAppNotice(error?.message || "Sign up failed.");
   } finally {
     authSignUpButton.disabled = false;
     setAuthMode("signup", { keepStatus: true });
@@ -10624,11 +11157,11 @@ async function resendSignupEmail() {
     saveAuthRememberPreference();
     setAuthMode("signup");
     updateCloudStatus("Email resent", "");
-    window.alert("Confirmation email sent again. Check your inbox and junk/spam folders.");
+    showAppNotice("Confirmation email sent again. Check your inbox and junk/spam folders.");
   } catch (error) {
     console.warn("Confirmation resend failed.", error);
     updateCloudStatus("Resend failed", "warning");
-    window.alert(error?.message || "Could not resend the confirmation email.");
+    showAppNotice(error?.message || "Could not resend the confirmation email.");
   } finally {
     authResendButton.disabled = false;
     setAuthMode("signup", { keepStatus: true });
@@ -10645,7 +11178,7 @@ async function signOutFromSupabase() {
     closeAuthDialog();
   } catch (error) {
     console.warn("Sign out failed.", error);
-    window.alert(error?.message || "Sign out failed.");
+    showAppNotice(error?.message || "Sign out failed.");
   }
 }
 
@@ -10758,14 +11291,14 @@ function setupHomeDashboard() {
     closeHomeDashboard();
     startNewDrawing().catch((error) => {
       console.warn("Start new drawing failed.", error);
-      window.alert(error?.message || "Start new drawing failed.");
+      showAppNotice(error?.message || "Start new drawing failed.");
     });
   });
   homeDashboardJobsButton?.addEventListener("click", () => {
     closeHomeDashboard();
     openBrowserProject().catch((error) => {
       console.warn("Open jobs failed.", error);
-      window.alert(error?.message || "Open jobs failed.");
+      showAppNotice(error?.message || "Open jobs failed.");
     });
   });
   homeDashboardTutorialButton?.addEventListener("click", () => {
@@ -11154,7 +11687,7 @@ function setupProjectDialog() {
       })
       .catch((error) => {
         console.warn("Save project failed.", error);
-        window.alert(error?.message || "Save project failed.");
+        showAppNotice(error?.message || "Save project failed.");
       });
   });
   projectLibraryDialog?.addEventListener("pointerdown", (event) => {
@@ -11193,7 +11726,7 @@ function setupProjectDialog() {
       })
       .catch((error) => {
         console.warn("Team message add failed.", error);
-        window.alert(error?.message || "Could not add team message.");
+        showAppNotice(error?.message || "Could not add team message.");
       });
   });
   projectLibraryList?.addEventListener("click", handleProjectLibraryActivation);
@@ -11230,7 +11763,7 @@ function handleProjectLibraryActivation(event) {
     if (shouldSkipProjectLibraryActivation(actionKey)) return;
     handleProjectLibraryProductionAction(productionAction).catch((error) => {
       console.warn("Production action failed.", error);
-      window.alert(error?.message || "Could not update production board.");
+      showAppNotice(error?.message || "Could not update production board.");
     });
     return;
   }
@@ -11302,7 +11835,7 @@ function handleProjectLibraryAction(actionElement) {
   if (action === "refresh-team-messages") {
     loadTeamMessages().catch((error) => {
       console.warn("Team messages refresh failed.", error);
-      window.alert(error?.message || "Could not refresh team messages.");
+      showAppNotice(error?.message || "Could not refresh team messages.");
     });
     return;
   }
@@ -11316,14 +11849,14 @@ function handleProjectLibraryAction(actionElement) {
       })
       .catch((error) => {
         console.warn("Team message add failed.", error);
-        window.alert(error?.message || "Could not add team message.");
+        showAppNotice(error?.message || "Could not add team message.");
       });
     return;
   }
   if (action === "complete-team-message") {
     completeTeamMessage(actionElement.dataset.teamMessageId).catch((error) => {
       console.warn("Team message complete failed.", error);
-      window.alert(error?.message || "Could not mark team message done.");
+      showAppNotice(error?.message || "Could not mark team message done.");
     });
     return;
   }
@@ -11342,6 +11875,10 @@ function handleProjectLibraryAction(actionElement) {
   }
   if (action === "copy-report") {
     copyProjectLibraryReport();
+    return;
+  }
+  if (action === "board-filter") {
+    setProjectLibraryBoardFilter(actionElement.dataset.boardFilter);
   }
 }
 
@@ -11362,7 +11899,7 @@ function handleProjectLibraryFieldChange(event) {
 
   updateSavedProjectWorkflow(projectId, updates).catch((error) => {
     console.warn("Production field update failed.", error);
-    window.alert(error?.message || "Could not update production field.");
+    showAppNotice(error?.message || "Could not update production field.");
   });
 }
 
@@ -11380,6 +11917,10 @@ async function handleProjectLibraryProductionAction(actionButton) {
   }
   if (action === "complete-message") {
     await updateSavedProjectWorkflow(projectId, { completeMessageId: actionButton.dataset.messageId });
+    return;
+  }
+  if (action === "set-status") {
+    await updateSavedProjectWorkflow(projectId, { status: actionButton.dataset.status });
     return;
   }
   if (action === "complete-spool") {
@@ -11427,7 +11968,7 @@ function handleProjectLibraryDrop(event) {
   const nextStatus = lane.dataset.productionDropStatus;
   updateSavedProjectWorkflow(projectLibraryDrag.projectId, { status: nextStatus }).catch((error) => {
     console.warn("Production drag update failed.", error);
-    window.alert(error?.message || "Could not move that spool.");
+    showAppNotice(error?.message || "Could not move that spool.");
   });
 }
 
@@ -11535,11 +12076,15 @@ function setupServiceWorkerUpdateChecks(registration) {
   });
 }
 
-function promptForAppUpdate(worker) {
+async function promptForAppUpdate(worker) {
   if (!worker || appUpdatePromptOpen || appUpdateReloadPending) return;
 
   appUpdatePromptOpen = true;
-  const reloadNow = window.confirm("A new SpoolMate update is ready. Reload now to use it?");
+  const reloadNow = await confirmAppAction("A new SpoolMate update is ready. Reload now to use it?", {
+    title: "Update ready",
+    confirmLabel: "Reload",
+    tone: "info",
+  });
   appUpdatePromptOpen = false;
   if (!reloadNow) return;
 
@@ -11576,13 +12121,17 @@ async function checkForNewerAppVersion(options = {}) {
 
     const message = `SpoolMate ${latest} is available. You are using ${APP_VERSION}.`;
     if (options.autoReload) {
-      window.alert(`${message} The app will reload before continuing.`);
+      showAppNotice(`${message} The app will reload before continuing.`);
       reloadToLatestApp(latest);
       return true;
     }
 
     updateCloudStatus(`Update ${latest} ready`, "warning");
-    const reloadNow = window.confirm(`${message} Reload now?`);
+    const reloadNow = await confirmAppAction(`${message} Reload now?`, {
+      title: "Update available",
+      confirmLabel: "Reload",
+      tone: "info",
+    });
     if (reloadNow) {
       reloadToLatestApp(latest);
     }
@@ -14751,8 +15300,13 @@ async function ensureCloudProjectCanOverwrite(options = {}) {
   updateCloudStatus("Cloud newer copy", "conflict");
   if (options.autosave) return false;
 
-  const overwrite = window.confirm(
-    `This spool was saved from another device at ${when}.\n\nOverwrite that cloud copy with this drawing?`
+  const overwrite = await confirmAppAction(
+    `This spool was saved from another device at ${when}. Overwrite that cloud copy with this drawing?`,
+    {
+      title: "Cloud copy is newer",
+      confirmLabel: "Overwrite cloud",
+      tone: "warning",
+    },
   );
   if (!overwrite) return false;
 
@@ -15080,7 +15634,7 @@ async function loadTeamWorkspace(options = {}) {
     updateCloudStatus();
   } catch (error) {
     console.warn("Could not load team workspace.", error);
-    if (!options.silent) window.alert(error?.message || "Could not load team workspace.");
+    if (!options.silent) showAppNotice(error?.message || "Could not load team workspace.");
     renderTeamWorkspace("Could not load team workspace.");
   }
 }
@@ -15205,7 +15759,7 @@ function renderTeamWorkspace(errorMessage = "") {
 async function createTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!hasActiveCloudLicense()) {
-    window.alert("An active trial or licence is required to create a team.");
+    showAppNotice("An active trial or licence is required to create a team.");
     return;
   }
 
@@ -15218,10 +15772,10 @@ async function createTeamCompany() {
     const created = Array.isArray(data) ? data[0] : data;
     if (created?.company_id) await activateCompanyFromId(created.company_id);
     if (teamCompanyNameInput) teamCompanyNameInput.value = "";
-    window.alert(`Team created.${activeCompany?.inviteCode ? ` Invite code: ${activeCompany.inviteCode}` : ""}`);
+    showAppNotice(`Team created.${activeCompany?.inviteCode ? ` Invite code: ${activeCompany.inviteCode}` : ""}`);
   } catch (error) {
     console.warn("Could not create team.", error);
-    window.alert(error?.message || "Could not create team.");
+    showAppNotice(error?.message || "Could not create team.");
   } finally {
     if (teamCreateButton) teamCreateButton.disabled = !hasActiveCloudLicense();
   }
@@ -15230,13 +15784,13 @@ async function createTeamCompany() {
 async function joinTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!hasActiveCloudLicense()) {
-    window.alert("An active trial or licence is required to join a team.");
+    showAppNotice("An active trial or licence is required to join a team.");
     return;
   }
 
   const joinCode = String(teamInviteCodeInput?.value ?? "").trim().toUpperCase();
   if (!joinCode) {
-    window.alert("Enter the team invite code.");
+    showAppNotice("Enter the team invite code.");
     return;
   }
 
@@ -15248,10 +15802,10 @@ async function joinTeamCompany() {
     const joined = Array.isArray(data) ? data[0] : data;
     if (joined?.company_id) await activateCompanyFromId(joined.company_id);
     if (teamInviteCodeInput) teamInviteCodeInput.value = "";
-    window.alert(joined?.status === "approved" ? "You are already approved for that team." : "Join request sent. A team admin can approve it.");
+    showAppNotice(joined?.status === "approved" ? "You are already approved for that team." : "Join request sent. A team admin can approve it.");
   } catch (error) {
     console.warn("Could not join team.", error);
-    window.alert(error?.message || "Could not join team.");
+    showAppNotice(error?.message || "Could not join team.");
   } finally {
     if (teamJoinButton) teamJoinButton.disabled = !hasActiveCloudLicense();
   }
@@ -15268,7 +15822,7 @@ async function reviewTeamMember(userId, approved) {
     .eq("company_id", activeCompany.id)
     .eq("user_id", memberId);
   if (error) {
-    window.alert(error?.message || "Could not update team member.");
+    showAppNotice(error?.message || "Could not update team member.");
     throw error;
   }
   await loadTeamWorkspace({ silent: true });
@@ -15276,7 +15830,7 @@ async function reviewTeamMember(userId, approved) {
 
 async function updateTeamMemberRole(userId, role) {
   if (!supabaseClient || !activeCompanyCanManageRoles()) {
-    window.alert("Only the team owner can change member roles.");
+    showAppNotice("Only the team owner can change member roles.");
     return;
   }
   const memberId = normalizeUuid(userId);
@@ -15379,7 +15933,7 @@ async function loadProjectComments(options = {}) {
     return projectComments;
   } catch (error) {
     console.warn("Could not load project comments.", error);
-    if (!options.silent) window.alert(error?.message || "Could not load comments.");
+    if (!options.silent) showAppNotice(error?.message || "Could not load comments.");
     renderProjectComments("Could not load comments.");
     return [];
   } finally {
@@ -15391,13 +15945,13 @@ async function loadProjectComments(options = {}) {
 async function addProjectComment() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!hasActiveCloudLicense()) {
-    window.alert("An active trial or licence is required for cloud comments.");
+    showAppNotice("An active trial or licence is required for cloud comments.");
     return;
   }
 
   const body = String(projectCommentInput?.value ?? "").trim();
   if (!body) {
-    window.alert("Type the comment first.");
+    showAppNotice("Type the comment first.");
     return;
   }
 
@@ -15406,7 +15960,7 @@ async function addProjectComment() {
   }
   const saved = await saveCloudProject({ silent: true });
   if (!saved) {
-    window.alert("Save the spool to the cloud before adding a comment.");
+    showAppNotice("Save the spool to the cloud before adding a comment.");
     return;
   }
 
@@ -15427,7 +15981,7 @@ async function addProjectComment() {
     await loadProjectComments({ silent: true });
   } catch (error) {
     console.warn("Could not add project comment.", error);
-    window.alert(error?.message || "Could not add comment.");
+    showAppNotice(error?.message || "Could not add comment.");
   } finally {
     projectCommentsBusy = false;
     renderProjectComments();
@@ -15464,7 +16018,7 @@ async function loadTeamMessages(options = {}) {
     console.warn("Could not load team messages.", error);
     teamMessages = [];
     teamMessagesError = "Team messages could not be loaded. Run the latest Supabase setup SQL if this is the first time using team comms.";
-    if (!options.silent) window.alert(error?.message || "Could not load team messages. Run the latest Supabase setup SQL if this is the first time using team comms.");
+    if (!options.silent) showAppNotice(error?.message || "Could not load team messages. Run the latest Supabase setup SQL if this is the first time using team comms.");
     renderProjectLibraryComms(projectLibraryProjects);
     return [];
   } finally {
@@ -15476,17 +16030,17 @@ async function loadTeamMessages(options = {}) {
 async function addTeamMessage(bodyText = "") {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!activeCompanyIsApproved()) {
-    window.alert("Join or create an approved team before adding team messages.");
+    showAppNotice("Join or create an approved team before adding team messages.");
     return;
   }
   if (!hasActiveCloudLicense()) {
-    window.alert("An active trial or licence is required for team messages.");
+    showAppNotice("An active trial or licence is required for team messages.");
     return;
   }
 
   const body = String(bodyText).trim().slice(0, 500);
   if (!body) {
-    window.alert("Type the team message first.");
+    showAppNotice("Type the team message first.");
     return;
   }
 
@@ -15505,7 +16059,7 @@ async function addTeamMessage(bodyText = "") {
     await loadTeamMessages({ silent: true });
   } catch (error) {
     console.warn("Could not add team message.", error);
-    window.alert(error?.message || "Could not add team message. Run the latest Supabase setup SQL if this is the first time using team comms.");
+    showAppNotice(error?.message || "Could not add team message. Run the latest Supabase setup SQL if this is the first time using team comms.");
   } finally {
     teamMessagesBusy = false;
     renderProjectLibraryComms(projectLibraryProjects);
@@ -15534,7 +16088,7 @@ async function completeTeamMessage(messageId) {
     await loadTeamMessages({ silent: true });
   } catch (error) {
     console.warn("Could not complete team message.", error);
-    window.alert(error?.message || "Could not mark team message done.");
+    showAppNotice(error?.message || "Could not mark team message done.");
   } finally {
     teamMessagesBusy = false;
     renderProjectLibraryComms(projectLibraryProjects);
@@ -15674,12 +16228,12 @@ async function saveCloudProject(options = {}) {
   if (!supabaseClient || !cloudUser) return false;
   if (!hasActiveCloudLicense()) {
     updateCloudStatus(cloudLicenseText(), "warning");
-    if (!options.silent) window.alert("This account does not have an active trial or licence.");
+    if (!options.silent) showAppNotice("This account does not have an active trial or licence.");
     return false;
   }
   if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
     updateCloudStatus("View/comment only", "warning");
-    if (!options.silent) window.alert("This team spool is view/comment only for your role. Ask the owner or a team admin to save changes.");
+    if (!options.silent) showAppNotice("This team spool is view/comment only for your role. Ask the owner or a team admin to save changes.");
     return false;
   }
   if (cloudAutosaveBusy) return false;
@@ -15737,19 +16291,23 @@ async function openSavedCloudProject(projectId, options = {}) {
     record = projects.find((project) => project.id === projectId);
   }
   if (!record) {
-    window.alert("That cloud project was not found.");
+    showAppNotice("That cloud project was not found.");
     return;
   }
 
   if (!options.skipConfirm && state.projectId !== record.id && hasDrawingContent()) {
-    const proceed = window.confirm("Open this cloud project? Your current drawing will be replaced.");
+    const proceed = await confirmAppAction("Open this cloud project? Your current drawing will be replaced.", {
+      title: "Open cloud spool",
+      confirmLabel: "Open spool",
+      tone: "warning",
+    });
     if (!proceed) return;
     persistState();
   }
 
   const restored = stateFromPayload(record.state);
   if (!restored) {
-    window.alert("That cloud project could not be opened.");
+    showAppNotice("That cloud project could not be opened.");
     return;
   }
 
@@ -15802,11 +16360,15 @@ async function deleteSavedCloudProject(projectId) {
   }
   if (!record) return;
   if (!projectPermission(record, { source: "cloud" }).canDelete) {
-    window.alert("Only the project owner or a team admin can delete this cloud spool.");
+    showAppNotice("Only the project owner or a team admin can delete this cloud spool.");
     return;
   }
 
-  const proceed = window.confirm(`Delete ${record.name || projectDisplayName(record.projectInfo)} from the cloud?`);
+  const proceed = await confirmAppAction(`Delete ${record.name || projectDisplayName(record.projectInfo)} from the cloud?`, {
+    title: "Delete cloud spool",
+    confirmLabel: "Delete",
+    tone: "error",
+  });
   if (!proceed) return;
 
   const { error } = await supabaseClient
@@ -15814,7 +16376,7 @@ async function deleteSavedCloudProject(projectId) {
     .delete()
     .eq("id", projectId);
   if (error) {
-    window.alert("Could not delete that cloud project.");
+    showAppNotice("Could not delete that cloud project.");
     throw error;
   }
   cloudProjectCache = null;
@@ -15883,7 +16445,7 @@ function autoSaveCurrentBrowserProject() {
 
 async function saveBrowserProject(options = {}) {
   if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
-    window.alert("This team spool is view/comment only for your role. Ask the project owner or a team admin to save changes.");
+    showAppNotice("This team spool is view/comment only for your role. Ask the project owner or a team admin to save changes.");
     return false;
   }
   const info = await openProjectDetailsDialog({
@@ -15908,7 +16470,7 @@ async function saveBrowserProject(options = {}) {
       })
     : false;
   if (!options.silent) {
-    window.alert(`Saved ${projectDisplayName(info)} ${savedToCloud ? "to the cloud and this browser" : "in this browser"}.`);
+    showAppNotice(`Saved ${projectDisplayName(info)} ${savedToCloud ? "to the cloud and this browser" : "in this browser"}.`);
   }
   return true;
 }
@@ -15959,7 +16521,7 @@ async function openBrowserProject(options = {}) {
   renderProjectLibrary(projects, { source: useCloud && projects.every((project) => project.source === "cloud") ? "cloud" : "browser" });
   showProjectLibraryDialog();
   if (!projectLibraryDialog && !projects.length) {
-    window.alert(useCloud ? "No cloud projects saved yet." : "No saved projects in this browser yet.");
+    showAppNotice(useCloud ? "No cloud projects saved yet." : "No saved projects in this browser yet.");
   }
 }
 
@@ -16081,6 +16643,7 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   }
 
   projectLibraryList.append(projectDashboardCard(filteredProjects, { totalCount: projectLibraryProjects.length, query }));
+  projectLibraryList.append(projectAlertCard(filteredProjects));
 
   if (!filteredProjects.length) {
     const empty = document.createElement("div");
@@ -16161,6 +16724,7 @@ function renderProjectLibraryFolderWindow(folder) {
 
   header.append(copy, backButton);
   windowCard.append(header);
+  windowCard.append(projectJobSummaryCard(folder));
 
   const drawings = document.createElement("div");
   drawings.className = "project-job-window-spools";
@@ -16210,6 +16774,147 @@ function savedProjectProductionMessages(project) {
   return activeProductionMessages(savedProjectState(project)?.productionMessages);
 }
 
+function savedProjectProductionActivity(project) {
+  return normalizeProductionActivity(savedProjectState(project)?.productionActivity);
+}
+
+function productionAlertPriority(type) {
+  if (type === "overdue") return 0;
+  if (type === "due") return 1;
+  if (type === "readycheck") return 2;
+  if (type === "message") return 3;
+  if (type === "mine") return 4;
+  return 5;
+}
+
+function projectTeamAlertItems(projects = projectLibraryProjects) {
+  const items = [];
+  for (const project of Array.isArray(projects) ? projects : []) {
+    if (productionProjectHidden(project)) continue;
+    const savedState = savedProjectState(project);
+    const status = normalizeProjectStatus(savedState?.projectStatus);
+    const production = savedProjectProductionInfo(project);
+    const dueState = productionDueState(production);
+    const dueTime = dueState.dueDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    if (status !== "complete" && dueState.key === "overdue") {
+      items.push({ project, type: "overdue", title: "Overdue", body: `${formatProductionDue(production)} / ${projectStatusLabel(status)}`, dueTime });
+    } else if (status !== "complete" && dueState.key === "today") {
+      items.push({ project, type: "due", title: "Due today", body: `${formatProductionDue(production)} / ${projectStatusLabel(status)}`, dueTime });
+    }
+    if (status === "readycheck") {
+      items.push({ project, type: "readycheck", title: "Ready to check", body: "Waiting for checking/sign-off.", dueTime });
+    }
+    if (status !== "complete" && productionAssignedToCurrentUser(production)) {
+      items.push({ project, type: "mine", title: "Assigned to you", body: `${projectStatusLabel(status)}${production.dueDate ? ` / due ${formatProductionDue(production)}` : ""}`, dueTime });
+    }
+    const activeMessage = [...savedProjectProductionMessages(project)].reverse().find((message) => !message.completed);
+    if (activeMessage) {
+      items.push({ project, type: "message", title: "Comment / message", body: activeMessage.body, dueTime });
+    }
+  }
+  return items
+    .sort((first, second) => productionAlertPriority(first.type) - productionAlertPriority(second.type) || first.dueTime - second.dueTime)
+    .slice(0, 12);
+}
+
+function projectAlertCard(projects = projectLibraryProjects) {
+  const alerts = projectTeamAlertItems(projects);
+  const section = document.createElement("section");
+  section.className = "project-alert-card";
+  section.innerHTML = `
+    <div class="project-alert-head">
+      <div>
+        <strong>Team alerts</strong>
+        <span>${alerts.length ? `${alerts.length} item${alerts.length === 1 ? "" : "s"} needing attention` : "No urgent team alerts in this view."}</span>
+      </div>
+    </div>
+    <div class="project-alert-list">
+      ${alerts.length ? alerts.map((alert) => `
+        <article class="project-alert-item ${escapeHtml(alert.type)}">
+          <button type="button" data-open-project-id="${escapeHtml(alert.project.id)}" data-project-source="${escapeHtml(alert.project.source ?? projectLibrarySource)}">
+            <strong>${escapeHtml(alert.title)}</strong>
+            <span>${escapeHtml(savedProjectSpoolTitle(alert.project))}</span>
+            <small>${escapeHtml(alert.body)}</small>
+          </button>
+        </article>
+      `).join("") : `<div class="project-alert-empty">Nothing due, overdue, ready to check or waiting on a card note.</div>`}
+    </div>
+  `;
+  return section;
+}
+
+function projectJobMetrics(projects = []) {
+  const visible = (Array.isArray(projects) ? projects : []).filter((project) => !productionProjectHidden(project));
+  return visible.reduce((summary, project) => {
+    const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+    const production = savedProjectProductionInfo(project);
+    const dueState = productionDueState(production);
+    summary.total += 1;
+    if (status === "readycheck") summary.readycheck += 1;
+    if (status === "checked") summary.checked += 1;
+    if (status === "issued") summary.issued += 1;
+    if (status === "complete") summary.fabricated += 1;
+    if (status !== "complete" && dueState.key === "overdue") summary.overdue += 1;
+    if (status !== "complete" && dueState.key === "today") summary.dueToday += 1;
+    if (status !== "complete" && production.hold) summary.onHold += 1;
+    return summary;
+  }, { total: 0, readycheck: 0, checked: 0, issued: 0, fabricated: 0, overdue: 0, dueToday: 0, onHold: 0 });
+}
+
+function projectNeedsTodayItems(projects = []) {
+  return sortedProductionProjects((Array.isArray(projects) ? projects : [])
+    .filter((project) => {
+      const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+      if (status === "complete") return false;
+      const production = savedProjectProductionInfo(project);
+      const dueState = productionDueState(production);
+      return ["overdue", "today"].includes(dueState.key) || status === "readycheck" || production.hold;
+    }))
+    .slice(0, 10);
+}
+
+function projectJobSummaryCard(folder) {
+  const metrics = projectJobMetrics(folder.projects);
+  const needsToday = projectNeedsTodayItems(folder.projects);
+  const section = document.createElement("section");
+  section.className = "project-job-summary-card";
+  section.innerHTML = `
+    <div class="project-job-summary-stats">
+      <div><b>${metrics.total}</b><span>Total</span></div>
+      <div><b>${metrics.readycheck}</b><span>Ready check</span></div>
+      <div><b>${metrics.checked}</b><span>Checked</span></div>
+      <div><b>${metrics.issued}</b><span>Issued</span></div>
+      <div><b>${metrics.fabricated}</b><span>Fabricated</span></div>
+      <div><b>${metrics.overdue}</b><span>Overdue</span></div>
+      <div><b>${metrics.onHold}</b><span>On hold</span></div>
+    </div>
+    <div class="project-job-today">
+      <strong>Needs doing today</strong>
+      <div>
+        ${needsToday.length ? needsToday.map((project) => {
+          const production = savedProjectProductionInfo(project);
+          const dueState = productionDueState(production);
+          const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+          const reason = production.hold
+            ? `Hold: ${production.holdReason || "No reason entered"}`
+            : dueState.key === "overdue"
+              ? `Overdue / ${formatProductionDue(production)}`
+              : dueState.key === "today"
+                ? `Due today / ${formatProductionDue(production)}`
+                : projectStatusLabel(status);
+          return `
+            <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
+              <span>${escapeHtml(savedProjectSpoolTitle(project))}</span>
+              <small>${escapeHtml(reason)}</small>
+            </button>
+          `;
+        }).join("") : `<span class="project-job-empty">No due, overdue, hold or ready-to-check spools in this job.</span>`}
+      </div>
+    </div>
+  `;
+  return section;
+}
+
 function productionPriorityRank(value) {
   const priority = normalizeProductionPriority(value);
   if (priority === "urgent") return 0;
@@ -16230,6 +16935,97 @@ function sortedProductionProjects(projects) {
     if (firstDue !== secondDue) return firstDue.localeCompare(secondDue);
     return String(second.updatedAt).localeCompare(String(first.updatedAt));
   });
+}
+
+function normalizeProductionBoardFilter(value) {
+  const key = String(value ?? "").trim().toLowerCase();
+  return PRODUCTION_BOARD_FILTER_KEYS.has(key) ? key : "active";
+}
+
+function setProjectLibraryBoardFilter(value) {
+  projectLibraryBoardFilter = normalizeProductionBoardFilter(value);
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function productionCurrentAssigneeNames() {
+  return new Set([
+    cloudUser?.email,
+    checkerName(),
+    normalizeProjectInfo(state.projectInfo).drawnBy,
+  ]
+    .map((value) => String(value ?? "").trim().toLowerCase())
+    .filter(Boolean));
+}
+
+function productionAssignedToCurrentUser(production) {
+  const assignee = normalizeProductionInfo(production).assignee.toLowerCase();
+  return Boolean(assignee && productionCurrentAssigneeNames().has(assignee));
+}
+
+function productionDueState(production) {
+  const dueDate = projectReportDueDate(production);
+  if (!dueDate) return { key: "none", label: "No due date", dueDate: null };
+  const now = new Date();
+  const todayStart = new Date(now);
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date(now);
+  todayEnd.setHours(23, 59, 59, 999);
+  const soonEnd = new Date(todayEnd);
+  soonEnd.setDate(soonEnd.getDate() + 6);
+  if (dueDate.getTime() < todayStart.getTime()) return { key: "overdue", label: "Overdue", dueDate };
+  if (dueDate.getTime() <= todayEnd.getTime()) return { key: "today", label: "Due today", dueDate };
+  if (dueDate.getTime() <= soonEnd.getTime()) return { key: "soon", label: "Due soon", dueDate };
+  return { key: "dated", label: "Scheduled", dueDate };
+}
+
+function productionBoardAssigneeChoices(projects = projectLibraryProjects) {
+  const choices = new Set();
+  if (cloudUser?.email) choices.add(cloudUser.email);
+  for (const member of companyMembers) {
+    if (member.status === "approved" && member.email) choices.add(member.email);
+  }
+  for (const project of Array.isArray(projects) ? projects : []) {
+    const info = normalizeProjectInfo(project.projectInfo);
+    const production = savedProjectProductionInfo(project);
+    if (production.assignee) choices.add(production.assignee);
+    if (info.drawnBy) choices.add(info.drawnBy);
+  }
+  return [...choices].filter(Boolean).slice(0, 40);
+}
+
+function productionProjectMatchesBoardFilter(project, filter = projectLibraryBoardFilter) {
+  if (productionProjectHidden(project)) return false;
+  const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+  const production = savedProjectProductionInfo(project);
+  const dueState = productionDueState(production);
+  const normalized = normalizeProductionBoardFilter(filter);
+  if (normalized === "all") return true;
+  if (normalized === "active") return status !== "complete";
+  if (normalized === "due") return status !== "complete" && ["overdue", "today", "soon"].includes(dueState.key);
+  if (normalized === "overdue") return status !== "complete" && dueState.key === "overdue";
+  if (normalized === "hold") return status !== "complete" && production.hold;
+  if (normalized === "mine") return status !== "complete" && productionAssignedToCurrentUser(production);
+  return status !== "complete";
+}
+
+function productionBoardFilterCounts(projects = projectLibraryProjects) {
+  const visible = (Array.isArray(projects) ? projects : []).filter((project) => !productionProjectHidden(project));
+  return Object.keys(PRODUCTION_BOARD_FILTERS).reduce((summary, filter) => {
+    summary[filter] = visible.filter((project) => productionProjectMatchesBoardFilter(project, filter)).length;
+    return summary;
+  }, {});
+}
+
+function productionStatusQuickActions(status, canEdit, projectId) {
+  const disabledAttr = canEdit ? "" : ' disabled title="View/comment only for your team role"';
+  const actions = [
+    ["readycheck", "Ready"],
+    ["issued", "Issued"],
+    ["complete", "Fabbed"],
+  ].filter(([nextStatus]) => normalizeProjectStatus(status) !== nextStatus);
+  return actions
+    .map(([nextStatus, label]) => `<button type="button" data-production-action="set-status" data-status="${nextStatus}" data-project-id="${escapeHtml(projectId)}"${disabledAttr}>${label}</button>`)
+    .join("");
 }
 
 function cloneProjectDrawingState(project) {
@@ -16259,6 +17055,7 @@ function syncCurrentStateFromProjectState(projectId, targetState) {
   state.projectStatus = normalizeProjectStatus(targetState.projectStatus);
   state.productionInfo = normalizeProductionInfo(targetState.productionInfo);
   state.productionMessages = normalizeProductionMessages(targetState.productionMessages);
+  state.productionActivity = normalizeProductionActivity(targetState.productionActivity);
   updateControls();
   updateAll();
 }
@@ -16269,11 +17066,11 @@ async function persistProjectWorkflowUpdate(project, nextDrawingState, updatedAt
 
   if (source === "cloud") {
     if (!(await ensureSupabaseClient()) || !cloudUser || !hasActiveCloudLicense()) {
-      window.alert("Sign in with an active licence to update cloud production items.");
+      showAppNotice("Sign in with an active licence to update cloud production items.");
       return false;
     }
     if (!projectPermission(project, { source: "cloud" }).canEdit) {
-      window.alert("Only the project owner or a team admin can update this cloud spool.");
+      showAppNotice("Only the project owner or a team admin can update this cloud spool.");
       return false;
     }
     updateCloudStatus("Updating production...", "");
@@ -16310,16 +17107,22 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
   if (!targetState) return false;
 
   const now = new Date().toISOString();
+  const previousStatus = normalizeProjectStatus(targetState.projectStatus);
+  const previousProduction = normalizeProductionInfo(targetState.productionInfo);
   const nextProduction = normalizeProductionInfo({
     ...targetState.productionInfo,
     ...(updates.productionInfo ?? {}),
     lastUpdatedBy: checkerName(),
     lastUpdatedAt: now,
   });
+  let activity = normalizeProductionActivity(targetState.productionActivity);
 
   if (updates.status !== undefined) {
     const nextStatus = normalizeProjectStatus(updates.status);
     targetState.projectStatus = nextStatus;
+    if (nextStatus !== previousStatus) {
+      activity = addProductionActivity(activity, "status", `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel(nextStatus)}.`, now);
+    }
     if (projectStatusAtLeast(nextStatus, "checked") && !targetState.checkedAt) {
       targetState.checkedAt = now;
       targetState.checkedBy = checkerName();
@@ -16331,6 +17134,28 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
       nextProduction.completedAt = "";
       nextProduction.removeAfter = "";
     }
+  }
+
+  const changedProduction = updates.productionInfo && typeof updates.productionInfo === "object" ? updates.productionInfo : {};
+  if (Object.prototype.hasOwnProperty.call(changedProduction, "assignee") && previousProduction.assignee !== nextProduction.assignee) {
+    activity = addProductionActivity(activity, "assignee", `Assigned changed from ${previousProduction.assignee || "Unassigned"} to ${nextProduction.assignee || "Unassigned"}.`, now);
+  }
+  if (
+    (Object.prototype.hasOwnProperty.call(changedProduction, "dueDate") || Object.prototype.hasOwnProperty.call(changedProduction, "dueTime")) &&
+    (previousProduction.dueDate !== nextProduction.dueDate || previousProduction.dueTime !== nextProduction.dueTime)
+  ) {
+    activity = addProductionActivity(activity, "due", `Due changed from ${formatProductionDue(previousProduction) || "No due date"} to ${formatProductionDue(nextProduction) || "No due date"}.`, now);
+  }
+  if (Object.prototype.hasOwnProperty.call(changedProduction, "priority") && previousProduction.priority !== nextProduction.priority) {
+    activity = addProductionActivity(activity, "priority", `Priority changed from ${productionPriorityLabel(previousProduction.priority)} to ${productionPriorityLabel(nextProduction.priority)}.`, now);
+  }
+  if (Object.prototype.hasOwnProperty.call(changedProduction, "hold") && previousProduction.hold !== nextProduction.hold) {
+    activity = addProductionActivity(activity, "hold", nextProduction.hold
+      ? `Put on hold${nextProduction.holdReason ? `: ${nextProduction.holdReason}` : "."}`
+      : "Hold removed.", now);
+  }
+  if (Object.prototype.hasOwnProperty.call(changedProduction, "holdReason") && previousProduction.holdReason !== nextProduction.holdReason) {
+    activity = addProductionActivity(activity, "hold", `Hold reason changed from ${previousProduction.holdReason || "none"} to ${nextProduction.holdReason || "none"}.`, now);
   }
 
   let messages = normalizeProductionMessages(targetState.productionMessages);
@@ -16346,9 +17171,11 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
         completedAt: "",
         removeAfter: "",
       });
+      activity = addProductionActivity(activity, "message", `Added note: ${body}`, now);
     }
   }
   if (updates.completeMessageId) {
+    const completedMessage = messages.find((message) => message.id === updates.completeMessageId);
     messages = messages.map((message) => message.id === updates.completeMessageId
       ? {
           ...message,
@@ -16357,10 +17184,14 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
           removeAfter: message.removeAfter || isoDaysFromNow(7),
         }
       : message);
+    if (completedMessage) {
+      activity = addProductionActivity(activity, "message", `Marked note done: ${completedMessage.body}`, now);
+    }
   }
 
   targetState.productionInfo = normalizeProductionInfo(nextProduction);
   targetState.productionMessages = normalizeProductionMessages(messages);
+  targetState.productionActivity = normalizeProductionActivity(activity);
   targetState.projectStatus = normalizeProjectStatus(targetState.projectStatus);
 
   return persistProjectWorkflowUpdate(project, nextDrawingState, now);
@@ -16512,7 +17343,7 @@ function showProjectLibraryGuide() {
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
   const guide = ensureProjectLibraryGuideSlot();
   if (!guide) {
-    window.alert("The Jobs guide is at the top of the Job dashboard.");
+    showAppNotice("The Jobs guide is at the top of the Job dashboard.");
     return;
   }
   guide.open = true;
@@ -16588,7 +17419,7 @@ function showProjectLibraryReport() {
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
   const slot = ensureProjectLibraryReportSlot();
   if (!slot) {
-    window.alert("The Jobs report could not be shown.");
+    showAppNotice("The Jobs report could not be shown.");
     return;
   }
   renderProjectLibraryReport();
@@ -16729,12 +17560,27 @@ function projectLibraryReportData(projects = null) {
     .sort((first, second) => (first.dueDate?.getTime() ?? 0) - (second.dueDate?.getTime() ?? 0));
   const overdue = enriched.filter((item) => item.status !== "complete" && item.dueDate && item.dueDate.getTime() < todayStart.getTime());
   const onHold = enriched.filter((item) => item.production.hold);
+  const readyToCheck = enriched.filter((item) => item.status === "readycheck");
+  const readyToIssue = enriched.filter((item) => item.status === "checked");
+  const issued = enriched.filter((item) => item.status === "issued");
+  const fabrication = enriched.filter((item) => ["cutting", "fitup", "welded", "finish"].includes(item.status));
+  const actionQueue = enriched
+    .filter((item) => item.status !== "complete" && !item.production.hold)
+    .sort((first, second) => {
+      const priority = productionPriorityRank(first.production.priority) - productionPriorityRank(second.production.priority);
+      if (priority !== 0) return priority;
+      const firstDue = first.dueDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      const secondDue = second.dueDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
+      if (firstDue !== secondDue) return firstDue - secondDue;
+      return PROJECT_STATUS_FLOW.findIndex(([key]) => key === first.status) - PROJECT_STATUS_FLOW.findIndex(([key]) => key === second.status);
+    });
   const assignees = new Map();
   for (const item of enriched.filter((entry) => entry.status !== "complete")) {
     const name = item.production.assignee || "Unassigned";
-    const current = assignees.get(name) ?? { name, count: 0, due: 0, hold: 0, urgent: 0 };
+    const current = assignees.get(name) ?? { name, count: 0, due: 0, overdue: 0, hold: 0, urgent: 0 };
     current.count += 1;
     if (item.dueDate && item.dueDate.getTime() <= range.dueEnd.getTime()) current.due += 1;
+    if (item.dueDate && item.dueDate.getTime() < todayStart.getTime()) current.overdue += 1;
     if (item.production.hold) current.hold += 1;
     if (item.production.priority === "urgent") current.urgent += 1;
     assignees.set(name, current);
@@ -16749,8 +17595,23 @@ function projectLibraryReportData(projects = null) {
     dueSoon,
     overdue,
     onHold,
+    readyToCheck,
+    readyToIssue,
+    issued,
+    fabrication,
+    actionQueue,
     assignees: [...assignees.values()].sort((first, second) => second.count - first.count || first.name.localeCompare(second.name)),
   };
+}
+
+function projectReportItemHtml(item, options = {}) {
+  const dueDate = item?.dueDate instanceof Date ? item.dueDate : null;
+  const activityDate = item?.activityDate instanceof Date ? item.activityDate : null;
+  const isOverdue = dueDate && dueDate.getTime() < new Date().setHours(0, 0, 0, 0);
+  const small = options.detail === "activity"
+    ? activityDate ? activityDate.toLocaleString() : "not dated"
+    : dueDate ? dueDate.toLocaleString() : projectStatusLabel(item?.status);
+  return `<li${isOverdue ? ' class="overdue"' : ""}><span>${escapeHtml(projectReportProjectLine(item.project))}</span><small>${escapeHtml(small)}</small></li>`;
 }
 
 function renderProjectLibraryReport(projects = null) {
@@ -16775,12 +17636,19 @@ function renderProjectLibraryReport(projects = null) {
       </div>
       <div class="project-report-stats">
         <div><b>${data.updated.length}</b><span>Updated ${escapeHtml(data.range.activityLabel)}</span></div>
-        <div><b>${data.completed.length}</b><span>Completed ${escapeHtml(data.range.activityLabel)}</span></div>
+        <div><b>${data.readyToCheck.length}</b><span>Ready to check</span></div>
+        <div><b>${data.readyToIssue.length}</b><span>Ready to issue</span></div>
         <div><b>${data.dueSoon.length}</b><span>Due ${escapeHtml(data.range.dueLabel)}</span></div>
         <div><b>${data.overdue.length}</b><span>Overdue</span></div>
-        <div><b>${data.onHold.length}</b><span>On hold</span></div>
+        <div><b>${data.completed.length}</b><span>Fabricated ${escapeHtml(data.range.activityLabel)}</span></div>
       </div>
       <div class="project-report-grid">
+        <section>
+          <strong>Today / next actions</strong>
+          <ul>
+            ${data.actionQueue.slice(0, 10).map((item) => projectReportItemHtml(item)).join("") || "<li><span>No open action queue yet.</span></li>"}
+          </ul>
+        </section>
         <section>
           <strong>Stages</strong>
           <ul>
@@ -16788,21 +17656,33 @@ function renderProjectLibraryReport(projects = null) {
           </ul>
         </section>
         <section>
-          <strong>Recent progress</strong>
+          <strong>Ready to check</strong>
           <ul>
-            ${data.updated.slice(0, 8).map((item) => `<li><span>${escapeHtml(projectReportProjectLine(item.project))}</span><small>${escapeHtml(item.activityDate ? item.activityDate.toLocaleString() : "not dated")}</small></li>`).join("") || "<li><span>No production updates in this period.</span></li>"}
+            ${data.readyToCheck.slice(0, 8).map((item) => projectReportItemHtml(item)).join("") || "<li><span>No spools waiting for checking.</span></li>"}
           </ul>
         </section>
         <section>
-          <strong>Due and overdue</strong>
+          <strong>Ready to issue / fabricate</strong>
           <ul>
-            ${data.dueSoon.slice(0, 8).map((item) => `<li class="${item.dueDate && item.dueDate < new Date() ? "overdue" : ""}"><span>${escapeHtml(projectReportProjectLine(item.project))}</span><small>${escapeHtml(item.dueDate ? item.dueDate.toLocaleString() : "")}</small></li>`).join("") || "<li><span>No spools due in this period.</span></li>"}
+            ${[...data.readyToIssue, ...data.issued, ...data.fabrication].slice(0, 10).map((item) => projectReportItemHtml(item)).join("") || "<li><span>No issued or fabrication queue yet.</span></li>"}
           </ul>
         </section>
         <section>
           <strong>People</strong>
           <ul>
-            ${data.assignees.slice(0, 8).map((item) => `<li><span>${escapeHtml(item.name)}</span><small>${item.count} active / ${item.due} due / ${item.hold} hold / ${item.urgent} urgent</small></li>`).join("") || "<li><span>No active assignees yet.</span></li>"}
+            ${data.assignees.slice(0, 10).map((item) => `<li><span>${escapeHtml(item.name)}</span><small>${item.count} active / ${item.due} due / ${item.overdue} overdue / ${item.hold} hold / ${item.urgent} urgent</small></li>`).join("") || "<li><span>No active assignees yet.</span></li>"}
+          </ul>
+        </section>
+        <section>
+          <strong>Holds and blockers</strong>
+          <ul>
+            ${data.onHold.slice(0, 10).map((item) => `<li><span>${escapeHtml(projectReportProjectLine(item.project))}</span><small>${escapeHtml(item.production.holdReason || "No hold reason entered")}</small></li>`).join("") || "<li><span>No spools on hold.</span></li>"}
+          </ul>
+        </section>
+        <section>
+          <strong>Recent progress</strong>
+          <ul>
+            ${data.updated.slice(0, 8).map((item) => projectReportItemHtml(item, { detail: "activity" })).join("") || "<li><span>No production updates in this period.</span></li>"}
           </ul>
         </section>
       </div>
@@ -16820,25 +17700,43 @@ function projectLibraryReportText(projects = null) {
     "",
     `Total spools: ${total}`,
     `Updated ${data.range.activityLabel}: ${data.updated.length}`,
-    `Completed ${data.range.activityLabel}: ${data.completed.length}`,
+    `Ready to check: ${data.readyToCheck.length}`,
+    `Ready to issue: ${data.readyToIssue.length}`,
     `Due ${data.range.dueLabel}: ${data.dueSoon.length}`,
     `Overdue: ${data.overdue.length}`,
     `On hold: ${data.onHold.length}`,
+    `Fabricated ${data.range.activityLabel}: ${data.completed.length}`,
     "",
     "Stage count:",
     ...PROJECT_STATUS_FLOW.map(([status, label]) => `- ${label}: ${data.stageCounts[status] ?? 0}`),
     "",
-    "Recent progress:",
-    ...(data.updated.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)} (${item.activityDate ? item.activityDate.toLocaleString() : "not dated"})`)),
-    ...(data.updated.length ? [] : ["- No production updates in this period."]),
+    "Today / next actions:",
+    ...(data.actionQueue.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)}`)),
+    ...(data.actionQueue.length ? [] : ["- No open action queue yet."]),
+    "",
+    "Ready to check:",
+    ...(data.readyToCheck.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)}`)),
+    ...(data.readyToCheck.length ? [] : ["- No spools waiting for checking."]),
+    "",
+    "Ready to issue / fabricate:",
+    ...([...data.readyToIssue, ...data.issued, ...data.fabrication].slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)}`)),
+    ...([...data.readyToIssue, ...data.issued, ...data.fabrication].length ? [] : ["- No issued or fabrication queue yet."]),
     "",
     "Due and overdue:",
     ...(data.dueSoon.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)} (${item.dueDate ? item.dueDate.toLocaleString() : "not dated"})`)),
     ...(data.dueSoon.length ? [] : ["- No spools due in this period."]),
     "",
+    "Holds and blockers:",
+    ...(data.onHold.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)} (${item.production.holdReason || "No hold reason entered"})`)),
+    ...(data.onHold.length ? [] : ["- No spools on hold."]),
+    "",
     "People:",
-    ...(data.assignees.slice(0, 12).map((item) => `- ${item.name}: ${item.count} active, ${item.due} due, ${item.hold} hold, ${item.urgent} urgent`)),
+    ...(data.assignees.slice(0, 12).map((item) => `- ${item.name}: ${item.count} active, ${item.due} due, ${item.overdue} overdue, ${item.hold} hold, ${item.urgent} urgent`)),
     ...(data.assignees.length ? [] : ["- No active assignees yet."]),
+    "",
+    "Recent progress:",
+    ...(data.updated.slice(0, 12).map((item) => `- ${projectReportProjectLine(item.project)} (${item.activityDate ? item.activityDate.toLocaleString() : "not dated"})`)),
+    ...(data.updated.length ? [] : ["- No production updates in this period."]),
   ];
   return lines.join("\n");
 }
@@ -16848,10 +17746,18 @@ async function copyProjectLibraryReport() {
   try {
     if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
     await navigator.clipboard.writeText(text);
-    window.alert("Jobs report copied.");
+    showAppNotice("Jobs report copied.");
   } catch (error) {
     console.warn("Could not copy report.", error);
-    window.prompt("Copy this Jobs report:", text);
+    await openFieldInputDialog({
+      title: "Copy Jobs report",
+      label: "Report text",
+      value: text,
+      multiline: true,
+      readOnly: true,
+      help: "Clipboard access was blocked, so select and copy this report manually.",
+      submitLabel: "Done",
+    });
   }
 }
 
@@ -16859,21 +17765,46 @@ function projectProductionBoard(projects) {
   const section = document.createElement("section");
   section.className = "production-board-card";
 
+  const boardFilter = normalizeProductionBoardFilter(projectLibraryBoardFilter);
+  const boardProjects = projects.filter((project) => productionProjectMatchesBoardFilter(project, boardFilter));
+  const counts = productionBoardFilterCounts(projects);
+  const assigneeOptions = productionBoardAssigneeChoices(projects)
+    .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+    .join("");
+
   const header = document.createElement("div");
   header.className = "production-board-header";
-  const title = document.createElement("strong");
-  title.textContent = "Production board";
-  const meta = document.createElement("span");
-  meta.textContent = "Move spools through the stages from the status menu, then assign due dates in Workflow.";
-  header.append(title, meta);
+  header.innerHTML = `
+    <div>
+      <strong>Production board</strong>
+      <span>${boardProjects.length} showing / ${projects.length} in dashboard. Drag cards, use quick status buttons, or update the card fields.</span>
+    </div>
+    <div class="production-board-filters" aria-label="Production board filters">
+      ${Object.entries(PRODUCTION_BOARD_FILTERS).map(([key, label]) => `
+        <button type="button" class="${boardFilter === key ? "active" : ""}" data-project-library-action="board-filter" data-board-filter="${key}">
+          ${escapeHtml(label)} <b>${counts[key] ?? 0}</b>
+        </button>
+      `).join("")}
+    </div>
+  `;
   section.append(header);
+
+  if (assigneeOptions) {
+    const datalist = document.createElement("datalist");
+    datalist.id = "productionBoardAssigneeOptions";
+    datalist.innerHTML = assigneeOptions;
+    section.append(datalist);
+  }
 
   const lanes = document.createElement("div");
   lanes.className = "production-board-lanes";
 
-  for (const [status, label] of PROJECT_STATUS_FLOW) {
-    const stageProjects = sortedProductionProjects(projects.filter((project) => {
-      if (productionProjectHidden(project)) return false;
+  const visibleStatuses = boardFilter === "active"
+    ? PROJECT_STATUS_FLOW.filter(([status]) => status !== "complete")
+    : PROJECT_STATUS_FLOW;
+
+  for (const [status, label] of visibleStatuses) {
+    const stageProjects = sortedProductionProjects(boardProjects.filter((project) => {
       return normalizeProjectStatus(savedProjectState(project)?.projectStatus) === status;
     }));
     const lane = document.createElement("section");
@@ -16932,10 +17863,13 @@ function projectProductionCard(project) {
   const permission = projectPermission(project);
   const canEdit = permission.canEdit;
   const disabledAttr = canEdit ? "" : ' disabled title="View/comment only for your team role"';
+  const dueState = productionDueState(production);
   const card = document.createElement("article");
   card.className = "production-spool-card";
   card.classList.toggle("urgent", production.priority === "urgent");
   card.classList.toggle("hold", production.hold);
+  card.classList.toggle("overdue", dueState.key === "overdue");
+  card.classList.toggle("due-today", dueState.key === "today");
   card.classList.toggle("complete", status === "complete");
   card.classList.toggle("read-only", !canEdit);
   card.draggable = canEdit;
@@ -16951,6 +17885,8 @@ function projectProductionCard(project) {
   if (production.hold) parts.unshift(production.holdReason ? `Hold: ${production.holdReason}` : "On hold");
   if (status === "complete" && production.removeAfter) parts.push(`Hides ${new Date(production.removeAfter).toLocaleDateString()}`);
   if (!canEdit) parts.push(permission.label);
+  const quickActions = productionStatusQuickActions(status, canEdit, project.id);
+  const latestActivity = [...savedProjectProductionActivity(project)].reverse()[0] ?? null;
 
   card.innerHTML = `
     <div class="production-card-head">
@@ -16960,7 +17896,20 @@ function projectProductionCard(project) {
       </button>
       <span class="production-drag-handle" aria-hidden="true">${canEdit ? "Drag" : "View"}</span>
     </div>
+    <div class="production-card-badges">
+      <span class="status">${escapeHtml(projectStatusLabel(status))}</span>
+      <span class="due ${escapeHtml(dueState.key)}">${escapeHtml(dueState.label)}</span>
+      <span class="priority ${escapeHtml(production.priority)}">${escapeHtml(productionPriorityLabel(production.priority))}</span>
+      ${production.hold ? `<span class="hold">Hold</span>` : ""}
+    </div>
     <small class="production-card-meta">${escapeHtml(parts.join(" / "))}</small>
+    ${latestActivity ? `
+      <div class="production-card-activity">
+        <span>${escapeHtml(latestActivity.actor || "Team")}</span>
+        <strong>${escapeHtml(latestActivity.text)}</strong>
+        <small>${escapeHtml(formatProductionActivityTime(latestActivity.createdAt))}</small>
+      </div>
+    ` : ""}
     <div class="production-card-fields">
       <label>
         <span>Stage</span>
@@ -16970,7 +17919,7 @@ function projectProductionCard(project) {
       </label>
       <label>
         <span>Assigned</span>
-        <input data-production-field="assignee" data-project-id="${escapeHtml(project.id)}" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Who"${disabledAttr} />
+        <input data-production-field="assignee" data-project-id="${escapeHtml(project.id)}" list="productionBoardAssigneeOptions" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Who"${disabledAttr} />
       </label>
       <label>
         <span>Due</span>
@@ -16990,6 +17939,10 @@ function projectProductionCard(project) {
         <input data-production-field="hold" data-project-id="${escapeHtml(project.id)}" type="checkbox"${production.hold ? " checked" : ""}${disabledAttr} />
         <span>Hold</span>
       </label>
+      <label class="production-hold-card-reason">
+        <span>Hold reason</span>
+        <input data-production-field="holdReason" data-project-id="${escapeHtml(project.id)}" type="text" maxlength="140" value="${escapeHtml(production.holdReason)}" placeholder="Missing fitting, client hold..."${disabledAttr} />
+      </label>
     </div>
     <div class="production-message-panel">
       ${activeMessage ? `
@@ -17004,7 +17957,7 @@ function projectProductionCard(project) {
       </div>
     </div>
     <div class="production-card-actions">
-      <button type="button" data-production-action="complete-spool" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Complete</button>
+      ${quickActions}
       <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">Open</button>
     </div>
   `;
@@ -17022,6 +17975,7 @@ function projectLibrarySearchText(project) {
   const savedState = savedProjectState(project);
   const production = normalizeProductionInfo(savedState?.productionInfo);
   const messages = activeProductionMessages(savedState?.productionMessages).map((message) => message.body).join(" ");
+  const activity = normalizeProductionActivity(savedState?.productionActivity).map((entry) => `${entry.actor} ${entry.text}`).join(" ");
   const status = projectStatusLabel(savedState?.projectStatus);
   const scope = project.companyId ? companyNameForId(project.companyId) : project.source === "cloud" ? "personal cloud" : "browser";
   return [
@@ -17039,6 +17993,7 @@ function projectLibrarySearchText(project) {
     production.hold ? "hold on hold" : "",
     production.holdReason,
     messages,
+    activity,
     scope,
     savedProjectSpoolTitle(project),
     savedProjectDetailLine(project),
@@ -17217,6 +18172,19 @@ function projectLibraryRow(project) {
 
     main.append(title, details, meta);
 
+    const activity = savedProjectProductionActivity(project).slice(-3).reverse();
+    if (activity.length) {
+      const activityBlock = document.createElement("div");
+      activityBlock.className = "project-library-activity";
+      activityBlock.innerHTML = `
+        <strong>Activity</strong>
+        ${activity.map((entry) => `
+          <span>${escapeHtml(entry.actor || "Team")}: ${escapeHtml(entry.text)}</span>
+        `).join("")}
+      `;
+      main.append(activityBlock);
+    }
+
     const openButton = document.createElement("button");
     openButton.type = "button";
     openButton.className = "project-library-action primary";
@@ -17335,23 +18303,27 @@ function closeProjectLibrary() {
   if (projectLibraryDialog) projectLibraryDialog.hidden = true;
 }
 
-function openSavedBrowserProject(projectId) {
+async function openSavedBrowserProject(projectId) {
   const record = loadSavedBrowserProjects().find((project) => project.id === projectId);
   if (!record) {
-    window.alert("That saved project was not found.");
+    showAppNotice("That saved project was not found.");
     renderProjectLibrary(loadSavedBrowserProjects(), { source: "browser" });
     return;
   }
 
   if (state.projectId !== record.id && hasDrawingContent()) {
-    const proceed = window.confirm("Open this project? Your current drawing will be replaced.");
+    const proceed = await confirmAppAction("Open this project? Your current drawing will be replaced.", {
+      title: "Open saved spool",
+      confirmLabel: "Open spool",
+      tone: "warning",
+    });
     if (!proceed) return;
     persistState();
   }
 
   const restored = stateFromPayload(record.state);
   if (!restored) {
-    window.alert("That saved project could not be opened.");
+    showAppNotice("That saved project could not be opened.");
     return;
   }
 
@@ -17373,12 +18345,16 @@ function openSavedBrowserProject(projectId) {
   closeProjectLibrary();
 }
 
-function deleteSavedBrowserProject(projectId) {
+async function deleteSavedBrowserProject(projectId) {
   const projects = loadSavedBrowserProjects();
   const record = projects.find((project) => project.id === projectId);
   if (!record) return;
 
-  const proceed = window.confirm(`Delete ${record.name || projectDisplayName(record.projectInfo)} from this browser?`);
+  const proceed = await confirmAppAction(`Delete ${record.name || projectDisplayName(record.projectInfo)} from this browser?`, {
+    title: "Delete saved spool",
+    confirmLabel: "Delete",
+    tone: "error",
+  });
   if (!proceed) return;
 
   storeSavedBrowserProjects(projects.filter((project) => project.id !== projectId));
@@ -17830,7 +18806,7 @@ function setVisibleLoadPlanSelection(selectAll) {
   if (selectAll) {
     loadPlanSelection = new Set(items.slice(0, LOAD_PLAN_MAX_SPOOLS).map((item) => item.id));
     if (items.length > LOAD_PLAN_MAX_SPOOLS) {
-      window.alert(`Selected the first ${LOAD_PLAN_MAX_SPOOLS} spools. This load planner handles up to ${LOAD_PLAN_MAX_SPOOLS} at once.`);
+      showAppNotice(`Selected the first ${LOAD_PLAN_MAX_SPOOLS} spools. This load planner handles up to ${LOAD_PLAN_MAX_SPOOLS} at once.`);
     }
   } else {
     loadPlanSelection.clear();
@@ -17862,7 +18838,7 @@ function handleLoadPlanChoiceChange(event) {
 
   if (checkbox.checked && loadPlanSelection.size >= LOAD_PLAN_MAX_SPOOLS) {
     checkbox.checked = false;
-    window.alert(`Pick up to ${LOAD_PLAN_MAX_SPOOLS} spools for this load plan.`);
+    showAppNotice(`Pick up to ${LOAD_PLAN_MAX_SPOOLS} spools for this load plan.`);
     return;
   }
 
@@ -19469,16 +20445,126 @@ async function startNewDrawing() {
 }
 
 function loadSampleDrawing() {
-  state = sampleState();
+  loadStateIntoWorkspace(sampleState());
+}
+
+function loadStateIntoWorkspace(nextState, options = {}) {
+  state = nextState;
   currentCloudProjectOwnerId = null;
   currentCloudProjectCompanyId = null;
   cloudPermissionReadOnly = false;
   resetCloudSaveTracking();
-  nextFittingId = 5;
-  nextNoteId = 2;
+  projectComments = [];
+  projectCommentsProjectId = null;
+  setNextIdsFromState(state);
   three.userMovedCamera = false;
   updateControls();
   updateAll();
+  if (options.openChecks === true) {
+    applyAppMode("review", { keepTool: false });
+    showHealthPanel();
+  }
+}
+
+function regressionSampleByKey(key) {
+  return REGRESSION_SAMPLES.find((sample) => sample.key === key) ?? REGRESSION_SAMPLES[0];
+}
+
+function activeRegressionSummaryMarkup() {
+  const segmentData = segments();
+  const quantities = quantitySummary(segmentData);
+  const items = drawingHealthItems();
+  const counts = healthCounts(items);
+  return `
+    <div>
+      <strong>${escapeHtml(APP_VERSION)}</strong>
+      <span>Current build</span>
+    </div>
+    <div>
+      <strong>${segmentData.length}</strong>
+      <span>Runs</span>
+    </div>
+    <div>
+      <strong>${quantities.reducers.length}</strong>
+      <span>Reducers</span>
+    </div>
+    <div>
+      <strong>${counts.error ?? 0}/${counts.warning ?? 0}</strong>
+      <span>Errors / warnings</span>
+    </div>
+  `;
+}
+
+function renderRegressionDialog() {
+  if (!regressionSummary || !regressionSampleList || !regressionChecklist) return;
+
+  regressionSummary.innerHTML = activeRegressionSummaryMarkup();
+  regressionSampleList.innerHTML = REGRESSION_SAMPLES.map((sample) => `
+    <article class="regression-sample-card">
+      <div>
+        <strong>${escapeHtml(sample.title)}</strong>
+        <span>${escapeHtml(sample.detail)}</span>
+      </div>
+      <ul>
+        ${sample.checks.map((check) => `<li>${escapeHtml(check)}</li>`).join("")}
+      </ul>
+      <button type="button" class="primary-button" data-regression-sample="${escapeHtml(sample.key)}">Load test spool</button>
+    </article>
+  `).join("");
+  regressionChecklist.innerHTML = `
+    <strong>Manual checks after loading samples</strong>
+    <div class="regression-check-grid">
+      ${REGRESSION_MANUAL_CHECKS.map((check, index) => `
+        <label>
+          <input type="checkbox" data-regression-check="${index}" />
+          <span>${escapeHtml(check)}</span>
+        </label>
+      `).join("")}
+    </div>
+  `;
+}
+
+function openRegressionDialog() {
+  closeActionMenu();
+  renderRegressionDialog();
+  if (regressionDialog) regressionDialog.hidden = false;
+}
+
+function closeRegressionDialog() {
+  if (regressionDialog) regressionDialog.hidden = true;
+}
+
+async function loadRegressionSample(key) {
+  const sample = regressionSampleByKey(key);
+  if (!sample) return;
+  if (hasDrawingContent()) {
+    const proceed = await confirmAppAction(`Load ${sample.title}? This replaces the current drawing on this device. Save first if you need to keep it.`, {
+      title: "Load test spool",
+      confirmLabel: "Load sample",
+      tone: "warning",
+    });
+    if (!proceed) return;
+  }
+  closeRegressionDialog();
+  const nextState = sample.build();
+  loadStateIntoWorkspace(nextState, { openChecks: true });
+  cursorReadout.textContent = `Loaded test kit: ${sample.title}`;
+  if (isTabletLayout()) {
+    showMobilePanel("inspector");
+  }
+}
+
+function setupRegressionDialog() {
+  regressionChecklistButton?.addEventListener("click", openRegressionDialog);
+  regressionCloseButton?.addEventListener("click", closeRegressionDialog);
+  regressionDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === regressionDialog) closeRegressionDialog();
+  });
+  regressionSampleList?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-regression-sample]") : null;
+    if (!button || !regressionSampleList.contains(button)) return;
+    loadRegressionSample(button.dataset.regressionSample);
+  });
 }
 
 function defaultDrawingAssistantState() {
@@ -19790,7 +20876,7 @@ function renderDrawingAssistantSegments() {
 function applyDrawingAssistantScale() {
   const assistant = ensureDrawingAssistantState();
   if (assistant.scalePoints.length < 2) {
-    window.alert("Pick two points on a known dimension first.");
+    showAppNotice("Pick two points on a known dimension first.");
     return;
   }
   const distanceMm = normalizeLength(drawingAssistantScaleInput?.value);
@@ -19799,7 +20885,7 @@ function applyDrawingAssistantScale() {
     assistant.scalePoints[1].y - assistant.scalePoints[0].y,
   );
   if (pixelDistance < 4) {
-    window.alert("Those scale points are too close together.");
+    showAppNotice("Those scale points are too close together.");
     return;
   }
   assistant.mmPerPx = distanceMm / pixelDistance;
@@ -19901,7 +20987,7 @@ async function loadDrawingAssistantFile(file) {
   }
 
   if (!file.type.startsWith("image/")) {
-    window.alert("Please upload an image, screenshot, photo or PDF.");
+    showAppNotice("Please upload an image, screenshot, photo or PDF.");
     return;
   }
 
@@ -19923,24 +21009,28 @@ async function loadDrawingAssistantFile(file) {
   updateDrawingAssistantStatus();
 }
 
-function buildSpoolFromDrawingAssistant() {
+async function buildSpoolFromDrawingAssistant() {
   if (!ensureDrawingEditable("build a spool from an imported drawing")) return;
   const assistant = ensureDrawingAssistantState();
   if (assistant.points.length < 2 || assistant.segments.length < 1) {
-    window.alert("Trace at least two centreline points first.");
+    showAppNotice("Trace at least two centreline points first.");
     return;
   }
   if (assistant.segments.length !== assistant.points.length - 1) {
-    window.alert("The traced points and pipe legs do not line up yet.");
+    showAppNotice("The traced points and pipe legs do not line up yet.");
     return;
   }
   const invalid = assistant.segments.find((segment) => !axisByKey.has(segment.axis) || !Number.isFinite(Number(segment.lengthMm)));
   if (invalid) {
-    window.alert("Check every leg has an axis and length.");
+    showAppNotice("Check every leg has an axis and length.");
     return;
   }
   if (hasDrawingContent()) {
-    const replace = window.confirm("Replace the current spool geometry with this imported trace?");
+    const replace = await confirmAppAction("Replace the current spool geometry with this imported trace?", {
+      title: "Replace drawing",
+      confirmLabel: "Replace",
+      tone: "warning",
+    });
     if (!replace) return;
   }
 
@@ -19980,9 +21070,14 @@ function buildSpoolFromDrawingAssistant() {
   closeDrawingAssistantDialog();
 }
 
-function openNewDrawingDialog() {
+async function openNewDrawingDialog() {
   if (!newDrawingDialog || !newDrawingCancelButton || !newDrawingDiscardButton || !newDrawingSaveButton) {
-    const saveFirst = window.confirm("Save this drawing before starting a new one?");
+    const saveFirst = await confirmAppAction("Save this drawing before starting a new one?", {
+      title: "Start new drawing",
+      confirmLabel: "Save first",
+      cancelLabel: "Don't save",
+      tone: "warning",
+    });
     return Promise.resolve(saveFirst ? "save" : "discard");
   }
 
@@ -20045,7 +21140,7 @@ async function editProjectDetailsFromHealth(field = "jobNumber") {
 }
 
 function openProjectDetailsDialog(options = {}) {
-  const fallback = () => Promise.resolve(promptProjectDetailsFallback(options.defaults));
+  const fallback = () => promptProjectDetailsFallback(options.defaults);
   if (!projectDialog || !projectDialogForm || !projectDialogSubmitButton) return fallback();
 
   if (projectDialogResolver) {
@@ -20090,17 +21185,42 @@ function projectDetailsFromDialog() {
   );
 }
 
-function promptProjectDetailsFallback(defaults = state.projectInfo) {
+async function promptProjectDetailsFallback(defaults = state.projectInfo) {
   const current = normalizeProjectInfo(defaults);
-  const jobNumber = window.prompt("Job no.", current.jobNumber);
+  const jobNumber = await openFieldInputDialog({
+    title: "Project details",
+    label: "Job no.",
+    value: current.jobNumber,
+    submitLabel: "Next",
+  });
   if (jobNumber === null) return null;
-  const spoolNumber = window.prompt("Spool no.", current.spoolNumber);
+  const spoolNumber = await openFieldInputDialog({
+    title: "Project details",
+    label: "Spool no.",
+    value: current.spoolNumber,
+    submitLabel: "Next",
+  });
   if (spoolNumber === null) return null;
-  const client = window.prompt("Client / area", current.client);
+  const client = await openFieldInputDialog({
+    title: "Project details",
+    label: "Client / area",
+    value: current.client,
+    submitLabel: "Next",
+  });
   if (client === null) return null;
-  const revision = window.prompt("Revision", current.revision || "A");
+  const revision = await openFieldInputDialog({
+    title: "Project details",
+    label: "Revision",
+    value: current.revision || "A",
+    submitLabel: "Next",
+  });
   if (revision === null) return null;
-  const drawnBy = window.prompt("Drawn by", current.drawnBy);
+  const drawnBy = await openFieldInputDialog({
+    title: "Project details",
+    label: "Drawn by",
+    value: current.drawnBy,
+    submitLabel: "Save details",
+  });
   if (drawnBy === null) return null;
   return normalizeProjectInfo({ jobNumber, spoolNumber, client, revision, drawnBy });
 }
@@ -20140,7 +21260,7 @@ async function shareReadOnlyProject() {
   const modelImage = capture3dPreviewImage();
   const html = projectExportHtml(payload, reportCanvas.toDataURL("image/png"), modelImage, { readOnly: true });
   downloadTextFile(html, `${name}-readonly.html`, "text/html");
-  window.alert("Read-only share export created. Send that HTML file to someone who only needs to view/print it.");
+  showAppNotice("Read-only share export created. Send that HTML file to someone who only needs to view/print it.");
 }
 
 function exportedProjectPayload() {
@@ -20384,7 +21504,7 @@ function importProjectFile(file) {
       const payload = parseImportedProjectPayload(String(reader.result ?? ""));
       const restored = stateFromPayload(payload);
       if (!restored) {
-        window.alert("That file does not look like a SpoolMate project.");
+        showAppNotice("That file does not look like a SpoolMate project.");
         return;
       }
 
@@ -20398,9 +21518,9 @@ function importProjectFile(file) {
       setNextIdsFromState(state);
       updateControls();
       updateAll();
-      window.alert("Project imported.");
+      showAppNotice("Project imported.");
     } catch {
-      window.alert("Could not import that project file.");
+      showAppNotice("Could not import that project file.");
     }
   });
   reader.readAsText(file);
@@ -20431,7 +21551,7 @@ function export3dImage() {
 function exportIsoImage() {
   exportFabSheetPdf().catch((error) => {
     console.warn("Could not export fab sheet PDF.", error);
-    window.alert("Could not create the PDF. The PNG fab sheet export will be used instead.");
+    showAppNotice("Could not create the PDF. The PNG fab sheet export will be used instead.");
     exportSpoolReportImage();
   });
 }
@@ -20648,7 +21768,7 @@ function buildImagePdf(pages) {
 }
 
 function pdfImageFit(imageWidth, imageHeight) {
-  const margin = 22;
+  const margin = 8;
   const maxWidth = FAB_PDF_PAGE_WIDTH_PT - margin * 2;
   const maxHeight = FAB_PDF_PAGE_HEIGHT_PT - margin * 2;
   const scale = Math.min(maxWidth / imageWidth, maxHeight / imageHeight);
@@ -20685,7 +21805,7 @@ function buildSpoolReportCanvas(template = fabSheetTemplate) {
 
 function buildWorkshopReportCanvas() {
   const quantities = quantitySummary();
-  const rowCount = Math.max(quantities.segments.length, 1);
+  const rowCount = Math.max((quantities.cutSegments ?? quantities.segments).length, 1);
   const bendCount = Math.max(quantities.elbows.length, 1);
   const teeCount = Math.max(quantities.tees.length, 1);
   const branchCount = Math.max(quantities.branches.length, 1);
@@ -20694,7 +21814,7 @@ function buildWorkshopReportCanvas() {
   const takeoffCount = Math.max(takeoffCountRows(quantities).length, 1);
   const canvas = document.createElement("canvas");
   canvas.width = 1800;
-  canvas.height = Math.max(1240, 990 + takeoffCount * 22 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
+  canvas.height = Math.max(1180, 930 + takeoffCount * 22 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
   const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = "#f7f3e9";
@@ -20702,14 +21822,14 @@ function buildWorkshopReportCanvas() {
 
   drawReportHeader(ctx, canvas.width);
 
-  const margin = 36;
-  const gutter = 28;
-  const reportWidth = 600;
+  const margin = 26;
+  const gutter = 22;
+  const reportWidth = 560;
   const drawingArea = {
     x: margin,
-    y: 150,
+    y: 136,
     width: canvas.width - margin * 2 - gutter - reportWidth,
-    height: canvas.height - 186,
+    height: canvas.height - 160,
   };
   const reportArea = {
     x: drawingArea.x + drawingArea.width + gutter,
@@ -20734,14 +21854,14 @@ function buildClientReportCanvas() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   drawReportHeader(ctx, canvas.width, FAB_SHEET_TEMPLATES.client);
 
-  const margin = 36;
-  const gutter = 28;
-  const reportWidth = 520;
+  const margin = 26;
+  const gutter = 22;
+  const reportWidth = 470;
   const drawingArea = {
     x: margin,
-    y: 150,
+    y: 136,
     width: canvas.width - margin * 2 - gutter - reportWidth,
-    height: canvas.height - 186,
+    height: canvas.height - 160,
   };
   const reportArea = {
     x: drawingArea.x + drawingArea.width + gutter,
@@ -20757,7 +21877,7 @@ function buildClientReportCanvas() {
 
 function buildTakeoffReportCanvas() {
   const quantities = quantitySummary();
-  const rowCount = Math.max(quantities.segments.length, 1);
+  const rowCount = Math.max((quantities.cutSegments ?? quantities.segments).length, 1);
   const bendCount = Math.max(quantities.elbows.length, 1);
   const teeCount = Math.max(quantities.tees.length, 1);
   const branchCount = Math.max(quantities.branches.length, 1);
@@ -20766,7 +21886,7 @@ function buildTakeoffReportCanvas() {
   const takeoffCount = Math.max(takeoffCountRows(quantities).length, 1);
   const canvas = document.createElement("canvas");
   canvas.width = 1800;
-  canvas.height = Math.max(1240, 720 + takeoffCount * 26 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
+  canvas.height = Math.max(1180, 680 + takeoffCount * 26 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
   const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = "#f7f3e9";
@@ -20774,10 +21894,10 @@ function buildTakeoffReportCanvas() {
   drawReportHeader(ctx, canvas.width, FAB_SHEET_TEMPLATES.takeoff);
 
   drawReportTakeoff(ctx, {
-    x: 36,
-    y: 150,
-    width: canvas.width - 72,
-    height: canvas.height - 186,
+    x: 26,
+    y: 136,
+    width: canvas.width - 52,
+    height: canvas.height - 160,
   }, quantities);
   return canvas;
 }
@@ -20833,7 +21953,7 @@ function drawReportClientPanel(ctx, area, quantities) {
   ctx.font = "800 13px Inter, system-ui, sans-serif";
   drawWrappedReportText(
     ctx,
-    "Client/approval view: drawing and material summary only. Workshop cut lengths, fitting weights and ordering take-off are available from the Workshop or Take-off PDF styles.",
+    "Client/approval view: drawing and material summary only. Workshop cut lengths, fitting weights and ordering take-off are available from the Workshop or Material order PDF styles.",
     x,
     y,
     area.width - 48,
@@ -20857,30 +21977,37 @@ function drawReportHeader(ctx, width, options = {}) {
     : "Unchecked";
 
   ctx.save();
-  roundRect(ctx, 36, 24, 160, 56, 10);
-  ctx.fillStyle = "#163c40";
+  roundRect(ctx, 26, 18, width - 52, 108, 12);
+  ctx.fillStyle = "#fffdf8";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.14)";
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  roundRect(ctx, 46, 38, 154, 52, 10);
+  ctx.fillStyle = "#123a40";
   ctx.fill();
   ctx.fillStyle = "#fff";
   ctx.font = "950 22px Inter, system-ui, sans-serif";
-  ctx.fillText("ISOSPOOL", 54, 58);
+  ctx.fillText("SPOOLMATE", 58, 70);
 
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 34px Inter, system-ui, sans-serif";
-  ctx.fillText(title, 220, 56);
+  ctx.fillText(title, 220, 52);
   ctx.font = "800 14px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
-  ctx.fillText(subtitle, 222, 82);
+  ctx.fillText(subtitle, 222, 78);
   if (reference) {
-    ctx.fillText(reference, 222, 104);
+    ctx.fillText(reference, 222, 100);
   }
   ctx.textAlign = "right";
-  ctx.fillText(new Date().toLocaleString(), width - 36, 56);
-  ctx.fillText(`SpoolMate ${APP_VERSION}`, width - 36, 82);
-  ctx.fillText(`${projectStatusLabel()}${state.locked ? " / Locked" : ""}`, width - 36, 104);
+  ctx.fillText(new Date().toLocaleString(), width - 48, 48);
+  ctx.fillText(`SpoolMate ${APP_VERSION}`, width - 48, 72);
+  ctx.fillText(`${projectStatusLabel()}${state.locked ? " / Locked" : ""}`, width - 48, 96);
   if (project.drawnBy) {
-    ctx.fillText(`Drawn by ${project.drawnBy} / ${checked}`, width - 36, 126);
+    ctx.fillText(`Drawn by ${project.drawnBy} / ${checked}`, width - 48, 120);
   } else {
-    ctx.fillText(checked, width - 36, 126);
+    ctx.fillText(checked, width - 48, 120);
   }
   ctx.restore();
 }
@@ -20942,10 +22069,10 @@ function drawReportDrawing(ctx, area) {
     drawGrid(ctx, area.width, area.height, projection);
     drawSpool2d(ctx, projection, {
       viewport: {
-        left: 18,
-        top: 48,
-        right: Math.max(18, area.width - 18),
-        bottom: Math.max(48, area.height - 18),
+        left: 10,
+        top: 38,
+        right: Math.max(10, area.width - 10),
+        bottom: Math.max(38, area.height - 10),
       },
     });
     drawMeasurements2d(ctx, projection);
@@ -20983,29 +22110,36 @@ function drawReportDrawing(ctx, area) {
 
 function reportIsoScale(width, height) {
   const rawPoints = reportRelevantPoints().map((point) => rawIso(point, 1));
+  if (!rawPoints.length) return state.gridScale || 0.2;
   const minX = Math.min(...rawPoints.map((point) => point.x));
   const maxX = Math.max(...rawPoints.map((point) => point.x));
   const minY = Math.min(...rawPoints.map((point) => point.y));
   const maxY = Math.max(...rawPoints.map((point) => point.y));
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
-  const reservedTop = 58;
-  const paddingX = 24;
-  const paddingBottom = 28;
-  return Math.min(154, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
+  const reservedTop = 42;
+  const paddingX = 12;
+  const paddingBottom = 14;
+  return Math.min(190, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
 }
 
 function reportProjection(width, height, scale) {
   const rawPoints = reportRelevantPoints().map((point) => rawIso(point, scale));
+  if (!rawPoints.length) {
+    return {
+      offsetX: width * 0.5,
+      offsetY: height * 0.5,
+    };
+  }
   const minX = Math.min(...rawPoints.map((point) => point.x));
   const maxX = Math.max(...rawPoints.map((point) => point.x));
   const minY = Math.min(...rawPoints.map((point) => point.y));
   const maxY = Math.max(...rawPoints.map((point) => point.y));
-  const reservedTop = 88;
-  const paddingBottom = 46;
+  const reservedTop = 56;
+  const paddingBottom = 18;
   return {
     offsetX: width * 0.5 - (minX + maxX) * 0.5,
-    offsetY: reservedTop + (height - reservedTop - paddingBottom) * 0.52 - (minY + maxY) * 0.5,
+    offsetY: reservedTop + (height - reservedTop - paddingBottom) * 0.5 - (minY + maxY) * 0.5,
   };
 }
 
@@ -21084,13 +22218,15 @@ function drawReportTotals(ctx, x, y, width, quantities) {
     ["Fitting weight", `${formatMass(quantities.fittingWeightKg)} kg`],
     ["Total est.", `${formatMass(quantities.totalWeightKg)} kg`],
   ];
-  const columnWidth = (width - 12) / 2;
+  const columnCount = width > 1120 ? 5 : width > 760 ? 3 : 2;
+  const gap = 12;
+  const columnWidth = (width - gap * (columnCount - 1)) / columnCount;
   const rowHeight = 54;
 
   for (const [index, total] of totals.entries()) {
-    const col = index % 2;
-    const row = Math.floor(index / 2);
-    const cardX = x + col * (columnWidth + 12);
+    const col = index % columnCount;
+    const row = Math.floor(index / columnCount);
+    const cardX = x + col * (columnWidth + gap);
     const cardY = y + row * (rowHeight + 10);
     roundRect(ctx, cardX, cardY, columnWidth, rowHeight, 8);
     ctx.fillStyle = index === totals.length - 1 ? "#d8f1ed" : "#f3f6f4";
@@ -21103,7 +22239,7 @@ function drawReportTotals(ctx, x, y, width, quantities) {
     ctx.fillText(total[1], cardX + 12, cardY + 41);
   }
 
-  return y + Math.ceil(totals.length / 2) * (rowHeight + 10);
+  return y + Math.ceil(totals.length / columnCount) * (rowHeight + 10);
 }
 
 function drawReportTakeoffList(ctx, x, y, width, quantities) {
@@ -21111,7 +22247,7 @@ function drawReportTakeoffList(ctx, x, y, width, quantities) {
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 18px Inter, system-ui, sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText("Take-off list by size", x, y);
+  ctx.fillText("Material order by size", x, y);
   y += 26;
 
   const columns = [
@@ -21130,6 +22266,15 @@ function drawReportTakeoffList(ctx, x, y, width, quantities) {
     ctx.fillText(column.label, x + column.x, y);
   }
   y += 16;
+
+  if (!rows.length) {
+    y += 24;
+    ctx.font = "800 13px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#607174";
+    ctx.textAlign = "left";
+    ctx.fillText("No fittings or pipe quantities yet.", x, y);
+    return y + 14;
+  }
 
   for (const row of rows) {
     y += 24;
@@ -21200,6 +22345,7 @@ function drawReportLugPlan(ctx, x, y, width, quantities) {
 }
 
 function drawReportRunTable(ctx, x, y, width, quantities) {
+  const cutRows = quantities.cutSegments ?? quantities.segments;
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 18px Inter, system-ui, sans-serif";
   ctx.fillText("Pipe runs", x, y);
@@ -21207,10 +22353,10 @@ function drawReportRunTable(ctx, x, y, width, quantities) {
 
   const columns = [
     { label: "Run", x: 0, align: "left" },
-    { label: "NB", x: 54, align: "left" },
-    { label: "C/C", x: 128, align: "right" },
-    { label: "Deduct", x: 238, align: "right" },
-    { label: "Cut", x: 350, align: "right" },
+    { label: "NB", x: Math.min(86, width * 0.16), align: "left" },
+    { label: "C/C", x: width * 0.42, align: "right" },
+    { label: "Deduct", x: width * 0.58, align: "right" },
+    { label: "Cut", x: width * 0.74, align: "right" },
     { label: "kg", x: width, align: "right" },
   ];
 
@@ -21223,14 +22369,14 @@ function drawReportRunTable(ctx, x, y, width, quantities) {
   ctx.textAlign = "left";
   y += 12;
 
-  if (!quantities.segments.length) {
+  if (!cutRows.length) {
     ctx.fillStyle = "#6a7475";
     ctx.font = "800 14px Inter, system-ui, sans-serif";
     ctx.fillText("No pipe runs yet.", x, y + 18);
     return y + 44;
   }
 
-  for (const { segment, quantity } of quantities.segments) {
+  for (const { segment, quantity } of cutRows) {
     y += 30;
     ctx.strokeStyle = "rgba(31, 42, 47, 0.12)";
     ctx.beginPath();
@@ -21240,7 +22386,7 @@ function drawReportRunTable(ctx, x, y, width, quantities) {
 
     const size = pipeSizeForSegment(segment);
     const values = [
-      cutRunLabel(segment),
+      cutRunDimensionLabel(segment),
       `${size.nb}`,
       `${formatLength(quantity.centrelineMm)}`,
       `${formatLength(quantity.bendTakeoffMm)}`,
@@ -21725,6 +22871,7 @@ function appendDrawingContextActions(actions) {
 
 function setDrawingContextMenuVariant(variant) {
   drawingContextMenu.classList.toggle("socket-setup-menu", variant === "socket-setup");
+  drawingContextMenu.classList.toggle("field-action-sheet", isCoarseInput());
 }
 
 function addDrawingContextHeader(titleText, detailText) {
@@ -21735,6 +22882,14 @@ function addDrawingContextHeader(titleText, detailText) {
   const subtitle = document.createElement("small");
   subtitle.textContent = detailText;
   header.append(title, subtitle);
+  if (isCoarseInput()) {
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "drawing-context-close";
+    closeButton.textContent = "Close";
+    closeButton.addEventListener("click", closeDrawingContextMenu);
+    header.append(closeButton);
+  }
   drawingContextMenu.append(header);
 }
 
@@ -22009,6 +23164,14 @@ function renderContextPipeSizeMenu() {
   const subtitle = document.createElement("small");
   subtitle.textContent = `${countText} - choose NB`;
   header.append(title, subtitle);
+  if (isCoarseInput()) {
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "drawing-context-close";
+    closeButton.textContent = "Close";
+    closeButton.addEventListener("click", closeDrawingContextMenu);
+    header.append(closeButton);
+  }
   drawingContextMenu.append(header);
 
   const backButton = document.createElement("button");
@@ -22727,7 +23890,7 @@ function socketPositionsForContext(hit, count, options = {}) {
   const stepT = spacingMm / lengthMm;
   const spanT = stepT * (count - 1);
   if (spanT >= maxT - minT) {
-    window.alert("That spacing does not fit on this pipe section, so the sockets will be evenly spaced instead.");
+    showAppNotice("That spacing does not fit on this pipe section, so the sockets will be evenly spaced instead.");
     return evenlySpacedSocketPositions(count, minT, maxT);
   }
 
@@ -22802,19 +23965,29 @@ function toggleContextBendReducerSide() {
   updateAll();
 }
 
-function setContextFittingWeight() {
+async function setContextFittingWeight() {
   if (!ensureDrawingEditable("set fitting weight")) return;
   const hit = drawingContextTarget?.fittingHit;
   if (!hit) return;
   if (hit.fitting.type === "rollGroove") return;
 
   const currentWeight = fittingWeightKg(hit.fitting, hit.segmentHit.segment);
-  const text = window.prompt("Fitting weight kg", formatMass(currentWeight));
+  const text = await openFieldInputDialog({
+    title: "Set fitting weight",
+    label: "Fitting weight",
+    value: formatMass(currentWeight),
+    unit: "kg",
+    type: "number",
+    inputMode: "decimal",
+    min: "0",
+    help: "Use this when you want to override the estimated fitting weight.",
+    submitLabel: "Save weight",
+  });
   if (text === null) return;
 
   const weightKg = Number(text);
   if (!Number.isFinite(weightKg) || weightKg < 0) {
-    window.alert("Enter a valid fitting weight in kg.");
+    showAppNotice("Enter a valid fitting weight in kg.");
     return;
   }
 
@@ -22877,13 +24050,20 @@ function deleteContextNote() {
   updateAll();
 }
 
-function editContextMeasurementLabel() {
+async function editContextMeasurementLabel() {
   if (!ensureDrawingEditable("edit measurement")) return;
   const measurement = drawingContextTarget?.measurementHit?.measurement;
   if (!measurement) return;
 
   state.selectedMeasurement = measurement.id;
-  const text = window.prompt("Measurement label. Leave blank to use the measured length.", measurement.label || "");
+  const text = await openFieldInputDialog({
+    title: "Edit measurement label",
+    label: "Label",
+    value: measurement.label || "",
+    placeholder: measurementLabel(measurement),
+    help: "Leave blank to use the measured length automatically.",
+    submitLabel: "Save label",
+  });
   if (text === null) return;
   const nextLabel = String(text).trim().slice(0, 64);
   if (nextLabel === measurement.label) return;
@@ -22953,7 +24133,7 @@ function editContextSegmentLength() {
   });
 }
 
-function editSegmentLengthFromDimensionSource(segment, options = {}) {
+async function editSegmentLengthFromDimensionSource(segment, options = {}) {
   if (!ensureDrawingEditable("edit length")) return false;
   if (!segment) return false;
 
@@ -22966,10 +24146,19 @@ function editSegmentLengthFromDimensionSource(segment, options = {}) {
     ? "Offset travel C/C mm"
     : "Pipe C/C length mm";
   const currentValue = offsetMeta && editSet ? offsetMeta.setMm : currentLength;
-  const text = window.prompt(
-    promptLabel,
-    String(Math.round(currentValue)),
-  );
+  const text = await openFieldInputDialog({
+    title: "Edit pipe length",
+    label: promptLabel,
+    value: String(Math.round(currentValue)),
+    unit: "mm",
+    type: "number",
+    inputMode: "numeric",
+    min: "1",
+    help: offsetMeta
+      ? "For offsets, use set C/C for the offset height or travel C/C for the angled run."
+      : "This changes the centre-to-centre length while keeping the pipe direction locked.",
+    submitLabel: "Apply length",
+  });
   if (text === null) return false;
 
   selectSingleSegment(segment.index);
@@ -22997,7 +24186,7 @@ function editSegmentLengthFromDimensionSource(segment, options = {}) {
   return true;
 }
 
-function editContextSegmentAngle() {
+async function editContextSegmentAngle() {
   if (!ensureDrawingEditable("edit bend angle")) return;
   const hit = drawingContextTarget?.segmentHit;
   if (!hit) return;
@@ -23006,7 +24195,17 @@ function editContextSegmentAngle() {
   if (anchorIndex === null) return;
 
   const currentBend = bendAngleForSegmentAt(hit.segment, anchorIndex) ?? 90;
-  const text = window.prompt("Bend angle degrees", formatAngle(currentBend));
+  const text = await openFieldInputDialog({
+    title: "Edit bend angle",
+    label: "Bend angle",
+    value: formatAngle(currentBend),
+    unit: "deg",
+    type: "number",
+    inputMode: "decimal",
+    min: "1",
+    help: "Change the bend angle while keeping the selected pipe connected.",
+    submitLabel: "Apply angle",
+  });
   if (text === null) return;
 
   editSegmentBendAngle(hit.segment, anchorIndex, text);
@@ -23062,13 +24261,231 @@ function editContextNote(note) {
     });
 }
 
+function appNoticeTone(message, requested = "") {
+  const tone = String(requested || "").trim().toLowerCase();
+  if (["success", "warning", "danger", "error", "info"].includes(tone)) return tone === "danger" ? "error" : tone;
+  const text = String(message ?? "").toLowerCase();
+  if (/(failed|could not|invalid|required|not found|blocked|error|view\/comment only|read-only|must be|does not|cannot)/.test(text)) return "error";
+  if (/(delete|replace|restore|overwrite|reload|warning|newer|issue|hold)/.test(text)) return "warning";
+  if (/(saved|copied|imported|created|sent|opened|selected|joined|approved|ready)/.test(text)) return "success";
+  return "info";
+}
+
+function appNoticeTitleForTone(tone) {
+  if (tone === "success") return "Done";
+  if (tone === "warning") return "Check this";
+  if (tone === "error") return "Could not complete";
+  return "SpoolMate";
+}
+
+function showAppNotice(message, options = {}) {
+  const text = String(message ?? "").trim();
+  if (!text) return null;
+  const tone = appNoticeTone(text, options.tone);
+  if (!appToastStack) {
+    console.info(`[${tone}] ${text}`);
+    return null;
+  }
+
+  const toast = document.createElement("article");
+  toast.className = `app-toast ${tone}`;
+  toast.setAttribute("role", tone === "error" ? "alert" : "status");
+
+  const copy = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = options.title || appNoticeTitleForTone(tone);
+  const body = document.createElement("span");
+  body.textContent = text;
+  copy.append(title, body);
+
+  const closeButton = document.createElement("button");
+  closeButton.type = "button";
+  closeButton.setAttribute("aria-label", "Dismiss message");
+  closeButton.textContent = "Close";
+  closeButton.addEventListener("click", () => dismissAppToast(toast));
+
+  toast.append(copy, closeButton);
+  appToastStack.append(toast);
+  while (appToastStack.children.length > 4) {
+    appToastStack.firstElementChild?.remove();
+  }
+
+  const timeout = Number(options.timeoutMs) || (tone === "error" ? 7200 : tone === "warning" ? 6400 : 4200);
+  window.setTimeout(() => dismissAppToast(toast), timeout);
+  return toast;
+}
+
+function dismissAppToast(toast) {
+  if (!toast || !toast.isConnected) return;
+  toast.classList.add("leaving");
+  window.setTimeout(() => toast.remove(), 180);
+}
+
+function confirmTitleForTone(tone) {
+  if (tone === "error") return "Confirm action";
+  if (tone === "warning") return "Check before continuing";
+  return "Confirm action";
+}
+
+function confirmIconForTone(tone) {
+  if (tone === "error") return "!";
+  if (tone === "warning") return "!";
+  return "?";
+}
+
+function confirmAppAction(message, options = {}) {
+  const text = String(message ?? "").trim();
+  if (!text) return Promise.resolve(false);
+  if (!appConfirmDialog || !appConfirmOkButton || !appConfirmCancelButton) {
+    showAppNotice(text, { tone: options.tone || "warning" });
+    return Promise.resolve(false);
+  }
+
+  if (appConfirmDialogResolver) {
+    closeAppConfirmDialog(false);
+  }
+
+  const tone = appNoticeTone(text, options.tone || "warning");
+  closeActionMenu();
+  closeDrawingContextMenu();
+  closeHelpDialog();
+  appConfirmDialog.dataset.tone = tone;
+  if (appConfirmTitle) appConfirmTitle.textContent = options.title || confirmTitleForTone(tone);
+  if (appConfirmMessage) appConfirmMessage.textContent = text;
+  if (appConfirmIcon) appConfirmIcon.textContent = options.icon || confirmIconForTone(tone);
+  appConfirmCancelButton.textContent = options.cancelLabel || "Cancel";
+  appConfirmOkButton.textContent = options.confirmLabel || "Continue";
+  appConfirmDialog.hidden = false;
+  window.setTimeout(() => {
+    const focusTarget = tone === "error" || tone === "warning" ? appConfirmCancelButton : appConfirmOkButton;
+    focusTarget?.focus();
+  }, 30);
+
+  return new Promise((resolve) => {
+    appConfirmDialogResolver = resolve;
+  });
+}
+
+function closeAppConfirmDialog(result = false) {
+  if (appConfirmDialog) appConfirmDialog.hidden = true;
+  const resolver = appConfirmDialogResolver;
+  appConfirmDialogResolver = null;
+  resolver?.(result);
+}
+
+function setupAppConfirmDialog() {
+  appConfirmCancelButton?.addEventListener("click", () => closeAppConfirmDialog(false));
+  appConfirmOkButton?.addEventListener("click", () => closeAppConfirmDialog(true));
+  appConfirmDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === appConfirmDialog) closeAppConfirmDialog(false);
+  });
+}
+
+function openFieldInputDialog(options = {}) {
+  if (
+    !fieldInputDialog ||
+    !fieldInputForm ||
+    !fieldInputValue ||
+    !fieldInputTextArea ||
+    !fieldInputSubmitButton
+  ) {
+    return Promise.resolve(null);
+  }
+
+  if (fieldInputDialogResolver) {
+    closeFieldInputDialog(null);
+  }
+
+  const multiline = options.multiline === true;
+  closeActionMenu();
+  closeDrawingContextMenu();
+  closeHelpDialog();
+  if (fieldInputTitle) fieldInputTitle.textContent = options.title ?? "Edit value";
+  if (fieldInputHelp) {
+    fieldInputHelp.textContent = options.help ?? "Enter the value to apply to the drawing.";
+    fieldInputHelp.hidden = !fieldInputHelp.textContent;
+  }
+  if (fieldInputLabel) fieldInputLabel.textContent = options.label ?? "Value";
+  fieldInputSubmitButton.textContent = options.submitLabel ?? "Apply";
+
+  fieldInputForm.classList.toggle("field-input-multiline", multiline);
+  fieldInputValue.hidden = multiline;
+  fieldInputTextArea.hidden = !multiline;
+
+  const unit = String(options.unit ?? "").trim();
+  fieldInputForm.classList.toggle("has-unit", Boolean(unit) && !multiline);
+  if (fieldInputUnit) {
+    fieldInputUnit.textContent = unit;
+    fieldInputUnit.hidden = !unit || multiline;
+  }
+
+  const value = String(options.value ?? "");
+  const activeControl = multiline ? fieldInputTextArea : fieldInputValue;
+  fieldInputValue.value = multiline ? "" : value;
+  fieldInputTextArea.value = multiline ? value : "";
+  fieldInputValue.type = options.type === "number" ? "number" : "text";
+  fieldInputValue.inputMode = options.inputMode ?? (options.type === "number" ? "decimal" : "text");
+  fieldInputValue.placeholder = options.placeholder ?? "";
+  fieldInputValue.step = options.step ?? "any";
+  fieldInputValue.min = options.min ?? "";
+  fieldInputTextArea.placeholder = options.placeholder ?? "";
+  fieldInputTextArea.readOnly = options.readOnly === true;
+
+  fieldInputDialog.hidden = false;
+  window.setTimeout(() => {
+    activeControl.focus();
+    if (options.select !== false) activeControl.select?.();
+  }, 30);
+
+  return new Promise((resolve) => {
+    fieldInputDialogResolver = resolve;
+  });
+}
+
+function closeFieldInputDialog(result = null) {
+  if (fieldInputDialog) fieldInputDialog.hidden = true;
+  if (fieldInputTextArea) fieldInputTextArea.readOnly = false;
+  const resolver = fieldInputDialogResolver;
+  fieldInputDialogResolver = null;
+  resolver?.(result);
+}
+
+function submitFieldInputDialog() {
+  const multiline = fieldInputForm?.classList.contains("field-input-multiline");
+  const value = multiline ? fieldInputTextArea?.value ?? "" : fieldInputValue?.value ?? "";
+  closeFieldInputDialog(value);
+}
+
+function setupFieldInputDialog() {
+  fieldInputCancelButton?.addEventListener("click", () => closeFieldInputDialog(null));
+  fieldInputForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    submitFieldInputDialog();
+  });
+  fieldInputDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === fieldInputDialog) closeFieldInputDialog(null);
+  });
+  fieldInputTextArea?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+      event.preventDefault();
+      submitFieldInputDialog();
+    }
+  });
+}
+
 function promptNoteDetails(options = {}) {
   const defaultText = String(options.text ?? "FIELD NOTE").slice(0, 80);
   const defaultColour = normalizeNoteColour(options.colour ?? noteColorInput?.value);
   if (!noteDialog || !noteDialogText || !noteDialogSaveButton) {
-    const text = window.prompt("Note text", defaultText || "FIELD NOTE");
-    if (text === null) return Promise.resolve(null);
-    return Promise.resolve({ text: text.replace(/\s+/g, " ").trim() || "NOTE", colour: defaultColour });
+    return openFieldInputDialog({
+      title: options.mode === "edit" ? "Edit text note" : "Add text note",
+      label: "Note text",
+      value: defaultText || "FIELD NOTE",
+      submitLabel: options.mode === "edit" ? "Save note" : "Add note",
+    }).then((text) => {
+      if (text === null) return null;
+      return { text: text.replace(/\s+/g, " ").trim() || "NOTE", colour: defaultColour };
+    });
   }
   closeActionMenu();
   closeDrawingContextMenu();
@@ -23986,14 +25403,27 @@ pipeSizeSelect.addEventListener("change", () => {
 
 projectStatusSelect?.addEventListener("change", () => {
   if (cloudPermissionReadOnly) {
-    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to change the drawing status.");
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change the drawing status.");
     updateControls();
     return;
   }
   const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
+  const previousStatus = normalizeProjectStatus(state.projectStatus);
+  const now = new Date().toISOString();
   state.projectStatus = nextStatus;
+  const currentProduction = normalizeProductionInfo(state.productionInfo);
+  state.productionInfo = normalizeProductionInfo({
+    ...currentProduction,
+    completedAt: nextStatus === "complete" ? currentProduction.completedAt || now : "",
+    removeAfter: nextStatus === "complete" ? currentProduction.removeAfter || isoDaysFromNow(7) : "",
+    lastUpdatedBy: checkerName(),
+    lastUpdatedAt: now,
+  });
+  if (nextStatus !== previousStatus) {
+    state.productionActivity = addProductionActivity(state.productionActivity, "status", `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel(nextStatus)}.`, now);
+  }
   if (projectStatusAtLeast(nextStatus, "checked") && !state.checkedAt) {
-    state.checkedAt = new Date().toISOString();
+    state.checkedAt = now;
     state.checkedBy = checkerName();
   }
   if (nextStatus !== "draft" && state.locked !== true) {
@@ -24005,7 +25435,7 @@ projectStatusSelect?.addEventListener("change", () => {
 
 projectLockToggle?.addEventListener("change", () => {
   if (cloudPermissionReadOnly) {
-    window.alert("This team spool is view/comment only for your role. Ask an owner/admin to unlock or edit it.");
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to unlock or edit it.");
     updateControls();
     return;
   }
@@ -24075,13 +25505,13 @@ previewResetButton?.addEventListener("click", resetThreeView);
 projectCommentAddButton?.addEventListener("click", () => {
   addProjectComment().catch((error) => {
     console.warn("Add comment failed.", error);
-    window.alert(error?.message || "Add comment failed.");
+    showAppNotice(error?.message || "Add comment failed.");
   });
 });
 projectCommentRefreshButton?.addEventListener("click", () => {
   loadProjectComments().catch((error) => {
     console.warn("Refresh comments failed.", error);
-    window.alert(error?.message || "Refresh comments failed.");
+    showAppNotice(error?.message || "Refresh comments failed.");
   });
 });
 projectCommentInput?.addEventListener("keydown", (event) => {
@@ -24089,7 +25519,7 @@ projectCommentInput?.addEventListener("keydown", (event) => {
     event.preventDefault();
     addProjectComment().catch((error) => {
       console.warn("Add comment failed.", error);
-      window.alert(error?.message || "Add comment failed.");
+      showAppNotice(error?.message || "Add comment failed.");
     });
   }
 });
@@ -24106,13 +25536,13 @@ saveDefaultsButton?.addEventListener("click", saveCurrentSettingsAsDefaults);
 saveBrowserProjectButton?.addEventListener("click", () => {
   saveBrowserProject().catch((error) => {
     console.warn("Save project failed.", error);
-    window.alert(error?.message || "Save project failed.");
+    showAppNotice(error?.message || "Save project failed.");
   });
 });
 openBrowserProjectButton?.addEventListener("click", () => {
   openBrowserProject().catch((error) => {
     console.warn("Open project failed.", error);
-    window.alert(error?.message || "Open project failed.");
+    showAppNotice(error?.message || "Open project failed.");
   });
 });
 document.querySelector("#deleteButton").addEventListener("click", deleteSelection);
@@ -24131,7 +25561,7 @@ drawingAssistantModeButtons.forEach((button) => {
 drawingAssistantFileInput?.addEventListener("change", () => {
   loadDrawingAssistantFile(drawingAssistantFileInput.files?.[0]).catch((error) => {
     console.warn("Drawing assistant file failed.", error);
-    window.alert("Could not load that drawing.");
+    showAppNotice("Could not load that drawing.");
   });
   drawingAssistantFileInput.value = "";
 });
@@ -24201,6 +25631,14 @@ document.addEventListener("keydown", (event) => {
       closeToolSettingsDialog();
       return;
     }
+    if (fieldInputDialog && !fieldInputDialog.hidden) {
+      closeFieldInputDialog(null);
+      return;
+    }
+    if (appConfirmDialog && !appConfirmDialog.hidden) {
+      closeAppConfirmDialog(false);
+      return;
+    }
     if (noteDialog && !noteDialog.hidden) {
       closeNoteDialog(null);
       return;
@@ -24250,7 +25688,7 @@ function isEditingField(target) {
 }
 
 function shouldStopDrawingOnEnter(target) {
-  if (!(state.activeTool === "draw" || pendingDraw)) return false;
+  if (!(DRAW_STOP_TOOLS.has(state.activeTool) || pendingDraw)) return false;
   if (keyboardBlockingOverlayOpen()) return false;
   if (!(target instanceof HTMLElement)) return true;
   if (target.isContentEditable || target instanceof HTMLTextAreaElement) return false;
@@ -24269,7 +25707,10 @@ function keyboardBlockingOverlayOpen() {
     (authDialog && !authDialog.hidden) ||
     (homeDashboardDialog && !homeDashboardDialog.hidden) ||
     (projectLibraryDialog && !projectLibraryDialog.hidden) ||
+    (regressionDialog && !regressionDialog.hidden) ||
     (toolSettingsDialog && !toolSettingsDialog.hidden) ||
+    (fieldInputDialog && !fieldInputDialog.hidden) ||
+    (appConfirmDialog && !appConfirmDialog.hidden) ||
     (noteDialog && !noteDialog.hidden) ||
     (helpDialog && !helpDialog.hidden) ||
     (tutorialDialog && !tutorialDialog.hidden) ||
@@ -24320,8 +25761,11 @@ setupAuthDialog();
 setupHomeDashboard();
 setupProjectDialog();
 setupToolSettingsDialog();
+setupFieldInputDialog();
+setupAppConfirmDialog();
 setupNoteDialog();
 setupTutorialDialog();
+setupRegressionDialog();
 setupHelpDialog();
 setupPanelFullscreen();
 setupFloatingPreviewPanel();

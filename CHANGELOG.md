@@ -1,6 +1,122 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.24`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.39`.
+
+## v2.39 - Hidden 3D Startup
+
+- Made the 3D preview start hidden by default so the drawing canvas opens cleaner.
+- Kept the existing Show 3D restore button and mobile 3D panel action for quick access when the preview is needed.
+- Added the hidden state directly to the startup HTML to avoid the preview flashing open while the app loads.
+- Bumped app cache to `spoolmate-v187`.
+
+## v2.38 - Matched Cut List Labels
+
+- Matched Cut List pipe-run labels to the numbered drawing key, so rows now use IDs such as `D1`, `D2` and merged branch cuts such as `D1+D2`.
+- Kept point-to-point run detail as secondary information under the cut row instead of making it the main label.
+- Updated fab sheet run tables to use the same cut-row IDs and branch-merged cut rows as the app Cut List tab.
+- Bumped app cache to `spoolmate-v186`.
+
+## v2.37 - Branch Reducer Separation
+
+- Kept Branch and Tee behaviour separate when pipe sizes change.
+- Preserved the branch marker after the Branch tool splits a straight main run, so it does not get cleaned up before the branch leg is drawn.
+- Prevented automatic reducers from being generated at branch-weld nodes; reducers now stay limited to normal run/bend changes and tee connections.
+- Updated the pipe-size tutorial text to clarify that branch welds are cut into the main pipe with no reducer.
+- Bumped app cache to `spoolmate-v185`.
+
+## v2.36 - Light Theme Refresh
+
+- Made Light the default theme for new devices while preserving an existing saved Dark preference.
+- Retuned the light UI palette from mint green to a cleaner steel/CAD look with warm white panels, graphite text and cyan-blue controls.
+- Updated the topbar, action cluster, project chips, auth tabs, panel bars and dashboard primary action to match the refreshed light theme.
+- Updated the browser/PWA theme colour for light mode.
+- Bumped app cache to `spoolmate-v184`.
+
+## v2.35 - App Notices and Confirmations
+
+- Replaced native browser alert boxes with SpoolMate toast notices for saved, copied, imported, warning and error messages.
+- Replaced native browser confirm boxes with a SpoolMate confirmation modal for delete, restore, open, reload, overwrite and replace actions.
+- Added safer confirm styling for destructive actions, including red delete/overwrite confirmation buttons.
+- Added mobile-friendly toast placement and dark-mode blue styling.
+- Bumped app cache to `spoolmate-v183`.
+
+## v2.34 - Polished Input Dialogs
+
+- Replaced native browser prompt boxes with a SpoolMate-styled input dialog for pipe length, offset C/C, bend angle, measurement labels, fitting weights and checked-by names.
+- Added unit pills for mm, kg and degrees so field edits are clearer.
+- Added a larger read-only report text dialog when clipboard copy is blocked.
+- Wired the new dialog into Escape handling and keyboard shortcut blocking.
+- Bumped app cache to `spoolmate-v182`.
+
+## v2.33 - Regression Test Kit
+- Added a Review menu Test Kit with built-in regression sample spools for workshop basics, reducing tees, welded branches and 45 degree offsets with sockets.
+- Added expected-behaviour checklists for each sample so updates can be checked against known examples.
+- Added a manual post-update checklist for Enter-to-stop drawing, right-click/long-press menus, 3D movement, PDF export and mobile/tablet usability.
+- Loading a test sample now clears cloud state, opens the review checks and resets next IDs safely.
+- Bumped app cache to `spoolmate-v181`.
+
+## v2.32 - Mobile and Tablet Field Mode
+- Added an automatic field-layout mode for touch devices with a cleaner topbar, larger drawing tools and clearer panel access.
+- Moved Account access into the main Menu so touch screens can keep the top action area focused on New, Save, Jobs and Menu.
+- Improved long-press/right-click menus on touch screens with a bottom-sheet layout, larger actions, a grab handle and a visible Close button.
+- Increased touch hit zones for tool buttons, mobile panel buttons and action-sheet controls.
+- Bumped app cache to `spoolmate-v180`.
+
+## v2.31 - Drawing Trust Pass
+- Locked endpoint fittings tighter so flanges and roll grooves always store on a pipe end, including older saved drawings that had near-end positions.
+- Added redraw-time geometry cleanup for stale branch flags, reducer-side overrides, invalid fitting references and invalid selections.
+- Kept selected pipe sizes in sync with the drawing default so continuing from a selected run is less likely to fall back to the wrong NB.
+- Normalized new run pipe sizes when pipes are created.
+- Made Enter stop drawing from Draw, Tee and Branch states, including when a pending drag is active.
+- Bumped app cache to `spoolmate-v179`.
+
+## v2.30 - Fab Sheet and Field Export Polish
+
+- Tightened fabrication PDF page margins and drawing report margins so exported spools fill more of the page.
+- Enlarged the report drawing area and made the export projection use less blank padding while still leaving room for tags and dimensions.
+- Renamed the take-off PDF style to Material order / take-off sheet and improved wide report tables so they use the available sheet width.
+- Added safer empty-drawing handling for report projection and larger touch targets for tablet/phone workflow buttons.
+- Bumped app cache to `spoolmate-v178`.
+
+## v2.29 - Compact Header Spacing
+
+- Reworked the top command bar into a tighter two-band layout so the mode/actions row and drawing setup controls use the available width more evenly.
+- Split the setup controls into full-width grouped panels for project, pipe and drawing display settings.
+- Bumped app cache to `spoolmate-v177`.
+
+## v2.28 - Sorted Top Command Bar
+
+- Reworked the top command area into clearer groups: brand/mode switching, project workflow, pipe setup, drawing view controls and project actions.
+- Added responsive rules so the command bar stays organised on laptop, tablet and phone widths.
+- Bumped app cache to `spoolmate-v176`.
+
+## v2.27 - Code Audit and Status Metadata Fix
+
+- Ran a code audit over the recent Jobs, activity history and production workflow changes.
+- Fixed the top Status dropdown so setting a drawing to Fabricated now also records production completion metadata, matching the Jobs board quick action behaviour.
+- Verified direct HTML listeners point at existing elements and service-worker cached files exist.
+- Bumped app cache to `spoolmate-v175`.
+
+## v2.26 - Activity History and Team Alerts
+
+- Added automatic activity history on each spool for status changes, assignment changes, due-date changes, priority changes, hold changes and production notes.
+- Show the latest activity on production cards and the last few activity items inside opened job folders.
+- Added an Activity history card to the open drawing Workflow panel.
+- Added Team alerts to the Jobs dashboard for overdue spools, due-today spools, spools assigned to you, ready-to-check spools and open production notes.
+- Added a better job-level dashboard inside opened job folders with totals for total, ready check, checked, issued, fabricated, overdue and on hold.
+- Added a clean Needs doing today list inside each opened job folder.
+- Updated the Production board tutorial topic for alerts and activity history.
+- Bumped app cache to `spoolmate-v174`.
+
+## v2.25 - Production Board Workflow Polish
+
+- Made the Jobs production board feel more like a workshop board with filters for Active, Due soon, Overdue, On hold, Mine and All.
+- Added clearer production-card badges for stage, due state, priority and holds, plus a hold-reason field directly on each card.
+- Added quick card actions for Ready, Issued and Fabbed so common stage changes do not require opening a dropdown.
+- Reworked daily/weekly Jobs reports into a clearer handover format with next actions, checking queue, issue/fabrication queue, holds/blockers, assignee workload and recent progress.
+- Added assignee suggestions from approved team members and saved project assignees.
+- Added a Production board tutorial topic.
+- Bumped app cache to `spoolmate-v173`.
 
 ## v2.24 - Team Roles and Fab Sheet Templates
 

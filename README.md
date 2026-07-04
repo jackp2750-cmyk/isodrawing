@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.24`
+Current app version: `v2.39`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -27,7 +27,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Calculate centre of gravity and optional suggested lifting lug points.
 - Preview the spool in 3D with realistic, workshop, carbon, stainless, painted, transparent, outline and CAD-style views.
 - Float, hide, minimize or fullscreen the 3D preview.
-- Export fabrication PDF sheets, 3D images and project files, including workshop, client/approval and take-off PDF styles.
+- Export fabrication PDF sheets, 3D images and project files, including workshop, client/approval and material order/take-off PDF styles.
 - Use the Drawing import assistant to upload a supplied drawing/photo/PDF, calibrate a known dimension and trace centreline runs into a SpoolMate spool.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
 - See cloud save confidence at a glance with saved, unsaved, saving, failed and conflict states.
@@ -37,8 +37,12 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Use the built-in Jobs `Guide` button to show the in-window guide only when needed.
 - Use the Jobs `Comms` button for shared company messages and a combined view of active spool/yard notes.
 - Generate a daily or weekly Jobs report from the dashboard, including stage counts, due/overdue work, hold items, assignees and recent progress.
-- Assign saved spools to team members, set due dates, priority and hold notes, and move each spool through Draft, Ready to check, Checked, Issued, Cutting, Fit-up, Welded, Paint / finish and Complete stages.
-- Drag production cards between stages, or use the card controls to change stage, assignee, due date, due time, priority and hold.
+- Assign saved spools to team members, set due dates, priority and hold notes, and move each spool through Draft, Ready to check, Checked, Issued, Cutting, Fit-up, Welded, Paint / finish and Fabricated stages.
+- Drag production cards between stages, filter the board by active/due/overdue/hold/mine/all, or use quick Ready, Issued and Fabbed buttons on each card.
+- See Team alerts for spools assigned to you, due today, overdue, ready to check or carrying an open production note.
+- Keep an automatic activity history on each spool for status moves, assignment changes, due changes, hold changes and production notes.
+- Open a job folder to see job-level totals for total, ready check, checked, issued, fabricated, overdue and on-hold spools, plus a clean needs-doing-today list.
+- Use improved daily/weekly Jobs reports with next actions, checking queue, issue/fabrication queue, blockers, assignee workload and recent progress.
 - Add short team/yard notes to production cards and mark notes done so they are cleaned up after one week.
 - Use accounts, trials/licences, company/team projects, project comments and owner/admin/member team permissions through Supabase.
 - Install as a Progressive Web App on iPad, Android and desktop when hosted over HTTPS.

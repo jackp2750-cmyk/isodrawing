@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#071018" />
+    <meta name="theme-color" content="#f6f8f7" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="SpoolMate" />
@@ -13,12 +13,12 @@
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
     <script>
       try {
-        document.documentElement.dataset.theme = localStorage.getItem("spoolmate-theme-v1") === "light" ? "light" : "dark";
+        document.documentElement.dataset.theme = localStorage.getItem("spoolmate-theme-v1") === "dark" ? "dark" : "light";
       } catch {
-        document.documentElement.dataset.theme = "dark";
+        document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=224" />
+    <link rel="stylesheet" href="./styles.css?v=239" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -183,95 +183,103 @@
 
     <div class="app-shell">
       <header class="topbar">
-        <div class="brand">
-          <img class="brand-logo" src="./icons/spoolmate-mark.png" alt="" aria-hidden="true" />
-          <div>
-            <strong>SpoolMate</strong>
-            <small>2D isometric pipe spools to 3D images</small>
-            <span class="version-badge" id="appVersionBadge">v2.24</span>
+        <div class="topbar-primary">
+          <div class="brand">
+            <img class="brand-logo" src="./icons/spoolmate-mark.png" alt="" aria-hidden="true" />
+            <div>
+              <strong>SpoolMate</strong>
+              <small>2D isometric pipe spools to 3D images</small>
+              <span class="version-badge" id="appVersionBadge">v2.39</span>
+            </div>
           </div>
+
+          <nav class="mode-switcher" aria-label="Workflow mode">
+            <button class="active" data-app-mode="draw" type="button" aria-pressed="true">Draw</button>
+            <button data-app-mode="edit" type="button" aria-pressed="false">Edit</button>
+            <button data-app-mode="review" type="button" aria-pressed="false">Review</button>
+            <button data-app-mode="export" type="button" aria-pressed="false">Export</button>
+          </nav>
         </div>
 
-        <nav class="mode-switcher" aria-label="Workflow mode">
-          <button class="active" data-app-mode="draw" type="button" aria-pressed="true">Draw</button>
-          <button data-app-mode="edit" type="button" aria-pressed="false">Edit</button>
-          <button data-app-mode="review" type="button" aria-pressed="false">Review</button>
-          <button data-app-mode="export" type="button" aria-pressed="false">Export</button>
-        </nav>
-
         <div class="topbar-settings" aria-label="Project defaults, drawing overlays and actions">
-          <span class="project-readout" id="projectReadout">No project set</span>
-          <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
-            <button data-theme-choice="light" type="button" role="tab" aria-selected="false">Light</button>
-            <button class="active" data-theme-choice="dark" type="button" role="tab" aria-selected="true">Dark</button>
+          <div class="topbar-settings-row project-row">
+            <span class="project-readout" id="projectReadout">No project set</span>
+            <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
+              <button class="active" data-theme-choice="light" type="button" role="tab" aria-selected="true">Light</button>
+              <button data-theme-choice="dark" type="button" role="tab" aria-selected="false">Dark</button>
+            </div>
+            <label class="dimension-style-field topbar-secondary-control">
+              <span>Status</span>
+              <select id="projectStatusSelect" aria-label="Drawing status">
+                <option value="draft">Draft</option>
+                <option value="readycheck">Ready to check</option>
+                <option value="checked">Checked</option>
+                <option value="issued">Issued</option>
+                <option value="cutting">Cutting</option>
+                <option value="fitup">Fit-up</option>
+                <option value="welded">Welded</option>
+                <option value="finish">Paint / finish</option>
+                <option value="complete">Fabricated</option>
+              </select>
+            </label>
+            <label class="toggle top-toggle topbar-secondary-control">
+              <input id="projectLockToggle" type="checkbox" />
+              <span>Lock edits</span>
+            </label>
           </div>
-          <label class="dimension-style-field topbar-secondary-control">
-            <span>Status</span>
-            <select id="projectStatusSelect" aria-label="Drawing status">
-              <option value="draft">Draft</option>
-              <option value="readycheck">Ready to check</option>
-              <option value="checked">Checked</option>
-              <option value="issued">Issued</option>
-              <option value="cutting">Cutting</option>
-              <option value="fitup">Fit-up</option>
-              <option value="welded">Welded</option>
-              <option value="finish">Paint / finish</option>
-              <option value="complete">Complete</option>
-            </select>
-          </label>
-          <label class="toggle top-toggle topbar-secondary-control">
-            <input id="projectLockToggle" type="checkbox" />
-            <span>Lock edits</span>
-          </label>
-          <label class="top-field">
-            <span>Material</span>
-            <select id="pipeSpecSelect">
-              <option value="carbon40">Carbon Sch 40</option>
-              <option value="stainless10">Stainless Sch 10S</option>
-            </select>
-          </label>
-          <label class="top-field">
-            <span>Pipe NB</span>
-            <select id="pipeSizeSelect"></select>
-          </label>
-          <span class="size-readout top-size-readout" id="pipeSizeReadout">OD 33.4 mm</span>
-          <label class="toggle top-toggle">
-            <input id="dimensionToggle" type="checkbox" checked />
-            <span>Dimensions</span>
-          </label>
-          <label class="dimension-style-field drawing-detail-field">
-            <span>Detail</span>
-            <select id="drawingDetailSelect" aria-label="Drawing detail">
-              <option value="clean">Clean</option>
-              <option value="fab">Fab dims</option>
-              <option value="sizes">Sizes</option>
-              <option value="callouts">Callouts</option>
-              <option value="full">Full</option>
-            </select>
-          </label>
-          <label class="dimension-style-field dimension-mode-field">
-            <span>Dim view</span>
-            <select id="dimensionStyleSelect" aria-label="Dimension style">
-              <option value="labels">Pipe labels</option>
-              <option value="redline">Red C/C lines</option>
-              <option value="numbered" selected>Numbered key</option>
-              <option value="chain">Chain dims</option>
-            </select>
-          </label>
-          <label class="toggle top-toggle topbar-secondary-control">
-            <input id="liftingToggle" type="checkbox" checked />
-            <span>Lifting points</span>
-          </label>
-          <label class="dimension-style-field lifting-angle-field topbar-secondary-control">
-            <span>Sling angle</span>
-            <select id="liftingAngleSelect" aria-label="Sling angle from horizontal">
-              <option value="30">30 deg</option>
-              <option value="45">45 deg</option>
-              <option value="60">60 deg</option>
-              <option value="75">75 deg</option>
-              <option value="90">90 deg</option>
-            </select>
-          </label>
+          <div class="topbar-settings-row pipe-row">
+            <label class="top-field">
+              <span>Material</span>
+              <select id="pipeSpecSelect">
+                <option value="carbon40">Carbon Sch 40</option>
+                <option value="stainless10">Stainless Sch 10S</option>
+              </select>
+            </label>
+            <label class="top-field">
+              <span>Pipe NB</span>
+              <select id="pipeSizeSelect"></select>
+            </label>
+            <span class="size-readout top-size-readout" id="pipeSizeReadout">OD 33.4 mm</span>
+          </div>
+          <div class="topbar-settings-row view-row">
+            <label class="toggle top-toggle">
+              <input id="dimensionToggle" type="checkbox" checked />
+              <span>Dimensions</span>
+            </label>
+            <label class="dimension-style-field drawing-detail-field">
+              <span>Detail</span>
+              <select id="drawingDetailSelect" aria-label="Drawing detail">
+                <option value="clean">Clean</option>
+                <option value="fab">Fab dims</option>
+                <option value="sizes">Sizes</option>
+                <option value="callouts">Callouts</option>
+                <option value="full">Full</option>
+              </select>
+            </label>
+            <label class="dimension-style-field dimension-mode-field">
+              <span>Dim view</span>
+              <select id="dimensionStyleSelect" aria-label="Dimension style">
+                <option value="labels">Pipe labels</option>
+                <option value="redline">Red C/C lines</option>
+                <option value="numbered" selected>Numbered key</option>
+                <option value="chain">Chain dims</option>
+              </select>
+            </label>
+            <label class="toggle top-toggle topbar-secondary-control">
+              <input id="liftingToggle" type="checkbox" checked />
+              <span>Lifting points</span>
+            </label>
+            <label class="dimension-style-field lifting-angle-field topbar-secondary-control">
+              <span>Sling angle</span>
+              <select id="liftingAngleSelect" aria-label="Sling angle from horizontal">
+                <option value="30">30 deg</option>
+                <option value="45">45 deg</option>
+                <option value="60">60 deg</option>
+                <option value="75">75 deg</option>
+                <option value="90">90 deg</option>
+              </select>
+            </label>
+          </div>
         </div>
 
         <div class="topbar-actions" aria-label="Project actions">
@@ -312,6 +320,10 @@
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Dashboard</span>
                   </button>
+                  <button class="icon-button labeled" id="accountMenuButton" type="button" title="Account and cloud sync" aria-label="Account and cloud sync">
+                    <svg><use href="#icon-user"></use></svg>
+                    <span>Account</span>
+                  </button>
                   <button class="icon-button labeled" id="tutorialButton" type="button" title="Open SpoolMate tutorial" aria-label="Open SpoolMate tutorial">
                     <svg><use href="#icon-help"></use></svg>
                     <span>Tutorial</span>
@@ -335,6 +347,10 @@
                     <svg><use href="#icon-select"></use></svg>
                     <span>Check</span>
                   </button>
+                  <button class="icon-button labeled" id="regressionChecklistButton" type="button" title="Open regression test samples" aria-label="Open regression test samples">
+                    <svg><use href="#icon-report"></use></svg>
+                    <span>Test kit</span>
+                  </button>
                   <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
                     <svg><use href="#icon-reset"></use></svg>
                     <span>Revision</span>
@@ -351,7 +367,7 @@
                     <select id="fabSheetTemplateSelect" aria-label="Fabrication PDF style">
                       <option value="workshop">Workshop cut sheet</option>
                       <option value="client">Client / approval sheet</option>
-                      <option value="takeoff">Fitting / take-off sheet</option>
+                      <option value="takeoff">Material order / take-off sheet</option>
                     </select>
                   </label>
                   <button class="primary-button" id="export3dButton" type="button">
@@ -670,7 +686,7 @@
           </div>
         </aside>
 
-        <section class="preview-panel" aria-label="3D preview">
+        <section class="preview-panel" aria-label="3D preview" hidden>
           <div class="panel-bar">
             <div class="bar-title">
               <span>3D Pipe Preview</span>
@@ -1087,6 +1103,21 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop regression-backdrop" id="regressionDialog" hidden>
+        <section class="project-dialog-card regression-card" aria-label="Regression test kit">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Regression test kit</strong>
+              <small>Load known spools after an update and check the expected behaviours.</small>
+            </div>
+            <button class="icon-button labeled" id="regressionCloseButton" type="button">Close</button>
+          </div>
+          <div class="regression-summary" id="regressionSummary"></div>
+          <div class="regression-sample-list" id="regressionSampleList"></div>
+          <div class="regression-checklist" id="regressionChecklist"></div>
+        </section>
+      </div>
+
       <div class="project-dialog-backdrop note-dialog-backdrop" id="noteDialog" hidden>
         <section class="project-dialog-card note-dialog-card" aria-label="Text note editor">
           <div class="project-dialog-header">
@@ -1112,6 +1143,45 @@
           <div class="project-dialog-actions note-dialog-actions">
             <button class="icon-button labeled" id="noteDialogCancelButton" type="button">Cancel</button>
             <button class="primary-button" id="noteDialogSaveButton" type="button">Add note</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop field-input-backdrop" id="fieldInputDialog" hidden>
+        <form class="project-dialog-card field-input-card" id="fieldInputForm" aria-label="SpoolMate input">
+          <div class="project-dialog-header">
+            <div>
+              <strong id="fieldInputTitle">Edit value</strong>
+              <small id="fieldInputHelp">Enter the value to apply to the drawing.</small>
+            </div>
+          </div>
+          <label class="field field-input-field" id="fieldInputLabelWrap">
+            <span id="fieldInputLabel">Value</span>
+            <div class="field-input-control">
+              <input id="fieldInputValue" type="text" autocomplete="off" />
+              <textarea id="fieldInputTextArea" rows="7" hidden></textarea>
+              <em id="fieldInputUnit" hidden>mm</em>
+            </div>
+          </label>
+          <div class="project-dialog-actions field-input-actions">
+            <button class="icon-button labeled" id="fieldInputCancelButton" type="button">Cancel</button>
+            <button class="primary-button" id="fieldInputSubmitButton" type="submit">Apply</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="app-toast-stack" id="appToastStack" aria-live="polite" aria-atomic="false"></div>
+
+      <div class="project-dialog-backdrop app-confirm-backdrop" id="appConfirmDialog" hidden>
+        <section class="project-dialog-card app-confirm-card" aria-label="SpoolMate message">
+          <div class="app-confirm-icon" id="appConfirmIcon" aria-hidden="true">!</div>
+          <div class="app-confirm-copy">
+            <strong id="appConfirmTitle">Confirm action</strong>
+            <p id="appConfirmMessage">Are you sure?</p>
+          </div>
+          <div class="project-dialog-actions app-confirm-actions">
+            <button class="icon-button labeled" id="appConfirmCancelButton" type="button">Cancel</button>
+            <button class="primary-button" id="appConfirmOkButton" type="button">Continue</button>
           </div>
         </section>
       </div>
@@ -1344,6 +1414,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=224"></script>
+    <script defer src="./app.js?v=239"></script>
   </body>
 </html>
