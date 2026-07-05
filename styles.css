@@ -690,6 +690,10 @@ body.action-menu-open .topbar-actions {
   max-width: 132px;
 }
 
+.pipe-label-mode-field select {
+  max-width: 126px;
+}
+
 .topbar-secondary-control {
   opacity: 0.86;
 }
@@ -5936,6 +5940,124 @@ body.auth-gate-open .app-shell {
   font-size: 10px;
 }
 
+.production-command-strip {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid rgba(0, 132, 255, 0.18);
+  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(234, 247, 243, 0.82), rgba(255, 253, 248, 0.86));
+}
+
+.production-command-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.production-command-head strong {
+  display: block;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 950;
+}
+
+.production-command-head span {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.production-command-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.production-command-actions button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.production-command-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.production-command-grid button {
+  min-width: 0;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 2px 8px;
+  align-content: center;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--button);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.production-command-grid button:hover,
+.production-command-actions button:hover {
+  border-color: rgba(0, 132, 255, 0.42);
+  background: var(--button-hover);
+}
+
+.production-command-grid button.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(0, 132, 255, 0.14), rgba(19, 216, 255, 0.08));
+  box-shadow: inset 0 0 0 1px rgba(0, 132, 255, 0.24);
+}
+
+.production-command-grid b {
+  grid-row: 1 / span 2;
+  min-width: 34px;
+  height: 34px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--teal-soft);
+  color: var(--teal-strong);
+  font-size: 16px;
+  font-weight: 950;
+}
+
+.production-command-grid span {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.production-command-grid small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 850;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .production-board-lanes {
   display: grid;
   grid-auto-flow: column;
@@ -7500,18 +7622,25 @@ body.auth-gate-open .app-shell {
 
   .project-report-head,
   .production-board-header,
+  .production-command-head,
   .project-report-grid {
     grid-template-columns: 1fr;
   }
 
   .project-report-actions,
-  .production-board-filters {
+  .production-board-filters,
+  .production-command-actions {
     justify-content: stretch;
   }
 
   .project-report-actions button,
-  .production-board-filters button {
+  .production-board-filters button,
+  .production-command-actions button {
     flex: 1 1 86px;
+  }
+
+  .production-command-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .team-comms-head,
@@ -8069,6 +8198,12 @@ body .preview-panel:fullscreen {
     bottom: 66px;
     min-height: 46px;
   }
+
+  body.field-layout .preview-show-button,
+  body.tablet-layout .preview-show-button,
+  body.phone-layout .preview-show-button {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
@@ -8145,6 +8280,7 @@ body .preview-panel:fullscreen {
   body.phone-layout .topbar-secondary-control,
   body.phone-layout .drawing-detail-field,
   body.phone-layout .dimension-mode-field,
+  body.phone-layout .pipe-label-mode-field,
   body.phone-layout .top-field:has(#pipeSpecSelect),
   body.phone-layout .top-size-readout {
     display: none;
@@ -9393,6 +9529,7 @@ body .preview-panel:fullscreen {
 :root[data-theme="dark"] .project-report-stats div,
 :root[data-theme="dark"] .project-report-grid section,
 :root[data-theme="dark"] .production-board-card,
+:root[data-theme="dark"] .production-command-strip,
 :root[data-theme="dark"] .production-lane,
 :root[data-theme="dark"] .project-folder,
 :root[data-theme="dark"] .project-job-window,
@@ -9424,9 +9561,29 @@ body .preview-panel:fullscreen {
 :root[data-theme="dark"] .project-guide-card,
 :root[data-theme="dark"] .project-report-card,
 :root[data-theme="dark"] .production-board-card,
+:root[data-theme="dark"] .production-command-strip,
 :root[data-theme="dark"] .project-folder-summary,
 :root[data-theme="dark"] .project-job-window {
   background: linear-gradient(180deg, #0d1f2d 0%, #08131d 100%);
+}
+
+:root[data-theme="dark"] .production-command-grid button,
+:root[data-theme="dark"] .production-command-actions button {
+  border-color: rgba(19, 216, 255, 0.22);
+  background: rgba(6, 17, 26, 0.88);
+  color: var(--ink);
+}
+
+:root[data-theme="dark"] .production-command-grid button:hover,
+:root[data-theme="dark"] .production-command-actions button:hover,
+:root[data-theme="dark"] .production-command-grid button.active {
+  border-color: rgba(19, 216, 255, 0.52);
+  background: rgba(0, 132, 255, 0.16);
+}
+
+:root[data-theme="dark"] .production-command-grid b {
+  background: rgba(19, 216, 255, 0.14);
+  color: #8eefff;
 }
 
 :root[data-theme="dark"] .project-alert-item button,

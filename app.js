@@ -59,6 +59,7 @@ const flangeStandardSelect = document.querySelector("#flangeStandardSelect");
 const dimensionToggle = document.querySelector("#dimensionToggle");
 const drawingDetailSelect = document.querySelector("#drawingDetailSelect");
 const dimensionStyleSelect = document.querySelector("#dimensionStyleSelect");
+const pipeLabelModeSelect = document.querySelector("#pipeLabelModeSelect");
 const liftingToggle = document.querySelector("#liftingToggle");
 const liftingAngleSelect = document.querySelector("#liftingAngleSelect");
 const previewLabelLayer = document.querySelector("#previewLabelLayer");
@@ -246,8 +247,8 @@ const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.39";
-const APP_BUILD_DATE = "2026-07-04";
+const APP_VERSION = "v2.45";
+const APP_BUILD_DATE = "2026-07-05";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -265,6 +266,8 @@ const VERSION_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const PROJECT_FILE_VERSION = 1;
 const FAB_PDF_PAGE_WIDTH_PT = 1190.55;
 const FAB_PDF_PAGE_HEIGHT_PT = 841.89;
+const REPORT_CANVAS_WIDTH = 1800;
+const REPORT_CANVAS_HEIGHT = 1240;
 const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 1;
 const MIN_LENGTH_MM = 50;
@@ -382,6 +385,7 @@ const DRAW_STOP_TOOLS = new Set(["draw", "tee", "branch"]);
 const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
 const DRAWING_DETAIL_MODES = new Set(["clean", "fab", "sizes", "callouts", "full"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
+const PIPE_LABEL_MODES = new Set(["auto", "key", "all", "export", "off"]);
 const NODE_CONNECTION_TYPES = new Set(["tee", "branch"]);
 const LIFTING_SLING_ANGLES = new Set([30, 45, 60, 75, 90]);
 const PROJECT_STATUS_FLOW = [
@@ -412,10 +416,13 @@ const PROJECT_STATUS_ALIASES = {
 const PRODUCTION_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 const PRODUCTION_BOARD_FILTERS = {
   active: "Active",
+  today: "Due today",
   due: "Due soon",
   overdue: "Overdue",
+  readycheck: "Ready check",
   hold: "On hold",
   mine: "Mine",
+  message: "Messages",
   all: "All",
 };
 const PRODUCTION_BOARD_FILTER_KEYS = new Set(Object.keys(PRODUCTION_BOARD_FILTERS));
@@ -521,6 +528,7 @@ const TUTORIAL_STEPS = [
     demo: "jobs",
     items: [
       "Use quick buttons on cards for Ready, Issued and Fabbed status changes.",
+      "Use the Production command centre for Due today, Overdue, Ready check, Assigned to me, On hold and Messages shortcuts.",
       "Assign a person, due date, priority and hold reason directly on the card.",
       "Team alerts show overdue, due today, assigned-to-you, ready-to-check and open note items.",
       "Each spool keeps an activity history of production changes.",
@@ -683,7 +691,7 @@ const TUTORIAL_STEPS = [
     kicker: "Dimensions",
     menuLabel: "Dimensions",
     title: "Choose the clearest dimension style",
-    body: "Dimensions can be pipe labels, red centre-to-centre lines, numbered dimensions or chain dimensions depending on how busy the spool is.",
+    body: "Dimensions can be red centre-to-centre lines, numbered dimensions or chain dimensions. Pipe-size labels now have their own visibility menu so the drawing can stay clean.",
     target: "#dimensionStyleSelect",
     targetLabel: "Dimension style menu",
     action: "focusDimensions",
@@ -693,6 +701,7 @@ const TUTORIAL_STEPS = [
       "Red C/C lines are good for fabrication checking.",
       "Drag red dimension labels away from clashes.",
       "Use numbered or chain dimensions when labels get crowded.",
+      "Use Pipe labels to show key sizes, all sizes, export-only labels or hide them while drawing.",
     ],
   },
   {
@@ -1160,6 +1169,7 @@ function sampleState() {
     drawingDetail: "callouts",
     showDimensions: true,
     dimensionStyle: "numbered",
+    pipeLabelMode: "auto",
     showLiftingPoints: false,
     liftingSlingAngleDegrees: 60,
     projectId: null,
@@ -1197,6 +1207,7 @@ function hardCodedDrawingDefaults() {
     drawingDetail: "callouts",
     showDimensions: true,
     dimensionStyle: "numbered",
+    pipeLabelMode: "auto",
     showLiftingPoints: false,
     liftingSlingAngleDegrees: 60,
   };
@@ -1218,6 +1229,7 @@ function normalizeDrawingDefaults(defaults = {}) {
     drawingDetail: normalizeDrawingDetail(defaults.drawingDetail ?? base.drawingDetail),
     showDimensions: defaults.showDimensions !== false,
     dimensionStyle: normalizeDimensionStyle(defaults.dimensionStyle ?? base.dimensionStyle),
+    pipeLabelMode: normalizePipeLabelMode(defaults.pipeLabelMode ?? base.pipeLabelMode),
     showLiftingPoints: defaults.showLiftingPoints === true,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(defaults.liftingSlingAngleDegrees ?? base.liftingSlingAngleDegrees),
   };
@@ -1249,6 +1261,7 @@ function applyNumberedDimensionDefault(target) {
   target.drawingDetail = "callouts";
   target.showDimensions = true;
   target.dimensionStyle = "numbered";
+  target.pipeLabelMode = "auto";
   return target;
 }
 
@@ -1284,6 +1297,7 @@ function drawingDefaultsFromState(source = state) {
     drawingDetail: normalizeDrawingDetail(source?.drawingDetail),
     showDimensions: source?.showDimensions,
     dimensionStyle: source?.dimensionStyle,
+    pipeLabelMode: source?.pipeLabelMode,
     showLiftingPoints: source?.showLiftingPoints,
     liftingSlingAngleDegrees: source?.liftingSlingAngleDegrees,
   });
@@ -1332,6 +1346,7 @@ function blankState(options = {}) {
     drawingDetail: defaults.drawingDetail,
     showDimensions: defaults.showDimensions,
     dimensionStyle: defaults.dimensionStyle,
+    pipeLabelMode: defaults.pipeLabelMode,
     showLiftingPoints: defaults.showLiftingPoints,
     liftingSlingAngleDegrees: defaults.liftingSlingAngleDegrees,
     projectId: null,
@@ -1407,6 +1422,7 @@ function statePayload(options = {}) {
     drawingDetail: normalizeDrawingDetail(state.drawingDetail),
     showDimensions: state.showDimensions,
     dimensionStyle: normalizeDimensionStyle(state.dimensionStyle),
+    pipeLabelMode: normalizePipeLabelMode(state.pipeLabelMode),
     showLiftingPoints: state.showLiftingPoints,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees),
     projectId: state.projectId,
@@ -1487,6 +1503,7 @@ function stateFromPayload(payload, options = {}) {
     drawingDetail: savedDrawingDetail,
     showDimensions: savedShowDimensions,
     dimensionStyle: savedDimensionStyle,
+    pipeLabelMode: normalizePipeLabelMode(saved.pipeLabelMode),
     showLiftingPoints: applyNewDefaults ? false : saved.showLiftingPoints === true,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(saved.liftingSlingAngleDegrees),
     projectId: normalizeProjectId(saved.projectId),
@@ -2037,6 +2054,7 @@ function regressionTeeReducerState() {
     drawingDetail: "callouts",
     showDimensions: true,
     dimensionStyle: "numbered",
+    pipeLabelMode: "auto",
     showLiftingPoints: false,
     projectInfoPrompted: true,
     projectStatus: "draft",
@@ -2087,6 +2105,7 @@ function regressionBranchNoReducerState() {
     drawingDetail: "callouts",
     showDimensions: true,
     dimensionStyle: "numbered",
+    pipeLabelMode: "auto",
     showLiftingPoints: false,
     projectInfoPrompted: true,
     projectStatus: "draft",
@@ -2151,6 +2170,7 @@ function regressionOffsetSocketsState() {
     drawingDetail: "callouts",
     showDimensions: true,
     dimensionStyle: "numbered",
+    pipeLabelMode: "auto",
     showLiftingPoints: false,
     projectInfoPrompted: true,
     projectStatus: "draft",
@@ -2623,6 +2643,10 @@ function normalizeDimensionStyle(value) {
   return DIMENSION_STYLES.has(value) ? value : "labels";
 }
 
+function normalizePipeLabelMode(value) {
+  return PIPE_LABEL_MODES.has(value) ? value : "auto";
+}
+
 function normalizeAppMode(value) {
   return APP_MODES.has(value) ? value : "draw";
 }
@@ -2641,12 +2665,23 @@ function drawingDimensionsVisible() {
   return state.showDimensions !== false && detail !== "clean" && detail !== "sizes";
 }
 
-function drawingPipeSizeLabelsVisible() {
+function drawingPipeLabelMode() {
+  return normalizePipeLabelMode(state.pipeLabelMode);
+}
+
+function drawingPipeSizeLabelsVisible(options = {}) {
+  const mode = drawingPipeLabelMode();
+  if (options.export === true && mode === "export") return true;
+  if (mode === "off" || mode === "export") return false;
+  if (mode === "key" || mode === "all") return true;
   const detail = activeDrawingDetail();
   return detail === "sizes" || detail === "callouts" || detail === "full";
 }
 
-function drawingPipeSizeLabelMode() {
+function drawingPipeSizeLabelMode(options = {}) {
+  const mode = drawingPipeLabelMode();
+  if (mode === "all") return "all";
+  if (mode === "key" || (options.export === true && mode === "export")) return "compact";
   return activeDrawingDetail() === "full" ? "all" : "compact";
 }
 
@@ -3310,8 +3345,9 @@ function drawSpool2d(ctx, projection, options = {}) {
     drawBendAngles(ctx, projection);
   }
 
-  if (drawingPipeSizeLabelsVisible()) {
-    drawPipeSizeLabels2d(ctx, projection, segmentListForDraw, dimensionLayout);
+  const exportMode = options.export === true;
+  if (drawingPipeSizeLabelsVisible({ export: exportMode })) {
+    drawPipeSizeLabels2d(ctx, projection, segmentListForDraw, dimensionLayout, { export: exportMode });
   }
 
   for (const fitting of state.fittings) {
@@ -4210,14 +4246,14 @@ function compactPipeSizeLabelIndexes(segmentData) {
   return selected;
 }
 
-function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []) {
+function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = [], options = {}) {
   const layoutState = Array.isArray(dimensionLayout)
     ? { labels: dimensionLayout, pipes: [] }
     : dimensionLayout;
   const labels = layoutState.labels ?? [];
   const pipes = layoutState.pipes ?? [];
   const viewport = layoutState.viewport ?? dimensionViewport(ctx, 18);
-  const compactLabels = drawingPipeSizeLabelMode() === "compact" ? compactPipeSizeLabelIndexes(segmentData) : null;
+  const compactLabels = drawingPipeSizeLabelMode(options) === "compact" ? compactPipeSizeLabelIndexes(segmentData) : null;
 
   ctx.save();
   ctx.font = "900 10.5px Inter, system-ui, sans-serif";
@@ -9804,6 +9840,7 @@ function storeAppMode(mode) {
 }
 
 function loadPreviewFloatPreference() {
+  if (isTabletLayout()) return false;
   try {
     const saved = localStorage.getItem(PREVIEW_FLOAT_KEY);
     if (saved === "false") return false;
@@ -10672,6 +10709,8 @@ function updateControls() {
   updatePipeSizeControls();
   state.drawingDetail = normalizeDrawingDetail(state.drawingDetail);
   if (drawingDetailSelect) drawingDetailSelect.value = activeDrawingDetail();
+  state.pipeLabelMode = normalizePipeLabelMode(state.pipeLabelMode);
+  if (pipeLabelModeSelect) pipeLabelModeSelect.value = state.pipeLabelMode;
   dimensionToggle.checked = state.showDimensions;
   dimensionStyleSelect.value = normalizeDimensionStyle(state.dimensionStyle);
   dimensionStyleSelect.disabled = !state.showDimensions;
@@ -10786,6 +10825,11 @@ function showMobilePanel(panel = "drawing") {
   if (normalized === "preview" && previewPanelHidden) {
     previewPanelHidden = false;
     previewPanelMinimized = false;
+    updatePreviewFloatingState();
+  }
+  if (normalized === "preview" && isTabletLayout() && previewFloatManual && !document.body.classList.contains("drawing-panel-fullscreen")) {
+    previewFloatManual = false;
+    storePreviewFloatPreference(false);
     updatePreviewFloatingState();
   }
   const sheetOpen = normalized !== "drawing";
@@ -11861,6 +11905,9 @@ function handleProjectLibraryAction(actionElement) {
     return;
   }
   if (action === "show-report") {
+    if (actionElement.dataset.reportPeriod) {
+      projectLibraryReportPeriod = actionElement.dataset.reportPeriod === "weekly" ? "weekly" : "daily";
+    }
     showProjectLibraryReport();
     return;
   }
@@ -17001,10 +17048,13 @@ function productionProjectMatchesBoardFilter(project, filter = projectLibraryBoa
   const normalized = normalizeProductionBoardFilter(filter);
   if (normalized === "all") return true;
   if (normalized === "active") return status !== "complete";
+  if (normalized === "today") return status !== "complete" && dueState.key === "today";
   if (normalized === "due") return status !== "complete" && ["overdue", "today", "soon"].includes(dueState.key);
   if (normalized === "overdue") return status !== "complete" && dueState.key === "overdue";
+  if (normalized === "readycheck") return status === "readycheck";
   if (normalized === "hold") return status !== "complete" && production.hold;
   if (normalized === "mine") return status !== "complete" && productionAssignedToCurrentUser(production);
+  if (normalized === "message") return status !== "complete" && savedProjectProductionMessages(project).some((message) => !message.completed);
   return status !== "complete";
 }
 
@@ -17761,6 +17811,67 @@ async function copyProjectLibraryReport() {
   }
 }
 
+function productionCommandStripItem(projects, filter, label, hint, counts, activeFilter) {
+  const matching = sortedProductionProjects((Array.isArray(projects) ? projects : [])
+    .filter((project) => productionProjectMatchesBoardFilter(project, filter)));
+  const first = matching[0] ?? null;
+  const count = counts?.[filter] ?? matching.length;
+  let detail = hint;
+  if (first) {
+    const production = savedProjectProductionInfo(first);
+    const dueState = productionDueState(production);
+    const status = normalizeProjectStatus(savedProjectState(first)?.projectStatus);
+    detail = [
+      savedProjectSpoolTitle(first),
+      production.assignee ? `to ${production.assignee}` : "",
+      dueState.key !== "none" ? dueState.label : projectStatusLabel(status),
+    ].filter(Boolean).join(" / ");
+  }
+  return `
+    <button type="button" class="${activeFilter === filter ? "active" : ""}" data-project-library-action="board-filter" data-board-filter="${escapeHtml(filter)}">
+      <b>${count}</b>
+      <span>${escapeHtml(label)}</span>
+      <small>${escapeHtml(count ? detail : hint)}</small>
+    </button>
+  `;
+}
+
+function projectProductionCommandStrip(projects, counts, activeFilter) {
+  const shortcuts = [
+    ["today", "Due today", "Nothing due today."],
+    ["overdue", "Overdue", "No overdue spools."],
+    ["readycheck", "Ready check", "No checking queue."],
+    ["mine", "Assigned to me", "Nothing assigned to you."],
+    ["hold", "On hold", "No hold items."],
+    ["message", "Messages", "No open yard notes."],
+  ];
+  const active = normalizeProductionBoardFilter(activeFilter);
+  const totalActive = counts?.active ?? 0;
+  const openActions = (counts?.today ?? 0) + (counts?.overdue ?? 0) + (counts?.readycheck ?? 0) + (counts?.hold ?? 0) + (counts?.message ?? 0);
+  const scope = projectLibrarySource === "cloud"
+    ? activeCompanyIsApproved() ? activeCompany.name : "Cloud"
+    : "Browser";
+  const section = document.createElement("section");
+  section.className = "production-command-strip";
+  section.innerHTML = `
+    <div class="production-command-head">
+      <div>
+        <strong>Production command centre</strong>
+        <span>${openActions} action item${openActions === 1 ? "" : "s"} / ${totalActive} active spool${totalActive === 1 ? "" : "s"} / ${escapeHtml(scope)} scope</span>
+      </div>
+      <div class="production-command-actions">
+        <button type="button" data-project-library-action="show-report" data-report-period="daily">Daily report</button>
+        <button type="button" data-project-library-action="show-report" data-report-period="weekly">Weekly report</button>
+        <button type="button" data-project-library-action="show-comms">Comms</button>
+      </div>
+    </div>
+    <div class="production-command-grid">
+      ${shortcuts.map(([filter, label, hint]) => productionCommandStripItem(projects, filter, label, hint, counts, active)).join("")}
+    </div>
+  `;
+  return section;
+}
+
 function projectProductionBoard(projects) {
   const section = document.createElement("section");
   section.className = "production-board-card";
@@ -17788,6 +17899,7 @@ function projectProductionBoard(projects) {
     </div>
   `;
   section.append(header);
+  section.append(projectProductionCommandStrip(projects, counts, boardFilter));
 
   if (assigneeOptions) {
     const datalist = document.createElement("datalist");
@@ -21305,7 +21417,7 @@ function capture3dReportViews() {
       const views = [
         {
           title: "Isometric",
-          direction: [-1.35, -1.25, 0.95],
+          direction: [-1, -1, -1],
           up: [-0.45, -0.45, 1],
         },
         {
@@ -21600,24 +21712,27 @@ async function buildModelReportCanvas(modelViews) {
     image: await loadReportImage(view.dataUrl),
   })));
   const canvas = document.createElement("canvas");
-  canvas.width = 1800;
-  canvas.height = 1240;
+  canvas.width = REPORT_CANVAS_WIDTH;
+  canvas.height = REPORT_CANVAS_HEIGHT;
   const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = "#f7f3e9";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  drawReportHeader(ctx, canvas.width);
+  drawReportHeader(ctx, canvas.width, {
+    title: "3D model reference views",
+    subtitle: "Isometric, plan and side views for workshop interpretation",
+  });
 
-  const area = { x: 36, y: 150, width: canvas.width - 72, height: canvas.height - 186 };
+  const area = { x: 28, y: 132, width: canvas.width - 56, height: canvas.height - 156 };
   roundRect(ctx, area.x, area.y, area.width, area.height, 10);
-  ctx.fillStyle = "#fbfcfc";
+  ctx.fillStyle = "#fffdf8";
   ctx.fill();
   ctx.strokeStyle = "rgba(31, 42, 47, 0.18)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.fillStyle = "#1f3438";
-  ctx.font = "900 24px Inter, system-ui, sans-serif";
+  ctx.font = "950 23px Inter, system-ui, sans-serif";
   ctx.fillText(loadedViews.length > 1 ? "3D model views" : "3D model preview", area.x + 24, area.y + 42);
   ctx.font = "800 14px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#607174";
@@ -21625,27 +21740,27 @@ async function buildModelReportCanvas(modelViews) {
 
   if (loadedViews.length <= 1) {
     drawModelViewCard(ctx, loadedViews[0], {
-      x: area.x + 36,
-      y: area.y + 92,
-      width: area.width - 72,
-      height: area.height - 124,
+      x: area.x + 30,
+      y: area.y + 84,
+      width: area.width - 60,
+      height: area.height - 112,
     });
     return canvas;
   }
 
-  const gap = 26;
-  const top = area.y + 92;
-  const bottom = area.y + area.height - 30;
+  const gap = 20;
+  const top = area.y + 84;
+  const bottom = area.y + area.height - 26;
   const left = {
-    x: area.x + 30,
+    x: area.x + 24,
     y: top,
-    width: Math.round((area.width - gap - 72) * 0.62),
+    width: Math.round((area.width - gap - 58) * 0.64),
     height: bottom - top,
   };
   const right = {
     x: left.x + left.width + gap,
     y: top,
-    width: area.x + area.width - 30 - (left.x + left.width + gap),
+    width: area.x + area.width - 24 - (left.x + left.width + gap),
     height: bottom - top,
   };
   const smallHeight = Math.floor((right.height - gap) * 0.5);
@@ -21670,20 +21785,28 @@ function drawModelViewCard(ctx, view, area) {
   if (!view?.image) return;
 
   roundRect(ctx, area.x, area.y, area.width, area.height, 8);
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = "#f8fbfa";
   ctx.fill();
   ctx.strokeStyle = "rgba(31, 42, 47, 0.14)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
+  roundRect(ctx, area.x + 10, area.y + 10, area.width - 20, 34, 7);
+  ctx.fillStyle = "#eaf7f3";
+  ctx.fill();
   ctx.fillStyle = "#31454c";
-  ctx.font = "900 17px Inter, system-ui, sans-serif";
-  ctx.fillText(view.title || "Model", area.x + 18, area.y + 30);
+  ctx.font = "950 15px Inter, system-ui, sans-serif";
+  ctx.fillText(view.title || "Model", area.x + 24, area.y + 32);
+  ctx.fillStyle = "#607174";
+  ctx.font = "800 11px Inter, system-ui, sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText("not to scale", area.x + area.width - 24, area.y + 32);
+  ctx.textAlign = "left";
   drawContainedImage(ctx, view.image, {
     x: area.x + 16,
-    y: area.y + 46,
+    y: area.y + 52,
     width: area.width - 32,
-    height: area.height - 62,
+    height: area.height - 68,
   });
 }
 
@@ -21805,16 +21928,9 @@ function buildSpoolReportCanvas(template = fabSheetTemplate) {
 
 function buildWorkshopReportCanvas() {
   const quantities = quantitySummary();
-  const rowCount = Math.max((quantities.cutSegments ?? quantities.segments).length, 1);
-  const bendCount = Math.max(quantities.elbows.length, 1);
-  const teeCount = Math.max(quantities.tees.length, 1);
-  const branchCount = Math.max(quantities.branches.length, 1);
-  const reducerCount = Math.max(quantities.reducers.length, 1);
-  const fittingCount = Math.max(quantities.fittings.length, 1);
-  const takeoffCount = Math.max(takeoffCountRows(quantities).length, 1);
   const canvas = document.createElement("canvas");
-  canvas.width = 1800;
-  canvas.height = Math.max(1180, 930 + takeoffCount * 22 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
+  canvas.width = REPORT_CANVAS_WIDTH;
+  canvas.height = REPORT_CANVAS_HEIGHT;
   const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = "#f7f3e9";
@@ -21822,14 +21938,14 @@ function buildWorkshopReportCanvas() {
 
   drawReportHeader(ctx, canvas.width);
 
-  const margin = 26;
-  const gutter = 22;
-  const reportWidth = 560;
+  const margin = 24;
+  const gutter = 18;
+  const reportWidth = 625;
   const drawingArea = {
     x: margin,
-    y: 136,
+    y: 132,
     width: canvas.width - margin * 2 - gutter - reportWidth,
-    height: canvas.height - 160,
+    height: canvas.height - 156,
   };
   const reportArea = {
     x: drawingArea.x + drawingArea.width + gutter,
@@ -21839,15 +21955,15 @@ function buildWorkshopReportCanvas() {
   };
 
   drawReportDrawing(ctx, drawingArea);
-  drawReportTakeoff(ctx, reportArea, quantities);
+  drawReportTakeoff(ctx, reportArea, quantities, { compact: true });
   return canvas;
 }
 
 function buildClientReportCanvas() {
   const quantities = quantitySummary();
   const canvas = document.createElement("canvas");
-  canvas.width = 1800;
-  canvas.height = 1240;
+  canvas.width = REPORT_CANVAS_WIDTH;
+  canvas.height = REPORT_CANVAS_HEIGHT;
   const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = "#f7f3e9";
@@ -21885,7 +22001,7 @@ function buildTakeoffReportCanvas() {
   const fittingCount = Math.max(quantities.fittings.length, 1);
   const takeoffCount = Math.max(takeoffCountRows(quantities).length, 1);
   const canvas = document.createElement("canvas");
-  canvas.width = 1800;
+  canvas.width = REPORT_CANVAS_WIDTH;
   canvas.height = Math.max(1180, 680 + takeoffCount * 26 + rowCount * 34 + bendCount * 28 + teeCount * 28 + branchCount * 28 + reducerCount * 28 + fittingCount * 24);
   const ctx = canvas.getContext("2d");
 
@@ -21962,53 +22078,86 @@ function drawReportClientPanel(ctx, area, quantities) {
   ctx.restore();
 }
 
+function truncateReportText(ctx, value, maxWidth) {
+  const text = String(value ?? "");
+  if (ctx.measureText(text).width <= maxWidth) return text;
+  let lo = 0;
+  let hi = text.length;
+  while (lo < hi) {
+    const mid = Math.ceil((lo + hi) / 2);
+    if (ctx.measureText(`${text.slice(0, mid)}...`).width <= maxWidth) lo = mid;
+    else hi = mid - 1;
+  }
+  return `${text.slice(0, Math.max(0, lo))}...`;
+}
+
+function drawReportInfoTile(ctx, label, value, x, y, width, height = 38, options = {}) {
+  roundRect(ctx, x, y, width, height, 7);
+  ctx.fillStyle = options.strong ? "#d8f1ed" : "#f3f6f4";
+  ctx.fill();
+  ctx.strokeStyle = options.strong ? "rgba(15, 118, 110, 0.22)" : "rgba(31, 42, 47, 0.1)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#607174";
+  ctx.font = "850 10px Inter, system-ui, sans-serif";
+  ctx.fillText(label.toUpperCase(), x + 10, y + 14);
+  ctx.fillStyle = "#1f3438";
+  ctx.font = options.strong ? "950 15px Inter, system-ui, sans-serif" : "900 13px Inter, system-ui, sans-serif";
+  ctx.fillText(truncateReportText(ctx, value || "-", width - 20), x + 10, y + height - 9);
+}
+
 function drawReportHeader(ctx, width, options = {}) {
   const title = options.title || "Pipe spool fabrication sheet";
   const subtitle = options.subtitle || `Centre-to-centre drawing, cut lengths and estimated ${pipeSpec().material.toLowerCase()} weight`;
   const project = normalizeProjectInfo(state.projectInfo);
-  const reference = [
-    project.jobNumber ? `Job ${project.jobNumber}` : "",
-    project.spoolNumber ? `Spool ${project.spoolNumber}` : "",
-    project.revision ? `Rev ${project.revision}` : "",
-    project.client,
-  ].filter(Boolean).join("  |  ");
   const checked = state.checkedAt
     ? `Checked ${new Date(state.checkedAt).toLocaleDateString()}${state.checkedBy ? ` by ${state.checkedBy}` : ""}`
     : "Unchecked";
+  const status = `${projectStatusLabel()}${state.locked ? " / Locked" : ""}`;
+  const exported = new Date().toLocaleString();
 
   ctx.save();
-  roundRect(ctx, 26, 18, width - 52, 108, 12);
+  roundRect(ctx, 24, 16, width - 48, 104, 12);
   ctx.fillStyle = "#fffdf8";
   ctx.fill();
   ctx.strokeStyle = "rgba(31, 42, 47, 0.14)";
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  roundRect(ctx, 46, 38, 154, 52, 10);
+  roundRect(ctx, 42, 34, 74, 68, 10);
   ctx.fillStyle = "#123a40";
   ctx.fill();
-  ctx.fillStyle = "#fff";
-  ctx.font = "950 22px Inter, system-ui, sans-serif";
-  ctx.fillText("SPOOLMATE", 58, 70);
+  ctx.strokeStyle = "rgba(0, 174, 255, 0.36)";
+  ctx.stroke();
+  ctx.fillStyle = "#12d8ff";
+  ctx.font = "950 24px Inter, system-ui, sans-serif";
+  ctx.fillText("SM", 58, 76);
 
+  ctx.textAlign = "left";
   ctx.fillStyle = "#1f3438";
-  ctx.font = "900 34px Inter, system-ui, sans-serif";
-  ctx.fillText(title, 220, 52);
-  ctx.font = "800 14px Inter, system-ui, sans-serif";
+  ctx.font = "950 29px Inter, system-ui, sans-serif";
+  ctx.fillText(truncateReportText(ctx, title, 760), 134, 49);
+  ctx.font = "800 13px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
-  ctx.fillText(subtitle, 222, 78);
-  if (reference) {
-    ctx.fillText(reference, 222, 100);
-  }
-  ctx.textAlign = "right";
-  ctx.fillText(new Date().toLocaleString(), width - 48, 48);
-  ctx.fillText(`SpoolMate ${APP_VERSION}`, width - 48, 72);
-  ctx.fillText(`${projectStatusLabel()}${state.locked ? " / Locked" : ""}`, width - 48, 96);
-  if (project.drawnBy) {
-    ctx.fillText(`Drawn by ${project.drawnBy} / ${checked}`, width - 48, 120);
-  } else {
-    ctx.fillText(checked, width - 48, 120);
-  }
+  ctx.fillText(truncateReportText(ctx, subtitle, 820), 136, 73);
+  const clientLine = project.client ? `Client / area: ${project.client}` : `${pipeSpec().label} / ${checked}`;
+  ctx.fillText(truncateReportText(ctx, clientLine, 820), 136, 96);
+
+  const tileY = 31;
+  const tileH = 36;
+  const gap = 8;
+  const right = width - 44;
+  const tileW = 136;
+  drawReportInfoTile(ctx, "Job", project.jobNumber || "-", right - tileW * 4 - gap * 3, tileY, tileW, tileH, { strong: true });
+  drawReportInfoTile(ctx, "Spool", project.spoolNumber || "-", right - tileW * 3 - gap * 2, tileY, tileW, tileH, { strong: true });
+  drawReportInfoTile(ctx, "Rev", project.revision || "-", right - tileW * 2 - gap, tileY, tileW, tileH);
+  drawReportInfoTile(ctx, "Status", status, right - tileW, tileY, tileW, tileH);
+  drawReportInfoTile(ctx, "Drawn by", project.drawnBy || "-", right - tileW * 4 - gap * 3, tileY + tileH + 8, tileW, tileH);
+  drawReportInfoTile(ctx, "Checked", checked, right - tileW * 3 - gap * 2, tileY + tileH + 8, tileW, tileH);
+  drawReportInfoTile(ctx, "Exported", exported, right - tileW * 2 - gap, tileY + tileH + 8, tileW, tileH);
+  drawReportInfoTile(ctx, "Version", APP_VERSION, right - tileW, tileY + tileH + 8, tileW, tileH);
   ctx.restore();
 }
 
@@ -22018,6 +22167,7 @@ function drawReportDrawing(ctx, area) {
     drawingDetail: state.drawingDetail,
     showDimensions: state.showDimensions,
     dimensionStyle: state.dimensionStyle,
+    pipeLabelMode: state.pipeLabelMode,
     selectedSegments: [...state.selectedSegments],
     selectedSegment: state.selectedSegment,
     selectedFitting: state.selectedFitting,
@@ -22045,6 +22195,7 @@ function drawReportDrawing(ctx, area) {
     state.drawingDetail = reportDetail;
     state.showDimensions = true;
     state.dimensionStyle = reportDetail === "callouts" ? "numbered" : reportDetail === "fab" ? savedDimensionStyle : normalizeDimensionStyle(saved.dimensionStyle);
+    state.pipeLabelMode = normalizePipeLabelMode(saved.pipeLabelMode);
     state.selectedSegments = [];
     state.selectedSegment = null;
     state.selectedFitting = null;
@@ -22068,6 +22219,7 @@ function drawReportDrawing(ctx, area) {
     ctx.translate(area.x, area.y);
     drawGrid(ctx, area.width, area.height, projection);
     drawSpool2d(ctx, projection, {
+      export: true,
       viewport: {
         left: 10,
         top: 38,
@@ -22094,6 +22246,7 @@ function drawReportDrawing(ctx, area) {
     state.drawingDetail = saved.drawingDetail;
     state.showDimensions = saved.showDimensions;
     state.dimensionStyle = saved.dimensionStyle;
+    state.pipeLabelMode = saved.pipeLabelMode;
     state.selectedSegments = saved.selectedSegments;
     state.selectedSegment = saved.selectedSegment;
     state.selectedFitting = saved.selectedFitting;
@@ -22109,7 +22262,7 @@ function drawReportDrawing(ctx, area) {
 }
 
 function reportIsoScale(width, height) {
-  const rawPoints = reportRelevantPoints().map((point) => rawIso(point, 1));
+  const rawPoints = reportDrawingFocusPoints().map((point) => rawIso(point, 1));
   if (!rawPoints.length) return state.gridScale || 0.2;
   const minX = Math.min(...rawPoints.map((point) => point.x));
   const maxX = Math.max(...rawPoints.map((point) => point.x));
@@ -22118,13 +22271,13 @@ function reportIsoScale(width, height) {
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
   const reservedTop = 42;
-  const paddingX = 12;
-  const paddingBottom = 14;
+  const paddingX = Math.max(18, width * 0.018);
+  const paddingBottom = 16;
   return Math.min(190, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
 }
 
 function reportProjection(width, height, scale) {
-  const rawPoints = reportRelevantPoints().map((point) => rawIso(point, scale));
+  const rawPoints = reportDrawingFocusPoints().map((point) => rawIso(point, scale));
   if (!rawPoints.length) {
     return {
       offsetX: width * 0.5,
@@ -22143,6 +22296,10 @@ function reportProjection(width, height, scale) {
   };
 }
 
+function reportDrawingFocusPoints() {
+  return state.points?.length ? state.points : reportRelevantPoints();
+}
+
 function reportRelevantPoints() {
   const measurementPoints = (state.measurements ?? []).flatMap((measurement) => [measurement.start, measurement.end]);
   return [
@@ -22152,7 +22309,8 @@ function reportRelevantPoints() {
   ];
 }
 
-function drawReportTakeoff(ctx, area, quantities) {
+function drawReportTakeoff(ctx, area, quantities, options = {}) {
+  const compact = options.compact === true;
   ctx.save();
   roundRect(ctx, area.x, area.y, area.width, area.height, 10);
   ctx.fillStyle = "#fffdf8";
@@ -22164,31 +22322,35 @@ function drawReportTakeoff(ctx, area, quantities) {
   const x = area.x + 24;
   let y = area.y + 36;
   ctx.fillStyle = "#1f3438";
-  ctx.font = "900 24px Inter, system-ui, sans-serif";
-  ctx.fillText("Cut list", x, y);
-  y += 30;
+  ctx.font = "950 23px Inter, system-ui, sans-serif";
+  ctx.fillText(compact ? "Workshop cut summary" : "Cut list", x, y);
+  y += compact ? 25 : 30;
 
-  y = drawReportTotals(ctx, x, y, area.width - 48, quantities);
-  y += 18;
-  y = drawReportTakeoffList(ctx, x, y, area.width - 48, quantities);
-  y += 18;
+  y = drawReportTotals(ctx, x, y, area.width - 48, quantities, { compact });
+  y += compact ? 12 : 18;
+  y = drawReportRunTable(ctx, x, y, area.width - 48, quantities, { compact, maxRows: compact ? 9 : Infinity });
+  y += compact ? 14 : 22;
+  y = drawReportTakeoffList(ctx, x, y, area.width - 48, quantities, { compact, maxRows: compact ? 8 : Infinity });
+  y += compact ? 14 : 18;
   if (state.showLiftingPoints) {
     y = drawReportLiftPoint(ctx, x, y, area.width - 48, quantities);
     y += 18;
     y = drawReportLugPlan(ctx, x, y, area.width - 48, quantities);
     y += 18;
   }
-  y = drawReportRunTable(ctx, x, y, area.width - 48, quantities);
-  y += 22;
-  y = drawReportBendNotes(ctx, x, y, area.width - 48, quantities);
-  y += 14;
-  y = drawReportTeeNotes(ctx, x, y, area.width - 48, quantities);
-  y += 14;
-  y = drawReportBranchNotes(ctx, x, y, area.width - 48, quantities);
-  y += 14;
-  y = drawReportReducerNotes(ctx, x, y, area.width - 48, quantities);
-  y += 14;
-  y = drawReportFittingNotes(ctx, x, y, area.width - 48, quantities);
+  if (compact) {
+    y = drawReportCompactFabricationNotes(ctx, x, y, area.width - 48, quantities);
+  } else {
+    y = drawReportBendNotes(ctx, x, y, area.width - 48, quantities);
+    y += 14;
+    y = drawReportTeeNotes(ctx, x, y, area.width - 48, quantities);
+    y += 14;
+    y = drawReportBranchNotes(ctx, x, y, area.width - 48, quantities);
+    y += 14;
+    y = drawReportReducerNotes(ctx, x, y, area.width - 48, quantities);
+    y += 14;
+    y = drawReportFittingNotes(ctx, x, y, area.width - 48, quantities);
+  }
 
   ctx.fillStyle = "#6b7475";
   ctx.font = "800 12px Inter, system-ui, sans-serif";
@@ -22205,23 +22367,26 @@ function drawReportTakeoff(ctx, area, quantities) {
   ctx.restore();
 }
 
-function drawReportTotals(ctx, x, y, width, quantities) {
+function drawReportTotals(ctx, x, y, width, quantities, options = {}) {
+  const compact = options.compact === true;
   const totals = [
     ["Centreline", `${formatLength(quantities.centrelineMm)} mm`],
     ["Deductions", `${formatLength(quantities.bendTakeoffMm)} mm`],
     ["Cut pipe", `${formatLength(quantities.cutLengthMm)} mm`],
-    ["Pipe weight", `${formatMass(quantities.pipeWeightKg)} kg`],
-    ["Elbow weight", `${formatMass(quantities.bendWeightKg)} kg`],
-    ["Tee weight", `${formatMass(quantities.teeWeightKg)} kg`],
-    ["Branch weight", `${formatMass(quantities.branchWeightKg)} kg`],
-    ["Reducer weight", `${formatMass(quantities.reducerWeightKg)} kg`],
-    ["Fitting weight", `${formatMass(quantities.fittingWeightKg)} kg`],
+    ...(compact ? [] : [
+      ["Pipe weight", `${formatMass(quantities.pipeWeightKg)} kg`],
+      ["Elbow weight", `${formatMass(quantities.bendWeightKg)} kg`],
+      ["Tee weight", `${formatMass(quantities.teeWeightKg)} kg`],
+      ["Branch weight", `${formatMass(quantities.branchWeightKg)} kg`],
+      ["Reducer weight", `${formatMass(quantities.reducerWeightKg)} kg`],
+      ["Fitting weight", `${formatMass(quantities.fittingWeightKg)} kg`],
+    ]),
     ["Total est.", `${formatMass(quantities.totalWeightKg)} kg`],
   ];
   const columnCount = width > 1120 ? 5 : width > 760 ? 3 : 2;
   const gap = 12;
   const columnWidth = (width - gap * (columnCount - 1)) / columnCount;
-  const rowHeight = 54;
+  const rowHeight = compact ? 46 : 54;
 
   for (const [index, total] of totals.entries()) {
     const col = index % columnCount;
@@ -22232,22 +22397,25 @@ function drawReportTotals(ctx, x, y, width, quantities) {
     ctx.fillStyle = index === totals.length - 1 ? "#d8f1ed" : "#f3f6f4";
     ctx.fill();
     ctx.fillStyle = "#6a7475";
-    ctx.font = "800 12px Inter, system-ui, sans-serif";
+    ctx.font = "800 11px Inter, system-ui, sans-serif";
     ctx.fillText(total[0], cardX + 12, cardY + 19);
     ctx.fillStyle = "#1f3438";
-    ctx.font = "900 18px Inter, system-ui, sans-serif";
-    ctx.fillText(total[1], cardX + 12, cardY + 41);
+    ctx.font = compact ? "950 16px Inter, system-ui, sans-serif" : "900 18px Inter, system-ui, sans-serif";
+    ctx.fillText(total[1], cardX + 12, cardY + (compact ? 37 : 41));
   }
 
   return y + Math.ceil(totals.length / columnCount) * (rowHeight + 10);
 }
 
-function drawReportTakeoffList(ctx, x, y, width, quantities) {
+function drawReportTakeoffList(ctx, x, y, width, quantities, options = {}) {
   const rows = takeoffCountRows(quantities);
+  const maxRows = Number.isFinite(options.maxRows) ? Math.max(0, Math.floor(options.maxRows)) : rows.length;
+  const visibleRows = rows.slice(0, maxRows);
+  const hiddenCount = Math.max(0, rows.length - visibleRows.length);
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 18px Inter, system-ui, sans-serif";
   ctx.textAlign = "left";
-  ctx.fillText("Material order by size", x, y);
+  ctx.fillText(options.compact ? "BOM / take-off by size" : "Material order by size", x, y);
   y += 26;
 
   const columns = [
@@ -22276,8 +22444,12 @@ function drawReportTakeoffList(ctx, x, y, width, quantities) {
     return y + 14;
   }
 
-  for (const row of rows) {
-    y += 24;
+  for (const [index, row] of visibleRows.entries()) {
+    y += options.compact ? 22 : 24;
+    if (index % 2 === 0) {
+      ctx.fillStyle = "rgba(234, 247, 243, 0.38)";
+      ctx.fillRect(x, y - 18, width, options.compact ? 23 : 25);
+    }
     ctx.strokeStyle = "rgba(31, 42, 47, 0.1)";
     ctx.beginPath();
     ctx.moveTo(x, y - 18);
@@ -22292,6 +22464,12 @@ function drawReportTakeoffList(ctx, x, y, width, quantities) {
     ctx.textAlign = "right";
     ctx.fillText(row.weightKg ? `${formatMass(row.weightKg)} kg` : "-", x + width, y);
     ctx.textAlign = "left";
+  }
+  if (hiddenCount > 0) {
+    y += 24;
+    ctx.fillStyle = "#607174";
+    ctx.font = "850 12px Inter, system-ui, sans-serif";
+    ctx.fillText(`+ ${hiddenCount} more item${hiddenCount === 1 ? "" : "s"} on the Material order PDF style.`, x, y);
   }
 
   return y + 14;
@@ -22344,11 +22522,14 @@ function drawReportLugPlan(ctx, x, y, width, quantities) {
   return y;
 }
 
-function drawReportRunTable(ctx, x, y, width, quantities) {
+function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
   const cutRows = quantities.cutSegments ?? quantities.segments;
+  const maxRows = Number.isFinite(options.maxRows) ? Math.max(0, Math.floor(options.maxRows)) : cutRows.length;
+  const visibleRows = cutRows.slice(0, maxRows);
+  const hiddenCount = Math.max(0, cutRows.length - visibleRows.length);
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 18px Inter, system-ui, sans-serif";
-  ctx.fillText("Pipe runs", x, y);
+  ctx.fillText(options.compact ? "Cut pipe runs" : "Pipe runs", x, y);
   y += 26;
 
   const columns = [
@@ -22360,6 +22541,9 @@ function drawReportRunTable(ctx, x, y, width, quantities) {
     { label: "kg", x: width, align: "right" },
   ];
 
+  ctx.fillStyle = "#eaf7f3";
+  roundRect(ctx, x, y - 17, width, 28, 7);
+  ctx.fill();
   ctx.font = "900 12px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
   for (const column of columns) {
@@ -22376,8 +22560,12 @@ function drawReportRunTable(ctx, x, y, width, quantities) {
     return y + 44;
   }
 
-  for (const { segment, quantity } of cutRows) {
-    y += 30;
+  for (const [rowIndex, { segment, quantity }] of visibleRows.entries()) {
+    y += options.compact ? 27 : 30;
+    if (rowIndex % 2 === 0) {
+      ctx.fillStyle = "rgba(234, 247, 243, 0.38)";
+      ctx.fillRect(x, y - 21, width, options.compact ? 28 : 30);
+    }
     ctx.strokeStyle = "rgba(31, 42, 47, 0.12)";
     ctx.beginPath();
     ctx.moveTo(x, y - 21);
@@ -22401,8 +22589,54 @@ function drawReportRunTable(ctx, x, y, width, quantities) {
     }
     ctx.textAlign = "left";
   }
+  if (hiddenCount > 0) {
+    y += 24;
+    ctx.fillStyle = "#607174";
+    ctx.font = "850 12px Inter, system-ui, sans-serif";
+    ctx.fillText(`+ ${hiddenCount} more cut row${hiddenCount === 1 ? "" : "s"} on the Material order PDF style.`, x, y);
+  }
 
   return y + 18;
+}
+
+function drawReportCompactFabricationNotes(ctx, x, y, width, quantities) {
+  const notes = [];
+  if (quantities.elbows.length) {
+    notes.push(`${quantities.elbows.length} bend${quantities.elbows.length === 1 ? "" : "s"} / ${formatLength(quantities.bendTakeoffMm)} mm total deduction / ${formatMass(quantities.bendWeightKg)} kg.`);
+  }
+  if (quantities.tees.length) {
+    notes.push(`${quantities.tees.length} tee${quantities.tees.length === 1 ? "" : "s"} / ${formatMass(quantities.teeWeightKg)} kg. Tee take-offs are included in cut lengths.`);
+  }
+  if (quantities.branches.length) {
+    notes.push(`${quantities.branches.length} branch weld${quantities.branches.length === 1 ? "" : "s"} / ${formatMass(quantities.branchWeightKg)} kg. Branches stay cut into the main pipe.`);
+  }
+  if (quantities.reducers.length) {
+    notes.push(`${quantities.reducers.length} reducer${quantities.reducers.length === 1 ? "" : "s"} / ${formatMass(quantities.reducerWeightKg)} kg. Size changes are included in take-off.`);
+  }
+  if (quantities.fittings.length) {
+    notes.push(`${quantities.fittings.length} end/socket/valve/weld fitting${quantities.fittings.length === 1 ? "" : "s"} / ${formatMass(quantities.fittingWeightKg)} kg.`);
+  }
+  if (!notes.length) notes.push("No fittings or deductions yet. Cut lengths are centre-to-centre pipe lengths.");
+
+  ctx.fillStyle = "#1f3438";
+  ctx.font = "900 18px Inter, system-ui, sans-serif";
+  ctx.fillText("Fabrication notes", x, y);
+  y += 22;
+
+  roundRect(ctx, x, y, width, 118, 8);
+  ctx.fillStyle = "#f3f6f4";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(31, 42, 47, 0.12)";
+  ctx.stroke();
+
+  ctx.fillStyle = "#516169";
+  ctx.font = "800 12px Inter, system-ui, sans-serif";
+  let textY = y + 22;
+  for (const note of notes.slice(0, 5)) {
+    textY = drawWrappedReportText(ctx, note, x + 12, textY, width - 24, 15);
+    if (textY > y + 104) break;
+  }
+  return y + 118;
 }
 
 function drawReportBendNotes(ctx, x, y, width, quantities) {
@@ -25464,6 +25698,12 @@ dimensionStyleSelect.addEventListener("change", () => {
   state.dimensionStyle = normalizeDimensionStyle(dimensionStyleSelect.value);
   state.showDimensions = true;
   state.drawingDetail = drawingDetailFromDimensionSettings(true, state.dimensionStyle);
+  updateControls();
+  updateAll();
+});
+
+pipeLabelModeSelect?.addEventListener("change", () => {
+  state.pipeLabelMode = normalizePipeLabelMode(pipeLabelModeSelect.value);
   updateControls();
   updateAll();
 });

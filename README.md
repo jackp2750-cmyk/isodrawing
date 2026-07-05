@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.39`
+Current app version: `v2.45`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -18,6 +18,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Pick socket size, quantity and spacing from a visual socket menu.
 - Work with Carbon Sch 40 and Stainless Sch 10S pipe data up to NB 300.
 - Show pipe size labels, red centre-to-centre dimensions, numbered dimension keys or chain-style dimensions.
+- Control pipe-size labels separately with Auto, Key sizes, All sizes, Export only and Hide modes.
 - Use the numbered dimension key as the default readable dimension view, with editable `D/O` rows for centre-to-centre values.
 - Drag red dimension labels away from clashes.
 - Add manual measurements by clicking two points on the drawing.
@@ -39,6 +40,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Generate a daily or weekly Jobs report from the dashboard, including stage counts, due/overdue work, hold items, assignees and recent progress.
 - Assign saved spools to team members, set due dates, priority and hold notes, and move each spool through Draft, Ready to check, Checked, Issued, Cutting, Fit-up, Welded, Paint / finish and Fabricated stages.
 - Drag production cards between stages, filter the board by active/due/overdue/hold/mine/all, or use quick Ready, Issued and Fabbed buttons on each card.
+- Use the Production command centre for Due today, Overdue, Ready check, Assigned to me, On hold and Messages shortcuts, plus quick Daily report, Weekly report and Comms actions.
 - See Team alerts for spools assigned to you, due today, overdue, ready to check or carrying an open production note.
 - Keep an automatic activity history on each spool for status moves, assignment changes, due changes, hold changes and production notes.
 - Open a job folder to see job-level totals for total, ready check, checked, issued, fabricated, overdue and on-hold spools, plus a clean needs-doing-today list.

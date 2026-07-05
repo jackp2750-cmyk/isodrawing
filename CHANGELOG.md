@@ -1,6 +1,49 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.39`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.45`.
+
+## v2.45 - Production Command Centre
+
+- Added a Production command centre above the Jobs board lanes with action shortcuts for Due today, Overdue, Ready check, Assigned to me, On hold and Messages.
+- Added board filters for Due today, Ready check and open production Messages so supervisors can narrow the board faster.
+- Added quick Daily report, Weekly report and Comms actions directly inside the production workflow area.
+- Updated the Jobs tutorial wording to teach the new command-centre shortcuts.
+- Bumped app cache to `spoolmate-v193`.
+
+## v2.44 - Fab Sheet Polish
+
+- Made the workshop PDF use a fixed landscape sheet so the drawing and tables stay readable instead of shrinking with long lists.
+- Tightened the drawing crop around the actual spool centreline for less empty space on exports.
+- Reworked the title block with clearer job, spool, revision, status, checked and export metadata.
+- Cleaned up the workshop cut list and BOM/take-off summary with denser tables, row limits and links to the full material-order style for long lists.
+- Improved the 3D model reference page with a cleaner layout, clearer view cards and better captions.
+- Bumped app cache to `spoolmate-v192`.
+
+## v2.43 - Drawing Label Clarity
+
+- Added a Pipe labels control for Auto, Key sizes, All sizes, Export only and Hide.
+- Let users keep the live drawing clean while still printing key pipe-size labels on fab sheets.
+- Kept numbered dimensions and draggable dimension offsets independent from pipe-size label clutter.
+- Bumped app cache to `spoolmate-v191`.
+
+## v2.42 - Exact Isometric Export Camera
+
+- Changed the fab-sheet/export 3D Isometric camera to the exact same axis relationship as the 2D isometric drawing.
+- Replaced the previous approximate export direction with a true `[-X, -Y, -Z]` isometric view, so +X reads down-right, +Y down-left and +Z upward like the drawing.
+- Bumped app cache to `spoolmate-v190`.
+
+## v2.41 - 3D Isometric Orientation Match
+
+- Verified the live 3D default camera against the 2D isometric axis projection: +X runs down-right, +Y runs down-left and +Z runs upward.
+- Changed the fab-sheet/export 3D Isometric camera to use the same Z-side orientation as the live preview, preventing exported model views from looking backwards against the drawing.
+- Bumped app cache to `spoolmate-v189`.
+
+## v2.40 - iPad Preview Dock Polish
+
+- Hid the floating Show 3D restore button on tablet and phone layouts so it no longer overlaps the bottom drawing tools.
+- Made tablet/touch devices default the 3D preview to the docked bottom-sheet panel instead of inheriting the desktop floating preview preference.
+- Made the iPad 3D Preview dock button force the cleaner tablet sheet view, while still leaving the Float control available once the preview is open.
+- Bumped app cache to `spoolmate-v188`.
 
 ## v2.39 - Hidden 3D Startup
 

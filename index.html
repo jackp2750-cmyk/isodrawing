@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=239" />
+    <link rel="stylesheet" href="./styles.css?v=245" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +189,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v2.39</span>
+              <span class="version-badge" id="appVersionBadge">v2.45</span>
             </div>
           </div>
 
@@ -259,10 +259,20 @@
             <label class="dimension-style-field dimension-mode-field">
               <span>Dim view</span>
               <select id="dimensionStyleSelect" aria-label="Dimension style">
-                <option value="labels">Pipe labels</option>
+                <option value="labels">Size labels only</option>
                 <option value="redline">Red C/C lines</option>
                 <option value="numbered" selected>Numbered key</option>
                 <option value="chain">Chain dims</option>
+              </select>
+            </label>
+            <label class="dimension-style-field pipe-label-mode-field">
+              <span>Pipe labels</span>
+              <select id="pipeLabelModeSelect" aria-label="Pipe size label visibility">
+                <option value="auto" selected>Auto</option>
+                <option value="key">Key sizes</option>
+                <option value="all">All sizes</option>
+                <option value="export">Export only</option>
+                <option value="off">Hide</option>
               </select>
             </label>
             <label class="toggle top-toggle topbar-secondary-control">
@@ -1323,7 +1333,7 @@
                 </article>
                 <article>
                   <strong>Dimension styles</strong>
-                  <p>Use Drawing detail first: Clean, Fab dims, Sizes, Callouts or Full. Use Dim style when you want to fine tune the dimension format.</p>
+                  <p>Use Drawing detail first, then Dim view for the dimension format. Use Pipe labels to show key sizes, all sizes, export-only labels or hide size labels while drawing.</p>
                 </article>
                 <article>
                   <strong>Takeoff list</strong>
@@ -1414,6 +1424,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=239"></script>
+    <script defer src="./app.js?v=245"></script>
   </body>
 </html>
