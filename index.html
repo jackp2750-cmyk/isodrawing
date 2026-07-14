@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=245" />
+    <link rel="stylesheet" href="./styles.css?v=263" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +189,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v2.45</span>
+              <span class="version-badge" id="appVersionBadge">v2.63</span>
             </div>
           </div>
 
@@ -233,10 +233,11 @@
               <select id="pipeSpecSelect">
                 <option value="carbon40">Carbon Sch 40</option>
                 <option value="stainless10">Stainless Sch 10S</option>
+                <option value="stainlessTube">Stainless tube 1.6</option>
               </select>
             </label>
             <label class="top-field">
-              <span>Pipe NB</span>
+              <span>Pipe / tube</span>
               <select id="pipeSizeSelect"></select>
             </label>
             <span class="size-readout top-size-readout" id="pipeSizeReadout">OD 33.4 mm</span>
@@ -1095,6 +1096,7 @@
 
       <div class="project-dialog-backdrop tutorial-backdrop" id="tutorialDialog" hidden>
         <div class="tutorial-spotlight" id="tutorialSpotlight" aria-hidden="true"></div>
+        <div class="tutorial-coach" id="tutorialCoach" hidden aria-live="polite"></div>
         <section class="project-dialog-card tutorial-card" aria-label="SpoolMate tutorial">
           <div class="project-dialog-header">
             <div>
@@ -1284,7 +1286,7 @@
                 </article>
                 <article>
                   <strong>Pipe size changes</strong>
-                  <p>Right-click or long-press a run, choose Change pipe size, then pick from the NB list. Size changes add reducers where needed.</p>
+                  <p>Right-click or long-press a run, choose Change pipe size, then pick from the pipe or tube size list. Size changes add reducers where needed.</p>
                 </article>
                 <article>
                   <strong>Flanges and grooves</strong>
@@ -1341,11 +1343,11 @@
                 </article>
                 <article>
                   <strong>Weight notes</strong>
-                  <p>Atlas table weights are used where available. Estimated or adjusted weights should be checked before ordering or lifting.</p>
+                  <p>Pipe and fitting table weights are used where available. Estimated or adjusted weights should be checked before ordering or lifting.</p>
                 </article>
                 <article>
                   <strong>Defaults</strong>
-                  <p>Use Menu, Defaults to save your usual material, NB size, dimensions, lifting and preview settings on that device.</p>
+                  <p>Use Menu, Defaults to save your usual material, pipe/tube size, dimensions, lifting and preview settings on that device.</p>
                 </article>
               </div>
             </section>
@@ -1424,6 +1426,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=245"></script>
+    <script defer src="./app.js?v=263"></script>
   </body>
 </html>

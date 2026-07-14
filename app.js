@@ -176,6 +176,7 @@ const tutorialPrevButton = document.querySelector("#tutorialPrevButton");
 const tutorialActionButton = document.querySelector("#tutorialActionButton");
 const tutorialNextButton = document.querySelector("#tutorialNextButton");
 const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
+const tutorialCoach = document.querySelector("#tutorialCoach");
 const noteDialog = document.querySelector("#noteDialog");
 const noteDialogTitle = document.querySelector("#noteDialogTitle");
 const noteDialogText = document.querySelector("#noteDialogText");
@@ -246,9 +247,10 @@ const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
+const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.45";
-const APP_BUILD_DATE = "2026-07-05";
+const APP_VERSION = "v2.63";
+const APP_BUILD_DATE = "2026-07-14";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -426,6 +428,7 @@ const PRODUCTION_BOARD_FILTERS = {
   all: "All",
 };
 const PRODUCTION_BOARD_FILTER_KEYS = new Set(Object.keys(PRODUCTION_BOARD_FILTERS));
+const TEAM_ALERT_RECENT_MS = 7 * 24 * 60 * 60 * 1000;
 const FAB_SHEET_TEMPLATES = {
   workshop: {
     label: "Workshop cut sheet",
@@ -641,14 +644,14 @@ const TUTORIAL_STEPS = [
     kicker: "Pipe Size",
     menuLabel: "Pipe size",
     title: "Change pipe size from menus",
-    body: "Pipe NB is chosen from the pipe-size menu. Size changes on normal runs and tee connections add reducers where needed. Branches stay as welded cut-ins without reducers.",
+    body: "Pipe size is chosen from the pipe/tube menu. Size changes on normal runs and tee connections add reducers where needed. Branches stay as welded cut-ins without reducers.",
     target: "#pipeSizeSelect",
-    targetLabel: "Pipe NB menu",
+    targetLabel: "Pipe / tube menu",
     action: "focusPipeSize",
     actionLabel: "Open Pipe Size",
     demo: "reducer",
     items: [
-      "Use the top Pipe NB menu for the next run size.",
+      "Use the top Pipe / tube menu for the next run size.",
       "Right-click or long-press selected pipe to change existing sizes from the list.",
       "Reducers are added for size changes on normal pipe and tee connections. Branch welds stay cut into the main pipe with no reducer.",
     ],
@@ -788,20 +791,50 @@ const PIPE_SPECS = {
     shortLabel: "Carbon Sch 40",
     material: "Carbon steel",
     schedule: "Sch 40",
+    sizeType: "pipe",
     wallKey: "wall40",
     kgPerMKey: "kgPerM40",
+    weightCoefficient: 0.0246615,
   },
   stainless10: {
     label: "Stainless steel Sch 10S",
     shortLabel: "Stainless Sch 10S",
     material: "Stainless steel",
     schedule: "Sch 10S",
+    sizeType: "pipe",
     wallKey: "wall10",
-    kgPerMKey: null,
+    kgPerMKey: "kgPerM10",
+    weightCoefficient: 0.02491,
+  },
+  stainlessTube: {
+    label: "Stainless steel tube 1.6 mm wall",
+    shortLabel: "Stainless tube",
+    material: "Stainless steel tube",
+    schedule: "1.6 mm wall",
+    sizeType: "tube",
+    wallKey: "wallTube",
+    kgPerMKey: "kgPerMTube",
+    weightCoefficient: 0.02491,
   },
 };
 const PIPE_SPEC_KEYS = new Set(Object.keys(PIPE_SPECS));
-const PIPE_WEIGHT_COEFFICIENT = 0.0246615;
+const DEFAULT_PIPE_WEIGHT_COEFFICIENT = 0.0246615;
+const PRESSURE_RATING_ASSUMPTIONS = {
+  carbon40: {
+    allowableStressMpa: 138,
+    label: "carbon steel ambient allowable stress",
+  },
+  stainless10: {
+    allowableStressMpa: 115,
+    label: "stainless steel ambient allowable stress",
+  },
+  stainlessTube: {
+    allowableStressMpa: 115,
+    label: "stainless tube ambient allowable stress",
+  },
+};
+const PRESSURE_WALL_TOLERANCE_FACTOR = 0.875;
+const PRESSURE_Y_COEFFICIENT = 0.4;
 const PROJECT_INFO_DEFAULT = {
   jobNumber: "",
   spoolNumber: "",
@@ -846,6 +879,22 @@ const ATLAS_BUTTWELD_WEIGHTS = {
     250: { elbow90: 18.15, elbow45: 9.75, tee: 26.76, reducer: 5.2 },
     300: { elbow90: 25.80, elbow45: 13.62, tee: 39.46, reducer: 7.98 },
   },
+  stainlessTube: {
+    95: { elbow45: 0.01, elbow90: 0.01, elbow180: 0.01, tee: 0.03 },
+    127: { elbow45: 0.01, elbow90: 0.01, elbow180: 0.01, tee: 0.05 },
+    191: { elbow45: 0.02, elbow90: 0.02, elbow180: 0.03, tee: 0.08, reducer: 0.02 },
+    254: { elbow45: 0.03, elbow90: 0.04, elbow180: 0.05, tee: 0.13, reducer: 0.04 },
+    318: { elbow45: 0.05, elbow90: 0.06, elbow180: 0.08, tee: 0.20, reducer: 0.05 },
+    381: { elbow45: 0.07, elbow90: 0.08, elbow180: 0.11, tee: 0.30, reducer: 0.05 },
+    508: { elbow45: 0.12, elbow90: 0.15, elbow180: 0.20, tee: 0.50, reducer: 0.10 },
+    635: { elbow45: 0.18, elbow90: 0.23, elbow180: 0.31, tee: 0.80, reducer: 0.10 },
+    762: { elbow45: 0.27, elbow90: 0.34, elbow180: 0.45, tee: 1.10, reducer: 0.25 },
+    1016: { elbow45: 0.48, elbow90: 0.60, elbow180: 0.80, tee: 1.60, reducer: 0.30 },
+    1270: { elbow45: 0.75, elbow90: 0.95, elbow180: 1.26, tee: 1.80, reducer: 0.60 },
+    1524: { elbow45: 1.36, elbow90: 1.70, elbow180: 2.26, tee: 5.40, reducer: 0.70 },
+    2032: { elbow45: 2.42, elbow90: 3.02, elbow180: 4.03, tee: 8.40, reducer: 1.60 },
+    2540: { elbow45: 3.49, elbow90: 4.50, elbow180: 5.05, tee: 9.90 },
+  },
 };
 const ATLAS_FLANGE_WEIGHTS = {
   15: 0.4,
@@ -863,6 +912,19 @@ const ATLAS_FLANGE_WEIGHTS = {
   200: 12.1,
   250: 16.5,
   300: 26.2,
+};
+const ATLAS_TUBE_REDUCING_TEE_WEIGHTS = {
+  191: 0.08,
+  254: 0.13,
+  318: 0.20,
+  381: 0.30,
+  508: 0.50,
+  635: 0.80,
+  762: 1.10,
+  1016: 1.60,
+  1270: 1.80,
+  1524: 2.80,
+  2032: 3.50,
 };
 const TEE_TAKEOFF_MM = {
   6: 25,
@@ -883,6 +945,26 @@ const TEE_TAKEOFF_MM = {
   200: 178,
   250: 216,
   300: 254,
+};
+const REDUCER_LENGTH_MM = {
+  6: 38,
+  8: 38,
+  10: 38,
+  15: 38,
+  20: 38,
+  25: 51,
+  32: 51,
+  40: 64,
+  50: 76,
+  65: 89,
+  80: 89,
+  90: 102,
+  100: 102,
+  125: 127,
+  150: 140,
+  200: 152,
+  250: 178,
+  300: 203,
 };
 const FLANGE_BOLT_COUNTS = [
   { maxNb: 50, count: 4 },
@@ -964,24 +1046,38 @@ document.body.append(drawingContextMenu);
 let drawingContextTarget = null;
 
 const PIPE_SIZES = [
-  { nb: 6, nps: '1/8"', od: 10.3, wall40: 1.73, wall10: 1.24, kgPerM40: 0.37, elbow90Kg: null, elbow45Kg: null, lrRadius: 38 },
-  { nb: 8, nps: '1/4"', od: 13.7, wall40: 2.24, wall10: 1.65, kgPerM40: 0.63, elbow90Kg: null, elbow45Kg: null, lrRadius: 38 },
-  { nb: 10, nps: '3/8"', od: 17.1, wall40: 2.31, wall10: 1.65, kgPerM40: 0.84, elbow90Kg: null, elbow45Kg: null, lrRadius: 38 },
-  { nb: 15, nps: '1/2"', od: 21.3, wall40: 2.77, wall10: 2.11, kgPerM40: 1.27, elbow90Kg: 0.08, elbow45Kg: 0.04, lrRadius: 38 },
-  { nb: 20, nps: '3/4"', od: 26.7, wall40: 2.87, wall10: 2.11, kgPerM40: 1.69, elbow90Kg: 0.11, elbow45Kg: 0.06, lrRadius: 38 },
-  { nb: 25, nps: '1"', od: 33.4, wall40: 3.38, wall10: 2.77, kgPerM40: 2.50, elbow90Kg: 0.16, elbow45Kg: 0.08, lrRadius: 38 },
-  { nb: 32, nps: '1 1/4"', od: 42.2, wall40: 3.56, wall10: 2.77, kgPerM40: 3.39, elbow90Kg: 0.26, elbow45Kg: 0.13, lrRadius: 48 },
-  { nb: 40, nps: '1 1/2"', od: 48.3, wall40: 3.68, wall10: 2.77, kgPerM40: 4.05, elbow90Kg: 0.37, elbow45Kg: 0.19, lrRadius: 57 },
-  { nb: 50, nps: '2"', od: 60.3, wall40: 3.91, wall10: 2.77, kgPerM40: 5.44, elbow90Kg: 0.66, elbow45Kg: 0.33, lrRadius: 76 },
-  { nb: 65, nps: '2 1/2"', od: 73.0, wall40: 5.16, wall10: 3.05, kgPerM40: 8.63, elbow90Kg: 1.29, elbow45Kg: 0.69, lrRadius: 95 },
-  { nb: 80, nps: '3"', od: 88.9, wall40: 5.49, wall10: 3.05, kgPerM40: 11.29, elbow90Kg: 2.04, elbow45Kg: 1.02, lrRadius: 114 },
-  { nb: 90, nps: '3 1/2"', od: 101.6, wall40: 5.74, wall10: 3.05, kgPerM40: 13.57, elbow90Kg: 2.94, elbow45Kg: 1.47, lrRadius: 133 },
-  { nb: 100, nps: '4"', od: 114.3, wall40: 6.02, wall10: 3.05, kgPerM40: 16.07, elbow90Kg: 3.84, elbow45Kg: 1.92, lrRadius: 152 },
-  { nb: 125, nps: '5"', od: 141.3, wall40: 6.55, wall10: 3.40, kgPerM40: 21.77, elbow90Kg: 6.48, elbow45Kg: 3.24, lrRadius: 190 },
-  { nb: 150, nps: '6"', od: 168.3, wall40: 7.11, wall10: 3.40, kgPerM40: 28.26, elbow90Kg: 9.94, elbow45Kg: 4.97, lrRadius: 229 },
-  { nb: 200, nps: '8"', od: 219.1, wall40: 8.18, wall10: 3.76, kgPerM40: 42.55, elbow90Kg: 20.1, elbow45Kg: 10.1, lrRadius: 305 },
-  { nb: 250, nps: '10"', od: 273.0, wall40: 9.27, wall10: 4.19, kgPerM40: 60.31, elbow90Kg: 35.4, elbow45Kg: 17.7, lrRadius: 381 },
-  { nb: 300, nps: '12"', od: 323.8, wall40: 10.31, wall10: 4.57, kgPerM40: 79.73, elbow90Kg: 52.0, elbow45Kg: 26.0, lrRadius: 457 },
+  { nb: 6, nps: '1/8"', od: 10.3, wall40: 1.73, wall10: 1.24, kgPerM40: 0.37, kgPerM10: 0.28, elbow90Kg: null, elbow45Kg: null, lrRadius: 38 },
+  { nb: 8, nps: '1/4"', od: 13.7, wall40: 2.24, wall10: 1.65, kgPerM40: 0.63, kgPerM10: 0.50, elbow90Kg: null, elbow45Kg: null, lrRadius: 38 },
+  { nb: 10, nps: '3/8"', od: 17.1, wall40: 2.31, wall10: 1.65, kgPerM40: 0.84, kgPerM10: 0.64, elbow90Kg: null, elbow45Kg: null, lrRadius: 38 },
+  { nb: 15, nps: '1/2"', od: 21.3, wall40: 2.77, wall10: 2.11, kgPerM40: 1.27, kgPerM10: 1.01, elbow90Kg: 0.08, elbow45Kg: 0.04, lrRadius: 38 },
+  { nb: 20, nps: '3/4"', od: 26.7, wall40: 2.87, wall10: 2.11, kgPerM40: 1.69, kgPerM10: 1.29, elbow90Kg: 0.11, elbow45Kg: 0.06, lrRadius: 38 },
+  { nb: 25, nps: '1"', od: 33.4, wall40: 3.38, wall10: 2.77, kgPerM40: 2.50, kgPerM10: 2.11, elbow90Kg: 0.16, elbow45Kg: 0.08, lrRadius: 38 },
+  { nb: 32, nps: '1 1/4"', od: 42.2, wall40: 3.56, wall10: 2.77, kgPerM40: 3.39, kgPerM10: 2.72, elbow90Kg: 0.26, elbow45Kg: 0.13, lrRadius: 48 },
+  { nb: 40, nps: '1 1/2"', od: 48.3, wall40: 3.68, wall10: 2.77, kgPerM40: 4.05, kgPerM10: 3.14, elbow90Kg: 0.37, elbow45Kg: 0.19, lrRadius: 57 },
+  { nb: 50, nps: '2"', od: 60.3, wall40: 3.91, wall10: 2.77, kgPerM40: 5.44, kgPerM10: 3.97, elbow90Kg: 0.66, elbow45Kg: 0.33, lrRadius: 76 },
+  { nb: 65, nps: '2 1/2"', od: 73.0, wall40: 5.16, wall10: 3.05, kgPerM40: 8.63, kgPerM10: 5.31, elbow90Kg: 1.29, elbow45Kg: 0.69, lrRadius: 95 },
+  { nb: 80, nps: '3"', od: 88.9, wall40: 5.49, wall10: 3.05, kgPerM40: 11.29, kgPerM10: 6.52, elbow90Kg: 2.04, elbow45Kg: 1.02, lrRadius: 114 },
+  { nb: 90, nps: '3 1/2"', od: 101.6, wall40: 5.74, wall10: 3.05, kgPerM40: 13.57, kgPerM10: 7.49, elbow90Kg: 2.94, elbow45Kg: 1.47, lrRadius: 133 },
+  { nb: 100, nps: '4"', od: 114.3, wall40: 6.02, wall10: 3.05, kgPerM40: 16.07, kgPerM10: 8.45, elbow90Kg: 3.84, elbow45Kg: 1.92, lrRadius: 152 },
+  { nb: 125, nps: '5"', od: 141.3, wall40: 6.55, wall10: 3.40, kgPerM40: 21.77, kgPerM10: 11.68, elbow90Kg: 6.48, elbow45Kg: 3.24, lrRadius: 190 },
+  { nb: 150, nps: '6"', od: 168.3, wall40: 7.11, wall10: 3.40, kgPerM40: 28.26, kgPerM10: 13.97, elbow90Kg: 9.94, elbow45Kg: 4.97, lrRadius: 229 },
+  { nb: 200, nps: '8"', od: 219.1, wall40: 8.18, wall10: 3.76, kgPerM40: 42.55, kgPerM10: 20.17, elbow90Kg: 20.1, elbow45Kg: 10.1, lrRadius: 305 },
+  { nb: 250, nps: '10"', od: 273.0, wall40: 9.27, wall10: 4.19, kgPerM40: 60.31, kgPerM10: 28.06, elbow90Kg: 35.4, elbow45Kg: 17.7, lrRadius: 381 },
+  { nb: 300, nps: '12"', od: 323.8, wall40: 10.31, wall10: 4.57, kgPerM40: 79.73, kgPerM10: 36.34, elbow90Kg: 52.0, elbow45Kg: 26.0, lrRadius: 457 },
+  { nb: 95, kind: "tube", label: "Tube OD 9.5", nps: '3/8"', od: 9.52, wallTube: 1.6, kgPerMTube: 0.32, lrRadius: 14, tubeTeeTakeoffMm: 14, tubeReducerLengthMm: 40 },
+  { nb: 127, kind: "tube", label: "Tube OD 12.7", nps: '1/2"', od: 12.7, wallTube: 1.6, kgPerMTube: 0.44, lrRadius: 19, tubeTeeTakeoffMm: 19, tubeReducerLengthMm: 40 },
+  { nb: 191, kind: "tube", label: "Tube OD 19.1", nps: '3/4"', od: 19.05, wallTube: 1.6, kgPerMTube: 0.70, lrRadius: 29, tubeTeeTakeoffMm: 29, tubeReducerLengthMm: 50 },
+  { nb: 254, kind: "tube", label: "Tube OD 25.4", nps: '1"', od: 25.4, wallTube: 1.6, kgPerMTube: 0.95, lrRadius: 38, tubeTeeTakeoffMm: 38, tubeReducerLengthMm: 50 },
+  { nb: 318, kind: "tube", label: "Tube OD 31.8", nps: '1 1/4"', od: 31.75, wallTube: 1.6, kgPerMTube: 1.20, lrRadius: 48, tubeTeeTakeoffMm: 48, tubeReducerLengthMm: 64 },
+  { nb: 381, kind: "tube", label: "Tube OD 38.1", nps: '1 1/2"', od: 38.1, wallTube: 1.6, kgPerMTube: 1.46, lrRadius: 57, tubeTeeTakeoffMm: 57, tubeReducerLengthMm: 64 },
+  { nb: 508, kind: "tube", label: "Tube OD 50.8", nps: '2"', od: 50.8, wallTube: 1.6, kgPerMTube: 1.96, lrRadius: 76, tubeTeeTakeoffMm: 76, tubeReducerLengthMm: 76 },
+  { nb: 635, kind: "tube", label: "Tube OD 63.5", nps: '2 1/2"', od: 63.5, wallTube: 1.6, kgPerMTube: 2.47, lrRadius: 95, tubeTeeTakeoffMm: 95, tubeReducerLengthMm: 89 },
+  { nb: 762, kind: "tube", label: "Tube OD 76.2", nps: '3"', od: 76.2, wallTube: 1.6, kgPerMTube: 2.97, lrRadius: 114, tubeTeeTakeoffMm: 114, tubeReducerLengthMm: 102 },
+  { nb: 1016, kind: "tube", label: "Tube OD 101.6", nps: '4"', od: 101.6, wallTube: 1.6, kgPerMTube: 3.99, lrRadius: 152, tubeTeeTakeoffMm: 152, tubeReducerLengthMm: 127 },
+  { nb: 1270, kind: "tube", label: "Tube OD 127.0", nps: '5"', od: 127.0, wallTube: 1.6, kgPerMTube: 5.00, lrRadius: 191, tubeTeeTakeoffMm: 191, tubeReducerLengthMm: 152 },
+  { nb: 1524, kind: "tube", label: "Tube OD 152.4", nps: '6"', od: 152.4, wallTube: 1.6, kgPerMTube: 6.10, lrRadius: 229, tubeTeeTakeoffMm: 229, tubeReducerLengthMm: 178 },
+  { nb: 2032, kind: "tube", label: "Tube OD 203.2", nps: '8"', od: 203.2, wallTube: 1.6, kgPerMTube: 8.10, lrRadius: 305, tubeTeeTakeoffMm: 305, tubeReducerLengthMm: 203 },
+  { nb: 2540, kind: "tube", label: "Tube OD 254.0", nps: '10"', od: 254.0, wallTube: 1.6, kgPerMTube: 10.10, lrRadius: 381, tubeTeeTakeoffMm: 381, tubeReducerLengthMm: 254 },
 ];
 
 const AXES = [
@@ -1020,6 +1116,9 @@ let noteDialogColour = DEFAULT_NOTE_COLOUR;
 let tutorialStepIndex = 0;
 let tutorialHighlightedElement = null;
 let tutorialPreviewRestoreState = null;
+let tutorialPractice = null;
+let tutorialTrainer = null;
+let tutorialCompletedSteps = new Set();
 let drawingAssistantState = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
@@ -1215,9 +1314,13 @@ function hardCodedDrawingDefaults() {
 
 function normalizeDrawingDefaults(defaults = {}) {
   const base = hardCodedDrawingDefaults();
+  const pipeSpecKey = normalizePipeSpec(defaults.pipeSpec ?? base.pipeSpec);
+  const requestedPipeSize = normalizePipeSize(defaults.pipeSizeNb ?? base.pipeSizeNb);
   return {
-    pipeSizeNb: normalizePipeSize(defaults.pipeSizeNb ?? base.pipeSizeNb),
-    pipeSpec: normalizePipeSpec(defaults.pipeSpec ?? base.pipeSpec),
+    pipeSizeNb: pipeSizeMatchesSpec(PIPE_SIZES.find((size) => size.nb === requestedPipeSize), pipeSpecKey)
+      ? requestedPipeSize
+      : closestPipeSizeNbForSpec(requestedPipeSize, pipeSpecKey),
+    pipeSpec: pipeSpecKey,
     stepLength: normalizeLength(defaults.stepLength ?? base.stepLength),
     angleDegrees: normalizeAngle(defaults.angleDegrees ?? base.angleDegrees),
     anglePlane: normalizeAnglePlane(defaults.anglePlane ?? base.anglePlane),
@@ -1354,6 +1457,8 @@ function blankState(options = {}) {
     projectStatus: "draft",
     checkedBy: "",
     checkedAt: "",
+    issuedBy: "",
+    issuedAt: "",
     locked: false,
     revisionHistory: [],
     productionInfo: defaultProductionInfo(),
@@ -1430,6 +1535,8 @@ function statePayload(options = {}) {
     projectStatus: normalizeProjectStatus(state.projectStatus),
     checkedBy: String(state.checkedBy ?? "").trim().slice(0, 64),
     checkedAt: String(state.checkedAt ?? "").trim(),
+    issuedBy: String(state.issuedBy ?? "").trim().slice(0, 64),
+    issuedAt: String(state.issuedAt ?? "").trim(),
     locked: state.locked === true,
     revisionHistory: options.includeRevisionHistory === false ? [] : normalizeRevisionHistory(state.revisionHistory),
     productionInfo: normalizeProductionInfo(state.productionInfo),
@@ -1511,6 +1618,8 @@ function stateFromPayload(payload, options = {}) {
     projectStatus: normalizeProjectStatus(saved.projectStatus),
     checkedBy: String(saved.checkedBy ?? "").trim().slice(0, 64),
     checkedAt: String(saved.checkedAt ?? "").trim(),
+    issuedBy: String(saved.issuedBy ?? "").trim().slice(0, 64),
+    issuedAt: String(saved.issuedAt ?? "").trim(),
     locked: saved.locked === true,
     revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
     productionInfo: normalizeProductionInfo(saved.productionInfo),
@@ -2239,6 +2348,192 @@ const REGRESSION_MANUAL_CHECKS = [
   "On iPad/Android, confirm tool buttons are easy to tap and panels do not cover the drawing unexpectedly.",
 ];
 
+const REGRESSION_AUTO_CHECKS = [
+  {
+    key: "teeReducer",
+    title: "Tee reducer check",
+    sampleKey: "teeReducer",
+    run: regressionAutoCheckTeeReducer,
+  },
+  {
+    key: "branchNoReducer",
+    title: "Branch no reducer check",
+    sampleKey: "branchNoReducer",
+    run: regressionAutoCheckBranchNoReducer,
+  },
+  {
+    key: "flangeFlush",
+    title: "Flange flush check",
+    sampleKey: "workshop",
+    run: regressionAutoCheckFlangeFlush,
+  },
+  {
+    key: "offset45",
+    title: "45 offset check",
+    sampleKey: "offsetSockets",
+    run: regressionAutoCheck45Offset,
+  },
+  {
+    key: "socketDimensions",
+    title: "Socket dimension check",
+    sampleKey: "offsetSockets",
+    run: regressionAutoCheckSocketDimensions,
+  },
+];
+
+function regressionCheckResult(title, sampleKey, passed, detail) {
+  const sample = regressionSampleByKey(sampleKey);
+  return {
+    title,
+    sampleKey,
+    sampleTitle: sample?.title ?? "Test spool",
+    passed: passed === true,
+    detail: String(detail ?? "").trim(),
+  };
+}
+
+function withRegressionSampleState(sampleKey, callback) {
+  const sample = regressionSampleByKey(sampleKey);
+  const previousState = state;
+  const previousNextFittingId = nextFittingId;
+  const previousNextNoteId = nextNoteId;
+  const previousNextMeasurementId = nextMeasurementId;
+
+  try {
+    state = sample.build();
+    normalizeEdgePipeSizesForState();
+    normalizeStateFittingPositions();
+    normalizeConnectionTrustState();
+    setNextIdsFromState(state);
+    const segmentData = segments();
+    const quantities = quantitySummary(segmentData);
+    return callback({ sample, segmentData, quantities });
+  } finally {
+    state = previousState;
+    nextFittingId = previousNextFittingId;
+    nextNoteId = previousNextNoteId;
+    nextMeasurementId = previousNextMeasurementId;
+  }
+}
+
+function runRegressionAutoCheck(definition) {
+  try {
+    return withRegressionSampleState(definition.sampleKey, ({ segmentData, quantities }) =>
+      definition.run(segmentData, quantities, definition),
+    );
+  } catch (error) {
+    return regressionCheckResult(
+      definition.title,
+      definition.sampleKey,
+      false,
+      error?.message || "The check could not run.",
+    );
+  }
+}
+
+function runRegressionAutoChecks() {
+  return REGRESSION_AUTO_CHECKS.map(runRegressionAutoCheck);
+}
+
+function regressionAutoCheckTeeReducer(segmentData, quantities, definition) {
+  const reducers = quantities.reducers.filter((reducer) =>
+    reducer.kind === "tee" &&
+    reducer.nodeIndex === 1 &&
+    reducer.largeNb === 150 &&
+    reducer.smallNb === 80,
+  );
+  const passed = reducers.length >= 1 && quantities.tees.length === 1 && quantities.branches.length === 0;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${reducers.length} tee reducer, ${quantities.tees.length} tee take-off, ${quantities.branches.length} branch welds.`,
+  );
+}
+
+function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition) {
+  const nodeReducers = quantities.reducers.filter((reducer) => reducer.nodeIndex === 1);
+  const mergedMainRun = (quantities.cutSegments ?? []).some((row) =>
+    Array.isArray(row.segment?.mergedIndexes) &&
+    row.segment.mergedIndexes.includes(0) &&
+    row.segment.mergedIndexes.includes(1),
+  );
+  const passed =
+    nodeConnectionType(1) === "branch" &&
+    quantities.branches.length === 1 &&
+    nodeReducers.length === 0 &&
+    mergedMainRun;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${nodeConnectionType(1)} node, ${nodeReducers.length} reducers at branch, main run ${mergedMainRun ? "merged" : "split"}.`,
+  );
+}
+
+function regressionAutoCheckFlangeFlush(segmentData, quantities, definition) {
+  const flanges = state.fittings.filter((fitting) => fitting.type === "flange");
+  const flushFlanges = flanges.filter((fitting) => {
+    const segment = segmentData.find((item) => item.index === fitting.segmentIndex);
+    if (!segment) return false;
+    const t = fittingDisplayT(segment, fitting);
+    const expectedPoint = t <= 0.5 ? segment.start : segment.end;
+    return (t === 0 || t === 1) && almostSamePoint(fittingDisplayPoint(segment, fitting), expectedPoint);
+  });
+  const passed = flanges.length > 0 && flushFlanges.length === flanges.length;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${flushFlanges.length}/${flanges.length} flange${flanges.length === 1 ? "" : "s"} snapped to pipe ends.`,
+  );
+}
+
+function regressionAutoCheck45Offset(segmentData, quantities, definition) {
+  const offsetSegment = segmentData.find((segment) => Number.isFinite(segment.offsetTravelMm));
+  const setMm = Number(offsetSegment?.offsetSetMm);
+  const angle = normalizeAngle(offsetSegment?.offsetAngleDeg);
+  const expectedTravel = offsetTravelLengthMm(setMm, angle);
+  const actualTravel = pointLength(offsetSegment?.vector ?? { x: 0, y: 0, z: 0 });
+  const measurementCount = Array.isArray(state.measurements) ? state.measurements.length : 0;
+  const passed =
+    Boolean(offsetSegment) &&
+    Math.abs(angle - 45) < 0.001 &&
+    Math.abs(setMm - 1000) <= 1 &&
+    Math.abs(actualTravel - expectedTravel) <= 2 &&
+    measurementCount >= 1;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `Set ${formatLength(setMm)} mm, travel ${formatLength(actualTravel)} mm, ${measurementCount} manual C/C measurement${measurementCount === 1 ? "" : "s"}.`,
+  );
+}
+
+function regressionAutoCheckSocketDimensions(segmentData, quantities, definition) {
+  const socketFittings = state.fittings
+    .filter((fitting) => fitting.type === "socket")
+    .sort((first, second) => first.t - second.t);
+  const segment = segmentData.find((item) => item.index === socketFittings[0]?.segmentIndex);
+  const lengthMm = pointLength(segment?.vector ?? { x: 0, y: 0, z: 0 });
+  const positions = socketFittings.map((fitting) => lengthMm * fitting.t);
+  const gaps = positions.slice(1).map((position, index) => position - positions[index]);
+  const expectedAngles = [0, 90, 180];
+  const anglesStepBy90 = socketFittings.every((fitting, index) =>
+    fittingSocketAngle(fitting) === expectedAngles[index],
+  );
+  const evenGaps = gaps.length >= 2 && gaps.every((gap) => Math.abs(gap - gaps[0]) <= 1);
+  const passed = socketFittings.length === 3 && anglesStepBy90 && evenGaps;
+  const firstPosition = positions[0] ?? 0;
+  const firstGap = gaps[0] ?? 0;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `First socket ${formatLength(firstPosition)} mm from end, then SOCK C/C ${formatLength(firstGap)} mm between sockets.`,
+  );
+}
+
 function normalizeTeamMessage(row) {
   if (!row || typeof row !== "object") return null;
   const id = normalizeUuid(row.id);
@@ -2321,10 +2616,14 @@ function normalizeRevisionHistory(history) {
 
 function projectCornerLabelLines(info = state.projectInfo) {
   const project = normalizeProjectInfo(info);
-  return [
-    `Job ${project.jobNumber || "-"}`,
-    `Spool ${project.spoolNumber || "-"}`,
-  ];
+  return [`Job ${project.jobNumber || "-"} / Spool ${project.spoolNumber || "-"}`];
+}
+
+function projectCornerTagHeight(fontSize = 12, pressureRating = weakestPressureEstimate(segments())) {
+  const lineHeight = Math.round(fontSize * 1.35);
+  const titleHeight = lineHeight + 14;
+  const bodyHeight = pressureRating ? lineHeight * 2 + 27 : 0;
+  return titleHeight + bodyHeight;
 }
 
 function drawProjectCornerTag(ctx, width, height, options = {}) {
@@ -2332,33 +2631,66 @@ function drawProjectCornerTag(ctx, width, height, options = {}) {
   const fontSize = options.fontSize ?? 12;
   const lineHeight = Math.round(fontSize * 1.35);
   const availableWidth = Math.max(72, width - padding * 2);
-  const maxBoxWidth = Math.min(options.maxWidth ?? 260, availableWidth);
-  const contentWidth = Math.max(52, maxBoxWidth - 18);
+  const maxBoxWidth = Math.min(options.maxWidth ?? 320, availableWidth);
+  const contentWidth = Math.max(52, maxBoxWidth - 24);
+  const dark = isDarkAppTheme();
+  const pressureRating = options.pressureRating === false
+    ? null
+    : options.pressureRating ?? weakestPressureEstimate(segments());
 
   ctx.save();
   ctx.font = `900 ${fontSize}px Inter, system-ui, sans-serif`;
-  const lines = projectCornerLabelLines(options.projectInfo).map((line) => fitCanvasText(ctx, line, contentWidth));
+  const title = fitCanvasText(ctx, projectCornerLabelLines(options.projectInfo)[0], contentWidth);
+  const pressureTitle = pressureRating ? "Weakest pressure note" : "";
+  const pressureValue = pressureRating ? formatPressureStandard(pressureRating.pressureBar) : "";
+  const pressureDetail = pressureRating
+    ? `${pipeSizeDisplayLabel(pressureRating.size)} pipe wall estimate`
+    : "";
+  const measuredTexts = [title];
+  if (pressureRating) measuredTexts.push(pressureTitle, pressureValue, pressureDetail);
   const tagWidth = Math.min(
     availableWidth,
-    Math.max(...lines.map((line) => ctx.measureText(line).width)) + 18,
+    Math.max(...measuredTexts.map((line) => ctx.measureText(line).width)) + 24,
   );
-  const tagHeight = lineHeight * lines.length + 12;
+  const titleHeight = lineHeight + 14;
+  const tagHeight = projectCornerTagHeight(fontSize, pressureRating);
   const x = Math.max(padding, width - padding - tagWidth);
   const y = padding;
 
-  roundRect(ctx, x, y, tagWidth, tagHeight, 7);
-  ctx.fillStyle = options.fill ?? "rgba(255, 253, 248, 0.94)";
+  roundRect(ctx, x, y, tagWidth, tagHeight, 9);
+  ctx.fillStyle = options.fill ?? (dark ? "rgba(4, 17, 27, 0.92)" : "rgba(255, 253, 248, 0.95)");
   ctx.fill();
-  ctx.strokeStyle = options.stroke ?? "rgba(8, 125, 115, 0.24)";
+  ctx.strokeStyle = options.stroke ?? (dark ? "rgba(18, 216, 255, 0.38)" : "rgba(8, 125, 115, 0.24)");
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  ctx.fillStyle = options.color ?? "#1f3438";
+  roundRect(ctx, x, y, tagWidth, titleHeight, 9);
+  ctx.fillStyle = options.headerFill ?? (dark ? "rgba(0, 174, 255, 0.16)" : "rgba(224, 247, 247, 0.92)");
+  ctx.fill();
+  ctx.strokeStyle = dark ? "rgba(18, 216, 255, 0.18)" : "rgba(8, 125, 115, 0.16)";
+  ctx.beginPath();
+  ctx.moveTo(x, y + titleHeight);
+  ctx.lineTo(x + tagWidth, y + titleHeight);
+  ctx.stroke();
+
+  ctx.fillStyle = options.color ?? (dark ? "#ecfeff" : "#123a40");
   ctx.textAlign = "left";
   ctx.textBaseline = "top";
-  lines.forEach((line, index) => {
-    ctx.fillText(line, x + 9, y + 7 + index * lineHeight);
-  });
+  ctx.font = `950 ${fontSize}px Inter, system-ui, sans-serif`;
+  ctx.fillText(title, x + 12, y + 8);
+
+  if (pressureRating) {
+    const bodyY = y + titleHeight + 10;
+    ctx.font = `900 ${Math.max(9, fontSize - 2)}px Inter, system-ui, sans-serif`;
+    ctx.fillStyle = dark ? "#ffd166" : "#92400e";
+    ctx.fillText(pressureTitle, x + 12, bodyY);
+    ctx.font = `950 ${Math.max(10, fontSize - 1)}px Inter, system-ui, sans-serif`;
+    ctx.fillStyle = dark ? "#fff7d6" : "#1f3438";
+    ctx.fillText(fitCanvasText(ctx, pressureValue, tagWidth - 24), x + 12, bodyY + lineHeight);
+    ctx.font = `850 ${Math.max(9, fontSize - 3)}px Inter, system-ui, sans-serif`;
+    ctx.fillStyle = dark ? "#9cc8d8" : "#607174";
+    ctx.fillText(fitCanvasText(ctx, pressureDetail, tagWidth - 24), x + 12, bodyY + lineHeight * 2);
+  }
   ctx.restore();
 }
 
@@ -2422,10 +2754,11 @@ function normalizeStateFittingPositions() {
 }
 
 function normalizeEdgePipeSizesForState() {
-  state.pipeSizeNb = normalizePipeSize(state.pipeSizeNb);
+  const specKey = normalizePipeSpec(state.pipeSpec);
+  state.pipeSizeNb = pipeSizeNbForSpec(state.pipeSizeNb, specKey);
   state.edges = state.edges.map((edge) => ({
     ...edge,
-    pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? state.pipeSizeNb),
+    pipeSizeNb: pipeSizeNbForSpec(edge.pipeSizeNb ?? state.pipeSizeNb, specKey),
   }));
 }
 
@@ -2573,7 +2906,10 @@ function normalizeMeasurements(measurements) {
 
 function normalizePipeSize(value) {
   const requested = Number(value);
-  return PIPE_SIZES.some((size) => size.nb === requested) ? requested : 25;
+  if (Number.isFinite(requested) && PIPE_SIZES.some((size) => size.nb === requested)) {
+    return requested;
+  }
+  return defaultPipeSizeNbForSpec("carbon40");
 }
 
 function pipeSizeFromText(value) {
@@ -2585,6 +2921,48 @@ function pipeSizeFromText(value) {
 
 function normalizePipeSpec(value) {
   return PIPE_SPEC_KEYS.has(value) ? value : "carbon40";
+}
+
+function pipeSpecForKey(value) {
+  return PIPE_SPECS[normalizePipeSpec(value)] ?? PIPE_SPECS.carbon40;
+}
+
+function isTubePipeSpec(value = "carbon40") {
+  return pipeSpecForKey(value).sizeType === "tube";
+}
+
+function isTubePipeSize(size) {
+  return size?.kind === "tube";
+}
+
+function pipeSizeMatchesSpec(size, specKey = "carbon40") {
+  return isTubePipeSpec(specKey) ? isTubePipeSize(size) : !isTubePipeSize(size);
+}
+
+function pipeSizesForSpec(specKey = "carbon40") {
+  return PIPE_SIZES.filter((size) => pipeSizeMatchesSpec(size, specKey));
+}
+
+function defaultPipeSizeNbForSpec(specKey = "carbon40") {
+  return pipeSizesForSpec(specKey)[0]?.nb ?? 25;
+}
+
+function closestPipeSizeNbForSpec(nb, specKey = "carbon40") {
+  const requested = Number(nb);
+  const current = PIPE_SIZES.find((size) => size.nb === requested);
+  const options = pipeSizesForSpec(specKey);
+  if (!options.length) return 25;
+  if (!current) return options[0].nb;
+  const closest = options.reduce((best, size) =>
+    Math.abs(size.od - current.od) < Math.abs(best.od - current.od) ? size : best,
+  options[0]);
+  return closest.nb;
+}
+
+function pipeSizeNbForSpec(nb, specKey = "carbon40") {
+  const requested = normalizePipeSize(nb);
+  const size = PIPE_SIZES.find((item) => item.nb === requested);
+  return pipeSizeMatchesSpec(size, specKey) ? requested : closestPipeSizeNbForSpec(requested, specKey);
 }
 
 function normalizeFlangeMode(value) {
@@ -2848,15 +3226,19 @@ function selectedPipeSize() {
 }
 
 function pipeSpec() {
-  return PIPE_SPECS[normalizePipeSpec(state.pipeSpec)] ?? PIPE_SPECS.carbon40;
+  return pipeSpecForKey(state.pipeSpec);
 }
 
 function pipeSpecShortLabel() {
   return pipeSpec().shortLabel;
 }
 
-function pipeSizeByNb(nb) {
-  return PIPE_SIZES.find((size) => size.nb === normalizePipeSize(nb)) ?? PIPE_SIZES.find((size) => size.nb === 25);
+function pipeSizeByNb(nb, specKey = state.pipeSpec) {
+  const requested = Number(nb);
+  const exact = PIPE_SIZES.find((size) => size.nb === requested && pipeSizeMatchesSpec(size, specKey));
+  if (exact) return exact;
+  const fallbackNb = closestPipeSizeNbForSpec(Number.isFinite(requested) ? requested : defaultPipeSizeNbForSpec(specKey), specKey);
+  return PIPE_SIZES.find((size) => size.nb === fallbackNb) ?? PIPE_SIZES.find((size) => size.nb === 25);
 }
 
 function pipeSizeForSegment(segment) {
@@ -2869,7 +3251,7 @@ function pipeMassPerMetre(segment) {
 
 function pipeWallForSize(size) {
   const spec = pipeSpec();
-  return Number(size[spec.wallKey]) || size.wall40;
+  return Number(size[spec.wallKey]) || Number(size.wall40) || Number(size.wallTube) || 1.6;
 }
 
 function pipeMassPerMetreForSize(size) {
@@ -2878,7 +3260,105 @@ function pipeMassPerMetreForSize(size) {
     return size[spec.kgPerMKey];
   }
   const wall = pipeWallForSize(size);
-  return PIPE_WEIGHT_COEFFICIENT * wall * (size.od - wall);
+  const coefficient = Number(spec.weightCoefficient) || DEFAULT_PIPE_WEIGHT_COEFFICIENT;
+  return coefficient * wall * (size.od - wall);
+}
+
+function pressureRatingAssumption(specKey = state.pipeSpec) {
+  return PRESSURE_RATING_ASSUMPTIONS[normalizePipeSpec(specKey)] ?? PRESSURE_RATING_ASSUMPTIONS.carbon40;
+}
+
+function pipePressureEstimateForSize(size, specKey = state.pipeSpec) {
+  if (!size) return null;
+  const assumption = pressureRatingAssumption(specKey);
+  const allowableStressMpa = Number(assumption.allowableStressMpa);
+  const wallMm = Number(size[pipeSpecForKey(specKey).wallKey]) || Number(size.wall40) || Number(size.wallTube);
+  const odMm = Number(size.od);
+  if (!Number.isFinite(allowableStressMpa) || !Number.isFinite(wallMm) || !Number.isFinite(odMm)) return null;
+
+  const effectiveWallMm = wallMm * PRESSURE_WALL_TOLERANCE_FACTOR;
+  const denominator = odMm - 2 * PRESSURE_Y_COEFFICIENT * effectiveWallMm;
+  if (effectiveWallMm <= 0 || denominator <= 0) return null;
+
+  const pressureMpa = (2 * allowableStressMpa * effectiveWallMm) / denominator;
+  const pressureBar = pressureMpa * 10;
+  return {
+    size,
+    pressureMpa,
+    pressureBar,
+    wallMm,
+    effectiveWallMm,
+    odMm,
+    allowableStressMpa,
+    assumption,
+  };
+}
+
+function pressureEstimateForSegment(segment) {
+  const rating = pipePressureEstimateForSize(pipeSizeForSegment(segment), state.pipeSpec);
+  return rating
+    ? {
+        ...rating,
+        segment,
+      }
+    : null;
+}
+
+function weakestPressureEstimate(segmentData = segments()) {
+  const ratings = segmentData
+    .map(pressureEstimateForSegment)
+    .filter(Boolean)
+    .sort((first, second) => first.pressureBar - second.pressureBar);
+  if (!ratings.length) return null;
+  const weakest = ratings[0];
+  const matchingSegmentIndexes = ratings
+    .filter((rating) => Math.abs(rating.pressureBar - weakest.pressureBar) < 0.05)
+    .map((rating) => rating.segment.index);
+  return {
+    ...weakest,
+    matchingSegmentIndexes,
+  };
+}
+
+function pressureEstimateDetail(rating) {
+  if (!rating) return "";
+  const sizeLabel = pipeSizeDisplayLabel(rating.size);
+  return `${sizeLabel} run ${rating.segment.index + 1}: ${formatPressureStandard(rating.pressureBar)} estimated pipe wall only.`;
+}
+
+function tubeOdText(size) {
+  const od = Number(size?.od);
+  if (!Number.isFinite(od)) return "";
+  return od % 1 === 0 ? String(Math.round(od)) : od.toFixed(1);
+}
+
+function pipeSizeDisplayLabel(size) {
+  if (!size) return "Pipe size";
+  if (isTubePipeSize(size)) return size.label ?? `Tube OD ${tubeOdText(size)}`;
+  return `NB ${size.nb}`;
+}
+
+function pipeSizeDisplayLabelByNb(nb, specKey = state.pipeSpec) {
+  return pipeSizeDisplayLabel(pipeSizeByNb(nb, specKey));
+}
+
+function pipeSizeSpecLabel(size) {
+  return `${pipeSizeDisplayLabel(size)} ${pipeSpec().schedule}`;
+}
+
+function pipeSizeOptionText(size) {
+  if (isTubePipeSize(size)) {
+    return `${pipeSizeDisplayLabel(size)} / ${size.nps} tube / wall ${Number(size.wallTube).toFixed(1)} mm`;
+  }
+  return `NB ${size.nb} / NPS ${size.nps} / OD ${size.od.toFixed(1)} mm`;
+}
+
+function pipeSizeReadoutNoun() {
+  return isTubePipeSpec(state.pipeSpec) ? "tube OD" : "NB size";
+}
+
+function maxPipeOdMm() {
+  return Math.max(...PIPE_SIZES.map((size) => size.od));
 }
 
 function selectedSegmentsData() {
@@ -3288,6 +3768,8 @@ function drawSpool2d(ctx, projection, options = {}) {
     labels: [],
     lines: [],
     viewport,
+    exportMode: options.export === true,
+    compactNumbered: options.export === true && normalizeDimensionStyle(state.dimensionStyle) === "numbered",
     pipes: segmentListForDraw.map((segment) => ({
       index: segment.index,
       start: projectIso(segment.start, projection),
@@ -3974,7 +4456,10 @@ function drawRedCentreDimension(ctx, segment, start, end, dimensionLayout = []) 
     type: "segment",
     segmentIndex: segment.index,
   });
-  const baseOffset = Math.min(64, Math.max(42, screenLength * 0.065));
+  const compactNumbered = layoutState.compactNumbered === true;
+  const baseOffset = compactNumbered
+    ? Math.min(42, Math.max(28, screenLength * 0.045))
+    : Math.min(64, Math.max(42, screenLength * 0.065));
   const manualOffset = dimensionOffsetForSegment(segment.index);
   let labelAngle = Math.atan2(along.y, along.x);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
@@ -4098,7 +4583,10 @@ function drawOffsetSetDimension(ctx, segment, start, end, meta, dimensionLayout 
     type: "offset-set",
     segmentIndex: segment.index,
   });
-  const baseOffset = Math.min(104, Math.max(58, screenLength * 0.14));
+  const compactNumbered = layoutState.compactNumbered === true;
+  const baseOffset = compactNumbered
+    ? Math.min(68, Math.max(40, screenLength * 0.09))
+    : Math.min(104, Math.max(58, screenLength * 0.14));
   const manualOffset = dimensionOffsetForSegment(segment.index);
   let labelAngle = Math.atan2(along.y, along.x);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
@@ -4271,7 +4759,7 @@ function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []
 
     const along = { x: dx / screenLength, y: dy / screenLength };
     const normal = { x: -along.y, y: along.x };
-    const text = `NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule}`;
+    const text = pipeSizeSpecLabel(pipeSizeForSegment(segment));
     const labelWidth = ctx.measureText(text).width + 14;
     const labelHeight = 19;
     const midpoint = { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 };
@@ -4321,6 +4809,125 @@ function drawPipeSizeLabels2d(ctx, projection, segmentData, dimensionLayout = []
   ctx.restore();
 }
 
+function drawWeakestPressureCallout2d(ctx, projection, segmentData, dimensionLayout = [], options = {}) {
+  const rating = weakestPressureEstimate(segmentData);
+  if (!rating) return;
+
+  const segment = segmentData.find((item) => item.index === rating.segment.index) ?? rating.segment;
+  if (!segment) return;
+
+  const start = projectIso(segment.start, projection);
+  const end = projectIso(segment.end, projection);
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const screenLength = Math.hypot(dx, dy);
+  if (screenLength < 18) return;
+
+  const layoutState = Array.isArray(dimensionLayout)
+    ? { labels: dimensionLayout, pipes: [], viewport: dimensionViewport(ctx, 18) }
+    : dimensionLayout;
+  const labels = layoutState.labels ?? [];
+  const pipes = layoutState.pipes ?? [];
+  const viewport = layoutState.viewport ?? dimensionViewport(ctx, 18);
+  const along = { x: dx / screenLength, y: dy / screenLength };
+  const normal = { x: -along.y, y: along.x };
+  const target = { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 };
+  const title = "Weakest pressure";
+  const detail = `${pipeSizeDisplayLabel(rating.size)} / ${formatPressureStandard(rating.pressureBar)}`;
+  const dark = isDarkAppTheme();
+
+  ctx.save();
+  ctx.font = "950 11px Inter, system-ui, sans-serif";
+  const titleWidth = ctx.measureText(title).width;
+  ctx.font = "900 10px Inter, system-ui, sans-serif";
+  const detailWidth = ctx.measureText(detail).width;
+  const badgeWidth = Math.max(titleWidth, detailWidth) + 26;
+  const badgeHeight = 42;
+  const candidates = [];
+  for (const side of [-1, 1]) {
+    for (const level of [0, 1, 2, 3, 4]) {
+      const offset = 38 + level * 24;
+      const lead = Math.min(24, screenLength * 0.08);
+      const center = {
+        x: target.x + normal.x * offset * side + along.x * lead,
+        y: target.y + normal.y * offset * side + along.y * lead,
+      };
+      const rawBounds = {
+        left: center.x - badgeWidth * 0.5,
+        right: center.x + badgeWidth * 0.5,
+        top: center.y - badgeHeight * 0.5,
+        bottom: center.y + badgeHeight * 0.5,
+      };
+      const shift = dimensionLabelShiftForViewport(rawBounds, viewport);
+      const bounds = shiftBounds(rawBounds, shift.x, shift.y);
+      const overlapPenalty = labels.reduce((sum, existing) => sum + boundsOverlapArea(bounds, existing), 0) * 55;
+      const pipePenalty = pipes.reduce((sum, pipe) => (
+        pipe.index === segment.index || segmentIntersectsBounds(pipe.start, pipe.end, inflateBounds(bounds, 4))
+          ? sum + 900
+          : sum
+      ), 0);
+      candidates.push({
+        center: { x: center.x + shift.x, y: center.y + shift.y },
+        bounds,
+        score: overlapPenalty + pipePenalty + level * 18 + (side < 0 ? 4 : 0),
+      });
+    }
+  }
+
+  const chosen = candidates.sort((a, b) => a.score - b.score)[0];
+  if (!chosen) {
+    ctx.restore();
+    return;
+  }
+
+  const markerRadius = options.export ? 5 : 6;
+  const lineColor = dark ? "#ffc857" : "#b45309";
+  const fillColor = dark ? "rgba(11, 25, 37, 0.96)" : "rgba(255, 251, 235, 0.96)";
+  const strokeColor = dark ? "rgba(255, 200, 87, 0.78)" : "rgba(180, 83, 9, 0.42)";
+  const titleColor = dark ? "#ffe8a3" : "#7c2d12";
+  const detailColor = dark ? "#ecfeff" : "#223236";
+  const tailEnd = {
+    x: clampNumber(chosen.center.x, chosen.bounds.left + 10, chosen.bounds.right - 10),
+    y: clampNumber(chosen.center.y, chosen.bounds.top + 10, chosen.bounds.bottom - 10),
+  };
+
+  ctx.shadowColor = dark ? "rgba(255, 200, 87, 0.26)" : "rgba(31, 42, 47, 0.16)";
+  ctx.shadowBlur = dark ? 12 : 8;
+  ctx.shadowOffsetY = 2;
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 5]);
+  drawLine(ctx, target, tailEnd);
+  ctx.setLineDash([]);
+
+  ctx.beginPath();
+  ctx.fillStyle = lineColor;
+  ctx.arc(target.x, target.y, markerRadius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = dark ? "rgba(6, 18, 28, 0.96)" : "rgba(255, 253, 248, 0.96)";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  roundRect(ctx, chosen.bounds.left, chosen.bounds.top, badgeWidth, badgeHeight, 8);
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.font = "950 11px Inter, system-ui, sans-serif";
+  ctx.fillStyle = titleColor;
+  ctx.fillText(title, chosen.bounds.left + 13, chosen.bounds.top + 17);
+  ctx.font = "900 10px Inter, system-ui, sans-serif";
+  ctx.fillStyle = detailColor;
+  ctx.fillText(fitCanvasText(ctx, detail, badgeWidth - 26), chosen.bounds.left + 13, chosen.bounds.top + 32);
+  labels.push(inflateBounds(chosen.bounds, 4));
+  ctx.restore();
+}
+
 function dimensionLabelText(layoutState, displayText, legendText, prefix = "D", target = {}) {
   if (normalizeDimensionStyle(state.dimensionStyle) !== "numbered") return displayText;
   layoutState.numberedItems ??= [];
@@ -4357,7 +4964,11 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   const cardWidth = Math.min(viewport.right - viewport.left, columns * colWidth + gap + padding * 2);
   const cardHeight = titleHeight + rows * lineHeight + padding * 2;
   const x = viewport.right - cardWidth;
-  const y = viewport.top;
+  const cornerReserve = projectCornerTagHeight(12) + 8;
+  const y = Math.min(
+    viewport.top + cornerReserve,
+    Math.max(viewport.top, viewport.bottom - cardHeight),
+  );
 
   ctx.shadowColor = dark ? "rgba(0, 0, 0, 0.42)" : "rgba(31, 42, 47, 0.14)";
   ctx.shadowBlur = dark ? 14 : 10;
@@ -4785,11 +5396,13 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
       }
     : null;
   const sideOptions = manual ? [manual.side] : [1, -1];
-  const maxLevels = manual ? 3 : 12;
+  const compactNumbered = !Array.isArray(dimensionLayout) && dimensionLayout.compactNumbered === true;
+  const offsetStep = compactNumbered ? 24 : 38;
+  const maxLevels = manual ? 3 : compactNumbered ? 7 : 12;
   let best = null;
 
   for (let level = 0; level < maxLevels; level += 1) {
-    const offset = baseOffset + (manual?.offset ?? 0) + level * 38;
+    const offset = baseOffset + (manual?.offset ?? 0) + level * offsetStep;
     for (const [sideIndex, side] of sideOptions.entries()) {
       const normal = { x: baseNormal.x * side, y: baseNormal.y * side };
       const lineStart = { x: start.x + normal.x * offset, y: start.y + normal.y * offset };
@@ -4812,7 +5425,12 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
         y: midpoint.y + labelShift.y,
       };
       const bounds = shiftBounds(rawBounds, labelShift.x, labelShift.y);
+      const fullBounds = combineBounds(
+        bounds,
+        dimensionLineBounds(candidateLines, 12),
+      );
       const labelShiftPenalty = labelShift.x * labelShift.x + labelShift.y * labelShift.y;
+      const viewportPenalty = boundsOverflowPenalty(fullBounds, viewport);
       const overlapArea = labels.reduce((sum, existing) => sum + boundsOverlapArea(bounds, existing), 0);
       const labelPipePenalty = pipes.reduce((sum, pipe) => {
         if (pipe.index === segmentIndex) return sum;
@@ -4834,7 +5452,7 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
         const distance = distanceSegmentToSegment(line.start, line.end, existing.start, existing.end);
         return distance < clearance ? lineSum + Math.pow(clearance - distance, 2) * 3 : lineSum;
       }, 0), 0);
-      const score = overlapArea * 90 + labelPipePenalty * 4 + linePipePenalty + dimensionLinePenalty + labelShiftPenalty * 80 + level * 10 + sideIndex * 2;
+      const score = viewportPenalty * 220 + overlapArea * 90 + labelPipePenalty * 4 + linePipePenalty + dimensionLinePenalty + labelShiftPenalty * 80 + level * 10 + sideIndex * 2;
       const candidate = {
         lineStart,
         lineEnd,
@@ -4859,6 +5477,37 @@ function redDimensionLayout(start, end, baseNormal, baseOffset, pipeGap, labelWi
   }
 
   return best;
+}
+
+function dimensionLineBounds(lines, padding = 0) {
+  const points = lines.flatMap((line) => [line.start, line.end]);
+  if (!points.length) return { left: 0, right: 0, top: 0, bottom: 0 };
+  return {
+    left: Math.min(...points.map((point) => point.x)) - padding,
+    right: Math.max(...points.map((point) => point.x)) + padding,
+    top: Math.min(...points.map((point) => point.y)) - padding,
+    bottom: Math.max(...points.map((point) => point.y)) + padding,
+  };
+}
+
+function combineBounds(...boundsList) {
+  const valid = boundsList.filter(Boolean);
+  if (!valid.length) return { left: 0, right: 0, top: 0, bottom: 0 };
+  return {
+    left: Math.min(...valid.map((bounds) => bounds.left)),
+    right: Math.max(...valid.map((bounds) => bounds.right)),
+    top: Math.min(...valid.map((bounds) => bounds.top)),
+    bottom: Math.max(...valid.map((bounds) => bounds.bottom)),
+  };
+}
+
+function boundsOverflowPenalty(bounds, viewport) {
+  if (!bounds || !viewport) return 0;
+  const left = Math.max(0, viewport.left - bounds.left);
+  const right = Math.max(0, bounds.right - viewport.right);
+  const top = Math.max(0, viewport.top - bounds.top);
+  const bottom = Math.max(0, bounds.bottom - viewport.bottom);
+  return left * left + right * right + top * top + bottom * bottom;
 }
 
 function dimensionLabelShiftForViewport(bounds, viewport) {
@@ -5263,6 +5912,27 @@ function formatMass(value) {
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
 }
 
+function formatPressureBar(value) {
+  const pressure = Number(value);
+  if (!Number.isFinite(pressure)) return "N/A";
+  const rounded = pressure >= 100 ? Math.round(pressure) : Math.round(pressure * 10) / 10;
+  const text = Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+  return `${text.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} bar`;
+}
+
+function formatPressureKpa(valueBar) {
+  const pressure = Number(valueBar);
+  if (!Number.isFinite(pressure)) return "N/A";
+  const kpa = Math.round(pressure * 100);
+  return `${String(kpa).replace(/\B(?=(\d{3})+(?!\d))/g, ",")} kPa`;
+}
+
+function formatPressureStandard(valueBar) {
+  const pressure = Number(valueBar);
+  if (!Number.isFinite(pressure)) return "N/A";
+  return `${formatPressureKpa(pressure)} (${formatPressureBar(pressure)})`;
+}
+
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -5301,7 +5971,7 @@ function visualPipeWidth(segment = null) {
 
 function pipeRadiusMetres(segment = null) {
   const od = (segment ? pipeSizeForSegment(segment) : selectedPipeSize()).od;
-  const maxOd = PIPE_SIZES[PIPE_SIZES.length - 1].od;
+  const maxOd = maxPipeOdMm();
   return 0.055 + (od / maxOd) * 0.255;
 }
 
@@ -6275,7 +6945,7 @@ function teeReducerFromEntries(nodeIndex, first, second) {
     kind: "tee",
     firstTakeoffMm: reducer.firstSegmentIndex === reducer.smallSegment.index ? takeoffMm : 0,
     secondTakeoffMm: reducer.secondSegmentIndex === reducer.smallSegment.index ? takeoffMm : 0,
-    source: reducer.source === "Atlas table" ? "Atlas table tee reducer" : "estimated tee reducer",
+    source: reducer.source.includes("Atlas") ? "Atlas large-end tee reducer" : "estimated tee reducer",
   };
 }
 
@@ -6304,7 +6974,9 @@ function teeTakeoffForNode(nodeIndex, connected, segmentData = segments()) {
   const smallestSize = entries
     .map((entry) => entry.size)
     .sort((a, b) => a.od - b.od)[0];
-  const atlasWeightKg = atlasButtweldWeight(largestSize, "tee");
+  const reducing = entries.some((entry) => entry.size.nb !== largestSize.nb);
+  const atlasReducingWeightKg = reducing ? atlasReducingTeeWeightForSizes(largestSize, smallestSize) : null;
+  const atlasWeightKg = atlasReducingWeightKg ?? atlasButtweldWeight(largestSize, "tee");
   const weightKg = atlasWeightKg ?? estimatedTeeWeightKg(largestSize);
 
   return {
@@ -6312,9 +6984,15 @@ function teeTakeoffForNode(nodeIndex, connected, segmentData = segments()) {
     nodeIndex,
     nb: largestSize.nb,
     branchNb: smallestSize.nb,
-    reducing: entries.some((entry) => entry.size.nb !== largestSize.nb),
+    reducing,
     weightKg,
-    source: atlasWeightKg === null ? "estimated" : "Atlas table",
+    source: atlasWeightKg === null
+      ? "estimated"
+      : isTubePipeSize(largestSize) && atlasReducingWeightKg !== null
+      ? "Atlas tube reducing tee table"
+      : isTubePipeSize(largestSize)
+      ? "Atlas tube tee table"
+      : "Atlas table",
     connections: entries.map((entry) => ({
       segmentIndex: entry.segment.index,
       nb: entry.size.nb,
@@ -6410,6 +7088,7 @@ function mostOppositeEntryPair(entries) {
 }
 
 function teeTakeoffMm(size) {
+  if (isTubePipeSize(size) && Number.isFinite(size.tubeTeeTakeoffMm)) return size.tubeTeeTakeoffMm;
   return TEE_TAKEOFF_MM[size.nb] ?? Math.max(size.od * 0.85, size.lrRadius * 0.68);
 }
 
@@ -6466,7 +7145,11 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     secondTakeoffMm,
     lengthMm,
     weightKg: reducerWeightKg,
-    source: atlasWeightKg === null ? "estimated" : "Atlas table",
+    source: atlasWeightKg === null
+      ? "estimated"
+      : isTubePipeSize(largeSize)
+      ? "Atlas tube reducer table"
+      : "Atlas large-end table",
     kind: isBendReducer ? "bend" : "inline",
     placementSide,
     bend: Number(options.bend) || 0,
@@ -6486,10 +7169,20 @@ function atlasReducerWeightForSizes(largeSize, smallSize) {
   return atlasButtweldWeight(largeSize, "reducer");
 }
 
+function atlasReducingTeeWeightForSizes(largeSize, smallSize) {
+  if (!largeSize || !smallSize || !isTubePipeSize(largeSize) || !isTubePipeSize(smallSize)) return null;
+  if (largeSize.nb === smallSize.nb) return null;
+  const weight = ATLAS_TUBE_REDUCING_TEE_WEIGHTS[largeSize.nb];
+  return Number.isFinite(weight) ? weight : null;
+}
+
 function reducerLengthMm(firstSize, secondSize) {
   const largeOd = Math.max(firstSize.od, secondSize.od);
-  const difference = Math.abs(firstSize.od - secondSize.od);
-  return clampNumber(largeOd * 2.4 + difference * 0.8, 100, 450);
+  const largeSize = firstSize.od >= secondSize.od ? firstSize : secondSize;
+  if (isTubePipeSize(largeSize) && Number.isFinite(largeSize.tubeReducerLengthMm)) return largeSize.tubeReducerLengthMm;
+  const tableLength = REDUCER_LENGTH_MM[largeSize.nb];
+  if (Number.isFinite(tableLength)) return tableLength;
+  return clampNumber(largeOd * 0.9, 38, 450);
 }
 
 function bendTakeoffMm(segment, bendDegrees) {
@@ -6504,11 +7197,19 @@ function largerPipeSize(firstSegment, secondSegment) {
 }
 
 function elbowWeightKg(size, bendDegrees) {
-  const table = atlasButtweldWeight(size, "elbow90");
-  if (table !== null) {
-    return table * (normalizeBendAngle(bendDegrees) / 90);
+  const bend = normalizeBendAngle(bendDegrees);
+  const elbow90 = atlasButtweldWeight(size, "elbow90");
+  const elbow45 = atlasButtweldWeight(size, "elbow45");
+  if (Math.abs(bend - 90) < 0.5 && elbow90 !== null) {
+    return elbow90;
   }
-  const bendRadians = normalizeBendAngle(bendDegrees) * Math.PI / 180;
+  if (Math.abs(bend - 45) < 0.5 && elbow45 !== null) {
+    return elbow45;
+  }
+  if (elbow90 !== null) {
+    return elbow90 * (bend / 90);
+  }
+  const bendRadians = bend * Math.PI / 180;
   return pipeMassPerMetreForSize(size) * (size.lrRadius / 1000) * bendRadians;
 }
 
@@ -6536,7 +7237,7 @@ function fittingWeightSource(fitting, segment = null) {
   if (fittingWeightOverride(fitting) !== null) return "manual";
   if (atlasFittingWeightKg(fitting, segment) === null) return "estimated";
   if (fitting?.type === "flange" && fittingFlangeStandard(fitting) !== "ansi150") {
-    return "Atlas table adjusted";
+    return "estimated from base table";
   }
   return "Atlas table";
 }
@@ -6590,7 +7291,7 @@ function estimatedFittingWeightKg(fitting, segment) {
   if (fitting.type === "weld") return Math.max(0.05, scale * 0.12);
   if (fitting.type === "reducer") return Math.max(0.25, scale * 1.35);
   if (fitting.type === "socket") {
-    const socketSize = pipeSizeByNb(fittingSocketSizeNb(fitting));
+    const socketSize = pipeSizeByNb(fittingSocketSizeNb(fitting), "carbon40");
     return Math.max(0.06, pipeMassPerMetreForSize(socketSize) * 0.05 + 0.03);
   }
   if (fitting.type === "rollGroove") return 0;
@@ -6774,10 +7475,10 @@ function takeoffCountRows(quantities = quantitySummary()) {
     const size = pipeSizeForSegment(segment);
     const row = add(
       `pipe:${size.nb}:${spec.schedule}`,
-      `Pipe NB ${size.nb} ${spec.schedule}`,
+      `${isTubePipeSize(size) ? "Tube" : "Pipe"} ${pipeSizeDisplayLabel(size)} ${spec.schedule}`,
       0,
       quantity.pipeWeightKg,
-      `${spec.material} pipe`,
+      `${spec.material} ${isTubePipeSize(size) ? "tube" : "pipe"}`,
       0,
     );
     row.lengthMm += quantity.cutLengthMm;
@@ -6788,18 +7489,18 @@ function takeoffCountRows(quantities = quantitySummary()) {
     const angle = formatAngle(elbow.bend);
     add(
       `elbow:${elbow.nb}:${angle}`,
-      `LR elbow NB ${elbow.nb} ${angle} deg`,
+      `${isTubePipeSpec(state.pipeSpec) ? "Tube bend" : "LR elbow"} ${pipeSizeDisplayLabelByNb(elbow.nb)} ${angle} deg`,
       1,
       elbow.weightKg,
-      "buttweld bend",
+      isTubePipeSpec(state.pipeSpec) ? "tube bend" : "buttweld bend",
       10,
     );
   }
 
   for (const tee of quantities.tees) {
     const label = tee.reducing
-      ? `Reducing tee NB ${tee.nb} x NB ${tee.branchNb}`
-      : `Tee NB ${tee.nb}`;
+      ? `Reducing tee ${pipeSizeDisplayLabelByNb(tee.nb)} x ${pipeSizeDisplayLabelByNb(tee.branchNb)}`
+      : `Tee ${pipeSizeDisplayLabelByNb(tee.nb)}`;
     add(
       `tee:${tee.nb}:${tee.branchNb}:${tee.reducing ? "reducing" : "equal"}`,
       label,
@@ -6813,7 +7514,7 @@ function takeoffCountRows(quantities = quantitySummary()) {
   for (const branch of quantities.branches) {
     add(
       `branch:${branch.nb}:${branch.branchNb}`,
-      `Branch weld NB ${branch.nb} x NB ${branch.branchNb}`,
+      `Branch weld ${pipeSizeDisplayLabelByNb(branch.nb)} x ${pipeSizeDisplayLabelByNb(branch.branchNb)}`,
       1,
       branch.weightKg,
       branch.source,
@@ -6824,7 +7525,7 @@ function takeoffCountRows(quantities = quantitySummary()) {
   for (const reducer of quantities.reducers) {
     add(
       `reducer:auto:${reducer.largeNb}:${reducer.smallNb}`,
-      `Reducer NB ${reducer.largeNb} x NB ${reducer.smallNb}`,
+      `Reducer ${pipeSizeDisplayLabelByNb(reducer.largeNb)} x ${pipeSizeDisplayLabelByNb(reducer.smallNb)}`,
       1,
       reducer.weightKg,
       reducer.source ?? "auto size change",
@@ -6841,7 +7542,7 @@ function takeoffCountRows(quantities = quantitySummary()) {
       const standardLabel = flangeStandardLabel(standard);
       const row = add(
         `flange:${standard}:${size.nb}`,
-        `${standardLabel} flange NB ${size.nb}`,
+        `${standardLabel} flange ${pipeSizeDisplayLabel(size)}`,
         mode === "double" ? 2 : 1,
         item.weightKg,
         `${mode === "double" ? "double set" : "single"} / physical flange plates`,
@@ -6855,7 +7556,7 @@ function takeoffCountRows(quantities = quantitySummary()) {
     if (type === "reducer") {
       add(
         `reducer:manual:${size.nb}`,
-        `Manual reducer on NB ${size.nb}`,
+        `Manual reducer on ${pipeSizeDisplayLabel(size)}`,
         1,
         item.weightKg,
         "confirm outlet size",
@@ -6868,7 +7569,7 @@ function takeoffCountRows(quantities = quantitySummary()) {
       const socketNb = fittingSocketSizeNb(item.fitting);
       add(
         `socket:${socketNb}:host:${size.nb}`,
-        `Socket NB ${socketNb} on NB ${size.nb}`,
+        `Socket ${pipeSizeDisplayLabelByNb(socketNb, "carbon40")} on ${pipeSizeDisplayLabel(size)}`,
         1,
         item.weightKg,
         `${formatAngle(fittingSocketAngle(item.fitting))} deg rotation`,
@@ -6880,7 +7581,7 @@ function takeoffCountRows(quantities = quantitySummary()) {
     if (type === "rollGroove") {
       add(
         `rollGroove:${size.nb}`,
-        `Roll groove NB ${size.nb}`,
+        `Roll groove ${pipeSizeDisplayLabel(size)}`,
         1,
         0,
         "0 kg allowance",
@@ -6890,12 +7591,12 @@ function takeoffCountRows(quantities = quantitySummary()) {
     }
 
     if (type === "valve") {
-      add(`valve:${size.nb}`, `Valve NB ${size.nb}`, 1, item.weightKg, item.weightSource, 50);
+      add(`valve:${size.nb}`, `Valve ${pipeSizeDisplayLabel(size)}`, 1, item.weightKg, item.weightSource, 50);
       continue;
     }
 
     if (type === "weld") {
-      add(`weld:${size.nb}`, `Weld mark NB ${size.nb}`, 1, item.weightKg, item.weightSource, 55);
+      add(`weld:${size.nb}`, `Weld mark ${pipeSizeDisplayLabel(size)}`, 1, item.weightKg, item.weightSource, 55);
     }
   }
 
@@ -7787,6 +8488,7 @@ function setTool(tool) {
     cursorReadout.textContent = "Measure - pick first point";
   }
   drawIso();
+  checkTutorialPractice();
 }
 
 function updateSegmentList() {
@@ -7819,7 +8521,7 @@ function updateSegmentList() {
       <span class="segment-main">
         <strong>${escapeHtml(cutRunDisplayTitle(segment))}</strong>
         <small>Cut ${formatLength(quantity.cutLengthMm)} mm / CL ${formatLength(quantity.centrelineMm)} mm / ${formatMass(quantity.pipeWeightKg)} kg</small>
-        <small>${pointDetail ? `${escapeHtml(pointDetail)} / ` : ""}NB ${pipeSizeForSegment(segment).nb} ${escapeHtml(pipeSpec().schedule)} / deductions ${formatLength(quantity.bendTakeoffMm)} mm</small>
+        <small>${pointDetail ? `${escapeHtml(pointDetail)} / ` : ""}${escapeHtml(pipeSizeSpecLabel(pipeSizeForSegment(segment)))} / deductions ${formatLength(quantity.bendTakeoffMm)} mm</small>
       </span>
       <span class="segment-fit">${fittingCount}</span>
     `;
@@ -7852,6 +8554,7 @@ function updateWeightsSummary() {
   if (!weightsSummary) return;
   const quantities = quantitySummary();
   const liftPoint = centreOfGravityData(quantities);
+  const pressureLimit = weakestPressureEstimate(segments());
 
   if (!quantities.segments.length) {
     weightsSummary.innerHTML = '<div class="takeoff-empty">No pipe weight yet</div>';
@@ -7868,8 +8571,9 @@ function updateWeightsSummary() {
       <div class="weight-card"><span>Fittings</span><strong>${formatMass(quantities.fittingWeightKg)} kg</strong></div>
       <div class="weight-card total"><span>Total estimated</span><strong>${formatMass(quantities.totalWeightKg)} kg</strong></div>
       <div class="weight-card"><span>COG</span><strong>${liftPoint ? formatPointCompact(liftPoint.point) : "N/A"}</strong></div>
+      <div class="weight-card"><span>Weakest pressure</span><strong>${pressureLimit ? `${formatPressureStandard(pressureLimit.pressureBar)} / ${pipeSizeDisplayLabel(pressureLimit.size)}` : "N/A"}</strong></div>
     </div>
-    <p class="weight-note">${pipeSpec().label}. Atlas table weights are used where available. Roll grooves add 0 kg. Branch welds, valves, sockets and custom weld allowances remain estimates unless set manually.</p>
+    <p class="weight-note">${pipeSpec().label}. Pipe kg/m and standard fitting table weights are used where available. Roll grooves add 0 kg. Branch welds, valves, sockets, adjusted flange standards and custom weld allowances remain estimates unless set manually. Weakest pressure is an estimated pipe-wall check only.</p>
   `;
 }
 
@@ -7888,25 +8592,25 @@ function updateTakeoffSummary() {
         const takeoffText = sameTakeoff
           ? `${formatLength(elbow.takeoffMm)} mm each side`
           : `run ${elbow.firstSegmentIndex + 1}: ${formatLength(elbow.firstTakeoffMm)} mm, run ${elbow.secondSegmentIndex + 1}: ${formatLength(elbow.secondTakeoffMm)} mm`;
-        return `<li>Bend ${index + 1}: NB ${elbow.nb} / ${formatAngle(elbow.bend)} deg - take off ${takeoffText}</li>`;
+        return `<li>Bend ${index + 1}: ${pipeSizeDisplayLabelByNb(elbow.nb)} / ${formatAngle(elbow.bend)} deg - take off ${takeoffText}</li>`;
       }).join("")
     : "<li>No bend take-off yet.</li>";
   const reducerNotes = quantities.reducers.length
     ? quantities.reducers.map((reducer, index) => {
-        return `<li>Reducer ${index + 1}: NB ${reducer.largeNb} to NB ${reducer.smallNb} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}</li>`;
+        return `<li>Reducer ${index + 1}: ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}</li>`;
       }).join("")
     : "<li>No automatic reducers yet.</li>";
   const teeNotes = quantities.tees.length
     ? quantities.tees.map((tee, index) => {
         const legs = tee.connections.map((connection) => `run ${connection.segmentIndex + 1}: ${formatLength(connection.takeoffMm)} mm`).join(", ");
         const label = tee.reducing ? `Reducing tee ${index + 1}` : `Tee ${index + 1}`;
-        return `<li>${label}: NB ${tee.nb}${tee.reducing ? ` to NB ${tee.branchNb}` : ""} - take off ${legs} / ${formatMass(tee.weightKg)} kg ${tee.source}</li>`;
+        return `<li>${label}: ${pipeSizeDisplayLabelByNb(tee.nb)}${tee.reducing ? ` to ${pipeSizeDisplayLabelByNb(tee.branchNb)}` : ""} - take off ${legs} / ${formatMass(tee.weightKg)} kg ${tee.source}</li>`;
       }).join("")
     : "<li>No tee take-off yet.</li>";
   const branchNotes = quantities.branches.length
     ? quantities.branches.map((branch, index) => {
         const legs = branch.connections.map((connection) => `run ${connection.segmentIndex + 1}: ${formatLength(connection.takeoffMm)} mm`).join(", ");
-        return `<li>Branch ${index + 1}: main NB ${branch.nb} to branch NB ${branch.branchNb} - take off ${legs} / ${formatMass(branch.weightKg)} kg ${branch.source}</li>`;
+        return `<li>Branch ${index + 1}: main ${pipeSizeDisplayLabelByNb(branch.nb)} to branch ${pipeSizeDisplayLabelByNb(branch.branchNb)} - take off ${legs} / ${formatMass(branch.weightKg)} kg ${branch.source}</li>`;
       }).join("")
     : "<li>No branch weld take-off yet.</li>";
   const fittingNotes = quantities.fittings.length
@@ -7916,6 +8620,7 @@ function updateTakeoffSummary() {
       }).join("")
     : "<li>No fittings with weight yet.</li>";
   const liftPoint = centreOfGravityData(quantities);
+  const pressureLimit = weakestPressureEstimate(segments());
   const liftPointText = centreOfGravityReferenceText(quantities, liftPoint);
   const lugPlan = suggestedLugPlan(quantities, liftPoint);
   const lugNotes = lugPlan
@@ -7955,6 +8660,7 @@ function updateTakeoffSummary() {
       <span>Reducers</span><strong>${quantities.reducers.length} / ${formatMass(quantities.reducerWeightKg)} kg</strong>
       <span>Fittings</span><strong>${quantities.fittings.length} / ${formatMass(quantities.fittingWeightKg)} kg</strong>
       <span>Total est.</span><strong>${formatMass(quantities.totalWeightKg)} kg</strong>
+      ${pressureLimit ? `<span>Weakest pressure</span><strong>${escapeHtml(formatPressureStandard(pressureLimit.pressureBar))} / ${escapeHtml(pipeSizeDisplayLabel(pressureLimit.size))}</strong>` : ""}
       ${liftRows}
     </div>
     <div class="bend-notes takeoff-counts">
@@ -7982,7 +8688,7 @@ function updateTakeoffSummary() {
       <ul>${fittingNotes}</ul>
     </div>
     ${liftSection}
-    <p>${pipeSpec().label}, LR elbows.${liftDisclaimer} Atlas table weights are used where available. Roll grooves add 0 kg. Valves, sockets and weld allowances remain estimated unless set manually.</p>
+    <p>${pipeSpec().label}, LR elbows.${liftDisclaimer} Pipe kg/m and standard fitting table weights are used where available. Roll grooves add 0 kg. Valves, sockets, adjusted flange standards and weld allowances remain estimated unless set manually. Weakest pressure is a pipe-wall estimate only and excludes fittings, flanges, gaskets, corrosion allowance, temperature and code checks.</p>
   `;
 }
 
@@ -8023,7 +8729,7 @@ function missingReducerIssues(segmentData, quantities) {
     issues.push(healthIssue(
       "error",
       `Missing reducer at ${label} ${pointLabel(nodeIndex)}`,
-      `Connected sizes: ${[...sizes].map((nb) => `NB ${nb}`).join(", ")}.`,
+      `Connected sizes: ${[...sizes].map((nb) => pipeSizeDisplayLabelByNb(nb)).join(", ")}.`,
       {
         type: "reducer-node",
         pointIndex: nodeIndex,
@@ -8045,6 +8751,18 @@ function drawingHealthItems() {
   if (!project.spoolNumber) items.push(healthIssue("error", "Spool number missing", "Add a spool number so the shop can identify this spool.", { type: "project", field: "spoolNumber" }));
   if (!segmentData.length) {
     items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting.", { type: "tool", tool: "draw" }));
+  }
+  const pressureLimit = weakestPressureEstimate(segmentData);
+  if (pressureLimit) {
+    items.push(healthIssue(
+      "warning",
+      "Weakest pressure point",
+      `${pressureEstimateDetail(pressureLimit)} Verify fittings, flanges, temperature and design code before using this as a rating.`,
+      {
+        type: "pressure",
+        segmentIndexes: pressureLimit.matchingSegmentIndexes,
+      },
+    ));
   }
 
   const connections = nodeConnections(segmentData);
@@ -8310,12 +9028,89 @@ function updateBomSummary() {
 
 function currentWorkflowRows() {
   const checked = state.checkedAt ? `${new Date(state.checkedAt).toLocaleString()} by ${state.checkedBy || "unknown"}` : "Not checked";
+  const issued = state.issuedAt ? `${new Date(state.issuedAt).toLocaleString()} by ${state.issuedBy || "unknown"}` : "Not issued";
   return [
     ["Stage", projectStatusLabel()],
     ["Lock", state.locked ? "Locked" : "Editable"],
     ["Checked", checked],
+    ["Issued", issued],
     ["Health", healthSummaryText()],
   ];
+}
+
+function preIssueChecklist() {
+  const project = normalizeProjectInfo(state.projectInfo);
+  const health = drawingHealthItems();
+  const projectMissing = [
+    project.jobNumber ? "" : "job number",
+    project.spoolNumber ? "" : "spool number",
+    project.revision ? "" : "revision",
+  ].filter(Boolean);
+  const regressionResults = runRegressionAutoChecks();
+  return {
+    projectMissing,
+    health,
+    errors: health.filter((item) => item.severity === "error"),
+    warnings: health.filter((item) => item.severity === "warning"),
+    regressionResults,
+    regressionFailures: regressionResults.filter((result) => result.passed !== true),
+  };
+}
+
+function preIssueChecklistStatus(checks = preIssueChecklist()) {
+  if (checks.projectMissing.length || checks.errors.length || checks.regressionFailures.length) return "blocked";
+  if (checks.warnings.length || !state.checkedAt) return "review";
+  return "ready";
+}
+
+function preIssueChecklistRowHtml(label, value, status) {
+  return `
+    <li class="preissue-${escapeHtml(status)}">
+      <span>${escapeHtml(label)}</span>
+      <strong>${escapeHtml(value)}</strong>
+    </li>
+  `;
+}
+
+function preIssueChecklistCardHtml() {
+  const checks = preIssueChecklist();
+  const status = preIssueChecklistStatus(checks);
+  const projectText = checks.projectMissing.length
+    ? `Missing ${checks.projectMissing.join(", ")}`
+    : "Job, spool and revision set";
+  const healthText = checks.errors.length
+    ? `${checks.errors.length} issue${checks.errors.length === 1 ? "" : "s"} to fix`
+    : checks.warnings.length
+    ? `${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} to review`
+    : "No drawing issues";
+  const testText = checks.regressionFailures.length
+    ? `${checks.regressionFailures.length} test kit check${checks.regressionFailures.length === 1 ? "" : "s"} failed`
+    : "Test kit passed";
+  const checkedText = state.checkedAt
+    ? `Checked by ${state.checkedBy || "unknown"}`
+    : "Not checked yet";
+  const issuedText = state.issuedAt
+    ? `Issued by ${state.issuedBy || "unknown"}`
+    : status === "ready"
+    ? "Ready to issue"
+    : status === "review"
+    ? "Needs review before issue"
+    : "Blocked";
+
+  return `
+    <div class="workflow-card preissue-card preissue-${escapeHtml(status)}">
+      <div class="preissue-heading">
+        <strong>Pre-issue check</strong>
+        <span>${escapeHtml(issuedText)}</span>
+      </div>
+      <ul class="workflow-list preissue-list">
+        ${preIssueChecklistRowHtml("Project", projectText, checks.projectMissing.length ? "blocked" : "ready")}
+        ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.warnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Test kit", testText, checks.regressionFailures.length ? "blocked" : "ready")}
+        ${preIssueChecklistRowHtml("Checked", checkedText, state.checkedAt ? "ready" : "review")}
+      </ul>
+    </div>
+  `;
 }
 
 function productionAssigneeChoices() {
@@ -8405,8 +9200,10 @@ function updateWorkflowSummary() {
         ${currentWorkflowRows().map(([label, value]) => `<li><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></li>`).join("")}
       </ul>
     </div>
+    ${preIssueChecklistCardHtml()}
     <div class="workflow-actions">
       <button type="button" data-workflow-action="mark-checked"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Mark checked</button>
+      <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Issue drawing</button>
       <button type="button" data-workflow-action="new-revision"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>New revision</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
       <button type="button" data-workflow-action="save-defaults">Save defaults</button>
@@ -8439,11 +9236,12 @@ function updateWorkflowSummary() {
 }
 
 function handleWorkflowAction(action) {
-  if (cloudPermissionReadOnly && (action === "mark-checked" || action === "new-revision")) {
+  if (cloudPermissionReadOnly && (action === "mark-checked" || action === "issue-drawing" || action === "new-revision")) {
     showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change workflow status.");
     return;
   }
   if (action === "mark-checked") markDrawingChecked();
+  if (action === "issue-drawing") issueDrawing();
   if (action === "new-revision") createNextRevision();
   if (action === "share-readonly") shareReadOnlyProject();
   if (action === "save-defaults") saveCurrentSettingsAsDefaults();
@@ -8524,6 +9322,9 @@ async function markDrawingChecked() {
   state.checkedBy = String(name).trim().slice(0, 64);
   state.checkedAt = now;
   state.projectStatus = "checked";
+  state.issuedBy = "";
+  state.issuedAt = "";
+  updateProductionStatusMeta("checked", now);
   if (previousStatus !== "checked") {
     state.productionActivity = addProductionActivity(state.productionActivity, "status", `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel("checked")}.`, now);
   }
@@ -8531,6 +9332,138 @@ async function markDrawingChecked() {
   updateControls();
   updateAll();
   showHealthPanel();
+}
+
+function updateProductionStatusMeta(nextStatus, now = new Date().toISOString()) {
+  const currentProduction = normalizeProductionInfo(state.productionInfo);
+  state.productionInfo = normalizeProductionInfo({
+    ...currentProduction,
+    completedAt: nextStatus === "complete" ? currentProduction.completedAt || now : "",
+    removeAfter: nextStatus === "complete" ? currentProduction.removeAfter || isoDaysFromNow(7) : "",
+    lastUpdatedBy: checkerName(),
+    lastUpdatedAt: now,
+  });
+}
+
+function recordStatusMove(previousStatus, nextStatus, now = new Date().toISOString()) {
+  if (normalizeProjectStatus(previousStatus) !== normalizeProjectStatus(nextStatus)) {
+    state.productionActivity = addProductionActivity(
+      state.productionActivity,
+      "status",
+      `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel(nextStatus)}.`,
+      now,
+    );
+  }
+}
+
+function clearIssueStampIfUnissuedStatus(nextStatus) {
+  if (projectStatusAtLeast(nextStatus, "issued")) return;
+  state.issuedBy = "";
+  state.issuedAt = "";
+}
+
+function applyProjectStatusChange(nextStatus, options = {}) {
+  const normalizedStatus = normalizeProjectStatus(nextStatus);
+  const previousStatus = normalizeProjectStatus(state.projectStatus);
+  const now = options.now || new Date().toISOString();
+  state.projectStatus = normalizedStatus;
+  updateProductionStatusMeta(normalizedStatus, now);
+  recordStatusMove(previousStatus, normalizedStatus, now);
+  if (projectStatusAtLeast(normalizedStatus, "checked") && !state.checkedAt) {
+    state.checkedAt = now;
+    state.checkedBy = checkerName();
+  }
+  clearIssueStampIfUnissuedStatus(normalizedStatus);
+  if (normalizedStatus !== "draft" && state.locked !== true) {
+    state.locked = true;
+  }
+}
+
+function preIssueBlockingMessage(checks) {
+  const parts = [];
+  if (checks.projectMissing.length) {
+    parts.push(`missing ${checks.projectMissing.join(", ")}`);
+  }
+  if (checks.errors.length) {
+    parts.push(`${checks.errors.length} drawing error${checks.errors.length === 1 ? "" : "s"}`);
+  }
+  if (checks.regressionFailures.length) {
+    parts.push(`${checks.regressionFailures.length} test kit failure${checks.regressionFailures.length === 1 ? "" : "s"}`);
+  }
+  return parts.join(", ");
+}
+
+async function issueDrawing(options = {}) {
+  if (cloudPermissionReadOnly) {
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to issue the drawing.");
+    updateControls();
+    return false;
+  }
+
+  const checks = preIssueChecklist();
+  const blocking = preIssueBlockingMessage(checks);
+  if (blocking) {
+    showAppNotice(`Pre-issue check blocked: ${blocking}.`);
+    showHealthPanel();
+    updateWorkflowSummary();
+    return false;
+  }
+
+  if (checks.warnings.length || !state.checkedAt) {
+    const warningBits = [];
+    if (checks.warnings.length) {
+      warningBits.push(`${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} still need review`);
+    }
+    if (!state.checkedAt) {
+      warningBits.push("the drawing is not marked checked");
+    }
+    const proceed = await confirmAppAction(`${warningBits.join(". ")}. Issue drawing anyway?`, {
+      title: "Pre-issue review",
+      confirmLabel: "Issue drawing",
+      tone: "warning",
+    });
+    if (!proceed) {
+      showHealthPanel();
+      updateControls();
+      return false;
+    }
+  }
+
+  const name = await openFieldInputDialog({
+    title: "Issue drawing",
+    label: "Issued by",
+    value: checkerName() || state.checkedBy || "",
+    help: "This name is recorded on the fab sheet, workflow card and activity history.",
+    submitLabel: "Issue drawing",
+  });
+  if (name === null) {
+    updateControls();
+    return false;
+  }
+
+  const issuedBy = String(name).trim().slice(0, 64) || checkerName() || "unknown";
+  const previousStatus = normalizeProjectStatus(state.projectStatus);
+  const now = new Date().toISOString();
+  state.issuedBy = issuedBy;
+  state.issuedAt = now;
+  if (!state.checkedAt) {
+    state.checkedBy = issuedBy;
+    state.checkedAt = now;
+  }
+  applyProjectStatusChange("issued", { now });
+  state.issuedBy = issuedBy;
+  state.issuedAt = now;
+  state.locked = true;
+  if (previousStatus === "issued") {
+    state.productionActivity = addProductionActivity(state.productionActivity, "status", `Issued again by ${issuedBy}.`, now);
+  }
+  if (options.targetStatus && normalizeProjectStatus(options.targetStatus) !== "issued") {
+    applyProjectStatusChange(options.targetStatus, { now: new Date().toISOString() });
+  }
+  updateControls();
+  updateAll();
+  showAppNotice("Drawing issued. Fab sheets will now show the issued-by details.");
+  return true;
 }
 
 function revisionRankText(value) {
@@ -8743,13 +9676,15 @@ async function restoreProjectBackup(backupId) {
 }
 
 function populatePipeSizeOptions() {
+  const current = pipeSizeNbForSpec(pipeSizeSelect.value || state.pipeSizeNb, state.pipeSpec);
   pipeSizeSelect.innerHTML = "";
-  for (const size of PIPE_SIZES) {
+  for (const size of pipeSizesForSpec(state.pipeSpec)) {
     const option = document.createElement("option");
     option.value = String(size.nb);
-    option.textContent = `NB ${size.nb} / NPS ${size.nps} / OD ${size.od.toFixed(1)} mm`;
+    option.textContent = pipeSizeOptionText(size);
     pipeSizeSelect.append(option);
   }
+  pipeSizeSelect.value = String(current);
 }
 
 function updatePipeSizeReadout() {
@@ -8760,21 +9695,23 @@ function updatePipeSizeReadout() {
   if (selected.length > 1) {
     const sizes = new Set(selected.map((segment) => pipeSizeForSegment(segment).nb));
     const prefix = sizes.size === 1 ? `Selected ${selected.length} sections` : `Selected ${selected.length} sections / mixed`;
-    pipeSizeReadout.textContent = `${prefix}: ${pipeSpecShortLabel()} - choose a NB size to update all selected sections`;
+    pipeSizeReadout.textContent = `${prefix}: ${pipeSpecShortLabel()} - choose a ${pipeSizeReadoutNoun()} to update all selected sections`;
     return;
   }
 
   const prefix = selected.length === 1 ? "Selected section" : "Default";
-  pipeSizeReadout.textContent = `${prefix}: NB ${size.nb} ${pipeSpecShortLabel()} - OD ${size.od.toFixed(1)} mm / wall ${wall.toFixed(2)} mm / ${formatMass(mass)} kg/m`;
+  pipeSizeReadout.textContent = `${prefix}: ${pipeSizeDisplayLabel(size)} ${pipeSpecShortLabel()} - OD ${size.od.toFixed(1)} mm / wall ${wall.toFixed(2)} mm / ${formatMass(mass)} kg/m`;
 }
 
 function updatePipeSizeControls() {
+  populatePipeSizeOptions();
   const selected = selectedSegmentsData();
-  pipeSizeSelect.value = String(selected.length ? pipeSizeForSegment(selected[0]).nb : state.pipeSizeNb);
+  pipeSizeSelect.value = String(selected.length ? pipeSizeForSegment(selected[0]).nb : pipeSizeNbForSpec(state.pipeSizeNb, state.pipeSpec));
   updatePipeSizeReadout();
 }
 
 function setPipeSizeForSegments(indexes, pipeSizeNb) {
+  pipeSizeNb = pipeSizeNbForSpec(pipeSizeNb, state.pipeSpec);
   const previousDefault = state.pipeSizeNb;
   const selected = normalizeSelectedSegments(indexes, state.edges.length);
   if (!selected.length) {
@@ -8850,6 +9787,7 @@ function activateInspectorTab(name) {
     panel.classList.toggle("active", panel.dataset.inspectorPanel === name);
   }
   refreshPreviewAfterLayoutChange();
+  checkTutorialPractice();
 }
 
 function refreshPreviewAfterLayoutChange() {
@@ -8933,7 +9871,7 @@ function updatePropertiesPanel() {
       [
         ["Run", fitting.segment.index + 1],
         ["Position", `${formatLength(distance)} mm`],
-        ["NB", pipeSizeForSegment(fitting.segment).nb],
+        ["Size", pipeSizeSpecLabel(pipeSizeForSegment(fitting.segment))],
         ["Mode", fittingModeText(fitting)],
         ["Weight", `${formatMass(fitting.weightKg)} kg ${fitting.weightSource}`],
       ],
@@ -9005,7 +9943,7 @@ function updatePropertiesPanel() {
       renderProperties(
         `Run ${segment.index + 1}`,
         [
-          ["NB", `${size.nb} ${pipeSpec().schedule}`],
+          ["Size", pipeSizeSpecLabel(size)],
           ["C/C", `${formatLength(quantity.centrelineMm)} mm`],
           ...(offsetMeta ? [
             ["Offset set", `${formatLength(offsetMeta.setMm)} mm`],
@@ -9030,7 +9968,7 @@ function updatePropertiesPanel() {
         ["Centreline", `${formatLength(selectedTotals.centrelineMm)} mm`],
         ["Cut pipe", `${formatLength(selectedTotals.cutLengthMm)} mm`],
         ["Pipe weight", `${formatMass(selectedTotals.pipeWeightKg)} kg`],
-        ["Sizes", new Set(selectedSegments.map((segment) => pipeSizeForSegment(segment).nb)).size === 1 ? `NB ${pipeSizeForSegment(selectedSegments[0]).nb}` : "Mixed"],
+        ["Sizes", new Set(selectedSegments.map((segment) => pipeSizeForSegment(segment).nb)).size === 1 ? pipeSizeDisplayLabel(pipeSizeForSegment(selectedSegments[0])) : "Mixed"],
       ],
       [
         ["delete-run", "Delete selected", "danger"],
@@ -9061,12 +9999,14 @@ function updatePropertiesPanel() {
 
   const quantities = quantitySummary();
   const liftPoint = centreOfGravityData(quantities);
+  const pressureLimit = weakestPressureEstimate(segments());
   renderProperties(
     "Spool summary",
     [
       ["Runs", quantities.segments.length],
       ["Material", pipeSpecShortLabel()],
       ["Total weight", `${formatMass(quantities.totalWeightKg)} kg`],
+      ["Weakest pressure", pressureLimit ? `${formatPressureStandard(pressureLimit.pressureBar)} / ${pipeSizeDisplayLabel(pressureLimit.size)}` : "N/A"],
       ["COG", liftPoint ? formatPointCompact(liftPoint.point) : "N/A"],
     ],
     [],
@@ -9505,20 +10445,7 @@ async function togglePanelFullscreen(panel) {
   }
 
   await closePanelFullscreen();
-  try {
-    if (panel === drawingPanel) {
-      appFullscreenPanel = panel;
-      updatePanelFullscreenState();
-      return;
-    }
-    const usedNativeFullscreen = await requestNativeFullscreen(panel);
-    if (!usedNativeFullscreen) {
-      appFullscreenPanel = panel;
-    }
-  } catch (error) {
-    console.warn("Browser fullscreen unavailable; using app focus mode.", error);
-    appFullscreenPanel = panel;
-  }
+  appFullscreenPanel = panel;
   updatePanelFullscreenState();
 }
 
@@ -9804,6 +10731,20 @@ function updateTouchComfortClass() {
   document.body.classList.toggle("tablet-layout", tabletMode);
   document.body.classList.toggle("phone-layout", phoneMode);
   document.body.classList.toggle("mobile-touch-layout", touchMode);
+  if (phoneMode) {
+    try {
+      if (localStorage.getItem(PHONE_PREVIEW_DEFAULT_KEY) !== "applied") {
+        previewPanelHidden = true;
+        previewPanelMinimized = false;
+        localStorage.setItem(PHONE_PREVIEW_DEFAULT_KEY, "applied");
+        window.requestAnimationFrame(updatePreviewFloatingState);
+      }
+    } catch {
+      previewPanelHidden = true;
+      previewPanelMinimized = false;
+      window.requestAnimationFrame(updatePreviewFloatingState);
+    }
+  }
 }
 
 function setupTouchComfort() {
@@ -9986,6 +10927,899 @@ function currentTutorialStep() {
   return TUTORIAL_STEPS[tutorialStepIndex] ?? TUTORIAL_STEPS[0];
 }
 
+function tutorialTrainerKind(step = currentTutorialStep()) {
+  if (!step) return "general";
+  if (step.kicker === "Start") return "startJobs";
+  if (step.kicker === "Jobs") return "production";
+  if (step.demo === "reducer") return "pipeSize";
+  return step.demo || step.action || "general";
+}
+
+function tutorialConnectionCount(type) {
+  let count = 0;
+  for (const [nodeIndex, connected] of nodeConnections(segments()).entries()) {
+    if (connected.length >= 3 && nodeConnectionType(nodeIndex) === type) count += 1;
+  }
+  return count;
+}
+
+function tutorialPracticeSnapshot() {
+  return {
+    edges: state.edges.length,
+    fittings: state.fittings.length,
+    flanges: state.fittings.filter((fitting) => fitting.type === "flange").length,
+    measurements: Array.isArray(state.measurements) ? state.measurements.length : 0,
+    notes: Array.isArray(state.notes) ? state.notes.length : 0,
+    teeNodes: tutorialConnectionCount("tee"),
+    branchNodes: tutorialConnectionCount("branch"),
+    selectedCount: selectedSegmentIndexes().length,
+    selectedSegment: state.selectedSegment,
+    pipeSizeNb: state.pipeSizeNb,
+    stepLength: state.stepLength,
+    angleDegrees: state.angleDegrees,
+    showDimensions: state.showDimensions,
+    dimensionStyle: normalizeDimensionStyle(state.dimensionStyle),
+    previewHidden: previewPanelHidden,
+    appMode,
+  };
+}
+
+function tutorialPracticeDetails(step = currentTutorialStep()) {
+  switch (tutorialTrainerKind(step)) {
+    case "startJobs":
+      return {
+        title: "Practice opening a job",
+        cue: "Click Jobs, open Job 121, then pick a spool.",
+        hint: "This is the normal way to get back to saved work.",
+        done: "Job and spool opened in the mini flow.",
+      };
+    case "comms":
+      return {
+        title: "Practice team comms",
+        cue: "Open Comms, type a quick team note, then send it.",
+        hint: "Use this when the team needs drawing or production notes in one place.",
+        done: "Team message sent in the mini flow.",
+      };
+    case "production":
+      return {
+        title: "Practice production board",
+        cue: "Open a job card, assign it, then move it to Ready to check.",
+        hint: "This is the workflow from draft drawing to production status.",
+        done: "Production card moved through the mini workflow.",
+      };
+    case "draw":
+      return {
+        title: "Practice drawing",
+        cue: "Choose Draw, tap the start point, tap the end point, then finish drawing.",
+        hint: "This mirrors Draw mode: pick the tool, place the run, then stop drawing.",
+        done: "Run added. That is the basic drawing move.",
+      };
+    case "select":
+      return {
+        title: "Practice selecting",
+        cue: "Choose Select, click one pipe, then Shift-select another pipe.",
+        hint: "This is how you change several wrong-size runs at once.",
+        done: "Multiple pipe runs selected in the mini drawing.",
+      };
+    case "tee":
+      return {
+        title: "Practice tee",
+        cue: "Choose Tee, click the main run, then click the branch endpoint.",
+        hint: "The real app creates a point on the run, then you continue drawing from it.",
+        done: "Tee point created. Now draw the branch from it.",
+      };
+    case "fittings":
+      return {
+        title: "Practice end fittings",
+        cue: "Choose Flange, click the pipe end, then pick the flange standard.",
+        hint: "This mirrors the end-fitting flow without touching your drawing.",
+        done: "End fitting added in the mini flow.",
+      };
+    case "pipeSize":
+      return {
+        title: "Practice pipe size",
+        cue: "Pick a main size, pick a smaller branch size, then confirm the reducer.",
+        hint: "Reducers are for tee/normal size changes. Branch weld-ins do not need reducers.",
+        done: "Pipe size change and reducer shown in the mini flow.",
+      };
+    case "sockets":
+      return {
+        title: "Practice sockets",
+        cue: "Long-press/right-click the pipe, choose Add sockets, set the layout, apply, then rotate a socket.",
+        hint: "This matches the real socket flow on PC, iPad and phone.",
+        done: "Socket layout added and rotated in the mini flow.",
+      };
+    case "measure":
+      return {
+        title: "Practice measure",
+        cue: "Choose Measure, click the first point, then click the second point.",
+        hint: "The measurement is separate from pipe cut lengths and can be undone.",
+        done: "Manual measurement added.",
+      };
+    case "exact":
+      return {
+        title: "Practice exact length",
+        cue: "Set a length in millimetres, then press +X to draw that exact run.",
+        hint: "This avoids guessing on the grid.",
+        done: "Exact run created in the mini flow.",
+      };
+    case "offset":
+      return {
+        title: "Practice angle",
+        cue: "Pick 45 degrees, then draw the offset travel piece.",
+        hint: "45 degree offsets use the travel multiplier for cut calculations.",
+        done: "Offset created in the mini flow.",
+      };
+    case "dimensions":
+      return {
+        title: "Practice dimensions",
+        cue: "Choose Numbered key, click D1 edit, then apply a new C/C value.",
+        hint: "Numbered key is usually the cleanest view when the drawing gets busy.",
+        done: "Dimension style and editable key used in the mini flow.",
+      };
+    case "preview":
+      return {
+        title: "Practice 3D",
+        cue: "Choose a view style, switch to Rotate, then spin the mini model.",
+        hint: "The preview is restored for this topic so you can try the controls.",
+        done: "3D model controls used in the mini flow.",
+      };
+    case "review":
+      return {
+        title: "Practice checks",
+        cue: "Open Checks, click a warning, then jump to the highlighted issue.",
+        hint: "Checks are used before issuing a spool.",
+        done: "Check warning opened in the mini flow.",
+      };
+    case "export":
+      return {
+        title: "Practice export",
+        cue: "Pick a PDF style, press Fab PDF, then confirm the 3D reference views.",
+        hint: "Fab PDF is the workshop sheet. Export 3D is for a clear model image.",
+        done: "Export flow completed in the mini trainer.",
+      };
+    default:
+      return null;
+  }
+}
+
+function tutorialPracticeCompleteForAction(action, baseline = {}) {
+  if (tutorialCompletedSteps.has(tutorialStepIndex)) return true;
+  if (tutorialTrainer?.stepIndex === tutorialStepIndex) return false;
+  switch (action) {
+    case "drawTool":
+      return state.edges.length > baseline.edges;
+    case "selectTool":
+      return state.selectedSegment !== null || selectedSegmentIndexes().length > baseline.selectedCount;
+    case "teeTool":
+      return tutorialConnectionCount("tee") > baseline.teeNodes;
+    case "flangeTool":
+      return state.fittings.filter((fitting) => fitting.type === "flange").length > baseline.flanges;
+    case "measureTool":
+      return (state.measurements ?? []).length > baseline.measurements;
+    case "focusPipeSize":
+      return document.activeElement === pipeSizeSelect || state.pipeSizeNb !== baseline.pipeSizeNb;
+    case "focusLength":
+      return document.activeElement === stepLengthInput || state.stepLength !== baseline.stepLength || state.edges.length > baseline.edges;
+    case "focusAngle":
+      return document.activeElement === angleInput || state.angleDegrees !== baseline.angleDegrees;
+    case "focusDimensions":
+      return document.activeElement === dimensionStyleSelect ||
+        state.showDimensions !== baseline.showDimensions ||
+        normalizeDimensionStyle(state.dimensionStyle) !== baseline.dimensionStyle;
+    case "showPreview":
+      return previewPanelHidden === false;
+    case "showChecks":
+      return appMode === "review" && document.querySelector('[data-inspector-tab="checks"]')?.classList.contains("active");
+    case "focusExport":
+      return appMode === "export";
+    case "focusJobs":
+      return Boolean(projectLibraryDialog && !projectLibraryDialog.hidden);
+    case "showComms":
+      return Boolean(projectLibraryDialog && !projectLibraryDialog.hidden && projectLibraryCommsSlot && !projectLibraryCommsSlot.hidden);
+    default:
+      return false;
+  }
+}
+
+function tutorialTrainerStepLabels(kind) {
+  const steps = {
+    startJobs: ["Jobs", "Job", "Spool"],
+    comms: ["Comms", "Message"],
+    production: ["Card", "Assign", "Ready"],
+    draw: ["Draw", "Start", "End", "Finish"],
+    exact: ["Length", "+X"],
+    offset: ["45 deg", "Set", "Travel"],
+    select: ["Select", "Pipe", "Shift"],
+    tee: ["Tee", "Main run", "Branch end"],
+    fittings: ["Flange", "Pipe end", "Standard"],
+    pipeSize: ["Main size", "Small size", "Reducer"],
+    sockets: ["Pipe", "Add sockets", "Apply", "Rotate"],
+    measure: ["Measure", "Point 1", "Point 2"],
+    dimensions: ["Numbered", "Edit D1", "Apply"],
+    preview: ["View", "Rotate", "Spin"],
+    review: ["Checks", "Warning"],
+    export: ["Style", "Fab PDF", "3D views"],
+  };
+  return steps[kind] ?? ["Try"];
+}
+
+function tutorialTrainerProgressMarkup(kind, phase, complete) {
+  const labels = tutorialTrainerStepLabels(kind);
+  const currentIndex = complete ? labels.length : clampNumber(Math.round(Number(phase) || 0), 0, labels.length - 1);
+  return `
+    <div class="tutorial-trainer-progress" aria-label="Mini practice progress">
+      ${labels.map((label, index) => {
+        const stateClass = complete || index < currentIndex ? "done" : index === currentIndex ? "current" : "next";
+        return `<span class="${stateClass}"><b>${index + 1}</b>${escapeHtml(label)}</span>`;
+      }).join("")}
+    </div>
+  `;
+}
+
+function tutorialTrainerPhase() {
+  return tutorialTrainer?.stepIndex === tutorialStepIndex ? Number(tutorialTrainer.phase) || 0 : 0;
+}
+
+function tutorialTrainerMarkup(step = currentTutorialStep(), options = {}) {
+  const details = tutorialPracticeDetails(step);
+  if (!details) return "";
+  const active = options.active === true;
+  const complete = options.complete === true;
+  const kind = tutorialTrainerKind(step);
+  if (!active && !complete) {
+    return `<div class="tutorial-trainer tutorial-trainer-idle">Press Start practice to open a safe mini task. It will not change your real drawing.</div>`;
+  }
+  const phase = tutorialTrainerPhase();
+  const doneBanner = complete ? `<div class="tutorial-trainer-done">Done. Now try the real tool on your drawing when you are ready.</div>` : "";
+  const content = complete ? `
+    <div class="tutorial-trainer-complete-panel">
+      <strong>Practice finished</strong>
+      <span>Use Try again to repeat this mini task, or press Next for the next topic.</span>
+    </div>
+  ` : tutorialTrainerContent(kind, phase, complete);
+  return `
+    <div class="tutorial-trainer" data-trainer-kind="${escapeHtml(kind)}" data-trainer-phase="${phase}">
+      <div class="tutorial-trainer-head">
+        <strong>Mini practice - safe sandbox</strong>
+        <span>${escapeHtml(complete ? details.done : details.cue)}</span>
+      </div>
+      ${tutorialTrainerProgressMarkup(kind, phase, complete)}
+      ${content}
+      ${doneBanner}
+    </div>
+  `;
+}
+
+function tutorialMiniIsoSvg(kind, phase, complete) {
+  const activeChoice = (() => {
+    if (complete) return "";
+    if (kind === "draw") return phase === 1 ? "start" : phase === 2 ? "end" : "";
+    if (kind === "select") return phase === 1 ? "pipe" : "";
+    if (kind === "tee") return phase === 1 ? "pipe" : phase === 2 ? "branch-end" : "";
+    if (kind === "fittings") return phase === 1 ? "end" : "";
+    if (kind === "sockets") return phase === 0 ? "pipe" : "";
+    if (kind === "measure") return phase === 1 ? "start" : phase === 2 ? "end" : "";
+    return "";
+  })();
+  const hitAttrs = (choice) => {
+    const active = activeChoice === choice;
+    return `class="tutorial-svg-hit ${choice}${active ? " active" : ""}"${active ? ` data-tutorial-trainer-choice="${choice}"` : ""}`;
+  };
+  const cue = (() => {
+    if (!activeChoice) return "";
+    const labels = {
+      start: ["Click start", 28, 82],
+      pipe: [kind === "sockets" ? "Right-click / long-press pipe" : "Click main pipe", 100, 42],
+      end: ["Click pipe end", 210, 22],
+      "branch-end": ["Click branch end", 116, 8],
+    };
+    const [label, x, y] = labels[activeChoice] ?? [];
+    if (!label) return "";
+    return `
+      <g class="trainer-cue">
+        <rect x="${x}" y="${y}" width="${Math.max(92, label.length * 6.4)}" height="20" rx="7" />
+        <text x="${x + 8}" y="${y + 14}">${escapeHtml(label)}</text>
+      </g>
+    `;
+  })();
+  const selected = complete || (kind === "select" && phase >= 1) ? " selected" : "";
+  const drawGuide = kind === "draw" && phase === 2 && !complete ? `<path class="trainer-guide" d="M66 105 L252 52" />` : "";
+  const drawRun = kind === "draw" && (phase >= 3 || complete) ? `<path class="trainer-pipe new" d="M66 105 L252 52" />` : "";
+  const teePoint = kind === "tee" && phase >= 2 ? `<circle class="trainer-node complete" cx="158" cy="76" r="11" />` : "";
+  const teeGuide = kind === "tee" && phase === 2 && !complete ? `<path class="trainer-guide" d="M158 76 L158 28" />` : "";
+  const teeBranch = kind === "tee" && complete ? `<path class="trainer-branch" d="M158 76 L158 28" />` : "";
+  const flange = kind === "fittings" && phase >= 2 ? `
+    <g class="trainer-flange">
+      <line x1="250" y1="40" x2="266" y2="72" />
+      <circle cx="258" cy="56" r="13" />
+    </g>
+  ` : "";
+  const reducer = kind === "pipeSize" && phase >= 2 ? `<path class="trainer-reducer" d="M148 58 L196 50 L196 78 L148 88 Z" />` : "";
+  const smallPipe = kind === "pipeSize" && phase >= 2 ? `<path class="trainer-pipe small" d="M196 65 L252 52" />` : "";
+  const sockets = kind === "sockets" && phase >= 3 ? `
+    <g class="trainer-socket ${complete ? "rotated" : ""}">
+      <line x1="138" y1="82" x2="138" y2="42" />
+      <circle cx="138" cy="36" r="8" />
+    </g>
+    <g class="trainer-socket">
+      <line x1="190" y1="68" x2="190" y2="28" />
+      <circle cx="190" cy="22" r="8" />
+    </g>
+  ` : "";
+  const measure = kind === "measure" && phase >= 1 ? `<circle class="trainer-point active" cx="66" cy="105" r="7" />` : "";
+  const measureLine = kind === "measure" && complete ? `<path class="trainer-measure" d="M66 120 L252 68" /><text x="134" y="86">2,450 mm</text>` : "";
+  const offsetGuide = kind === "offset" && phase >= 2 && !complete ? `<path class="trainer-guide" d="M92 108 L145 108 L195 58 L250 58" />` : "";
+  const offset = kind === "offset" && complete ? `<path class="trainer-pipe new" d="M92 108 L145 108 L195 58 L250 58" />` : "";
+  const dimension = kind === "dimensions" ? `
+    <path class="trainer-measure" d="M66 126 L252 73" />
+    <text x="126" y="93">${phase >= 2 ? "D1 2500" : "D1"}</text>
+  ` : "";
+  const reviewRing = kind === "review" && complete ? `<circle class="trainer-review-ring" cx="158" cy="76" r="20" />` : "";
+  return `
+    <svg class="tutorial-trainer-iso" viewBox="0 0 320 150" role="img" aria-label="Mini isometric practice">
+      <path class="trainer-grid" d="M0 122 L80 76 L160 122 L240 76 L320 122 M0 76 L80 30 L160 76 L240 30 L320 76 M0 30 L80 -16 M78 166 L320 30" />
+      <path class="trainer-pipe${selected}" d="M66 105 L158 76 L252 52" />
+      ${drawGuide}
+      ${drawRun}
+      ${offsetGuide}
+      ${offset}
+      ${teeGuide}
+      ${teeBranch}
+      ${teePoint}
+      ${flange}
+      ${reducer}
+      ${smallPipe}
+      ${sockets}
+      ${measure}
+      ${measureLine}
+      ${dimension}
+      ${reviewRing}
+      ${cue}
+      <circle ${hitAttrs("start")} cx="66" cy="105" r="18" />
+      <rect ${hitAttrs("pipe")} x="84" y="54" width="146" height="58" rx="22" />
+      <circle ${hitAttrs("end")} cx="252" cy="52" r="18" />
+      <circle ${hitAttrs("branch-end")} cx="158" cy="28" r="20" />
+      <circle class="trainer-point" cx="66" cy="105" r="6" />
+      <circle class="trainer-point" cx="158" cy="76" r="6" />
+      <circle class="trainer-point" cx="252" cy="52" r="6" />
+      ${kind === "tee" && phase >= 2 && !complete ? `<circle class="trainer-point active" cx="158" cy="28" r="7" />` : ""}
+    </svg>
+  `;
+}
+
+function tutorialTrainerContent(kind, phase, complete) {
+  switch (kind) {
+    case "startJobs":
+      return `
+        <div class="tutorial-trainer-toolbar">
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="jobs-open">Jobs</button>
+          <span class="tutorial-trainer-pill">Sample</span>
+          <span class="tutorial-trainer-pill">Account</span>
+        </div>
+        <div class="tutorial-trainer-jobs">
+          ${phase >= 1 || complete ? `<button type="button" data-tutorial-trainer-choice="job-card">Job 121 <small>14 spools</small></button>` : ""}
+          ${phase >= 2 || complete ? `<button type="button" data-tutorial-trainer-choice="spool-card">Spool 002 <small>Draft</small></button>` : ""}
+        </div>
+        <div class="tutorial-trainer-instructions">${complete ? "Spool opened." : phase === 0 ? "Click Jobs." : phase === 1 ? "Open Job 121." : "Pick Spool 002."}</div>
+      `;
+    case "comms":
+      return `
+        <div class="tutorial-trainer-toolbar">
+          <span class="tutorial-trainer-pill">Jobs</span>
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="comms-tab">Comms</button>
+          <span class="tutorial-trainer-pill">Report</span>
+        </div>
+        ${phase >= 1 || complete ? `
+          <div class="tutorial-trainer-comms">
+            <input data-tutorial-trainer-value="message" value="Spool 12 ready to check" aria-label="Team message" />
+            <button type="button" data-tutorial-trainer-choice="send-message">Send message</button>
+          </div>
+        ` : ""}
+        <div class="tutorial-trainer-instructions">${complete ? "Team message sent." : phase === 0 ? "Click Comms." : "Send the team message."}</div>
+      `;
+    case "production":
+      return `
+        <div class="tutorial-trainer-board">
+          <button type="button" class="tutorial-trainer-card" data-tutorial-trainer-choice="job-card">
+            <strong>Job 121 - Spool 002</strong>
+            <small>${phase >= 3 || complete ? "Ready to check" : phase >= 2 ? "Assigned to Jack" : "Draft"}</small>
+          </button>
+          ${phase >= 1 || complete ? `
+            <div class="tutorial-trainer-controls compact">
+              <button type="button" data-tutorial-trainer-choice="assign-user">Assign Jack</button>
+              <button type="button" data-tutorial-trainer-choice="ready-check" ${phase < 2 && !complete ? "disabled" : ""}>Ready to check</button>
+            </div>
+          ` : ""}
+        </div>
+        <div class="tutorial-trainer-instructions">${complete ? "Production card is ready to check." : phase === 0 ? "Open the spool card." : phase === 1 ? "Assign who owns it." : "Move it to Ready to check."}</div>
+      `;
+    case "draw":
+      return `
+        <div class="tutorial-trainer-stage">
+          <div class="tutorial-trainer-toolbar">
+            <button type="button" data-tutorial-trainer-choice="draw-tool" class="${phase >= 1 || complete ? "active" : ""}">Draw</button>
+            <span class="tutorial-trainer-pill">Select</span>
+          </div>
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-action-row">
+            ${phase === 0 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="draw-tool">Click Draw</button>` : ""}
+            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="start">Tap start point</button>` : ""}
+            ${phase === 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="end">Tap end point</button>` : ""}
+          </div>
+          <div class="tutorial-trainer-instructions">${complete ? "You drew a mini run and stopped drawing." : phase === 0 ? "Click Draw first." : phase === 1 ? "Click the active start point." : phase === 2 ? "Click the end point to place the run." : "Press Finish drawing, like pressing Enter."}</div>
+          ${phase >= 3 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="finish-draw">Finish drawing</button>` : ""}
+        </div>
+      `;
+    case "select":
+      return `
+        <div class="tutorial-trainer-stage">
+          <div class="tutorial-trainer-toolbar">
+            <button type="button" data-tutorial-trainer-choice="select-tool" class="${phase >= 1 || complete ? "active" : ""}">Select</button>
+            <span class="tutorial-trainer-pill">Box select</span>
+          </div>
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-action-row">
+            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="pipe">Tap pipe run</button>` : ""}
+          </div>
+          <div class="tutorial-trainer-instructions">${complete ? "Two runs selected." : phase === 0 ? "Click Select." : phase === 1 ? "Click the first pipe run." : "Click Shift select to add another run."}</div>
+          ${phase >= 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="shift-select">Shift select second run</button>` : ""}
+        </div>
+      `;
+    case "tee":
+      return `
+        <div class="tutorial-trainer-stage">
+          <div class="tutorial-trainer-toolbar">
+            <button type="button" data-tutorial-trainer-choice="tee-tool" class="${phase >= 1 || complete ? "active" : ""}">Tee</button>
+            <span class="tutorial-trainer-pill">Branch</span>
+            <span class="tutorial-trainer-pill">Draw</span>
+          </div>
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-action-row">
+            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="pipe">Tap main run</button>` : ""}
+            ${phase === 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="branch-end">Tap branch endpoint</button>` : ""}
+          </div>
+          <div class="tutorial-trainer-instructions">${complete ? "Tee branch drawn from the new tee point." : phase === 0 ? "Click Tee, just like the side tool." : phase === 1 ? "Click the main run where the tee belongs." : "Click the branch endpoint to draw from the tee point."}</div>
+        </div>
+      `;
+    case "fittings":
+      return `
+        <div class="tutorial-trainer-stage">
+          <div class="tutorial-trainer-toolbar">
+            <button type="button" data-tutorial-trainer-choice="flange-tool" class="${phase >= 1 || complete ? "active" : ""}">Flange</button>
+            <span class="tutorial-trainer-pill">Groove</span>
+            <span class="tutorial-trainer-pill">Reducer</span>
+          </div>
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-action-row">
+            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="end">Tap pipe end</button>` : ""}
+          </div>
+          ${phase >= 2 && !complete ? `
+            <div class="tutorial-trainer-menu">
+              <button type="button" data-tutorial-trainer-choice="table-e">AS 2129 Table E</button>
+              <button type="button" data-tutorial-trainer-choice="pn16">PN 16</button>
+            </div>
+          ` : ""}
+          <div class="tutorial-trainer-instructions">${complete ? "Flange placed with a standard selected." : phase === 0 ? "Click Flange." : phase === 1 ? "Click the pipe end." : "Pick the flange standard from the menu."}</div>
+        </div>
+      `;
+    case "pipeSize":
+      return `
+        <div class="tutorial-trainer-stage">
+          <div class="tutorial-trainer-controls compact">
+            <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="main-size">Main NB 100</button>
+            <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="small-size" ${phase < 1 && !complete ? "disabled" : ""}>Branch NB 50</button>
+            <button type="button" data-tutorial-trainer-choice="confirm-reducer" ${phase < 2 && !complete ? "disabled" : ""}>Confirm reducer</button>
+          </div>
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-instructions">${complete ? "Reducer shown at the size change." : phase === 0 ? "Pick the main pipe size." : phase === 1 ? "Pick the smaller size." : "Confirm the reducer belongs at the connection."}</div>
+        </div>
+      `;
+    case "sockets":
+      return `
+        <div class="tutorial-trainer-stage">
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-action-row">
+            ${phase === 0 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="pipe">Long-press / right-click pipe</button>` : ""}
+          </div>
+          ${phase >= 1 && phase < 3 ? `
+            <div class="tutorial-trainer-menu">
+              <button type="button" data-tutorial-trainer-choice="add-sockets">Add sockets</button>
+              <span class="tutorial-trainer-pill">Change pipe size</span>
+            </div>
+          ` : ""}
+          ${phase >= 2 && phase < 3 ? `
+            <div class="tutorial-socket-layout" aria-label="Selected socket layout">
+              <span><b>Size</b> NB 15 / 1/2&quot;</span>
+              <span><b>Qty</b> 2 sockets</span>
+              <span><b>Spacing</b> 150 mm C/C</span>
+            </div>
+            <div class="tutorial-trainer-controls compact">
+              <button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="apply-sockets">Apply socket layout</button>
+            </div>
+          ` : ""}
+          ${phase >= 3 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="rotate-socket">Rotate socket 90 deg</button>` : ""}
+          <div class="tutorial-trainer-instructions">${complete ? "Sockets added and one rotated." : phase === 0 ? "Long-press or right-click the pipe." : phase === 1 ? "Choose Add sockets." : phase === 2 ? "Pick size, count and spacing." : "Rotate a socket 90 degrees."}</div>
+        </div>
+      `;
+    case "measure":
+      return `
+        <div class="tutorial-trainer-stage">
+          <div class="tutorial-trainer-toolbar">
+            <button type="button" data-tutorial-trainer-choice="measure-tool" class="${phase >= 1 || complete ? "active" : ""}">Measure</button>
+            <span class="tutorial-trainer-pill">Note</span>
+          </div>
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-action-row">
+            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="start">Tap point 1</button>` : ""}
+            ${phase === 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="end">Tap point 2</button>` : ""}
+          </div>
+          <div class="tutorial-trainer-instructions">${complete ? "Measurement placed." : phase === 0 ? "Click Measure." : phase === 1 ? "Click the first point." : "Click the second point."}</div>
+        </div>
+      `;
+    case "exact":
+      return `
+        <div class="tutorial-trainer-controls">
+          <label class="tutorial-trainer-field"><span>Next run length mm</span><input data-tutorial-trainer-value="length" type="number" value="${phase >= 1 || complete ? "2500" : ""}" placeholder="2500" readonly /></label>
+          ${phase < 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="length-typed">Enter 2500 mm</button>` : ""}
+          <button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="exact-run" ${phase < 1 && !complete ? "disabled" : ""}>+X</button>
+          <div class="tutorial-trainer-instructions">${complete ? "Exact 2,500 mm run created." : phase === 0 ? "Press Enter 2500 mm to fill the length box." : "Press +X to add the exact run."}</div>
+        </div>
+      `;
+    case "offset":
+      return `
+        <div class="tutorial-trainer-controls">
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="angle">45 deg</button>
+          <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="set-distance" ${phase < 1 && !complete ? "disabled" : ""}>Set 400 mm</button>
+          <button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="offset-run" ${phase < 2 && !complete ? "disabled" : ""}>Draw travel</button>
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <div class="tutorial-trainer-instructions">${complete ? "45 degree offset drawn with the travel piece." : phase === 0 ? "Choose 45 deg." : phase === 1 ? "Set the offset/set distance." : "Draw the travel piece."}</div>
+        </div>
+      `;
+    case "dimensions":
+      return `
+        <div class="tutorial-trainer-controls">
+          ${tutorialMiniIsoSvg(kind, phase, complete)}
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="numbered-key">Numbered key</button>
+          ${phase >= 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="edit-d1">Edit D1 C/C</button>` : ""}
+          ${phase >= 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="apply-dim">Apply 2500 mm</button>` : ""}
+          <div class="tutorial-trainer-instructions">${complete ? "Dimension key edited." : phase === 0 ? "Choose Numbered key." : phase === 1 ? "Click D1 edit." : "Apply the new C/C value."}</div>
+        </div>
+      `;
+    case "preview":
+      return `
+        <div class="tutorial-trainer-controls">
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="realistic-view">Realistic 3D</button>
+          <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="rotate-mode" ${phase < 1 && !complete ? "disabled" : ""}>Rotate</button>
+          <div class="tutorial-trainer-model" data-tutorial-trainer-choice="spin-model">
+            <span></span><span></span><span></span>
+          </div>
+          <button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="spin-model" ${phase < 2 && !complete ? "disabled" : ""}>${complete ? "Spun" : "Drag / spin model"}</button>
+          <div class="tutorial-trainer-instructions">${complete ? "3D model spun." : phase === 0 ? "Choose a 3D view style." : phase === 1 ? "Choose Rotate." : "Spin the model."}</div>
+        </div>
+      `;
+    case "review":
+      return `
+        <div class="tutorial-trainer-checks">
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="checks-tab">Checks tab</button>
+          <button type="button" data-tutorial-trainer-choice="check-warning" ${phase < 1 && !complete ? "disabled" : ""}>Reducer missing <small>Click to highlight</small></button>
+          ${phase >= 2 || complete ? tutorialMiniIsoSvg(kind, phase, complete) : ""}
+        </div>
+        <div class="tutorial-trainer-instructions">${complete ? "Warning highlighted on the drawing." : phase === 0 ? "Open Checks." : "Click the warning to see where it is."}</div>
+      `;
+    case "export":
+      return `
+        <div class="tutorial-trainer-export">
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="workshop-pdf">Workshop PDF</button>
+          ${phase >= 1 || complete ? `<button type="button" data-tutorial-trainer-choice="fab-pdf">Fab PDF</button>` : ""}
+          ${phase >= 2 || complete ? `<button type="button" data-tutorial-trainer-choice="include-3d">Include 3D views</button>` : ""}
+        </div>
+        <div class="tutorial-trainer-instructions">${complete ? "Export flow ready." : phase === 0 ? "Pick Workshop PDF." : phase === 1 ? "Press Fab PDF." : "Include the 3D reference views."}</div>
+      `;
+    default:
+      return `
+        <div class="tutorial-trainer-controls">
+          <button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="complete">Try this step</button>
+        </div>
+      `;
+  }
+}
+
+function tutorialPracticeMarkup(step = currentTutorialStep()) {
+  const details = tutorialPracticeDetails(step);
+  if (!details) return "";
+  const practiceActive = tutorialPractice?.stepIndex === tutorialStepIndex;
+  const complete = tutorialCompletedSteps.has(tutorialStepIndex);
+  const stateName = complete ? "complete" : practiceActive ? "active" : "idle";
+  const message = complete ? details.done : practiceActive ? details.cue : "Press Start practice to start a guided mini task.";
+  const helper = complete ? "Nice. You can move to the next topic or try this again." : details.hint;
+  return `
+    <div class="tutorial-practice" id="tutorialPracticePanel" data-state="${stateName}">
+      <strong>${escapeHtml(complete ? "Practice complete" : details.title)}</strong>
+      <span>${escapeHtml(message)}</span>
+      <small>${escapeHtml(helper)}</small>
+      ${tutorialTrainerMarkup(step, { active: practiceActive, complete })}
+    </div>
+  `;
+}
+
+function stopTutorialPractice() {
+  tutorialPractice = null;
+  tutorialTrainer = null;
+  document.body.classList.remove("tutorial-practice-active");
+  if (tutorialCoach) tutorialCoach.hidden = true;
+}
+
+function startTutorialPractice(step = currentTutorialStep()) {
+  const details = tutorialPracticeDetails(step);
+  if (!details) return null;
+  const kind = tutorialTrainerKind(step);
+  tutorialCompletedSteps.delete(tutorialStepIndex);
+  tutorialPractice = {
+    stepIndex: tutorialStepIndex,
+    action: step.action,
+    baseline: tutorialPracticeSnapshot(),
+  };
+  tutorialTrainer = {
+    stepIndex: tutorialStepIndex,
+    action: kind,
+    phase: 0,
+  };
+  document.body.classList.add("tutorial-practice-active");
+  renderTutorialStep();
+  return tutorialPractice;
+}
+
+function updateTutorialPracticeUi() {
+  if (!tutorialDialog || tutorialDialog.hidden) {
+    stopTutorialPractice();
+    return;
+  }
+  const step = currentTutorialStep();
+  const details = tutorialPracticeDetails(step);
+  const practiceActive = tutorialPractice?.stepIndex === tutorialStepIndex && details;
+  const complete = tutorialCompletedSteps.has(tutorialStepIndex);
+  const stateName = complete ? "complete" : practiceActive ? "active" : "idle";
+  const panel = tutorialStepCard?.querySelector("#tutorialPracticePanel");
+  if (panel && details) {
+    panel.dataset.state = stateName;
+    const title = panel.querySelector("strong");
+    const message = panel.querySelector("span");
+    const helper = panel.querySelector("small");
+    if (title) title.textContent = complete ? "Practice complete" : details.title;
+    if (message) message.textContent = complete ? details.done : practiceActive ? details.cue : "Press Start practice to start a guided mini task.";
+    if (helper) helper.textContent = complete ? "Nice. You can move to the next topic or try this again." : details.hint;
+  }
+  const activeTab = tutorialProgress?.querySelector(`[data-tutorial-step="${tutorialStepIndex}"]`);
+  activeTab?.classList.toggle("complete", complete);
+  if (tutorialActionButton && details) {
+    tutorialActionButton.textContent = complete ? "Try again" : practiceActive ? "Restart practice" : "Start practice";
+  }
+  document.body.classList.toggle("tutorial-practice-active", Boolean(practiceActive && !complete));
+  if (tutorialCoach) {
+    tutorialCoach.hidden = true;
+  }
+}
+
+function scrollTutorialPracticeControlIntoView() {
+  if (!tutorialDialog || tutorialDialog.hidden) return;
+  if (!tutorialPractice || tutorialPractice.stepIndex !== tutorialStepIndex) return;
+  window.requestAnimationFrame(() => {
+    const panel = tutorialStepCard?.querySelector("#tutorialPracticePanel");
+    if (!panel) return;
+    const target =
+      panel.querySelector(".tutorial-trainer-button[data-tutorial-trainer-choice]:not(:disabled)") ||
+      panel.querySelector("button[data-tutorial-trainer-choice]:not(:disabled)") ||
+      panel.querySelector("[data-tutorial-trainer-choice]");
+    target?.scrollIntoView({ block: "nearest", inline: "nearest" });
+  });
+}
+
+function checkTutorialPractice() {
+  if (!tutorialPractice || tutorialPractice.stepIndex !== tutorialStepIndex) {
+    updateTutorialPracticeUi();
+    return;
+  }
+  if (tutorialPracticeCompleteForAction(tutorialPractice.action, tutorialPractice.baseline)) {
+    const alreadyComplete = tutorialCompletedSteps.has(tutorialPractice.stepIndex);
+    tutorialCompletedSteps.add(tutorialPractice.stepIndex);
+    if (!alreadyComplete) {
+      renderTutorialStep();
+      return;
+    }
+  }
+  updateTutorialPracticeUi();
+}
+
+function completeTutorialTrainer() {
+  tutorialCompletedSteps.add(tutorialStepIndex);
+  if (tutorialPractice) tutorialPractice.complete = true;
+  renderTutorialStep();
+}
+
+function advanceTutorialTrainer(phase) {
+  if (!tutorialTrainer || tutorialTrainer.stepIndex !== tutorialStepIndex) return;
+  tutorialTrainer.phase = phase;
+  renderTutorialStep();
+}
+
+function handleTutorialTrainerChoice(choice) {
+  const step = currentTutorialStep();
+  const kind = tutorialTrainerKind(step);
+  if (!tutorialPractice || tutorialPractice.stepIndex !== tutorialStepIndex) {
+    startTutorialPractice(step);
+  }
+  if (!tutorialTrainer || tutorialTrainer.stepIndex !== tutorialStepIndex) {
+    tutorialTrainer = { stepIndex: tutorialStepIndex, action: kind, phase: 0 };
+  }
+  const phase = tutorialTrainerPhase();
+  switch (kind) {
+    case "startJobs":
+      if (choice === "jobs-open" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "job-card" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "spool-card" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "comms":
+      if (choice === "comms-tab" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "send-message" && phase >= 1) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "production":
+      if (choice === "job-card" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "assign-user" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "ready-check" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "draw":
+      if (choice === "draw-tool" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "start" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "end" && phase >= 2 && phase < 3) {
+        advanceTutorialTrainer(3);
+      } else if (choice === "finish-draw" && phase >= 3) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "select":
+      if (choice === "select-tool" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "pipe" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "shift-select" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "tee":
+      if (choice === "tee-tool" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "pipe" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "branch-end" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "fittings":
+      if (choice === "flange-tool" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "end" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (["table-e", "pn16"].includes(choice) && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "pipeSize":
+      if (choice === "main-size" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "small-size" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "confirm-reducer" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "sockets":
+      if (choice === "pipe" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "add-sockets" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "apply-sockets" && phase >= 2 && phase < 3) {
+        advanceTutorialTrainer(3);
+      } else if (choice === "rotate-socket" && phase >= 3) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "measure":
+      if (choice === "measure-tool" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "start" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "end" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "exact":
+      if (choice === "length-typed" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "exact-run") {
+        completeTutorialTrainer();
+      }
+      break;
+    case "offset":
+      if (choice === "angle" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "set-distance" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "offset-run" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "dimensions":
+      if (choice === "numbered-key" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "edit-d1" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "apply-dim" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "preview":
+      if (choice === "realistic-view" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "rotate-mode" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "spin-model" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "review":
+      if (choice === "checks-tab" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "check-warning" && phase >= 1) {
+        completeTutorialTrainer();
+      }
+      break;
+    case "export":
+      if (choice === "workshop-pdf" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "fab-pdf" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "include-3d" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
+    default:
+      completeTutorialTrainer();
+      break;
+  }
+}
+
+function handleTutorialTrainerClick(event) {
+  const target = event.target instanceof Element ? event.target.closest("[data-tutorial-trainer-choice]") : null;
+  if (!target || !tutorialStepCard?.contains(target)) return;
+  const choice = target.getAttribute("data-tutorial-trainer-choice");
+  if (!choice) return;
+  event.preventDefault();
+  event.stopPropagation();
+  handleTutorialTrainerChoice(choice);
+}
+
+function handleTutorialTrainerChange(event) {
+  const target = event.target;
+  if (!(target instanceof HTMLElement) || !tutorialStepCard?.contains(target)) return;
+  const choice = target.getAttribute("data-tutorial-trainer-choice");
+  if (!choice) return;
+  handleTutorialTrainerChoice(choice);
+}
+
 function tutorialTargetForStep(step = currentTutorialStep()) {
   if (step?.action === "showComms") {
     const commsButton = document.querySelector("#projectLibraryCommsButton");
@@ -10114,17 +11948,8 @@ function prepareTutorialStep(step = currentTutorialStep()) {
   closeToolSettingsDialog();
   closeDrawingContextMenu();
 
-  if (document.body.classList.contains("tutorial-running") && step.action !== "showPreview") {
+  if (document.body.classList.contains("tutorial-running")) {
     minimizePreviewForTutorial();
-  }
-
-  if (step.mode && normalizeAppMode(step.mode) !== appMode) {
-    applyAppMode(step.mode, { activateTab: false, keepTool: true });
-  }
-  if (step.action === "showChecks") {
-    applyAppMode("review", { keepTool: true });
-    activateInspectorTab("checks");
-    showMobilePanel("inspector");
   }
 }
 
@@ -10422,9 +12247,9 @@ function tutorialMenuMarkup() {
     </div>
     <div class="tutorial-topic-menu" role="tablist" aria-label="Tutorial topics">
       ${TUTORIAL_STEPS.map((step, index) => `
-        <button type="button" role="tab" data-tutorial-step="${index}" aria-selected="${index === tutorialStepIndex ? "true" : "false"}" class="${index === tutorialStepIndex ? "active" : ""}">
+        <button type="button" role="tab" data-tutorial-step="${index}" aria-selected="${index === tutorialStepIndex ? "true" : "false"}" class="${index === tutorialStepIndex ? "active" : ""} ${tutorialCompletedSteps.has(index) ? "complete" : ""}">
           <span>${escapeHtml(tutorialMenuLabel(step, index))}</span>
-          <small>${escapeHtml(step.kicker || `Step ${index + 1}`)}</small>
+          <small>${escapeHtml(tutorialCompletedSteps.has(index) ? "Done" : step.kicker || `Step ${index + 1}`)}</small>
         </button>
       `).join("")}
     </div>
@@ -10436,8 +12261,8 @@ function renderTutorialStep() {
   const step = currentTutorialStep();
   prepareTutorialStep(step);
   const stepNumber = tutorialStepIndex + 1;
-  const target = tutorialTargetForStep(step);
-  const targetText = tutorialTargetLabel(target, step);
+  const practiceDetails = tutorialPracticeDetails(step);
+  const practiceText = practiceDetails ? "Press Start practice below. Your drawing stays untouched." : "Use the mini task below. Your drawing stays untouched.";
   tutorialProgress.innerHTML = tutorialMenuMarkup();
   tutorialStepCard.innerHTML = `
     <div class="tutorial-copy">
@@ -10449,25 +12274,29 @@ function renderTutorialStep() {
       </ul>
     </div>
     <div class="tutorial-visual">
+      ${tutorialPracticeMarkup(step)}
       ${tutorialDemoMarkup(step.demo)}
-      <div class="tutorial-target-note"><strong>Tool to try</strong><span>${escapeHtml(targetText)}</span></div>
+      <div class="tutorial-target-note"><strong>Safe practice</strong><span>${escapeHtml(practiceText)}</span></div>
     </div>
   `;
   tutorialPrevButton.disabled = tutorialStepIndex === 0;
   tutorialNextButton.textContent = tutorialStepIndex === TUTORIAL_STEPS.length - 1 ? "Done" : "Next";
   if (tutorialActionButton) {
-    tutorialActionButton.hidden = !step.action;
-    tutorialActionButton.textContent = step.actionLabel || "Try it";
+    tutorialActionButton.hidden = !practiceDetails;
+    tutorialActionButton.textContent = tutorialCompletedSteps.has(tutorialStepIndex) ? "Try again" : "Start practice";
   }
-  syncTutorialTarget();
+  updateTutorialPracticeUi();
+  clearTutorialTarget();
+  scrollTutorialPracticeControlIntoView();
 }
 
 function selectTutorialStep(index) {
   const nextIndex = clampNumber(Math.round(Number(index) || 0), 0, TUTORIAL_STEPS.length - 1);
   if (nextIndex === tutorialStepIndex) {
-    syncTutorialTarget();
+    clearTutorialTarget();
     return;
   }
+  stopTutorialPractice();
   tutorialStepIndex = nextIndex;
   renderTutorialStep();
 }
@@ -10487,92 +12316,12 @@ function focusTutorialTarget(step = currentTutorialStep()) {
 
 function runTutorialStepAction() {
   const step = currentTutorialStep();
-  switch (step.action) {
-    case "drawTool":
-      applyAppMode("draw", { activateTab: false, keepTool: true });
-      setTool("draw");
-      break;
-    case "selectTool":
-      applyAppMode("draw", { activateTab: false, keepTool: true });
-      setTool("select");
-      break;
-    case "teeTool":
-      applyAppMode("draw", { activateTab: false, keepTool: true });
-      setTool("tee");
-      break;
-    case "flangeTool":
-      applyAppMode("edit", { activateTab: false, keepTool: true });
-      setTool("flange");
-      break;
-    case "measureTool":
-      applyAppMode("draw", { activateTab: false, keepTool: true });
-      setTool("measure");
-      break;
-    case "focusPipeSize":
-      focusTutorialTarget(step);
-      break;
-    case "focusLength":
-      applyAppMode("draw", { activateTab: false, keepTool: true });
-      activateInspectorTab("properties");
-      showMobilePanel("inspector");
-      focusTutorialTarget(step);
-      break;
-    case "focusAngle":
-      applyAppMode("draw", { activateTab: false, keepTool: true });
-      activateInspectorTab("properties");
-      showMobilePanel("inspector");
-      focusTutorialTarget(step);
-      break;
-    case "focusDimensions":
-      if (dimensionToggle && !dimensionToggle.checked) {
-        dimensionToggle.checked = true;
-        state.showDimensions = true;
-        dimensionStyleSelect.disabled = false;
-        updateAll();
-      }
-      focusTutorialTarget(step);
-      break;
-    case "showPreview":
-      previewPanelHidden = false;
-      previewPanelMinimized = false;
-      updatePreviewFloatingState();
-      showMobilePanel("preview");
-      focusTutorialTarget(step);
-      break;
-    case "showChecks":
-      applyAppMode("review", { keepTool: true });
-      activateInspectorTab("checks");
-      showMobilePanel("inspector");
-      focusTutorialTarget(step);
-      break;
-    case "focusExport":
-      applyAppMode("export", { keepTool: true });
-      showMobilePanel("drawing");
-      focusTutorialTarget(step);
-      break;
-    case "showComms":
-      openBrowserProject({ keepSearch: true, keepFolder: true })
-        .then(() => {
-          showProjectLibraryComms();
-          window.setTimeout(() => {
-            const commsButton = document.querySelector("#projectLibraryCommsButton");
-            if (commsButton instanceof HTMLElement) {
-              commsButton.focus({ preventScroll: true });
-            }
-            syncTutorialTarget();
-          }, 180);
-        })
-        .catch((error) => {
-          console.warn("Could not open team comms from tutorial.", error);
-          focusTutorialTarget(step);
-        });
-      break;
-    case "focusJobs":
-    default:
-      focusTutorialTarget(step);
-      break;
-  }
-  window.setTimeout(syncTutorialTarget, 120);
+  startTutorialPractice(step);
+  clearTutorialTarget();
+  window.setTimeout(() => {
+    checkTutorialPractice();
+    clearTutorialTarget();
+  }, 120);
 }
 
 function openTutorialDialog(index = 0) {
@@ -10580,6 +12329,7 @@ function openTutorialDialog(index = 0) {
   tutorialStepIndex = clampNumber(Math.round(Number(index) || 0), 0, TUTORIAL_STEPS.length - 1);
   tutorialDialog.hidden = false;
   document.body.classList.add("tutorial-running");
+  stopTutorialPractice();
   minimizePreviewForTutorial();
   renderTutorialStep();
   tutorialNextButton?.focus();
@@ -10589,6 +12339,7 @@ function closeTutorialDialog() {
   if (tutorialDialog) tutorialDialog.hidden = true;
   document.body.classList.remove("tutorial-running");
   clearTutorialTarget();
+  stopTutorialPractice();
   restorePreviewAfterTutorial();
 }
 
@@ -10597,18 +12348,20 @@ function tutorialNextStep() {
     closeTutorialDialog();
     return;
   }
+  stopTutorialPractice();
   tutorialStepIndex += 1;
   renderTutorialStep();
 }
 
 function tutorialPreviousStep() {
+  stopTutorialPractice();
   tutorialStepIndex = Math.max(0, tutorialStepIndex - 1);
   renderTutorialStep();
 }
 
 function updateTutorialCoachPosition() {
   if (tutorialDialog && !tutorialDialog.hidden) {
-    syncTutorialTarget({ scroll: false });
+    clearTutorialTarget();
   }
 }
 
@@ -10624,6 +12377,9 @@ function setupTutorialDialog() {
   tutorialPrevButton?.addEventListener("click", tutorialPreviousStep);
   tutorialActionButton?.addEventListener("click", runTutorialStepAction);
   tutorialNextButton?.addEventListener("click", tutorialNextStep);
+  tutorialStepCard?.addEventListener("click", handleTutorialTrainerClick);
+  tutorialStepCard?.addEventListener("input", handleTutorialTrainerChange);
+  tutorialStepCard?.addEventListener("change", handleTutorialTrainerChange);
   window.addEventListener("resize", updateTutorialCoachPosition);
   window.addEventListener("scroll", updateTutorialCoachPosition, true);
 }
@@ -10742,6 +12498,7 @@ function updateAll(options = {}) {
   updatePropertiesPanel();
   update3dPreview();
   if (save) persistState();
+  checkTutorialPractice();
 }
 
 function setupCollapsibleControls() {
@@ -13569,8 +15326,8 @@ function socketRadialDirection(direction, fitting = null) {
 }
 
 function socketRadiusMetres(fitting) {
-  const size = pipeSizeByNb(fittingSocketSizeNb(fitting));
-  const maxOd = PIPE_SIZES[PIPE_SIZES.length - 1].od;
+  const size = pipeSizeByNb(fittingSocketSizeNb(fitting), "carbon40");
+  const maxOd = maxPipeOdMm();
   return Math.max(0.035, (0.055 + (size.od / maxOd) * 0.255) * 0.72);
 }
 
@@ -14252,7 +16009,7 @@ function build3dPipeLabels(segmentData, modelPoints) {
 }
 
 function pipePreviewLabelLines(segment) {
-  return [`NB ${pipeSizeForSegment(segment).nb} ${pipeSpec().schedule}`];
+  return [pipeSizeSpecLabel(pipeSizeForSegment(segment))];
 }
 
 function update3dLabelPositions(options = {}) {
@@ -16829,9 +18586,48 @@ function productionAlertPriority(type) {
   if (type === "overdue") return 0;
   if (type === "due") return 1;
   if (type === "readycheck") return 2;
-  if (type === "message") return 3;
+  if (type === "comment" || type === "message") return 3;
   if (type === "mine") return 4;
-  return 5;
+  if (type === "issued") return 5;
+  if (type === "fabricated") return 6;
+  return 7;
+}
+
+function teamAlertDateText(date) {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+function recentProjectStatusDate(project, status) {
+  const savedState = savedProjectState(project);
+  if (normalizeProjectStatus(savedState?.projectStatus) !== status) return null;
+
+  const statusLabel = projectStatusLabel(status).toLowerCase();
+  const activityDate = savedProjectProductionActivity(project)
+    .slice()
+    .reverse()
+    .find((entry) => entry.type === "status" && String(entry.text ?? "").toLowerCase().includes(statusLabel));
+  const production = savedProjectProductionInfo(project);
+  const dates = [
+    projectReportDate(activityDate?.createdAt),
+    status === "complete" ? projectReportDate(production.completedAt) : null,
+    projectReportDate(production.lastUpdatedAt),
+  ].filter(Boolean);
+
+  if (!dates.length) return null;
+  const latest = new Date(Math.max(...dates.map((date) => date.getTime())));
+  return Date.now() - latest.getTime() <= TEAM_ALERT_RECENT_MS ? latest : null;
+}
+
+function loadedProjectCommentForAlert(project) {
+  if (!project?.id || projectCommentsProjectId !== project.id || !Array.isArray(projectComments)) return null;
+  const latest = [...projectComments]
+    .sort((first, second) =>
+      (new Date(second.createdAt).getTime() || 0) - (new Date(first.createdAt).getTime() || 0),
+    )[0];
+  const created = projectReportDate(latest?.createdAt);
+  if (!latest || !created || Date.now() - created.getTime() > TEAM_ALERT_RECENT_MS) return null;
+  return latest;
 }
 
 function projectTeamAlertItems(projects = projectLibraryProjects) {
@@ -16856,11 +18652,44 @@ function projectTeamAlertItems(projects = projectLibraryProjects) {
     }
     const activeMessage = [...savedProjectProductionMessages(project)].reverse().find((message) => !message.completed);
     if (activeMessage) {
-      items.push({ project, type: "message", title: "Comment / message", body: activeMessage.body, dueTime });
+      const eventTime = new Date(activeMessage.createdAt).getTime() || 0;
+      items.push({ project, type: "comment", title: "New comment", body: activeMessage.body, dueTime, eventTime });
+    }
+    const cloudComment = loadedProjectCommentForAlert(project);
+    if (cloudComment) {
+      const eventTime = new Date(cloudComment.createdAt).getTime() || 0;
+      const author = cloudComment.authorEmail ? `${cloudComment.authorEmail}: ` : "";
+      items.push({ project, type: "comment", title: "Cloud comment", body: `${author}${cloudComment.body}`, dueTime, eventTime });
+    }
+    const issuedDate = recentProjectStatusDate(project, "issued");
+    if (issuedDate) {
+      items.push({
+        project,
+        type: "issued",
+        title: "Spool issued",
+        body: `Issued ${teamAlertDateText(issuedDate)}`,
+        dueTime: Number.MAX_SAFE_INTEGER,
+        eventTime: issuedDate.getTime(),
+      });
+    }
+    const fabricatedDate = recentProjectStatusDate(project, "complete");
+    if (fabricatedDate) {
+      items.push({
+        project,
+        type: "fabricated",
+        title: "Spool fabricated",
+        body: `Fabricated ${teamAlertDateText(fabricatedDate)}`,
+        dueTime: Number.MAX_SAFE_INTEGER,
+        eventTime: fabricatedDate.getTime(),
+      });
     }
   }
   return items
-    .sort((first, second) => productionAlertPriority(first.type) - productionAlertPriority(second.type) || first.dueTime - second.dueTime)
+    .sort((first, second) =>
+      productionAlertPriority(first.type) - productionAlertPriority(second.type) ||
+      first.dueTime - second.dueTime ||
+      (second.eventTime ?? 0) - (first.eventTime ?? 0),
+    )
     .slice(0, 12);
 }
 
@@ -16884,7 +18713,7 @@ function projectAlertCard(projects = projectLibraryProjects) {
             <small>${escapeHtml(alert.body)}</small>
           </button>
         </article>
-      `).join("") : `<div class="project-alert-empty">Nothing due, overdue, ready to check or waiting on a card note.</div>`}
+      `).join("") : `<div class="project-alert-empty">Nothing due, overdue, assigned, ready to check, commented, issued or fabricated recently.</div>`}
     </div>
   `;
   return section;
@@ -18688,7 +20517,9 @@ function loadPlanItemFromPayload(id, name, payload, projectInfo, updatedAt = "",
       footprintAreaMm2: Math.max(...footprintSet.footprints.map((item) => item.areaMm2)),
       weightKg: quantities.totalWeightKg,
       pipeSpecLabel: pipeSpecShortLabel(),
-      pipeSizesLabel: footprintSet.pipeSizes.length ? `NB ${footprintSet.pipeSizes.join(", NB ")}` : `NB ${state.pipeSizeNb}`,
+      pipeSizesLabel: footprintSet.pipeSizes.length
+        ? footprintSet.pipeSizes.map((nb) => pipeSizeDisplayLabelByNb(nb)).join(", ")
+        : pipeSizeDisplayLabelByNb(state.pipeSizeNb),
     };
   });
 }
@@ -20607,6 +22438,34 @@ function activeRegressionSummaryMarkup() {
   `;
 }
 
+function regressionAutoChecksMarkup() {
+  const results = runRegressionAutoChecks();
+  const passedCount = results.filter((result) => result.passed).length;
+  return `
+    <div class="regression-auto-panel">
+      <div class="regression-auto-head">
+        <div>
+          <strong>Automatic drawing trust checks</strong>
+          <span>Tee reducers, branch welds, flush flanges, 45 offsets and socket dimensions.</span>
+        </div>
+        <b>${passedCount}/${results.length} passed</b>
+      </div>
+      <div class="regression-auto-grid">
+        ${results.map((result) => `
+          <article class="regression-auto-check ${result.passed ? "pass" : "fail"}">
+            <div>
+              <strong>${escapeHtml(result.title)}</strong>
+              <span>${escapeHtml(result.sampleTitle)}</span>
+            </div>
+            <b>${result.passed ? "PASS" : "CHECK"}</b>
+            <small>${escapeHtml(result.detail)}</small>
+          </article>
+        `).join("")}
+      </div>
+    </div>
+  `;
+}
+
 function renderRegressionDialog() {
   if (!regressionSummary || !regressionSampleList || !regressionChecklist) return;
 
@@ -20624,6 +22483,7 @@ function renderRegressionDialog() {
     </article>
   `).join("");
   regressionChecklist.innerHTML = `
+    ${regressionAutoChecksMarkup()}
     <strong>Manual checks after loading samples</strong>
     <div class="regression-check-grid">
       ${REGRESSION_MANUAL_CHECKS.map((check, index) => `
@@ -21939,8 +23799,8 @@ function buildWorkshopReportCanvas() {
   drawReportHeader(ctx, canvas.width);
 
   const margin = 24;
-  const gutter = 18;
-  const reportWidth = 625;
+  const gutter = 16;
+  const reportWidth = 600;
   const drawingArea = {
     x: margin,
     y: 132,
@@ -22041,6 +23901,8 @@ function drawReportClientPanel(ctx, area, quantities) {
     ["Client / area", project.client || "-"],
     ["Revision", project.revision || "-"],
     ["Status", projectStatusLabel()],
+    ["Checked", state.checkedAt ? `${new Date(state.checkedAt).toLocaleDateString()}${state.checkedBy ? ` by ${state.checkedBy}` : ""}` : "Unchecked"],
+    ["Issued", state.issuedAt ? `${new Date(state.issuedAt).toLocaleDateString()}${state.issuedBy ? ` by ${state.issuedBy}` : ""}` : "Not issued"],
     ["Material", pipeSpec().label],
     ["Pipe centreline", `${formatLength(quantities.centrelineMm)} mm`],
     ["Estimated weight", `${formatMass(quantities.totalWeightKg)} kg`],
@@ -22108,15 +23970,34 @@ function drawReportInfoTile(ctx, label, value, x, y, width, height = 38, options
   ctx.fillText(truncateReportText(ctx, value || "-", width - 20), x + 10, y + height - 9);
 }
 
+function drawReportPill(ctx, label, x, y, width, options = {}) {
+  roundRect(ctx, x, y, width, 22, 11);
+  ctx.fillStyle = options.issued ? "#d8f1ed" : options.warning ? "#fff1d8" : "#eaf7f3";
+  ctx.fill();
+  ctx.strokeStyle = options.issued ? "rgba(15, 118, 110, 0.24)" : "rgba(31, 42, 47, 0.1)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = options.issued ? "#0f766e" : "#4e6266";
+  ctx.font = "950 10px Inter, system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText(truncateReportText(ctx, label, width - 16).toUpperCase(), x + width * 0.5, y + 15);
+  ctx.textAlign = "left";
+}
+
 function drawReportHeader(ctx, width, options = {}) {
   const title = options.title || "Pipe spool fabrication sheet";
   const subtitle = options.subtitle || `Centre-to-centre drawing, cut lengths and estimated ${pipeSpec().material.toLowerCase()} weight`;
+  const templateLabel = options.shortLabel || FAB_SHEET_TEMPLATES.workshop.shortLabel;
   const project = normalizeProjectInfo(state.projectInfo);
   const checked = state.checkedAt
     ? `Checked ${new Date(state.checkedAt).toLocaleDateString()}${state.checkedBy ? ` by ${state.checkedBy}` : ""}`
     : "Unchecked";
+  const issued = state.issuedAt
+    ? `Issued ${new Date(state.issuedAt).toLocaleDateString()}${state.issuedBy ? ` by ${state.issuedBy}` : ""}`
+    : "Not issued";
   const status = `${projectStatusLabel()}${state.locked ? " / Locked" : ""}`;
   const exported = new Date().toLocaleString();
+  const subtitleWithVersion = `${subtitle} / ${APP_VERSION}`;
 
   ctx.save();
   roundRect(ctx, 24, 16, width - 48, 104, 12);
@@ -22125,6 +24006,11 @@ function drawReportHeader(ctx, width, options = {}) {
   ctx.strokeStyle = "rgba(31, 42, 47, 0.14)";
   ctx.lineWidth = 2;
   ctx.stroke();
+  ctx.fillStyle = "#123a40";
+  roundRect(ctx, 24, 16, width - 48, 8, 4);
+  ctx.fill();
+  ctx.fillStyle = "#12d8ff";
+  ctx.fillRect(42, 16, 130, 8);
 
   roundRect(ctx, 42, 34, 74, 68, 10);
   ctx.fillStyle = "#123a40";
@@ -22141,9 +24027,16 @@ function drawReportHeader(ctx, width, options = {}) {
   ctx.fillText(truncateReportText(ctx, title, 760), 134, 49);
   ctx.font = "800 13px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
-  ctx.fillText(truncateReportText(ctx, subtitle, 820), 136, 73);
-  const clientLine = project.client ? `Client / area: ${project.client}` : `${pipeSpec().label} / ${checked}`;
-  ctx.fillText(truncateReportText(ctx, clientLine, 820), 136, 96);
+  ctx.fillText(truncateReportText(ctx, subtitleWithVersion, 820), 136, 73);
+  const clientLine = project.client ? `Client / area: ${project.client} / ${pipeSpec().label}` : `${pipeSpec().label} / ${checked}`;
+  drawReportPill(ctx, `${templateLabel} sheet`, 136, 84, 130);
+  drawReportPill(ctx, state.issuedAt ? "Issued" : projectStatusLabel(), 274, 84, 116, {
+    issued: Boolean(state.issuedAt),
+    warning: !state.issuedAt,
+  });
+  ctx.fillStyle = "#6a7475";
+  ctx.font = "800 13px Inter, system-ui, sans-serif";
+  ctx.fillText(truncateReportText(ctx, clientLine, 560), 406, 99);
 
   const tileY = 31;
   const tileH = 36;
@@ -22156,8 +24049,8 @@ function drawReportHeader(ctx, width, options = {}) {
   drawReportInfoTile(ctx, "Status", status, right - tileW, tileY, tileW, tileH);
   drawReportInfoTile(ctx, "Drawn by", project.drawnBy || "-", right - tileW * 4 - gap * 3, tileY + tileH + 8, tileW, tileH);
   drawReportInfoTile(ctx, "Checked", checked, right - tileW * 3 - gap * 2, tileY + tileH + 8, tileW, tileH);
-  drawReportInfoTile(ctx, "Exported", exported, right - tileW * 2 - gap, tileY + tileH + 8, tileW, tileH);
-  drawReportInfoTile(ctx, "Version", APP_VERSION, right - tileW, tileY + tileH + 8, tileW, tileH);
+  drawReportInfoTile(ctx, "Issued", issued, right - tileW * 2 - gap, tileY + tileH + 8, tileW, tileH);
+  drawReportInfoTile(ctx, "Exported", exported, right - tileW, tileY + tileH + 8, tileW, tileH);
   ctx.restore();
 }
 
@@ -22218,14 +24111,10 @@ function drawReportDrawing(ctx, area) {
     ctx.clip();
     ctx.translate(area.x, area.y);
     drawGrid(ctx, area.width, area.height, projection);
+    const safeViewport = reportDrawingSafeViewport(area.width, area.height);
     drawSpool2d(ctx, projection, {
       export: true,
-      viewport: {
-        left: 10,
-        top: 38,
-        right: Math.max(10, area.width - 10),
-        bottom: Math.max(38, area.height - 10),
-      },
+      viewport: safeViewport,
     });
     drawMeasurements2d(ctx, projection);
     drawNotes2d(ctx, projection);
@@ -22261,6 +24150,18 @@ function drawReportDrawing(ctx, area) {
   }
 }
 
+function reportDrawingSafeViewport(width, height) {
+  const sidePadding = Math.max(36, Math.min(68, width * 0.05));
+  const topPadding = Math.max(58, Math.min(92, height * 0.11));
+  const bottomPadding = Math.max(40, Math.min(68, height * 0.08));
+  return {
+    left: sidePadding,
+    top: topPadding,
+    right: Math.max(sidePadding + 80, width - sidePadding),
+    bottom: Math.max(topPadding + 80, height - bottomPadding),
+  };
+}
+
 function reportIsoScale(width, height) {
   const rawPoints = reportDrawingFocusPoints().map((point) => rawIso(point, 1));
   if (!rawPoints.length) return state.gridScale || 0.2;
@@ -22270,10 +24171,11 @@ function reportIsoScale(width, height) {
   const maxY = Math.max(...rawPoints.map((point) => point.y));
   const spanX = Math.max(1, maxX - minX);
   const spanY = Math.max(1, maxY - minY);
-  const reservedTop = 42;
-  const paddingX = Math.max(18, width * 0.018);
-  const paddingBottom = 16;
-  return Math.min(190, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
+  const safeViewport = reportDrawingSafeViewport(width, height);
+  const paddingX = Math.max(safeViewport.left, width - safeViewport.right);
+  const reservedTop = safeViewport.top;
+  const paddingBottom = Math.max(12, height - safeViewport.bottom);
+  return Math.min(255, Math.max(6, Math.min((width - paddingX * 2) / spanX, (height - reservedTop - paddingBottom) / spanY)));
 }
 
 function reportProjection(width, height, scale) {
@@ -22288,8 +24190,9 @@ function reportProjection(width, height, scale) {
   const maxX = Math.max(...rawPoints.map((point) => point.x));
   const minY = Math.min(...rawPoints.map((point) => point.y));
   const maxY = Math.max(...rawPoints.map((point) => point.y));
-  const reservedTop = 56;
-  const paddingBottom = 18;
+  const safeViewport = reportDrawingSafeViewport(width, height);
+  const reservedTop = safeViewport.top;
+  const paddingBottom = Math.max(14, height - safeViewport.bottom);
   return {
     offsetX: width * 0.5 - (minX + maxX) * 0.5,
     offsetY: reservedTop + (height - reservedTop - paddingBottom) * 0.5 - (minY + maxY) * 0.5,
@@ -22357,8 +24260,8 @@ function drawReportTakeoff(ctx, area, quantities, options = {}) {
   drawWrappedReportText(
     ctx,
     state.showLiftingPoints
-      ? `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
-      : `${pipeSpec().label} pipe. Tee/elbow/reducer Atlas table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets and weld allowances are estimated unless manually set.`,
+      ? `${pipeSpec().label} pipe. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
+      : `${pipeSpec().label} pipe. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set.`,
     x,
     area.y + area.height - 36,
     area.width - 48,
@@ -22383,10 +24286,10 @@ function drawReportTotals(ctx, x, y, width, quantities, options = {}) {
     ]),
     ["Total est.", `${formatMass(quantities.totalWeightKg)} kg`],
   ];
-  const columnCount = width > 1120 ? 5 : width > 760 ? 3 : 2;
+  const columnCount = compact && width > 520 ? Math.min(4, totals.length) : width > 1120 ? 5 : width > 760 ? 3 : 2;
   const gap = 12;
   const columnWidth = (width - gap * (columnCount - 1)) / columnCount;
-  const rowHeight = compact ? 46 : 54;
+  const rowHeight = compact ? 44 : 54;
 
   for (const [index, total] of totals.entries()) {
     const col = index % columnCount;
@@ -22397,10 +24300,10 @@ function drawReportTotals(ctx, x, y, width, quantities, options = {}) {
     ctx.fillStyle = index === totals.length - 1 ? "#d8f1ed" : "#f3f6f4";
     ctx.fill();
     ctx.fillStyle = "#6a7475";
-    ctx.font = "800 11px Inter, system-ui, sans-serif";
+    ctx.font = compact ? "850 10px Inter, system-ui, sans-serif" : "800 11px Inter, system-ui, sans-serif";
     ctx.fillText(total[0], cardX + 12, cardY + 19);
     ctx.fillStyle = "#1f3438";
-    ctx.font = compact ? "950 16px Inter, system-ui, sans-serif" : "900 18px Inter, system-ui, sans-serif";
+    ctx.font = compact ? "950 14px Inter, system-ui, sans-serif" : "900 18px Inter, system-ui, sans-serif";
     ctx.fillText(total[1], cardX + 12, cardY + (compact ? 37 : 41));
   }
 
@@ -22420,8 +24323,8 @@ function drawReportTakeoffList(ctx, x, y, width, quantities, options = {}) {
 
   const columns = [
     { label: "Item", x: 0, align: "left" },
-    { label: "Qty", x: width * 0.5, align: "left" },
-    { label: "kg", x: width, align: "right" },
+    { label: "Qty / length", x: width * 0.58, align: "left" },
+    { label: "Weight kg", x: width, align: "right" },
   ];
 
   ctx.fillStyle = "#eaf7f3";
@@ -22444,25 +24347,33 @@ function drawReportTakeoffList(ctx, x, y, width, quantities, options = {}) {
     return y + 14;
   }
 
+  const rowHeight = options.compact ? 31 : 34;
   for (const [index, row] of visibleRows.entries()) {
-    y += options.compact ? 22 : 24;
+    y += rowHeight;
     if (index % 2 === 0) {
       ctx.fillStyle = "rgba(234, 247, 243, 0.38)";
-      ctx.fillRect(x, y - 18, width, options.compact ? 23 : 25);
+      ctx.fillRect(x, y - rowHeight + 6, width, rowHeight);
     }
     ctx.strokeStyle = "rgba(31, 42, 47, 0.1)";
     ctx.beginPath();
-    ctx.moveTo(x, y - 18);
-    ctx.lineTo(x + width, y - 18);
+    ctx.moveTo(x, y - rowHeight + 6);
+    ctx.lineTo(x + width, y - rowHeight + 6);
     ctx.stroke();
 
-    ctx.font = "900 13px Inter, system-ui, sans-serif";
+    ctx.font = "900 12px Inter, system-ui, sans-serif";
     ctx.fillStyle = "#263d45";
     ctx.textAlign = "left";
-    ctx.fillText(row.label, x, y);
-    ctx.fillText(row.countText, x + width * 0.5, y);
+    ctx.fillText(truncateReportText(ctx, row.label, width * 0.54), x, y - 4);
+    if (row.detail) {
+      ctx.font = "800 9px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#6a7475";
+      ctx.fillText(truncateReportText(ctx, row.detail, width * 0.54), x, y + 10);
+    }
+    ctx.font = "900 12px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#263d45";
+    ctx.fillText(row.countText, x + width * 0.58, y - 1);
     ctx.textAlign = "right";
-    ctx.fillText(row.weightKg ? `${formatMass(row.weightKg)} kg` : "-", x + width, y);
+    ctx.fillText(row.weightKg ? `${formatMass(row.weightKg)}` : "-", x + width, y - 1);
     ctx.textAlign = "left";
   }
   if (hiddenCount > 0) {
@@ -22529,16 +24440,16 @@ function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
   const hiddenCount = Math.max(0, cutRows.length - visibleRows.length);
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 18px Inter, system-ui, sans-serif";
-  ctx.fillText(options.compact ? "Cut pipe runs" : "Pipe runs", x, y);
+  ctx.fillText(options.compact ? "Cut pipe runs / drawing IDs" : "Pipe runs", x, y);
   y += 26;
 
   const columns = [
-    { label: "Run", x: 0, align: "left" },
-    { label: "NB", x: Math.min(86, width * 0.16), align: "left" },
-    { label: "C/C", x: width * 0.42, align: "right" },
-    { label: "Deduct", x: width * 0.58, align: "right" },
-    { label: "Cut", x: width * 0.74, align: "right" },
-    { label: "kg", x: width, align: "right" },
+    { label: "ID", x: 0, align: "left" },
+    { label: "Size", x: Math.min(98, width * 0.18), align: "left" },
+    { label: "C/C mm", x: width * 0.42, align: "right" },
+    { label: "Deduct mm", x: width * 0.6, align: "right" },
+    { label: "Cut mm", x: width * 0.78, align: "right" },
+    { label: "Weight kg", x: width, align: "right" },
   ];
 
   ctx.fillStyle = "#eaf7f3";
@@ -22560,32 +24471,40 @@ function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
     return y + 44;
   }
 
+  const rowHeight = options.compact ? 31 : 34;
   for (const [rowIndex, { segment, quantity }] of visibleRows.entries()) {
-    y += options.compact ? 27 : 30;
+    y += rowHeight;
     if (rowIndex % 2 === 0) {
       ctx.fillStyle = "rgba(234, 247, 243, 0.38)";
-      ctx.fillRect(x, y - 21, width, options.compact ? 28 : 30);
+      ctx.fillRect(x, y - rowHeight + 6, width, rowHeight);
     }
     ctx.strokeStyle = "rgba(31, 42, 47, 0.12)";
     ctx.beginPath();
-    ctx.moveTo(x, y - 21);
-    ctx.lineTo(x + width, y - 21);
+    ctx.moveTo(x, y - rowHeight + 6);
+    ctx.lineTo(x + width, y - rowHeight + 6);
     ctx.stroke();
 
     const size = pipeSizeForSegment(segment);
+    const detail = cutRunPointDetail(segment);
     const values = [
       cutRunDimensionLabel(segment),
-      `${size.nb}`,
+      pipeSizeDisplayLabel(size),
       `${formatLength(quantity.centrelineMm)}`,
       `${formatLength(quantity.bendTakeoffMm)}`,
       `${formatLength(quantity.cutLengthMm)}`,
       `${formatMass(quantity.pipeWeightKg)}`,
     ];
-    ctx.font = "800 14px Inter, system-ui, sans-serif";
+    ctx.font = "850 13px Inter, system-ui, sans-serif";
     ctx.fillStyle = "#263d45";
     for (const [index, column] of columns.entries()) {
       ctx.textAlign = column.align;
-      ctx.fillText(values[index], x + column.x, y);
+      ctx.fillText(values[index], x + column.x, index === 0 && detail ? y - 4 : y);
+    }
+    if (detail) {
+      ctx.font = "800 9px Inter, system-ui, sans-serif";
+      ctx.fillStyle = "#6a7475";
+      ctx.textAlign = "left";
+      ctx.fillText(truncateReportText(ctx, detail, width * 0.32), x, y + 10);
     }
     ctx.textAlign = "left";
   }
@@ -22658,7 +24577,7 @@ function drawReportBendNotes(ctx, x, y, width, quantities) {
     const takeoff = sameTakeoff
       ? `${formatLength(elbow.takeoffMm)} mm each side`
       : `run ${elbow.firstSegmentIndex + 1}: ${formatLength(elbow.firstTakeoffMm)} mm, run ${elbow.secondSegmentIndex + 1}: ${formatLength(elbow.secondTakeoffMm)} mm`;
-    const line = `B${index + 1} NB ${elbow.nb} ${formatAngle(elbow.bend)} deg - take off ${takeoff} / ${formatMass(elbow.weightKg)} kg`;
+    const line = `B${index + 1} ${pipeSizeDisplayLabelByNb(elbow.nb)} ${formatAngle(elbow.bend)} deg - take off ${takeoff} / ${formatMass(elbow.weightKg)} kg`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
 
@@ -22683,7 +24602,9 @@ function drawReportTeeNotes(ctx, x, y, width, quantities) {
     const legs = tee.connections
       .map((connection) => `run ${connection.segmentIndex + 1}: ${formatLength(connection.takeoffMm)} mm`)
       .join(", ");
-    const label = tee.reducing ? `T${index + 1} reducing tee NB ${tee.nb} to NB ${tee.branchNb}` : `T${index + 1} tee NB ${tee.nb}`;
+    const label = tee.reducing
+      ? `T${index + 1} reducing tee ${pipeSizeDisplayLabelByNb(tee.nb)} to ${pipeSizeDisplayLabelByNb(tee.branchNb)}`
+      : `T${index + 1} tee ${pipeSizeDisplayLabelByNb(tee.nb)}`;
     const line = `${label} - take off ${legs} / ${formatMass(tee.weightKg)} kg ${tee.source}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
@@ -22709,7 +24630,7 @@ function drawReportBranchNotes(ctx, x, y, width, quantities) {
     const legs = branch.connections
       .map((connection) => `run ${connection.segmentIndex + 1}: ${formatLength(connection.takeoffMm)} mm`)
       .join(", ");
-    const line = `BR${index + 1} main NB ${branch.nb} to branch NB ${branch.branchNb} - take off ${legs} / ${formatMass(branch.weightKg)} kg ${branch.source}`;
+    const line = `BR${index + 1} main ${pipeSizeDisplayLabelByNb(branch.nb)} to branch ${pipeSizeDisplayLabelByNb(branch.branchNb)} - take off ${legs} / ${formatMass(branch.weightKg)} kg ${branch.source}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
 
@@ -22731,7 +24652,7 @@ function drawReportReducerNotes(ctx, x, y, width, quantities) {
   }
 
   for (const [index, reducer] of quantities.reducers.entries()) {
-    const line = `R${index + 1} NB ${reducer.largeNb} to NB ${reducer.smallNb} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}`;
+    const line = `R${index + 1} ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
 
@@ -23283,7 +25204,7 @@ function renderMobileDrawingContextMenu(target) {
     actions.push(
       {
         label: "Pipe size",
-        detail: "Pick NB from list",
+        detail: `Pick ${pipeSizeReadoutNoun()} from list`,
         action: () => changeContextPipeSize(),
         keepOpen: true,
       },
@@ -23396,7 +25317,7 @@ function renderContextPipeSizeMenu() {
   const title = document.createElement("strong");
   title.textContent = "Pipe size";
   const subtitle = document.createElement("small");
-  subtitle.textContent = `${countText} - choose NB`;
+  subtitle.textContent = `${countText} - choose ${pipeSizeReadoutNoun()}`;
   header.append(title, subtitle);
   if (isCoarseInput()) {
     const closeButton = document.createElement("button");
@@ -23419,7 +25340,7 @@ function renderContextPipeSizeMenu() {
   drawingContextMenu.append(backButton);
   addDrawingContextHint("Tap a size to apply it to the selected run. Use Undo if it was the wrong one.");
 
-  for (const size of PIPE_SIZES) {
+  for (const size of pipeSizesForSpec(state.pipeSpec)) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "drawing-context-item";
@@ -23429,9 +25350,11 @@ function renderContextPipeSizeMenu() {
     button.setAttribute("role", "menuitem");
 
     const label = document.createElement("span");
-    label.textContent = `NB ${size.nb}`;
+    label.textContent = pipeSizeDisplayLabel(size);
     const detail = document.createElement("small");
-    detail.textContent = `NPS ${size.nps} / OD ${size.od.toFixed(1)} mm / ${pipeSpec().schedule}`;
+    detail.textContent = isTubePipeSize(size)
+      ? `${size.nps} tube / wall ${Number(size.wallTube).toFixed(1)} mm / ${pipeSpec().schedule}`
+      : `NPS ${size.nps} / OD ${size.od.toFixed(1)} mm / ${pipeSpec().schedule}`;
     button.append(label, detail);
 
     button.addEventListener("click", () => {
@@ -23878,12 +25801,12 @@ function setFlangeStandardForFitting(fittingId, standard) {
 }
 
 function socketSizeChoiceLabel(nb) {
-  const size = pipeSizeByNb(nb);
+  const size = pipeSizeByNb(nb, "carbon40");
   return `NB ${size.nb}`;
 }
 
 function socketSizeChoiceDetail(nb) {
-  const size = pipeSizeByNb(nb);
+  const size = pipeSizeByNb(nb, "carbon40");
   return `${size.nps} socket`;
 }
 
@@ -23930,7 +25853,7 @@ function socketPreviewPositions(settings) {
 function socketPreviewElement(settings) {
   const preview = document.createElement("div");
   preview.className = "drawing-context-preview";
-  const socketSize = pipeSizeByNb(settings.socketSizeNb);
+  const socketSize = pipeSizeByNb(settings.socketSizeNb, "carbon40");
   const positions = socketPreviewPositions(settings);
   const pipeStart = 20;
   const pipeEnd = 240;
@@ -24447,8 +26370,8 @@ async function editContextSegmentAngle() {
 
 function contextPipeSizeDetail(segment) {
   const count = contextPipeSizeTargetIndexes(segment).length;
-  const nb = pipeSizeForSegment(segment).nb;
-  return count > 1 ? `${count} selected sections` : `Current NB ${nb}`;
+  const size = pipeSizeForSegment(segment);
+  return count > 1 ? `${count} selected sections` : `Current ${pipeSizeDisplayLabel(size)}`;
 }
 
 function contextPipeSizeTargetIndexes(segment) {
@@ -25616,6 +27539,8 @@ document.querySelector("#angleNegativeButton").addEventListener("click", () => a
 
 pipeSpecSelect.addEventListener("change", () => {
   state.pipeSpec = normalizePipeSpec(pipeSpecSelect.value);
+  normalizeEdgePipeSizesForState();
+  populatePipeSizeOptions();
   if (state.previewMode === "black" || state.previewMode === "stainless") {
     state.previewMode = "carbon";
     if (previewModeSelect) previewModeSelect.value = "carbon";
@@ -25625,7 +27550,7 @@ pipeSpecSelect.addEventListener("change", () => {
 });
 
 pipeSizeSelect.addEventListener("change", () => {
-  const pipeSizeNb = normalizePipeSize(pipeSizeSelect.value);
+  const pipeSizeNb = pipeSizeNbForSpec(pipeSizeSelect.value, state.pipeSpec);
   const selected = selectedSegmentIndexes();
   if (selected.length) {
     setPipeSizeForSegments(selected, pipeSizeNb);
@@ -25635,34 +27560,22 @@ pipeSizeSelect.addEventListener("change", () => {
   }
 });
 
-projectStatusSelect?.addEventListener("change", () => {
+projectStatusSelect?.addEventListener("change", async () => {
   if (cloudPermissionReadOnly) {
     showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change the drawing status.");
     updateControls();
     return;
   }
   const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
-  const previousStatus = normalizeProjectStatus(state.projectStatus);
-  const now = new Date().toISOString();
-  state.projectStatus = nextStatus;
-  const currentProduction = normalizeProductionInfo(state.productionInfo);
-  state.productionInfo = normalizeProductionInfo({
-    ...currentProduction,
-    completedAt: nextStatus === "complete" ? currentProduction.completedAt || now : "",
-    removeAfter: nextStatus === "complete" ? currentProduction.removeAfter || isoDaysFromNow(7) : "",
-    lastUpdatedBy: checkerName(),
-    lastUpdatedAt: now,
-  });
-  if (nextStatus !== previousStatus) {
-    state.productionActivity = addProductionActivity(state.productionActivity, "status", `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel(nextStatus)}.`, now);
+  if (projectStatusAtLeast(nextStatus, "issued") && !state.issuedAt) {
+    const issued = await issueDrawing({ targetStatus: nextStatus });
+    if (!issued) {
+      updateControls();
+      return;
+    }
+    return;
   }
-  if (projectStatusAtLeast(nextStatus, "checked") && !state.checkedAt) {
-    state.checkedAt = now;
-    state.checkedBy = checkerName();
-  }
-  if (nextStatus !== "draft" && state.locked !== true) {
-    state.locked = true;
-  }
+  applyProjectStatusChange(nextStatus);
   updateControls();
   updateAll();
 });

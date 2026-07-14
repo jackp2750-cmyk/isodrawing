@@ -1,6 +1,152 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.45`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.63`.
+
+## v2.63 - Tutorial Reliability Pass
+
+- Fixed the Draw tutorial mini flow so it now advances through Draw, start point, end point and Finish drawing.
+- Moved the mini practice panel above the demo so the next action is visible first instead of buried below the lesson content.
+- Added automatic scrolling to keep the current tutorial practice action in view as each step advances.
+- Replaced fake tutorial buttons with passive labels so every button that looks clickable has a purpose.
+- Hardened tutorial click handling for SVG hotspots and buttons by reading the choice attribute consistently.
+- Added a clean completed-state panel so finished lessons do not leave stale clickable practice controls behind.
+- Bumped app cache to `spoolmate-v211`.
+
+## v2.62 - Self-Contained Tutorial Flow
+
+- Reworked tutorial practice so lessons stay inside a stable full-size tutorial window instead of moving into a small floating coach panel.
+- Stopped tutorial topics from changing the live drawing mode, opening hidden panels or highlighting giant controls while users are learning.
+- Added clearer visible next-action buttons for drawing, tee, socket, fitting, measuring and exact-length mini practice steps.
+- Changed tutorial buttons to consistently use Start practice, Restart practice and Try again wording.
+- Kept the real 3D preview minimized while the tutorial is open so it cannot cover the lesson.
+- Replaced the old Tool to try label with a simple Safe practice note so long pipe-size menus do not clutter the tutorial.
+- Bumped app cache to `spoolmate-v210`.
+
+## v2.61 - Tutorial Polish Pass
+
+- Stopped mini tutorial practices from auto-completing just because a real app panel opened.
+- Added step-by-step progress chips to every mini practice so users can see exactly where they are.
+- Made only the current highlighted target clickable inside mini isometric practice drawings.
+- Disabled future-step buttons until the tutorial is ready for them, removing dead-click moments.
+- Cleaned up the socket and exact-length mini practices so they feel more like guided workflows.
+- Improved active target cues and dark-mode styling for tutorial practice controls.
+- Bumped app cache to `spoolmate-v209`.
+
+## v2.60 - Realistic Tutorial Mini Workflows
+
+- Reworked tutorial mini practice boxes so each topic follows a realistic app workflow instead of a generic click-to-complete demo.
+- Made Tee practice use the actual sequence: choose Tee, click the main run, then pick the branch endpoint.
+- Added richer guided mini flows for Jobs, team comms, production board, pipe size reducers, sockets, dimensions, 3D preview, checks and export.
+- Improved tutorial trainer button, menu, reducer and socket styling in light and dark themes.
+- Bumped app cache to `spoolmate-v208`.
+
+## v2.59 - Tutorial Mini Trainer Boxes
+
+- Added safe mini practice boxes inside the tutorial so users can click, select, type and complete small simulated tasks before using the real drawing.
+- Added mini trainers for drawing, selecting, tees, flanges, measuring, pipe size, exact lengths, angles, dimensions, 3D, checks, export, Jobs and Comms topics.
+- Changed Jobs and Comms tutorial Try actions to use the mini trainer instead of opening extra dashboards over the tutorial.
+- Added dark-mode styling for the trainer practice boxes.
+- Bumped app cache to `spoolmate-v207`.
+
+## v2.58 - Interactive Tutorial Practice Mode
+
+- Added guided tutorial practice mode so Try it starts a real task, shows a live coach prompt and marks the topic complete when the user performs the action.
+- Made tutorial topics show completed states for tools that have been practised in the current session.
+- Compact the tutorial card during practice so the drawing pad, Jobs dashboard or 3D preview is easier to use.
+- Improved Jobs tutorial actions so Try it opens the Jobs dashboard instead of only highlighting the button.
+- Bumped app cache to `spoolmate-v206`.
+
+## v2.57 - Pressure Note and Title Block Polish
+
+- Changed weakest pressure displays to use kPa first, with bar shown in brackets.
+- Moved the live weakest pressure indicator off the pipe and into a tidy top-right drawing note.
+- Combined job and spool details into a cleaner top-right drawing title/note block.
+- Dropped the numbered dimension key below the top-right note so the two blocks do not sit on top of each other.
+- Bumped app cache to `spoolmate-v205`.
+
+## v2.56 - Live Pressure Drawing Callout
+
+- Added a live 2D drawing callout on the weakest estimated pressure run, with a marker on the pipe and a compact pressure/size badge.
+- Positioned the pressure badge using the existing drawing label layout so it tries to avoid dimension and pipe-size label clashes.
+- Kept the callout advisory-style and consistent with the Checks/Weights weakest pressure result.
+- Bumped app cache to `spoolmate-v204`.
+
+## v2.55 - Weakest Pressure Advisory
+
+- Added a weakest pressure point warning in Checks so the app identifies the lowest estimated pipe-wall pressure run in the current spool.
+- Added the weakest pressure estimate to Properties, Weights and the takeoff summary.
+- Made the pressure warning clickable so it highlights/selects the affected run on the drawing.
+- Worded the result as a pipe-wall estimate only, excluding fittings, flanges, gaskets, corrosion allowance, temperature and final design-code verification.
+- Bumped app cache to `spoolmate-v203`.
+
+## v2.54 - Stainless Tube Material
+
+- Added a separate Stainless tube 1.6 material/category using Atlas Section 4 stainless tube OD sizes.
+- Added Atlas stainless tube bend, tee and reducer table weights where available, with tube-specific bend radius, tee takeoff and reducer length allowances instead of NB pipe fitting allowances.
+- Updated the material and size pickers, drawing labels, inspector, takeoff list and PDF report wording so tube drawings show Tube OD labels instead of NB pipe labels.
+- Kept socket selections on the normal NB socket-size list so small socket fittings do not get confused with tube OD sizes.
+- Bumped app cache to `spoolmate-v202`.
+
+## v2.53 - Fullscreen Dialog Fix
+
+- Fixed fullscreen edits so field input dialogs, note dialogs, confirmations, context menus and tutorial/help overlays appear above the fullscreen drawing or preview panel.
+- Changed panel fullscreen to use SpoolMate's app fullscreen layer instead of browser-native fullscreen, keeping edit popups in the visible app layer.
+- Added stronger phone/tablet fullscreen menu z-index overrides so long-press menus are not hidden behind the panel.
+- Bumped app cache to `spoolmate-v201`.
+
+## v2.52 - Dimension Export Fit
+
+- Fixed numbered export dimensions so the full red dimension line, extension lines and label are considered during layout, not just the small label box.
+- Reduced numbered export dimension offsets so the D/O tags stay closer to the spool and rely on the editable dimension key for detail.
+- Tightened the export safe margins back down so drawings use more of the sheet without throwing dimension lines outside the frame.
+- Bumped app cache to `spoolmate-v200`.
+
+## v2.51 - Fullscreen Tool Rail Fix
+
+- Fixed drawing fullscreen so the tool rail sits above the normal topbar instead of being hidden behind it.
+- Made the fullscreen desktop tool rail vertically scrollable when there are more tools than the screen height allows.
+- Kept tablet and phone fullscreen tool rails above the drawing panel while preserving their horizontal scroll behavior.
+- Bumped app cache to `spoolmate-v199`.
+
+## v2.50 - Export Drawing Fit
+
+- Added a print-safe viewport for 2D drawing exports so red dimension labels and extension lines stay away from the sheet edges.
+- Moved the numbered dimension key lower in exported drawings so it no longer crowds the job/spool tag.
+- Used the same safe viewport for export scaling so large spools leave room for dimensions instead of fitting only the pipe centreline.
+- Bumped app cache to `spoolmate-v198`.
+
+## v2.49 - Calculation Audit
+
+- Added stainless Sch 10S kg/m values using the stainless steel pipe mass coefficient instead of reusing the carbon coefficient.
+- Replaced automatic reducer end-to-end length estimates with fixed standard reducer lengths by large-end NB.
+- Made 45 degree elbows use the separate 45 degree fitting weight table entry where available instead of halving the 90 degree elbow weight.
+- Clarified weight notes so branch welds, valves, sockets, adjusted flange standards and manual allowances are shown as estimates unless manually set.
+- Bumped app cache to `spoolmate-v197`.
+
+## v2.48 - Fab Sheet Finish
+
+- Tightened the workshop PDF drawing crop so the spool uses more of the available drawing area.
+- Made the fabrication title block more document-like with a top accent bar, sheet-type badge and issued/draft badge.
+- Gave the workshop cut summary clearer table headers with units and drawing-ID wording.
+- Added fitting/material detail text to the compact BOM/take-off rows so ordering information is easier to read.
+- Made compact workshop totals denser so the sheet keeps more information on one page.
+- Bumped app cache to `spoolmate-v196`.
+
+## v2.47 - Pre-Issue Polish
+
+- Added a pre-issue check card to the workflow panel with project details, drawing health, Review Test Kit and checked-state status.
+- Made Issued/Cutting/Fit-up/Welded/Paint/Fabricated status changes run through the issue gate when the spool has not been issued yet.
+- Recorded issued-by and issued-at details in saved projects, workflow history and fabrication sheet title blocks.
+- Improved phone field mode with cleaner bottom-sheet context menus, larger menu rows and one-time hidden 3D preview default on phones.
+- Bumped app cache to `spoolmate-v195`.
+
+## v2.46 - Drawing Trust and Team Alerts
+
+- Added automatic Review Test Kit checks for tee reducers, welded branches with no reducers, flush end flanges, 45 degree offset travel and socket spacing.
+- Added pass/fail cards to the Test Kit so risky drawing behaviours can be checked before showing or uploading a new build.
+- Expanded Team alerts to include new comments/messages plus recent Issued and Fabricated status changes.
+- Styled the new checks and alert types for both light and dark themes.
+- Bumped app cache to `spoolmate-v194`.
 
 ## v2.45 - Production Command Centre
 

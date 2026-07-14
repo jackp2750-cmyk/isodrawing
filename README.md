@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.45`
+Current app version: `v2.63`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -16,20 +16,22 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Add reducers, sockets, welds, flanges, valves and roll grooves, with Tee and Branch available directly in Draw mode.
 - Pick common flange standards from menus, including ANSI, PN, DIN, JIS and AS 2129 Table types.
 - Pick socket size, quantity and spacing from a visual socket menu.
-- Work with Carbon Sch 40 and Stainless Sch 10S pipe data up to NB 300.
+- Work with Carbon Sch 40 and Stainless Sch 10S pipe data up to NB 300, plus Atlas stainless steel tube OD sizes and tube fitting weights.
 - Show pipe size labels, red centre-to-centre dimensions, numbered dimension keys or chain-style dimensions.
 - Control pipe-size labels separately with Auto, Key sizes, All sizes, Export only and Hide modes.
 - Use the numbered dimension key as the default readable dimension view, with editable `D/O` rows for centre-to-centre values.
 - Drag red dimension labels away from clashes.
 - Add manual measurements by clicking two points on the drawing.
 - Add and drag text notes.
-- Estimate cut lengths, bend deductions, fitting takeoffs and weights.
+- Calculate cut lengths, bend deductions, fitting takeoffs and table-backed or estimated weights.
+- Show the weakest estimated pipe-wall pressure as a tidy drawing note using kPa with bar in brackets.
 - Show drawing checks and click many check warnings to highlight the issue on the drawing.
 - Calculate centre of gravity and optional suggested lifting lug points.
 - Preview the spool in 3D with realistic, workshop, carbon, stainless, painted, transparent, outline and CAD-style views.
 - Float, hide, minimize or fullscreen the 3D preview.
-- Export fabrication PDF sheets, 3D images and project files, including workshop, client/approval and material order/take-off PDF styles.
+- Export polished fabrication PDF sheets, 3D images and project files, including workshop, client/approval and material order/take-off PDF styles.
 - Use the Drawing import assistant to upload a supplied drawing/photo/PDF, calibrate a known dimension and trace centreline runs into a SpoolMate spool.
+- Learn the app with an interactive tutorial that includes topic-specific mini practice workflows, live prompts and completed topic states.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
 - See cloud save confidence at a glance with saved, unsaved, saving, failed and conflict states.
 - Use the startup dashboard to continue drawing, start a new spool, open jobs, load the sample, manage account settings, open help or follow the interactive tool tutorial.
@@ -41,7 +43,9 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Assign saved spools to team members, set due dates, priority and hold notes, and move each spool through Draft, Ready to check, Checked, Issued, Cutting, Fit-up, Welded, Paint / finish and Fabricated stages.
 - Drag production cards between stages, filter the board by active/due/overdue/hold/mine/all, or use quick Ready, Issued and Fabbed buttons on each card.
 - Use the Production command centre for Due today, Overdue, Ready check, Assigned to me, On hold and Messages shortcuts, plus quick Daily report, Weekly report and Comms actions.
-- See Team alerts for spools assigned to you, due today, overdue, ready to check or carrying an open production note.
+- Run the Review Test Kit automatic checks for tee reducers, welded branches, flush flanges, 45 degree offsets and socket dimensions after changes.
+- Use the pre-issue check flow to block issuing drawings until project details, drawing health and the test kit are clear.
+- See Team alerts for spools assigned to you, due today, overdue, ready to check, carrying a new comment/message, or recently issued/fabricated.
 - Keep an automatic activity history on each spool for status moves, assignment changes, due changes, hold changes and production notes.
 - Open a job folder to see job-level totals for total, ready check, checked, issued, fabricated, overdue and on-hold spools, plus a clean needs-doing-today list.
 - Use improved daily/weekly Jobs reports with next actions, checking queue, issue/fabrication queue, blockers, assignee workload and recent progress.
