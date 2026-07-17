@@ -1,6 +1,86 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.63`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.75`.
+
+## v2.75 - iPad Long-Press Menu Cleanup
+- Fixed iPad long-press on pipe runs so the inspector/selection sheet closes before the pipe action menu opens.
+- Prevented the pipe actions such as Add flange, Add sockets and Change pipe size from being covered by the tablet panel layer.
+- Bumped app cache to `spoolmate-v223`.
+
+## v2.74 - iPad Layout Tidy Pass
+- Added a tablet-specific compact layout for iPad/field use so the drawing gets more space.
+- Tightened the topbar by hiding brand copy, compacting workflow/action buttons and keeping settings in a horizontal quick-controls strip.
+- Reduced iPad bottom tool rail height and button size while keeping touch targets usable.
+- Tuned iPad inspector/preview sheets and context menus so they cover less of the drawing.
+- Bumped app cache to `spoolmate-v222`.
+
+## v2.73 - Tutorial Completion Stays Open
+- Changed completed tutorial practices so the mini task stays visible instead of being replaced by only a small finished panel.
+- Kept the completed example on screen with a Done message so new users can review what they just did.
+- Updated the complete-state message to point users toward Try again or Next without making the practice feel closed.
+- Bumped app cache to `spoolmate-v221`.
+
+## v2.72 - Socket Tutorial Real App Flow
+- Reworked the socket mini practice to follow the real app flow: pipe context menu, Add sockets, size, quantity, spacing, Apply, socket context menu and Rotate.
+- Added a mini socket setup panel with preview, socket size choices, count choices and spacing choices instead of skipping straight to Apply.
+- Changed socket practice so sockets only appear on the mini drawing after the Apply step.
+- Added light and dark styling for the tutorial socket context/setup panels.
+- Bumped app cache to `spoolmate-v220`.
+
+## v2.71 - 3D Tutorial Mode Clarity
+- Changed the 3D tutorial progress labels to Style, Mode and Drag.
+- Reworked the 3D mini practice controls so view style and navigation mode are shown as separate controls.
+- Added compact mode-row styling so Rotate, Move and Fit read like 3D preview controls instead of unrelated big buttons.
+- Bumped app cache to `spoolmate-v219`.
+
+## v2.70 - 3D Tutorial Step Order Fix
+- Changed the 3D tutorial mini practice so the drag model appears as an active target only after Rotate is selected.
+- Renamed the 3D practice progress from Spin to Drag so it matches the real action.
+- Added a muted locked state for the mini 3D model before it is ready to drag.
+- Bumped app cache to `spoolmate-v218`.
+
+## v2.69 - 3D Tutorial Practice Cleanup
+- Changed the 3D preview mini practice so the model must be dragged sideways instead of completed with a simple tap.
+- Added clearer "drag sideways" cueing and live mini-model rotation while practising the 3D preview.
+- Added dark-mode styling for the 3D tutorial model cue.
+- Bumped app cache to `spoolmate-v217`.
+
+## v2.68 - 45 Tutorial Marker Cleanup
+- Removed the generic sample-pipe dots from the 45 degree offset tutorial diagram.
+- Simplified the 45 tutorial markers so only A start, B travel end and C return end are shown.
+- Added quieter completed-point styling for the 45 tutorial in light and dark themes.
+- Bumped app cache to `spoolmate-v216`.
+
+## v2.67 - Tutorial Teaching Pass
+- Live-tested the beginner tutorial in the local app and tightened the lessons around actual user actions.
+- Stopped the Tee mini practice from jumping straight to completion after drawing the branch; it now shows the branch and asks users to finish drawing.
+- Cleaned up the 45 degree offset mini practice with A/B/C points, clearer set/travel/return labels and less repeated instruction text.
+- Fixed tutorial SVG touch targeting so decorative points do not block the active drag target.
+- Clarified Pipe Size wording so reducer practice does not describe the smaller pipe as a branch weld-in.
+- Bumped app cache to `spoolmate-v215`.
+
+## v2.66 - Tutorial Action Pass
+- Reworked the 45 degree offset tutorial so users pick 45 degrees, set the offset distance, drag the angled travel piece, drag the straight return run and finish drawing.
+- Reworked the Tee tutorial so users tap the main run and then drag the branch from the tee point instead of clicking through a fake endpoint.
+- Added shared tutorial drag handling for Draw, Tee and 45 offset mini-practice steps.
+- Updated beginner tutorial wording so the practice cues match the real action users need to perform.
+- Bumped app cache to `spoolmate-v214`.
+
+## v2.65 - Draw Tutorial Drag Fix
+- Changed the first Draw tutorial mini practice so it starts with a blank isometric pad instead of a pre-drawn pipe.
+- Made the Draw tutorial require an actual drag from the yellow start point to the blue end point before it advances.
+- Reworded the Draw beginner lesson to explain press-and-drag drawing clearly for new users.
+- Added visible drag preview, end target and miss guidance for the mini practice.
+- Added matching dark-mode styling for the tutorial drag target and preview line.
+- Bumped app cache to `spoolmate-v213`.
+
+## v2.64 - Beginner Tutorial Path
+- Made the tutorial open to a Beginner tour by default instead of Jobs/team workflow topics.
+- Added Beginner tour / All topics switching so new users see drawing basics first and advanced workflow topics remain available.
+- Updated tutorial Next/Back, topic counts and menu filtering to follow the selected path.
+- Reworded the first drawing lessons for brand-new users learning their first spool.
+- Added light/dark styling for the tutorial path switch and beginner explanation card.
+- Bumped app cache to `spoolmate-v212`.
 
 ## v2.63 - Tutorial Reliability Pass
 

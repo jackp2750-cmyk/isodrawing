@@ -2898,6 +2898,53 @@ body.auth-gate-open .app-shell {
   letter-spacing: 0;
 }
 
+.tutorial-mode-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tutorial-mode-switch button {
+  min-height: 38px;
+  padding: 8px 9px;
+  border: 1px solid rgba(0, 127, 171, 0.26);
+  border-radius: 8px;
+  background: var(--button);
+  color: var(--ink);
+  font: 950 11px Inter, system-ui, sans-serif;
+  text-align: center;
+  box-shadow: var(--button-shadow);
+}
+
+.tutorial-mode-switch button.active,
+.tutorial-mode-switch button[aria-pressed="true"] {
+  border-color: rgba(0, 127, 171, 0.64);
+  background: var(--button-selected);
+  color: #fff;
+}
+
+.tutorial-path-help {
+  display: grid;
+  gap: 3px;
+  padding: 9px 10px;
+  border: 1px solid rgba(0, 127, 171, 0.16);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.tutorial-path-help strong {
+  color: var(--teal-strong);
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.tutorial-path-help span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 850;
+  line-height: 1.3;
+}
+
 .tutorial-progress-head {
   display: grid;
   gap: 4px;
@@ -4229,6 +4276,10 @@ body.auth-gate-open .app-shell {
   background: #fffdf8;
 }
 
+.tutorial-trainer-iso * {
+  pointer-events: none;
+}
+
 .trainer-grid {
   fill: none;
   stroke: rgba(15, 118, 110, 0.16);
@@ -4266,6 +4317,40 @@ body.auth-gate-open .app-shell {
   stroke-dasharray: 8 6;
 }
 
+.trainer-angle-arc {
+  fill: none;
+  stroke: #c1121f;
+  stroke-width: 2.5;
+}
+
+.trainer-small-label {
+  fill: #8b1e18;
+  font: 950 10px Inter, system-ui, sans-serif;
+}
+
+.trainer-point-label {
+  fill: #052b36;
+  font: 950 11px Inter, system-ui, sans-serif;
+}
+
+.trainer-drag-target {
+  stroke: rgba(201, 107, 71, 0.58);
+  stroke-width: 2.5;
+}
+
+.trainer-drag-preview {
+  fill: none;
+  stroke: #13d8ff;
+  stroke-width: 7;
+  stroke-linecap: round;
+}
+
+.trainer-end-target {
+  fill: rgba(19, 216, 255, 0.22);
+  stroke: #0f6669;
+  stroke-width: 3;
+}
+
 .trainer-reducer {
   fill: rgba(19, 216, 255, 0.22);
   stroke: #0f6669;
@@ -4291,6 +4376,10 @@ body.auth-gate-open .app-shell {
   stroke-width: 2;
 }
 
+.trainer-set-tick {
+  stroke-width: 1.7;
+}
+
 .trainer-measure + text {
   fill: #c1121f;
   font: 900 12px Inter, system-ui, sans-serif;
@@ -4307,6 +4396,12 @@ body.auth-gate-open .app-shell {
   fill: #ffd166;
   stroke: #0f6669;
   stroke-width: 3;
+}
+
+.trainer-point.complete {
+  fill: #dff7f5;
+  stroke: #0f6669;
+  stroke-width: 2.2;
 }
 
 .trainer-flange line,
@@ -4345,6 +4440,7 @@ body.auth-gate-open .app-shell {
   stroke-width: 2;
   cursor: pointer;
   pointer-events: auto;
+  touch-action: none;
 }
 
 .tutorial-svg-hit:hover,
@@ -4402,6 +4498,44 @@ body.auth-gate-open .app-shell {
   color: #04101a;
 }
 
+.tutorial-preview-practice {
+  grid-template-columns: 1fr;
+}
+
+.tutorial-trainer-mode-block {
+  display: grid;
+  gap: 5px;
+}
+
+.tutorial-trainer-mode-block small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.tutorial-trainer-mode-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tutorial-trainer-selectlike {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tutorial-trainer-selectlike::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  opacity: 0.72;
+}
+
 .tutorial-trainer button:disabled,
 .tutorial-trainer-button:disabled {
   cursor: not-allowed;
@@ -4438,6 +4572,145 @@ body.auth-gate-open .app-shell {
   font-size: 9px;
   font-weight: 950;
   text-transform: uppercase;
+}
+
+.tutorial-context-sheet,
+.tutorial-socket-setup-panel {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid rgba(0, 127, 171, 0.2);
+  border-radius: 9px;
+  background: rgba(255, 253, 248, 0.94);
+}
+
+.tutorial-context-sheet.compact {
+  max-width: 360px;
+}
+
+.tutorial-context-head,
+.tutorial-socket-setup-head {
+  display: grid;
+  gap: 2px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(0, 127, 171, 0.14);
+}
+
+.tutorial-context-head strong,
+.tutorial-socket-setup-head strong {
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.tutorial-context-head small,
+.tutorial-socket-setup-head small,
+.tutorial-socket-section > small {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.tutorial-context-sheet button,
+.tutorial-socket-setup-actions button,
+.tutorial-socket-setup-actions span,
+.tutorial-socket-choice-grid button {
+  min-height: 38px;
+  display: grid;
+  gap: 2px;
+  align-content: center;
+  padding: 8px 10px;
+  border: 1px solid rgba(31, 42, 47, 0.14);
+  border-radius: 7px;
+  background: var(--button);
+  color: var(--ink);
+  font: 900 12px Inter, system-ui, sans-serif;
+  text-align: left;
+}
+
+.tutorial-context-sheet button span,
+.tutorial-socket-setup-actions button span,
+.tutorial-socket-setup-actions span b,
+.tutorial-socket-choice-grid button span {
+  font-weight: 950;
+}
+
+.tutorial-context-sheet button small,
+.tutorial-socket-setup-actions button small,
+.tutorial-socket-setup-actions span small,
+.tutorial-socket-choice-grid button small {
+  color: var(--muted);
+  font-size: 9.5px;
+  font-weight: 800;
+}
+
+.tutorial-context-sheet button.active,
+.tutorial-context-sheet button:focus-visible,
+.tutorial-socket-choice-grid button.active,
+.tutorial-socket-choice-grid button:focus-visible,
+.tutorial-socket-setup-actions button:focus-visible {
+  border-color: rgba(19, 216, 255, 0.62);
+  background: rgba(19, 216, 255, 0.13);
+  outline: none;
+}
+
+.tutorial-context-sheet button:disabled,
+.tutorial-socket-choice-grid button:disabled,
+.tutorial-socket-setup-actions button:disabled {
+  opacity: 0.55;
+}
+
+.tutorial-socket-setup-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.35fr);
+  gap: 6px;
+}
+
+.tutorial-socket-preview {
+  width: 100%;
+  height: 108px;
+  display: block;
+  border: 1px solid rgba(0, 127, 171, 0.16);
+  border-radius: 8px;
+  background: rgba(240, 251, 249, 0.72);
+}
+
+.tutorial-socket-preview-pipe,
+.tutorial-socket-preview-socket line,
+.tutorial-socket-preview-socket circle {
+  fill: rgba(255, 253, 248, 0.96);
+  stroke: #0f6669;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tutorial-socket-preview-pipe {
+  fill: none;
+  stroke-width: 11;
+}
+
+.tutorial-socket-preview-dim,
+.tutorial-socket-preview-tick {
+  fill: none;
+  stroke: rgba(193, 18, 31, 0.72);
+  stroke-width: 1.7;
+}
+
+.tutorial-socket-preview text {
+  fill: var(--muted);
+  font: 900 9px Inter, system-ui, sans-serif;
+}
+
+.tutorial-socket-section {
+  display: grid;
+  gap: 4px;
+}
+
+.tutorial-socket-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
 }
 
 .tutorial-trainer-field {
@@ -4485,32 +4758,93 @@ body.auth-gate-open .app-shell {
     linear-gradient(135deg, transparent 48%, rgba(15, 118, 110, 0.12) 49%, rgba(15, 118, 110, 0.12) 51%, transparent 52%),
     #fffdf8;
   overflow: hidden;
+  cursor: default;
+  touch-action: none;
+  --trainer-spin: 0deg;
+  --trainer-spin-mid: 0deg;
+  --trainer-tilt: 0px;
 }
 
 .tutorial-trainer-model span {
   position: absolute;
   left: 25%;
-  top: 52%;
+  top: calc(52% + var(--trainer-tilt));
   width: 52%;
   height: 10px;
   border-radius: 999px;
   background: #0f6669;
   box-shadow: 0 8px 20px rgba(15, 102, 105, 0.22);
   transform-origin: 30% 50%;
+  transform: rotate(var(--trainer-spin));
+  transition: transform 0.14s ease, top 0.14s ease;
 }
 
 .tutorial-trainer-model span:nth-child(2) {
   left: 49%;
-  top: 31%;
+  top: calc(31% + var(--trainer-tilt));
   width: 10px;
   height: 58px;
+  transform: rotate(var(--trainer-spin-mid));
 }
 
 .tutorial-trainer-model span:nth-child(3) {
   left: 45%;
-  top: 28%;
+  top: calc(28% + var(--trainer-tilt));
   width: 36%;
-  transform: rotate(32deg);
+  transform: rotate(calc(32deg + var(--trainer-spin)));
+}
+
+.tutorial-trainer-model.ready {
+  cursor: grab;
+  border-color: rgba(19, 216, 255, 0.5);
+  box-shadow: inset 0 0 0 1px rgba(19, 216, 255, 0.14);
+}
+
+.tutorial-trainer-model.locked {
+  opacity: 0.72;
+}
+
+.tutorial-trainer-model.dragging {
+  cursor: grabbing;
+}
+
+.tutorial-trainer-model b {
+  position: absolute;
+  left: 50%;
+  bottom: 13px;
+  transform: translateX(-50%);
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(19, 216, 255, 0.12);
+  color: var(--teal-strong);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tutorial-trainer-model.ready b::before,
+.tutorial-trainer-model.ready b::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 28px;
+  height: 2px;
+  background: rgba(19, 216, 255, 0.74);
+}
+
+.tutorial-trainer-model.ready b::before {
+  right: calc(100% + 8px);
+}
+
+.tutorial-trainer-model.ready b::after {
+  left: calc(100% + 8px);
+}
+
+.tutorial-trainer-model.locked b {
+  background: rgba(96, 114, 122, 0.12);
+  color: var(--muted);
 }
 
 .tutorial-trainer-done {
@@ -9570,6 +9904,204 @@ body .preview-panel:fullscreen {
   }
 }
 
+body.tablet-layout.field-layout .topbar {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "primary actions"
+    "settings settings";
+  gap: 5px 8px;
+  padding: 6px 8px;
+}
+
+body.tablet-layout.field-layout .topbar-primary {
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 8px;
+}
+
+body.tablet-layout.field-layout .brand {
+  max-width: 58px;
+  min-width: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+body.tablet-layout.field-layout .brand-logo {
+  width: 36px;
+  height: 36px;
+}
+
+body.tablet-layout.field-layout .brand > div {
+  display: none;
+}
+
+body.tablet-layout.field-layout .mode-switcher {
+  align-self: center;
+  min-height: 42px;
+  padding: 4px;
+}
+
+body.tablet-layout.field-layout .mode-switcher button {
+  min-height: 36px;
+  padding: 0 11px;
+  font-size: 12px;
+}
+
+body.tablet-layout.field-layout .topbar-actions {
+  display: grid;
+  width: auto;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(62px, 82px));
+  align-content: center;
+  align-self: center;
+  gap: 5px;
+  overflow: visible;
+}
+
+body.tablet-layout.field-layout .topbar-actions .cloud-status-pill {
+  display: none;
+}
+
+body.tablet-layout.field-layout .topbar-actions .icon-button.labeled,
+body.tablet-layout.field-layout .topbar-actions .primary-button {
+  min-height: 42px;
+  height: 42px;
+  padding: 0 7px;
+  font-size: 12px;
+}
+
+body.tablet-layout.field-layout .topbar-settings {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 6px;
+  min-height: 46px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 2px 5px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+body.tablet-layout.field-layout .topbar-settings::-webkit-scrollbar {
+  display: none;
+}
+
+body.tablet-layout.field-layout .project-readout {
+  flex: 0 0 190px;
+  max-width: 190px;
+}
+
+body.tablet-layout.field-layout .top-field,
+body.tablet-layout.field-layout .top-toggle,
+body.tablet-layout.field-layout .dimension-style-field {
+  flex: 0 0 auto;
+  min-height: 42px;
+}
+
+body.tablet-layout.field-layout .top-field {
+  min-width: 174px;
+}
+
+body.tablet-layout.field-layout .top-field:has(#pipeSizeSelect) {
+  min-width: 210px;
+}
+
+body.tablet-layout.field-layout .dimension-mode-field {
+  min-width: 172px;
+}
+
+body.tablet-layout.field-layout .pipe-label-mode-field {
+  display: none;
+}
+
+body.tablet-layout.field-layout .dimension-style-field select,
+body.tablet-layout.field-layout .top-field select {
+  min-height: 34px;
+  max-width: 178px;
+  font-size: 12px;
+}
+
+body.tablet-layout.field-layout .drawing-panel {
+  padding-bottom: 136px;
+}
+
+body.tablet-layout.field-layout .panel-bar {
+  min-height: 48px;
+  padding: 6px 9px;
+}
+
+body.tablet-layout.field-layout .drawing-panel .bar-actions {
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+body.tablet-layout.field-layout .drawing-panel .bar-actions::-webkit-scrollbar {
+  display: none;
+}
+
+body.tablet-layout.field-layout .drawing-panel .icon-button.compact.labeled {
+  min-width: 74px;
+  min-height: 38px;
+  height: 38px;
+  padding: 0 8px;
+}
+
+body.tablet-layout.field-layout .tool-rail {
+  height: 84px;
+  bottom: 52px;
+  padding: 7px 10px;
+}
+
+body.tablet-layout.field-layout .tool-rail .tool-grid {
+  gap: 7px;
+}
+
+body.tablet-layout.field-layout .tool-button {
+  flex-basis: 84px;
+  min-width: 84px;
+  min-height: 68px;
+  padding: 6px 5px;
+  gap: 4px;
+}
+
+body.tablet-layout.field-layout .tool-button svg {
+  width: 21px;
+  height: 21px;
+}
+
+body.tablet-layout.field-layout .tool-button span {
+  font-size: 11px;
+  line-height: 1.12;
+}
+
+body.tablet-layout.field-layout .mobile-panel-dock {
+  height: 52px;
+  padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+}
+
+body.tablet-layout.field-layout .mobile-panel-dock button {
+  min-height: 38px;
+  font-size: 12px;
+}
+
+body.tablet-layout.field-layout .control-panel,
+body.tablet-layout.field-layout .preview-panel {
+  bottom: 52px;
+  height: min(68dvh, 610px);
+  max-height: calc(100dvh - 74px);
+}
+
+body.tablet-layout.field-layout .inspector-tab-panel {
+  max-height: calc(68dvh - 104px);
+}
+
+body.tablet-layout.field-layout .drawing-context-menu.field-action-sheet {
+  bottom: calc(60px + env(safe-area-inset-bottom)) !important;
+  max-height: min(66dvh, 580px);
+}
+
 @media (max-width: 640px) {
   body.phone-layout.field-layout .topbar {
     grid-template-columns: 1fr;
@@ -9950,6 +10482,7 @@ body .preview-panel:fullscreen {
 
 :root[data-theme="dark"] .tutorial-trainer-head span,
 :root[data-theme="dark"] .tutorial-trainer-instructions,
+:root[data-theme="dark"] .tutorial-trainer-mode-block small,
 :root[data-theme="dark"] .tutorial-trainer-pill,
 :root[data-theme="dark"] .tutorial-trainer-progress span,
 :root[data-theme="dark"] .tutorial-socket-layout span,
@@ -9962,6 +10495,10 @@ body .preview-panel:fullscreen {
 :root[data-theme="dark"] .tutorial-trainer-comms button,
 :root[data-theme="dark"] .tutorial-trainer-export button {
   color: #e8fbff;
+}
+
+:root[data-theme="dark"] .tutorial-trainer-mode-block small {
+  color: #9fc0d1;
 }
 
 :root[data-theme="dark"] .tutorial-trainer-progress span {
@@ -9986,10 +10523,94 @@ body .preview-panel:fullscreen {
   color: #8eefff;
 }
 
+:root[data-theme="dark"] .tutorial-context-sheet,
+:root[data-theme="dark"] .tutorial-socket-setup-panel {
+  border-color: rgba(19, 216, 255, 0.2);
+  background: rgba(6, 16, 24, 0.96);
+}
+
+:root[data-theme="dark"] .tutorial-context-head,
+:root[data-theme="dark"] .tutorial-socket-setup-head {
+  border-bottom-color: rgba(19, 216, 255, 0.16);
+}
+
+:root[data-theme="dark"] .tutorial-context-head strong,
+:root[data-theme="dark"] .tutorial-socket-setup-head strong {
+  color: #e8fbff;
+}
+
+:root[data-theme="dark"] .tutorial-context-head small,
+:root[data-theme="dark"] .tutorial-socket-setup-head small,
+:root[data-theme="dark"] .tutorial-socket-section > small {
+  color: #9fc0d1;
+}
+
+:root[data-theme="dark"] .tutorial-context-sheet button,
+:root[data-theme="dark"] .tutorial-socket-setup-actions button,
+:root[data-theme="dark"] .tutorial-socket-setup-actions span,
+:root[data-theme="dark"] .tutorial-socket-choice-grid button {
+  border-color: rgba(19, 216, 255, 0.2);
+  background: rgba(9, 28, 43, 0.92);
+  color: #e8fbff;
+}
+
+:root[data-theme="dark"] .tutorial-context-sheet button small,
+:root[data-theme="dark"] .tutorial-socket-setup-actions button small,
+:root[data-theme="dark"] .tutorial-socket-setup-actions span small,
+:root[data-theme="dark"] .tutorial-socket-choice-grid button small {
+  color: #9fc0d1;
+}
+
+:root[data-theme="dark"] .tutorial-context-sheet button:focus-visible,
+:root[data-theme="dark"] .tutorial-socket-choice-grid button.active,
+:root[data-theme="dark"] .tutorial-socket-choice-grid button:focus-visible,
+:root[data-theme="dark"] .tutorial-socket-setup-actions button:focus-visible {
+  border-color: rgba(19, 216, 255, 0.64);
+  background: rgba(0, 132, 255, 0.18);
+}
+
+:root[data-theme="dark"] .tutorial-socket-preview {
+  border-color: rgba(19, 216, 255, 0.18);
+  background: rgba(5, 18, 29, 0.92);
+}
+
+:root[data-theme="dark"] .tutorial-socket-preview-pipe,
+:root[data-theme="dark"] .tutorial-socket-preview-socket line,
+:root[data-theme="dark"] .tutorial-socket-preview-socket circle {
+  fill: #071018;
+  stroke: #13d8ff;
+}
+
+:root[data-theme="dark"] .tutorial-socket-preview-dim,
+:root[data-theme="dark"] .tutorial-socket-preview-tick {
+  stroke: rgba(255, 102, 115, 0.82);
+}
+
+:root[data-theme="dark"] .tutorial-socket-preview text {
+  fill: #9fc0d1;
+}
+
 :root[data-theme="dark"] .tutorial-trainer-iso,
 :root[data-theme="dark"] .tutorial-trainer-model {
   border-color: rgba(19, 216, 255, 0.18);
   background: #061018;
+}
+
+:root[data-theme="dark"] .tutorial-trainer-model.ready {
+  border-color: rgba(19, 216, 255, 0.56);
+  box-shadow:
+    inset 0 0 0 1px rgba(19, 216, 255, 0.18),
+    0 0 20px rgba(19, 216, 255, 0.08);
+}
+
+:root[data-theme="dark"] .tutorial-trainer-model span {
+  background: #8eefff;
+  box-shadow: 0 8px 22px rgba(19, 216, 255, 0.22);
+}
+
+:root[data-theme="dark"] .tutorial-trainer-model b {
+  background: rgba(19, 216, 255, 0.16);
+  color: #b9f5ff;
 }
 
 :root[data-theme="dark"] .trainer-grid {
@@ -10011,8 +10632,38 @@ body .preview-panel:fullscreen {
   stroke: #ff6673;
 }
 
+:root[data-theme="dark"] .trainer-angle-arc {
+  stroke: #ff8a96;
+}
+
+:root[data-theme="dark"] .trainer-small-label {
+  fill: #ffd0d5;
+}
+
+:root[data-theme="dark"] .trainer-point-label {
+  fill: #e8fbff;
+}
+
+:root[data-theme="dark"] .trainer-drag-target {
+  stroke: rgba(255, 102, 115, 0.7);
+}
+
+:root[data-theme="dark"] .trainer-drag-preview {
+  stroke: #13d8ff;
+}
+
+:root[data-theme="dark"] .trainer-end-target {
+  fill: rgba(19, 216, 255, 0.28);
+  stroke: #8eefff;
+}
+
 :root[data-theme="dark"] .trainer-reducer {
   fill: rgba(19, 216, 255, 0.24);
+  stroke: #8eefff;
+}
+
+:root[data-theme="dark"] .trainer-point.complete {
+  fill: #0b2a37;
   stroke: #8eefff;
 }
 
@@ -10195,6 +10846,32 @@ body .preview-panel:fullscreen {
 :root[data-theme="dark"] .tutorial-progress {
   border-color: rgba(19, 216, 255, 0.22);
   background: #0a1722;
+}
+
+:root[data-theme="dark"] .tutorial-mode-switch button {
+  border-color: rgba(19, 216, 255, 0.22);
+  background: #07131d;
+  color: #e8fbff;
+}
+
+:root[data-theme="dark"] .tutorial-mode-switch button.active,
+:root[data-theme="dark"] .tutorial-mode-switch button[aria-pressed="true"] {
+  border-color: rgba(19, 216, 255, 0.72);
+  background: linear-gradient(180deg, #03a9ff, #0066d6);
+  color: #fff;
+}
+
+:root[data-theme="dark"] .tutorial-path-help {
+  border-color: rgba(19, 216, 255, 0.2);
+  background: rgba(9, 28, 43, 0.78);
+}
+
+:root[data-theme="dark"] .tutorial-path-help strong {
+  color: #8eefff;
+}
+
+:root[data-theme="dark"] .tutorial-path-help span {
+  color: #9fc0d1;
 }
 
 :root[data-theme="dark"] .tutorial-progress-head span {
