@@ -249,7 +249,7 @@ const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.75";
+const APP_VERSION = "v2.77";
 const APP_BUILD_DATE = "2026-07-17";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -1121,6 +1121,7 @@ let tutorialPreviewRestoreState = null;
 let tutorialPractice = null;
 let tutorialTrainer = null;
 let tutorialCompletedSteps = new Set();
+let tutorialTrainerSuppressClickUntil = 0;
 let drawingAssistantState = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
@@ -11177,6 +11178,28 @@ function tutorialTrainerStepLabels(kind) {
   return steps[kind] ?? ["Try"];
 }
 
+function tutorialTrainerCurrentChoice(kind = tutorialTrainerKind(currentTutorialStep()), phase = tutorialTrainerPhase()) {
+  const choices = {
+    startJobs: ["jobs-open", "job-card", "spool-card"],
+    comms: ["comms-tab", "message", "send-message"],
+    production: ["job-card", "assign-user", "ready-check"],
+    draw: ["draw-tool", "draw-start", "finish-draw"],
+    exact: ["length", "exact-run"],
+    offset: ["angle", "set-distance", "offset-travel-start", "offset-return-start", "finish-offset"],
+    select: ["select-tool", "pipe", "shift-select"],
+    tee: ["tee-tool", "pipe", "tee-branch-start", "finish-tee"],
+    fittings: ["flange-tool", "end", "flange-standard"],
+    pipeSize: ["main-size", "small-size", "confirm-reducer"],
+    sockets: ["pipe", "add-sockets", "socket-size", "socket-count", "socket-spacing", "apply-sockets", "socket", "rotate-socket"],
+    measure: ["measure-tool", "start", "end"],
+    dimensions: ["numbered-key", "edit-d1", "dimension-value"],
+    preview: ["realistic-view", "rotate-mode", "spin-model"],
+    review: ["checks-tab", "check-warning"],
+    export: ["workshop-pdf", "fab-pdf", "include-3d"],
+  };
+  return choices[kind]?.[Math.max(0, Math.round(Number(phase) || 0))] ?? "";
+}
+
 function tutorialTrainerProgressMarkup(kind, phase, complete) {
   const labels = tutorialTrainerStepLabels(kind);
   const currentIndex = complete ? labels.length : clampNumber(Math.round(Number(phase) || 0), 0, labels.length - 1);
@@ -11249,8 +11272,8 @@ function tutorialMiniIsoSvg(kind, phase, complete) {
       "offset-travel-start": ["Drag 45 travel", 70, 90],
       "offset-return-start": ["Drag return run", 156, 24],
       "tee-branch-start": ["Drag branch", 122, 84],
-      pipe: [kind === "sockets" ? "Right-click / long-press pipe" : "Click main pipe", 100, 42],
-      socket: ["Right-click socket", 116, 24],
+      pipe: [kind === "sockets" ? "Hold pipe" : "Click main pipe", 100, 42],
+      socket: ["Hold socket", 116, 24],
       end: ["Click pipe end", 210, 22],
     };
     const [label, x, y] = labels[activeChoice] ?? [];
@@ -11323,15 +11346,36 @@ function tutorialMiniIsoSvg(kind, phase, complete) {
   const offsetReturnLabel = kind === "offset" && phase >= 4 ? `
     <text x="204" y="31" class="trainer-small-label">Return run</text>
   ` : "";
-  const standardTrainerPoints = kind !== "offset" ? `
+  const trainerPointMarkers = (() => {
+    if (kind === "offset") return "";
+    if (kind === "draw") {
+      const targetPoint = phase >= 1 || complete ? `<circle class="trainer-point target" cx="252" cy="52" r="6" />` : "";
+      return `
+        <circle class="trainer-point active" cx="66" cy="105" r="7" />
+        ${targetPoint}
+      `;
+    }
+    if (kind === "tee") {
+      return `
+        <circle class="trainer-point" cx="66" cy="105" r="6" />
+        <circle class="trainer-point" cx="252" cy="52" r="6" />
+      `;
+    }
+    return `
       <circle class="trainer-point" cx="66" cy="105" r="6" />
       <circle class="trainer-point" cx="158" cy="76" r="6" />
       <circle class="trainer-point" cx="252" cy="52" r="6" />
-  ` : "";
+    `;
+  })();
   const offsetPointMarkers = kind === "offset" ? `
       <circle class="trainer-point active" cx="108" cy="112" r="6" />
       ${phase >= 3 || complete ? `<circle class="trainer-point complete" cx="178" cy="42" r="5" />` : ""}
       ${phase >= 4 || complete ? `<circle class="trainer-point complete" cx="258" cy="42" r="5" />` : ""}
+  ` : "";
+  const offsetPointLabels = kind === "offset" ? `
+      <text x="101" y="136" class="trainer-point-label">A</text>
+      ${phase >= 2 || complete ? `<text x="173" y="31" class="trainer-point-label">B</text>` : ""}
+      ${phase >= 3 || complete ? `<text x="255" y="31" class="trainer-point-label">C</text>` : ""}
   ` : "";
   const dimension = kind === "dimensions" ? `
     <path class="trainer-measure" d="M66 126 L252 73" />
@@ -11372,9 +11416,9 @@ function tutorialMiniIsoSvg(kind, phase, complete) {
       ${kind === "offset" && phase === 2 && !complete ? `<circle ${hitAttrs("offset-travel-start")} cx="108" cy="112" r="22" />` : ""}
       ${kind === "offset" && phase === 3 && !complete ? `<circle ${hitAttrs("offset-return-start")} cx="178" cy="42" r="22" />` : ""}
       ${kind === "tee" && phase === 2 && !complete ? `<circle ${hitAttrs("tee-branch-start")} cx="158" cy="76" r="22" />` : ""}
-      ${standardTrainerPoints}
+      ${trainerPointMarkers}
       ${offsetPointMarkers}
-      ${kind === "offset" ? `<text x="101" y="136" class="trainer-point-label">A</text><text x="173" y="31" class="trainer-point-label">B</text><text x="255" y="31" class="trainer-point-label">C</text>` : ""}
+      ${offsetPointLabels}
       ${kind === "tee" && phase >= 2 && !complete ? `<circle class="trainer-point active" cx="158" cy="28" r="7" />` : ""}
     </svg>
   `;
@@ -11485,11 +11529,11 @@ function tutorialTrainerContent(kind, phase, complete) {
         </div>
         ${phase >= 1 || complete ? `
           <div class="tutorial-trainer-comms">
-            <input data-tutorial-trainer-value="message" value="Spool 12 ready to check" aria-label="Team message" />
+            <input data-tutorial-trainer-value="message" data-tutorial-trainer-choice="message" value="${escapeHtml(tutorialTrainer?.values?.message || "")}" placeholder="Type: Spool 12 ready to check" aria-label="Team message" />
             <button type="button" data-tutorial-trainer-choice="send-message">Send message</button>
           </div>
         ` : ""}
-        <div class="tutorial-trainer-instructions">${complete ? "Team message sent." : phase === 0 ? "Click Comms." : "Send the team message."}</div>
+        <div class="tutorial-trainer-instructions">${complete ? "Team message sent." : phase === 0 ? "Click Comms." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Type a short team message, then press Send message."}</div>
       `;
     case "production":
       return `
@@ -11515,9 +11559,6 @@ function tutorialTrainerContent(kind, phase, complete) {
             <span class="tutorial-trainer-pill">Select</span>
           </div>
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-action-row">
-            ${phase === 0 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="draw-tool">Click Draw</button>` : ""}
-          </div>
           <div class="tutorial-trainer-instructions">${complete ? "You drew a mini run and stopped drawing." : phase === 0 ? "Click Draw first." : phase === 1 ? tutorialTrainer?.missedDrag ? "Start on the yellow point, hold down, drag to the blue end point, then let go." : "Hold on the yellow point and drag to the blue end point." : "Press Finish drawing, like pressing Enter."}</div>
           ${phase >= 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="finish-draw">Finish drawing</button>` : ""}
         </div>
@@ -11530,10 +11571,7 @@ function tutorialTrainerContent(kind, phase, complete) {
             <span class="tutorial-trainer-pill">Box select</span>
           </div>
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-action-row">
-            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="pipe">Tap pipe run</button>` : ""}
-          </div>
-          <div class="tutorial-trainer-instructions">${complete ? "Two runs selected." : phase === 0 ? "Click Select." : phase === 1 ? "Click the first pipe run." : "Click Shift select to add another run."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "Two runs selected." : phase === 0 ? "Click Select." : phase === 1 ? "Click the highlighted first pipe run." : "Click Shift select to add another run."}</div>
           ${phase >= 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="shift-select">Shift select second run</button>` : ""}
         </div>
       `;
@@ -11546,10 +11584,7 @@ function tutorialTrainerContent(kind, phase, complete) {
             <span class="tutorial-trainer-pill">Draw</span>
           </div>
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-action-row">
-            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="pipe">Tap main run</button>` : ""}
-          </div>
-          <div class="tutorial-trainer-instructions">${complete ? "Tee branch drawn from the new tee point." : phase === 0 ? "Click Tee, just like the side tool." : phase === 1 ? "Click the main run where the tee belongs." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold the yellow tee point and drag out to the blue branch end point." : "Branch is drawn. Press Finish drawing, like pressing Enter."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "Tee branch drawn from the new tee point." : phase === 0 ? "Click Tee, just like the side tool." : phase === 1 ? "Click the highlighted main run where the tee belongs." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold the yellow tee point and drag out to the blue branch end point." : "Branch is drawn. Press Finish drawing, like pressing Enter."}</div>
           ${phase >= 3 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="finish-tee">Finish drawing</button>` : ""}
         </div>
       `;
@@ -11562,14 +11597,16 @@ function tutorialTrainerContent(kind, phase, complete) {
             <span class="tutorial-trainer-pill">Reducer</span>
           </div>
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-action-row">
-            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="end">Tap pipe end</button>` : ""}
-          </div>
           ${phase >= 2 && !complete ? `
-            <div class="tutorial-trainer-menu">
-              <button type="button" data-tutorial-trainer-choice="table-e">AS 2129 Table E</button>
-              <button type="button" data-tutorial-trainer-choice="pn16">PN 16</button>
-            </div>
+            <label class="tutorial-trainer-field">
+              <span>Flange standard</span>
+              <select data-tutorial-trainer-choice="flange-standard" aria-label="Flange standard">
+                <option value="">Choose a standard</option>
+                <option value="table-e">AS 2129 Table E</option>
+                <option value="pn16">EN 1092-1 PN 16</option>
+                <option value="ansi150">ASME ANSI Class 150</option>
+              </select>
+            </label>
           ` : ""}
           <div class="tutorial-trainer-instructions">${complete ? "Flange placed with a standard selected." : phase === 0 ? "Click Flange." : phase === 1 ? "Click the pipe end." : "Pick the flange standard from the menu."}</div>
         </div>
@@ -11578,8 +11615,8 @@ function tutorialTrainerContent(kind, phase, complete) {
       return `
         <div class="tutorial-trainer-stage">
           <div class="tutorial-trainer-controls compact">
-            <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="main-size">Main NB 100</button>
-            <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="small-size" ${phase < 1 && !complete ? "disabled" : ""}>Small pipe NB 50</button>
+            <label class="tutorial-trainer-field"><span>Main pipe size</span><select data-tutorial-trainer-choice="main-size" ${phase >= 1 || complete ? "disabled" : ""}><option value="">Choose main size</option><option value="100" ${phase >= 1 || complete ? "selected" : ""}>NB 100</option></select></label>
+            <label class="tutorial-trainer-field"><span>Connected pipe size</span><select data-tutorial-trainer-choice="small-size" ${phase < 1 || phase >= 2 || complete ? "disabled" : ""}><option value="">Choose smaller size</option><option value="50" ${phase >= 2 || complete ? "selected" : ""}>NB 50</option></select></label>
             <button type="button" data-tutorial-trainer-choice="confirm-reducer" ${phase < 2 && !complete ? "disabled" : ""}>Confirm reducer</button>
           </div>
           ${tutorialMiniIsoSvg(kind, phase, complete)}
@@ -11612,7 +11649,7 @@ function tutorialTrainerContent(kind, phase, complete) {
               <button type="button" disabled><span>Change socket size</span><small>Pick from socket menu</small></button>
             </div>
           ` : ""}
-          <div class="tutorial-trainer-instructions">${complete ? "Sockets added and one rotated." : phase === 0 ? "Right-click or long-press the highlighted pipe in the mini drawing." : phase === 1 ? "Choose Add sockets from the pipe actions menu." : phase === 2 ? "Pick NB 15 as the socket size." : phase === 3 ? "Pick 2 sockets." : phase === 4 ? "Pick 150 mm C/C spacing." : phase === 5 ? "Press Apply sockets to pipe." : phase === 6 ? "Right-click or long-press one of the sockets." : "Choose Rotate socket 90 deg."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "Sockets added and one rotated." : phase === 0 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Press and hold the highlighted pipe until the pipe actions menu opens." : phase === 1 ? "Choose Add sockets from the pipe actions menu." : phase === 2 ? "Pick NB 15 as the socket size." : phase === 3 ? "Pick 2 sockets." : phase === 4 ? "Pick 150 mm C/C spacing." : phase === 5 ? "Press Apply sockets to pipe." : phase === 6 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Press and hold one socket until the socket actions menu opens." : "Choose Rotate socket 90 deg."}</div>
         </div>
       `;
     case "measure":
@@ -11623,29 +11660,24 @@ function tutorialTrainerContent(kind, phase, complete) {
             <span class="tutorial-trainer-pill">Note</span>
           </div>
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-action-row">
-            ${phase === 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="start">Tap point 1</button>` : ""}
-            ${phase === 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="end">Tap point 2</button>` : ""}
-          </div>
-          <div class="tutorial-trainer-instructions">${complete ? "Measurement placed." : phase === 0 ? "Click Measure." : phase === 1 ? "Click the first point." : "Click the second point."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "Measurement placed." : phase === 0 ? "Click Measure." : phase === 1 ? "Click the highlighted first point." : "Click the highlighted second point."}</div>
         </div>
       `;
     case "exact":
       return `
         <div class="tutorial-trainer-controls">
-          <label class="tutorial-trainer-field"><span>Next run length mm</span><input data-tutorial-trainer-value="length" type="number" value="${phase >= 1 || complete ? "2500" : ""}" placeholder="2500" readonly /></label>
-          ${phase < 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="length-typed">Enter 2500 mm</button>` : ""}
+          <label class="tutorial-trainer-field"><span>Next run length mm</span><input data-tutorial-trainer-value="length" data-tutorial-trainer-choice="length" type="number" min="1" step="1" inputmode="numeric" value="${escapeHtml(tutorialTrainer?.values?.length || (phase >= 1 || complete ? "2500" : ""))}" placeholder="Type 2500" ${phase >= 1 || complete ? "readonly" : ""} /></label>
           <button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="exact-run" ${phase < 1 && !complete ? "disabled" : ""}>+X</button>
-          <div class="tutorial-trainer-instructions">${complete ? "Exact 2,500 mm run created." : phase === 0 ? "Press Enter 2500 mm to fill the length box." : "Press +X to add the exact run."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "Exact 2,500 mm run created." : phase === 0 ? "Click the length box, type 2500, then press Enter." : "Press +X to add that exact run."}</div>
         </div>
       `;
     case "offset":
       return `
         <div class="tutorial-trainer-controls">
-          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="angle">45 deg</button>
-          <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="set-distance" ${phase < 1 && !complete ? "disabled" : ""}>Set 400 mm</button>
+          <label class="tutorial-trainer-field"><span>Angle</span><select data-tutorial-trainer-choice="angle" ${phase >= 1 || complete ? "disabled" : ""}><option value="">Choose angle</option><option value="45" ${phase >= 1 || complete ? "selected" : ""}>45 deg</option></select></label>
+          <label class="tutorial-trainer-field"><span>Offset set mm</span><input data-tutorial-trainer-value="offset-set" data-tutorial-trainer-choice="set-distance" type="number" min="1" step="1" inputmode="numeric" value="${escapeHtml(tutorialTrainer?.values?.["offset-set"] || (phase >= 2 || complete ? "400" : ""))}" placeholder="Type 400" ${phase < 1 || phase >= 2 || complete ? "readonly" : ""} /></label>
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-instructions">${complete ? "45 degree offset drawn and drawing stopped." : phase === 0 ? "Choose 45 deg." : phase === 1 ? "Set the offset/set distance." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold the yellow point and drag the angled 45 travel piece to the blue point." : phase === 3 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Now drag the straight return run from the yellow point to the blue point." : "Press Finish drawing, like pressing Enter."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "45 degree offset drawn and drawing stopped." : phase === 0 ? "Open the angle menu and choose 45 deg." : phase === 1 ? "Type 400 for the offset set, then press Enter." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold the yellow point and drag the angled 45 travel piece to the blue point." : phase === 3 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Now drag the straight return run from the yellow point to the blue point." : "Press Finish drawing, like pressing Enter."}</div>
           ${phase >= 4 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="finish-offset">Finish drawing</button>` : ""}
         </div>
       `;
@@ -11653,10 +11685,10 @@ function tutorialTrainerContent(kind, phase, complete) {
       return `
         <div class="tutorial-trainer-controls">
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="numbered-key">Numbered key</button>
+          <label class="tutorial-trainer-field"><span>Dimension view</span><select data-tutorial-trainer-choice="numbered-key" ${phase >= 1 || complete ? "disabled" : ""}><option value="">Choose a view</option><option value="numbered" ${phase >= 1 || complete ? "selected" : ""}>Numbered key</option></select></label>
           ${phase >= 1 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="edit-d1">Edit D1 C/C</button>` : ""}
-          ${phase >= 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="apply-dim">Apply 2500 mm</button>` : ""}
-          <div class="tutorial-trainer-instructions">${complete ? "Dimension key edited." : phase === 0 ? "Choose Numbered key." : phase === 1 ? "Click D1 edit." : "Apply the new C/C value."}</div>
+          ${phase >= 2 && !complete ? `<label class="tutorial-trainer-field"><span>D1 centre-to-centre mm</span><input data-tutorial-trainer-value="dimension" data-tutorial-trainer-choice="dimension-value" type="number" min="1" step="1" inputmode="numeric" value="${escapeHtml(tutorialTrainer?.values?.dimension || "")}" placeholder="Type 2500 and press Enter" /></label>` : ""}
+          <div class="tutorial-trainer-instructions">${complete ? "Dimension key edited." : phase === 0 ? "Choose Numbered key." : phase === 1 ? "Click D1 edit." : "Type the new C/C value, then press Enter to apply it."}</div>
         </div>
       `;
     case "preview":
@@ -11678,12 +11710,30 @@ function tutorialTrainerContent(kind, phase, complete) {
           </div>
           ${phase >= 2 || complete ? `
             <div class="tutorial-trainer-model ${!complete ? "ready" : ""}" data-tutorial-trainer-choice="spin-model" role="button" aria-label="Drag the mini 3D model sideways">
-              <span></span><span></span><span></span>
+              <svg class="tutorial-model-scene" viewBox="0 0 290 132" aria-hidden="true">
+                <path class="tutorial-model-grid" d="M0 104 L74 64 L148 104 L222 64 L296 104 M0 64 L74 24 L148 64 L222 24 L296 64 M74 144 L290 28" />
+                <g class="tutorial-model-spool">
+                  <path class="tutorial-model-shadow" d="M48 92 L112 92 Q132 92 132 72 L132 48 Q132 30 150 30 L232 30" />
+                  <path class="tutorial-model-pipe" d="M48 88 L112 88 Q128 88 128 72 L128 48 Q128 34 144 34 L232 34" />
+                  <path class="tutorial-model-highlight" d="M50 84 L110 84 Q122 84 122 72 L122 48 Q122 40 142 40 L230 40" />
+                  <ellipse class="tutorial-model-end" cx="48" cy="88" rx="5" ry="9" />
+                  <ellipse class="tutorial-model-end" cx="232" cy="34" rx="5" ry="9" />
+                </g>
+              </svg>
               ${!complete ? "<b>drag sideways</b>" : "<b>model rotated</b>"}
             </div>
           ` : `
             <div class="tutorial-trainer-model locked" aria-hidden="true">
-              <span></span><span></span><span></span>
+              <svg class="tutorial-model-scene" viewBox="0 0 290 132">
+                <path class="tutorial-model-grid" d="M0 104 L74 64 L148 104 L222 64 L296 104 M0 64 L74 24 L148 64 L222 24 L296 64 M74 144 L290 28" />
+                <g class="tutorial-model-spool">
+                  <path class="tutorial-model-shadow" d="M48 92 L112 92 Q132 92 132 72 L132 48 Q132 30 150 30 L232 30" />
+                  <path class="tutorial-model-pipe" d="M48 88 L112 88 Q128 88 128 72 L128 48 Q128 34 144 34 L232 34" />
+                  <path class="tutorial-model-highlight" d="M50 84 L110 84 Q122 84 122 72 L122 48 Q122 40 142 40 L230 40" />
+                  <ellipse class="tutorial-model-end" cx="48" cy="88" rx="5" ry="9" />
+                  <ellipse class="tutorial-model-end" cx="232" cy="34" rx="5" ry="9" />
+                </g>
+              </svg>
               <b>${phase === 0 ? "choose view first" : "choose rotate"}</b>
             </div>
           `}
@@ -11787,7 +11837,7 @@ function updateTutorialPracticeUi() {
   if (tutorialActionButton && details) {
     tutorialActionButton.textContent = complete ? "Try again" : practiceActive ? "Restart practice" : "Start practice";
   }
-  document.body.classList.toggle("tutorial-practice-active", Boolean(practiceActive && !complete));
+  document.body.classList.toggle("tutorial-practice-active", Boolean(practiceActive));
   if (tutorialCoach) {
     tutorialCoach.hidden = true;
   }
@@ -11799,11 +11849,26 @@ function scrollTutorialPracticeControlIntoView() {
   window.requestAnimationFrame(() => {
     const panel = tutorialStepCard?.querySelector("#tutorialPracticePanel");
     if (!panel) return;
-    const target =
-      panel.querySelector(".tutorial-trainer-button[data-tutorial-trainer-choice]:not(:disabled)") ||
-      panel.querySelector("button[data-tutorial-trainer-choice]:not(:disabled)") ||
-      panel.querySelector("[data-tutorial-trainer-choice]");
-    target?.scrollIntoView({ block: "nearest", inline: "nearest" });
+    const currentChoice = tutorialTrainerCurrentChoice();
+    const target = currentChoice
+      ? panel.querySelector(`[data-tutorial-trainer-choice="${currentChoice}"]:not(:disabled)`)
+      : null;
+    if (!target) return;
+    let scroller = target.parentElement;
+    while (scroller && scroller !== tutorialDialog) {
+      const style = window.getComputedStyle(scroller);
+      if (/(auto|scroll)/.test(style.overflowY) && scroller.scrollHeight > scroller.clientHeight + 2) break;
+      scroller = scroller.parentElement;
+    }
+    if (!scroller || scroller === tutorialDialog) scroller = tutorialStepCard;
+    const targetRect = target.getBoundingClientRect();
+    const scrollerRect = scroller?.getBoundingClientRect();
+    if (!scrollerRect) return;
+    if (targetRect.top < scrollerRect.top + 12) {
+      scroller.scrollTop -= scrollerRect.top + 12 - targetRect.top;
+    } else if (targetRect.bottom > scrollerRect.bottom - 12) {
+      scroller.scrollTop += targetRect.bottom - (scrollerRect.bottom - 12);
+    }
   });
 }
 
@@ -11824,6 +11889,8 @@ function checkTutorialPractice() {
 }
 
 function completeTutorialTrainer() {
+  if (tutorialTrainer?.holding?.timer) window.clearTimeout(tutorialTrainer.holding.timer);
+  if (tutorialTrainer) tutorialTrainer.holding = null;
   tutorialCompletedSteps.add(tutorialStepIndex);
   if (tutorialPractice) tutorialPractice.complete = true;
   renderTutorialStep();
@@ -11831,8 +11898,10 @@ function completeTutorialTrainer() {
 
 function advanceTutorialTrainer(phase) {
   if (!tutorialTrainer || tutorialTrainer.stepIndex !== tutorialStepIndex) return;
+  if (tutorialTrainer.holding?.timer) window.clearTimeout(tutorialTrainer.holding.timer);
   tutorialTrainer.phase = phase;
   tutorialTrainer.dragging = null;
+  tutorialTrainer.holding = null;
   tutorialTrainer.missedDrag = false;
   renderTutorialStep();
 }
@@ -11899,6 +11968,90 @@ function tutorialTrainerDragDefinition(choice) {
   return definitions[choice] ?? null;
 }
 
+function tutorialTrainerHoldDefinition(choice) {
+  const kind = tutorialTrainerKind(currentTutorialStep());
+  const phase = tutorialTrainerPhase();
+  if (kind !== "sockets") return null;
+  if (choice === "pipe" && phase === 0) {
+    return {
+      nextPhase: 1,
+      holdMs: 520,
+      missText: "Keep holding on the highlighted pipe until the pipe actions menu opens.",
+    };
+  }
+  if (choice === "socket" && phase === 6) {
+    return {
+      nextPhase: 7,
+      holdMs: 520,
+      missText: "Keep holding on one socket until the socket actions menu opens.",
+    };
+  }
+  return null;
+}
+
+function setTutorialPointerCapture(target, pointerId) {
+  try {
+    target?.setPointerCapture?.(pointerId);
+  } catch {
+    // Safari may decline pointer capture on an SVG hit target; card-level events still handle the drag.
+  }
+}
+
+function releaseTutorialPointerCapture(target, pointerId) {
+  try {
+    target?.releasePointerCapture?.(pointerId);
+  } catch {
+    // The target can be replaced when a tutorial phase advances.
+  }
+}
+
+function startTutorialTrainerHold(event, target, choice) {
+  const definition = tutorialTrainerHoldDefinition(choice);
+  if (!definition || !tutorialTrainer || tutorialCompletedSteps.has(tutorialStepIndex)) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  tutorialTrainer.holding = {
+    ...definition,
+    choice,
+    pointerId: event.pointerId,
+    captureTarget: target,
+    fired: false,
+    timer: window.setTimeout(() => {
+      if (!tutorialTrainer?.holding || tutorialTrainer.holding.pointerId !== event.pointerId) return;
+      const hold = tutorialTrainer.holding;
+      hold.fired = true;
+      hold.captureTarget?.classList.remove("holding");
+      releaseTutorialPointerCapture(hold.captureTarget, event.pointerId);
+      tutorialTrainerSuppressClickUntil = performance.now() + 700;
+      advanceTutorialTrainer(definition.nextPhase);
+    }, definition.holdMs || 520),
+  };
+  tutorialTrainer.missedDrag = "";
+  target.classList.add("holding");
+  setTutorialPointerCapture(target, event.pointerId);
+  return true;
+}
+
+function finishTutorialTrainerHold(event, cancelled = false) {
+  const hold = tutorialTrainer?.holding;
+  if (!hold || hold.pointerId !== event.pointerId) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  window.clearTimeout(hold.timer);
+  hold.captureTarget?.classList.remove("holding");
+  releaseTutorialPointerCapture(hold.captureTarget, event.pointerId);
+  const fired = hold.fired;
+  const missText = hold.missText;
+  tutorialTrainer.holding = null;
+  if (fired) return true;
+  if (!cancelled) {
+    tutorialTrainer.missedDrag = missText || "Keep holding until the action menu opens.";
+    tutorialTrainerSuppressClickUntil = performance.now() + 700;
+    renderTutorialStep();
+  }
+  return true;
+}
+
 function updateTutorialTrainerDragLine(point, drag = tutorialTrainer?.dragging) {
   const line = tutorialStepCard?.querySelector(".trainer-drag-preview");
   if (!line || !point || !drag?.start) return;
@@ -11927,7 +12080,7 @@ function startTutorialTrainerModelDrag(event, target) {
   };
   tutorialTrainer.missedDrag = "";
   target.classList.add("dragging");
-  target.setPointerCapture?.(event.pointerId);
+  setTutorialPointerCapture(target, event.pointerId);
   return true;
 }
 
@@ -11938,7 +12091,6 @@ function updateTutorialTrainerModelDrag(event, drag = tutorialTrainer?.dragging)
   const spin = clampNumber(dx * 0.55, -54, 54);
   const tilt = clampNumber(dy * 0.16, -10, 10);
   drag.captureTarget.style.setProperty("--trainer-spin", `${spin.toFixed(1)}deg`);
-  drag.captureTarget.style.setProperty("--trainer-spin-mid", `${(spin * 0.38).toFixed(1)}deg`);
   drag.captureTarget.style.setProperty("--trainer-tilt", `${tilt.toFixed(1)}px`);
 }
 
@@ -11946,6 +12098,7 @@ function handleTutorialTrainerPointerDown(event) {
   const target = event.target instanceof Element ? event.target.closest("[data-tutorial-trainer-choice]") : null;
   if (!target || !tutorialStepCard?.contains(target)) return;
   const choice = target.getAttribute("data-tutorial-trainer-choice");
+  if (startTutorialTrainerHold(event, target, choice)) return;
   const definition = tutorialTrainerDragDefinition(choice);
   if (!definition) {
     startTutorialTrainerModelDrag(event, target);
@@ -11965,7 +12118,7 @@ function handleTutorialTrainerPointerDown(event) {
     svg,
   };
   tutorialTrainer.missedDrag = "";
-  target.setPointerCapture?.(event.pointerId);
+  setTutorialPointerCapture(target, event.pointerId);
   updateTutorialTrainerDragLine(point, tutorialTrainer.dragging);
 }
 
@@ -11982,11 +12135,12 @@ function handleTutorialTrainerPointerMove(event) {
 }
 
 function finishTutorialTrainerDrawDrag(event, cancelled = false) {
+  if (finishTutorialTrainerHold(event, cancelled)) return;
   const drag = tutorialTrainer?.dragging;
   if (!drag || drag.pointerId !== event.pointerId) return;
   event.preventDefault();
   event.stopPropagation();
-  drag.captureTarget?.releasePointerCapture?.(event.pointerId);
+  releaseTutorialPointerCapture(drag.captureTarget, event.pointerId);
   if (drag.kind === "preview") {
     const moved = Math.hypot(event.clientX - drag.startClientX, event.clientY - drag.startClientY);
     tutorialTrainer.dragging = null;
@@ -12036,7 +12190,12 @@ function handleTutorialTrainerChoice(choice) {
       if (choice === "comms-tab" && phase < 1) {
         advanceTutorialTrainer(1);
       } else if (choice === "send-message" && phase >= 1) {
-        completeTutorialTrainer();
+        if (String(tutorialTrainer?.values?.message || "").trim()) {
+          completeTutorialTrainer();
+        } else {
+          tutorialTrainer.missedDrag = "Type a short message before pressing Send message.";
+          renderTutorialStep();
+        }
       }
       break;
     case "production":
@@ -12078,7 +12237,7 @@ function handleTutorialTrainerChoice(choice) {
         advanceTutorialTrainer(1);
       } else if (choice === "end" && phase >= 1 && phase < 2) {
         advanceTutorialTrainer(2);
-      } else if (["table-e", "pn16"].includes(choice) && phase >= 2) {
+      } else if (choice === "flange-standard" && phase >= 2) {
         completeTutorialTrainer();
       }
       break;
@@ -12120,9 +12279,7 @@ function handleTutorialTrainerChoice(choice) {
       }
       break;
     case "exact":
-      if (choice === "length-typed" && phase < 1) {
-        advanceTutorialTrainer(1);
-      } else if (choice === "exact-run") {
+      if (choice === "exact-run" && phase >= 1) {
         completeTutorialTrainer();
       }
       break;
@@ -12140,8 +12297,6 @@ function handleTutorialTrainerChoice(choice) {
         advanceTutorialTrainer(1);
       } else if (choice === "edit-d1" && phase >= 1 && phase < 2) {
         advanceTutorialTrainer(2);
-      } else if (choice === "apply-dim" && phase >= 2) {
-        completeTutorialTrainer();
       }
       break;
     case "preview":
@@ -12178,10 +12333,12 @@ function handleTutorialTrainerChoice(choice) {
 function handleTutorialTrainerClick(event) {
   const target = event.target instanceof Element ? event.target.closest("[data-tutorial-trainer-choice]") : null;
   if (!target || !tutorialStepCard?.contains(target)) return;
+  if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
   const choice = target.getAttribute("data-tutorial-trainer-choice");
   if (!choice) return;
   event.preventDefault();
   event.stopPropagation();
+  if (performance.now() < tutorialTrainerSuppressClickUntil) return;
   if (choice === "spin-model" && tutorialTrainerKind(currentTutorialStep()) === "preview") {
     if (tutorialTrainerPhase() >= 2 && tutorialTrainer && !tutorialCompletedSteps.has(tutorialStepIndex)) {
       tutorialTrainer.missedDrag = "Hold down on the mini model and drag sideways, then let go.";
@@ -12195,9 +12352,65 @@ function handleTutorialTrainerClick(event) {
 function handleTutorialTrainerChange(event) {
   const target = event.target;
   if (!(target instanceof HTMLElement) || !tutorialStepCard?.contains(target)) return;
+  const valueKey = target.getAttribute("data-tutorial-trainer-value");
+  if (valueKey && tutorialTrainer?.stepIndex === tutorialStepIndex) {
+    tutorialTrainer.values = tutorialTrainer.values || {};
+    tutorialTrainer.values[valueKey] = "value" in target ? String(target.value || "") : "";
+    tutorialTrainer.missedDrag = false;
+    const kind = tutorialTrainerKind(currentTutorialStep());
+    const phase = tutorialTrainerPhase();
+    const numericValue = Number(tutorialTrainer.values[valueKey]);
+    if (event.type === "change" && kind === "exact" && valueKey === "length" && phase === 0 && numericValue > 0) {
+      advanceTutorialTrainer(1);
+      return;
+    }
+    if (event.type === "change" && kind === "dimensions" && valueKey === "dimension" && phase >= 2 && numericValue > 0) {
+      completeTutorialTrainer();
+      return;
+    }
+    if (event.type === "change" && kind === "offset" && valueKey === "offset-set" && phase === 1 && numericValue > 0) {
+      advanceTutorialTrainer(2);
+      return;
+    }
+    if (event.type === "input") return;
+  }
   const choice = target.getAttribute("data-tutorial-trainer-choice");
   if (!choice) return;
+  if (target instanceof HTMLSelectElement && !target.value) return;
   handleTutorialTrainerChoice(choice);
+}
+
+function handleTutorialTrainerKeyDown(event) {
+  if (event.key !== "Enter") return;
+  const target = event.target;
+  if (!(target instanceof HTMLInputElement) || !tutorialStepCard?.contains(target)) return;
+  const valueKey = target.getAttribute("data-tutorial-trainer-value");
+  if (!valueKey || !tutorialTrainer || tutorialTrainer.stepIndex !== tutorialStepIndex) return;
+  const value = String(target.value || "").trim();
+  const kind = tutorialTrainerKind(currentTutorialStep());
+  const phase = tutorialTrainerPhase();
+  event.preventDefault();
+  event.stopPropagation();
+  tutorialTrainer.values = tutorialTrainer.values || {};
+  tutorialTrainer.values[valueKey] = value;
+  if (kind === "exact" && valueKey === "length" && phase === 0 && Number(value) > 0) {
+    advanceTutorialTrainer(1);
+    return;
+  }
+  if (kind === "dimensions" && valueKey === "dimension" && phase >= 2 && Number(value) > 0) {
+    completeTutorialTrainer();
+    return;
+  }
+  if (kind === "offset" && valueKey === "offset-set" && phase === 1 && Number(value) > 0) {
+    advanceTutorialTrainer(2);
+    return;
+  }
+  if (kind === "comms" && valueKey === "message" && phase >= 1 && value) {
+    completeTutorialTrainer();
+    return;
+  }
+  tutorialTrainer.missedDrag = "Enter a valid value before continuing.";
+  renderTutorialStep();
 }
 
 function tutorialTargetForStep(step = currentTutorialStep()) {
@@ -12654,13 +12867,22 @@ function tutorialMenuMarkup() {
 
 function renderTutorialStep() {
   if (!tutorialStepCard || !tutorialProgress || !tutorialPrevButton || !tutorialNextButton) return;
+  const previousStepIndex = Number(tutorialStepCard.dataset.tutorialStepIndex);
+  const sameStep = Number.isFinite(previousStepIndex) && previousStepIndex === tutorialStepIndex;
+  const previousCopyScroll = sameStep ? tutorialStepCard.querySelector(".tutorial-copy")?.scrollTop || 0 : 0;
+  const previousVisualScroll = sameStep ? tutorialStepCard.querySelector(".tutorial-visual")?.scrollTop || 0 : 0;
   const step = currentTutorialStep();
   prepareTutorialStep(step);
   const visibleIndexes = tutorialVisibleStepIndexes();
   const visiblePosition = tutorialVisibleStepPosition();
   const stepNumber = visiblePosition + 1;
   const practiceDetails = tutorialPracticeDetails(step);
-  const practiceText = practiceDetails ? "Press Start practice below. Your drawing stays untouched." : "Use the mini task below. Your drawing stays untouched.";
+  const practiceActive = tutorialPractice?.stepIndex === tutorialStepIndex;
+  const practiceComplete = tutorialCompletedSteps.has(tutorialStepIndex);
+  const showDemo = !(practiceActive || practiceComplete);
+  const practiceText = practiceActive || practiceComplete
+    ? "Focus on the mini practice above. Your drawing stays untouched."
+    : practiceDetails ? "Press Start practice below. Your drawing stays untouched." : "Use the mini task below. Your drawing stays untouched.";
   tutorialProgress.innerHTML = tutorialMenuMarkup();
   tutorialStepCard.innerHTML = `
     <div class="tutorial-copy">
@@ -12673,10 +12895,24 @@ function renderTutorialStep() {
     </div>
     <div class="tutorial-visual">
       ${tutorialPracticeMarkup(step)}
-      ${tutorialDemoMarkup(step.demo)}
+      ${showDemo ? tutorialDemoMarkup(step.demo) : ""}
       <div class="tutorial-target-note"><strong>Safe practice</strong><span>${escapeHtml(practiceText)}</span></div>
     </div>
   `;
+  tutorialStepCard.dataset.tutorialStepIndex = String(tutorialStepIndex);
+  if (sameStep) {
+    const copy = tutorialStepCard.querySelector(".tutorial-copy");
+    const visual = tutorialStepCard.querySelector(".tutorial-visual");
+    if (copy) copy.scrollTop = previousCopyScroll;
+    if (visual) visual.scrollTop = previousVisualScroll;
+  }
+  if (practiceActive && !practiceComplete) {
+    const currentChoice = tutorialTrainerCurrentChoice();
+    const currentControl = currentChoice
+      ? tutorialStepCard.querySelector(`[data-tutorial-trainer-choice="${currentChoice}"]:not(:disabled)`)
+      : null;
+    currentControl?.classList.add("tutorial-current-control");
+  }
   tutorialPrevButton.disabled = visiblePosition === 0;
   tutorialNextButton.textContent = visiblePosition === visibleIndexes.length - 1 ? "Done" : "Next";
   if (tutorialActionButton) {
@@ -12793,6 +13029,7 @@ function setupTutorialDialog() {
   tutorialStepCard?.addEventListener("pointercancel", (event) => finishTutorialTrainerDrawDrag(event, true));
   tutorialStepCard?.addEventListener("input", handleTutorialTrainerChange);
   tutorialStepCard?.addEventListener("change", handleTutorialTrainerChange);
+  tutorialStepCard?.addEventListener("keydown", handleTutorialTrainerKeyDown);
   window.addEventListener("resize", updateTutorialCoachPosition);
   window.addEventListener("scroll", updateTutorialCoachPosition, true);
 }

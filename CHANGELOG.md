@@ -1,6 +1,23 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.75`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.77`.
+
+## v2.77 - Tutorial Real-Workflow Pass
+- Reworked tutorial steps to use the mini drawing itself instead of duplicate shortcut buttons.
+- Added real inputs and menus for exact lengths, 45 offset set, flange standard, pipe sizes, messages and editable dimensions.
+- Added a clear highlight around the exact next control for every tutorial phase.
+- Preserved tutorial scroll position between phases and stopped the panel jumping after drawing a run or tee.
+- Kept the practice layout stable after completion so the tutorial no longer appears to close or resize when a task is finished.
+- Replaced the unclear 3D practice graphic with a recognisable shaded pipe spool that responds to drag rotation.
+- Hardened tutorial pointer capture for iPad/Safari and kept long-press socket practice stable.
+- Bumped app cache to `spoolmate-v225`.
+
+## v2.76 - Tutorial Slow Pass Polish
+- Hid the animated demo while a mini practice is active so new users focus on the actual try-it task.
+- Cleaned up Draw, Tee and 45 offset mini drawings so points only appear when they are relevant.
+- Changed the socket practice to require a real hold gesture on the mini pipe/socket before the action menu appears.
+- Reduced tutorial jumpiness by only scrolling the next control into view when it is actually outside the tutorial card.
+- Bumped app cache to `spoolmate-v224`.
 
 ## v2.75 - iPad Long-Press Menu Cleanup
 - Fixed iPad long-press on pipe runs so the inspector/selection sheet closes before the pipe action menu opens.

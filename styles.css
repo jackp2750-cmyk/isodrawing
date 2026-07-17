@@ -4443,6 +4443,18 @@ body.auth-gate-open .app-shell {
   touch-action: none;
 }
 
+.tutorial-svg-hit.active.holding {
+  fill: rgba(19, 216, 255, 0.34);
+  stroke: #13d8ff;
+  stroke-width: 3;
+}
+
+.tutorial-current-control:not(.tutorial-svg-hit) {
+  outline: 3px solid rgba(19, 216, 255, 0.5);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px rgba(19, 216, 255, 0.1) !important;
+}
+
 .tutorial-svg-hit:hover,
 .tutorial-svg-hit:focus {
   fill: rgba(19, 216, 255, 0.16);
@@ -4761,37 +4773,79 @@ body.auth-gate-open .app-shell {
   cursor: default;
   touch-action: none;
   --trainer-spin: 0deg;
-  --trainer-spin-mid: 0deg;
   --trainer-tilt: 0px;
 }
 
-.tutorial-trainer-model span {
-  position: absolute;
-  left: 25%;
-  top: calc(52% + var(--trainer-tilt));
-  width: 52%;
-  height: 10px;
-  border-radius: 999px;
-  background: #0f6669;
-  box-shadow: 0 8px 20px rgba(15, 102, 105, 0.22);
-  transform-origin: 30% 50%;
-  transform: rotate(var(--trainer-spin));
-  transition: transform 0.14s ease, top 0.14s ease;
+.tutorial-model-scene {
+  width: 100%;
+  height: 118px;
+  display: block;
+  overflow: visible;
 }
 
-.tutorial-trainer-model span:nth-child(2) {
-  left: 49%;
-  top: calc(31% + var(--trainer-tilt));
-  width: 10px;
-  height: 58px;
-  transform: rotate(var(--trainer-spin-mid));
+.tutorial-model-grid {
+  fill: none;
+  stroke: rgba(15, 118, 110, 0.14);
+  stroke-width: 1;
 }
 
-.tutorial-trainer-model span:nth-child(3) {
-  left: 45%;
-  top: calc(28% + var(--trainer-tilt));
-  width: 36%;
-  transform: rotate(calc(32deg + var(--trainer-spin)));
+.tutorial-model-spool {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: translateY(var(--trainer-tilt)) rotate(var(--trainer-spin));
+  transition: transform 0.12s ease;
+}
+
+.tutorial-model-shadow,
+.tutorial-model-pipe,
+.tutorial-model-highlight {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tutorial-model-shadow {
+  stroke: rgba(3, 17, 24, 0.28);
+  stroke-width: 18;
+  transform: translate(4px, 5px);
+}
+
+.tutorial-model-pipe {
+  stroke: #456d78;
+  stroke-width: 15;
+}
+
+.tutorial-model-highlight {
+  stroke: #bdebf0;
+  stroke-width: 3;
+  opacity: 0.92;
+}
+
+.tutorial-model-end {
+  fill: #173c48;
+  stroke: #bdebf0;
+  stroke-width: 2;
+}
+
+:root[data-theme="dark"] .tutorial-model-grid {
+  stroke: rgba(19, 216, 255, 0.2);
+}
+
+:root[data-theme="dark"] .tutorial-model-shadow {
+  stroke: rgba(0, 0, 0, 0.56);
+}
+
+:root[data-theme="dark"] .tutorial-model-pipe {
+  stroke: #89b8c5;
+}
+
+:root[data-theme="dark"] .tutorial-model-highlight {
+  stroke: #e7fbff;
+}
+
+:root[data-theme="dark"] .tutorial-model-end {
+  fill: #153745;
+  stroke: #d9f8ff;
 }
 
 .tutorial-trainer-model.ready {
@@ -10601,11 +10655,6 @@ body.tablet-layout.field-layout .drawing-context-menu.field-action-sheet {
   box-shadow:
     inset 0 0 0 1px rgba(19, 216, 255, 0.18),
     0 0 20px rgba(19, 216, 255, 0.08);
-}
-
-:root[data-theme="dark"] .tutorial-trainer-model span {
-  background: #8eefff;
-  box-shadow: 0 8px 22px rgba(19, 216, 255, 0.22);
 }
 
 :root[data-theme="dark"] .tutorial-trainer-model b {
