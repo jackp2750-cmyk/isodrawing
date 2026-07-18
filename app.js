@@ -22,6 +22,11 @@ const previewHideButton = document.querySelector("#previewHideButton");
 const previewShowButton = document.querySelector("#previewShowButton");
 const undoButton = document.querySelector("#undoButton");
 const redoButton = document.querySelector("#redoButton");
+const fittingsToolButton = document.querySelector("#fittingsToolButton");
+const fittingsToolMenu = document.querySelector("#fittingsToolMenu");
+const fittingsToolCloseButton = document.querySelector("#fittingsToolCloseButton");
+const fittingsToolLabel = document.querySelector("#fittingsToolLabel");
+const inspectorShowButton = document.querySelector("#inspectorShowButton");
 const loadPlanButton = document.querySelector("#loadPlanButton");
 const previewFloatResize = document.querySelector("#previewFloatResize");
 const loadPlanDialog = document.querySelector("#loadPlanDialog");
@@ -67,6 +72,7 @@ const propertiesPanel = document.querySelector("#propertiesPanel");
 const projectFileInput = document.querySelector("#projectFileInput");
 const projectReadout = document.querySelector("#projectReadout");
 const projectStatusSelect = document.querySelector("#projectStatusSelect");
+const projectAssigneeReadout = document.querySelector("#projectAssigneeReadout");
 const projectLockToggle = document.querySelector("#projectLockToggle");
 const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
@@ -146,6 +152,7 @@ let projectLibraryReportButton = document.querySelector("#projectLibraryReportBu
 let projectLibraryReportSlot = document.querySelector("#projectLibraryReportSlot");
 let projectLibraryCommsButton = document.querySelector("#projectLibraryCommsButton");
 let projectLibraryCommsSlot = document.querySelector("#projectLibraryCommsSlot");
+let projectLibrarySpoolConversation = document.querySelector("#projectLibrarySpoolConversation");
 let projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
 let projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
 const healthSummary = document.querySelector("#healthSummary");
@@ -156,6 +163,13 @@ const projectCommentsList = document.querySelector("#projectCommentsList");
 const projectCommentInput = document.querySelector("#projectCommentInput");
 const projectCommentAddButton = document.querySelector("#projectCommentAddButton");
 const projectCommentRefreshButton = document.querySelector("#projectCommentRefreshButton");
+const projectCommentMentionPicks = document.querySelector("#projectCommentMentionPicks");
+const projectCommentPhotoButton = document.querySelector("#projectCommentPhotoButton");
+const projectCommentPhotoInput = document.querySelector("#projectCommentPhotoInput");
+const projectCommentPhotoPreview = document.querySelector("#projectCommentPhotoPreview");
+const projectCommentPhotoPreviewImage = document.querySelector("#projectCommentPhotoPreviewImage");
+const projectCommentPhotoPreviewName = document.querySelector("#projectCommentPhotoPreviewName");
+const projectCommentPhotoRemoveButton = document.querySelector("#projectCommentPhotoRemoveButton");
 const toolSettingsButton = document.querySelector("#toolSettingsButton");
 const toolSettingsDialog = document.querySelector("#toolSettingsDialog");
 const toolSettingsList = document.querySelector("#toolSettingsList");
@@ -163,6 +177,8 @@ const toolSettingsDoneButton = document.querySelector("#toolSettingsDoneButton")
 const toolSettingsResetButton = document.querySelector("#toolSettingsResetButton");
 const themeChoiceButtons = [...document.querySelectorAll("[data-theme-choice]")];
 const appModeButtons = [...document.querySelectorAll("[data-app-mode]")];
+const appModeSettingGroups = [...document.querySelectorAll("[data-mode-settings]")];
+const inspectorModeHint = document.querySelector("#inspectorModeHint");
 const themeColorMeta = document.querySelector("meta[name='theme-color']");
 const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
@@ -247,10 +263,11 @@ const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
+const PREVIEW_FLOAT_BOUNDS_KEY = "spoolmate-preview-bounds-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.77";
-const APP_BUILD_DATE = "2026-07-17";
+const APP_VERSION = "v2.90";
+const APP_BUILD_DATE = "2026-07-18";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -259,6 +276,7 @@ const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_COMPANIES_TABLE = "companies";
 const CLOUD_COMPANY_MEMBERS_TABLE = "company_members";
 const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
+const CLOUD_PROJECT_PHOTOS_BUCKET = "spool-photos";
 const CLOUD_TEAM_MESSAGES_TABLE = "team_messages";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
@@ -278,6 +296,17 @@ const RUN_CONNECTION_TOLERANCE_MM = 8;
 const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
 const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer", "socket"]);
+const FITTINGS_FLYOUT_TOOLS = new Set(["tee", "branch", "flange", "reducer", "rollGroove", "valve", "socket", "weld"]);
+const FITTINGS_FLYOUT_ICONS = {
+  tee: "#icon-tee",
+  branch: "#icon-tee",
+  flange: "#icon-flange",
+  reducer: "#icon-reducer",
+  rollGroove: "#icon-groove",
+  valve: "#icon-valve",
+  socket: "#icon-tee",
+  weld: "#icon-weld",
+};
 const FLANGE_MODES = new Set(["single", "double"]);
 const FLANGE_STANDARDS = {
   ansi150: {
@@ -379,6 +408,104 @@ const FLANGE_STANDARDS = {
     thicknessFactor: 0.96,
   },
 };
+
+// [NB, flange OD, plate thickness, bolt PCD, bolt-hole diameter, hole count], all dimensions in mm.
+// ASME and AS 2129 rows are from Atlas/Prochem tables; EN/DIN and JIS rows use their published drilling tables.
+const FLANGE_DRILLING_TABLES = {
+  ansi150: [
+    [15, 88.9, 11.2, 60.4, 15.7, 4], [20, 98.6, 12.7, 69.9, 15.7, 4],
+    [25, 108, 14.2, 79.2, 15.7, 4], [32, 117.3, 15.7, 88.9, 15.7, 4],
+    [40, 127, 17.5, 98.6, 15.7, 4], [50, 152.4, 19.1, 120.7, 19.1, 4],
+    [65, 177.8, 22.4, 139.7, 19.1, 4], [80, 190.5, 23.9, 152.4, 19.1, 4],
+    [90, 215.9, 23.9, 177.8, 19.1, 8], [100, 228.6, 23.9, 190.5, 19.1, 8],
+    [125, 254, 23.9, 215.9, 22.4, 8], [150, 279.4, 25.4, 241.3, 22.4, 8],
+    [200, 342.9, 28.4, 298.5, 22.4, 8], [250, 406.4, 30.2, 362, 25.4, 12],
+    [300, 482.6, 31.8, 431.8, 25.4, 12],
+  ],
+  ansi300: [
+    [15, 95.3, 14.2, 66.5, 15.7, 4], [20, 117.3, 15.7, 82.6, 19.1, 4],
+    [25, 124, 17.5, 88.9, 19.1, 4], [32, 133.4, 19.1, 98.6, 19.1, 4],
+    [40, 155.5, 20.6, 114.3, 22.4, 4], [50, 165.1, 22.4, 127, 19.1, 8],
+    [65, 190.5, 25.4, 149.4, 22.4, 8], [80, 215.9, 28.4, 168.1, 22.4, 8],
+    [90, 228.6, 30.2, 184.2, 22.4, 8], [100, 254, 31.8, 200.2, 22.4, 8],
+    [125, 279.4, 35.1, 235, 22.4, 8], [150, 317.5, 36.6, 269.7, 22.4, 12],
+    [200, 381, 41.1, 330.2, 25.4, 12], [250, 444.5, 47.6, 387.4, 28.4, 16],
+    [300, 520.7, 50.8, 450.9, 31.8, 16],
+  ],
+  ansi600: [
+    [15, 95.3, 14.2, 66.5, 15.7, 4], [20, 117.3, 15.7, 82.6, 19.1, 4],
+    [25, 124, 17.5, 88.9, 19.1, 4], [32, 133.4, 20.6, 98.6, 19.1, 4],
+    [40, 155.4, 22.4, 114.3, 22.4, 4], [50, 165.1, 25.4, 127, 19.1, 8],
+    [65, 190.5, 28.4, 149.4, 22.4, 8], [80, 209.6, 31.8, 168.1, 22.4, 8],
+    [90, 228.6, 35.1, 184.2, 25.4, 8], [100, 273.1, 38.1, 215.9, 25.4, 8],
+    [125, 330.2, 44.5, 266.7, 28.4, 8], [150, 355.6, 47.8, 292.1, 28.4, 12],
+    [200, 419.1, 55.6, 349.3, 31.8, 12], [250, 508, 63.5, 431.8, 35.1, 16],
+    [300, 558.8, 66.5, 489, 35.1, 20],
+  ],
+  tableD: [
+    [15, 95, 5, 67, 14, 4], [20, 100, 5, 73, 14, 4], [25, 115, 5, 83, 14, 4],
+    [32, 120, 6, 87, 14, 4], [40, 135, 6, 98, 14, 4], [50, 150, 8, 114, 18, 4],
+    [65, 165, 8, 127, 18, 4], [80, 185, 10, 146, 18, 4], [90, 205, 10, 165, 18, 4],
+    [100, 215, 10, 178, 18, 4], [125, 255, 13, 210, 18, 8], [150, 280, 13, 235, 18, 8],
+    [200, 335, 13, 292, 18, 8], [250, 405, 16, 356, 22, 8], [300, 455, 19, 406, 26, 12],
+  ],
+  tableE: [
+    [15, 95, 6, 67, 14, 4], [20, 100, 6, 73, 14, 4], [25, 115, 7, 83, 14, 4],
+    [32, 120, 8, 87, 14, 4], [40, 135, 9, 98, 14, 4], [50, 150, 10, 114, 18, 4],
+    [65, 165, 10, 127, 18, 4], [80, 185, 11, 146, 18, 4], [90, 205, 12, 165, 18, 8],
+    [100, 215, 13, 178, 18, 8], [125, 255, 14, 210, 18, 8], [150, 280, 17, 235, 22, 8],
+    [200, 335, 19, 292, 22, 8], [250, 405, 22, 356, 22, 12], [300, 455, 25, 406, 26, 12],
+  ],
+  tableF: [
+    [15, 95, 10, 67, 14, 4], [20, 100, 10, 73, 14, 4], [25, 120, 10, 87, 18, 4],
+    [32, 135, 13, 98, 18, 4], [40, 140, 13, 105, 18, 4], [50, 165, 16, 127, 18, 4],
+    [65, 185, 16, 146, 18, 8], [80, 205, 16, 165, 18, 8], [90, 215, 19, 178, 18, 8],
+    [100, 230, 19, 191, 18, 8], [125, 280, 22, 235, 22, 8], [150, 305, 22, 260, 22, 12],
+    [200, 370, 25, 324, 22, 12], [250, 430, 29, 381, 26, 12], [300, 490, 32, 438, 26, 16],
+  ],
+  tableH: [
+    [15, 115, 13, 83, 18, 4], [20, 115, 13, 83, 18, 4], [25, 120, 14, 87, 18, 4],
+    [32, 135, 17, 98, 18, 4], [40, 140, 17, 105, 18, 4], [50, 165, 19, 127, 18, 4],
+    [65, 185, 19, 146, 18, 8], [80, 205, 22, 165, 18, 8], [90, 215, 22, 178, 18, 8],
+    [100, 230, 25, 191, 18, 8], [125, 280, 29, 235, 22, 8], [150, 305, 29, 260, 22, 12],
+    [200, 370, 32, 324, 22, 12], [250, 430, 35, 381, 26, 12], [300, 490, 41, 438, 26, 16],
+  ],
+  pn10: [
+    [15, 95, 14, 65, 14, 4], [20, 105, 16, 75, 14, 4], [25, 115, 16, 85, 14, 4],
+    [32, 140, 18, 100, 18, 4], [40, 150, 18, 110, 18, 4], [50, 165, 20, 125, 18, 4],
+    [65, 185, 20, 145, 18, 8], [80, 200, 20, 160, 18, 8], [100, 220, 22, 180, 18, 8],
+    [125, 250, 22, 210, 18, 8], [150, 285, 24, 240, 22, 8], [200, 340, 24, 295, 22, 8],
+    [250, 395, 26, 350, 22, 12], [300, 445, 26, 400, 22, 12],
+  ],
+  pn16: [
+    [15, 95, 14, 65, 14, 4], [20, 105, 16, 75, 14, 4], [25, 115, 16, 85, 14, 4],
+    [32, 140, 18, 100, 18, 4], [40, 150, 18, 110, 18, 4], [50, 165, 20, 125, 18, 4],
+    [65, 185, 20, 145, 18, 8], [80, 200, 20, 160, 18, 8], [100, 220, 22, 180, 18, 8],
+    [125, 250, 22, 210, 18, 8], [150, 285, 24, 240, 22, 8], [200, 340, 26, 295, 22, 12],
+    [250, 405, 29, 355, 26, 12], [300, 460, 32, 410, 26, 12],
+  ],
+  pn25: [
+    [15, 95, 14, 65, 14, 4], [20, 105, 16, 75, 14, 4], [25, 115, 16, 85, 14, 4],
+    [32, 140, 18, 100, 18, 4], [40, 150, 18, 110, 18, 4], [50, 165, 20, 125, 18, 4],
+    [65, 185, 22, 145, 18, 8], [80, 200, 24, 160, 18, 8], [100, 235, 26, 190, 22, 8],
+    [125, 270, 28, 220, 26, 8], [150, 300, 30, 250, 26, 8], [200, 360, 32, 310, 26, 12],
+    [250, 425, 35, 370, 30, 12], [300, 485, 38, 430, 30, 16],
+  ],
+  pn40: [
+    [15, 95, 14, 65, 14, 4], [20, 105, 16, 75, 14, 4], [25, 115, 16, 85, 14, 4],
+    [32, 140, 18, 100, 18, 4], [40, 150, 18, 110, 18, 4], [50, 165, 20, 125, 18, 4],
+    [65, 185, 22, 145, 18, 8], [80, 200, 24, 160, 18, 8], [100, 235, 26, 190, 22, 8],
+    [125, 270, 28, 220, 26, 8], [150, 300, 30, 250, 26, 8], [200, 375, 36, 320, 30, 12],
+    [250, 450, 42, 385, 33, 12], [300, 515, 52, 450, 33, 16],
+  ],
+  jis10k: [
+    [15, 95, 12, 70, 15, 4], [20, 100, 14, 75, 15, 4], [25, 125, 14, 90, 19, 4],
+    [32, 135, 16, 100, 19, 4], [40, 140, 16, 105, 19, 4], [50, 155, 16, 120, 19, 4],
+    [65, 175, 18, 140, 19, 4], [80, 185, 18, 150, 19, 8], [90, 195, 18, 160, 19, 8],
+    [100, 210, 18, 175, 19, 8], [125, 250, 20, 210, 23, 8], [150, 280, 22, 240, 23, 8],
+    [200, 330, 22, 290, 23, 12], [250, 400, 24, 355, 25, 12], [300, 445, 24, 400, 25, 16],
+  ],
+};
 const FLANGE_STANDARD_KEYS = new Set(Object.keys(FLANGE_STANDARDS));
 const ROLL_GROOVE_SETBACK_MM = 10;
 const ROLL_GROOVE_VISUAL_WIDTH_MM = 18;
@@ -468,6 +595,12 @@ const APP_MODE_DEFAULT_TAB = {
   review: "checks",
   export: "bom",
 };
+const APP_MODE_INSPECTOR_HINT = {
+  draw: "Draw lengths, angles and selected properties",
+  edit: "Selection and fitting properties",
+  review: "Checks, workflow, notes and retained history",
+  export: "Cut list, weights and material order",
+};
 const SIDE_TOOL_DETAILS = {
   draw: ["Draw", "Create pipe runs from points"],
   select: ["Select", "Pick, edit and drag items"],
@@ -500,21 +633,25 @@ const TUTORIAL_STEPS = [
       "Tap Jobs to open saved local or cloud spools.",
       "Use Dashboard from Menu when you want the big start screen.",
       "Use Sample when teaching someone without touching a real job.",
+      "Draw shows pipe and dimension controls, Edit shows fitting properties, Review shows checks and history, and Export shows fabrication outputs.",
+      "New spool and theme are in Menu; Save, Jobs, Account and sync state stay available in the header.",
+      "Blue marks the active tool or primary next action, green marks Save, red marks destructive actions, and ordinary controls stay neutral.",
     ],
   },
   {
     kicker: "Team",
     menuLabel: "Team comms",
-    title: "Communicate from the Jobs dashboard",
-    body: "Comms gives the team one shared place for general messages and active spool notes, so drawing changes and yard questions do not get buried inside one spool.",
+    title: "Team messages and spool conversations",
+    body: "Comms is for team-wide messages. Each cloud spool also has its own conversation for @mentions, workshop photos, checker comments and resolved actions.",
     target: "#openBrowserProjectButton",
     targetLabel: "Jobs button, then Comms",
     action: "showComms",
     actionLabel: "Open Comms",
     demo: "comms",
     items: [
-      "Open Jobs, then use Comms for team-wide messages.",
-      "Active spool notes from production cards are shown in the same view.",
+      "Open Jobs, then use Comms for messages that affect the whole team.",
+      "Open Jobs, choose Comms, then use Open spool conversation for messages attached to the current drawing.",
+      "Tag a teammate with @name, attach a workshop photo, then resolve the message once addressed.",
       "Owners can promote admins. Admins can approve users and manage shared team spools.",
       "Team messages are shared through Supabase for approved company members.",
     ],
@@ -530,12 +667,38 @@ const TUTORIAL_STEPS = [
     actionLabel: "Open Jobs",
     demo: "jobs",
     items: [
-      "Use quick buttons on cards for Ready, Issued and Fabbed status changes.",
-      "Use the Production command centre for Due today, Overdue, Ready check, Assigned to me, On hold and Messages shortcuts.",
+      "Use the team dashboard for Assigned to me, Due today, Overdue, Ready to check and On hold queues.",
+      "Recent team activity shows assignment, due-date, hold, message, pipe-size and stage changes.",
+      "Drag cards between stages, or use the stage menu on touch devices.",
       "Assign a person, due date, priority and hold reason directly on the card.",
-      "Team alerts show overdue, due today, assigned-to-you, ready-to-check and open note items.",
-      "Each spool keeps an activity history of production changes.",
+      "A reason is required whenever a spool is placed on hold.",
+      "Team alerts show assigned work, due soon or overdue work, checker returns, comments and newly issued revisions.",
+      "Each spool keeps an actor-and-time activity history. Open View older events for the retained timeline.",
+      "Checkers can approve a drawing or return it with a required comment.",
+      "Issued drawings stay locked; Return for changes preserves the issued revision before work continues.",
       "Use Daily or Weekly reports for handover and progress meetings.",
+    ],
+  },
+  {
+    kicker: "Review",
+    menuLabel: "Approve / return",
+    title: "Approve, issue or return a spool",
+    body: "A checker approves a Ready to check spool with an optional comment. Issuing records the issuer and locks the drawing. Return for changes requires a reason and preserves an issued revision.",
+    target: "[data-inspector-tab='checks']",
+    targetLabel: "Checks tab, then Drawing workflow",
+    action: "showChecks",
+    actionLabel: "Open checks",
+    demo: "approval",
+    items: [
+      "Move the spool to Ready to check before review.",
+      "Approve drawing records the checker and optional conversation comment.",
+      "Reducer and tee/branch findings include Show, Set as tee and Set as branch actions where they apply.",
+      "Show on drawing only highlights the finding; Review and the Checks list stay open so you do not lose your place.",
+      "An intentional exception can be acknowledged with a required reason; it is saved with the spool and then allows issue.",
+      "The app test kit diagnoses SpoolMate itself. A failed self-test is shown for review but does not block the current spool.",
+      "Issue drawing requires approval and locks the issued revision.",
+      "Return for changes requires a checker reason.",
+      "Returning an issued drawing snapshots it and starts the next editable revision.",
     ],
   },
   {
@@ -610,12 +773,12 @@ const TUTORIAL_STEPS = [
     kicker: "Tee / Branch",
     menuLabel: "Tee / branch",
     title: "Add tees and branches while drawing",
-    body: "Tee and Branch stay close to the normal drawing workflow. Pick the tool, tap the main run and draw the new branch from the point SpoolMate creates.",
-    target: '[data-tool="tee"]',
-    targetLabel: "Tee tool",
+    body: "Tee and Branch stay close to the normal drawing workflow inside Fittings. Open Fittings, choose Tee or Branch, tap the main run and draw the new leg from the point SpoolMate creates.",
+    target: "#fittingsToolButton",
+    targetLabel: "Fittings menu",
     mode: "draw",
     action: "teeTool",
-    actionLabel: "Select Tee",
+    actionLabel: "Open Fittings",
     demo: "tee",
     items: [
       "Tee splits the main run and adds tee takeoff and fitting weight.",
@@ -627,16 +790,17 @@ const TUTORIAL_STEPS = [
     kicker: "End Fittings",
     menuLabel: "End fittings",
     title: "Add flanges, grooves and reducers",
-    body: "End fittings can be added from the side tools or from the right-click/long-press menu on a pipe end or run.",
-    target: '[data-tool="flange"]',
-    targetLabel: "Flange tool",
+    body: "End fittings are grouped in Fittings and remain available from the right-click/long-press menu on a pipe end or run.",
+    target: "#fittingsToolButton",
+    targetLabel: "Fittings menu",
     mode: "edit",
     action: "flangeTool",
-    actionLabel: "Select Flange",
+    actionLabel: "Open Fittings",
     demo: "fittings",
     items: [
       "Single flange is the default, but double flange is still available.",
       "Flange standard is picked from the menu, including Table E, PN and ANSI options.",
+      "The 3D flange uses the selected table's actual OD, thickness, PCD, hole diameter and hole count for that NB.",
       "Roll grooves sit close to the pipe end and add no weight.",
     ],
   },
@@ -654,6 +818,7 @@ const TUTORIAL_STEPS = [
       "Use the top Pipe / tube menu for the next run size.",
       "Right-click or long-press selected pipe to change existing sizes from the list.",
       "Reducers are added for size changes on normal pipe and tee connections. Branch welds stay cut into the main pipe with no reducer.",
+      "At a welded branch, changing either straight-through main section updates the whole continuous main. The side outlet keeps its own size.",
     ],
   },
   {
@@ -708,12 +873,30 @@ const TUTORIAL_STEPS = [
     ],
   },
   {
+    kicker: "Focus",
+    menuLabel: "Focus mode",
+    title: "Draw without the surrounding panels",
+    body: "Focus mode gives the drawing the whole screen while keeping a slim tool rail. Details and 3D open temporarily over the drawing without changing the active workflow mode.",
+    target: "#drawingFullscreenButton",
+    targetLabel: "Focus button",
+    mode: "draw",
+    action: "focusMode",
+    actionLabel: "Practice Focus",
+    demo: "focus",
+    items: [
+      "Press Focus beside the drawing controls.",
+      "Use the slim tool rail while the drawing fills the screen.",
+      "Open Details or 3D only when needed, then close the overlay to keep drawing.",
+      "Press Exit or Escape to leave Focus without changing Draw, Edit, Review or Export mode.",
+    ],
+  },
+  {
     kicker: "3D",
     menuLabel: "3D preview",
     title: "Use the 3D preview to explain the spool",
     body: "The 3D preview makes the pipe clearer for people who do not read isometric drawings every day.",
-    target: "#previewModePanelSelect",
-    targetLabel: "3D view style menu",
+    target: "#previewShowButton",
+    targetLabel: "3D Preview button",
     action: "showPreview",
     actionLabel: "Show 3D",
     demo: "preview",
@@ -759,7 +942,7 @@ const TUTORIAL_STEPS = [
     ],
   },
 ];
-const BEGINNER_TUTORIAL_STEP_INDEXES = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+const BEGINNER_TUTORIAL_STEP_INDEXES = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 const LOAD_PLAN_TRAYS = {
   medium: { key: "medium", label: "3460 x 2040 mm tray", lengthMm: 3460, widthMm: 2040 },
   long: { key: "long", label: "4490 x 2040 mm tray", lengthMm: 4490, widthMm: 2040 },
@@ -839,7 +1022,7 @@ const PRESSURE_Y_COEFFICIENT = 0.4;
 const PROJECT_INFO_DEFAULT = {
   jobNumber: "",
   spoolNumber: "",
-  revision: "",
+  revision: "A",
   drawnBy: "",
   client: "",
 };
@@ -914,18 +1097,38 @@ const ATLAS_FLANGE_WEIGHTS = {
   250: 16.5,
   300: 26.2,
 };
-const ATLAS_TUBE_REDUCING_TEE_WEIGHTS = {
-  191: 0.08,
-  254: 0.13,
-  318: 0.20,
-  381: 0.30,
-  508: 0.50,
-  635: 0.80,
-  762: 1.10,
-  1016: 1.60,
-  1270: 1.80,
-  1524: 2.80,
-  2032: 3.50,
+const ATLAS_STAINLESS10_REDUCER_WEIGHTS = {
+  "20:15": 0.10,
+  "25:15": 0.12,
+  "25:20": 0.13,
+  "32:20": 0.18,
+  "32:25": 0.18,
+  "40:20": 0.18,
+  "40:25": 0.19,
+  "40:32": 0.21,
+  "50:25": 0.28,
+  "50:32": 0.30,
+  "50:40": 0.31,
+  "65:40": 0.44,
+  "65:50": 0.47,
+  "80:40": 0.51,
+  "80:50": 0.55,
+  "80:65": 0.59,
+  "100:40": 0.68,
+  "100:50": 0.78,
+  "100:65": 0.83,
+  "100:80": 0.87,
+  "125:100": 1.49,
+  "150:80": 1.82,
+  "150:100": 1.96,
+  "150:125": 2.00,
+  "200:100": 3.01,
+  "200:150": 3.19,
+  "250:100": 4.73,
+  "250:150": 5.00,
+  "250:200": 5.20,
+  "300:200": 7.67,
+  "300:250": 7.98,
 };
 const TEE_TAKEOFF_MM = {
   6: 25,
@@ -1126,8 +1329,9 @@ let drawingAssistantState = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
+let focusModeActive = false;
 let previewFloatDrag = null;
-let previewFloatBounds = null;
+let previewFloatBounds = loadPreviewFloatBoundsPreference();
 let previewFloatManual = loadPreviewFloatPreference();
 let previewPanelMinimized = false;
 let previewPanelHidden = true;
@@ -1153,6 +1357,9 @@ let companyMembers = [];
 let projectComments = [];
 let projectCommentsProjectId = null;
 let projectCommentsBusy = false;
+let pendingProjectCommentPhoto = null;
+let pendingProjectCommentPhotoUrl = "";
+const projectCommentPhotoUrlCache = new Map();
 let teamMessages = [];
 let teamMessagesCompanyId = null;
 let teamMessagesBusy = false;
@@ -1284,6 +1491,7 @@ function sampleState() {
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
     productionActivity: [],
+    healthAcknowledgements: {},
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -1467,6 +1675,7 @@ function blankState(options = {}) {
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
     productionActivity: [],
+    healthAcknowledgements: {},
     projectInfo: defaultProjectInfo(),
     history: [],
     redoHistory: [],
@@ -1545,6 +1754,7 @@ function statePayload(options = {}) {
     productionInfo: normalizeProductionInfo(state.productionInfo),
     productionMessages: normalizeProductionMessages(state.productionMessages),
     productionActivity: normalizeProductionActivity(state.productionActivity),
+    healthAcknowledgements: normalizeHealthAcknowledgements(state.healthAcknowledgements),
     projectInfo: normalizeProjectInfo(state.projectInfo),
   };
 }
@@ -1628,6 +1838,7 @@ function stateFromPayload(payload, options = {}) {
     productionInfo: normalizeProductionInfo(saved.productionInfo),
     productionMessages: normalizeProductionMessages(saved.productionMessages),
     productionActivity: normalizeProductionActivity(saved.productionActivity),
+    healthAcknowledgements: normalizeHealthAcknowledgements(saved.healthAcknowledgements),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
     redoHistory: [],
@@ -1671,6 +1882,24 @@ function normalizeNodeTypes(nodeTypes, pointCount) {
     ) {
       normalized[index] = type;
     }
+  }
+  return normalized;
+}
+
+function normalizeHealthAcknowledgements(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const normalized = {};
+  for (const [rawKey, rawEntry] of Object.entries(value).slice(-80)) {
+    const key = String(rawKey ?? "").trim().slice(0, 180);
+    if (!key || !rawEntry || typeof rawEntry !== "object") continue;
+    const reason = String(rawEntry.reason ?? "").trim().slice(0, 500);
+    if (!reason) continue;
+    normalized[key] = {
+      title: String(rawEntry.title ?? "Drawing check").trim().slice(0, 120),
+      reason,
+      by: String(rawEntry.by ?? "").trim().slice(0, 80),
+      at: String(rawEntry.at ?? "").trim().slice(0, 40),
+    };
   }
   return normalized;
 }
@@ -1721,11 +1950,7 @@ function setNodeConnectionType(nodeIndex, type, options = {}) {
   if (!NODE_CONNECTION_TYPES.has(type)) return;
 
   state.nodeTypes = normalizeNodeTypes(state.nodeTypes, state.points.length);
-  if (type === "branch") {
-    state.nodeTypes[nodeIndex] = "branch";
-  } else {
-    delete state.nodeTypes[nodeIndex];
-  }
+  state.nodeTypes[nodeIndex] = type;
   if (options.update !== false) updateAll();
 }
 
@@ -2022,7 +2247,7 @@ function normalizeProductionActivity(entries) {
       };
     })
     .filter(Boolean)
-    .slice(-80);
+    .slice(-240);
 }
 
 function productionActivityActor() {
@@ -2123,6 +2348,13 @@ function normalizeProjectComment(row) {
     authorId: normalizeUuid(row.author_id),
     authorEmail: String(row.author_email ?? "").trim().slice(0, 120),
     body,
+    mentions: Array.isArray(row.mentions)
+      ? row.mentions.map((mention) => String(mention ?? "").trim().toLowerCase().slice(0, 80)).filter(Boolean).slice(0, 24)
+      : [],
+    photoPath: String(row.photo_path ?? "").trim().slice(0, 500),
+    resolved: row.resolved === true,
+    resolvedAt: String(row.resolved_at ?? ""),
+    resolvedBy: normalizeUuid(row.resolved_by),
     createdAt: String(row.created_at ?? ""),
     updatedAt: String(row.updated_at ?? ""),
   };
@@ -2310,8 +2542,8 @@ const REGRESSION_SAMPLES = [
   },
   {
     key: "teeReducer",
-    title: "Reducing tee",
-    detail: "NB 150 main run with NB 80 tee outlet.",
+    title: "Tee outlet reducer",
+    detail: "NB 150 equal tee with a separate reducer to the NB 80 outlet.",
     build: regressionTeeReducerState,
     checks: [
       "Connection is treated as a tee, not a bend.",
@@ -2328,6 +2560,7 @@ const REGRESSION_SAMPLES = [
       "Connection is marked as Branch.",
       "No reducer is added at the branch weld.",
       "Cut list keeps the main run as one pipe through the branch.",
+      "Changing either main leg size updates both straight-through legs and leaves the branch outlet unchanged.",
     ],
   },
   {
@@ -2347,6 +2580,7 @@ const REGRESSION_MANUAL_CHECKS = [
   "Press Enter while drawing to confirm drawing stops.",
   "Right-click on PC or long-press on tablet/phone to confirm the action sheet opens cleanly.",
   "Open 3D preview, change view style, rotate, move and fit the model.",
+  "Select a flange, switch between Table E, ANSI 150 and PN 16, then confirm plate/drilling values and 3D bolt holes update.",
   "Export Fab PDF and confirm the drawing is zoomed in, readable and includes cut list/BOM/weights.",
   "On iPad/Android, confirm tool buttons are easy to tap and panels do not cover the drawing unexpectedly.",
 ];
@@ -2371,6 +2605,12 @@ const REGRESSION_AUTO_CHECKS = [
     run: regressionAutoCheckFlangeFlush,
   },
   {
+    key: "flangeDrilling",
+    title: "Flange drilling table check",
+    sampleKey: "workshop",
+    run: regressionAutoCheckFlangeDrilling,
+  },
+  {
     key: "offset45",
     title: "45 offset check",
     sampleKey: "offsetSockets",
@@ -2381,6 +2621,18 @@ const REGRESSION_AUTO_CHECKS = [
     title: "Socket dimension check",
     sampleKey: "offsetSockets",
     run: regressionAutoCheckSocketDimensions,
+  },
+  {
+    key: "stateRoundTrip",
+    title: "Save/open round-trip check",
+    sampleKey: "offsetSockets",
+    run: regressionAutoCheckStateRoundTrip,
+  },
+  {
+    key: "stainlessTubeMaterial",
+    title: "Stainless tube 3D check",
+    sampleKey: "workshop",
+    run: regressionAutoCheckStainlessTubeMaterial,
   },
 ];
 
@@ -2445,17 +2697,53 @@ function regressionAutoCheckTeeReducer(segmentData, quantities, definition) {
     reducer.largeNb === 150 &&
     reducer.smallNb === 80,
   );
-  const passed = reducers.length >= 1 && quantities.tees.length === 1 && quantities.branches.length === 0;
+  const tee = quantities.tees[0];
+  const lineSize = PIPE_SIZES.find((size) => size.nb === 150);
+  const expectedTeeTakeoff = teeTakeoffMm(lineSize);
+  const expectedTeeWeight = atlasButtweldWeight(lineSize, "tee");
+  const teeTakeoffsExact = tee?.connections?.length === 3 && tee.connections.every((connection) =>
+    Math.abs(Number(connection.takeoffMm) - expectedTeeTakeoff) < 0.001,
+  );
+  const teeWeightExact = Number.isFinite(expectedTeeWeight) &&
+    Math.abs(Number(tee?.weightKg) - expectedTeeWeight) < 0.001;
+  const reducer = reducers[0];
+  const reducerLengthExact = Number(reducer?.lengthMm) === REDUCER_LENGTH_MM[150];
+  const stainlessReducerWeightsExact =
+    atlasStainless10ReducerWeightForSizes({ nb: 100 }, { nb: 40 }) === 0.68 &&
+    atlasStainless10ReducerWeightForSizes({ nb: 300 }, { nb: 250 }) === 7.98;
+  const takeoffRows = takeoffCountRows(quantities);
+  const bomSeparatesTeeAndReducer =
+    takeoffRows.some((row) => row.key === "tee:150:equal" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:150:80" && row.quantity === 1) &&
+    !takeoffRows.some((row) => row.label.startsWith("Reducing tee"));
+  const passed =
+    reducers.length >= 1 &&
+    quantities.tees.length === 1 &&
+    quantities.branches.length === 0 &&
+    teeTakeoffsExact &&
+    teeWeightExact &&
+    reducerLengthExact &&
+    stainlessReducerWeightsExact &&
+    bomSeparatesTeeAndReducer;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `${reducers.length} tee reducer, ${quantities.tees.length} tee take-off, ${quantities.branches.length} branch welds.`,
+    `${reducers.length} tee reducer; ${formatLength(expectedTeeTakeoff)} mm line-size tee take-off on all legs; ` +
+      `${formatMass(expectedTeeWeight)} kg tee; ${formatLength(reducer?.lengthMm ?? 0)} mm reducer.`,
   );
 }
 
 function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition) {
   const nodeReducers = quantities.reducers.filter((reducer) => reducer.nodeIndex === 1);
+  const branchInfo = branchNodeInfo(1, nodeConnections(segmentData).get(1) ?? [], segmentData);
+  const mainIndexes = (branchInfo?.mainPair ?? []).map((entry) => entry.segment.index).sort((a, b) => a - b);
+  const branchIndexes = (branchInfo?.branchEntries ?? []).map((entry) => entry.segment.index).sort((a, b) => a - b);
+  const linkedFromFirstMain = branchMainLinkedSegmentIndexes([mainIndexes[0]], segmentData);
+  const mainSizePropagationExact =
+    mainIndexes.length === 2 &&
+    mainIndexes.every((index) => linkedFromFirstMain.includes(index)) &&
+    branchIndexes.every((index) => !linkedFromFirstMain.includes(index));
   const mergedMainRun = (quantities.cutSegments ?? []).some((row) =>
     Array.isArray(row.segment?.mergedIndexes) &&
     row.segment.mergedIndexes.includes(0) &&
@@ -2465,12 +2753,14 @@ function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition)
     nodeConnectionType(1) === "branch" &&
     quantities.branches.length === 1 &&
     nodeReducers.length === 0 &&
-    mergedMainRun;
+    mergedMainRun &&
+    mainSizePropagationExact;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `${nodeConnectionType(1)} node, ${nodeReducers.length} reducers at branch, main run ${mergedMainRun ? "merged" : "split"}.`,
+    `${nodeConnectionType(1)} node, ${nodeReducers.length} reducers at branch, main run ${mergedMainRun ? "merged" : "split"}, ` +
+      `size link ${linkedFromFirstMain.join("+")} with outlet ${branchIndexes.join("+")} excluded.`,
   );
 }
 
@@ -2489,6 +2779,45 @@ function regressionAutoCheckFlangeFlush(segmentData, quantities, definition) {
     definition.sampleKey,
     passed,
     `${flushFlanges.length}/${flanges.length} flange${flanges.length === 1 ? "" : "s"} snapped to pipe ends.`,
+  );
+}
+
+function regressionAutoCheckFlangeDrilling(segmentData, quantities, definition) {
+  const representativeRows = [
+    ["ansi150", 100, 228.6, 190.5, 19.1, 8],
+    ["ansi300", 150, 317.5, 269.7, 22.4, 12],
+    ["ansi600", 300, 558.8, 489, 35.1, 20],
+    ["tableE", 150, 280, 235, 22, 8],
+    ["pn16", 200, 340, 295, 22, 12],
+    ["jis10k", 300, 445, 400, 25, 16],
+  ];
+  const rowMatches = representativeRows.every(([standard, nb, odMm, pcdMm, holeMm, holes]) => {
+    const drilling = flangeDrillingDimensions(standard, { nb, kind: "pipe" }, 0.05);
+    return drilling.exactSize &&
+      Math.abs(drilling.odMm - odMm) < 0.001 &&
+      Math.abs(drilling.pcdMm - pcdMm) < 0.001 &&
+      Math.abs(drilling.holeMm - holeMm) < 0.001 &&
+      drilling.boltCount === holes;
+  });
+  const allRowsValid = Object.values(FLANGE_DRILLING_TABLES).every((table) =>
+    table.every(([nb, odMm, thicknessMm, pcdMm, holeMm, holes]) =>
+      nb > 0 && odMm > pcdMm && pcdMm > holeMm && thicknessMm > 0 &&
+      Number.isInteger(holes) && holes >= 4 && holes % 4 === 0,
+    ),
+  );
+  const dinAliasMatches =
+    flangeDrillingDimensions("din10", { nb: 100, kind: "pipe" }, 0.05).boltCircleRadius ===
+      flangeDrillingDimensions("pn10", { nb: 100, kind: "pipe" }, 0.05).boltCircleRadius &&
+    flangeDrillingDimensions("din16", { nb: 200, kind: "pipe" }, 0.05).boltCount ===
+      flangeDrillingDimensions("pn16", { nb: 200, kind: "pipe" }, 0.05).boltCount;
+  const scaledPreview = flangeDrillingDimensions("ansi150", { nb: 100, od: 114.3, kind: "pipe" }, 0.15);
+  const visualScaleMatches = Math.abs((scaledPreview.outerRadius / 0.15) - (228.6 / 114.3)) < 0.0001;
+  const passed = rowMatches && allRowsValid && dinAliasMatches && visualScaleMatches;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${Object.keys(FLANGE_DRILLING_TABLES).length} drilling tables cover ${Object.keys(FLANGE_STANDARDS).length} menu standards and were checked for OD, thickness, PCD, hole size and hole count.`,
   );
 }
 
@@ -2534,6 +2863,51 @@ function regressionAutoCheckSocketDimensions(segmentData, quantities, definition
     definition.sampleKey,
     passed,
     `First socket ${formatLength(firstPosition)} mm from end, then SOCK C/C ${formatLength(firstGap)} mm between sockets.`,
+  );
+}
+
+function regressionAutoCheckStateRoundTrip(segmentData, quantities, definition) {
+  const payload = statePayload();
+  const restored = stateFromPayload(JSON.parse(JSON.stringify(payload)));
+  const same = (first, second) => JSON.stringify(first) === JSON.stringify(second);
+  const passed = Boolean(restored) &&
+    same(restored.points, payload.points) &&
+    same(restored.edges, payload.edges) &&
+    same(restored.fittings, payload.fittings) &&
+    same(restored.measurements, payload.measurements) &&
+    same(restored.nodeTypes, payload.nodeTypes) &&
+    same(restored.reducerSideOverrides, payload.reducerSideOverrides) &&
+    same(restored.dimensionOffsets, payload.dimensionOffsets) &&
+    same(restored.projectInfo, payload.projectInfo) &&
+    restored.pipeSpec === payload.pipeSpec &&
+    restored.dimensionStyle === payload.dimensionStyle;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${payload.points.length} points, ${payload.edges.length} runs, ${payload.fittings.length} fittings and ${payload.measurements.length} manual measurements restored.`,
+  );
+}
+
+function regressionAutoCheckStainlessTubeMaterial(segmentData, quantities, definition) {
+  state.previewMode = "carbon";
+  state.pipeSpec = "carbon40";
+  const carbonStyle = previewViewStyle();
+  const carbonFallback = fallbackPreviewStyle();
+  state.pipeSpec = "stainlessTube";
+  const tubeStyle = previewViewStyle();
+  const tubeFallback = fallbackPreviewStyle();
+  const passed =
+    tubeStyle.physical === true &&
+    tubeStyle.colors.pipe === 0xfbfcfc &&
+    tubeStyle.colors.pipe !== carbonStyle.colors.pipe &&
+    tubeFallback.pipeStops.includes("#ffffff") &&
+    !carbonFallback.pipeStops.includes("#ffffff");
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    "Stainless Sch 10S and stainless tube use the silver physical/fallback material path instead of carbon black.",
   );
 }
 
@@ -2611,6 +2985,10 @@ function normalizeRevisionHistory(history) {
       createdAt: String(entry?.createdAt ?? "").trim(),
       status: normalizeProjectStatus(entry?.status),
       note: String(entry?.note ?? "").trim().slice(0, 120),
+      checkedBy: String(entry?.checkedBy ?? entry?.state?.checkedBy ?? "").trim().slice(0, 120),
+      checkedAt: String(entry?.checkedAt ?? entry?.state?.checkedAt ?? "").trim(),
+      issuedBy: String(entry?.issuedBy ?? entry?.state?.issuedBy ?? "").trim().slice(0, 120),
+      issuedAt: String(entry?.issuedAt ?? entry?.state?.issuedAt ?? "").trim(),
       state: entry?.state && typeof entry.state === "object" ? entry.state : null,
     }))
     .filter((entry) => entry.revision || entry.state)
@@ -2810,7 +3188,11 @@ function normalizeConnectionTrustState() {
   for (const key of Object.keys(state.nodeTypes)) {
     const nodeIndex = Number(key);
     const connected = connections.get(nodeIndex) ?? [];
-    if (state.nodeTypes[key] !== "branch" || !branchMarkCanPersistAtNode(nodeIndex, connected)) {
+    if (state.nodeTypes[key] === "tee") {
+      if (connected.length < 3 && !branchMarkCanPersistAtNode(nodeIndex, connected)) delete state.nodeTypes[key];
+      continue;
+    }
+    if (!branchMarkCanPersistAtNode(nodeIndex, connected)) {
       delete state.nodeTypes[key];
     }
   }
@@ -6948,7 +7330,7 @@ function teeReducerFromEntries(nodeIndex, first, second) {
     kind: "tee",
     firstTakeoffMm: reducer.firstSegmentIndex === reducer.smallSegment.index ? takeoffMm : 0,
     secondTakeoffMm: reducer.secondSegmentIndex === reducer.smallSegment.index ? takeoffMm : 0,
-    source: reducer.source.includes("Atlas") ? "Atlas large-end tee reducer" : "estimated tee reducer",
+    source: reducer.source.includes("Atlas") ? reducer.source : "estimated tee reducer",
   };
 }
 
@@ -6963,23 +7345,23 @@ function applyReducerTakeoff(segmentTakeoffs, reducer) {
 }
 
 function teeTakeoffForNode(nodeIndex, connected, segmentData = segments()) {
-  const entries = nodeConnectionEntries(nodeIndex, connected, segmentData)
-    .map((entry) => ({
-      ...entry,
-      takeoffMm: Math.min(teeTakeoffMm(entry.size), entry.lengthMm * 0.45),
-    }));
+  const rawEntries = nodeConnectionEntries(nodeIndex, connected, segmentData);
+  if (rawEntries.length < 3) return null;
 
-  if (entries.length < 3) return null;
-
-  const largestSize = entries
+  const largestSize = rawEntries
     .map((entry) => entry.size)
     .sort((a, b) => b.od - a.od)[0];
-  const smallestSize = entries
+  const smallestSize = rawEntries
     .map((entry) => entry.size)
     .sort((a, b) => a.od - b.od)[0];
+  const entries = rawEntries.map((entry) => ({
+    ...entry,
+    // A smaller connected run is modelled as an equal tee plus a reducer.
+    // The tee centre-to-end deduction therefore remains the line-size tee takeoff on every leg.
+    takeoffMm: Math.min(teeTakeoffMm(largestSize), entry.lengthMm * 0.45),
+  }));
   const reducing = entries.some((entry) => entry.size.nb !== largestSize.nb);
-  const atlasReducingWeightKg = reducing ? atlasReducingTeeWeightForSizes(largestSize, smallestSize) : null;
-  const atlasWeightKg = atlasReducingWeightKg ?? atlasButtweldWeight(largestSize, "tee");
+  const atlasWeightKg = atlasButtweldWeight(largestSize, "tee");
   const weightKg = atlasWeightKg ?? estimatedTeeWeightKg(largestSize);
 
   return {
@@ -6991,8 +7373,6 @@ function teeTakeoffForNode(nodeIndex, connected, segmentData = segments()) {
     weightKg,
     source: atlasWeightKg === null
       ? "estimated"
-      : isTubePipeSize(largestSize) && atlasReducingWeightKg !== null
-      ? "Atlas tube reducing tee table"
       : isTubePipeSize(largestSize)
       ? "Atlas tube tee table"
       : "Atlas table",
@@ -7057,12 +7437,14 @@ function branchNodeInfo(nodeIndex, connected, segmentData = segments()) {
   const entries = nodeConnectionEntries(nodeIndex, connected, segmentData);
   if (entries.length < 3) return null;
 
-  const largestOd = Math.max(...entries.map((entry) => entry.size.od));
-  const largestEntries = entries.filter((entry) => Math.abs(entry.size.od - largestOd) < 0.001);
-  const mainPair = mostOppositeEntryPair(largestEntries.length >= 2 ? largestEntries : entries);
+  // A welded branch is defined by geometry: the most straight-through pair is
+  // the continuous main, even when the outlet is temporarily the largest size.
+  const mainPair = mostOppositeEntryPair(entries);
   const mainSegments = new Set(mainPair ? mainPair.map((entry) => entry.segment.index) : []);
   const branchEntries = entries.filter((entry) => !mainSegments.has(entry.segment.index));
-  const mainSize = (mainPair?.[0]?.size ?? entries.find((entry) => Math.abs(entry.size.od - largestOd) < 0.001)?.size) ?? pipeSizeByNb(state.pipeSizeNb);
+  const mainSize = (mainPair ?? [])
+    .map((entry) => entry.size)
+    .sort((a, b) => b.od - a.od)[0] ?? pipeSizeByNb(state.pipeSizeNb);
 
   return {
     entries,
@@ -7071,6 +7453,30 @@ function branchNodeInfo(nodeIndex, connected, segmentData = segments()) {
     mainSize,
     branchEntries,
   };
+}
+
+function branchMainLinkedSegmentIndexes(indexes, segmentData = segments()) {
+  const linked = new Set(normalizeSelectedSegments(indexes, state.edges.length));
+  if (!linked.size || !segmentData.length) return [...linked];
+  const connections = nodeConnections(segmentData);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const [nodeIndex, connected] of connections.entries()) {
+      if (connected.length < 3 || nodeConnectionType(nodeIndex) !== "branch") continue;
+      const mainPair = branchNodeInfo(nodeIndex, connected, segmentData)?.mainPair ?? [];
+      const mainIndexes = mainPair
+        .map((entry) => entry?.segment?.index)
+        .filter((index) => Number.isInteger(index));
+      if (mainIndexes.length !== 2 || !mainIndexes.some((index) => linked.has(index))) continue;
+      for (const index of mainIndexes) {
+        if (linked.has(index)) continue;
+        linked.add(index);
+        changed = true;
+      }
+    }
+  }
+  return [...linked].sort((a, b) => a - b);
 }
 
 function mostOppositeEntryPair(entries) {
@@ -7139,6 +7545,13 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   const secondBendTakeoffMm = isBendReducer ? bendTakeoffMm(secondSegment, options.bend) : 0;
   const atlasWeightKg = atlasReducerWeightForSizes(largeSize, smallSize);
   const reducerWeightKg = atlasWeightKg ?? (lengthMm / 1000) * ((pipeMassPerMetreForSize(firstSize) + pipeMassPerMetreForSize(secondSize)) * 0.5) * 1.12;
+  const reducerWeightSource = atlasWeightKg === null
+    ? "estimated"
+    : isTubePipeSize(largeSize)
+    ? "Atlas tube reducer table"
+    : normalizePipeSpec(state.pipeSpec) === "stainless10"
+    ? "Atlas Sch 10S size-pair table"
+    : "Atlas large-end table";
 
   return {
     nodeIndex,
@@ -7148,11 +7561,7 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     secondTakeoffMm,
     lengthMm,
     weightKg: reducerWeightKg,
-    source: atlasWeightKg === null
-      ? "estimated"
-      : isTubePipeSize(largeSize)
-      ? "Atlas tube reducer table"
-      : "Atlas large-end table",
+    source: reducerWeightSource,
     kind: isBendReducer ? "bend" : "inline",
     placementSide,
     bend: Number(options.bend) || 0,
@@ -7167,16 +7576,19 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   };
 }
 
-function atlasReducerWeightForSizes(largeSize, smallSize) {
+function atlasStainless10ReducerWeightForSizes(largeSize, smallSize) {
   if (!largeSize || !smallSize) return null;
-  return atlasButtweldWeight(largeSize, "reducer");
+  const key = `${Number(largeSize.nb)}:${Number(smallSize.nb)}`;
+  const weight = ATLAS_STAINLESS10_REDUCER_WEIGHTS[key];
+  return Number.isFinite(weight) ? weight : null;
 }
 
-function atlasReducingTeeWeightForSizes(largeSize, smallSize) {
-  if (!largeSize || !smallSize || !isTubePipeSize(largeSize) || !isTubePipeSize(smallSize)) return null;
-  if (largeSize.nb === smallSize.nb) return null;
-  const weight = ATLAS_TUBE_REDUCING_TEE_WEIGHTS[largeSize.nb];
-  return Number.isFinite(weight) ? weight : null;
+function atlasReducerWeightForSizes(largeSize, smallSize) {
+  if (!largeSize || !smallSize) return null;
+  if (normalizePipeSpec(state.pipeSpec) === "stainless10" && !isTubePipeSize(largeSize)) {
+    return atlasStainless10ReducerWeightForSizes(largeSize, smallSize);
+  }
+  return atlasButtweldWeight(largeSize, "reducer");
 }
 
 function reducerLengthMm(firstSize, secondSize) {
@@ -7272,6 +7684,9 @@ function atlasFittingWeightKg(fitting, segment) {
   }
 
   if (fitting.type === "reducer") {
+    // Stainless Sch 10S reducer weights depend on both end sizes. A manually placed
+    // marker has no nominated outlet size, so do not present a large-end value as exact.
+    if (normalizePipeSpec(state.pipeSpec) === "stainless10" && !isTubePipeSize(size)) return null;
     return atlasButtweldWeight(size, "reducer");
   }
 
@@ -7501,15 +7916,14 @@ function takeoffCountRows(quantities = quantitySummary()) {
   }
 
   for (const tee of quantities.tees) {
-    const label = tee.reducing
-      ? `Reducing tee ${pipeSizeDisplayLabelByNb(tee.nb)} x ${pipeSizeDisplayLabelByNb(tee.branchNb)}`
-      : `Tee ${pipeSizeDisplayLabelByNb(tee.nb)}`;
     add(
-      `tee:${tee.nb}:${tee.branchNb}:${tee.reducing ? "reducing" : "equal"}`,
-      label,
+      `tee:${tee.nb}:equal`,
+      `Tee ${pipeSizeDisplayLabelByNb(tee.nb)}`,
       1,
       tee.weightKg,
-      tee.source,
+      tee.reducing
+        ? `${tee.source} / equal tee; ${pipeSizeDisplayLabelByNb(tee.branchNb)} outlet uses the separately listed reducer`
+        : tee.source,
       20,
     );
   }
@@ -8138,6 +8552,7 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   nextFittingId += 1;
   recordHistory({ type: "fitting" });
   updateAll();
+  showMobilePanel("inspector");
 }
 
 function placeSocketFittings(segmentIndex, positions, options = {}) {
@@ -8166,6 +8581,7 @@ function placeSocketFittings(segmentIndex, positions, options = {}) {
   state.selectedMeasurement = null;
   recordHistory({ type: "fittings", fittingIds });
   updateAll();
+  showMobilePanel("inspector");
 }
 
 function placeNote(point, textOverride = null) {
@@ -8190,6 +8606,7 @@ function placeNote(point, textOverride = null) {
   nextNoteId += 1;
   recordHistory({ type: "note", noteId: note.id });
   updateAll();
+  showMobilePanel("inspector");
 }
 
 function measurementLengthMm(measurement) {
@@ -8257,6 +8674,7 @@ function beginOrFinishMeasurement(pointer) {
   recordHistory({ type: "snapshot", snapshot });
   cursorReadout.textContent = `Measured ${measurementLabel(measurement)}`;
   updateAll();
+  showMobilePanel("inspector");
 }
 
 function createUndoSnapshot() {
@@ -8485,6 +8903,7 @@ function setTool(tool) {
   document.querySelectorAll("[data-tool]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tool === tool);
   });
+  updateFittingsToolButton(tool);
   if (tool === "select") {
     cursorReadout.textContent = "Select - hold Shift to pick multiple runs";
   } else if (tool === "measure") {
@@ -8492,6 +8911,81 @@ function setTool(tool) {
   }
   drawIso();
   checkTutorialPractice();
+}
+
+function updateFittingsToolButton(tool = state.activeTool) {
+  if (!fittingsToolButton) return;
+  const active = FITTINGS_FLYOUT_TOOLS.has(tool);
+  fittingsToolButton.classList.toggle("active", active);
+  fittingsToolButton.dataset.activeFitting = active ? tool : "";
+  if (fittingsToolLabel) fittingsToolLabel.textContent = active ? sideToolLabel(tool) : "Fittings";
+  const iconUse = fittingsToolButton.querySelector("use");
+  iconUse?.setAttribute("href", active ? FITTINGS_FLYOUT_ICONS[tool] ?? "#icon-flange" : "#icon-flange");
+  fittingsToolButton.title = active ? `${sideToolLabel(tool)} selected. Open fitting tools.` : "Open fitting tools";
+}
+
+function fittingsToolMenuOpen() {
+  return Boolean(fittingsToolMenu && !fittingsToolMenu.hidden);
+}
+
+function setFittingsToolMenuOpen(open) {
+  if (!fittingsToolButton || !fittingsToolMenu) return;
+  const next = Boolean(open && !fittingsToolButton.hidden);
+  fittingsToolMenu.hidden = !next;
+  fittingsToolButton.setAttribute("aria-expanded", String(next));
+  document.body.classList.toggle("fittings-tool-menu-open", next);
+  if (next) positionFittingsToolMenu();
+}
+
+function positionFittingsToolMenu() {
+  if (!fittingsToolButton || !fittingsToolMenu || fittingsToolMenu.hidden) return;
+  fittingsToolMenu.style.left = "";
+  fittingsToolMenu.style.right = "";
+  fittingsToolMenu.style.top = "";
+  fittingsToolMenu.style.bottom = "";
+  if (isTabletLayout()) {
+    fittingsToolMenu.style.left = "10px";
+    fittingsToolMenu.style.right = "10px";
+    fittingsToolMenu.style.bottom = isPhoneLayout()
+      ? "calc(164px + env(safe-area-inset-bottom))"
+      : "calc(142px + env(safe-area-inset-bottom))";
+    return;
+  }
+  const triggerRect = fittingsToolButton.getBoundingClientRect();
+  const menuWidth = 300;
+  const menuHeight = Math.min(fittingsToolMenu.scrollHeight || 520, window.innerHeight - 20);
+  fittingsToolMenu.style.left = `${Math.min(window.innerWidth - menuWidth - 10, triggerRect.right + 8)}px`;
+  fittingsToolMenu.style.top = `${Math.max(10, Math.min(triggerRect.top, window.innerHeight - menuHeight - 10))}px`;
+}
+
+function setupFittingsToolMenu() {
+  if (fittingsToolMenu && fittingsToolMenu.parentElement !== document.body) {
+    document.body.append(fittingsToolMenu);
+  }
+  fittingsToolButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+    setFittingsToolMenuOpen(!fittingsToolMenuOpen());
+  });
+  fittingsToolCloseButton?.addEventListener("click", () => setFittingsToolMenuOpen(false));
+  fittingsToolMenu?.addEventListener("click", (event) => {
+    if (event.target.closest("[data-tool], [data-side-tool]")) {
+      setFittingsToolMenuOpen(false);
+    }
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!fittingsToolMenuOpen()) return;
+    if (fittingsToolMenu?.contains(event.target) || fittingsToolButton?.contains(event.target)) return;
+    setFittingsToolMenuOpen(false);
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && fittingsToolMenuOpen()) {
+      setFittingsToolMenuOpen(false);
+    }
+  });
+  window.addEventListener("resize", () => {
+    if (fittingsToolMenuOpen()) positionFittingsToolMenu();
+  });
+  updateFittingsToolButton();
 }
 
 function updateSegmentList() {
@@ -8606,8 +9100,10 @@ function updateTakeoffSummary() {
   const teeNotes = quantities.tees.length
     ? quantities.tees.map((tee, index) => {
         const legs = tee.connections.map((connection) => `run ${connection.segmentIndex + 1}: ${formatLength(connection.takeoffMm)} mm`).join(", ");
-        const label = tee.reducing ? `Reducing tee ${index + 1}` : `Tee ${index + 1}`;
-        return `<li>${label}: ${pipeSizeDisplayLabelByNb(tee.nb)}${tee.reducing ? ` to ${pipeSizeDisplayLabelByNb(tee.branchNb)}` : ""} - take off ${legs} / ${formatMass(tee.weightKg)} kg ${tee.source}</li>`;
+        const outlet = tee.reducing
+          ? ` / separate reducer to ${pipeSizeDisplayLabelByNb(tee.branchNb)} listed below`
+          : "";
+        return `<li>Tee ${index + 1}: equal ${pipeSizeDisplayLabelByNb(tee.nb)}${outlet} - take off ${legs} / ${formatMass(tee.weightKg)} kg ${tee.source}</li>`;
       }).join("")
     : "<li>No tee take-off yet.</li>";
   const branchNotes = quantities.branches.length
@@ -8695,8 +9191,22 @@ function updateTakeoffSummary() {
   `;
 }
 
-function healthIssue(severity, title, detail = "", target = null) {
-  return { severity, title, detail, target };
+function healthIssue(severity, title, detail = "", target = null, options = {}) {
+  const key = String(options.key ?? "").trim();
+  const acknowledgement = key
+    ? normalizeHealthAcknowledgements(state.healthAcknowledgements)[key] ?? null
+    : null;
+  return {
+    severity,
+    title,
+    detail,
+    target,
+    key,
+    guidance: String(options.guidance ?? "").trim(),
+    canAcknowledge: options.canAcknowledge === true,
+    acknowledgement,
+    acknowledged: Boolean(acknowledgement),
+  };
 }
 
 function endpointHasFinish(segment, pointIndex) {
@@ -8729,14 +9239,24 @@ function missingReducerIssues(segmentData, quantities) {
     if (reducerNodes.has(nodeIndex)) continue;
 
     const label = entries.length >= 3 ? "tee" : "bend/run";
+    const segmentIndexes = entries.map((entry) => entry.segment.index).sort((a, b) => a - b);
+    const connectedSizes = [...sizes].sort((a, b) => a - b);
     issues.push(healthIssue(
       "error",
       `Missing reducer at ${label} ${pointLabel(nodeIndex)}`,
-      `Connected sizes: ${[...sizes].map((nb) => pipeSizeDisplayLabelByNb(nb)).join(", ")}.`,
+      `Connected sizes: ${connectedSizes.map((nb) => pipeSizeDisplayLabelByNb(nb)).join(", ")}.`,
       {
         type: "reducer-node",
         pointIndex: nodeIndex,
-        segmentIndexes: entries.map((entry) => entry.segment.index),
+        segmentIndexes,
+        connectionCount: entries.length,
+      },
+      {
+        key: `missing-reducer:${nodeIndex}:${segmentIndexes.join("-")}:${connectedSizes.join("-")}`,
+        canAcknowledge: true,
+        guidance: entries.length >= 3
+          ? "Choose Set as tee when this is a tee fitting; the smaller leg should receive the reducer. Choose Set as branch when the smaller pipe is welded directly into the main and no reducer is required."
+          : "Show the joint and confirm both run sizes. Keep the automatic reducer for a real size transition, or acknowledge this exception only when the transition is intentionally handled outside this spool.",
       },
     ));
   }
@@ -8752,6 +9272,15 @@ function drawingHealthItems() {
 
   if (!project.jobNumber) items.push(healthIssue("error", "Job number missing", "Add a job number before issuing the drawing.", { type: "project", field: "jobNumber" }));
   if (!project.spoolNumber) items.push(healthIssue("error", "Spool number missing", "Add a spool number so the shop can identify this spool.", { type: "project", field: "spoolNumber" }));
+  if (!project.revision) {
+    items.push(healthIssue(
+      "error",
+      "Revision missing",
+      "Set the drawing revision before issuing it.",
+      { type: "project", field: "revision" },
+      { guidance: "Use Set Rev A for the first issue, or Edit revision if your company uses another revision format." },
+    ));
+  }
   if (!segmentData.length) {
     items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting.", { type: "tool", tool: "draw" }));
   }
@@ -8801,15 +9330,22 @@ function drawingHealthItems() {
       nodeIndex,
       segmentIndexes: connected.map((connection) => connection.segmentIndex),
     }));
-  if (untypedBranchNodes.length) {
+  for (const item of untypedBranchNodes) {
+    const segmentIndexes = [...new Set(item.segmentIndexes)].sort((a, b) => a - b);
     items.push(healthIssue(
       "warning",
-      "Tee/branch points need review",
-      `${untypedBranchNodes.map((item) => pointLabel(item.nodeIndex)).join(", ")} are being treated as tees unless marked as branch welds.`,
+      `Confirm tee or branch at ${pointLabel(item.nodeIndex)}`,
+      "This connection is currently calculated as a tee until its fabrication type is confirmed.",
       {
         type: "tee-branch-review",
-        pointIndexes: untypedBranchNodes.map((item) => item.nodeIndex),
-        segmentIndexes: [...new Set(untypedBranchNodes.flatMap((item) => item.segmentIndexes))],
+        pointIndex: item.nodeIndex,
+        pointIndexes: [item.nodeIndex],
+        segmentIndexes,
+      },
+      {
+        key: `tee-branch-review:${item.nodeIndex}:${segmentIndexes.join("-")}`,
+        canAcknowledge: true,
+        guidance: "Choose Set as tee for a separate tee fitting with tee take-off and weight. Choose Set as branch when the outlet pipe is welded into the side of the main pipe with no tee or reducer.",
       },
     ));
   }
@@ -8845,6 +9381,10 @@ function drawingHealthItems() {
 
 function healthCounts(items = drawingHealthItems()) {
   return items.reduce((counts, item) => {
+    if (item.acknowledged) {
+      counts.acknowledged = (counts.acknowledged ?? 0) + 1;
+      return counts;
+    }
     counts[item.severity] = (counts[item.severity] ?? 0) + 1;
     return counts;
   }, {});
@@ -8854,6 +9394,7 @@ function healthSummaryText(items = drawingHealthItems()) {
   const counts = healthCounts(items);
   if (counts.error) return `${counts.error} issue${counts.error === 1 ? "" : "s"} need fixing`;
   if (counts.warning) return `${counts.warning} warning${counts.warning === 1 ? "" : "s"} to review`;
+  if (counts.acknowledged) return `No blocking issues / ${counts.acknowledged} acknowledged`;
   return "No blocking issues";
 }
 
@@ -8878,12 +9419,51 @@ function healthIssueTargetHint(item) {
   return "Show on drawing";
 }
 
+function healthIssueActionHtml(item, index) {
+  const actions = [];
+  if (item.target?.type === "project" && item.target.field === "revision") {
+    actions.push(["set-revision-a", "Set Rev A", "primary"]);
+  }
+  if (healthIssueClickable(item)) {
+    actions.push(["locate", healthIssueTargetHint(item), ""]);
+  }
+  if (item.target?.type === "tee-branch-review" || (item.target?.type === "reducer-node" && item.target.connectionCount >= 3)) {
+    actions.push(["set-tee", "Set as tee", "primary"]);
+    actions.push(["set-branch", "Set as branch", ""]);
+  }
+  if (item.canAcknowledge && item.key) {
+    actions.push(item.acknowledged
+      ? ["reopen", "Reopen check", ""]
+      : ["acknowledge", "Acknowledge & allow issue", "acknowledge"]);
+  }
+  if (!actions.length) return "";
+  return `
+    <div class="health-item-actions">
+      ${actions.map(([action, label, className]) => `
+        <button type="button" class="${escapeHtml(className)}" data-health-action="${escapeHtml(action)}" data-health-index="${index}">${escapeHtml(label)}</button>
+      `).join("")}
+    </div>
+  `;
+}
+
+function healthAcknowledgementHtml(item) {
+  if (!item.acknowledgement) return "";
+  const who = item.acknowledgement.by || "Reviewer";
+  const when = item.acknowledgement.at ? new Date(item.acknowledgement.at).toLocaleString() : "date not recorded";
+  return `
+    <div class="health-acknowledgement">
+      <strong>Acknowledged by ${escapeHtml(who)} / ${escapeHtml(when)}</strong>
+      <span>${escapeHtml(item.acknowledgement.reason)}</span>
+    </div>
+  `;
+}
+
 function updateHealthSummary() {
   if (!healthSummary) return;
   const items = drawingHealthItems();
-  const level = items.some((item) => item.severity === "error")
+  const level = items.some((item) => item.severity === "error" && !item.acknowledged)
     ? "error"
-    : items.some((item) => item.severity === "warning")
+    : items.some((item) => item.severity === "warning" && !item.acknowledged)
     ? "warning"
     : "ok";
   healthSummary.innerHTML = `
@@ -8892,20 +9472,15 @@ function updateHealthSummary() {
       <span>${escapeHtml(projectStatusLabel())}${state.locked ? " / Locked" : ""}</span>
     </div>
     <div class="health-list">
-      ${items.map((item, index) => {
-        const clickable = healthIssueClickable(item);
-        const tag = clickable ? "button" : "div";
-        const attrs = clickable
-          ? ` type="button" data-health-index="${index}" title="${escapeHtml(healthIssueTargetHint(item))}"`
-          : "";
-        return `
-        <${tag} class="health-item ${escapeHtml(item.severity)}${clickable ? " clickable" : ""}"${attrs}>
+      ${items.map((item, index) => `
+        <div class="health-item ${escapeHtml(item.severity)}${item.acknowledged ? " acknowledged" : ""}" data-health-index="${index}">
           <strong>${escapeHtml(item.title)}</strong>
           ${item.detail ? `<span>${escapeHtml(item.detail)}</span>` : ""}
-          ${clickable ? `<em>${escapeHtml(healthIssueTargetHint(item))}</em>` : ""}
-        </${tag}>
-      `;
-      }).join("")}
+          ${item.guidance ? `<p class="health-guidance"><b>How to fix:</b> ${escapeHtml(item.guidance)}</p>` : ""}
+          ${healthAcknowledgementHtml(item)}
+          ${healthIssueActionHtml(item, index)}
+        </div>
+      `).join("")}
     </div>
   `;
 }
@@ -8913,16 +9488,121 @@ function updateHealthSummary() {
 function setupHealthIssueClicks() {
   healthSummary?.addEventListener("click", (event) => {
     if (!(event.target instanceof Element)) return;
-    const row = event.target.closest(".health-item[data-health-index]");
-    if (!row || !healthSummary.contains(row)) return;
-    const index = Number(row.dataset.healthIndex);
+    const actionButton = event.target.closest("[data-health-action][data-health-index]");
+    if (!actionButton || !healthSummary.contains(actionButton)) return;
+    const index = Number(actionButton.dataset.healthIndex);
     const item = drawingHealthItems()[index];
-    if (!item?.target) return;
-    focusHealthIssue(item).catch((error) => {
-      console.warn("Could not focus health issue.", error);
-      showAppNotice(error?.message || "Could not open that check.");
+    if (!item) return;
+    handleHealthIssueAction(item, actionButton.dataset.healthAction).catch((error) => {
+      console.warn("Could not handle health issue.", error);
+      showAppNotice(error?.message || "Could not update that check.");
     });
   });
+}
+
+async function handleHealthIssueAction(item, action) {
+  if (action === "set-revision-a") {
+    if (cloudPermissionReadOnly) {
+      showAppNotice("This team spool is view/comment only. Ask an owner or admin to set the drawing revision.");
+      return;
+    }
+    state.projectInfo = normalizeProjectInfo({ ...state.projectInfo, revision: "A" });
+    state.projectInfoPrompted = true;
+    updateAll();
+    showHealthPanel();
+    showAppNotice("Revision A set. The drawing can now continue through the pre-issue check.");
+    return;
+  }
+  if (action === "locate") {
+    await focusHealthIssue(item);
+    return;
+  }
+  if (action === "set-tee" || action === "set-branch") {
+    if (!ensureDrawingEditable("change this tee/branch connection")) return;
+    const pointIndex = Number(item.target?.pointIndex ?? item.target?.pointIndexes?.[0]);
+    if (!Number.isInteger(pointIndex)) return;
+    const snapshot = createUndoSnapshot();
+    state.selectedPoint = pointIndex;
+    state.activePoint = pointIndex;
+    setNodeConnectionType(pointIndex, action === "set-branch" ? "branch" : "tee", { update: false });
+    if (item.key) {
+      state.healthAcknowledgements = normalizeHealthAcknowledgements(state.healthAcknowledgements);
+      delete state.healthAcknowledgements[item.key];
+    }
+    recordHistory({ type: "snapshot", snapshot });
+    updateAll();
+    showHealthPanel();
+    showAppNotice(action === "set-branch"
+      ? "Connection set as a welded branch. Tee and reducer take-off will not be used there."
+      : "Connection set as a tee. The app will add the smaller-leg reducer when the connected sizes require one.");
+    return;
+  }
+  if (action === "acknowledge") {
+    await acknowledgeHealthIssue(item);
+    return;
+  }
+  if (action === "reopen") {
+    reopenHealthIssue(item);
+  }
+}
+
+async function acknowledgeHealthIssue(item) {
+  if (!item?.canAcknowledge || !item.key) return;
+  if (cloudPermissionReadOnly) {
+    showAppNotice("This team spool is view/comment only. Ask a checker, admin or owner to acknowledge the exception.");
+    return;
+  }
+  const response = await openFieldInputDialog({
+    title: "Acknowledge drawing exception",
+    label: "Reason this can proceed",
+    value: "",
+    placeholder: "Engineering confirmed branch weld; reducer supplied elsewhere...",
+    help: "The exception, your name and the time are saved with the spool and added to activity history.",
+    submitLabel: "Acknowledge exception",
+    multiline: true,
+  });
+  if (response === null) return;
+  const reason = String(response).trim().slice(0, 500);
+  if (!reason) {
+    showAppNotice("Enter a reason before acknowledging this drawing exception.");
+    return;
+  }
+  const now = new Date().toISOString();
+  const by = checkerName() || "Reviewer";
+  state.healthAcknowledgements = normalizeHealthAcknowledgements(state.healthAcknowledgements);
+  state.healthAcknowledgements[item.key] = { title: item.title, reason, by, at: now };
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "review",
+    `Acknowledged drawing check "${item.title}": ${reason}`,
+    now,
+  );
+  persistState();
+  updateHealthSummary();
+  updateWorkflowSummary();
+  showAppNotice("Exception acknowledged. It no longer blocks approval or issue, and the reason is recorded.");
+}
+
+function reopenHealthIssue(item) {
+  if (!item?.key) return;
+  if (cloudPermissionReadOnly) {
+    showAppNotice("This team spool is view/comment only. Ask a checker, admin or owner to reopen the check.");
+    return;
+  }
+  state.healthAcknowledgements = normalizeHealthAcknowledgements(state.healthAcknowledgements);
+  if (!state.healthAcknowledgements[item.key]) return;
+  delete state.healthAcknowledgements[item.key];
+  const now = new Date().toISOString();
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "review",
+    `Reopened drawing check "${item.title}".`,
+    now,
+  );
+  persistState();
+  updateHealthSummary();
+  updateWorkflowSummary();
+  showAppNotice("Drawing check reopened and will block issue again until fixed or acknowledged.");
 }
 
 async function focusHealthIssue(item) {
@@ -8953,22 +9633,16 @@ async function focusHealthIssue(item) {
     return;
   }
 
-  const segmentIndexes = healthTargetSegmentIndexes(target);
-  const pointIndexes = healthTargetPointIndexes(target);
-  applyAppMode("edit", { keepTool: true, activateTab: false });
-  setSelectedSegments(segmentIndexes);
-  state.selectedPoint = pointIndexes[0] ?? null;
-  state.selectedFitting = null;
-  state.selectedNote = null;
-  state.activeTool = "select";
-  activateInspectorTab("properties");
+  if (appMode !== "review") {
+    applyAppMode("review", { keepTool: true, activateTab: false });
+  }
+  activateInspectorTab("checks");
   startHealthIssueHighlight(target, item.title);
-  updateControls();
-  updateSelectionControls();
-  updatePropertiesPanel();
   drawIso();
   if (isTabletLayout()) {
-    showMobilePanel("drawing");
+    showMobilePanel("inspector");
+  } else {
+    setInspectorDrawerOpen(true);
   }
 }
 
@@ -9053,16 +9727,19 @@ function preIssueChecklist() {
   return {
     projectMissing,
     health,
-    errors: health.filter((item) => item.severity === "error"),
-    warnings: health.filter((item) => item.severity === "warning"),
+    // Missing project fields are reported by projectMissing, avoiding a second
+    // generic drawing-error count for the same fixable item.
+    errors: health.filter((item) => item.severity === "error" && !item.acknowledged && item.target?.type !== "project"),
+    warnings: health.filter((item) => item.severity === "warning" && !item.acknowledged),
+    acknowledged: health.filter((item) => item.acknowledged),
     regressionResults,
     regressionFailures: regressionResults.filter((result) => result.passed !== true),
   };
 }
 
 function preIssueChecklistStatus(checks = preIssueChecklist()) {
-  if (checks.projectMissing.length || checks.errors.length || checks.regressionFailures.length) return "blocked";
-  if (checks.warnings.length || !state.checkedAt) return "review";
+  if (checks.projectMissing.length || checks.errors.length) return "blocked";
+  if (checks.warnings.length || checks.regressionFailures.length || !state.checkedAt) return "review";
   return "ready";
 }
 
@@ -9087,7 +9764,7 @@ function preIssueChecklistCardHtml() {
     ? `${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} to review`
     : "No drawing issues";
   const testText = checks.regressionFailures.length
-    ? `${checks.regressionFailures.length} test kit check${checks.regressionFailures.length === 1 ? "" : "s"} failed`
+    ? `${checks.regressionFailures.length} app self-test${checks.regressionFailures.length === 1 ? "" : "s"} need review; not a spool blocker`
     : "Test kit passed";
   const checkedText = state.checkedAt
     ? `Checked by ${state.checkedBy || "unknown"}`
@@ -9109,9 +9786,15 @@ function preIssueChecklistCardHtml() {
       <ul class="workflow-list preissue-list">
         ${preIssueChecklistRowHtml("Project", projectText, checks.projectMissing.length ? "blocked" : "ready")}
         ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.warnings.length ? "review" : "ready")}
-        ${preIssueChecklistRowHtml("Test kit", testText, checks.regressionFailures.length ? "blocked" : "ready")}
+        ${checks.acknowledged.length ? preIssueChecklistRowHtml("Acknowledged", `${checks.acknowledged.length} recorded exception${checks.acknowledged.length === 1 ? "" : "s"}`, "review") : ""}
+        ${preIssueChecklistRowHtml("Test kit", testText, checks.regressionFailures.length ? "review" : "ready")}
         ${preIssueChecklistRowHtml("Checked", checkedText, state.checkedAt ? "ready" : "review")}
       </ul>
+      <p class="preissue-help">Drawing errors must be fixed or acknowledged with a reason. Test-kit results diagnose SpoolMate itself and do not block this spool.</p>
+      <div class="preissue-actions">
+        <button type="button" data-workflow-action="open-health">Review drawing checks</button>
+        ${checks.regressionFailures.length ? `<button type="button" data-workflow-action="open-test-kit">Open app test kit</button>` : ""}
+      </div>
     </div>
   `;
 }
@@ -9133,62 +9816,49 @@ function productionAssigneeChoices() {
 
 function productionWorkflowCardHtml() {
   const production = normalizeProductionInfo(state.productionInfo);
-  const disabledAttr = cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : "";
-  const lastUpdated = production.lastUpdatedAt
-    ? `${new Date(production.lastUpdatedAt).toLocaleString()}${production.lastUpdatedBy ? ` by ${production.lastUpdatedBy}` : ""}`
-    : "Not updated yet";
-  const assigneeOptions = productionAssigneeChoices()
-    .map((choice) => `<option value="${escapeHtml(choice)}"></option>`)
-    .join("");
-
   return `
-    <div class="workflow-card production-workflow-card">
-      <strong>Production allocation</strong>
-      <div class="production-grid">
-        <label class="field">
-          <span>Assigned to</span>
-          <input data-production-field="assignee" list="productionAssigneeOptions" type="text" maxlength="80" value="${escapeHtml(production.assignee)}" placeholder="Unassigned"${disabledAttr} />
-        </label>
-        <datalist id="productionAssigneeOptions">${assigneeOptions}</datalist>
-        <label class="field">
-          <span>Due date</span>
-          <input data-production-field="dueDate" type="date" value="${escapeHtml(production.dueDate)}"${disabledAttr} />
-        </label>
-        <label class="field">
-          <span>Due time</span>
-          <input data-production-field="dueTime" type="time" value="${escapeHtml(production.dueTime)}"${disabledAttr} />
-        </label>
-        <label class="field">
-          <span>Priority</span>
-          <select data-production-field="priority"${disabledAttr}>
-            ${[...PRODUCTION_PRIORITIES].map((priority) => `<option value="${priority}"${production.priority === priority ? " selected" : ""}>${escapeHtml(productionPriorityLabel(priority))}</option>`).join("")}
-          </select>
-        </label>
-        <label class="toggle production-hold-toggle">
-          <input data-production-field="hold" type="checkbox"${production.hold ? " checked" : ""}${disabledAttr} />
-          <span>On hold</span>
-        </label>
-        <label class="field production-hold-reason">
-          <span>Hold / shop note</span>
-          <input data-production-field="holdReason" type="text" maxlength="140" value="${escapeHtml(production.holdReason)}" placeholder="Reason, missing fitting, client hold..."${disabledAttr} />
-        </label>
+    <div class="workflow-card production-workflow-card production-workflow-summary">
+      <div class="production-activity-head">
+        <strong>Production</strong>
+        <span>Managed from Jobs</span>
       </div>
-      <span class="production-updated">Last production update: ${escapeHtml(lastUpdated)}</span>
+      <ul class="workflow-list">
+        <li><span>Assigned</span><strong>${escapeHtml(production.assignee || "Unassigned")}</strong></li>
+        <li><span>Due</span><strong>${escapeHtml([production.dueDate, production.dueTime].filter(Boolean).join(" ") || "Not set")}</strong></li>
+        <li><span>Priority</span><strong>${escapeHtml(productionPriorityLabel(production.priority))}</strong></li>
+        <li><span>Hold</span><strong>${escapeHtml(production.hold ? production.holdReason || "On hold" : "No")}</strong></li>
+      </ul>
+      <button type="button" data-workflow-action="open-jobs">Open Jobs</button>
     </div>
   `;
 }
 
+function productionActivityEntryHtml(entry) {
+  return `
+    <li>
+      <span>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</span>
+      <strong>${escapeHtml(entry.text)}</strong>
+    </li>
+  `;
+}
+
 function productionActivityCardHtml() {
-  const activity = normalizeProductionActivity(state.productionActivity).slice(-8).reverse();
+  const activity = normalizeProductionActivity(state.productionActivity).reverse();
+  const recent = activity.slice(0, 8);
+  const older = activity.slice(8);
   return `
     <div class="workflow-card production-activity-card">
-      <strong>Activity history</strong>
-      ${activity.length ? `<ul class="production-activity-list">${activity.map((entry) => `
-        <li>
-          <span>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</span>
-          <strong>${escapeHtml(entry.text)}</strong>
-        </li>
-      `).join("")}</ul>` : "<span>No production activity recorded yet.</span>"}
+      <div class="production-activity-head">
+        <strong>Activity history</strong>
+        <span>${activity.length} retained event${activity.length === 1 ? "" : "s"}</span>
+      </div>
+      ${recent.length ? `<ul class="production-activity-list">${recent.map(productionActivityEntryHtml).join("")}</ul>` : "<span>No production activity recorded yet.</span>"}
+      ${older.length ? `
+        <details class="production-activity-older">
+          <summary>View ${older.length} older event${older.length === 1 ? "" : "s"}</summary>
+          <ul class="production-activity-list">${older.map(productionActivityEntryHtml).join("")}</ul>
+        </details>
+      ` : ""}
     </div>
   `;
 }
@@ -9196,6 +9866,12 @@ function productionActivityCardHtml() {
 function updateWorkflowSummary() {
   if (!workflowSummary) return;
   const history = normalizeRevisionHistory(state.revisionHistory);
+  const reviewReady = projectStatusAtLeast(state.projectStatus, "readycheck");
+  const reviewDisabledAttr = cloudPermissionReadOnly
+    ? ' disabled title="View/comment only for your team role"'
+    : !reviewReady
+    ? ' disabled title="Move the spool to Ready to check before review"'
+    : "";
   workflowSummary.innerHTML = `
     <div class="workflow-card">
       <strong>Drawing workflow</strong>
@@ -9205,21 +9881,27 @@ function updateWorkflowSummary() {
     </div>
     ${preIssueChecklistCardHtml()}
     <div class="workflow-actions">
-      <button type="button" data-workflow-action="mark-checked"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Mark checked</button>
+      <button type="button" data-workflow-action="mark-checked"${reviewDisabledAttr}>Approve drawing</button>
+      <button type="button" data-workflow-action="return-changes"${reviewDisabledAttr}>Return for changes</button>
       <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Issue drawing</button>
       <button type="button" data-workflow-action="new-revision"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>New revision</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
       <button type="button" data-workflow-action="save-defaults">Save defaults</button>
     </div>
     ${productionWorkflowCardHtml()}
-    ${productionActivityCardHtml()}
     <div class="revision-card">
       <strong>Revision history</strong>
+      <div class="revision-current">
+        <strong>Current Rev ${escapeHtml(normalizeProjectInfo(state.projectInfo).revision || "-")}</strong>
+        <span>${escapeHtml(state.checkedAt ? `Checked by ${state.checkedBy || "unknown"}` : "Not checked")}</span>
+        <span>${escapeHtml(state.issuedAt ? `Issued by ${state.issuedBy || "unknown"}` : "Not issued")}</span>
+      </div>
       ${history.length ? `<ul class="revision-list">${history.map((entry) => `
         <li>
           <div>
             <strong>Rev ${escapeHtml(entry.revision || "-")} / ${escapeHtml(projectStatusLabel(entry.status))}</strong>
             <span>${escapeHtml(entry.createdAt ? new Date(entry.createdAt).toLocaleString() : "not dated")}</span>
+            <small>${escapeHtml(entry.checkedAt ? `Checked by ${entry.checkedBy || "unknown"}` : "Not checked")} / ${escapeHtml(entry.issuedAt ? `Issued by ${entry.issuedBy || "unknown"}` : "Not issued")}</small>
           </div>
           <button type="button" data-restore-revision="${escapeHtml(entry.id)}">Restore</button>
         </li>
@@ -9228,29 +9910,43 @@ function updateWorkflowSummary() {
   `;
 
   workflowSummary.querySelectorAll("[data-workflow-action]").forEach((button) => {
-    button.addEventListener("click", () => handleWorkflowAction(button.dataset.workflowAction));
+    button.addEventListener("click", () => {
+      handleWorkflowAction(button.dataset.workflowAction).catch((error) => {
+        console.warn("Drawing workflow action failed.", error);
+        showAppNotice(error?.message || "Could not update drawing workflow.");
+      });
+    });
   });
   workflowSummary.querySelectorAll("[data-restore-revision]").forEach((button) => {
     button.addEventListener("click", () => restoreRevision(button.dataset.restoreRevision));
   });
   workflowSummary.querySelectorAll("[data-production-field]").forEach((field) => {
-    field.addEventListener("change", () => handleProductionFieldChange(field));
+    field.addEventListener("change", () => {
+      handleProductionFieldChange(field).catch((error) => {
+        console.warn("Production allocation update failed.", error);
+        showAppNotice(error?.message || "Could not update production allocation.");
+      });
+    });
   });
 }
 
-function handleWorkflowAction(action) {
-  if (cloudPermissionReadOnly && (action === "mark-checked" || action === "issue-drawing" || action === "new-revision")) {
+async function handleWorkflowAction(action) {
+  if (cloudPermissionReadOnly && (action === "mark-checked" || action === "return-changes" || action === "issue-drawing" || action === "new-revision")) {
     showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change workflow status.");
     return;
   }
-  if (action === "mark-checked") markDrawingChecked();
-  if (action === "issue-drawing") issueDrawing();
+  if (action === "mark-checked") await markDrawingChecked();
+  if (action === "return-changes") await returnDrawingForChanges();
+  if (action === "issue-drawing") await issueDrawing();
   if (action === "new-revision") createNextRevision();
   if (action === "share-readonly") shareReadOnlyProject();
   if (action === "save-defaults") saveCurrentSettingsAsDefaults();
+  if (action === "open-jobs") await openBrowserProject();
+  if (action === "open-health") showHealthPanel();
+  if (action === "open-test-kit") openRegressionDialog();
 }
 
-function handleProductionFieldChange(field) {
+async function handleProductionFieldChange(field) {
   const key = field?.dataset?.productionField;
   if (!key) return;
   if (cloudPermissionReadOnly) {
@@ -9260,10 +9956,33 @@ function handleProductionFieldChange(field) {
   }
   const previous = normalizeProductionInfo(state.productionInfo);
   const value = field.type === "checkbox" ? field.checked : field.value;
+  if (key === "holdReason" && previous.hold && !String(value ?? "").trim()) {
+    field.value = previous.holdReason;
+    showAppNotice("A spool on hold must keep a hold reason. Remove the hold first if it is no longer blocked.");
+    return;
+  }
+  let requiredHoldReason = "";
+  if (key === "hold" && value === true) {
+    const response = await openFieldInputDialog({
+      title: "Place spool on hold",
+      label: "Hold reason",
+      value: previous.holdReason,
+      placeholder: "Missing flange, client hold, material unavailable...",
+      help: "A hold reason is required so the team knows what must be resolved.",
+      submitLabel: "Place on hold",
+    });
+    requiredHoldReason = String(response ?? "").trim().slice(0, 140);
+    if (!requiredHoldReason) {
+      field.checked = false;
+      showAppNotice("Hold was not applied. Enter a reason before placing a spool on hold.");
+      return;
+    }
+  }
   const now = new Date().toISOString();
   state.productionInfo = normalizeProductionInfo({
     ...previous,
     [key]: value,
+    ...(requiredHoldReason ? { holdReason: requiredHoldReason } : {}),
     lastUpdatedBy: checkerName(),
     lastUpdatedAt: now,
   });
@@ -9294,12 +10013,29 @@ function checkerName() {
   return cloudUser?.email || normalizeProjectInfo(state.projectInfo).drawnBy || "";
 }
 
+async function recordReviewConversationMessage(body) {
+  if (!cloudUser || !hasActiveCloudLicense() || !state.projectId || !currentProjectHasCloudRecord()) return false;
+  try {
+    await insertProjectCommentRecord(body);
+    await loadProjectComments({ silent: true });
+    return true;
+  } catch (error) {
+    console.warn("Could not add review message to spool conversation.", error);
+    showAppNotice("Review was recorded, but its spool conversation message could not be added.");
+    return false;
+  }
+}
+
 async function markDrawingChecked() {
   if (cloudPermissionReadOnly) {
     showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to mark it checked.");
     return;
   }
-  const issues = drawingHealthItems().filter((item) => item.severity === "error");
+  if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
+    showAppNotice("Move the spool to Ready to check before approving it.");
+    return;
+  }
+  const issues = drawingHealthItems().filter((item) => item.severity === "error" && !item.acknowledged);
   if (issues.length) {
     const proceed = await confirmAppAction(`${issues.length} health issue${issues.length === 1 ? "" : "s"} still need fixing. Mark checked anyway?`, {
       title: "Health issues remain",
@@ -9320,9 +10056,21 @@ async function markDrawingChecked() {
     submitLabel: "Mark checked",
   });
   if (name === null) return;
+  const reviewNote = await openFieldInputDialog({
+    title: "Approve drawing",
+    label: "Checker comment (optional)",
+    value: "",
+    placeholder: "Checked against dimensions, fittings and project requirements...",
+    help: "This comment is added to the spool conversation. Leave it blank when no extra note is needed.",
+    submitLabel: "Approve drawing",
+    multiline: true,
+  });
+  if (reviewNote === null) return;
+  const checkedBy = String(name).trim().slice(0, 64) || checkerName() || "unknown";
+  const approvalComment = String(reviewNote).trim().slice(0, 900);
   const previousStatus = normalizeProjectStatus(state.projectStatus);
   const now = new Date().toISOString();
-  state.checkedBy = String(name).trim().slice(0, 64);
+  state.checkedBy = checkedBy;
   state.checkedAt = now;
   state.projectStatus = "checked";
   state.issuedBy = "";
@@ -9331,10 +10079,83 @@ async function markDrawingChecked() {
   if (previousStatus !== "checked") {
     state.productionActivity = addProductionActivity(state.productionActivity, "status", `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel("checked")}.`, now);
   }
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "review",
+    `Approved by ${checkedBy}${approvalComment ? `: ${approvalComment}` : "."}`,
+    now,
+  );
   state.locked = true;
   updateControls();
   updateAll();
+  await recordReviewConversationMessage(`APPROVED by ${checkedBy}${approvalComment ? `: ${approvalComment}` : "."}`);
+  showAppNotice("Drawing approved and locked for issue.");
   showHealthPanel();
+}
+
+async function returnDrawingForChanges() {
+  if (cloudPermissionReadOnly) {
+    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to return it for changes.");
+    return false;
+  }
+  if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
+    showAppNotice("Only spools in Ready to check or a later stage can be returned for changes.");
+    return false;
+  }
+  const reason = await openFieldInputDialog({
+    title: "Return drawing for changes",
+    label: "Required checker comment",
+    value: "",
+    placeholder: "Explain exactly what needs changing...",
+    help: "The drawing will return to Draft and this comment will be kept in the spool conversation and activity history.",
+    submitLabel: "Return for changes",
+    multiline: true,
+  });
+  if (reason === null) return false;
+  const comment = String(reason).trim().slice(0, 900);
+  if (!comment) {
+    showAppNotice("Enter a checker comment before returning the drawing.");
+    return false;
+  }
+
+  const reviewer = checkerName() || "Checker";
+  const previousStatus = normalizeProjectStatus(state.projectStatus);
+  const wasIssued = Boolean(state.issuedAt) || projectStatusAtLeast(previousStatus, "issued");
+  addRevisionSnapshot(`Returned for changes: ${comment.slice(0, 90)}`);
+  if (wasIssued) {
+    const project = normalizeProjectInfo(state.projectInfo);
+    state.projectInfo = normalizeProjectInfo({ ...project, revision: nextRevisionValue(project.revision) });
+  }
+  const now = new Date().toISOString();
+  state.projectStatus = "draft";
+  state.checkedBy = "";
+  state.checkedAt = "";
+  state.issuedBy = "";
+  state.issuedAt = "";
+  state.locked = false;
+  updateProductionStatusMeta("draft", now);
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "review",
+    `Returned for changes by ${reviewer}: ${comment}`,
+    now,
+  );
+  if (wasIssued) {
+    state.productionActivity = addProductionActivity(
+      state.productionActivity,
+      "revision",
+      `Opened revision ${normalizeProjectInfo(state.projectInfo).revision || "-"} after checker return.`,
+      now,
+    );
+  }
+  updateControls();
+  updateAll();
+  await recordReviewConversationMessage(`RETURNED FOR CHANGES by ${reviewer}: ${comment}`);
+  showAppNotice(wasIssued
+    ? `Issued revision preserved. Rev ${normalizeProjectInfo(state.projectInfo).revision || "-"} is ready for changes.`
+    : "Drawing returned to Draft with the checker comment recorded.");
+  showHealthPanel();
+  return true;
 }
 
 function updateProductionStatusMeta(nextStatus, now = new Date().toISOString()) {
@@ -9390,10 +10211,30 @@ function preIssueBlockingMessage(checks) {
   if (checks.errors.length) {
     parts.push(`${checks.errors.length} drawing error${checks.errors.length === 1 ? "" : "s"}`);
   }
-  if (checks.regressionFailures.length) {
-    parts.push(`${checks.regressionFailures.length} test kit failure${checks.regressionFailures.length === 1 ? "" : "s"}`);
-  }
   return parts.join(", ");
+}
+
+async function promptForMissingIssueRevision() {
+  const project = normalizeProjectInfo(state.projectInfo);
+  if (project.revision) return true;
+  const revision = await openFieldInputDialog({
+    title: "Set drawing revision",
+    label: "Revision",
+    value: "A",
+    placeholder: "A",
+    help: "Initial drawings normally start at A. Change this if your company uses another revision format.",
+    submitLabel: "Set revision and continue",
+  });
+  if (revision === null) return false;
+  const value = String(revision).trim().slice(0, 16);
+  if (!value) {
+    showAppNotice("Enter a revision before issuing the drawing.");
+    return false;
+  }
+  state.projectInfo = normalizeProjectInfo({ ...project, revision: value });
+  state.projectInfoPrompted = true;
+  updateAll();
+  return true;
 }
 
 async function issueDrawing(options = {}) {
@@ -9403,22 +10244,41 @@ async function issueDrawing(options = {}) {
     return false;
   }
 
-  const checks = preIssueChecklist();
+  let checks = preIssueChecklist();
+  if (checks.projectMissing.includes("revision")) {
+    const revisionSet = await promptForMissingIssueRevision();
+    if (!revisionSet) {
+      showHealthPanel();
+      updateWorkflowSummary();
+      return false;
+    }
+    checks = preIssueChecklist();
+  }
   const blocking = preIssueBlockingMessage(checks);
   if (blocking) {
-    showAppNotice(`Pre-issue check blocked: ${blocking}.`);
+    const nextStep = checks.projectMissing.length
+      ? "Complete the project details shown in Drawing checks."
+      : "Fix the drawing item, or acknowledge an intentional reducer/tee exception with a reason.";
+    showAppNotice(`Pre-issue check blocked: ${blocking}. ${nextStep}`);
     showHealthPanel();
     updateWorkflowSummary();
     return false;
   }
 
-  if (checks.warnings.length || !state.checkedAt) {
+  if (!state.checkedAt) {
+    showAppNotice("Approve the drawing before issuing it so the checker is recorded.");
+    showHealthPanel();
+    updateWorkflowSummary();
+    return false;
+  }
+
+  if (checks.warnings.length || checks.regressionFailures.length) {
     const warningBits = [];
     if (checks.warnings.length) {
       warningBits.push(`${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} still need review`);
     }
-    if (!state.checkedAt) {
-      warningBits.push("the drawing is not marked checked");
+    if (checks.regressionFailures.length) {
+      warningBits.push(`${checks.regressionFailures.length} SpoolMate self-test${checks.regressionFailures.length === 1 ? "" : "s"} need review but do not describe this spool`);
     }
     const proceed = await confirmAppAction(`${warningBits.join(". ")}. Issue drawing anyway?`, {
       title: "Pre-issue review",
@@ -9445,7 +10305,6 @@ async function issueDrawing(options = {}) {
   }
 
   const issuedBy = String(name).trim().slice(0, 64) || checkerName() || "unknown";
-  const previousStatus = normalizeProjectStatus(state.projectStatus);
   const now = new Date().toISOString();
   state.issuedBy = issuedBy;
   state.issuedAt = now;
@@ -9457,9 +10316,13 @@ async function issueDrawing(options = {}) {
   state.issuedBy = issuedBy;
   state.issuedAt = now;
   state.locked = true;
-  if (previousStatus === "issued") {
-    state.productionActivity = addProductionActivity(state.productionActivity, "status", `Issued again by ${issuedBy}.`, now);
-  }
+  const issuedRevision = normalizeProjectInfo(state.projectInfo).revision || "-";
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "revision",
+    `Revision ${issuedRevision} issued by ${issuedBy}.`,
+    now,
+  );
   if (options.targetStatus && normalizeProjectStatus(options.targetStatus) !== "issued") {
     applyProjectStatusChange(options.targetStatus, { now: new Date().toISOString() });
   }
@@ -9502,6 +10365,10 @@ function addRevisionSnapshot(note = "Saved revision") {
     createdAt: new Date().toISOString(),
     status: normalizeProjectStatus(state.projectStatus),
     note,
+    checkedBy: String(state.checkedBy ?? "").trim(),
+    checkedAt: String(state.checkedAt ?? "").trim(),
+    issuedBy: String(state.issuedBy ?? "").trim(),
+    issuedAt: String(state.issuedAt ?? "").trim(),
     state: statePayload({ includeRevisionHistory: false }),
   });
   state.revisionHistory = history.slice(0, 12);
@@ -9513,15 +10380,24 @@ function createNextRevision() {
     return;
   }
   const project = normalizeProjectInfo(state.projectInfo);
+  const previousRevision = project.revision || "-";
+  const nextRevision = nextRevisionValue(project.revision);
   addRevisionSnapshot("Before new revision");
   state.projectInfo = normalizeProjectInfo({
     ...project,
-    revision: nextRevisionValue(project.revision),
+    revision: nextRevision,
   });
   state.projectStatus = "draft";
   state.checkedBy = "";
   state.checkedAt = "";
+  state.issuedBy = "";
+  state.issuedAt = "";
   state.locked = false;
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "revision",
+    `Created revision ${nextRevision} from revision ${previousRevision}.`,
+  );
   updateControls();
   updateAll();
   showHealthPanel();
@@ -9552,6 +10428,11 @@ async function restoreRevision(revisionId) {
   state.revisionHistory = history;
   state.projectStatus = "draft";
   state.locked = false;
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "revision",
+    `Restored revision ${entry.revision || "-"} into an editable Draft.`,
+  );
   three.userMovedCamera = false;
   setNextIdsFromState(state);
   updateControls();
@@ -9716,15 +10597,18 @@ function updatePipeSizeControls() {
 function setPipeSizeForSegments(indexes, pipeSizeNb) {
   pipeSizeNb = pipeSizeNbForSpec(pipeSizeNb, state.pipeSpec);
   const previousDefault = state.pipeSizeNb;
-  const selected = normalizeSelectedSegments(indexes, state.edges.length);
-  if (!selected.length) {
+  const requestedSelected = normalizeSelectedSegments(indexes, state.edges.length);
+  if (!requestedSelected.length) {
     state.pipeSizeNb = pipeSizeNb;
     updateAll();
     return;
   }
   if (!ensureDrawingEditable("change pipe sizes")) return;
+  const selected = branchMainLinkedSegmentIndexes(requestedSelected);
+  const linkedMainCount = Math.max(0, selected.length - requestedSelected.length);
 
-  const changed = selected.some((segmentIndex) => normalizePipeSize(state.edges[segmentIndex]?.pipeSizeNb ?? previousDefault) !== pipeSizeNb);
+  const previousSizes = selected.map((segmentIndex) => normalizePipeSize(state.edges[segmentIndex]?.pipeSizeNb ?? previousDefault));
+  const changed = previousSizes.some((sizeNb) => sizeNb !== pipeSizeNb);
   const snapshot = changed ? createUndoSnapshot() : null;
   state.pipeSizeNb = pipeSizeNb;
   for (const segmentIndex of selected) {
@@ -9733,8 +10617,28 @@ function setPipeSizeForSegments(indexes, pipeSizeNb) {
     }
   }
   setSelectedSegments(selected);
-  if (snapshot) recordHistory({ type: "snapshot", snapshot });
+  if (snapshot) {
+    recordHistory({ type: "snapshot", snapshot });
+    const uniquePreviousSizes = [...new Set(previousSizes)];
+    const previousLabel = uniquePreviousSizes.length === 1
+      ? pipeSizeDisplayLabelByNb(uniquePreviousSizes[0])
+      : "mixed sizes";
+    const nextLabel = pipeSizeDisplayLabelByNb(pipeSizeNb);
+    const runText = selected.length === 1
+      ? `Run ${selected[0] + 1}`
+      : linkedMainCount
+      ? `${selected.length} continuous branch-main runs`
+      : `${selected.length} selected runs`;
+    state.productionActivity = addProductionActivity(
+      state.productionActivity,
+      "pipe-size",
+      `Changed ${runText} from ${previousLabel} to ${nextLabel}.`,
+    );
+  }
   updateAll();
+  if (changed && linkedMainCount) {
+    showAppNotice(`Updated ${selected.length} continuous main-pipe sections through the branch. The branch outlet size was left unchanged.`);
+  }
 }
 
 function updateSelectionControls() {
@@ -9771,23 +10675,38 @@ function updateWorkflowControls() {
     projectStatusSelect.disabled = cloudPermissionReadOnly;
     projectStatusSelect.title = cloudPermissionReadOnly ? "Team members can view/comment only. Ask an owner/admin to issue or change status." : "";
   }
+  if (projectAssigneeReadout) {
+    const assignee = normalizeProductionInfo(state.productionInfo).assignee.trim();
+    projectAssigneeReadout.textContent = assignee ? `Assigned: ${assignee}` : "Unassigned";
+    projectAssigneeReadout.classList.toggle("assigned", Boolean(assignee));
+  }
   if (projectLockToggle) {
-    projectLockToggle.checked = state.locked === true || cloudPermissionReadOnly;
-    projectLockToggle.disabled = cloudPermissionReadOnly;
-    projectLockToggle.title = cloudPermissionReadOnly ? "This cloud spool is view/comment only for your team role." : "";
+    const issuedLocked = Boolean(state.issuedAt) || projectStatusAtLeast(state.projectStatus, "issued");
+    if (issuedLocked) state.locked = true;
+    projectLockToggle.checked = state.locked === true || cloudPermissionReadOnly || issuedLocked;
+    projectLockToggle.disabled = cloudPermissionReadOnly || issuedLocked;
+    projectLockToggle.title = cloudPermissionReadOnly
+      ? "This cloud spool is view/comment only for your team role."
+      : issuedLocked
+      ? "Issued drawings stay locked. Use Return for changes or New revision."
+      : "";
   }
 }
 
 function activateInspectorTab(name) {
   const tabs = [...document.querySelectorAll("[data-inspector-tab]")];
   const panels = [...document.querySelectorAll("[data-inspector-panel]")];
+  const requestedTab = tabs.find((tab) => tab.dataset.inspectorTab === name && !tab.hidden);
+  const fallbackTab = tabs.find((tab) => tab.dataset.inspectorTab === APP_MODE_DEFAULT_TAB[appMode] && !tab.hidden)
+    ?? tabs.find((tab) => !tab.hidden);
+  const activeName = (requestedTab ?? fallbackTab)?.dataset.inspectorTab ?? "properties";
   for (const tab of tabs) {
-    const active = tab.dataset.inspectorTab === name;
+    const active = !tab.hidden && tab.dataset.inspectorTab === activeName;
     tab.classList.toggle("active", active);
     tab.setAttribute("aria-selected", String(active));
   }
   for (const panel of panels) {
-    panel.classList.toggle("active", panel.dataset.inspectorPanel === name);
+    panel.classList.toggle("active", panel.dataset.inspectorPanel === activeName);
   }
   refreshPreviewAfterLayoutChange();
   checkTutorialPractice();
@@ -9835,6 +10754,9 @@ function schedulePreviewStabilize() {
 }
 
 function showHealthPanel() {
+  if (appMode !== "review") {
+    applyAppMode("review", { keepTool: true });
+  }
   activateInspectorTab("checks");
   showMobilePanel("inspector");
 }
@@ -9869,15 +10791,31 @@ function updatePropertiesPanel() {
           ...(fitting.weightSource === "manual" ? [["clear-fitting-weight", "Clear manual"]] : []),
           ["delete-fitting", "Delete", "danger"],
         ];
+    const fittingProperties = [
+      ["Run", fitting.segment.index + 1],
+      ["Position", `${formatLength(distance)} mm`],
+      ["Size", pipeSizeSpecLabel(pipeSizeForSegment(fitting.segment))],
+      ["Mode", fittingModeText(fitting)],
+      ["Weight", `${formatMass(fitting.weightKg)} kg ${fitting.weightSource}`],
+    ];
+    if (fitting.fitting.type === "flange") {
+      const flangeSize = pipeSizeForSegment(fitting.segment);
+      const drilling = flangeDrillingDimensions(
+        fittingFlangeStandard(fitting.fitting),
+        flangeSize,
+        pipeRadiusMetres(fitting.segment),
+      );
+      fittingProperties.splice(4, 0,
+        ["Plate", `OD ${formatFlangeTableMm(drilling.odMm)} x ${formatFlangeTableMm(drilling.thicknessMm)} mm`],
+        ["Drilling", `${drilling.boltCount} x ${formatFlangeTableMm(drilling.holeMm)} mm holes / PCD ${formatFlangeTableMm(drilling.pcdMm)} mm`],
+      );
+      if (!drilling.exactSize) {
+        fittingProperties.splice(6, 0, ["Table row", `NB ${drilling.sourceNb} for NB ${drilling.requestedNb}`]);
+      }
+    }
     renderProperties(
       `${fittingActionLabel(fitting.fitting.type)} fitting`,
-      [
-        ["Run", fitting.segment.index + 1],
-        ["Position", `${formatLength(distance)} mm`],
-        ["Size", pipeSizeSpecLabel(pipeSizeForSegment(fitting.segment))],
-        ["Mode", fittingModeText(fitting)],
-        ["Weight", `${formatMass(fitting.weightKg)} kg ${fitting.weightSource}`],
-      ],
+      fittingProperties,
       fittingActions,
     );
     return;
@@ -10238,6 +11176,31 @@ function isSideToolAvailable(id, visibility = readSideToolVisibility(), mode = a
   return isSideToolVisible(id, visibility) && isSideToolAllowedInMode(id, mode);
 }
 
+function elementAllowsAppMode(element, dataKey, mode = appMode) {
+  const modes = element?.dataset?.[dataKey];
+  if (!modes) return true;
+  return modes.split(/\s+/).filter(Boolean).includes(normalizeAppMode(mode));
+}
+
+function updateAppModeVisibility(mode = appMode) {
+  const normalized = normalizeAppMode(mode);
+  for (const group of appModeSettingGroups) {
+    group.hidden = !elementAllowsAppMode(group, "modeSettings", normalized);
+  }
+  for (const tab of document.querySelectorAll("[data-inspector-tab]")) {
+    tab.hidden = !elementAllowsAppMode(tab, "modeTabs", normalized);
+  }
+  for (const trigger of document.querySelectorAll("[data-mode-trigger]")) {
+    trigger.hidden = !elementAllowsAppMode(trigger, "modeTrigger", normalized);
+  }
+  if (fittingsToolButton?.closest("[data-mode-trigger]")?.hidden) {
+    setFittingsToolMenuOpen(false);
+  }
+  if (inspectorModeHint) {
+    inspectorModeHint.textContent = APP_MODE_INSPECTOR_HINT[normalized] ?? APP_MODE_INSPECTOR_HINT.draw;
+  }
+}
+
 function defaultToolForMode(mode = appMode) {
   return APP_MODE_DEFAULT_TOOL[normalizeAppMode(mode)] ?? "draw";
 }
@@ -10335,6 +11298,7 @@ function applyAppMode(mode, options = {}) {
     storeAppMode(normalized);
   }
 
+  updateAppModeVisibility(normalized);
   applySideToolVisibility({ keepActive: true });
   const activeAvailable = state.activeTool && isSideToolAvailable(state.activeTool);
   if (options.keepTool === true && activeAvailable) {
@@ -10347,8 +11311,10 @@ function applyAppMode(mode, options = {}) {
     activateInspectorTab(APP_MODE_DEFAULT_TAB[normalized] ?? "properties");
   }
 
-  if ((normalized === "review" || normalized === "export") && isTabletLayout()) {
+  if (normalized === "review" || normalized === "export" || hasInspectorSelection()) {
     showMobilePanel("inspector");
+  } else if (!isTabletLayout()) {
+    setInspectorDrawerOpen(false);
   }
 
   closeDrawingContextMenu();
@@ -10408,6 +11374,38 @@ function setFullscreenButtonState(button, active) {
   if (label) label.textContent = active ? "Exit" : "Full";
 }
 
+function setFocusModeButtonState() {
+  if (!drawingFullscreenButton) return;
+  drawingFullscreenButton.setAttribute("aria-pressed", String(focusModeActive));
+  drawingFullscreenButton.title = focusModeActive ? "Exit Focus mode" : "Enter Focus mode";
+  drawingFullscreenButton.setAttribute("aria-label", drawingFullscreenButton.title);
+  const label = drawingFullscreenButton.querySelector("span");
+  if (label) label.textContent = focusModeActive ? "Exit" : "Focus";
+}
+
+function setFocusMode(active) {
+  focusModeActive = active === true;
+  document.body.classList.toggle("focus-mode", focusModeActive);
+  if (focusModeActive) {
+    setInspectorDrawerOpen(false);
+    setPreviewHidden(true);
+    setFittingsToolMenuOpen(false);
+    closeActionMenu();
+    closeDrawingContextMenu();
+    if (isTabletLayout()) showMobilePanel("drawing");
+  }
+  setFocusModeButtonState();
+  syncDrawingContextMenuHost();
+  requestAnimationFrame(() => {
+    drawIso();
+    resizeThree();
+  });
+}
+
+function toggleFocusMode() {
+  setFocusMode(!focusModeActive);
+}
+
 function updatePanelFullscreenState() {
   const native = browserFullscreenElement();
   for (const panel of [drawingPanel, previewPanel]) {
@@ -10421,7 +11419,7 @@ function updatePanelFullscreenState() {
   document.body.classList.toggle("drawing-panel-fullscreen", drawingFullscreen);
   document.body.classList.toggle("preview-panel-fullscreen", previewFullscreen);
   updatePreviewFloatingState();
-  setFullscreenButtonState(drawingFullscreenButton, drawingFullscreen);
+  setFocusModeButtonState();
   setFullscreenButtonState(previewFullscreenButton, previewFullscreen);
   syncDrawingContextMenuHost();
   if (!drawingContextMenu.hidden) clampDrawingContextMenuToViewport();
@@ -10453,7 +11451,7 @@ async function togglePanelFullscreen(panel) {
 }
 
 function setupPanelFullscreen() {
-  drawingFullscreenButton?.addEventListener("click", () => togglePanelFullscreen(drawingPanel));
+  drawingFullscreenButton?.addEventListener("click", toggleFocusMode);
   previewFullscreenButton?.addEventListener("click", () => togglePanelFullscreen(previewPanel));
   document.addEventListener("fullscreenchange", () => {
     if (!browserFullscreenElement()) appFullscreenPanel = null;
@@ -10549,8 +11547,8 @@ function defaultPreviewFloatBounds() {
   const margin = coarse ? 10 : 18;
   const availableWidth = Math.max(260, window.innerWidth - sideReserve - margin * 2);
   const availableHeight = Math.max(200, window.innerHeight - bottomReserve - margin * 2);
-  const width = Math.min(coarse ? 420 : 460, availableWidth);
-  const height = Math.min(coarse ? 320 : 360, availableHeight);
+  const width = Math.min(coarse ? 390 : 420, availableWidth);
+  const height = Math.min(coarse ? 290 : 310, availableHeight);
   return {
     left: window.innerWidth - width - margin,
     top: window.innerHeight - bottomReserve - height - margin,
@@ -10686,6 +11684,7 @@ function finishPreviewFloatDrag(event) {
   previewPanel.releasePointerCapture?.(event.pointerId);
   previewPanel.classList.remove("preview-floating-dragging", "preview-floating-resizing");
   previewFloatDrag = null;
+  storePreviewFloatBoundsPreference(previewFloatBounds);
   schedulePreviewStabilize();
   event.preventDefault();
 }
@@ -10793,6 +11792,32 @@ function loadPreviewFloatPreference() {
     // Default below keeps first use cleaner if local storage is not available.
   }
   return true;
+}
+
+function loadPreviewFloatBoundsPreference() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(PREVIEW_FLOAT_BOUNDS_KEY) || "null");
+    if (!saved || typeof saved !== "object") return null;
+    const values = [saved.left, saved.top, saved.width, saved.height].map(Number);
+    if (values.some((value) => !Number.isFinite(value))) return null;
+    return { left: values[0], top: values[1], width: values[2], height: values[3] };
+  } catch {
+    return null;
+  }
+}
+
+function storePreviewFloatBoundsPreference(bounds) {
+  if (!bounds) return;
+  try {
+    localStorage.setItem(PREVIEW_FLOAT_BOUNDS_KEY, JSON.stringify({
+      left: Math.round(bounds.left),
+      top: Math.round(bounds.top),
+      width: Math.round(bounds.width),
+      height: Math.round(bounds.height),
+    }));
+  } catch (error) {
+    console.warn("Could not save the 3D preview position.", error);
+  }
 }
 
 function storePreviewFloatPreference(active) {
@@ -10903,8 +11928,7 @@ function setupActionMenu() {
     const actionButton = event.target.closest("button");
     if (!actionButton || actionButton === actionMenuCloseButton) return;
     if (actionButton === tutorialButton) {
-      event.preventDefault();
-      openTutorialDialog();
+      closeActionMenu();
       return;
     }
     window.setTimeout(closeActionMenu, 80);
@@ -11017,9 +12041,9 @@ function tutorialPracticeDetails(step = currentTutorialStep()) {
     case "production":
       return {
         title: "Practice production board",
-        cue: "Open a job card, assign it, then move it to Ready to check.",
+        cue: "Open Assigned to me, assign a spool, move it to Ready to check, then place it on hold with a reason.",
         hint: "This is the workflow from draft drawing to production status.",
-        done: "Production card moved through the mini workflow.",
+        done: "Production card assigned, moved and placed on hold with a recorded reason.",
       };
     case "draw":
       return {
@@ -11038,14 +12062,14 @@ function tutorialPracticeDetails(step = currentTutorialStep()) {
     case "tee":
       return {
         title: "Practice tee",
-        cue: "Choose Tee, click the main run, then drag the branch from the tee point.",
+        cue: "Open Fittings, choose Tee, click the main run, then drag the branch from the tee point.",
         hint: "The real app creates a point on the run, then you draw the branch from that new point.",
         done: "Tee point created and branch dragged from it.",
       };
     case "fittings":
       return {
         title: "Practice end fittings",
-        cue: "Choose Flange, click the pipe end, then pick the flange standard.",
+        cue: "Open Fittings, choose Flange, click the pipe end, then pick the flange standard.",
         hint: "This mirrors the end-fitting flow without touching your drawing.",
         done: "End fitting added in the mini flow.",
       };
@@ -11097,6 +12121,13 @@ function tutorialPracticeDetails(step = currentTutorialStep()) {
         cue: "Choose a view style, switch to Rotate, then drag the mini model sideways.",
         hint: "The preview is restored for this topic so you can try the controls.",
         done: "3D model controls used in the mini flow.",
+      };
+    case "focus":
+      return {
+        title: "Practice Focus mode",
+        cue: "Enter Focus, open the temporary Details drawer, then exit Focus.",
+        hint: "The workflow mode stays the same; only the drawing layout changes.",
+        done: "Focus mode entered, Details opened over the drawing, then Focus closed.",
       };
     case "review":
       return {
@@ -11159,8 +12190,9 @@ function tutorialPracticeCompleteForAction(action, baseline = {}) {
 function tutorialTrainerStepLabels(kind) {
   const steps = {
     startJobs: ["Jobs", "Job", "Spool"],
-    comms: ["Comms", "Message"],
-    production: ["Card", "Assign", "Ready"],
+    comms: ["Conversation", "Mention", "Photo", "Send", "Resolve"],
+    production: ["Dashboard", "Card", "Assign", "Ready", "Hold", "Reason"],
+    approval: ["Ready spool", "Approve", "Comment", "Issue", "Return", "Reason"],
     draw: ["Draw", "Drag pipe", "Finish"],
     exact: ["Length", "+X"],
     offset: ["45 deg", "Set", "Travel", "Return", "Finish"],
@@ -11172,6 +12204,7 @@ function tutorialTrainerStepLabels(kind) {
     measure: ["Measure", "Point 1", "Point 2"],
     dimensions: ["Numbered", "Edit D1", "Apply"],
     preview: ["Style", "Mode", "Drag"],
+    focus: ["Focus", "Details", "Exit"],
     review: ["Checks", "Warning"],
     export: ["Style", "Fab PDF", "3D views"],
   };
@@ -11181,8 +12214,9 @@ function tutorialTrainerStepLabels(kind) {
 function tutorialTrainerCurrentChoice(kind = tutorialTrainerKind(currentTutorialStep()), phase = tutorialTrainerPhase()) {
   const choices = {
     startJobs: ["jobs-open", "job-card", "spool-card"],
-    comms: ["comms-tab", "message", "send-message"],
-    production: ["job-card", "assign-user", "ready-check"],
+    comms: ["conversation-tab", "mention-sarah", "attach-photo", "send-message", "resolve-message"],
+    production: ["dashboard-mine", "job-card", "assign-user", "ready-check", "hold-spool", "hold-reason"],
+    approval: ["ready-spool", "approve-drawing", "approval-note", "issue-reviewed", "return-drawing", "return-reason"],
     draw: ["draw-tool", "draw-start", "finish-draw"],
     exact: ["length", "exact-run"],
     offset: ["angle", "set-distance", "offset-travel-start", "offset-return-start", "finish-offset"],
@@ -11194,6 +12228,7 @@ function tutorialTrainerCurrentChoice(kind = tutorialTrainerKind(currentTutorial
     measure: ["measure-tool", "start", "end"],
     dimensions: ["numbered-key", "edit-d1", "dimension-value"],
     preview: ["realistic-view", "rotate-mode", "spin-model"],
+    focus: ["focus-toggle", "focus-details", "focus-exit"],
     review: ["checks-tab", "check-warning"],
     export: ["workshop-pdf", "fab-pdf", "include-3d"],
   };
@@ -11523,33 +12558,83 @@ function tutorialTrainerContent(kind, phase, complete) {
     case "comms":
       return `
         <div class="tutorial-trainer-toolbar">
-          <span class="tutorial-trainer-pill">Jobs</span>
-          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="comms-tab">Comms</button>
-          <span class="tutorial-trainer-pill">Report</span>
+          <span class="tutorial-trainer-pill">Properties</span>
+          <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="conversation-tab">Spool conversation</button>
+          <span class="tutorial-trainer-pill">Job details</span>
         </div>
         ${phase >= 1 || complete ? `
           <div class="tutorial-trainer-comms">
-            <input data-tutorial-trainer-value="message" data-tutorial-trainer-choice="message" value="${escapeHtml(tutorialTrainer?.values?.message || "")}" placeholder="Type: Spool 12 ready to check" aria-label="Team message" />
-            <button type="button" data-tutorial-trainer-choice="send-message">Send message</button>
+            <div class="tutorial-trainer-controls compact">
+              <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="mention-sarah">@Sarah</button>
+              <button type="button" class="${phase >= 3 || complete ? "active" : ""}" data-tutorial-trainer-choice="attach-photo" ${phase < 2 && !complete ? "disabled" : ""}>Add photo</button>
+            </div>
+            <input data-tutorial-trainer-value="message" value="${escapeHtml(tutorialTrainer?.values?.message || "")}" placeholder="@Sarah please check this flange" aria-label="Spool conversation message" />
+            ${phase >= 3 || complete ? `<div class="tutorial-trainer-photo">Workshop photo attached</div>` : ""}
+            <button type="button" data-tutorial-trainer-choice="send-message" ${phase < 3 && !complete ? "disabled" : ""}>Send message</button>
+            ${phase >= 4 || complete ? `<button type="button" data-tutorial-trainer-choice="resolve-message">${complete ? "Resolved" : "Resolve message"}</button>` : ""}
           </div>
         ` : ""}
-        <div class="tutorial-trainer-instructions">${complete ? "Team message sent." : phase === 0 ? "Click Comms." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Type a short team message, then press Send message."}</div>
+        <div class="tutorial-trainer-instructions">${complete ? "The workshop message is attached to the spool and marked resolved." : phase === 0 ? "Open Spool conversation." : phase === 1 ? "Tag Sarah so she receives a clear mention." : phase === 2 ? "Attach a workshop photo." : phase === 3 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Type a short message, then press Send message." : "Resolve the message once the work is addressed."}</div>
       `;
     case "production":
       return `
         <div class="tutorial-trainer-board">
-          <button type="button" class="tutorial-trainer-card" data-tutorial-trainer-choice="job-card">
+          <div class="tutorial-trainer-controls compact">
+            <button type="button" class="${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="dashboard-mine">Assigned to me <b>${phase >= 1 || complete ? "1" : "0"}</b></button>
+            <span class="tutorial-trainer-pill">Due today</span>
+            <span class="tutorial-trainer-pill">On hold</span>
+          </div>
+          ${phase >= 1 || complete ? `
+            <button type="button" class="tutorial-trainer-card" data-tutorial-trainer-choice="job-card">
+              <strong>Job 121 - Spool 002</strong>
+              <small>${phase >= 4 || complete ? "Ready to check" : phase >= 3 ? "Assigned to Jack" : "Draft"}</small>
+            </button>
+          ` : ""}
+          ${phase >= 2 || complete ? `
+            <div class="tutorial-trainer-controls compact">
+              <button type="button" data-tutorial-trainer-choice="assign-user">Assign Jack</button>
+              <button type="button" data-tutorial-trainer-choice="ready-check" ${phase < 3 && !complete ? "disabled" : ""}>Move to Ready to check</button>
+              <button type="button" data-tutorial-trainer-choice="hold-spool" ${phase < 4 && !complete ? "disabled" : ""}>Place on hold</button>
+            </div>
+          ` : ""}
+          ${phase >= 5 && !complete ? `
+            <label class="tutorial-trainer-field">
+              <span>Required hold reason</span>
+              <input data-tutorial-trainer-value="hold-reason" data-tutorial-trainer-choice="hold-reason" type="text" maxlength="140" value="${escapeHtml(tutorialTrainer?.values?.["hold-reason"] || "")}" placeholder="Type: Waiting on flange" />
+            </label>
+          ` : ""}
+        </div>
+        <div class="tutorial-trainer-instructions">${complete ? "The team can now see who owns the spool, its stage and why it is on hold." : phase === 0 ? "Open the Assigned to me queue on the team dashboard." : phase === 1 ? "Open the spool card." : phase === 2 ? "Assign who owns it." : phase === 3 ? "Move the card to Ready to check." : phase === 4 ? "Place the spool on hold." : "Type a clear hold reason, then press Enter."}</div>
+      `;
+    case "approval":
+      return `
+        <div class="tutorial-trainer-board">
+          <button type="button" class="tutorial-trainer-card ${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="ready-spool">
             <strong>Job 121 - Spool 002</strong>
-            <small>${phase >= 3 || complete ? "Ready to check" : phase >= 2 ? "Assigned to Jack" : "Draft"}</small>
+            <small>${phase >= 4 || complete ? "Issued / locked" : phase >= 1 ? "Ready to check" : "Open review"}</small>
           </button>
           ${phase >= 1 || complete ? `
             <div class="tutorial-trainer-controls compact">
-              <button type="button" data-tutorial-trainer-choice="assign-user">Assign Jack</button>
-              <button type="button" data-tutorial-trainer-choice="ready-check" ${phase < 2 && !complete ? "disabled" : ""}>Ready to check</button>
+              <button type="button" data-tutorial-trainer-choice="approve-drawing" ${phase !== 1 && !complete ? "disabled" : ""}>Approve drawing</button>
+              <button type="button" data-tutorial-trainer-choice="issue-reviewed" ${phase !== 3 && !complete ? "disabled" : ""}>Issue drawing</button>
+              <button type="button" data-tutorial-trainer-choice="return-drawing" ${phase !== 4 && !complete ? "disabled" : ""}>Return for changes</button>
             </div>
           ` : ""}
+          ${phase === 2 && !complete ? `
+            <label class="tutorial-trainer-field">
+              <span>Checker comment (optional)</span>
+              <input data-tutorial-trainer-value="approval-note" type="text" value="${escapeHtml(tutorialTrainer?.values?.["approval-note"] || "")}" placeholder="Dimensions and fittings checked" />
+            </label>
+          ` : ""}
+          ${phase === 5 && !complete ? `
+            <label class="tutorial-trainer-field">
+              <span>Required return reason</span>
+              <input data-tutorial-trainer-value="return-reason" type="text" value="${escapeHtml(tutorialTrainer?.values?.["return-reason"] || "")}" placeholder="Flange orientation needs correction" />
+            </label>
+          ` : ""}
+          ${phase >= 4 || complete ? `<div class="tutorial-trainer-photo">Issued revision preserved and locked</div>` : ""}
         </div>
-        <div class="tutorial-trainer-instructions">${complete ? "Production card is ready to check." : phase === 0 ? "Open the spool card." : phase === 1 ? "Assign who owns it." : "Move it to Ready to check."}</div>
+        <div class="tutorial-trainer-instructions">${complete ? "The issued revision was preserved and the next revision is editable with the checker reason recorded." : phase === 0 ? "Open the Ready to check spool." : phase === 1 ? "Approve the drawing as checker." : phase === 2 ? "Type an optional approval comment, then press Enter." : phase === 3 ? "Issue the approved drawing." : phase === 4 ? "Use Return for changes instead of unlocking the issued drawing." : "Enter the required reason, then press Enter."}</div>
       `;
     case "draw":
       return `
@@ -11576,26 +12661,43 @@ function tutorialTrainerContent(kind, phase, complete) {
         </div>
       `;
     case "tee":
+      const teeFittingsOpen = Boolean(tutorialTrainer?.values?.fittingsOpen) || phase >= 1 || complete;
       return `
         <div class="tutorial-trainer-stage">
           <div class="tutorial-trainer-toolbar">
-            <button type="button" data-tutorial-trainer-choice="tee-tool" class="${phase >= 1 || complete ? "active" : ""}">Tee</button>
-            <span class="tutorial-trainer-pill">Branch</span>
+            <button type="button" data-tutorial-trainer-choice="open-fittings" class="${teeFittingsOpen ? "active" : ""}">Fittings</button>
             <span class="tutorial-trainer-pill">Draw</span>
+            <span class="tutorial-trainer-pill">Select</span>
           </div>
+          ${phase === 0 && teeFittingsOpen ? `
+            <div class="tutorial-trainer-fitting-menu" aria-label="Practice fitting tools">
+              <button type="button" data-tutorial-trainer-choice="tee-tool">Tee</button>
+              <span>Branch</span>
+              <span>Flange</span>
+              <span>Reducer</span>
+            </div>
+          ` : ""}
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-instructions">${complete ? "Tee branch drawn from the new tee point." : phase === 0 ? "Click Tee, just like the side tool." : phase === 1 ? "Click the highlighted main run where the tee belongs." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold the yellow tee point and drag out to the blue branch end point." : "Branch is drawn. Press Finish drawing, like pressing Enter."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "Tee branch drawn from the new tee point." : phase === 0 ? teeFittingsOpen ? "Now choose Tee from the Fittings menu." : "Click Fittings to open the fitting tools." : phase === 1 ? "Click the highlighted main run where the tee belongs." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold the yellow tee point and drag out to the blue branch end point." : "Branch is drawn. Press Finish drawing, like pressing Enter."}</div>
           ${phase >= 3 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="finish-tee">Finish drawing</button>` : ""}
         </div>
       `;
-    case "fittings":
+    case "fittings": {
+      const endFittingsOpen = Boolean(tutorialTrainer?.values?.fittingsOpen) || phase >= 1 || complete;
       return `
         <div class="tutorial-trainer-stage">
           <div class="tutorial-trainer-toolbar">
-            <button type="button" data-tutorial-trainer-choice="flange-tool" class="${phase >= 1 || complete ? "active" : ""}">Flange</button>
-            <span class="tutorial-trainer-pill">Groove</span>
-            <span class="tutorial-trainer-pill">Reducer</span>
+            <button type="button" data-tutorial-trainer-choice="open-fittings" class="${endFittingsOpen ? "active" : ""}">Fittings</button>
+            <span class="tutorial-trainer-pill">Select</span>
           </div>
+          ${phase === 0 && endFittingsOpen ? `
+            <div class="tutorial-trainer-fitting-menu" aria-label="Practice fitting tools">
+              <button type="button" data-tutorial-trainer-choice="flange-tool">Flange</button>
+              <span>Groove</span>
+              <span>Reducer</span>
+              <span>Valve</span>
+            </div>
+          ` : ""}
           ${tutorialMiniIsoSvg(kind, phase, complete)}
           ${phase >= 2 && !complete ? `
             <label class="tutorial-trainer-field">
@@ -11608,9 +12710,10 @@ function tutorialTrainerContent(kind, phase, complete) {
               </select>
             </label>
           ` : ""}
-          <div class="tutorial-trainer-instructions">${complete ? "Flange placed with a standard selected." : phase === 0 ? "Click Flange." : phase === 1 ? "Click the pipe end." : "Pick the flange standard from the menu."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "Flange placed with a standard selected." : phase === 0 ? endFittingsOpen ? "Now choose Flange from the Fittings menu." : "Click Fittings to open the fitting tools." : phase === 1 ? "Click the pipe end." : "Pick the flange standard from the menu."}</div>
         </div>
       `;
+    }
     case "pipeSize":
       return `
         <div class="tutorial-trainer-stage">
@@ -11738,6 +12841,23 @@ function tutorialTrainerContent(kind, phase, complete) {
             </div>
           `}
           <div class="tutorial-trainer-instructions">${complete ? "3D model rotated." : phase === 0 ? "Open the 3D view menu and choose Realistic 3D." : phase === 1 ? "Choose Rotate under Navigation mode." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold on the mini model and drag sideways to rotate it."}</div>
+        </div>
+      `;
+    case "focus":
+      return `
+        <div class="tutorial-trainer-stage tutorial-focus-practice">
+          <div class="tutorial-trainer-toolbar">
+            <button type="button" data-tutorial-trainer-choice="focus-toggle" class="${phase >= 1 || complete ? "active" : ""}">${phase >= 1 || complete ? "Focus active" : "Focus"}</button>
+            ${phase >= 1 || complete ? `<button type="button" data-tutorial-trainer-choice="focus-details" class="${phase >= 2 || complete ? "active" : ""}">Details</button>` : `<span class="tutorial-trainer-pill">Details</span>`}
+            <span class="tutorial-trainer-pill">3D</span>
+          </div>
+          <div class="tutorial-focus-canvas ${phase >= 1 || complete ? "active" : ""}">
+            <div class="tutorial-focus-tools"><span>Draw</span><span>Select</span><span>Note</span></div>
+            <strong>Drawing fills the screen</strong>
+            ${phase >= 2 || complete ? `<div class="tutorial-focus-inspector"><b>Details</b><span>Selected run</span><span>Cut 2,450 mm</span></div>` : ""}
+          </div>
+          ${phase >= 2 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="focus-exit">Exit Focus</button>` : ""}
+          <div class="tutorial-trainer-instructions">${complete ? "Focus closed without changing the drawing mode." : phase === 0 ? "Press Focus to make the drawing fill the practice area." : phase === 1 ? "Open Details temporarily over the drawing." : "Close Details and press Exit Focus."}</div>
         </div>
       `;
     case "review":
@@ -12186,25 +13306,48 @@ function handleTutorialTrainerChoice(choice) {
         completeTutorialTrainer();
       }
       break;
-    case "comms":
-      if (choice === "comms-tab" && phase < 1) {
+    case "approval":
+      if (choice === "ready-spool" && phase < 1) {
         advanceTutorialTrainer(1);
-      } else if (choice === "send-message" && phase >= 1) {
+      } else if (choice === "approve-drawing" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "issue-reviewed" && phase >= 3 && phase < 4) {
+        advanceTutorialTrainer(4);
+      } else if (choice === "return-drawing" && phase >= 4 && phase < 5) {
+        advanceTutorialTrainer(5);
+      }
+      break;
+    case "comms":
+      if (choice === "conversation-tab" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "mention-sarah" && phase >= 1 && phase < 2) {
+        tutorialTrainer.values = tutorialTrainer.values || {};
+        tutorialTrainer.values.message = "@Sarah please check this flange";
+        advanceTutorialTrainer(2);
+      } else if (choice === "attach-photo" && phase >= 2 && phase < 3) {
+        advanceTutorialTrainer(3);
+      } else if (choice === "send-message" && phase >= 3 && phase < 4) {
         if (String(tutorialTrainer?.values?.message || "").trim()) {
-          completeTutorialTrainer();
+          advanceTutorialTrainer(4);
         } else {
-          tutorialTrainer.missedDrag = "Type a short message before pressing Send message.";
+          tutorialTrainer.missedDrag = "Type a short spool message before pressing Send message.";
           renderTutorialStep();
         }
+      } else if (choice === "resolve-message" && phase >= 4) {
+        completeTutorialTrainer();
       }
       break;
     case "production":
-      if (choice === "job-card" && phase < 1) {
+      if (choice === "dashboard-mine" && phase < 1) {
         advanceTutorialTrainer(1);
-      } else if (choice === "assign-user" && phase >= 1 && phase < 2) {
+      } else if (choice === "job-card" && phase >= 1 && phase < 2) {
         advanceTutorialTrainer(2);
-      } else if (choice === "ready-check" && phase >= 2) {
-        completeTutorialTrainer();
+      } else if (choice === "assign-user" && phase >= 2 && phase < 3) {
+        advanceTutorialTrainer(3);
+      } else if (choice === "ready-check" && phase >= 3 && phase < 4) {
+        advanceTutorialTrainer(4);
+      } else if (choice === "hold-spool" && phase >= 4 && phase < 5) {
+        advanceTutorialTrainer(5);
       }
       break;
     case "draw":
@@ -12224,7 +13367,10 @@ function handleTutorialTrainerChoice(choice) {
       }
       break;
     case "tee":
-      if (choice === "tee-tool" && phase < 1) {
+      if (choice === "open-fittings" && phase < 1) {
+        tutorialTrainer.values = { ...(tutorialTrainer.values || {}), fittingsOpen: true };
+        renderTutorialStep();
+      } else if (choice === "tee-tool" && phase < 1 && tutorialTrainer?.values?.fittingsOpen) {
         advanceTutorialTrainer(1);
       } else if (choice === "pipe" && phase >= 1 && phase < 2) {
         advanceTutorialTrainer(2);
@@ -12233,7 +13379,10 @@ function handleTutorialTrainerChoice(choice) {
       }
       break;
     case "fittings":
-      if (choice === "flange-tool" && phase < 1) {
+      if (choice === "open-fittings" && phase < 1) {
+        tutorialTrainer.values = { ...(tutorialTrainer.values || {}), fittingsOpen: true };
+        renderTutorialStep();
+      } else if (choice === "flange-tool" && phase < 1 && tutorialTrainer?.values?.fittingsOpen) {
         advanceTutorialTrainer(1);
       } else if (choice === "end" && phase >= 1 && phase < 2) {
         advanceTutorialTrainer(2);
@@ -12308,6 +13457,15 @@ function handleTutorialTrainerChoice(choice) {
         completeTutorialTrainer();
       }
       break;
+    case "focus":
+      if (choice === "focus-toggle" && phase < 1) {
+        advanceTutorialTrainer(1);
+      } else if (choice === "focus-details" && phase >= 1 && phase < 2) {
+        advanceTutorialTrainer(2);
+      } else if (choice === "focus-exit" && phase >= 2) {
+        completeTutorialTrainer();
+      }
+      break;
     case "review":
       if (choice === "checks-tab" && phase < 1) {
         advanceTutorialTrainer(1);
@@ -12372,6 +13530,18 @@ function handleTutorialTrainerChange(event) {
       advanceTutorialTrainer(2);
       return;
     }
+    if (event.type === "change" && kind === "production" && valueKey === "hold-reason" && phase >= 5 && String(tutorialTrainer.values[valueKey]).trim()) {
+      completeTutorialTrainer();
+      return;
+    }
+    if (event.type === "change" && kind === "approval" && valueKey === "approval-note" && phase === 2) {
+      advanceTutorialTrainer(3);
+      return;
+    }
+    if (event.type === "change" && kind === "approval" && valueKey === "return-reason" && phase >= 5 && String(tutorialTrainer.values[valueKey]).trim()) {
+      completeTutorialTrainer();
+      return;
+    }
     if (event.type === "input") return;
   }
   const choice = target.getAttribute("data-tutorial-trainer-choice");
@@ -12405,8 +13575,20 @@ function handleTutorialTrainerKeyDown(event) {
     advanceTutorialTrainer(2);
     return;
   }
-  if (kind === "comms" && valueKey === "message" && phase >= 1 && value) {
+  if (kind === "production" && valueKey === "hold-reason" && phase >= 5 && value) {
     completeTutorialTrainer();
+    return;
+  }
+  if (kind === "approval" && valueKey === "approval-note" && phase === 2) {
+    advanceTutorialTrainer(3);
+    return;
+  }
+  if (kind === "approval" && valueKey === "return-reason" && phase >= 5 && value) {
+    completeTutorialTrainer();
+    return;
+  }
+  if (kind === "comms" && valueKey === "message" && phase >= 3 && value) {
+    advanceTutorialTrainer(4);
     return;
   }
   tutorialTrainer.missedDrag = "Enter a valid value before continuing.";
@@ -12510,7 +13692,8 @@ function minimizePreviewForTutorial() {
     };
   }
   if (previewPanelHidden) return;
-  previewPanelMinimized = true;
+  previewPanelHidden = true;
+  previewPanelMinimized = false;
   updatePreviewFloatingState();
   if (isTabletLayout()) {
     showMobilePanel("drawing");
@@ -13147,6 +14330,9 @@ function updateAll(options = {}) {
   updatePipeSizeControls();
   updatePropertiesPanel();
   update3dPreview();
+  if (!isTabletLayout() && (appMode === "draw" || appMode === "edit") && !hasInspectorSelection()) {
+    setInspectorDrawerOpen(false);
+  }
   if (save) persistState();
   checkTutorialPractice();
 }
@@ -13220,15 +14406,49 @@ function setupMobilePanels() {
     button.addEventListener("click", () => showMobilePanel("drawing"));
   }
 
+  inspectorShowButton?.addEventListener("click", () => showMobilePanel("inspector"));
+
   mobilePanelScrim?.addEventListener("click", () => showMobilePanel("drawing"));
-  showMobilePanel("drawing");
+  if (isTabletLayout()) {
+    showMobilePanel("drawing");
+  } else {
+    setInspectorDrawerOpen(appMode === "review" || appMode === "export" || hasInspectorSelection());
+  }
+}
+
+function hasInspectorSelection() {
+  return Boolean(
+    selectedSegmentIndexes().length ||
+    state.selectedFitting ||
+    state.selectedNote ||
+    state.selectedMeasurement ||
+    (state.activeTool === "select" && Number.isInteger(state.selectedPoint))
+  );
+}
+
+function setInspectorDrawerOpen(open) {
+  const next = Boolean(open);
+  document.body.classList.toggle("inspector-drawer-open", next);
+  document.body.classList.toggle("inspector-drawer-closed", !next);
+  controlPanel?.setAttribute("aria-hidden", String(!next));
+  inspectorShowButton?.setAttribute("aria-expanded", String(next));
+  if (!next && controlPanel?.contains(document.activeElement)) {
+    inspectorShowButton?.focus?.();
+  }
+  refreshPreviewAfterLayoutChange();
 }
 
 function showMobilePanel(panel = "drawing") {
-  let normalized = panel === "inspector" || panel === "preview" ? panel : "drawing";
+  const requested = panel === "inspector" || panel === "preview" ? panel : "drawing";
   if (!isTabletLayout()) {
-    normalized = "drawing";
+    if (requested === "inspector") {
+      setInspectorDrawerOpen(true);
+    } else if (requested === "drawing") {
+      setInspectorDrawerOpen(false);
+    }
+    return;
   }
+  let normalized = requested;
   if (normalized === "preview" && previewPanelHidden) {
     previewPanelHidden = false;
     previewPanelMinimized = false;
@@ -14015,11 +15235,13 @@ function ensureProjectLibraryCommsSlot() {
     slot.className = "project-library-comms-slot";
     slot.id = "projectLibraryCommsSlot";
     card.insertBefore(slot, card.querySelector("#projectLibraryReportSlot") ?? projectLibraryList);
-  } else if (slot.nextElementSibling !== (projectLibraryReportSlot ?? projectLibraryList)) {
-    card.insertBefore(slot, projectLibraryReportSlot ?? projectLibraryList);
   }
+  projectLibrarySpoolConversation = card.querySelector("#projectLibrarySpoolConversation");
+  const desiredNext = projectLibrarySpoolConversation ?? projectLibraryReportSlot ?? projectLibraryList;
+  if (slot.nextElementSibling !== desiredNext) card.insertBefore(slot, desiredNext);
   projectLibraryCommsSlot = slot;
   slot.hidden = !projectLibraryCommsVisible;
+  if (projectLibrarySpoolConversation) projectLibrarySpoolConversation.hidden = !projectLibraryCommsVisible;
   if (projectLibraryCommsVisible) renderProjectLibraryComms(projectLibraryProjects);
   return slot;
 }
@@ -14181,7 +15403,12 @@ function setupProjectDialog() {
       });
   });
   projectLibraryList?.addEventListener("click", handleProjectLibraryActivation);
-  projectLibraryList?.addEventListener("change", handleProjectLibraryFieldChange);
+  projectLibraryList?.addEventListener("change", (event) => {
+    handleProjectLibraryFieldChange(event).catch((error) => {
+      console.warn("Production field update failed.", error);
+      showAppNotice(error?.message || "Could not update production field.");
+    });
+  });
   projectLibraryList?.addEventListener("dragstart", handleProjectLibraryDragStart);
   projectLibraryList?.addEventListener("dragover", handleProjectLibraryDragOver);
   projectLibraryList?.addEventListener("dragleave", handleProjectLibraryDragLeave);
@@ -14336,7 +15563,7 @@ function handleProjectLibraryAction(actionElement) {
   }
 }
 
-function handleProjectLibraryFieldChange(event) {
+async function handleProjectLibraryFieldChange(event) {
   const target = event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement ? event.target : null;
   if (!target?.dataset.productionField) return;
   const projectId = target.dataset.projectId;
@@ -14344,17 +15571,52 @@ function handleProjectLibraryFieldChange(event) {
 
   const field = target.dataset.productionField;
   const value = target.type === "checkbox" ? target.checked : target.value;
+  const project = projectLibraryProjects.find((item) => item.id === projectId);
+  const currentProduction = savedProjectProductionInfo(project);
+  if (field === "status") {
+    const currentStatus = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+    const nextStatus = normalizeProjectStatus(value);
+    if (nextStatus === "checked" && currentStatus !== "checked") {
+      target.value = currentStatus;
+      showAppNotice("Open the spool and use Approve drawing so the checker and comment are recorded.");
+      return;
+    }
+    if (projectStatusAtLeast(currentStatus, "checked") && projectStatusIndex(nextStatus) < projectStatusIndex("checked")) {
+      target.value = currentStatus;
+      showAppNotice("Open the spool and use Return for changes so a checker comment and revision record are kept.");
+      return;
+    }
+  }
+  if (field === "holdReason" && currentProduction.hold && !String(value ?? "").trim()) {
+    target.value = currentProduction.holdReason;
+    showAppNotice("A spool on hold must keep a hold reason. Remove the hold first if it is no longer blocked.");
+    return;
+  }
   const updates = {};
   if (field === "status") {
     updates.status = value;
   } else {
     updates.productionInfo = { [field]: value };
   }
+  if (field === "hold" && value === true) {
+    const response = await openFieldInputDialog({
+      title: "Place spool on hold",
+      label: "Hold reason",
+      value: currentProduction.holdReason,
+      placeholder: "Missing flange, client hold, material unavailable...",
+      help: "A hold reason is required so everyone can see what is blocking the spool.",
+      submitLabel: "Place on hold",
+    });
+    const reason = String(response ?? "").trim().slice(0, 140);
+    if (!reason) {
+      target.checked = false;
+      showAppNotice("Hold was not applied. Enter a reason before placing a spool on hold.");
+      return;
+    }
+    updates.productionInfo.holdReason = reason;
+  }
 
-  updateSavedProjectWorkflow(projectId, updates).catch((error) => {
-    console.warn("Production field update failed.", error);
-    showAppNotice(error?.message || "Could not update production field.");
-  });
+  await updateSavedProjectWorkflow(projectId, updates);
 }
 
 async function handleProjectLibraryProductionAction(actionButton) {
@@ -14374,7 +15636,14 @@ async function handleProjectLibraryProductionAction(actionButton) {
     return;
   }
   if (action === "set-status") {
-    await updateSavedProjectWorkflow(projectId, { status: actionButton.dataset.status });
+    const project = projectLibraryProjects.find((item) => item.id === projectId);
+    const currentStatus = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+    const nextStatus = normalizeProjectStatus(actionButton.dataset.status);
+    if (projectStatusAtLeast(currentStatus, "checked") && projectStatusIndex(nextStatus) < projectStatusIndex(currentStatus)) {
+      showAppNotice("Open the spool and use Return for changes so the checker comment and revision are preserved.");
+      return;
+    }
+    await updateSavedProjectWorkflow(projectId, { status: nextStatus });
     return;
   }
   if (action === "complete-spool") {
@@ -14420,6 +15689,16 @@ function handleProjectLibraryDrop(event) {
   event.preventDefault();
   lane.classList.remove("drag-over");
   const nextStatus = lane.dataset.productionDropStatus;
+  const project = projectLibraryProjects.find((item) => item.id === projectLibraryDrag.projectId);
+  const currentStatus = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+  if (normalizeProjectStatus(nextStatus) === "checked" && currentStatus !== "checked") {
+    showAppNotice("Open the spool and use Approve drawing so the checker and comment are recorded.");
+    return;
+  }
+  if (projectStatusAtLeast(currentStatus, "checked") && projectStatusIndex(nextStatus) < projectStatusIndex("checked")) {
+    showAppNotice("Open the spool and use Return for changes so the review comment and revision are preserved.");
+    return;
+  }
   updateSavedProjectWorkflow(projectLibraryDrag.projectId, { status: nextStatus }).catch((error) => {
     console.warn("Production drag update failed.", error);
     showAppNotice(error?.message || "Could not move that spool.");
@@ -14926,13 +16205,90 @@ function fittingEndpointSide(fitting, segmentLengthMm = null) {
   return null;
 }
 
-function flangePlateThicknessForRadius(pipeRadius, flangeStandard) {
-  const standardInfo = flangeStandardInfo(flangeStandard);
-  const thicknessFactor = standardInfo.thicknessFactor || 1;
-  return clampNumber(pipeRadius * 0.42 * thicknessFactor, 0.045, 0.16);
+function flangeNominalBore(pipeSizeOrNb) {
+  if (pipeSizeOrNb && typeof pipeSizeOrNb === "object") {
+    const nominalBore = Number(pipeSizeOrNb.nb);
+    if (pipeSizeOrNb.kind !== "tube") return Number.isFinite(nominalBore) ? nominalBore : 15;
+
+    const tubeOd = Number(pipeSizeOrNb.od);
+    const enclosingPipe = PIPE_SIZES
+      .filter((size) => size.kind !== "tube" && Number.isFinite(size.od))
+      .sort((left, right) => left.od - right.od)
+      .find((size) => size.od >= tubeOd - 0.01);
+    return enclosingPipe?.nb ?? 300;
+  }
+
+  const nominalBore = Number(pipeSizeOrNb);
+  return Number.isFinite(nominalBore) ? nominalBore : 15;
 }
 
-function flangeRenderTransform(fitting, position, direction, pipeRadius, segmentLengthMm = null) {
+function flangeDrillingDimensions(flangeStandard, pipeSizeOrNb, pipeRadius) {
+  const standard = normalizeFlangeStandard(flangeStandard);
+  const tableKey = standard === "din10" ? "pn10" : standard === "din16" ? "pn16" : standard;
+  const table = FLANGE_DRILLING_TABLES[tableKey];
+  const requestedNb = flangeNominalBore(pipeSizeOrNb);
+  const selectedPipeSize = pipeSizeOrNb && typeof pipeSizeOrNb === "object"
+    ? pipeSizeOrNb
+    : PIPE_SIZES.find((size) => size.kind !== "tube" && size.nb === requestedNb);
+  const physicalPipeRadius = Number(selectedPipeSize?.od) / 2000;
+  const visualScale = Number.isFinite(physicalPipeRadius) && physicalPipeRadius > 0 && Number.isFinite(pipeRadius)
+    ? pipeRadius / physicalPipeRadius
+    : 1;
+
+  if (Array.isArray(table) && table.length) {
+    const row = table.find((entry) => entry[0] === requestedNb)
+      ?? table.find((entry) => entry[0] >= requestedNb)
+      ?? table[table.length - 1];
+    const [sourceNb, odMm, thicknessMm, pcdMm, holeMm, holes] = row;
+    return {
+      requestedNb,
+      sourceNb,
+      exactSize: sourceNb === requestedNb,
+      odMm,
+      thicknessMm,
+      pcdMm,
+      holeMm,
+      visualScale,
+      outerRadius: (odMm / 2000) * visualScale,
+      plateThickness: (thicknessMm / 1000) * visualScale,
+      boltCircleRadius: (pcdMm / 2000) * visualScale,
+      boltHoleRadius: (holeMm / 2000) * visualScale,
+      boltCount: holes,
+    };
+  }
+
+  const standardInfo = flangeStandardInfo(flangeStandard);
+  const radiusFactor = standardInfo.radiusFactor || 1;
+  const thicknessFactor = standardInfo.thicknessFactor || 1;
+  return {
+    requestedNb,
+    sourceNb: requestedNb,
+    exactSize: false,
+    odMm: (pipeRadius * 2.15 * radiusFactor * 2000) / visualScale,
+    thicknessMm: (clampNumber(pipeRadius * 0.42 * thicknessFactor, 0.006, 0.0665) * 1000) / visualScale,
+    pcdMm: (pipeRadius * 1.58 * radiusFactor * 2000) / visualScale,
+    holeMm: (clampNumber(pipeRadius * 0.15 * Math.sqrt(radiusFactor), 0.007, 0.018) * 2000) / visualScale,
+    visualScale,
+    outerRadius: pipeRadius * 2.15 * radiusFactor,
+    plateThickness: clampNumber(pipeRadius * 0.42 * thicknessFactor, 0.006, 0.0665),
+    boltCircleRadius: pipeRadius * 1.58 * radiusFactor,
+    boltHoleRadius: clampNumber(pipeRadius * 0.15 * Math.sqrt(radiusFactor), 0.007, 0.018),
+    boltCount: boltCountForNb(requestedNb),
+  };
+}
+
+function flangeGasketThickness(drilling) {
+  const scale = Number.isFinite(drilling?.visualScale) ? drilling.visualScale : 1;
+  return clampNumber(drilling.plateThickness * 0.14, 0.0015 * scale, 0.003 * scale);
+}
+
+function formatFlangeTableMm(value) {
+  const rounded = Math.round(Number(value) * 10) / 10;
+  if (!Number.isFinite(rounded)) return "0";
+  return Number.isInteger(rounded) ? rounded.toFixed(0) : rounded.toFixed(1);
+}
+
+function flangeRenderTransform(fitting, position, direction, pipeRadius, pipeSizeOrNb = null, segmentLengthMm = null) {
   const endpointSide = fittingEndpointSide(fitting, segmentLengthMm);
   if (!endpointSide) {
     return {
@@ -14945,9 +16301,13 @@ function flangeRenderTransform(fitting, position, direction, pipeRadius, segment
   const outward = endpointSide === "start"
     ? direction.clone().multiplyScalar(-1)
     : direction.clone();
-  const plateThickness = flangePlateThicknessForRadius(pipeRadius, fittingFlangeStandard(fitting));
+  const drilling = flangeDrillingDimensions(fittingFlangeStandard(fitting), pipeSizeOrNb, pipeRadius);
+  const plateThickness = drilling.plateThickness;
+  const isSingle = fittingFlangeMode(fitting) === "single";
+  const gasketThickness = flangeGasketThickness(drilling);
+  const mountOffset = isSingle ? plateThickness * 0.5 : plateThickness + gasketThickness * 0.5;
   return {
-    position: position.clone().addScaledVector(outward, plateThickness * 0.5),
+    position: position.clone().addScaledVector(outward, mountOffset),
     direction: outward,
     endMount: true,
   };
@@ -15095,20 +16455,21 @@ function rebuildThreeSpool() {
     const position = fittingRenderPosition(fitting, start, end, renderedSegments.get(segment.index), radius, endpointClearances);
 
     if (fitting.type === "flange") {
-      const flangeTransform = flangeRenderTransform(fitting, position, direction, radius, start.distanceTo(end) * 1000);
+      const flangePipeSize = pipeSizeForSegment(segment);
+      const flangeTransform = flangeRenderTransform(fitting, position, direction, radius, flangePipeSize, start.distanceTo(end) * 1000);
       if (style.lineDrawing) {
         group.add(outlineFlangeMarker(
           flangeTransform.position,
           flangeTransform.direction,
           radius,
-          pipeSizeForSegment(segment).nb,
+          flangePipeSize,
           fittingFlangeMode(fitting),
           fittingFlangeStandard(fitting),
           flangeMaterial,
         ));
       } else {
         group.add(
-          flangeAssembly(flangeTransform.position, flangeTransform.direction, radius, pipeSizeForSegment(segment).nb, fittingFlangeMode(fitting), fittingFlangeStandard(fitting), {
+          flangeAssembly(flangeTransform.position, flangeTransform.direction, radius, flangePipeSize, fittingFlangeMode(fitting), fittingFlangeStandard(fitting), {
             flange: flangeMaterial,
             bolt: boltMaterial,
             gasket: gasketMaterial,
@@ -15179,7 +16540,7 @@ function rebuildThreeSpool() {
 
 function previewViewStyle() {
   const mode = normalizePreviewMode(state.previewMode);
-  const stainless = normalizePipeSpec(state.pipeSpec) === "stainless10";
+  const stainless = normalizePipeSpec(state.pipeSpec) !== "carbon40";
   const carbonColors = {
     pipe: 0x252c2f,
     joint: 0x394145,
@@ -15559,20 +16920,15 @@ function outlineRollGrooveMarker(position, direction, radius, material, width = 
   return group;
 }
 
-function outlineFlangeMarker(position, direction, radius, nominalBore, flangeMode, flangeStandard, material) {
+function outlineFlangeMarker(position, direction, radius, pipeSizeOrNb, flangeMode, flangeStandard, material) {
   const THREE = three.module;
   const group = new THREE.Group();
   const axis = direction.clone().normalize();
-  const boltCount = boltCountForNb(nominalBore);
   const isSingle = normalizeFlangeMode(flangeMode) === "single";
-  const standardInfo = flangeStandardInfo(flangeStandard);
-  const radiusFactor = standardInfo.radiusFactor || 1;
-  const plateThickness = flangePlateThicknessForRadius(radius, flangeStandard);
-  const gasketThickness = clampNumber(plateThickness * 0.32, 0.018, 0.038);
-  const plateOffset = plateThickness * 0.62 + gasketThickness * 0.5;
-  const outerRadius = radius * 2.15 * radiusFactor;
-  const boltCircleRadius = radius * 1.58 * radiusFactor;
-  const boltHoleRadius = clampNumber(radius * 0.15 * Math.sqrt(radiusFactor), 0.018, 0.055);
+  const drilling = flangeDrillingDimensions(flangeStandard, pipeSizeOrNb, radius);
+  const { outerRadius, plateThickness, boltCircleRadius, boltHoleRadius, boltCount } = drilling;
+  const gasketThickness = flangeGasketThickness(drilling);
+  const plateOffset = plateThickness * 0.5 + gasketThickness * 0.5;
   const plateCenters = isSingle
     ? [position.clone()]
     : [-1, 1].map((side) => position.clone().addScaledVector(axis, side * plateOffset));
@@ -15592,7 +16948,8 @@ function outlineFlangeMarker(position, direction, radius, nominalBore, flangeMod
   }
 
   if (!isSingle) {
-    group.add(outlineRing(position, axis, radius * 1.82 * radiusFactor, material));
+    const gasketOuterRadius = Math.max(radius * 1.12, Math.min(outerRadius * 0.82, boltCircleRadius - boltHoleRadius * 1.25));
+    group.add(outlineRing(position, axis, gasketOuterRadius, material));
     group.add(outlineRing(position, axis, radius * 1.05, material));
   }
 
@@ -15610,7 +16967,7 @@ function outlineFlangePlate(position, axis, outerRadius, innerRadius, thickness,
     group.add(outlineRing(face, axis, innerRadius, material));
 
     for (let index = 0; index < boltCount; index += 1) {
-      const angle = (Math.PI * 2 * index) / boltCount;
+      const angle = (Math.PI * 2 * index) / boltCount + Math.PI / boltCount;
       const boltCenter = face.clone()
         .add(basis.u.clone().multiplyScalar(Math.cos(angle) * boltCircleRadius))
         .add(basis.v.clone().multiplyScalar(Math.sin(angle) * boltCircleRadius));
@@ -16349,25 +17706,22 @@ function torusRing(position, direction, radius, tubeRadius, material, radialSegm
   return ring;
 }
 
-function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode, flangeStandard, materials) {
+function flangeAssembly(position, direction, pipeRadius, pipeSizeOrNb, flangeMode, flangeStandard, materials) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
-  const boltCount = boltCountForNb(nominalBore);
   const isSingle = normalizeFlangeMode(flangeMode) === "single";
   const endMount = isSingle && materials?.endMount === true;
-  const standardInfo = flangeStandardInfo(flangeStandard);
-  const radiusFactor = standardInfo.radiusFactor || 1;
-  const plateThickness = flangePlateThicknessForRadius(pipeRadius, flangeStandard);
-  const gasketThickness = clampNumber(plateThickness * 0.32, 0.018, 0.038);
-  const plateOffset = plateThickness * 0.62 + gasketThickness * 0.5;
-  const totalHalfDepth = isSingle ? plateThickness * 0.58 : plateOffset + plateThickness * 0.52;
-  const outerRadius = pipeRadius * 2.15 * radiusFactor;
+  const drilling = flangeDrillingDimensions(flangeStandard, pipeSizeOrNb, pipeRadius);
+  const { outerRadius, plateThickness, boltCircleRadius, boltHoleRadius, boltCount } = drilling;
+  const gasketThickness = flangeGasketThickness(drilling);
+  const plateOffset = plateThickness * 0.5 + gasketThickness * 0.5;
+  const totalHalfDepth = isSingle ? plateThickness * 0.5 : plateThickness + gasketThickness * 0.5;
   const innerRadius = pipeRadius * 1.07;
-  const boltCircleRadius = pipeRadius * 1.58 * radiusFactor;
-  const boltHoleRadius = clampNumber(pipeRadius * 0.15 * Math.sqrt(radiusFactor), 0.018, 0.055);
-  const boltBodyRadius = boltHoleRadius * 0.62;
-  const boltHeadRadius = boltHoleRadius * 1.18;
-  const boltHeadDepth = clampNumber(plateThickness * 0.26, 0.018, 0.04);
+  const boltBodyRadius = boltHoleRadius * 0.72;
+  const boltHeadRadius = boltBodyRadius * 1.55;
+  const boltHeadDepth = boltBodyRadius * 1.1;
+  const gasketOuterRadius = Math.max(pipeRadius * 1.12, Math.min(outerRadius * 0.82, boltCircleRadius - boltHoleRadius * 1.25));
+  const raisedFaceOuterRadius = Math.max(pipeRadius * 1.12, Math.min(pipeRadius * 1.38, boltCircleRadius - boltHoleRadius * 1.3));
   const basis = radialBasis(axis);
   const group = new THREE.Group();
 
@@ -16401,7 +17755,7 @@ function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode
       flangePlate(
         endMount ? position.clone().addScaledVector(axis, plateThickness * 0.08) : position,
         axis,
-        pipeRadius * 1.38,
+        raisedFaceOuterRadius,
         pipeRadius * 1.06,
         boltHeadDepth,
         0,
@@ -16417,7 +17771,7 @@ function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode
         flangePlate(
           faceCenter,
           axis,
-          pipeRadius * 1.38,
+          raisedFaceOuterRadius,
           pipeRadius * 1.06,
           boltHeadDepth,
           0,
@@ -16432,7 +17786,7 @@ function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode
       flangePlate(
         position,
         axis,
-        pipeRadius * 1.82,
+        gasketOuterRadius,
         pipeRadius * 1.05,
         gasketThickness,
         0,
@@ -16443,30 +17797,31 @@ function flangeAssembly(position, direction, pipeRadius, nominalBore, flangeMode
     );
   }
 
-  for (let index = 0; index < boltCount; index += 1) {
-    const angle = (Math.PI * 2 * index) / boltCount;
-    const radialOffset = basis.u.clone().multiplyScalar(Math.cos(angle) * boltCircleRadius)
-      .add(basis.v.clone().multiplyScalar(Math.sin(angle) * boltCircleRadius));
-    const boltCenter = position.clone().add(radialOffset);
-    const boltInDepth = endMount ? plateThickness * 0.48 : totalHalfDepth + boltHeadDepth;
-    const boltOutDepth = totalHalfDepth + boltHeadDepth;
-    const boltStart = boltCenter.clone().addScaledVector(axis, -boltInDepth);
-    const boltEnd = boltCenter.clone().addScaledVector(axis, boltOutDepth);
-    const bolt = cylinderBetween(boltStart, boltEnd, boltBodyRadius, materials.bolt, 12);
-    bolt.castShadow = true;
-    group.add(bolt);
+  if (!isSingle) {
+    for (let index = 0; index < boltCount; index += 1) {
+      const angle = (Math.PI * 2 * index) / boltCount + Math.PI / boltCount;
+      const radialOffset = basis.u.clone().multiplyScalar(Math.cos(angle) * boltCircleRadius)
+        .add(basis.v.clone().multiplyScalar(Math.sin(angle) * boltCircleRadius));
+      const boltCenter = position.clone().add(radialOffset);
+      const boltDepth = totalHalfDepth + boltHeadDepth;
+      const boltStart = boltCenter.clone().addScaledVector(axis, -boltDepth);
+      const boltEnd = boltCenter.clone().addScaledVector(axis, boltDepth);
+      const bolt = cylinderBetween(boltStart, boltEnd, boltBodyRadius, materials.bolt, 12);
+      bolt.castShadow = true;
+      group.add(bolt);
 
-    for (const side of endMount ? [1] : [-1, 1]) {
-      const headCenter = boltCenter.clone().addScaledVector(axis, side * (totalHalfDepth + boltHeadDepth * 0.42));
-      const head = cylinderBetween(
-        headCenter.clone().addScaledVector(axis, -side * boltHeadDepth * 0.45),
-        headCenter.clone().addScaledVector(axis, side * boltHeadDepth * 0.45),
-        boltHeadRadius,
-        materials.bolt,
-        12,
-      );
-      head.castShadow = true;
-      group.add(head);
+      for (const side of [-1, 1]) {
+        const headCenter = boltCenter.clone().addScaledVector(axis, side * (totalHalfDepth + boltHeadDepth * 0.42));
+        const head = cylinderBetween(
+          headCenter.clone().addScaledVector(axis, -side * boltHeadDepth * 0.45),
+          headCenter.clone().addScaledVector(axis, side * boltHeadDepth * 0.45),
+          boltHeadRadius,
+          materials.bolt,
+          12,
+        );
+        head.castShadow = true;
+        group.add(head);
+      }
     }
   }
 
@@ -16483,7 +17838,7 @@ function flangePlate(position, direction, outerRadius, innerRadius, thickness, b
   shape.holes.push(pipeHole);
 
   for (let index = 0; index < boltCount; index += 1) {
-    const angle = (Math.PI * 2 * index) / boltCount;
+    const angle = (Math.PI * 2 * index) / boltCount + Math.PI / boltCount;
     const boltHole = new THREE.Path();
     boltHole.absarc(
       Math.cos(angle) * boltCircleRadius,
@@ -16939,7 +18294,7 @@ function drawFallbackGrid(ctx, width, height, style = {}) {
 
 function fallbackPreviewStyle() {
   const mode = normalizePreviewMode(state.previewMode);
-  const stainless = normalizePipeSpec(state.pipeSpec) === "stainless10";
+  const stainless = normalizePipeSpec(state.pipeSpec) !== "carbon40";
   const darkTheme = isDarkAppTheme();
   const carbonStyle = {
     background: darkTheme ? "#071018" : "#f8fbfb",
@@ -18301,15 +19656,179 @@ async function updateTeamMemberRole(userId, role) {
   await loadTeamWorkspace({ silent: true });
 }
 
+function projectCommentMentionChoices() {
+  const seen = new Set();
+  const choices = [];
+  for (const member of companyMembers) {
+    if (member.status !== "approved" || !member.email) continue;
+    const token = member.email.split("@")[0].replace(/[^a-z0-9._-]/gi, "").slice(0, 48);
+    if (!token || seen.has(token.toLowerCase())) continue;
+    seen.add(token.toLowerCase());
+    choices.push({ token, email: member.email });
+  }
+  return choices.slice(0, 18);
+}
+
+function projectCommentMentions(body) {
+  const mentions = [];
+  const seen = new Set();
+  for (const match of String(body ?? "").matchAll(/@([a-z0-9._-]+)/gi)) {
+    const token = String(match[1] ?? "").toLowerCase();
+    if (!token || seen.has(token)) continue;
+    seen.add(token);
+    mentions.push(token);
+  }
+  return mentions.slice(0, 24);
+}
+
+function currentUserMentionTokens() {
+  const email = String(cloudUser?.email ?? "").toLowerCase();
+  const local = email.split("@")[0].replace(/[^a-z0-9._-]/g, "");
+  return new Set([email, local].filter(Boolean));
+}
+
+function projectCommentMentionsCurrentUser(comment) {
+  const mine = currentUserMentionTokens();
+  return Array.isArray(comment?.mentions) && comment.mentions.some((mention) => mine.has(String(mention).toLowerCase()));
+}
+
+function renderProjectCommentMentionPicks() {
+  if (!projectCommentMentionPicks) return;
+  const choices = projectCommentMentionChoices();
+  projectCommentMentionPicks.innerHTML = choices.length
+    ? `<span>Mention:</span>${choices.map((choice) => `<button type="button" data-comment-mention="${escapeHtml(choice.token)}" title="Mention ${escapeHtml(choice.email)}">@${escapeHtml(choice.token)}</button>`).join("")}`
+    : "";
+  projectCommentMentionPicks.hidden = !choices.length;
+}
+
+function appendProjectCommentBody(element, body) {
+  const text = String(body ?? "");
+  const pattern = /@[a-z0-9._-]+/gi;
+  let index = 0;
+  for (const match of text.matchAll(pattern)) {
+    const start = match.index ?? 0;
+    if (start > index) element.append(document.createTextNode(text.slice(index, start)));
+    const mention = document.createElement("span");
+    mention.className = "comment-mention";
+    mention.textContent = match[0];
+    element.append(mention);
+    index = start + match[0].length;
+  }
+  if (index < text.length) element.append(document.createTextNode(text.slice(index)));
+}
+
+function clearPendingProjectCommentPhoto() {
+  if (pendingProjectCommentPhotoUrl) URL.revokeObjectURL(pendingProjectCommentPhotoUrl);
+  pendingProjectCommentPhoto = null;
+  pendingProjectCommentPhotoUrl = "";
+  if (projectCommentPhotoInput) projectCommentPhotoInput.value = "";
+  if (projectCommentPhotoPreview) projectCommentPhotoPreview.hidden = true;
+  if (projectCommentPhotoPreviewImage) projectCommentPhotoPreviewImage.removeAttribute("src");
+}
+
+function setPendingProjectCommentPhoto(file) {
+  clearPendingProjectCommentPhoto();
+  if (!(file instanceof File)) return;
+  if (!/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+    showAppNotice("Use a JPG, PNG or WebP workshop photo.");
+    return;
+  }
+  if (file.size > 8 * 1024 * 1024) {
+    showAppNotice("Workshop photos must be 8 MB or smaller.");
+    return;
+  }
+  pendingProjectCommentPhoto = file;
+  pendingProjectCommentPhotoUrl = URL.createObjectURL(file);
+  if (projectCommentPhotoPreviewImage) projectCommentPhotoPreviewImage.src = pendingProjectCommentPhotoUrl;
+  if (projectCommentPhotoPreviewName) projectCommentPhotoPreviewName.textContent = file.name || "Workshop photo";
+  if (projectCommentPhotoPreview) projectCommentPhotoPreview.hidden = false;
+}
+
+async function projectCommentPhotoUrl(path) {
+  const key = String(path ?? "").trim();
+  if (!key || !supabaseClient) return "";
+  const cached = projectCommentPhotoUrlCache.get(key);
+  if (cached && Date.now() - cached.createdAt < 45 * 60 * 1000) return cached.url;
+  const { data, error } = await supabaseClient.storage.from(CLOUD_PROJECT_PHOTOS_BUCKET).createSignedUrl(key, 3600);
+  if (error) throw error;
+  const url = String(data?.signedUrl ?? "");
+  if (url) projectCommentPhotoUrlCache.set(key, { url, createdAt: Date.now() });
+  return url;
+}
+
+async function hydrateProjectCommentPhoto(image, path) {
+  try {
+    const url = await projectCommentPhotoUrl(path);
+    if (!image.isConnected || !url) return;
+    image.src = url;
+    image.classList.add("loaded");
+  } catch (error) {
+    console.warn("Could not load workshop photo.", error);
+    if (image.isConnected) image.alt = "Workshop photo unavailable";
+  }
+}
+
+async function uploadProjectCommentPhoto(file) {
+  if (!file || !supabaseClient || !cloudUser || !state.projectId) return "";
+  const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  const scope = normalizeUuid(currentProjectCompanyId()) || normalizeUuid(cloudUser.id);
+  const projectKey = String(state.projectId).replace(/[^a-z0-9_-]/gi, "-").slice(0, 100);
+  const path = `${scope}/${projectKey}/${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}.${extension}`;
+  const { error } = await supabaseClient.storage
+    .from(CLOUD_PROJECT_PHOTOS_BUCKET)
+    .upload(path, file, { contentType: file.type, cacheControl: "3600", upsert: false });
+  if (error) throw error;
+  return path;
+}
+
+async function insertProjectCommentRecord(body, options = {}) {
+  const text = String(body ?? "").trim().slice(0, 1000);
+  if (!supabaseClient || !cloudUser || !state.projectId || !text) return false;
+  const { error } = await supabaseClient
+    .from(CLOUD_PROJECT_COMMENTS_TABLE)
+    .insert({
+      project_id: state.projectId,
+      company_id: currentProjectCompanyId(),
+      author_id: cloudUser.id,
+      author_email: cloudUser.email ?? "",
+      body: text,
+      mentions: projectCommentMentions(text),
+      photo_path: String(options.photoPath ?? "").trim() || null,
+    });
+  if (error) throw error;
+  return true;
+}
+
+async function toggleProjectCommentResolved(commentId, resolved) {
+  if (!supabaseClient || !cloudUser) return;
+  projectCommentsBusy = true;
+  renderProjectComments();
+  try {
+    const { error } = await supabaseClient.rpc("set_project_comment_resolved", {
+      comment_id_value: commentId,
+      resolved_value: resolved === true,
+    });
+    if (error) throw error;
+    await loadProjectComments({ silent: true });
+  } finally {
+    projectCommentsBusy = false;
+    renderProjectComments();
+  }
+}
+
 function renderProjectComments(errorMessage = "") {
   if (!projectCommentsList) return;
   projectCommentsList.innerHTML = "";
+  renderProjectCommentMentionPicks();
 
   if (projectCommentAddButton) {
-    projectCommentAddButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy;
+    projectCommentAddButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy || (!String(projectCommentInput?.value ?? "").trim() && !pendingProjectCommentPhoto);
   }
   if (projectCommentRefreshButton) {
     projectCommentRefreshButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy || !state.projectId;
+  }
+  if (projectCommentPhotoButton) {
+    projectCommentPhotoButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy;
   }
 
   const empty = (message) => {
@@ -18347,18 +19866,59 @@ function renderProjectComments(errorMessage = "") {
   for (const comment of projectComments) {
     const item = document.createElement("div");
     item.className = "team-comment";
+    item.classList.toggle("resolved", comment.resolved);
+    item.classList.toggle("mentions-me", projectCommentMentionsCurrentUser(comment));
 
+    const header = document.createElement("div");
+    header.className = "team-comment-head";
     const author = document.createElement("strong");
     author.textContent = comment.authorEmail || "Team member";
+    header.append(author);
+    if (comment.resolved) {
+      const badge = document.createElement("span");
+      badge.className = "team-comment-resolved-badge";
+      badge.textContent = "Resolved";
+      header.append(badge);
+    } else if (projectCommentMentionsCurrentUser(comment)) {
+      const badge = document.createElement("span");
+      badge.className = "team-comment-mention-badge";
+      badge.textContent = "Mentioned you";
+      header.append(badge);
+    }
 
     const body = document.createElement("p");
-    body.textContent = comment.body;
+    appendProjectCommentBody(body, comment.body);
+
+    let photo = null;
+    if (comment.photoPath) {
+      photo = document.createElement("img");
+      photo.className = "team-comment-photo";
+      photo.alt = "Workshop photo attached to this spool message";
+      photo.loading = "lazy";
+      hydrateProjectCommentPhoto(photo, comment.photoPath);
+    }
 
     const meta = document.createElement("span");
     meta.className = "team-comment-meta";
-    meta.textContent = comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "Just now";
+    const created = comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "Just now";
+    const resolved = comment.resolved && comment.resolvedAt
+      ? ` / resolved ${new Date(comment.resolvedAt).toLocaleString()}`
+      : "";
+    meta.textContent = `${created}${resolved}`;
 
-    item.append(author, body, meta);
+    const actions = document.createElement("div");
+    actions.className = "team-comment-actions";
+    const resolveButton = document.createElement("button");
+    resolveButton.type = "button";
+    resolveButton.dataset.projectCommentAction = comment.resolved ? "reopen" : "resolve";
+    resolveButton.dataset.projectCommentId = comment.id;
+    resolveButton.textContent = comment.resolved ? "Reopen" : "Resolve";
+    resolveButton.disabled = projectCommentsBusy;
+    actions.append(resolveButton);
+
+    item.append(header, body);
+    if (photo) item.append(photo);
+    item.append(meta, actions);
     projectCommentsList.append(item);
   }
 }
@@ -18376,7 +19936,7 @@ async function loadProjectComments(options = {}) {
   try {
     const { data, error } = await supabaseClient
       .from(CLOUD_PROJECT_COMMENTS_TABLE)
-      .select("id,project_id,company_id,author_id,author_email,body,created_at,updated_at")
+      .select("id,project_id,company_id,author_id,author_email,body,mentions,photo_path,resolved,resolved_at,resolved_by,created_at,updated_at")
       .eq("project_id", state.projectId)
       .order("created_at", { ascending: true })
       .limit(100);
@@ -18403,39 +19963,40 @@ async function addProjectComment() {
     return;
   }
 
-  const body = String(projectCommentInput?.value ?? "").trim();
-  if (!body) {
-    showAppNotice("Type the comment first.");
+  const body = String(projectCommentInput?.value ?? "").trim() || (pendingProjectCommentPhoto ? "Workshop photo" : "");
+  if (!body && !pendingProjectCommentPhoto) {
+    showAppNotice("Type a message or add a workshop photo first.");
     return;
   }
 
   if (!state.projectId) {
     state.projectId = createProjectId();
   }
-  const saved = await saveCloudProject({ silent: true });
-  if (!saved) {
-    showAppNotice("Save the spool to the cloud before adding a comment.");
-    return;
+  if (!currentProjectHasCloudRecord()) {
+    const saved = await saveCloudProject({ silent: true });
+    if (!saved) {
+      showAppNotice("Save the spool to the cloud before adding a message.");
+      return;
+    }
   }
 
   projectCommentsBusy = true;
   renderProjectComments();
+  let uploadedPhotoPath = "";
   try {
-    const { error } = await supabaseClient
-      .from(CLOUD_PROJECT_COMMENTS_TABLE)
-      .insert({
-        project_id: state.projectId,
-        company_id: currentProjectCompanyId(),
-        author_id: cloudUser.id,
-        author_email: cloudUser.email ?? "",
-        body,
-      });
-    if (error) throw error;
+    if (pendingProjectCommentPhoto) {
+      uploadedPhotoPath = await uploadProjectCommentPhoto(pendingProjectCommentPhoto);
+    }
+    await insertProjectCommentRecord(body, { photoPath: uploadedPhotoPath });
     if (projectCommentInput) projectCommentInput.value = "";
+    clearPendingProjectCommentPhoto();
     await loadProjectComments({ silent: true });
   } catch (error) {
+    if (uploadedPhotoPath) {
+      supabaseClient.storage.from(CLOUD_PROJECT_PHOTOS_BUCKET).remove([uploadedPhotoPath]).catch(() => {});
+    }
     console.warn("Could not add project comment.", error);
-    showAppNotice(error?.message || "Could not add comment.");
+    showAppNotice(error?.message || "Could not add spool message.");
   } finally {
     projectCommentsBusy = false;
     renderProjectComments();
@@ -18739,6 +20300,7 @@ async function loadSavedCloudProjects() {
 }
 
 async function openSavedCloudProject(projectId, options = {}) {
+  clearPendingProjectCommentPhoto();
   let record = (cloudProjectCache ?? []).find((project) => project.id === projectId);
   if (!record) {
     const projects = await loadSavedCloudProjects();
@@ -19097,7 +20659,6 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   }
 
   projectLibraryList.append(projectDashboardCard(filteredProjects, { totalCount: projectLibraryProjects.length, query }));
-  projectLibraryList.append(projectAlertCard(filteredProjects));
 
   if (!filteredProjects.length) {
     const empty = document.createElement("div");
@@ -19233,19 +20794,31 @@ function savedProjectProductionActivity(project) {
 }
 
 function productionAlertPriority(type) {
-  if (type === "overdue") return 0;
-  if (type === "due") return 1;
-  if (type === "readycheck") return 2;
-  if (type === "comment" || type === "message") return 3;
-  if (type === "mine") return 4;
-  if (type === "issued") return 5;
-  if (type === "fabricated") return 6;
-  return 7;
+  if (type === "returned") return 0;
+  if (type === "overdue") return 1;
+  if (type === "due") return 2;
+  if (type === "soon") return 3;
+  if (type === "readycheck") return 4;
+  if (type === "comment" || type === "message") return 5;
+  if (type === "mine") return 6;
+  if (type === "revision" || type === "issued") return 7;
+  if (type === "fabricated") return 8;
+  return 9;
 }
 
 function teamAlertDateText(date) {
   if (!(date instanceof Date) || Number.isNaN(date.getTime())) return "";
   return date.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
+function recentProjectActivity(project, predicate) {
+  const entry = savedProjectProductionActivity(project)
+    .slice()
+    .reverse()
+    .find((item) => predicate(item));
+  const date = projectReportDate(entry?.createdAt);
+  if (!entry || !date || Date.now() - date.getTime() > TEAM_ALERT_RECENT_MS) return null;
+  return { entry, date };
 }
 
 function recentProjectStatusDate(project, status) {
@@ -19272,6 +20845,7 @@ function recentProjectStatusDate(project, status) {
 function loadedProjectCommentForAlert(project) {
   if (!project?.id || projectCommentsProjectId !== project.id || !Array.isArray(projectComments)) return null;
   const latest = [...projectComments]
+    .filter((comment) => !comment.resolved)
     .sort((first, second) =>
       (new Date(second.createdAt).getTime() || 0) - (new Date(first.createdAt).getTime() || 0),
     )[0];
@@ -19293,6 +20867,8 @@ function projectTeamAlertItems(projects = projectLibraryProjects) {
       items.push({ project, type: "overdue", title: "Overdue", body: `${formatProductionDue(production)} / ${projectStatusLabel(status)}`, dueTime });
     } else if (status !== "complete" && dueState.key === "today") {
       items.push({ project, type: "due", title: "Due today", body: `${formatProductionDue(production)} / ${projectStatusLabel(status)}`, dueTime });
+    } else if (status !== "complete" && dueState.key === "soon") {
+      items.push({ project, type: "soon", title: "Due soon", body: `${formatProductionDue(production)} / ${projectStatusLabel(status)}`, dueTime });
     }
     if (status === "readycheck") {
       items.push({ project, type: "readycheck", title: "Ready to check", body: "Waiting for checking/sign-off.", dueTime });
@@ -19300,24 +20876,49 @@ function projectTeamAlertItems(projects = projectLibraryProjects) {
     if (status !== "complete" && productionAssignedToCurrentUser(production)) {
       items.push({ project, type: "mine", title: "Assigned to you", body: `${projectStatusLabel(status)}${production.dueDate ? ` / due ${formatProductionDue(production)}` : ""}`, dueTime });
     }
+    const returnedReview = status === "draft"
+      ? recentProjectActivity(project, (entry) => entry.type === "review" && /^Returned for changes/i.test(entry.text))
+      : null;
+    if (returnedReview) {
+      items.push({
+        project,
+        type: "returned",
+        title: "Returned by checker",
+        body: returnedReview.entry.text,
+        dueTime,
+        eventTime: returnedReview.date.getTime(),
+      });
+    }
     const activeMessage = [...savedProjectProductionMessages(project)].reverse().find((message) => !message.completed);
     if (activeMessage) {
       const eventTime = new Date(activeMessage.createdAt).getTime() || 0;
       items.push({ project, type: "comment", title: "New comment", body: activeMessage.body, dueTime, eventTime });
     }
     const cloudComment = loadedProjectCommentForAlert(project);
-    if (cloudComment) {
+    const returnedConversationDuplicate = returnedReview && /^RETURNED FOR CHANGES/i.test(cloudComment?.body ?? "");
+    if (cloudComment && !returnedConversationDuplicate) {
       const eventTime = new Date(cloudComment.createdAt).getTime() || 0;
       const author = cloudComment.authorEmail ? `${cloudComment.authorEmail}: ` : "";
-      items.push({ project, type: "comment", title: "Cloud comment", body: `${author}${cloudComment.body}`, dueTime, eventTime });
-    }
-    const issuedDate = recentProjectStatusDate(project, "issued");
-    if (issuedDate) {
       items.push({
         project,
-        type: "issued",
-        title: "Spool issued",
-        body: `Issued ${teamAlertDateText(issuedDate)}`,
+        type: "comment",
+        title: projectCommentMentionsCurrentUser(cloudComment) ? "Mentioned you" : "Spool message",
+        body: `${author}${cloudComment.body}`,
+        dueTime,
+        eventTime,
+      });
+    }
+    const revisionIssue = recentProjectActivity(project, (entry) => entry.type === "revision" && /\bissued by\b/i.test(entry.text));
+    const issuedDate = revisionIssue?.date ?? recentProjectStatusDate(project, "issued");
+    if (issuedDate) {
+      const revision = normalizeProjectInfo(savedState?.projectInfo).revision || "-";
+      items.push({
+        project,
+        type: "revision",
+        title: `Revision ${revision} issued`,
+        body: revisionIssue
+          ? `${revisionIssue.entry.actor || "Team"} / ${teamAlertDateText(issuedDate)}`
+          : `Issued ${teamAlertDateText(issuedDate)}`,
         dueTime: Number.MAX_SAFE_INTEGER,
         eventTime: issuedDate.getTime(),
       });
@@ -19363,7 +20964,7 @@ function projectAlertCard(projects = projectLibraryProjects) {
             <small>${escapeHtml(alert.body)}</small>
           </button>
         </article>
-      `).join("") : `<div class="project-alert-empty">Nothing due, overdue, assigned, ready to check, commented, issued or fabricated recently.</div>`}
+      `).join("") : `<div class="project-alert-empty">Nothing due, returned, assigned, ready to check, commented, issued or fabricated recently.</div>`}
     </div>
   `;
   return section;
@@ -19648,6 +21249,15 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
 
   if (updates.status !== undefined) {
     const nextStatus = normalizeProjectStatus(updates.status);
+    if (nextStatus === "checked" && previousStatus !== "checked") {
+      throw new Error("Open the spool and use Approve drawing so the checker and comment are recorded.");
+    }
+    if (projectStatusAtLeast(nextStatus, "issued") && !targetState.checkedAt) {
+      throw new Error("Approve the drawing before moving it to Issued or fabrication.");
+    }
+    if (projectStatusAtLeast(previousStatus, "checked") && projectStatusIndex(nextStatus) < projectStatusIndex("checked")) {
+      throw new Error("Open the spool and use Return for changes so the checker comment and revision are preserved.");
+    }
     targetState.projectStatus = nextStatus;
     if (nextStatus !== previousStatus) {
       activity = addProductionActivity(activity, "status", `Moved from ${projectStatusLabel(previousStatus)} to ${projectStatusLabel(nextStatus)}.`, now);
@@ -19683,7 +21293,11 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
       ? `Put on hold${nextProduction.holdReason ? `: ${nextProduction.holdReason}` : "."}`
       : "Hold removed.", now);
   }
-  if (Object.prototype.hasOwnProperty.call(changedProduction, "holdReason") && previousProduction.holdReason !== nextProduction.holdReason) {
+  if (
+    Object.prototype.hasOwnProperty.call(changedProduction, "holdReason") &&
+    previousProduction.holdReason !== nextProduction.holdReason &&
+    !(Object.prototype.hasOwnProperty.call(changedProduction, "hold") && nextProduction.hold)
+  ) {
     activity = addProductionActivity(activity, "hold", `Hold reason changed from ${previousProduction.holdReason || "none"} to ${nextProduction.holdReason || "none"}.`, now);
   }
 
@@ -19736,6 +21350,13 @@ function showProjectLibraryComms() {
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
   ensureProjectLibraryCommsSlot();
   renderProjectLibraryComms(projectLibraryProjects);
+  renderProjectComments();
+  if (cloudUser && state.projectId && projectCommentsProjectId !== state.projectId) {
+    loadProjectComments({ silent: true }).catch((error) => {
+      console.warn("Spool conversation refresh failed.", error);
+      renderProjectComments("The current spool conversation could not be loaded.");
+    });
+  }
   if (projectLibrarySource === "cloud" && activeCompanyIsApproved()) {
     loadTeamMessages({ silent: true }).catch((error) => {
       console.warn("Team comms refresh failed.", error);
@@ -19769,6 +21390,7 @@ function dashboardCommsItems(projects = projectLibraryProjects) {
 function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessage = "") {
   if (!projectLibraryCommsSlot) return;
   projectLibraryCommsSlot.hidden = !projectLibraryCommsVisible;
+  if (projectLibrarySpoolConversation) projectLibrarySpoolConversation.hidden = !projectLibraryCommsVisible;
   if (!projectLibraryCommsVisible) return;
 
   const activeErrorMessage = errorMessage || teamMessagesError;
@@ -20378,7 +22000,6 @@ function projectProductionBoard(projects) {
     </div>
   `;
   section.append(header);
-  section.append(projectProductionCommandStrip(projects, counts, boardFilter));
 
   if (assigneeOptions) {
     const datalist = document.createElement("datalist");
@@ -20594,31 +22215,69 @@ function projectLibrarySearchText(project) {
     .toLowerCase();
 }
 
+function projectRecentActivityItems(projects = [], limit = 7) {
+  return (Array.isArray(projects) ? projects : [])
+    .filter((project) => !productionProjectHidden(project))
+    .flatMap((project) => savedProjectProductionActivity(project).map((entry) => ({
+      project,
+      entry,
+      time: new Date(entry.createdAt).getTime() || 0,
+    })))
+    .sort((first, second) => second.time - first.time)
+    .slice(0, limit);
+}
+
 function projectDashboardCard(projects, options = {}) {
-  const card = document.createElement("div");
-  card.className = "project-dashboard-card";
-  const counts = projects.reduce((summary, project) => {
-    const savedState = savedProjectState(project);
-    const status = normalizeProjectStatus(savedState?.projectStatus);
-    summary[status] = (summary[status] ?? 0) + 1;
-    return summary;
-  }, {});
+  const card = document.createElement("section");
+  card.className = "project-dashboard-card team-work-dashboard";
+  const counts = productionBoardFilterCounts(projects);
+  const recentActivity = projectRecentActivityItems(projects);
   const totalCount = options.totalCount ?? projects.length;
   const resultText = options.query && totalCount !== projects.length
     ? `${projects.length} matching of ${totalCount} saved spool${totalCount === 1 ? "" : "s"}`
     : `${projects.length} saved spool${projects.length === 1 ? "" : "s"}`;
+  const title = projectLibrarySource === "cloud"
+    ? activeCompanyIsApproved() ? `${activeCompany.name} team dashboard` : "Cloud team dashboard"
+    : "Browser production dashboard";
+  const queues = [
+    ["mine", "Assigned to me", "Nothing assigned to you."],
+    ["today", "Due today", "Nothing due today."],
+    ["overdue", "Overdue", "No overdue spools."],
+    ["readycheck", "Ready to check", "No checking queue."],
+    ["hold", "On hold", "No hold items."],
+  ];
+
   card.innerHTML = `
-    <div>
-      <strong>${projectLibrarySource === "cloud" ? activeCompanyIsApproved() ? `${escapeHtml(activeCompany.name)} dashboard` : "Cloud dashboard" : "Browser dashboard"}</strong>
-      <span>${escapeHtml(resultText)}</span>
+    <div class="team-dashboard-head">
+      <div>
+        <strong>${escapeHtml(title)}</strong>
+        <span>${escapeHtml(resultText)} / ${counts.active ?? 0} active</span>
+      </div>
+      <div class="team-dashboard-actions">
+        <button type="button" data-project-library-action="show-report" data-report-period="daily">Daily report</button>
+        <button type="button" data-project-library-action="show-report" data-report-period="weekly">Weekly report</button>
+        <button type="button" data-project-library-action="show-comms">Team comms</button>
+      </div>
     </div>
-    <div class="project-dashboard-stats">
-      ${PROJECT_STATUS_FLOW.map(([status]) => `
-        <div class="project-dashboard-stat">
-          <b>${counts[status] ?? 0}</b>
-          <small>${escapeHtml(projectStatusLabel(status))}</small>
+    <div class="team-dashboard-layout">
+      <div class="team-dashboard-queues production-command-grid" aria-label="Team work queues">
+        ${queues.map(([filter, label, hint]) => productionCommandStripItem(projects, filter, label, hint, counts, projectLibraryBoardFilter)).join("")}
+      </div>
+      <section class="team-dashboard-activity" aria-label="Recent team activity">
+        <div class="team-dashboard-activity-head">
+          <strong>Recent team activity</strong>
+          <span>Latest assignment, due-date, hold, note and stage changes</span>
         </div>
-      `).join("")}
+        <div class="team-dashboard-activity-list">
+          ${recentActivity.length ? recentActivity.map(({ project, entry }) => `
+            <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
+              <span>${escapeHtml(savedProjectSpoolTitle(project))}</span>
+              <strong>${escapeHtml(entry.text)}</strong>
+              <small>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</small>
+            </button>
+          `).join("") : `<div class="team-dashboard-empty">No team activity yet. Assign a spool or move one to begin the history.</div>`}
+        </div>
+      </section>
     </div>
   `;
   return card;
@@ -20895,6 +22554,7 @@ function closeProjectLibrary() {
 }
 
 async function openSavedBrowserProject(projectId) {
+  clearPendingProjectCommentPhoto();
   const record = loadSavedBrowserProjects().find((project) => project.id === projectId);
   if (!record) {
     showAppNotice("That saved project was not found.");
@@ -23010,6 +24670,7 @@ function redrawLoadPlanIfOpen() {
 }
 
 async function startNewDrawing() {
+  clearPendingProjectCommentPhoto();
   let nextProjectDefaults = null;
   if (hasDrawingContent()) {
     const choice = await openNewDrawingDialog();
@@ -23038,6 +24699,7 @@ async function startNewDrawing() {
 }
 
 function loadSampleDrawing() {
+  clearPendingProjectCommentPhoto();
   loadStateIntoWorkspace(sampleState());
 }
 
@@ -23096,7 +24758,7 @@ function regressionAutoChecksMarkup() {
       <div class="regression-auto-head">
         <div>
           <strong>Automatic drawing trust checks</strong>
-          <span>Tee reducers, branch welds, flush flanges, 45 offsets and socket dimensions.</span>
+          <span>Connections, flange drilling, offsets, sockets, save/open data and stainless 3D materials.</span>
         </div>
         <b>${passedCount}/${results.length} passed</b>
       </div>
@@ -25170,6 +26832,10 @@ function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
 
 function drawReportCompactFabricationNotes(ctx, x, y, width, quantities) {
   const notes = [];
+  const acknowledgedChecks = drawingHealthItems().filter((item) => item.acknowledged && item.acknowledgement);
+  for (const item of acknowledgedChecks.slice(0, 3)) {
+    notes.push(`ACKNOWLEDGED CHECK: ${item.title} - ${item.acknowledgement.reason} (${item.acknowledgement.by || "Reviewer"}).`);
+  }
   if (quantities.elbows.length) {
     notes.push(`${quantities.elbows.length} bend${quantities.elbows.length === 1 ? "" : "s"} / ${formatLength(quantities.bendTakeoffMm)} mm total deduction / ${formatMass(quantities.bendWeightKg)} kg.`);
   }
@@ -25252,9 +26918,8 @@ function drawReportTeeNotes(ctx, x, y, width, quantities) {
     const legs = tee.connections
       .map((connection) => `run ${connection.segmentIndex + 1}: ${formatLength(connection.takeoffMm)} mm`)
       .join(", ");
-    const label = tee.reducing
-      ? `T${index + 1} reducing tee ${pipeSizeDisplayLabelByNb(tee.nb)} to ${pipeSizeDisplayLabelByNb(tee.branchNb)}`
-      : `T${index + 1} tee ${pipeSizeDisplayLabelByNb(tee.nb)}`;
+    const label = `T${index + 1} equal tee ${pipeSizeDisplayLabelByNb(tee.nb)}` +
+      (tee.reducing ? ` / separate reducer to ${pipeSizeDisplayLabelByNb(tee.branchNb)}` : "");
     const line = `${label} - take off ${legs} / ${formatMass(tee.weightKg)} kg ${tee.source}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
@@ -25958,7 +27623,12 @@ function renderContextPipeSizeMenu() {
       .filter(Boolean)
       .map((segment) => pipeSizeForSegment(segment).nb),
   );
-  const countText = targetIndexes.length > 1 ? `${targetIndexes.length} selected runs` : `Run ${hit.segment.index + 1}`;
+  const branchMainLinked = branchMainLinkedSegmentIndexes([hit.segment.index], segmentData).length > 1;
+  const countText = targetIndexes.length > 1
+    ? branchMainLinked
+      ? `${targetIndexes.length} continuous branch-main runs`
+      : `${targetIndexes.length} selected runs`
+    : `Run ${hit.segment.index + 1}`;
 
   drawingContextMenu.innerHTML = "";
 
@@ -25988,7 +27658,9 @@ function renderContextPipeSizeMenu() {
     clampDrawingContextMenuToViewport();
   });
   drawingContextMenu.append(backButton);
-  addDrawingContextHint("Tap a size to apply it to the selected run. Use Undo if it was the wrong one.");
+  addDrawingContextHint(branchMainLinked
+    ? "This is the straight-through main at a welded branch. Both main sections will change together; the branch outlet stays unchanged."
+    : "Tap a size to apply it to the selected run. Use Undo if it was the wrong one.");
 
   for (const size of pipeSizesForSpec(state.pipeSpec)) {
     const button = document.createElement("button");
@@ -26049,18 +27721,17 @@ function handleDocumentScrollForContextMenu(event) {
   closeDrawingContextMenu();
 }
 
-function hasContextHit(pointer) {
-  const target = contextTargetFromPointer(pointer);
-  return Boolean(target.segmentHit || target.fittingHit || target.pointHit || target.noteHit || target.measurementHit);
-}
-
 function startTouchContextPress(event, pointer) {
   if (!isTouchLikeEvent(event) || event.button !== 0) return false;
   if (state.activeTool !== "select") return false;
 
   cancelTouchContextPress();
-  const hasHit = hasContextHit(pointer);
+  const target = contextTargetFromPointer(pointer);
+  const hasHit = Boolean(target.segmentHit || target.fittingHit || target.pointHit || target.noteHit || target.measurementHit);
   if (!hasHit) return false;
+  const canDragDirectly = !drawingEditLocked() && Boolean(
+    target.noteHit || target.fittingHit?.fitting?.type === "socket",
+  );
   cursorReadout.textContent = "Hold still for actions";
   touchContextPress = {
     pointerId: event.pointerId,
@@ -26079,7 +27750,9 @@ function startTouchContextPress(event, pointer) {
     }, TOUCH_CONTEXT_PRESS_MS),
   };
 
-  return isPhoneLayout();
+  // Keep a pipe/point hold from also opening selection/inspector UI underneath the action sheet.
+  // Notes and sockets continue into their normal drag handlers, which cancel this timer.
+  return !canDragDirectly;
 }
 
 function updateTouchContextPress(event) {
@@ -26228,13 +27901,9 @@ function finishTouchContextPress(event) {
     return true;
   }
 
-  if (isPhoneLayout()) {
-    selectContextHitOnTouch(press.pointer, event);
-    event.preventDefault();
-    return true;
-  }
-
-  return false;
+  selectContextHitOnTouch(press.pointer, event);
+  event.preventDefault();
+  return true;
 }
 
 function startPendingDraw(event, pointer) {
@@ -26360,6 +28029,19 @@ function selectContextHitOnTouch(pointer, event) {
   if (target.noteHit) {
     state.selectedNote = target.noteHit.note.id;
     state.selectedFitting = null;
+    state.selectedMeasurement = null;
+    state.selectedPoint = null;
+    clearSelectedSegments();
+    setTool("select");
+    updateAll({ save: false });
+    showMobilePanel("inspector");
+    return;
+  }
+
+  if (target.measurementHit) {
+    state.selectedMeasurement = target.measurementHit.measurement.id;
+    state.selectedNote = null;
+    state.selectedFitting = null;
     state.selectedPoint = null;
     clearSelectedSegments();
     setTool("select");
@@ -26373,6 +28055,7 @@ function selectContextHitOnTouch(pointer, event) {
     state.activePoint = target.pointHit.index;
     state.selectedFitting = null;
     state.selectedNote = null;
+    state.selectedMeasurement = null;
     clearSelectedSegments();
     setTool("select");
     updateAll({ save: false });
@@ -26383,6 +28066,7 @@ function selectContextHitOnTouch(pointer, event) {
   if (target.segmentHit) {
     chooseSegmentFromPointer(event, target.segmentHit.segment.index);
     state.selectedNote = null;
+    state.selectedMeasurement = null;
     state.selectedFitting = target.fittingHit ? target.fittingHit.fitting.id : null;
     state.selectedPoint = target.segmentHit.t < 0.5 ? target.segmentHit.segment.from : target.segmentHit.segment.to;
     state.activePoint = state.selectedPoint;
@@ -27028,7 +28712,8 @@ function contextPipeSizeDetail(segment) {
 function contextPipeSizeTargetIndexes(segment) {
   if (!segment) return [];
   const selected = selectedSegmentIndexes();
-  return selected.includes(segment.index) && selected.length > 1 ? selected : [segment.index];
+  const requested = selected.includes(segment.index) && selected.length > 1 ? selected : [segment.index];
+  return branchMainLinkedSegmentIndexes(requested);
 }
 
 function changeContextPipeSize() {
@@ -27373,6 +29058,7 @@ function beginDimensionDrag(event, target, pointer) {
   };
   state.selectedNote = null;
   state.selectedFitting = null;
+  state.selectedMeasurement = null;
   clearSelectedSegments();
   state.selectedPoint = null;
   cursorReadout.textContent = "Dragging dimension";
@@ -27462,6 +29148,7 @@ function beginNoteDrag(event, noteHit, pointer) {
   };
   state.selectedNote = note.id;
   state.selectedFitting = null;
+  state.selectedMeasurement = null;
   state.selectedPoint = null;
   clearSelectedSegments();
   cursorReadout.textContent = "Dragging note";
@@ -27531,6 +29218,7 @@ function beginSocketDrag(event, fittingHit, pointer) {
   };
   state.selectedFitting = fitting.id;
   state.selectedNote = null;
+  state.selectedMeasurement = null;
   state.selectedPoint = null;
   selectSingleSegment(segment.index);
   cursorReadout.textContent = socketPositionReadout(segment, fitting.t);
@@ -27655,6 +29343,7 @@ function finishBoxSelect(event) {
   setSelectedSegments(chosen);
   state.selectedFitting = null;
   state.selectedNote = null;
+  state.selectedMeasurement = null;
   const selectedSegments = segments().filter((segment) => chosen.includes(segment.index));
   if (selectedSegments.length) {
     const last = selectedSegments[selectedSegments.length - 1];
@@ -28218,6 +29907,24 @@ projectStatusSelect?.addEventListener("change", async () => {
     return;
   }
   const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
+  const currentStatus = normalizeProjectStatus(state.projectStatus);
+  if (nextStatus === "checked" && currentStatus !== "checked") {
+    projectStatusSelect.value = currentStatus;
+    await markDrawingChecked();
+    return;
+  }
+  if (projectStatusAtLeast(currentStatus, "checked") && projectStatusIndex(nextStatus) < projectStatusIndex("checked")) {
+    showAppNotice("Use Return for changes so the checker comment and revision record are preserved.");
+    updateControls();
+    showHealthPanel();
+    return;
+  }
+  if ((state.issuedAt || projectStatusAtLeast(currentStatus, "issued")) && projectStatusIndex(nextStatus) < projectStatusIndex("issued")) {
+    showAppNotice("Issued drawings stay locked. Use Return for changes to record the reason and preserve the issued revision.");
+    updateControls();
+    showHealthPanel();
+    return;
+  }
   if (projectStatusAtLeast(nextStatus, "issued") && !state.issuedAt) {
     const issued = await issueDrawing({ targetStatus: nextStatus });
     if (!issued) {
@@ -28235,6 +29942,12 @@ projectLockToggle?.addEventListener("change", () => {
   if (cloudPermissionReadOnly) {
     showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to unlock or edit it.");
     updateControls();
+    return;
+  }
+  if ((state.issuedAt || projectStatusAtLeast(state.projectStatus, "issued")) && !projectLockToggle.checked) {
+    showAppNotice("Issued drawings cannot be unlocked directly. Use Return for changes or create a new revision.");
+    updateControls();
+    showHealthPanel();
     return;
   }
   state.locked = projectLockToggle.checked;
@@ -28317,6 +30030,38 @@ projectCommentRefreshButton?.addEventListener("click", () => {
     console.warn("Refresh comments failed.", error);
     showAppNotice(error?.message || "Refresh comments failed.");
   });
+});
+projectCommentMentionPicks?.addEventListener("click", (event) => {
+  const button = event.target instanceof Element ? event.target.closest("[data-comment-mention]") : null;
+  if (!button || !projectCommentInput) return;
+  const mention = `@${button.dataset.commentMention}`;
+  const current = String(projectCommentInput.value ?? "");
+  projectCommentInput.value = `${current}${current && !/\s$/.test(current) ? " " : ""}${mention} `;
+  projectCommentInput.focus();
+  projectCommentAddButton.disabled = false;
+});
+projectCommentPhotoButton?.addEventListener("click", () => projectCommentPhotoInput?.click());
+projectCommentPhotoInput?.addEventListener("change", () => {
+  setPendingProjectCommentPhoto(projectCommentPhotoInput.files?.[0]);
+  if (projectCommentAddButton) projectCommentAddButton.disabled = !pendingProjectCommentPhoto && !String(projectCommentInput?.value ?? "").trim();
+});
+projectCommentPhotoRemoveButton?.addEventListener("click", () => {
+  clearPendingProjectCommentPhoto();
+  if (projectCommentAddButton) projectCommentAddButton.disabled = !String(projectCommentInput?.value ?? "").trim();
+});
+projectCommentsList?.addEventListener("click", (event) => {
+  const button = event.target instanceof Element ? event.target.closest("[data-project-comment-action]") : null;
+  if (!button) return;
+  const resolved = button.dataset.projectCommentAction === "resolve";
+  toggleProjectCommentResolved(button.dataset.projectCommentId, resolved).catch((error) => {
+    console.warn("Could not update spool message.", error);
+    showAppNotice(error?.message || "Could not update spool message.");
+  });
+});
+projectCommentInput?.addEventListener("input", () => {
+  if (projectCommentAddButton) {
+    projectCommentAddButton.disabled = projectCommentsBusy || (!String(projectCommentInput.value ?? "").trim() && !pendingProjectCommentPhoto);
+  }
 });
 projectCommentInput?.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
@@ -28411,6 +30156,10 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     deleteSelection();
   } else if (event.key === "Escape") {
+    if (focusModeActive) {
+      setFocusMode(false);
+      return;
+    }
     if (actionMenuOpen()) {
       closeActionMenu();
       return;
@@ -28537,7 +30286,7 @@ window.addEventListener("resize", () => {
   redrawLoadPlanIfOpen();
   renderDrawingAssistant();
   if (!isTabletLayout()) {
-    showMobilePanel("drawing");
+    setInspectorDrawerOpen(appMode === "review" || appMode === "export" || hasInspectorSelection());
   }
 });
 window.addEventListener("blur", () => setShiftAngleSnap(false));
@@ -28559,6 +30308,7 @@ setupCollapsibleControls();
 setupInspectorTabs();
 setupAppModes();
 setupMobilePanels();
+setupFittingsToolMenu();
 setupAppTheme();
 setupActionMenu();
 setupAuthDialog();

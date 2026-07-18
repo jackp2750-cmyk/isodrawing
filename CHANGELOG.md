@@ -1,6 +1,145 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.77`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.90`.
+
+## v2.90 - Clear Revision Fix
+- Added Revision missing as a visible, actionable Drawing checks card instead of reporting it only in a blocked-issue toast.
+- Added a one-tap Set Rev A action that works while a checked drawing is locked.
+- Made Issue drawing prompt for a missing revision with A prefilled, then continue the pre-issue check automatically.
+- Stopped project-detail failures being counted again as generic drawing errors.
+- Kept acknowledged reducer and tee/branch exceptions separate from missing project details in blocked-issue guidance.
+- Set Revision A as the default for new drawings.
+- Bumped app cache to `spoolmate-v238`.
+
+## v2.89 - Checks Stay in Review
+- Changed Show on drawing into a highlight-only inspection action.
+- Kept Review mode and the Checks tab active while a reducer, tee, branch, open-end or other drawing finding is highlighted.
+- Stopped Show on drawing from selecting the pipe, changing the active drawing tool or opening Properties.
+- Kept the Inspector/Checks panel open on desktop, iPad and phone so users can work through findings without losing their place.
+- Updated Review tutorial and Help guidance for the non-destructive inspection behavior.
+- Bumped app cache to `spoolmate-v237`.
+
+## v2.88 - Continuous Branch Main Sizing
+- Made pipe-size changes propagate across both straight-through sections of a welded branch main.
+- Kept the side branch outlet independent so its nominated size is never changed with the main.
+- Applied the rule to top pipe-size controls, right-click/long-press size menus and multi-select edits.
+- Followed linked main sections through multiple welded branch points and kept the whole continuous main consistent.
+- Changed branch-main detection to geometry-first, using the most straight-through pair rather than assuming the largest connected legs are the main.
+- Added clear context-menu guidance and a notice showing that linked main sections changed while the outlet remained untouched.
+- Expanded the branch regression check and Pipe Size tutorial/help guidance for this fabrication rule.
+- Bumped app cache to `spoolmate-v236`.
+
+## v2.87 - Actionable Drawing Checks
+- Rebuilt drawing check cards with plain-English fix guidance and dedicated actions instead of a single unexplained highlight.
+- Added Set as tee and Set as branch actions so connection intent can be corrected directly from Review.
+- Added Acknowledge & allow issue for intentional reducer or tee/branch exceptions, with a required reason, reviewer and timestamp saved in the spool.
+- Added Reopen check so an acknowledgement can be withdrawn and made blocking again.
+- Added acknowledged check decisions to production activity history and the pre-issue summary.
+- Printed active acknowledged check reasons in fabrication-sheet notes so exported workshop documents retain the exception record.
+- Changed internal regression test-kit failures from hard spool blockers to visible application diagnostics with an Open app test kit action.
+- Improved blocked-issue notices and added a direct Review drawing checks action to the pre-issue card.
+- Updated Review tutorial and Help guidance for the fix, acknowledge and self-test workflow.
+- Bumped app cache to `spoolmate-v235`.
+
+## v2.86 - Clear Visual Hierarchy
+- Reserved blue for active tools, selected tabs and primary next actions instead of using it for ordinary hover states.
+- Gave Save actions a consistent green treatment, destructive actions a consistent red treatment and export actions a distinct neutral treatment with the primary export remaining blue.
+- Flattened the top action and settings groups, reduced nested borders and used spacing plus quiet separators to organise controls.
+- Made version, sync, status, assignee, pipe-size and helper text less visually dominant while preserving readable state colours for saved, unsaved, warning and error states.
+- Simplified inactive side tools and Inspector tabs while retaining clear touch boundaries on iPad and Android.
+- Applied the same hierarchy to light and dark themes and documented the action colours in the Start tutorial.
+- Added regression checks for semantic action classes and hierarchy tokens.
+- Bumped app cache to `spoolmate-v234`.
+
+## v2.85 - Focus Drawing and Jobs Separation
+- Kept the 3D preview hidden by default and placed one clear 3D launcher beside Focus, Details and PDF in the drawing toolbar.
+- Made 3D reopen as a compact movable overlay and saved its last position and size on the current device.
+- Removed the dock/float choice from the compact 3D header while retaining Rotate, Move, Fit, Full, Minimize, Hide and view styles.
+- Added Focus mode: the drawing fills the screen, a slim tool rail remains available, and Inspector or 3D open temporarily above the drawing.
+- Added Escape and an explicit Exit control for leaving Focus without changing Draw, Edit, Review or Export mode.
+- Moved the cloud spool conversation, @mentions and workshop-photo controls from the drawing Inspector into Jobs > Comms.
+- Removed assignment, due-date, hold and activity editing from Review; it now shows a compact production summary with one Open Jobs action.
+- Kept current status, assignee and save state visible in the drawing header.
+- Quieted secondary borders and hover colours, reserved blue for active/primary actions, kept destructive actions red and gave Save a distinct green treatment.
+- Added an interactive Focus tutorial topic and updated Help for the new 3D, Focus and Jobs communication workflows.
+- Added release-verifier checks for Focus mode, remembered preview bounds and Jobs-only spool conversations.
+- Bumped app cache to `spoolmate-v233`.
+
+## v2.84 - Compact Tools and Inspector Drawer
+- Reduced the permanent side rail to the six everyday tools: Draw, Select, Undo, Redo, Measure and Note.
+- Grouped Tee, Branch, Flange, Reducer, Groove, Valve, Socket and Weld into a compact Fittings flyout, with the active fitting shown on its trigger.
+- Kept Box Select and Delete available as clearly labelled selection utilities inside the flyout without taking permanent rail space.
+- Turned the desktop Inspector into an on-demand right drawer that stays closed with no selection and opens automatically for selected runs, points, notes, measurements and fittings.
+- Made Review and Export Inspector views full height so Cut List, Weights, BOM, Checks and Notes no longer squeeze the drawing into a permanent third column.
+- Added a visible Details button to reopen the Inspector after closing it.
+- Updated the Tee and end-fitting tutorial practices to teach the new Fittings-menu workflow before placement.
+- Added release-verifier protection for the compact tool rail, Fittings flyout and Inspector drawer wiring.
+- Bumped app cache to `spoolmate-v232`.
+
+## v2.83 - Focused Workspaces
+- Turned Draw, Edit, Review and Export into distinct workspaces that only show their relevant top settings, side tools and inspector tabs.
+- Reduced the permanent action bar to Save, Jobs, Account, cloud-save state and Menu, with the current job/spool kept beside the mode switcher.
+- Moved New spool and theme selection into the Setup/Project menu to remove rarely used controls from the drawing surface.
+- Put PDF style, Export 3D, Fab PDF and Project file actions directly in the Export workspace.
+- Limited Draw/Edit to the Properties inspector, Review to checks/workflow/notes plus fabrication summaries, and Export to Cut List, Weights and BOM.
+- Made health checks switch cleanly into Review and prevented hidden inspector panels from opening behind the selected workspace.
+- Added compact desktop, tablet, phone and dark-theme styling for the new workspace settings strip.
+- Updated the tutorial and README for the simplified navigation.
+- Bumped app cache to `spoolmate-v231`.
+
+## v2.82 - Team Accountability Timeline
+- Expanded each spool's activity history to retain up to 240 actor-and-time events, with the latest eight visible and older events available from an expandable timeline.
+- Added activity records for single and multi-run pipe-size changes, checker returns, revision creation/restoration and revision issue.
+- Added Jobs alerts for work due soon, spools returned by a checker and newly issued revision numbers, while avoiding duplicate return comments.
+- Kept existing assigned-to-you, due-today, overdue, ready-to-check, comment and fabricated alerts in the same prioritized list.
+- Updated the Production tutorial and README to explain the expanded timeline and alerts.
+- Added release-verifier coverage for the new timeline retention and lifecycle alert wiring.
+- Bumped app cache to `spoolmate-v230`.
+
+## v2.81 - Full Release Integrity Audit
+- Audited drawing, fitting, dimension, weight, pressure, lifting, 3D, export, save/open, cloud, PWA, tutorial and touch code paths.
+- Corrected size-changing tee calculations to use an equal line-size tee plus a separate reducer, keeping tee deductions and weights from being mixed or double-counted.
+- Added Atlas stainless Schedule 10S reducer weights by exact large/small size pair and kept unsupported/manual cases clearly estimated.
+- Fixed iPad and Android long-press gesture ownership so pipe action sheets no longer compete with the inspector or selection underneath.
+- Fixed touch selection of manual measurements and cleared stale selections when dragging notes, sockets, dimensions or using box select.
+- Stopped the Tutorial action from opening twice through the main Menu event delegation.
+- Corrected stainless steel tube to use the silver 3D and fallback material paths instead of carbon-black rendering.
+- Aligned the installed PWA splash and theme colours with the light-mode default while preserving the saved dark-mode option.
+- Added automatic save/open round-trip and stainless 3D material checks to the built-in Review Test Kit.
+- Added `verify-app.cjs` to check syntax, UI references, icon/ARIA targets, version/cache wiring, PWA assets, engineering tables, frontend key safety and Supabase RPC definitions before release.
+- Bumped app cache to `spoolmate-v229`.
+
+## v2.80 - Standards-Accurate 3D Flanges
+- Replaced generic scaled flange drilling with table-backed dimensions for ASME Class 150/300/600, AS 2129 Tables D/E/F/H, EN/DIN PN 10/16/25/40 and JIS 10K.
+- Made flange outside diameter, plate thickness, bolt PCD, hole diameter and hole count respond to the selected flange standard and pipe NB.
+- Kept unsupported intermediate sizes conservative by selecting the next available nominal flange table row rather than an undersized row.
+- Showed open bolt holes on single flanges and bolts, gasket and both plates on double flange assemblies.
+- Corrected bolt-hole rotation so holes straddle flange centre lines and reduced oversized gasket/fastener proportions.
+- Added a flange drilling table check to the built-in regression kit and documented the behavior in Help and the tutorial.
+- Bumped app cache to `spoolmate-v228`.
+
+## v2.79 - Spool Conversation and Review Approval
+- Replaced basic project comments with a spool conversation containing teammate @mentions and Resolve/Reopen controls.
+- Added private workshop photo attachments using a secured Supabase Storage bucket and temporary signed image links.
+- Fixed view/comment team members being blocked from commenting when they did not have permission to resave the drawing.
+- Added Approve drawing with checker identity and an optional spool conversation comment.
+- Added Return for changes with a required reason recorded in both conversation and activity history.
+- Kept issued drawings locked and preserved the issued snapshot before automatically starting the next revision when returned.
+- Required checker approval before a spool can be issued or moved into fabrication stages.
+- Added checked-by and issued-by details to every saved revision entry.
+- Prevented Jobs board stage menus and drag/drop from bypassing the approve/return review path.
+- Added interactive tutorial practices for spool conversation, photos, resolution, approval, issue and return.
+- Updated `supabase-setup.sql` with conversation columns, secure resolve RPC and private spool-photo policies.
+- Bumped app cache to `spoolmate-v227`.
+
+## v2.78 - Team Production Dashboard
+- Consolidated the Jobs overview into one team dashboard instead of repeating separate alert and command panels.
+- Added clickable Assigned to me, Due today, Overdue, Ready to check and On hold queues above the production board.
+- Added a recent team activity feed that opens the affected spool directly.
+- Kept Daily report, Weekly report and Team comms actions together in the dashboard header.
+- Required a clear reason whenever a spool is placed on hold from either the open spool or a Jobs board card.
+- Expanded the interactive Production tutorial to cover queues, assignment, stage changes, holds and hold reasons.
+- Bumped app cache to `spoolmate-v226`.
 
 ## v2.77 - Tutorial Real-Workflow Pass
 - Reworked tutorial steps to use the mini drawing itself instead of duplicate shortcut buttons.

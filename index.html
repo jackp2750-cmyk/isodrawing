@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=277" />
+    <link rel="stylesheet" href="./styles.css?v=290" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +189,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v2.77</span>
+              <span class="version-badge" id="appVersionBadge">v2.90</span>
             </div>
           </div>
 
@@ -199,16 +199,9 @@
             <button data-app-mode="review" type="button" aria-pressed="false">Review</button>
             <button data-app-mode="export" type="button" aria-pressed="false">Export</button>
           </nav>
-        </div>
-
-        <div class="topbar-settings" aria-label="Project defaults, drawing overlays and actions">
-          <div class="topbar-settings-row project-row">
+          <div class="project-context-strip" aria-label="Current spool workflow">
             <span class="project-readout" id="projectReadout">No project set</span>
-            <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
-              <button class="active" data-theme-choice="light" type="button" role="tab" aria-selected="true">Light</button>
-              <button data-theme-choice="dark" type="button" role="tab" aria-selected="false">Dark</button>
-            </div>
-            <label class="dimension-style-field topbar-secondary-control">
+            <label class="project-status-field">
               <span>Status</span>
               <select id="projectStatusSelect" aria-label="Drawing status">
                 <option value="draft">Draft</option>
@@ -222,12 +215,34 @@
                 <option value="complete">Fabricated</option>
               </select>
             </label>
+            <span class="project-assignee-readout" id="projectAssigneeReadout" title="Change assignment from Jobs">Unassigned</span>
+          </div>
+        </div>
+
+        <div class="topbar-settings" aria-label="Current workspace settings">
+          <div class="topbar-settings-row project-row" data-mode-settings="review">
+            <strong class="workspace-settings-label">Review</strong>
             <label class="toggle top-toggle topbar-secondary-control">
               <input id="projectLockToggle" type="checkbox" />
               <span>Lock edits</span>
             </label>
+            <label class="toggle top-toggle topbar-secondary-control">
+              <input id="liftingToggle" type="checkbox" checked />
+              <span>Lifting points</span>
+            </label>
+            <label class="dimension-style-field lifting-angle-field topbar-secondary-control">
+              <span>Sling angle</span>
+              <select id="liftingAngleSelect" aria-label="Sling angle from horizontal">
+                <option value="30">30 deg</option>
+                <option value="45">45 deg</option>
+                <option value="60">60 deg</option>
+                <option value="75">75 deg</option>
+                <option value="90">90 deg</option>
+              </select>
+            </label>
           </div>
-          <div class="topbar-settings-row pipe-row">
+          <div class="topbar-settings-row pipe-row" data-mode-settings="draw edit">
+            <strong class="workspace-settings-label">Pipe</strong>
             <label class="top-field">
               <span>Material</span>
               <select id="pipeSpecSelect">
@@ -242,7 +257,8 @@
             </label>
             <span class="size-readout top-size-readout" id="pipeSizeReadout">OD 33.4 mm</span>
           </div>
-          <div class="topbar-settings-row view-row">
+          <div class="topbar-settings-row view-row" data-mode-settings="draw export">
+            <strong class="workspace-settings-label">Drawing</strong>
             <label class="toggle top-toggle">
               <input id="dimensionToggle" type="checkbox" checked />
               <span>Dimensions</span>
@@ -276,29 +292,34 @@
                 <option value="off">Hide</option>
               </select>
             </label>
-            <label class="toggle top-toggle topbar-secondary-control">
-              <input id="liftingToggle" type="checkbox" checked />
-              <span>Lifting points</span>
-            </label>
-            <label class="dimension-style-field lifting-angle-field topbar-secondary-control">
-              <span>Sling angle</span>
-              <select id="liftingAngleSelect" aria-label="Sling angle from horizontal">
-                <option value="30">30 deg</option>
-                <option value="45">45 deg</option>
-                <option value="60">60 deg</option>
-                <option value="75">75 deg</option>
-                <option value="90">90 deg</option>
+          </div>
+          <div class="topbar-settings-row export-row" data-mode-settings="export">
+            <strong class="workspace-settings-label">Export</strong>
+            <label class="fab-template-field workspace-export-template">
+              <span>PDF style</span>
+              <select id="fabSheetTemplateSelect" aria-label="Fabrication PDF style">
+                <option value="workshop">Workshop cut sheet</option>
+                <option value="client">Client / approval sheet</option>
+                <option value="takeoff">Material order / take-off sheet</option>
               </select>
             </label>
+            <button class="workspace-action-button export-action" id="export3dButton" type="button">
+              <svg><use href="#icon-export"></use></svg>
+              <span>Export 3D</span>
+            </button>
+            <button class="workspace-action-button primary export-action" id="exportReportButton" type="button" title="Export fabrication sheet PDF" aria-label="Export fabrication sheet PDF">
+              <svg><use href="#icon-export"></use></svg>
+              <span>Fab PDF</span>
+            </button>
+            <button class="workspace-action-button export-action" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
+              <svg><use href="#icon-export"></use></svg>
+              <span>Project file</span>
+            </button>
           </div>
         </div>
 
         <div class="topbar-actions" aria-label="Project actions">
-            <button class="icon-button labeled danger" id="resetButton" type="button" title="Reset spool" aria-label="Reset spool">
-              <svg><use href="#icon-reset"></use></svg>
-              <span>New</span>
-            </button>
-            <button class="icon-button labeled" id="saveBrowserProjectButton" type="button" title="Save project in this browser" aria-label="Save project in this browser">
+            <button class="icon-button labeled save-action" id="saveBrowserProjectButton" type="button" title="Save project in this browser" aria-label="Save project in this browser">
               <svg><use href="#icon-export"></use></svg>
               <span>Save</span>
             </button>
@@ -320,13 +341,17 @@
               <div class="action-menu-header">
                 <div>
                   <strong>Menu</strong>
-                  <span>Project, review, export and setup tools</span>
+                  <span>Project, review and setup tools</span>
                 </div>
                 <button class="icon-button compact labeled" id="actionMenuCloseButton" type="button">Close</button>
               </div>
               <div class="action-menu-groups">
                 <section class="action-menu-group">
                   <h2>Project</h2>
+                  <button class="icon-button labeled danger" id="resetButton" type="button" title="Start a new spool" aria-label="Start a new spool">
+                    <svg><use href="#icon-reset"></use></svg>
+                    <span>New spool</span>
+                  </button>
                   <button class="icon-button labeled" id="homeDashboardButton" type="button" title="Open SpoolMate dashboard" aria-label="Open SpoolMate dashboard">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Dashboard</span>
@@ -366,41 +391,25 @@
                     <svg><use href="#icon-reset"></use></svg>
                     <span>Revision</span>
                   </button>
-                  <button class="icon-button labeled" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
+                  <button class="icon-button labeled export-action" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
                     <svg><use href="#icon-export"></use></svg>
                     <span>Share</span>
                   </button>
                 </section>
                 <section class="action-menu-group">
-                  <h2>Export</h2>
-                  <label class="fab-template-field">
-                    <span>PDF style</span>
-                    <select id="fabSheetTemplateSelect" aria-label="Fabrication PDF style">
-                      <option value="workshop">Workshop cut sheet</option>
-                      <option value="client">Client / approval sheet</option>
-                      <option value="takeoff">Material order / take-off sheet</option>
-                    </select>
-                  </label>
-                  <button class="primary-button" id="export3dButton" type="button">
-                    <svg><use href="#icon-export"></use></svg>
-                    Export 3D
-                  </button>
-                  <button class="primary-button" id="exportReportButton" type="button" title="Export fabrication sheet PDF" aria-label="Export fabrication sheet PDF">
-                    <svg><use href="#icon-export"></use></svg>
-                    Fab PDF
-                  </button>
-                  <button class="icon-button labeled" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
-                    <svg><use href="#icon-export"></use></svg>
-                    <span>Project file</span>
-                  </button>
-                </section>
-                <section class="action-menu-group">
                   <h2>Setup</h2>
+                  <div class="theme-menu-control">
+                    <span>Theme</span>
+                    <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
+                      <button class="active" data-theme-choice="light" type="button" role="tab" aria-selected="true">Light</button>
+                      <button data-theme-choice="dark" type="button" role="tab" aria-selected="false">Dark</button>
+                    </div>
+                  </div>
                   <button class="icon-button labeled" id="toolSettingsButton" type="button" title="Choose side tools" aria-label="Choose side tools">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Side tools</span>
                   </button>
-                  <button class="icon-button labeled" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
+                  <button class="icon-button labeled save-action" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Defaults</span>
                   </button>
@@ -433,38 +442,6 @@
               <svg><use href="#icon-redo"></use></svg>
               <span>Redo</span>
             </button>
-            <button class="tool-button" data-tool="boxSelect" data-mode-tools="edit review" type="button" title="Box select multiple pipe runs" aria-label="Box select multiple pipe runs">
-              <svg><use href="#icon-box-select"></use></svg>
-              <span>Box Select</span>
-            </button>
-            <button class="tool-button" data-tool="flange" data-mode-tools="edit" type="button" title="Place flange" aria-label="Place flange">
-              <svg><use href="#icon-flange"></use></svg>
-              <span>Flange</span>
-            </button>
-            <button class="tool-button" data-tool="rollGroove" data-mode-tools="edit" type="button" title="Place roll groove" aria-label="Place roll groove">
-              <svg><use href="#icon-groove"></use></svg>
-              <span>Groove</span>
-            </button>
-            <button class="tool-button" data-tool="reducer" data-mode-tools="edit" type="button" title="Place reducer" aria-label="Place reducer">
-              <svg><use href="#icon-reducer"></use></svg>
-              <span>Reducer</span>
-            </button>
-            <button class="tool-button" data-tool="tee" data-mode-tools="draw edit" type="button" title="Draw tee point" aria-label="Draw tee point">
-              <svg><use href="#icon-tee"></use></svg>
-              <span>Tee</span>
-            </button>
-            <button class="tool-button" data-tool="branch" data-mode-tools="draw edit" type="button" title="Draw branch weld point" aria-label="Draw branch weld point">
-              <svg><use href="#icon-tee"></use></svg>
-              <span>Branch</span>
-            </button>
-            <button class="tool-button" data-tool="weld" data-mode-tools="edit" type="button" title="Place weld" aria-label="Place weld">
-              <svg><use href="#icon-weld"></use></svg>
-              <span>Weld</span>
-            </button>
-            <button class="tool-button" data-tool="valve" data-mode-tools="edit" type="button" title="Place valve" aria-label="Place valve">
-              <svg><use href="#icon-valve"></use></svg>
-              <span>Valve</span>
-            </button>
             <button class="tool-button" data-tool="note" data-mode-tools="draw edit review" type="button" title="Place note" aria-label="Place note">
               <svg><use href="#icon-note"></use></svg>
               <span>Note</span>
@@ -473,10 +450,56 @@
               <svg><use href="#icon-measure"></use></svg>
               <span>Measure</span>
             </button>
-            <button class="tool-button danger" id="deleteButton" data-side-tool="delete" data-mode-tools="edit" type="button" title="Delete selection" aria-label="Delete selection">
-              <svg><use href="#icon-trash"></use></svg>
-              <span>Delete</span>
-            </button>
+            <div class="tool-flyout-wrap" data-mode-trigger="draw edit">
+              <button class="tool-button fittings-tool-button" id="fittingsToolButton" type="button" aria-expanded="false" aria-controls="fittingsToolMenu" title="Open fitting tools">
+                <svg><use href="#icon-flange"></use></svg>
+                <span id="fittingsToolLabel">Fittings</span>
+              </button>
+              <div class="fittings-tool-menu" id="fittingsToolMenu" role="dialog" aria-label="Fitting tools" hidden>
+                <div class="fittings-tool-head">
+                  <div>
+                    <strong>Fittings</strong>
+                    <span>Choose a fitting, then place it on the drawing.</span>
+                  </div>
+                  <button id="fittingsToolCloseButton" type="button" aria-label="Close fitting tools">Close</button>
+                </div>
+                <div class="fittings-tool-grid">
+                  <button class="tool-button" data-tool="tee" data-mode-tools="draw edit" type="button" title="Draw tee point" aria-label="Draw tee point">
+                    <svg><use href="#icon-tee"></use></svg><span>Tee</span>
+                  </button>
+                  <button class="tool-button" data-tool="branch" data-mode-tools="draw edit" type="button" title="Draw branch weld point" aria-label="Draw branch weld point">
+                    <svg><use href="#icon-tee"></use></svg><span>Branch</span>
+                  </button>
+                  <button class="tool-button" data-tool="flange" data-mode-tools="edit" type="button" title="Place flange" aria-label="Place flange">
+                    <svg><use href="#icon-flange"></use></svg><span>Flange</span>
+                  </button>
+                  <button class="tool-button" data-tool="reducer" data-mode-tools="edit" type="button" title="Place reducer" aria-label="Place reducer">
+                    <svg><use href="#icon-reducer"></use></svg><span>Reducer</span>
+                  </button>
+                  <button class="tool-button" data-tool="rollGroove" data-mode-tools="edit" type="button" title="Place roll groove" aria-label="Place roll groove">
+                    <svg><use href="#icon-groove"></use></svg><span>Groove</span>
+                  </button>
+                  <button class="tool-button" data-tool="valve" data-mode-tools="edit" type="button" title="Place valve" aria-label="Place valve">
+                    <svg><use href="#icon-valve"></use></svg><span>Valve</span>
+                  </button>
+                  <button class="tool-button" data-tool="socket" data-mode-tools="edit" type="button" title="Place one socket; use right-click for a socket layout" aria-label="Place one socket">
+                    <svg><use href="#icon-tee"></use></svg><span>Socket</span>
+                  </button>
+                  <button class="tool-button" data-tool="weld" data-mode-tools="edit" type="button" title="Place weld" aria-label="Place weld">
+                    <svg><use href="#icon-weld"></use></svg><span>Weld</span>
+                  </button>
+                </div>
+                <div class="fittings-tool-subhead">Selection utilities</div>
+                <div class="fittings-tool-utility">
+                  <button class="tool-button" data-tool="boxSelect" data-mode-tools="edit review" type="button" title="Box select multiple pipe runs" aria-label="Box select multiple pipe runs">
+                    <svg><use href="#icon-box-select"></use></svg><span>Box Select</span>
+                  </button>
+                  <button class="tool-button danger" id="deleteButton" data-side-tool="delete" data-mode-tools="edit" type="button" title="Delete selection" aria-label="Delete selection">
+                    <svg><use href="#icon-trash"></use></svg><span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
 
@@ -496,11 +519,19 @@
                 <span class="button-sign" aria-hidden="true">+</span>
                 <span>Zoom</span>
               </button>
-              <button class="icon-button compact labeled" id="drawingFullscreenButton" type="button" title="View drawing full screen" aria-label="View drawing full screen" aria-pressed="false">
+              <button class="icon-button compact labeled focus-mode-button" id="drawingFullscreenButton" type="button" title="Enter Focus mode" aria-label="Enter Focus mode" aria-pressed="false">
                 <svg><use href="#icon-fullscreen"></use></svg>
-                <span>Full</span>
+                <span>Focus</span>
               </button>
-              <button class="icon-button compact labeled" id="exportIsoButton" type="button" title="Save fabrication sheet PDF" aria-label="Save fabrication sheet PDF">
+              <button class="icon-button compact labeled preview-open-button" id="previewShowButton" type="button" title="Open 3D preview" aria-label="Open 3D preview">
+                <svg><use href="#icon-sample"></use></svg>
+                <span>3D</span>
+              </button>
+              <button class="icon-button compact labeled inspector-show-button" id="inspectorShowButton" type="button" title="Open drawing details" aria-label="Open Inspector" aria-expanded="false">
+                <svg><use href="#icon-settings"></use></svg>
+                <span>Details</span>
+              </button>
+              <button class="icon-button compact labeled export-action" id="exportIsoButton" type="button" title="Save fabrication sheet PDF" aria-label="Save fabrication sheet PDF">
                 <svg><use href="#icon-image"></use></svg>
                 <span>PDF</span>
               </button>
@@ -515,17 +546,17 @@
           <div class="inspector-header">
             <div>
               <strong>Inspector</strong>
-              <small>Selection, cut list and job details</small>
+              <small id="inspectorModeHint">Draw lengths, angles and selected properties</small>
             </div>
             <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close inspector">Close</button>
           </div>
           <div class="inspector-tabs" role="tablist" aria-label="Inspector views">
-            <button class="active" data-inspector-tab="properties" type="button">Properties</button>
-            <button data-inspector-tab="cutlist" type="button">Cut List</button>
-            <button data-inspector-tab="weights" type="button">Weights</button>
-            <button data-inspector-tab="bom" type="button">BOM</button>
-            <button data-inspector-tab="checks" type="button">Checks</button>
-            <button data-inspector-tab="notes" type="button">Notes</button>
+            <button class="active" data-inspector-tab="properties" data-mode-tabs="draw edit" type="button">Properties</button>
+            <button data-inspector-tab="cutlist" data-mode-tabs="review export" type="button">Cut List</button>
+            <button data-inspector-tab="weights" data-mode-tabs="review export" type="button">Weights</button>
+            <button data-inspector-tab="bom" data-mode-tabs="export" type="button">BOM</button>
+            <button data-inspector-tab="checks" data-mode-tabs="review" type="button">Checks</button>
+            <button data-inspector-tab="notes" data-mode-tabs="review" type="button">Notes</button>
           </div>
 
           <div class="inspector-tab-panel active" data-inspector-panel="properties">
@@ -658,18 +689,6 @@
               </label>
             </section>
             <section class="control-section">
-              <h2>Team comments</h2>
-              <div class="team-comments" id="projectCommentsList" aria-live="polite"></div>
-              <label class="field">
-                <span>Comment</span>
-                <input id="projectCommentInput" type="text" maxlength="1000" placeholder="Add a note for the team" />
-              </label>
-              <div class="property-actions">
-                <button id="projectCommentAddButton" type="button">Add comment</button>
-                <button id="projectCommentRefreshButton" type="button">Refresh</button>
-              </div>
-            </section>
-            <section class="control-section">
               <h2>Job details</h2>
               <div class="project-grid">
                 <label class="field">
@@ -700,7 +719,7 @@
         <section class="preview-panel" aria-label="3D preview" hidden>
           <div class="panel-bar">
             <div class="bar-title">
-              <span>3D Pipe Preview</span>
+              <span>3D Preview</span>
               <small id="renderStatus">Starting viewport</small>
             </div>
             <div class="bar-actions">
@@ -726,10 +745,6 @@
                 <svg><use href="#icon-fullscreen"></use></svg>
                 <span>Full</span>
               </button>
-              <button class="icon-button compact labeled" id="previewFloatButton" type="button" title="Float 3D preview over drawing" aria-label="Float 3D preview over drawing" aria-pressed="false">
-                <svg><use href="#icon-sample"></use></svg>
-                <span>Float</span>
-              </button>
               <button class="icon-button compact labeled" id="previewMinimizeButton" type="button" title="Minimize 3D preview" aria-label="Minimize 3D preview" aria-pressed="false">
                 <span class="button-sign" aria-hidden="true">-</span>
                 <span>Min</span>
@@ -754,11 +769,6 @@
           <div class="preview-float-resize" id="previewFloatResize" aria-hidden="true"></div>
         </section>
       </main>
-
-      <button class="preview-show-button" id="previewShowButton" type="button" hidden>
-        <svg><use href="#icon-sample"></use></svg>
-        <span>Show 3D</span>
-      </button>
 
       <div class="mobile-panel-scrim" id="mobilePanelScrim" hidden></div>
       <nav class="mobile-panel-dock" aria-label="Tablet panels">
@@ -803,7 +813,7 @@
           </div>
           <div class="project-dialog-actions">
             <button class="icon-button labeled" id="projectDialogCancelButton" type="button">Cancel</button>
-            <button class="primary-button" id="projectDialogSubmitButton" type="submit">Save project</button>
+            <button class="primary-button save-action" id="projectDialogSubmitButton" type="submit">Save project</button>
           </div>
         </form>
       </div>
@@ -819,7 +829,7 @@
           <div class="new-drawing-options">
             <button class="icon-button labeled" id="newDrawingCancelButton" type="button">Cancel</button>
             <button class="icon-button labeled danger" id="newDrawingDiscardButton" type="button">Don't save</button>
-            <button class="primary-button" id="newDrawingSaveButton" type="button">Save and start new</button>
+            <button class="primary-button save-action" id="newDrawingSaveButton" type="button">Save and start new</button>
           </div>
         </section>
       </div>
@@ -971,7 +981,7 @@
               <svg><use href="#icon-reset"></use></svg>
               <span>New spool</span>
             </button>
-            <button class="primary-button" id="projectLibrarySaveButton" type="button">
+            <button class="primary-button save-action" id="projectLibrarySaveButton" type="button">
               <svg><use href="#icon-export"></use></svg>
               <span>Save current</span>
             </button>
@@ -1010,6 +1020,38 @@
             </details>
           </div>
           <div class="project-library-comms-slot" id="projectLibraryCommsSlot" hidden></div>
+          <section class="project-library-spool-conversation" id="projectLibrarySpoolConversation" aria-label="Open spool conversation" hidden>
+            <div class="team-comms-head">
+              <div>
+                <strong>Open spool conversation</strong>
+                <span>Messages, mentions and workshop photos stay attached to the current cloud spool.</span>
+              </div>
+            </div>
+            <div class="project-library-conversation-layout">
+              <div class="team-comments" id="projectCommentsList" aria-live="polite"></div>
+              <div class="project-library-conversation-compose">
+                <div class="comment-mention-picks" id="projectCommentMentionPicks" aria-label="Mention a teammate"></div>
+                <label class="field">
+                  <span>Message</span>
+                  <textarea id="projectCommentInput" rows="3" maxlength="1000" placeholder="Message the team or type @name"></textarea>
+                </label>
+                <div class="comment-photo-preview" id="projectCommentPhotoPreview" hidden>
+                  <img id="projectCommentPhotoPreviewImage" alt="Workshop photo ready to attach" />
+                  <div>
+                    <strong id="projectCommentPhotoPreviewName">Workshop photo</strong>
+                    <span>Photo will be attached to this spool message.</span>
+                  </div>
+                  <button id="projectCommentPhotoRemoveButton" type="button">Remove</button>
+                </div>
+                <input id="projectCommentPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden />
+                <div class="property-actions">
+                  <button id="projectCommentAddButton" type="button">Send message</button>
+                  <button id="projectCommentPhotoButton" type="button">Add photo</button>
+                  <button id="projectCommentRefreshButton" type="button">Refresh</button>
+                </div>
+              </div>
+            </div>
+          </section>
           <div class="project-library-report-slot" id="projectLibraryReportSlot" hidden></div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
           <div class="project-dialog-actions">
@@ -1220,7 +1262,7 @@
               <div class="help-grid">
                 <article>
                   <strong>Change a flange</strong>
-                  <p>Tap Select, zoom in if needed, then press and hold directly on the flange marker until the menu opens. Tap Flange standard, then pick Table E, PN 16, ANSI 150 or another type.</p>
+                  <p>Tap Select, zoom in if needed, then press and hold directly on the flange marker until the menu opens. Tap Flange standard, then pick Table E, PN 16, ANSI 150 or another type. The 3D model uses that table's actual flange OD, thickness, bolt PCD, hole diameter and hole count.</p>
                 </article>
                 <article>
                   <strong>Add fittings</strong>
@@ -1275,6 +1317,14 @@
                   <strong>Undo and redo</strong>
                   <p>Use Undo or Redo in the side tools if a run, fitting or note was placed wrong.</p>
                 </article>
+                <article>
+                  <strong>Focus mode</strong>
+                  <p>Press Focus beside the drawing controls to fill the screen with the drawing and a slim tool rail. Press Exit or Escape when finished.</p>
+                </article>
+                <article>
+                  <strong>3D overlay</strong>
+                  <p>Press 3D beside Focus to open the movable preview over the drawing. Resize it from the corner; SpoolMate remembers its last size and position on that device.</p>
+                </article>
               </div>
             </section>
             <section class="help-panel" data-help-panel="edit">
@@ -1286,7 +1336,7 @@
                 </article>
                 <article>
                   <strong>Pipe size changes</strong>
-                  <p>Right-click or long-press a run, choose Change pipe size, then pick from the pipe or tube size list. Size changes add reducers where needed.</p>
+                  <p>Right-click or long-press a run, choose Change pipe size, then pick from the pipe or tube size list. At a welded branch, either straight-through main section updates the whole continuous main while the side outlet stays separate.</p>
                 </article>
                 <article>
                   <strong>Flanges and grooves</strong>
@@ -1319,7 +1369,11 @@
               <div class="help-grid">
                 <article>
                   <strong>Checks</strong>
-                  <p>Open Check from the Menu to find missing project details, estimated weights, tiny runs and other issues. Tap an issue to highlight the area.</p>
+                  <p>Open Check from the Menu to find drawing issues. Show on drawing highlights the finding without leaving Review or the Checks list; fix buttons remain separate.</p>
+                </article>
+                <article>
+                  <strong>Intentional exceptions</strong>
+                  <p>Use Acknowledge &amp; allow issue only when the arrangement is intentional. A reason, reviewer and time are saved with the spool. App test-kit failures remain visible but do not block that spool.</p>
                 </article>
                 <article>
                   <strong>Cut list and takeoff</strong>
@@ -1327,7 +1381,7 @@
                 </article>
                 <article>
                   <strong>Lifting points</strong>
-                  <p>Turn Lifting points on from the top bar. Change sling angle to see suggested lug points and dimensions update.</p>
+                  <p>Open Review and turn Lifting points on from its settings strip. Change sling angle to see suggested lug points and dimensions update.</p>
                 </article>
                 <article>
                   <strong>Lock edits</strong>
@@ -1335,7 +1389,7 @@
                 </article>
                 <article>
                   <strong>Dimension styles</strong>
-                  <p>Use Drawing detail first, then Dim view for the dimension format. Use Pipe labels to show key sizes, all sizes, export-only labels or hide size labels while drawing.</p>
+                  <p>Use the Draw or Export settings strip: choose Drawing detail first, then Dim view. Pipe labels can show key sizes, all sizes, export-only labels or stay hidden while drawing.</p>
                 </article>
                 <article>
                   <strong>Takeoff list</strong>
@@ -1356,7 +1410,7 @@
               <div class="help-grid">
                 <article>
                   <strong>Fab PDF</strong>
-                  <p>Exports the drawing with centre-to-centre dimensions, cut list, weight summary, takeoff list and project details.</p>
+                  <p>Choose a PDF style in the Export settings strip, then use Fab PDF for centre-to-centre dimensions, cut list, weights, takeoff and project details.</p>
                 </article>
                 <article>
                   <strong>3D image</strong>
@@ -1405,7 +1459,11 @@
                 </article>
                 <article>
                   <strong>Team notes</strong>
-                  <p>Project comments are for simple workshop notes while a spool is being drawn, checked or revised.</p>
+                  <p>Open Jobs, then Comms for team messages and the current spool conversation. Use @mentions, attach workshop photos and resolve messages once addressed.</p>
+                </article>
+                <article>
+                  <strong>Review and approval</strong>
+                  <p>Checkers can approve a drawing or return it with a required comment. Issued drawings stay locked; returning one preserves it and starts the next revision.</p>
                 </article>
               </div>
             </section>
@@ -1426,6 +1484,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=277"></script>
+    <script defer src="./app.js?v=290"></script>
   </body>
 </html>
