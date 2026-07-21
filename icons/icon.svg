@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">SpoolMate</title>
+  <desc id="description">An isometric pipe spool forming an S on a dark workshop-blue background.</desc>
+  <defs>
+    <linearGradient id="background" x1="72" y1="48" x2="440" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#102a38"/>
+      <stop offset="1" stop-color="#061018"/>
+    </linearGradient>
+    <linearGradient id="pipe" x1="118" y1="106" x2="394" y2="406" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#32c8f4"/>
+      <stop offset="1" stop-color="#007fab"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="104" fill="url(#background)"/>
+  <path d="M120 154 214 100l98 56-100 58 92 53-96 56 96 55 88-51"
+        fill="none" stroke="#001019" stroke-width="74" stroke-linecap="round" stroke-linejoin="round" opacity=".55"/>
+  <path d="M120 145 214 91l98 56-100 58 92 53-96 56 96 55 88-51"
+        fill="none" stroke="url(#pipe)" stroke-width="58" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M120 145 214 91l98 56" fill="none" stroke="#85e5ff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity=".7"/>
+  <g fill="#f5a623" stroke="#061018" stroke-width="10">
+    <circle cx="120" cy="145" r="32"/>
+    <circle cx="392" cy="318" r="32"/>
+  </g>
+  <g fill="#f8c76f">
+    <circle cx="120" cy="145" r="13"/>
+    <circle cx="392" cy="318" r="13"/>
+  </g>
+</svg>

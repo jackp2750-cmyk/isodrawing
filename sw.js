@@ -1,10 +1,12 @@
-const CACHE_NAME = "spoolmate-v238";
+const CACHE_NAME = "spoolmate-v239";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css?v=290",
   "./app.js?v=290",
-  "./manifest.webmanifest",
+  "./manifest.webmanifest"
+];
+const OPTIONAL_ASSETS = [
   "./icons/icon.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -15,7 +17,10 @@ const APP_SHELL = [
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
+      .then(async (cache) => {
+        await cache.addAll(APP_SHELL);
+        await Promise.allSettled(OPTIONAL_ASSETS.map((asset) => cache.add(asset)));
+      })
   );
 });
 
