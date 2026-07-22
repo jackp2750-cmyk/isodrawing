@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.94`
+Current app version: `v2.99.1`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -10,7 +10,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 
 - Draw 2D isometric pipe runs in millimetres.
 - Add exact X, Y and Z runs, plus angled offset runs.
-- Hold Shift while drawing to use 45 degree offset snap guides.
+- Hold Shift on a keyboard, or Hold 45° beside the drawing on touch, while drawing to use 45 degree offset snap guides.
 - Edit run length, angle, pipe size and fitting details from the inspector or right-click/long-press menus.
 - Select one run, multiple runs with Shift, or multiple runs with box select.
 - Keep the side rail focused on Draw, Select, Undo, Redo, Measure and Note, with Tee, Branch, Flange, Reducer, Groove, Valve, Socket and Weld grouped in one Fittings flyout.
@@ -37,7 +37,15 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Use Focus mode to give the drawing the whole screen while retaining a slim tool rail; Details and 3D open temporarily over it without changing workflow mode.
 - Export polished fabrication PDF sheets, 3D images and project files, including workshop, client/approval and material order/take-off PDF styles.
 - Use the Drawing import assistant to upload a supplied drawing/photo/PDF, calibrate a known dimension and trace centreline runs into a SpoolMate spool.
-- Learn the app with an interactive tutorial that includes topic-specific mini practice workflows, live prompts and completed topic states.
+- Learn the app with a 5-minute Quick Start, a complete Beginner tour or the full topic library; progress is saved and resumes automatically.
+- After any completed mini practice, use Try in drawing to open the matching real tool without changing the current drawing first.
+- Give first-time users a temporary First Spool layout that emphasises Draw, exact length, Fittings, Select and Save before revealing Review and Export.
+- Follow contextual real-workspace prompts that clear as drawing, exact runs, fittings, selection, saving, checks and export are learned.
+- Finish the tutorial with a live checklist for drawing content, project details, checks, saving and the workshop PDF.
+- Open Jobs on a simplified Today dashboard with Needs attention, My work and Ready next queues; use Full board only when every production stage and field is needed.
+- Scan issued fabrication-sheet QR codes with the device camera or a saved QR photo to open the permitted cloud spool traveller.
+- Verify the scanned spool revision before workshop use: historical issued snapshots are shown when available and a clear warning appears if the requested revision cannot be found.
+- Use Ask SpoolMate for instant built-in guidance and, for unfamiliar questions on active accounts, protected AI answers through a Supabase Edge Function. The helper sends only the question, short help history and safe screen/tool context—not drawing geometry, project names, notes or photos.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
 - See cloud save confidence at a glance with saved, unsaved, saving, failed and conflict states.
 - Use the startup dashboard to continue drawing, start a new spool, open jobs, load the sample, manage account settings, open help or follow the interactive tool tutorial.
@@ -66,6 +74,9 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Use improved daily/weekly Jobs reports with next actions, checking queue, issue/fabrication queue, blockers, assignee workload and recent progress.
 - Add short team/yard notes to production cards and mark notes done so they are cleaned up after one week.
 - Use accounts, trials/licences, company/team projects, project comments and owner/admin/member team permissions through Supabase.
+- Start with a 30-day full cloud trial, see countdown warnings near expiry, and retain read-only open/view/export access to permitted cloud spools after expiry.
+- Switch the Jobs dashboard between cloud projects and projects stored only on the current device.
+- Use a seven-day `grace` licence state for failed-payment recovery without immediately interrupting cloud editing.
 - Install as a Progressive Web App on iPad, Android and desktop when hosted over HTTPS.
 
 ## Important Files
@@ -77,6 +88,9 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - `sw.js` - service worker app-shell cache.
 - `icons/` - SpoolMate app icons and logo assets.
 - `supabase-setup.sql` - database tables, policies and helper functions for cloud accounts/team projects.
+- `supabase-migration-v295-trial-access.sql` - existing-database migration for expired read-only access, grace periods and hardened cloud writes.
+- `supabase-migration-v296-ai-helper.sql` - private daily AI allowance counters and protected service-role RPCs.
+- `supabase/functions/ai-help/index.ts` - authenticated OpenAI proxy for Ask SpoolMate; the API key stays in Supabase secrets.
 - `verify-app.cjs` - release integrity checks for code, controls, PWA assets, engineering tables and Supabase RPC wiring.
 - `CHANGELOG.md` - current update log.
 
@@ -189,10 +203,32 @@ With Supabase configured:
 - Jobs Comms can share general team messages across an approved company.
 - Users can request password-reset emails and securely choose a new password after returning to the app.
 - Account includes a JSON data export, privacy/support information, diagnostics and protected account deletion.
+- Trial accounts receive 30 days of full cloud access. After expiry, permitted cloud spools, comments and workshop photos remain readable/exportable while cloud writes are paused.
+- Expired users can continue local-only work and switch Jobs between Cloud and This device.
 
 ## Supabase Setup
 
-For an existing SpoolMate database, run `supabase-migration-v279.sql` as a new query in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`. The v2.79 migration adds spool conversation fields, the resolve function and the private photo bucket.
+For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql` and `supabase-migration-v296-ai-helper.sql` as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`.
+
+The v2.95 migration must be applied before publishing the matching frontend. It separates authenticated read access from active-licence write access, adds the seven-day grace-state field and keeps expired cloud data visible without allowing edits. Trial expiry does not delete cloud data.
+
+The v2.96 migration adds private per-user daily AI counters. Trial accounts receive up to 10 AI answers per UTC day; paid, full and grace accounts receive up to 50. Guest and expired users keep the complete built-in helper without creating API cost.
+
+Until online billing is connected, activate the owner account or a manually paid customer from the SQL Editor using the UUID shown in Authentication > Users:
+
+```sql
+update public.profiles
+set license_status = 'full', grace_ends_at = null
+where id = '<user-uuid>'::uuid;
+```
+
+For a failed-payment grace period:
+
+```sql
+update public.profiles
+set license_status = 'grace', grace_ends_at = now() + interval '7 days'
+where id = '<user-uuid>'::uuid;
+```
 
 In Supabase Auth settings:
 
@@ -209,11 +245,19 @@ supabase functions deploy delete-account
 
 The function lives at `supabase/functions/delete-account/index.ts`. Supabase supplies its URL, public key and service-role secret inside the Edge Function environment. Never copy the service-role secret into `app.js`.
 
+For Ask SpoolMate, create an OpenAI API key in a dedicated OpenAI project with an appropriate spend limit. In Supabase Dashboard, open Project Settings > Edge Functions > Secrets and add it as `OPENAI_API_KEY`. Never put this value in GitHub, `app.js`, SQL or screenshots. Then deploy the helper:
+
+```powershell
+supabase functions deploy ai-help
+```
+
+The helper lives at `supabase/functions/ai-help/index.ts`, requires a valid SpoolMate session, checks the account licence on the server, applies the SQL daily allowance atomically, sends a privacy-preserving safety identifier and calls the OpenAI Responses API with `store: false`.
+
 Before launch, use two disposable accounts to test password recovery and account deletion. A team owner with other approved members must transfer ownership or remove those members before deletion.
 
 ## Launch Smoke Test
 
-Open Menu > Test kit and complete the Launch smoke test on the production URL. It covers account email, password recovery, cloud sync, cross-company RLS isolation, QR travellers, iPad/Android PWA updates, offline behaviour, backups, account deletion and privacy-safe diagnostics.
+Open Menu > Test kit and complete the Launch smoke test on the production URL. It covers account email, password recovery, cloud sync, cross-company RLS isolation, QR travellers, Ask SpoolMate built-in/AI limits, iPad/Android PWA updates, offline behaviour, backups, account deletion and privacy-safe diagnostics.
 
 For a different Supabase project, update these constants near the top of `app.js`:
 

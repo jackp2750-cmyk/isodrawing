@@ -1,6 +1,59 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.94`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.99.1`.
+
+## v2.99.1 - Simple Team Dashboard and QR Workshop Flow
+- Replaced the dense default team dashboard with Today, Full board and More views.
+- Added three focused Today queues: Needs attention, My work and Ready next, with compact spool cards and one clear open action.
+- Moved reports, team communications and recent activity behind More, while preserving the complete stage board for supervisors.
+- Collapsed full-board assignment, due-date, priority, hold and message fields under Details and updates.
+- Added an in-app rear-camera QR scanner with Android/iPad-friendly touch controls, saved-photo scanning and a paste-link fallback.
+- Kept QR navigation on the current SpoolMate origin and continued to rely on signed-in project permissions for cloud access.
+- Made the mobile spool traveller workshop-first with hold warnings, live stage/assignment/due details, drawing access, notes, photos and weld acceptance progress.
+- Honoured the revision identifier carried by QR links by showing saved issued snapshots when available and warning clearly when a requested revision cannot be verified.
+- Made project forms scroll safely on short landscape tablet screens so their Save actions stay reachable.
+- Bumped the PWA cache to `spoolmate-v2991`.
+
+## v2.98 - First Spool Launch Experience
+- Added a recommended 5-minute Quick Start path covering drawing, exact and 45-degree runs, fittings, dimensions, checks and export.
+- Added Try in drawing after every completed mini practice so the tutorial hands users directly to the correct live mode, panel or tool.
+- Added a temporary First Spool workspace that reduces early visual density to Draw, exact length, Fittings, Select and Save, with an immediate Show all controls option.
+- Added contextual real-app prompts that advance as users draw, add exact runs, open fittings, select, save, review checks and export.
+- Added a live final checklist for drawing content, project details, checks, saved state and workshop PDF export.
+- Kept the new guide responsive for desktop, iPad and Android tablet layouts, with persisted progress and a clear End tips action.
+- Bumped the PWA cache to `spoolmate-v298`.
+
+## v2.97 - New User Tutorial Polish
+- Saved tutorial path, last topic and completed practice tasks locally so new users continue where they left off after closing or reloading the app.
+- Added clearer progress wording and a Finish tour action with a useful completion/resume message.
+- Added a real Hold 45° drawing control for iPad, Android and compact layouts so the touch tutorial now matches the live drawing workflow.
+- Expanded Review guidance for automatic W01 weld numbering, welder/WPS and inspection/NDT tracking.
+- Expanded Export guidance for issued spool/revision QR travellers and their mobile production information.
+- Clarified the tutorial header and dashboard entry so users know practice is safe and resumable.
+- Bumped the PWA cache to `spoolmate-v297`.
+
+## v2.96 - Ask SpoolMate In-App Helper
+- Added a responsive Ask SpoolMate panel for desktop, iPad and Android with large touch targets, suggested questions and safe-area-aware bottom-sheet behaviour.
+- Added instant built-in answers for drawing, 45 degree offsets, fittings, checks, cloud spools, fabrication PDFs, weld registers and production workflows.
+- Added direct Open tutorial, Open help, Solved and Still stuck actions so answers lead back into the existing learning tools.
+- Added a protected authenticated Supabase `ai-help` Edge Function using the OpenAI Responses API and the cost-sensitive `gpt-5.6-luna` model.
+- Kept the OpenAI API key server-side, whitelisted the small app context, omitted drawing/client content by default, disabled response storage and sent a hashed safety identifier.
+- Added atomic daily allowances of 10 AI answers for trials and 50 for paid/full/grace accounts. Expired and guest users retain built-in help without API cost.
+- Added `supabase-migration-v296-ai-helper.sql`, setup documentation, privacy wording and release checks for the helper.
+- Bumped the PWA cache to `spoolmate-v296-helper`.
+
+## v2.95 - Fair Trial Expiry and Read-Only Cloud Access
+- Kept permitted cloud spools visible after trial expiry instead of making the account appear empty.
+- Opened expired cloud spools in enforced read-only mode while preserving drawing, PDF, project and account-data exports.
+- Kept existing cloud comments, workshop photos and team-message history readable after expiry while blocking new cloud activity.
+- Added a 30-day trial plan panel, persistent seven/three/one-day warning stages and a clear expired-account banner.
+- Added an Upgrade licence action with an honest manual-contact fallback until online checkout is connected.
+- Added a seven-day payment-grace licence state for future billing recovery.
+- Added a Cloud / This device switch to Jobs so signed-in users can always reach local browser projects.
+- Hardened Supabase write policies for company administration, memberships, comments and workshop photos.
+- Added `supabase-migration-v295-trial-access.sql` for existing databases and updated the complete setup SQL.
+- Documented that expiry does not delete customer cloud data and that no automatic inactive-data deletion is enabled.
+- Bumped app cache to `spoolmate-v295`.
 
 ## v2.94 - Launch Readiness Accounts and Support
 - Added Supabase password-reset email requests and a recovery callback flow for choosing a new password.

@@ -118,11 +118,22 @@ const authBackToSignInButton = document.querySelector("#authBackToSignInButton")
 const authSendResetButton = document.querySelector("#authSendResetButton");
 const authUpdatePasswordButton = document.querySelector("#authUpdatePasswordButton");
 const authSignOutButton = document.querySelector("#authSignOutButton");
+const accountPlanPanel = document.querySelector("#accountPlanPanel");
+const accountPlanBadge = document.querySelector("#accountPlanBadge");
+const accountPlanTitle = document.querySelector("#accountPlanTitle");
+const accountPlanMessage = document.querySelector("#accountPlanMessage");
+const accountPlanCountdown = document.querySelector("#accountPlanCountdown");
+const accountPlanCapabilities = document.querySelector("#accountPlanCapabilities");
+const accountPlanUpgradeButton = document.querySelector("#accountPlanUpgradeButton");
 const accountLaunchPanel = document.querySelector("#accountLaunchPanel");
 const accountExportDataButton = document.querySelector("#accountExportDataButton");
 const diagnosticReportButton = document.querySelector("#diagnosticReportButton");
 const legalSupportButton = document.querySelector("#legalSupportButton");
 const accountDeleteButton = document.querySelector("#accountDeleteButton");
+const licenceBanner = document.querySelector("#licenceBanner");
+const licenceBannerTitle = document.querySelector("#licenceBannerTitle");
+const licenceBannerMessage = document.querySelector("#licenceBannerMessage");
+const licenceBannerUpgradeButton = document.querySelector("#licenceBannerUpgradeButton");
 const teamWorkspacePanel = document.querySelector("#teamWorkspacePanel");
 const teamWorkspaceStatus = document.querySelector("#teamWorkspaceStatus");
 const teamCompanyNameInput = document.querySelector("#teamCompanyNameInput");
@@ -160,6 +171,7 @@ const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
 let projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
 let projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+let projectLibrarySourceButton = document.querySelector("#projectLibrarySourceButton");
 let projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButton");
 let projectLibraryGuideSlot = document.querySelector("#projectLibraryGuideSlot");
 let projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
@@ -207,6 +219,16 @@ const tutorialActionButton = document.querySelector("#tutorialActionButton");
 const tutorialNextButton = document.querySelector("#tutorialNextButton");
 const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
 const tutorialCoach = document.querySelector("#tutorialCoach");
+const firstSpoolGuide = document.querySelector("#firstSpoolGuide");
+const firstSpoolGuideProgressBar = document.querySelector("#firstSpoolGuideProgressBar");
+const firstSpoolGuideKicker = document.querySelector("#firstSpoolGuideKicker");
+const firstSpoolGuideTitle = document.querySelector("#firstSpoolGuideTitle");
+const firstSpoolGuideMessage = document.querySelector("#firstSpoolGuideMessage");
+const firstSpoolGuideExpandButton = document.querySelector("#firstSpoolGuideExpandButton");
+const firstSpoolGuideActionButton = document.querySelector("#firstSpoolGuideActionButton");
+const firstSpoolGuideNextButton = document.querySelector("#firstSpoolGuideNextButton");
+const firstSpoolGuideCloseButton = document.querySelector("#firstSpoolGuideCloseButton");
+const touchShiftAngleButton = document.querySelector("#touchShiftAngleButton");
 const noteDialog = document.querySelector("#noteDialog");
 const noteDialogTitle = document.querySelector("#noteDialogTitle");
 const noteDialogText = document.querySelector("#noteDialogText");
@@ -249,6 +271,17 @@ const drawingAssistantBuildButton = document.querySelector("#drawingAssistantBui
 const helpButton = document.querySelector("#helpButton");
 const helpDialog = document.querySelector("#helpDialog");
 const helpCloseButton = document.querySelector("#helpCloseButton");
+const aiHelperButton = document.querySelector("#aiHelperButton");
+const aiHelperDialog = document.querySelector("#aiHelperDialog");
+const aiHelperCloseButton = document.querySelector("#aiHelperCloseButton");
+const aiHelperClearButton = document.querySelector("#aiHelperClearButton");
+const aiHelperMode = document.querySelector("#aiHelperMode");
+const aiHelperQuota = document.querySelector("#aiHelperQuota");
+const aiHelperMessages = document.querySelector("#aiHelperMessages");
+const aiHelperSuggestions = document.querySelector("#aiHelperSuggestions");
+const aiHelperForm = document.querySelector("#aiHelperForm");
+const aiHelperInput = document.querySelector("#aiHelperInput");
+const aiHelperSendButton = document.querySelector("#aiHelperSendButton");
 const legalSupportMenuButton = document.querySelector("#legalSupportMenuButton");
 const legalSupportDialog = document.querySelector("#legalSupportDialog");
 const legalSupportCloseButton = document.querySelector("#legalSupportCloseButton");
@@ -284,13 +317,17 @@ const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const PREVIEW_FLOAT_BOUNDS_KEY = "spoolmate-preview-bounds-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
+const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
+const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
+const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.94";
+const APP_VERSION = "v2.99.1";
 const APP_BUILD_DATE = "2026-07-22";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const QR_CODE_JS_URL = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
+const QR_CODE_READER_JS_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/+esm";
 const CLOUD_PROJECTS_TABLE = "spool_projects";
 const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_COMPANIES_TABLE = "companies";
@@ -298,6 +335,14 @@ const CLOUD_COMPANY_MEMBERS_TABLE = "company_members";
 const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
 const CLOUD_PROJECT_PHOTOS_BUCKET = "spool-photos";
 const CLOUD_TEAM_MESSAGES_TABLE = "team_messages";
+const TRIAL_LENGTH_DAYS = 30;
+const AI_HELPER_FUNCTION = "ai-help";
+const AI_HELPER_TRIAL_DAILY_LIMIT = 10;
+const AI_HELPER_PAID_DAILY_LIMIT = 50;
+const AI_HELPER_MAX_HISTORY = 6;
+const AI_HELPER_WELCOME = "Hi — tell me what you are trying to do in SpoolMate. I can guide you through drawing, fittings, checks, cloud projects and fabrication PDFs.";
+const LICENCE_NOTICE_KEY = "spoolmate-licence-notice-v1";
+const LICENCE_UPGRADE_URL = "";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
 const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
@@ -759,7 +804,7 @@ const TUTORIAL_STEPS = [
     kicker: "Angles",
     menuLabel: "Angles / offsets",
     title: "Add 45 degree offsets",
-    body: "In the real drawing, hold Shift while drawing to snap the angled travel to 45 degrees. Enter the offset set first, then keep Shift held while dragging the travel piece.",
+    body: "Enter the offset set first, then hold Shift on a keyboard or Hold 45° beside the drawing on touch while dragging the angled travel.",
     target: "#stepLengthInput",
     targetLabel: "Next run / offset set mm",
     mode: "draw",
@@ -768,8 +813,9 @@ const TUTORIAL_STEPS = [
     demo: "offset",
     items: [
       "Enter the required offset set distance.",
-      "Hold Shift while dragging the angled travel piece so it snaps to 45 degrees.",
-      "Release Shift after the angled travel, then draw the straight return run. SpoolMate calculates and labels the 45 travel.",
+      "Hold Shift on a keyboard while dragging the angled travel so it snaps to 45 degrees.",
+      "On iPad or Android, press and hold Hold 45° with one finger while dragging the travel with another.",
+      "Release Shift or Hold 45° after the angled travel, then draw the straight return. SpoolMate calculates and labels the 45 travel.",
     ],
   },
   {
@@ -929,8 +975,8 @@ const TUTORIAL_STEPS = [
   {
     kicker: "Review",
     menuLabel: "Checks",
-    title: "Check before saving or issuing",
-    body: "The Checks, Cut List, Weights and BOM tabs turn the drawing into fabrication information before anyone starts cutting pipe.",
+    title: "Check the drawing and weld register",
+    body: "Checks, Cut List, Weights, BOM and the weld register turn the drawing into fabrication information before anyone starts cutting pipe.",
     target: '[data-inspector-tab="checks"]',
     targetLabel: "Checks tab",
     mode: "review",
@@ -940,6 +986,8 @@ const TUTORIAL_STEPS = [
     items: [
       "Checks can highlight issues directly on the drawing.",
       "Cut List and BOM show what needs to be made and ordered.",
+      "Weld markers are numbered W01, W02 and onward automatically.",
+      "Record the welder, WPS, completion and inspection/NDT status in the weld register before issue.",
       "Verify estimated weights and lifting details before fabrication or lifting.",
     ],
   },
@@ -957,12 +1005,66 @@ const TUTORIAL_STEPS = [
     items: [
       "Pick Workshop, Client or Material order PDF style from the Export menu before pressing Fab PDF.",
       "Workshop PDF includes the drawing, dimension key, cut list, weights and takeoff list.",
+      "An issued cloud spool can include its permanent spool/revision QR traveller on the fabrication PDF.",
+      "Scanning the QR opens the current revision, production stage, assignment, due date, holds, notes, photos and weld status for permitted users.",
       "Export 3D gives a clean model image for explaining the spool.",
       "Project export is the backup file if someone needs to import the spool later.",
     ],
   },
 ];
 const BEGINNER_TUTORIAL_STEP_INDEXES = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+const QUICK_START_TUTORIAL_STEP_INDEXES = [4, 5, 6, 8, 13, 16, 17];
+const FIRST_USE_GUIDE_STEPS = [
+  {
+    id: "draw",
+    title: "Draw the first pipe run",
+    message: "Choose Draw, then drag from the yellow point to place the first centreline run.",
+    actionLabel: "Start drawing",
+    target: '[data-tool="draw"]',
+  },
+  {
+    id: "length",
+    title: "Add an exact length",
+    message: "Enter the centre-to-centre length in millimetres, then use an X, Y or Z direction button.",
+    actionLabel: "Set length",
+    target: "#stepLengthInput",
+  },
+  {
+    id: "fittings",
+    title: "Add a fitting",
+    message: "Open Fittings to add a tee, branch, flange, groove, reducer, socket, valve or weld.",
+    actionLabel: "Open fittings",
+    target: "#fittingsToolButton",
+  },
+  {
+    id: "select",
+    title: "Edit what you drew",
+    message: "Choose Select, then tap a run or fitting to change it without adding more pipe.",
+    actionLabel: "Choose Select",
+    target: '[data-tool="select"]',
+  },
+  {
+    id: "save",
+    title: "Save the spool",
+    message: "Save now so the job, spool and revision stay attached to this drawing.",
+    actionLabel: "Save spool",
+    target: "#saveBrowserProjectButton",
+  },
+  {
+    id: "review",
+    title: "Review the checks",
+    message: "The full workspace is now visible. Open Review and clear the drawing and weld-register checks.",
+    actionLabel: "Open checks",
+    target: '[data-app-mode="review"]',
+  },
+  {
+    id: "export",
+    title: "Issue the workshop output",
+    message: "Open Export, choose the PDF style and create the fabrication sheet when the checklist is clear.",
+    actionLabel: "Open export",
+    target: '[data-app-mode="export"]',
+  },
+];
 const LOAD_PLAN_TRAYS = {
   medium: { key: "medium", label: "3460 x 2040 mm tray", lengthMm: 3460, widthMm: 2040 },
   long: { key: "long", label: "4490 x 2040 mm tray", lengthMm: 4490, widthMm: 2040 },
@@ -1327,6 +1429,7 @@ let dimensionHitTargets = [];
 let boxSelectDrag = null;
 let measurementDraft = null;
 let shiftAngleSnap = false;
+let touchShiftAnglePointerId = null;
 let touchContextPress = null;
 let pendingDraw = null;
 let activeTouchPointers = new Map();
@@ -1338,13 +1441,19 @@ let fieldInputDialogResolver = null;
 let appConfirmDialogResolver = null;
 let noteDialogColour = DEFAULT_NOTE_COLOUR;
 let tutorialStepIndex = 0;
-let tutorialPathMode = "beginner";
+let tutorialPathMode = "quick";
 let tutorialHighlightedElement = null;
 let tutorialPreviewRestoreState = null;
 let tutorialPractice = null;
 let tutorialTrainer = null;
 let tutorialCompletedSteps = new Set();
 let tutorialTrainerSuppressClickUntil = 0;
+let firstUseGuideState = null;
+let firstUseHighlightedElement = null;
+let aiHelperConversation = [];
+let aiHelperBusy = false;
+let aiHelperRemaining = null;
+let aiHelperLastFocused = null;
 let drawingAssistantState = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
@@ -1408,6 +1517,10 @@ let projectLibraryReportVisible = false;
 let projectLibraryCommsVisible = false;
 let projectLibraryReportPeriod = "daily";
 let projectLibraryBoardFilter = "active";
+let projectLibraryDashboardView = readTeamDashboardView();
+let projectLibraryMoreVisible = false;
+let qrReaderModulePromise = null;
+let activeQrScanner = null;
 let fabSheetTemplate = loadFabSheetTemplate();
 let loadPlanSelection = new Set();
 let loadPlanAnimationFrame = 0;
@@ -2688,6 +2801,7 @@ const REGRESSION_LAUNCH_CHECKS = [
   "Use two test companies to confirm drawings, comments and private photos cannot cross company boundaries.",
   "Issue a fabrication PDF, scan its QR code on a phone and confirm the correct spool/revision traveller opens.",
   "Install the PWA on iPad and Android, then publish a cache bump and confirm the update prompt loads it.",
+  "Open Ask SpoolMate as a guest, trial and expired account; confirm built-in help always works and AI stops at the daily limit without exposing private drawing data.",
   "Disconnect the internet and confirm local projects remain available with clear cloud/QR limitations.",
   "Export account data and a project backup, then restore the project on a second browser.",
   "Delete a disposable test account and confirm its cloud projects/photos are no longer accessible.",
@@ -6703,8 +6817,12 @@ function getSnappedCandidate(pointer, options = {}) {
 
 function setShiftAngleSnap(active) {
   const next = active === true && state.activeTool === "draw";
-  if (shiftAngleSnap === next) return;
+  if (shiftAngleSnap === next) {
+    updateTouchShiftAngleButton();
+    return;
+  }
   shiftAngleSnap = next;
+  updateTouchShiftAngleButton();
   if (state.activeTool !== "draw") return;
 
   if (state.pointer) {
@@ -6723,6 +6841,45 @@ function setShiftAngleSnap(active) {
     ? formatPoint(candidate.point)
     : formatPoint(activePoint());
   drawIso();
+}
+
+function updateTouchShiftAngleButton() {
+  if (!touchShiftAngleButton) return;
+  const available = state.activeTool === "draw" && !drawingEditLocked();
+  touchShiftAngleButton.disabled = !available;
+  touchShiftAngleButton.classList.toggle("active", available && shiftAngleSnap);
+  touchShiftAngleButton.setAttribute("aria-pressed", String(available && shiftAngleSnap));
+  touchShiftAngleButton.title = available
+    ? "Press and hold while dragging a 45 degree offset"
+    : "Choose Draw to use Hold 45°";
+}
+
+function setupTouchShiftAngleButton() {
+  if (!touchShiftAngleButton) return;
+  const release = (event = null) => {
+    if (event && touchShiftAnglePointerId !== null && event.pointerId !== touchShiftAnglePointerId) return;
+    touchShiftAnglePointerId = null;
+    setShiftAngleSnap(false);
+  };
+
+  touchShiftAngleButton.addEventListener("pointerdown", (event) => {
+    if (touchShiftAngleButton.disabled || state.activeTool !== "draw") return;
+    event.preventDefault();
+    touchShiftAnglePointerId = event.pointerId;
+    try {
+      touchShiftAngleButton.setPointerCapture(event.pointerId);
+    } catch {
+      // Holding still works when pointer capture is unavailable.
+    }
+    setShiftAngleSnap(true);
+  });
+  touchShiftAngleButton.addEventListener("pointerup", release);
+  touchShiftAngleButton.addEventListener("pointercancel", release);
+  touchShiftAngleButton.addEventListener("lostpointercapture", release);
+  touchShiftAngleButton.addEventListener("click", (event) => event.preventDefault());
+  touchShiftAngleButton.addEventListener("contextmenu", (event) => event.preventDefault());
+  window.addEventListener("blur", () => release());
+  updateTouchShiftAngleButton();
 }
 
 function findNearestSegment(pointer) {
@@ -7069,6 +7226,7 @@ function addRunToPoint(from, next, options = {}) {
     state.previewCandidate = null;
     recordHistory({ type: "snapshot", snapshot });
     updateAll();
+    markFirstUseGuideLearned("draw");
     return;
   }
 
@@ -7084,6 +7242,7 @@ function addRunToPoint(from, next, options = {}) {
   state.previewCandidate = null;
   recordHistory({ type: "edge", pointIndex: to, edgeIndex: state.edges.length - 1 });
   updateAll();
+  markFirstUseGuideLearned("draw");
 }
 
 function addAngledRun(direction) {
@@ -9020,7 +9179,9 @@ function setTool(tool) {
   state.activeTool = tool;
   if (tool !== "draw") {
     shiftAngleSnap = false;
+    touchShiftAnglePointerId = null;
   }
+  updateTouchShiftAngleButton();
   state.previewCandidate = null;
   document.querySelectorAll("[data-tool]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tool === tool);
@@ -9028,6 +9189,7 @@ function setTool(tool) {
   updateFittingsToolButton(tool);
   if (tool === "select") {
     cursorReadout.textContent = "Select - hold Shift to pick multiple runs";
+    markFirstUseGuideLearned("select");
   } else if (tool === "measure") {
     cursorReadout.textContent = "Measure - pick first point";
   }
@@ -9056,7 +9218,10 @@ function setFittingsToolMenuOpen(open) {
   fittingsToolMenu.hidden = !next;
   fittingsToolButton.setAttribute("aria-expanded", String(next));
   document.body.classList.toggle("fittings-tool-menu-open", next);
-  if (next) positionFittingsToolMenu();
+  if (next) {
+    positionFittingsToolMenu();
+    markFirstUseGuideLearned("fittings");
+  }
 }
 
 function positionFittingsToolMenu() {
@@ -9625,7 +9790,7 @@ function setupHealthIssueClicks() {
 async function handleHealthIssueAction(item, action) {
   if (action === "set-revision-a") {
     if (cloudPermissionReadOnly) {
-      showAppNotice("This team spool is view/comment only. Ask an owner or admin to set the drawing revision.");
+      showAppNotice(cloudReadOnlyMessage("set the drawing revision"));
       return;
     }
     state.projectInfo = normalizeProjectInfo({ ...state.projectInfo, revision: "A" });
@@ -9671,7 +9836,7 @@ async function handleHealthIssueAction(item, action) {
 async function acknowledgeHealthIssue(item) {
   if (!item?.canAcknowledge || !item.key) return;
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only. Ask a checker, admin or owner to acknowledge the exception.");
+    showAppNotice(cloudReadOnlyMessage("acknowledge drawing exceptions"));
     return;
   }
   const response = await openFieldInputDialog({
@@ -9708,7 +9873,7 @@ async function acknowledgeHealthIssue(item) {
 function reopenHealthIssue(item) {
   if (!item?.key) return;
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only. Ask a checker, admin or owner to reopen the check.");
+    showAppNotice(cloudReadOnlyMessage("reopen drawing checks"));
     return;
   }
   state.healthAcknowledgements = normalizeHealthAcknowledgements(state.healthAcknowledgements);
@@ -10094,7 +10259,7 @@ function weldRegisterCardHtml() {
 
 function handleWeldRegisterFieldChange(field) {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role.");
+    showAppNotice(cloudReadOnlyMessage("change the weld register"));
     updateWorkflowSummary();
     return;
   }
@@ -10111,7 +10276,7 @@ function handleWeldRegisterFieldChange(field) {
 
 async function handleWorkflowAction(action) {
   if (cloudPermissionReadOnly && (action === "mark-checked" || action === "return-changes" || action === "issue-drawing" || action === "new-revision")) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change workflow status.");
+    showAppNotice(cloudReadOnlyMessage("change workflow status"));
     return;
   }
   if (action === "mark-checked") await markDrawingChecked();
@@ -10129,7 +10294,7 @@ async function handleProductionFieldChange(field) {
   const key = field?.dataset?.productionField;
   if (!key) return;
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to update production allocation.");
+    showAppNotice(cloudReadOnlyMessage("update production allocation"));
     updateWorkflowSummary();
     return;
   }
@@ -10207,7 +10372,7 @@ async function recordReviewConversationMessage(body) {
 
 async function markDrawingChecked() {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to mark it checked.");
+    showAppNotice(cloudReadOnlyMessage("approve the drawing"));
     return;
   }
   if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
@@ -10274,7 +10439,7 @@ async function markDrawingChecked() {
 
 async function returnDrawingForChanges() {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to return it for changes.");
+    showAppNotice(cloudReadOnlyMessage("return the drawing for changes"));
     return false;
   }
   if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
@@ -10418,7 +10583,7 @@ async function promptForMissingIssueRevision() {
 
 async function issueDrawing(options = {}) {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to issue the drawing.");
+    showAppNotice(cloudReadOnlyMessage("issue the drawing"));
     updateControls();
     return false;
   }
@@ -10555,7 +10720,7 @@ function addRevisionSnapshot(note = "Saved revision") {
 
 function createNextRevision() {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to create a new revision.");
+    showAppNotice(cloudReadOnlyMessage("create a new revision"));
     return;
   }
   const project = normalizeProjectInfo(state.projectInfo);
@@ -10584,7 +10749,7 @@ function createNextRevision() {
 
 async function restoreRevision(revisionId) {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to restore revisions.");
+    showAppNotice(cloudReadOnlyMessage("restore revisions"));
     return;
   }
   const entry = normalizeRevisionHistory(state.revisionHistory).find((item) => item.id === revisionId);
@@ -10947,7 +11112,7 @@ function drawingEditLocked() {
 function ensureDrawingEditable(action = "edit this drawing") {
   if (!drawingEditLocked()) return true;
   if (cloudPermissionReadOnly) {
-    showAppNotice(`This team spool is view/comment only for your role. Ask the project owner or a team admin before you ${action}.`);
+    showAppNotice(cloudReadOnlyMessage(action));
   } else {
     showAppNotice(`This drawing is locked as ${projectStatusLabel()}. Unlock edits or create a new revision before you ${action}.`);
   }
@@ -11497,6 +11662,7 @@ function applyAppMode(mode, options = {}) {
   }
 
   closeDrawingContextMenu();
+  if (normalized === "review") markFirstUseGuideLearned("review");
 }
 
 function setupAppModes() {
@@ -12129,11 +12295,315 @@ function helpSectionForCurrentMode() {
   return "touch";
 }
 
+function defaultFirstUseGuideState() {
+  return {
+    active: false,
+    compact: true,
+    completed: false,
+    currentStep: 0,
+    learned: [],
+  };
+}
+
+function readFirstUseGuideState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FIRST_USE_GUIDE_KEY) || "null");
+    if (!saved || typeof saved !== "object") return null;
+    const learned = Array.isArray(saved.learned)
+      ? [...new Set(saved.learned.map((id) => String(id ?? "")).filter((id) => FIRST_USE_GUIDE_STEPS.some((step) => step.id === id)))]
+      : [];
+    return {
+      active: saved.active === true,
+      compact: saved.compact !== false,
+      completed: saved.completed === true,
+      currentStep: clampNumber(Math.round(Number(saved.currentStep) || 0), 0, FIRST_USE_GUIDE_STEPS.length - 1),
+      learned,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function persistFirstUseGuideState() {
+  if (!firstUseGuideState) return;
+  try {
+    localStorage.setItem(FIRST_USE_GUIDE_KEY, JSON.stringify(firstUseGuideState));
+  } catch {
+    // First-use help remains available for this session when storage is blocked.
+  }
+}
+
+function firstUseGuideStepIndexById(id) {
+  const index = FIRST_USE_GUIDE_STEPS.findIndex((step) => step.id === id);
+  return index >= 0 ? index : 0;
+}
+
+function currentFirstUseGuideStep() {
+  if (!firstUseGuideState) return FIRST_USE_GUIDE_STEPS[0];
+  firstUseGuideState.currentStep = clampNumber(
+    Math.round(Number(firstUseGuideState.currentStep) || 0),
+    0,
+    FIRST_USE_GUIDE_STEPS.length - 1,
+  );
+  return FIRST_USE_GUIDE_STEPS[firstUseGuideState.currentStep];
+}
+
+function clearFirstUseGuideTarget() {
+  firstUseHighlightedElement?.classList.remove("first-use-focus-target");
+  firstUseHighlightedElement = null;
+}
+
+function syncFirstUseGuideTarget() {
+  clearFirstUseGuideTarget();
+  if (!firstUseGuideState?.active || !firstSpoolGuide || firstSpoolGuide.hidden) return;
+  const target = document.querySelector(currentFirstUseGuideStep()?.target || "");
+  if (!(target instanceof HTMLElement) || target.hidden || target.getClientRects().length === 0) return;
+  firstUseHighlightedElement = target;
+  target.classList.add("first-use-focus-target");
+}
+
+function currentProjectHasSavedRecord() {
+  const projectId = normalizeProjectId(state.projectId);
+  if (!projectId) return false;
+  if (loadSavedBrowserProjects().some((project) => project.id === projectId)) return true;
+  return Boolean(cloudLastSavedAt && !cloudSaveDirty && !cloudSaveError && !cloudSaveConflict);
+}
+
+function firstSpoolLaunchChecklist() {
+  const learned = new Set(firstUseGuideState?.learned || []);
+  const project = normalizeProjectInfo(state.projectInfo);
+  return [
+    { label: "Drawing complete", detail: "Pipe route and fittings are in place.", done: hasDrawingContent() },
+    { label: "Details entered", detail: "Job, spool and revision identify the drawing.", done: Boolean(project.jobNumber && project.spoolNumber && project.revision) },
+    { label: "Checks reviewed", detail: "Drawing health and weld register were opened.", done: learned.has("review") },
+    { label: "Spool saved", detail: "A browser or cloud record exists.", done: currentProjectHasSavedRecord() },
+    { label: "Workshop PDF exported", detail: "The fabrication output was generated.", done: learned.has("export") },
+  ];
+}
+
+function tutorialLaunchChecklistMarkup(step = currentTutorialStep()) {
+  if (step?.demo !== "export") return "";
+  const items = firstSpoolLaunchChecklist();
+  const completeCount = items.filter((item) => item.done).length;
+  return `
+    <section class="tutorial-launch-checklist" aria-label="First spool launch checklist">
+      <div>
+        <strong>First spool checklist</strong>
+        <span>${completeCount} of ${items.length} complete in the real drawing</span>
+      </div>
+      <ul>
+        ${items.map((item) => `
+          <li class="${item.done ? "done" : "pending"}">
+            <b aria-hidden="true">${item.done ? "✓" : "○"}</b>
+            <span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail)}</small></span>
+          </li>
+        `).join("")}
+      </ul>
+    </section>
+  `;
+}
+
+function renderFirstUseGuide() {
+  if (!firstSpoolGuide || !firstUseGuideState) return;
+  const active = firstUseGuideState.active === true;
+  const step = currentFirstUseGuideStep();
+  const position = firstUseGuideState.currentStep;
+  const compact = active && firstUseGuideState.compact && position <= firstUseGuideStepIndexById("save");
+  firstSpoolGuide.hidden = !active;
+  document.body.classList.toggle("first-spool-mode", compact);
+  document.body.classList.toggle("first-spool-guide-active", active);
+  if (!active) {
+    clearFirstUseGuideTarget();
+    return;
+  }
+  if (firstSpoolGuideKicker) firstSpoolGuideKicker.textContent = `First spool · Step ${position + 1} of ${FIRST_USE_GUIDE_STEPS.length}`;
+  if (firstSpoolGuideTitle) firstSpoolGuideTitle.textContent = step.title;
+  if (firstSpoolGuideMessage) firstSpoolGuideMessage.textContent = step.message;
+  if (firstSpoolGuideActionButton) firstSpoolGuideActionButton.textContent = step.actionLabel;
+  if (firstSpoolGuideNextButton) firstSpoolGuideNextButton.textContent = position === FIRST_USE_GUIDE_STEPS.length - 1 ? "Finish" : "Next";
+  if (firstSpoolGuideExpandButton) {
+    firstSpoolGuideExpandButton.hidden = position > firstUseGuideStepIndexById("save");
+    firstSpoolGuideExpandButton.textContent = compact ? "Show all controls" : "Simplify controls";
+  }
+  if (firstSpoolGuideProgressBar) firstSpoolGuideProgressBar.style.width = `${((position + 1) / FIRST_USE_GUIDE_STEPS.length) * 100}%`;
+  window.requestAnimationFrame(syncFirstUseGuideTarget);
+}
+
+function activateFirstUseGuide(options = {}) {
+  if (!firstUseGuideState) firstUseGuideState = readFirstUseGuideState() ?? defaultFirstUseGuideState();
+  if (firstUseGuideState.completed && options.force !== true) return false;
+  firstUseGuideState.active = true;
+  firstUseGuideState.completed = false;
+  if (typeof options.compact === "boolean") firstUseGuideState.compact = options.compact;
+  if (options.stepId) firstUseGuideState.currentStep = firstUseGuideStepIndexById(options.stepId);
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+  return true;
+}
+
+function finishFirstUseGuide(message = "First spool tips finished. You can reopen the tutorial from Menu at any time.") {
+  if (!firstUseGuideState) return;
+  firstUseGuideState.active = false;
+  firstUseGuideState.compact = false;
+  firstUseGuideState.completed = true;
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+  if (message) showAppNotice(message);
+}
+
+function markFirstUseGuideLearned(id) {
+  if (!firstUseGuideState || !FIRST_USE_GUIDE_STEPS.some((step) => step.id === id)) return;
+  if (!firstUseGuideState.learned.includes(id)) firstUseGuideState.learned.push(id);
+  if (firstUseGuideState.active && currentFirstUseGuideStep()?.id === id) {
+    const nextIndex = FIRST_USE_GUIDE_STEPS.findIndex((step, index) => (
+      index > firstUseGuideState.currentStep && !firstUseGuideState.learned.includes(step.id)
+    ));
+    if (nextIndex >= 0) {
+      firstUseGuideState.currentStep = nextIndex;
+      if (FIRST_USE_GUIDE_STEPS[nextIndex].id === "review") firstUseGuideState.compact = false;
+    } else {
+      finishFirstUseGuide("First spool workflow complete. Your contextual tips have been cleared.");
+      return;
+    }
+  }
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+}
+
+function advanceFirstUseGuide() {
+  if (!firstUseGuideState?.active) return;
+  if (firstUseGuideState.currentStep >= FIRST_USE_GUIDE_STEPS.length - 1) {
+    finishFirstUseGuide();
+    return;
+  }
+  firstUseGuideState.currentStep += 1;
+  if (currentFirstUseGuideStep()?.id === "review") firstUseGuideState.compact = false;
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+}
+
+function runFirstUseGuideAction() {
+  const step = currentFirstUseGuideStep();
+  if (!step) return;
+  if (step.id === "draw") {
+    applyAppMode("draw");
+    setTool("draw");
+    showMobilePanel("drawing");
+  } else if (step.id === "length") {
+    applyAppMode("draw");
+    activateInspectorTab("properties");
+    showMobilePanel("inspector");
+    window.setTimeout(() => {
+      stepLengthInput?.focus({ preventScroll: true });
+      stepLengthInput?.select();
+      syncFirstUseGuideTarget();
+    }, 80);
+  } else if (step.id === "fittings") {
+    applyAppMode("draw");
+    showMobilePanel("drawing");
+    setFittingsToolMenuOpen(true);
+  } else if (step.id === "select") {
+    applyAppMode("draw");
+    setTool("select");
+    showMobilePanel("drawing");
+  } else if (step.id === "save") {
+    saveBrowserProject().catch((error) => {
+      console.warn("First spool save failed.", error);
+      showAppNotice(error?.message || "Could not save the spool.");
+    });
+  } else if (step.id === "review") {
+    showHealthPanel();
+  } else if (step.id === "export") {
+    applyAppMode("export");
+    showMobilePanel("inspector");
+    document.querySelector("#exportReportButton")?.focus({ preventScroll: true });
+  }
+  window.requestAnimationFrame(syncFirstUseGuideTarget);
+}
+
+function setupFirstUseGuide() {
+  const saved = readFirstUseGuideState();
+  firstUseGuideState = saved ?? defaultFirstUseGuideState();
+  const startForNewUser = !saved && !hasDrawingContent() && loadSavedBrowserProjects().length === 0;
+  if (startForNewUser) {
+    firstUseGuideState.active = true;
+    firstUseGuideState.compact = true;
+  }
+  firstSpoolGuideExpandButton?.addEventListener("click", () => {
+    firstUseGuideState.compact = !document.body.classList.contains("first-spool-mode");
+    persistFirstUseGuideState();
+    renderFirstUseGuide();
+  });
+  firstSpoolGuideActionButton?.addEventListener("click", runFirstUseGuideAction);
+  firstSpoolGuideNextButton?.addEventListener("click", advanceFirstUseGuide);
+  firstSpoolGuideCloseButton?.addEventListener("click", () => finishFirstUseGuide());
+  window.addEventListener("resize", syncFirstUseGuideTarget);
+  if (startForNewUser) {
+    applyAppMode("draw");
+    setTool("draw");
+  }
+  renderFirstUseGuide();
+}
+
 function tutorialVisibleStepIndexes() {
   const indexes = tutorialPathMode === "all"
     ? TUTORIAL_STEPS.map((_, index) => index)
+    : tutorialPathMode === "quick"
+    ? QUICK_START_TUTORIAL_STEP_INDEXES
     : BEGINNER_TUTORIAL_STEP_INDEXES;
   return indexes.filter((index) => TUTORIAL_STEPS[index]);
+}
+
+function readTutorialProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TUTORIAL_PROGRESS_KEY) || "null");
+    if (!saved || typeof saved !== "object") return null;
+    const completed = Array.isArray(saved.completed)
+      ? saved.completed
+        .map((index) => Math.round(Number(index)))
+        .filter((index) => Number.isFinite(index) && TUTORIAL_STEPS[index])
+      : [];
+    const lastStepIndex = Math.round(Number(saved.lastStepIndex));
+    return {
+      pathMode: saved.pathMode === "all" || saved.pathMode === "beginner" || saved.pathMode === "quick"
+        ? saved.pathMode
+        : "quick",
+      lastStepIndex: Number.isFinite(lastStepIndex) && TUTORIAL_STEPS[lastStepIndex] ? lastStepIndex : null,
+      completed,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function restoreTutorialProgress() {
+  const saved = readTutorialProgress();
+  if (!saved) return;
+  tutorialPathMode = saved.pathMode;
+  tutorialCompletedSteps = new Set(saved.completed);
+  if (saved.lastStepIndex !== null) tutorialStepIndex = saved.lastStepIndex;
+}
+
+function persistTutorialProgress() {
+  try {
+    localStorage.setItem(TUTORIAL_PROGRESS_KEY, JSON.stringify({
+      pathMode: tutorialPathMode,
+      lastStepIndex: tutorialStepIndex,
+      completed: [...tutorialCompletedSteps].sort((a, b) => a - b),
+    }));
+  } catch {
+    // Tutorial still works when browser storage is unavailable.
+  }
+}
+
+function tutorialResumeStepIndex() {
+  const visibleIndexes = tutorialVisibleStepIndexes();
+  if (!visibleIndexes.length) return 0;
+  if (visibleIndexes.includes(tutorialStepIndex) && !tutorialCompletedSteps.has(tutorialStepIndex)) {
+    return tutorialStepIndex;
+  }
+  return visibleIndexes.find((index) => !tutorialCompletedSteps.has(index))
+    ?? visibleIndexes[visibleIndexes.length - 1];
 }
 
 function tutorialVisibleStepPosition(index = tutorialStepIndex) {
@@ -12156,11 +12626,12 @@ function currentTutorialStep() {
 }
 
 function setTutorialPathMode(mode) {
-  const nextMode = mode === "all" ? "all" : "beginner";
+  const nextMode = mode === "all" || mode === "beginner" ? mode : "quick";
   if (tutorialPathMode === nextMode) return;
   tutorialPathMode = nextMode;
   stopTutorialPractice();
-  tutorialStepIndex = tutorialVisibleStepIndexes()[0] ?? 0;
+  tutorialStepIndex = tutorialResumeStepIndex();
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -13087,6 +13558,7 @@ function tutorialPracticeMarkup(step = currentTutorialStep()) {
       <span>${escapeHtml(message)}</span>
       <small>${escapeHtml(helper)}</small>
       ${tutorialTrainerMarkup(step, { active: practiceActive, complete })}
+      ${complete ? `<button type="button" class="tutorial-use-real-button" data-tutorial-use-real>Try in drawing</button>` : ""}
     </div>
   `;
 }
@@ -13103,6 +13575,7 @@ function startTutorialPractice(step = currentTutorialStep()) {
   if (!details) return null;
   const kind = tutorialTrainerKind(step);
   tutorialCompletedSteps.delete(tutorialStepIndex);
+  persistTutorialProgress();
   tutorialPractice = {
     stepIndex: tutorialStepIndex,
     action: step.action,
@@ -13186,6 +13659,7 @@ function checkTutorialPractice() {
   if (tutorialPracticeCompleteForAction(tutorialPractice.action, tutorialPractice.baseline)) {
     const alreadyComplete = tutorialCompletedSteps.has(tutorialPractice.stepIndex);
     tutorialCompletedSteps.add(tutorialPractice.stepIndex);
+    persistTutorialProgress();
     if (!alreadyComplete) {
       renderTutorialStep();
       return;
@@ -13203,6 +13677,7 @@ function completeTutorialTrainer() {
     tutorialTrainer.shiftCaptureTarget = null;
   }
   tutorialCompletedSteps.add(tutorialStepIndex);
+  persistTutorialProgress();
   if (tutorialPractice) tutorialPractice.complete = true;
   renderTutorialStep();
 }
@@ -13727,7 +14202,118 @@ function handleTutorialTrainerChoice(choice) {
   }
 }
 
+function firstUseGuideStepForTutorial(step = currentTutorialStep()) {
+  if (step?.action === "drawTool") return "draw";
+  if (step?.action === "focusLength") return "length";
+  if (step?.action === "teeTool" || step?.action === "flangeTool") return "fittings";
+  if (step?.action === "selectTool") return "select";
+  if (step?.action === "showChecks") return "review";
+  if (step?.action === "focusExport") return "export";
+  return "";
+}
+
+async function tryTutorialStepInDrawing() {
+  const step = currentTutorialStep();
+  const guideStep = firstUseGuideStepForTutorial(step);
+  closeTutorialDialog();
+  if (guideStep) {
+    activateFirstUseGuide({
+      force: true,
+      stepId: guideStep,
+      compact: firstUseGuideStepIndexById(guideStep) <= firstUseGuideStepIndexById("save"),
+    });
+  }
+
+  await new Promise((resolve) => window.setTimeout(resolve, 80));
+  switch (step.action) {
+    case "focusJobs":
+      await openBrowserProject();
+      break;
+    case "showComms":
+      await openBrowserProject();
+      showProjectLibraryComms();
+      break;
+    case "drawTool":
+      applyAppMode("draw");
+      setTool("draw");
+      showMobilePanel("drawing");
+      break;
+    case "focusLength":
+      applyAppMode("draw");
+      activateInspectorTab("properties");
+      showMobilePanel("inspector");
+      stepLengthInput?.focus({ preventScroll: true });
+      stepLengthInput?.select();
+      break;
+    case "selectTool":
+      applyAppMode("draw");
+      setTool("select");
+      showMobilePanel("drawing");
+      break;
+    case "teeTool":
+      applyAppMode("draw");
+      setTool("tee");
+      showMobilePanel("drawing");
+      setFittingsToolMenuOpen(true);
+      break;
+    case "flangeTool":
+      applyAppMode("edit");
+      setTool("flange");
+      showMobilePanel("drawing");
+      setFittingsToolMenuOpen(true);
+      break;
+    case "focusPipeSize":
+      applyAppMode("draw");
+      activateInspectorTab("properties");
+      showMobilePanel("inspector");
+      pipeSizeSelect?.focus({ preventScroll: true });
+      break;
+    case "measureTool":
+      applyAppMode("draw");
+      setTool("measure");
+      showMobilePanel("drawing");
+      break;
+    case "focusDimensions":
+      applyAppMode("draw");
+      showMobilePanel("drawing");
+      dimensionStyleSelect?.focus({ preventScroll: true });
+      break;
+    case "focusMode":
+      applyAppMode("draw");
+      setFocusMode(true);
+      break;
+    case "showPreview":
+      setPreviewHidden(false);
+      showMobilePanel("preview");
+      break;
+    case "showChecks":
+      showHealthPanel();
+      break;
+    case "focusExport":
+      applyAppMode("export");
+      showMobilePanel("inspector");
+      document.querySelector("#exportReportButton")?.focus({ preventScroll: true });
+      break;
+    default:
+      if (step.mode) applyAppMode(step.mode);
+      focusTutorialTarget(step);
+      break;
+  }
+  showAppNotice(`${step.menuLabel || step.kicker} is ready in the real workspace. Your existing drawing has not been changed.`);
+  window.requestAnimationFrame(syncFirstUseGuideTarget);
+}
+
 function handleTutorialTrainerClick(event) {
+  const useRealTarget = event.target instanceof Element ? event.target.closest("[data-tutorial-use-real]") : null;
+  if (useRealTarget && tutorialStepCard?.contains(useRealTarget)) {
+    event.preventDefault();
+    event.stopPropagation();
+    tryTutorialStepInDrawing().catch((error) => {
+      console.warn("Could not open the real tutorial tool.", error);
+      showAppNotice(error?.message || "Could not open that tool in the drawing.");
+    });
+    return;
+  }
   const target = event.target instanceof Element ? event.target.closest("[data-tutorial-trainer-choice]") : null;
   if (!target || !tutorialStepCard?.contains(target)) return;
   if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
@@ -14257,12 +14843,20 @@ function tutorialMenuLabel(step, index) {
 function tutorialMenuMarkup() {
   const visibleIndexes = tutorialVisibleStepIndexes();
   const position = tutorialVisibleStepPosition();
-  const pathName = tutorialPathMode === "all" ? "All topics" : "Beginner tour";
+  const practisedCount = visibleIndexes.filter((index) => tutorialCompletedSteps.has(index)).length;
+  const pathName = tutorialPathMode === "all"
+    ? "All topics"
+    : tutorialPathMode === "beginner"
+    ? "Beginner tour"
+    : "5-minute Quick Start";
   const pathHelp = tutorialPathMode === "all"
     ? "Every feature, including Jobs, team comms and production workflow."
-    : "Start here. This teaches the drawing workflow before the advanced team tools.";
+    : tutorialPathMode === "beginner"
+    ? "The complete first-spool drawing workflow, in a guided order."
+    : "The essentials: draw, exact and 45° runs, fittings, dimensions, checks and export.";
   return `
     <div class="tutorial-mode-switch" aria-label="Tutorial path">
+      <button type="button" data-tutorial-mode="quick" class="${tutorialPathMode === "quick" ? "active" : ""}" aria-pressed="${tutorialPathMode === "quick" ? "true" : "false"}">Quick Start</button>
       <button type="button" data-tutorial-mode="beginner" class="${tutorialPathMode === "beginner" ? "active" : ""}" aria-pressed="${tutorialPathMode === "beginner" ? "true" : "false"}">Beginner tour</button>
       <button type="button" data-tutorial-mode="all" class="${tutorialPathMode === "all" ? "active" : ""}" aria-pressed="${tutorialPathMode === "all" ? "true" : "false"}">All topics</button>
     </div>
@@ -14271,8 +14865,8 @@ function tutorialMenuMarkup() {
       <span>${escapeHtml(pathHelp)}</span>
     </div>
     <div class="tutorial-progress-head">
-      <span>Topic ${position + 1} of ${visibleIndexes.length}</span>
-      <small>${tutorialPathMode === "all" ? "Pick any feature, or use Next and Back." : "Follow these in order to learn your first spool."}</small>
+      <span>Topic ${position + 1} of ${visibleIndexes.length} — ${practisedCount} practised</span>
+      <small>${tutorialPathMode === "all" ? "Pick any feature, or use Next and Back." : tutorialPathMode === "quick" ? "A short launch path for your first usable spool." : "Follow these in order to learn your first spool."}</small>
     </div>
     <label class="tutorial-topic-select-wrap">
       <span>Choose topic</span>
@@ -14329,6 +14923,7 @@ function renderTutorialStep() {
       ${tutorialPracticeMarkup(step)}
       ${showDemo ? tutorialDemoMarkup(step.demo) : ""}
       <div class="tutorial-target-note"><strong>Safe practice</strong><span>${escapeHtml(practiceText)}</span></div>
+      ${tutorialLaunchChecklistMarkup(step)}
     </div>
   `;
   tutorialStepCard.dataset.tutorialStepIndex = String(tutorialStepIndex);
@@ -14346,7 +14941,7 @@ function renderTutorialStep() {
     currentControl?.classList.add("tutorial-current-control");
   }
   tutorialPrevButton.disabled = visiblePosition === 0;
-  tutorialNextButton.textContent = visiblePosition === visibleIndexes.length - 1 ? "Done" : "Next";
+  tutorialNextButton.textContent = visiblePosition === visibleIndexes.length - 1 ? "Finish tour" : "Next";
   if (tutorialActionButton) {
     tutorialActionButton.hidden = !practiceDetails;
     tutorialActionButton.textContent = tutorialCompletedSteps.has(tutorialStepIndex) ? "Try again" : "Start practice";
@@ -14364,6 +14959,7 @@ function selectTutorialStep(index) {
   }
   stopTutorialPractice();
   tutorialStepIndex = nextIndex;
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -14392,8 +14988,12 @@ function runTutorialStepAction() {
 
 function openTutorialDialog(index = null) {
   if (!tutorialDialog) return;
-  const visibleIndexes = tutorialVisibleStepIndexes();
-  tutorialStepIndex = index === null ? (visibleIndexes[0] ?? 0) : normalizeTutorialStepIndex(index);
+  const requestedIndex = Math.round(Number(index));
+  if (index !== null && Number.isFinite(requestedIndex) && TUTORIAL_STEPS[requestedIndex] && !tutorialVisibleStepIndexes().includes(requestedIndex)) {
+    tutorialPathMode = BEGINNER_TUTORIAL_STEP_INDEXES.includes(requestedIndex) ? "beginner" : "all";
+  }
+  tutorialStepIndex = index === null ? tutorialResumeStepIndex() : normalizeTutorialStepIndex(requestedIndex);
+  persistTutorialProgress();
   tutorialDialog.hidden = false;
   document.body.classList.add("tutorial-running");
   stopTutorialPractice();
@@ -14403,6 +15003,7 @@ function openTutorialDialog(index = null) {
 }
 
 function closeTutorialDialog() {
+  persistTutorialProgress();
   if (tutorialDialog) tutorialDialog.hidden = true;
   document.body.classList.remove("tutorial-running");
   clearTutorialTarget();
@@ -14414,11 +15015,16 @@ function tutorialNextStep() {
   const visibleIndexes = tutorialVisibleStepIndexes();
   const position = tutorialVisibleStepPosition();
   if (position >= visibleIndexes.length - 1) {
+    const practisedCount = visibleIndexes.filter((index) => tutorialCompletedSteps.has(index)).length;
     closeTutorialDialog();
+    showAppNotice(practisedCount === visibleIndexes.length
+      ? "Tutorial complete. Your practice progress is saved, and you can reopen any topic from Menu."
+      : `Tutorial closed with ${practisedCount} of ${visibleIndexes.length} topics practised. Reopen it to continue where you left off.`);
     return;
   }
   stopTutorialPractice();
   tutorialStepIndex = visibleIndexes[position + 1] ?? tutorialStepIndex;
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -14427,6 +15033,7 @@ function tutorialPreviousStep() {
   const position = tutorialVisibleStepPosition();
   stopTutorialPractice();
   tutorialStepIndex = visibleIndexes[Math.max(0, position - 1)] ?? tutorialStepIndex;
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -14437,6 +15044,7 @@ function updateTutorialCoachPosition() {
 }
 
 function setupTutorialDialog() {
+  restoreTutorialProgress();
   tutorialButton?.addEventListener("click", () => openTutorialDialog());
   tutorialProgress?.addEventListener("click", (event) => {
     const modeTarget = event.target instanceof Element ? event.target.closest("[data-tutorial-mode]") : null;
@@ -14470,6 +15078,445 @@ function setupTutorialDialog() {
   tutorialStepCard?.addEventListener("keydown", handleTutorialTrainerKeyDown);
   window.addEventListener("resize", updateTutorialCoachPosition);
   window.addEventListener("scroll", updateTutorialCoachPosition, true);
+}
+
+const AI_HELPER_LOCAL_GUIDE = [
+  {
+    patterns: [["45", "offset"], ["45", "degree"], ["shift", "angle"]],
+    answer: "To draw a 45° offset:\n1. Choose Draw and enter the required offset set in Next run / offset set.\n2. Hold Shift on a keyboard, or hold the Hold 45° drawing control on touch, while dragging the angled travel.\n3. Release it, draw the straight return, then press Enter or switch to Select to finish.",
+    tutorial: "Angles / offsets",
+    help: "draw",
+  },
+  {
+    patterns: [["draw", "pipe"], ["first", "run"], ["start", "drawing"]],
+    answer: "Choose Draw, then press and drag from the yellow active point to the next point on the isometric paper. Continue from the new yellow point. Press Enter when the spool is finished, or switch to Select to stop drawing and edit existing runs.",
+    tutorial: "Draw pipe",
+    help: "draw",
+  },
+  {
+    patterns: [["finish", "drawing"], ["stop", "drawing"], ["end", "draw"]],
+    answer: "Press Enter to finish drawing and return to Select. On a touch device, switch to Select after placing the last run. Your existing pipe stays on the drawing.",
+    tutorial: "Draw pipe",
+    help: "draw",
+  },
+  {
+    patterns: [["flange"], ["add", "fitting"], ["end", "fitting"]],
+    answer: "Open Edit, choose Fittings, then choose Flange and tap the pipe end. You can also activate Select, long-press or right-click the pipe end, and use Add fitting. To change an existing flange, long-press it with Select active and choose Flange standard.",
+    tutorial: "End fittings",
+    help: "edit",
+  },
+  {
+    patterns: [["tee"], ["branch"], ["cut", "in"]],
+    answer: "Open Fittings and choose Tee or Branch. Tap the main pipe run where the connection starts, then draw the new leg. Use Tee for a tee fitting. Use Branch when the smaller pipe is welded into the side of the larger main pipe.",
+    tutorial: "Tee / branch",
+    help: "draw",
+  },
+  {
+    patterns: [["socket"], ["long", "press", "pipe"]],
+    answer: "Activate Select, then right-click on PC or long-press the pipe on iPad/Android. Choose Add sockets, select the socket size, count and spacing, then Apply. Long-press a socket later to rotate it, or drag it along the pipe in Select.",
+    tutorial: "Sockets",
+    help: "edit",
+  },
+  {
+    patterns: [["pipe", "size"], ["change", "size"], ["reducer"]],
+    answer: "For the next run, choose the size from the Pipe / tube menu. To change existing pipe, activate Select, choose the run, then change its size in the inspector or context menu. Normal and tee size changes can add reducers; welded branch outlets keep their own size without an automatic reducer.",
+    tutorial: "Pipe size",
+    help: "edit",
+  },
+  {
+    patterns: [["dimension"], ["measurement"], ["measure"]],
+    answer: "Use Measure to place a check between any two picked points without changing the pipe. For fabrication dimensions, turn Dimensions on and choose red C/C, numbered or chain style. With Select active, drag crowded red dimension labels into a clearer position.",
+    tutorial: "Dimensions",
+    help: "review",
+  },
+  {
+    patterns: [["issue"], ["approve"], ["ready", "check"], ["drawing", "blocked"]],
+    answer: "A spool must have its required project details and revision, pass or acknowledge its drawing checks, move to Ready to check, and be approved before it can be issued. Open Review > Checks to see the exact blocker and use its action. Issuing then records the issuer and locks that revision.",
+    tutorial: "Approve / return",
+    help: "review",
+  },
+  {
+    patterns: [["cloud", "spool"], ["saved", "spool"], ["missing", "project"], ["other", "device"]],
+    answer: "First confirm Account shows you are signed in with the same email. Open Jobs and set its source to Cloud. Local projects stay only in that browser, while cloud projects follow the signed-in account across PC, iPad and Android. Trial expiry keeps existing cloud spools visible in read-only mode.",
+    help: "account",
+  },
+  {
+    patterns: [["trial"], ["expired"], ["read", "only"], ["licence"]],
+    answer: "The 30-day trial includes cloud editing and collaboration. After expiry, existing permitted cloud spools remain available to open, view and export, but cloud saves and team changes pause. Built-in Ask SpoolMate help remains available; AI answers resume with an active trial or licence.",
+    help: "account",
+  },
+  {
+    patterns: [["fab", "pdf"], ["fabrication", "pdf"], ["export", "pdf"], ["qr", "code"]],
+    answer: "Open Export, choose the PDF style, then press Fab PDF. Workshop PDFs include fabrication information and the issued spool/revision QR traveller when the drawing has the required cloud identity. Check the revision and issue status before sending the sheet to the workshop.",
+    tutorial: "Export",
+    help: "export",
+  },
+  {
+    patterns: [["weld", "register"], ["weld", "number"], ["wps"], ["ndt"]],
+    answer: "SpoolMate numbers drawing welds W01, W02 and onward. Open Review and the weld register to record the welder, WPS, completion date and inspection/NDT status. Review the register before issuing the fabrication PDF.",
+    help: "review",
+  },
+  {
+    patterns: [["production", "stage"], ["assign", "worker"], ["due", "date"], ["on", "hold"]],
+    answer: "Open Jobs > Production board. Use the spool card to set its stage, assigned worker, due date and priority. A hold requires a reason. The same current production information is shown on the mobile QR traveller for permitted users.",
+    tutorial: "Production board",
+    help: "account",
+  },
+  {
+    patterns: [["3d"], ["preview"], ["rotate", "model"]],
+    answer: "Open 3D Preview. Use Rotate to spin the model, Move to pan, and wheel or pinch to zoom. Press Fit to centre the whole spool. On phones and tablets the preview opens as a panel so it does not cover the drawing.",
+    tutorial: "3D preview",
+    help: "touch",
+  },
+  {
+    patterns: [["ipad"], ["android"], ["tablet"], ["touch"]],
+    answer: "On iPad and Android, use Select before long-pressing a pipe or fitting. Keep your finger still until the context menu opens. Use two-finger pinch for zoom, the mobile panel buttons for details and 3D, and Hold 45° beside the drawing while dragging a 45 degree offset.",
+    help: "touch",
+  },
+];
+
+function normalizeAiHelperText(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/[°º]/g, " degree ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function aiHelperGuideMatch(question, minimumScore = 2) {
+  const normalized = normalizeAiHelperText(question);
+  if (!normalized) return null;
+  let best = null;
+  let bestScore = 0;
+  for (const entry of AI_HELPER_LOCAL_GUIDE) {
+    for (const pattern of entry.patterns) {
+      if (!pattern.every((term) => normalized.includes(normalizeAiHelperText(term)))) continue;
+      const score = pattern.length * 2 + pattern.reduce((total, term) => total + Math.min(2, normalizeAiHelperText(term).length / 8), 0);
+      if (score > bestScore) {
+        best = entry;
+        bestScore = score;
+      }
+    }
+  }
+  return bestScore >= minimumScore ? best : null;
+}
+
+function aiHelperMessageId() {
+  return `ai-help-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function resetAiHelperConversation() {
+  aiHelperConversation = [{
+    id: aiHelperMessageId(),
+    role: "assistant",
+    text: AI_HELPER_WELCOME,
+    source: "Built-in guide",
+    welcome: true,
+  }];
+  renderAiHelperConversation();
+}
+
+function appendAiHelperMessage(role, text, options = {}) {
+  const message = {
+    id: aiHelperMessageId(),
+    role: role === "user" ? "user" : "assistant",
+    text: String(text ?? "").trim(),
+    source: options.source ?? "",
+    question: String(options.question ?? "").trim(),
+    action: options.action ?? null,
+    allowAi: options.allowAi === true,
+    welcome: options.welcome === true,
+    feedback: "",
+  };
+  aiHelperConversation.push(message);
+  if (aiHelperConversation.length > 24) aiHelperConversation.splice(1, aiHelperConversation.length - 24);
+  renderAiHelperConversation();
+  return message;
+}
+
+function aiHelperCanUseAi() {
+  return Boolean(navigator.onLine && cloudUser && hasActiveCloudLicense());
+}
+
+function aiHelperDailyLimit() {
+  if (!cloudUser || !hasActiveCloudLicense()) return 0;
+  return cloudLicenceState() === "trial" ? AI_HELPER_TRIAL_DAILY_LIMIT : AI_HELPER_PAID_DAILY_LIMIT;
+}
+
+function updateAiHelperAvailability() {
+  if (!aiHelperMode || !aiHelperQuota) return;
+  const stateName = cloudLicenceState();
+  if (aiHelperBusy) {
+    aiHelperMode.textContent = "Finding an answer…";
+    aiHelperQuota.textContent = "Please keep this panel open";
+    return;
+  }
+  if (!navigator.onLine) {
+    aiHelperMode.textContent = "Built-in help";
+    aiHelperQuota.textContent = "Offline — instant guides still work";
+    return;
+  }
+  if (!cloudUser) {
+    aiHelperMode.textContent = "Built-in help";
+    aiHelperQuota.textContent = "Sign in for extra AI answers";
+    return;
+  }
+  if (!hasActiveCloudLicense()) {
+    aiHelperMode.textContent = "Built-in help";
+    aiHelperQuota.textContent = "AI paused on read-only access";
+    return;
+  }
+  const limit = aiHelperDailyLimit();
+  aiHelperMode.textContent = stateName === "trial" ? "Trial AI help" : "AI help available";
+  aiHelperQuota.textContent = Number.isInteger(aiHelperRemaining)
+    ? `${aiHelperRemaining} of ${limit} AI questions left today`
+    : `Up to ${limit} AI questions per day`;
+}
+
+function aiHelperActionButton(label, action, message) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.dataset.aiAction = action;
+  button.dataset.aiMessageId = message.id;
+  return button;
+}
+
+function renderAiHelperConversation() {
+  if (!aiHelperMessages) return;
+  aiHelperMessages.replaceChildren();
+  for (const message of aiHelperConversation) {
+    const article = document.createElement("article");
+    article.className = `ai-helper-message ${message.role}`;
+    article.dataset.aiMessage = message.id;
+
+    const bubble = document.createElement("div");
+    bubble.className = "ai-helper-bubble";
+    const text = document.createElement("p");
+    text.textContent = message.text;
+    bubble.append(text);
+
+    if (message.role === "assistant" && message.source) {
+      const source = document.createElement("small");
+      source.textContent = message.source;
+      bubble.append(source);
+    }
+    article.append(bubble);
+
+    if (message.role === "assistant" && !message.welcome) {
+      const actions = document.createElement("div");
+      actions.className = "ai-helper-message-actions";
+      if (message.action?.tutorial) actions.append(aiHelperActionButton("Open tutorial", "tutorial", message));
+      if (message.action?.help) actions.append(aiHelperActionButton("Open help", "help", message));
+      if (message.action?.account) actions.append(aiHelperActionButton("Open account", "account", message));
+      if (message.allowAi && aiHelperCanUseAi()) actions.append(aiHelperActionButton("Ask AI instead", "ask-ai", message));
+      if (message.feedback) {
+        const feedback = document.createElement("span");
+        feedback.className = "ai-helper-feedback-note";
+        feedback.textContent = message.feedback === "solved" ? "Marked solved" : "Tell me what still looks wrong below";
+        actions.append(feedback);
+      } else {
+        actions.append(aiHelperActionButton("Solved", "solved", message));
+        actions.append(aiHelperActionButton("Still stuck", "stuck", message));
+      }
+      article.append(actions);
+    }
+    aiHelperMessages.append(article);
+  }
+  requestAnimationFrame(() => {
+    aiHelperMessages.scrollTop = aiHelperMessages.scrollHeight;
+  });
+}
+
+function aiHelperSafeContext() {
+  return {
+    appVersion: APP_VERSION,
+    mode: normalizeAppMode(appMode),
+    activeTool: String(state.activeTool || "select").slice(0, 30),
+    layout: window.innerWidth <= 680 ? "phone" : isTabletLayout() ? "tablet" : "desktop",
+    touch: (navigator.maxTouchPoints || 0) > 0,
+    online: navigator.onLine,
+    signedIn: Boolean(cloudUser),
+    licence: cloudLicenceState(),
+    hasDrawing: hasDrawingContent(),
+    projectStatus: normalizeProjectStatus(state.projectStatus),
+    drawingLocked: state.locked === true || cloudPermissionReadOnly,
+  };
+}
+
+function aiHelperApiHistory() {
+  return aiHelperConversation
+    .filter((message) => !message.welcome && (message.role === "user" || message.role === "assistant"))
+    .slice(-AI_HELPER_MAX_HISTORY)
+    .map((message) => ({
+      role: message.role,
+      content: message.text.slice(0, 700),
+    }));
+}
+
+function aiHelperFallbackMessage(reason = "unavailable") {
+  if (reason === "offline") {
+    return "The AI connection is offline, but the built-in guides still work. Try naming the exact tool or action, such as flange, pipe size, issue, cloud spools or fab PDF.";
+  }
+  if (!cloudUser) {
+    return "That question is not in the built-in guide yet. Sign in for extra AI answers, or open the Tutorial and Help sections for the complete app walkthrough.";
+  }
+  if (!hasActiveCloudLicense()) {
+    return "That question is not in the built-in guide yet. Extra AI answers are paused while the cloud account is read only, but Tutorial and Help remain available.";
+  }
+  return "The AI helper could not connect just now. Built-in guides still work, and you can try again without losing the drawing.";
+}
+
+async function sendAiHelperQuestion(value, options = {}) {
+  const question = String(value ?? "").trim().slice(0, 500);
+  if (!question || aiHelperBusy) return;
+  const history = aiHelperApiHistory();
+  if (options.appendUser !== false) appendAiHelperMessage("user", question);
+  if (aiHelperInput) aiHelperInput.value = "";
+
+  const guide = aiHelperGuideMatch(question);
+  if (guide && options.forceAi !== true) {
+    appendAiHelperMessage("assistant", guide.answer, {
+      source: "Built-in guide",
+      question,
+      action: { tutorial: guide.tutorial || "", help: guide.help || "" },
+      allowAi: true,
+    });
+    return;
+  }
+
+  if (!aiHelperCanUseAi()) {
+    appendAiHelperMessage("assistant", aiHelperFallbackMessage(!navigator.onLine ? "offline" : "unavailable"), {
+      source: "Built-in guide",
+      question,
+      action: { help: guide?.help || helpSectionForCurrentMode(), account: !cloudUser },
+    });
+    return;
+  }
+
+  aiHelperBusy = true;
+  if (aiHelperSendButton) aiHelperSendButton.disabled = true;
+  if (aiHelperInput) aiHelperInput.disabled = true;
+  updateAiHelperAvailability();
+  try {
+    const client = await ensureSupabaseClient();
+    if (!client || !cloudUser) throw new Error("Cloud session unavailable");
+    const { data, error } = await client.functions.invoke(AI_HELPER_FUNCTION, {
+      body: {
+        question,
+        history,
+        context: aiHelperSafeContext(),
+      },
+    });
+    if (error || !data?.answer) throw error || new Error("AI answer missing");
+    aiHelperRemaining = Number.isFinite(Number(data.remaining)) ? Math.max(0, Number(data.remaining)) : aiHelperRemaining;
+    const recommended = guide || aiHelperGuideMatch(question, 1);
+    appendAiHelperMessage("assistant", String(data.answer).trim().slice(0, 4000), {
+      source: data.code === "daily_limit" ? "Built-in guide" : "AI helper",
+      question,
+      action: { tutorial: recommended?.tutorial || "", help: recommended?.help || helpSectionForCurrentMode() },
+    });
+  } catch (error) {
+    console.warn("AI helper request failed.", error?.name || "request-error");
+    appendAiHelperMessage("assistant", aiHelperFallbackMessage("error"), {
+      source: "Built-in guide",
+      question,
+      action: { help: guide?.help || helpSectionForCurrentMode() },
+    });
+  } finally {
+    aiHelperBusy = false;
+    if (aiHelperSendButton) aiHelperSendButton.disabled = false;
+    if (aiHelperInput) aiHelperInput.disabled = false;
+    updateAiHelperAvailability();
+    aiHelperInput?.focus();
+  }
+}
+
+function openAiHelper() {
+  if (!aiHelperDialog) return;
+  if (!aiHelperConversation.length) resetAiHelperConversation();
+  aiHelperLastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  aiHelperDialog.hidden = false;
+  aiHelperButton?.setAttribute("aria-expanded", "true");
+  closeActionMenu();
+  updateAiHelperAvailability();
+  requestAnimationFrame(() => aiHelperInput?.focus());
+}
+
+function closeAiHelper() {
+  if (aiHelperDialog) aiHelperDialog.hidden = true;
+  aiHelperButton?.setAttribute("aria-expanded", "false");
+  if (aiHelperLastFocused?.isConnected) aiHelperLastFocused.focus({ preventScroll: true });
+  aiHelperLastFocused = null;
+}
+
+function openAiHelperTutorial(message) {
+  const topic = message?.action?.tutorial;
+  const index = topic ? TUTORIAL_STEPS.findIndex((step) => step.menuLabel === topic) : -1;
+  closeAiHelper();
+  openTutorialDialog(index >= 0 ? index : null);
+}
+
+function handleAiHelperAction(event) {
+  const button = event.target instanceof Element ? event.target.closest("[data-ai-action]") : null;
+  if (!button) return;
+  const message = aiHelperConversation.find((item) => item.id === button.dataset.aiMessageId);
+  if (!message) return;
+  const action = button.dataset.aiAction;
+  if (action === "tutorial") {
+    openAiHelperTutorial(message);
+  } else if (action === "help") {
+    const section = message.action?.help || helpSectionForCurrentMode();
+    closeAiHelper();
+    openHelpDialog(section);
+  } else if (action === "account") {
+    closeAiHelper();
+    openAuthDialog({ mode: "signin" });
+  } else if (action === "ask-ai" && message.question) {
+    sendAiHelperQuestion(message.question, { forceAi: true, appendUser: false });
+  } else if (action === "solved") {
+    message.feedback = "solved";
+    renderAiHelperConversation();
+  } else if (action === "stuck") {
+    message.feedback = "stuck";
+    renderAiHelperConversation();
+    if (aiHelperInput) {
+      aiHelperInput.value = message.question ? `I am still stuck with: ${message.question}\nWhat should I check next?` : "I am still stuck. What should I check next?";
+      aiHelperInput.focus();
+      aiHelperInput.setSelectionRange(aiHelperInput.value.length, aiHelperInput.value.length);
+    }
+  }
+}
+
+function setupAiHelper() {
+  resetAiHelperConversation();
+  aiHelperButton?.addEventListener("click", () => {
+    if (aiHelperDialog?.hidden === false) closeAiHelper();
+    else openAiHelper();
+  });
+  aiHelperCloseButton?.addEventListener("click", closeAiHelper);
+  aiHelperClearButton?.addEventListener("click", resetAiHelperConversation);
+  aiHelperDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === aiHelperDialog) closeAiHelper();
+  });
+  aiHelperForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    sendAiHelperQuestion(aiHelperInput?.value);
+  });
+  aiHelperInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      aiHelperForm?.requestSubmit();
+    }
+  });
+  aiHelperSuggestions?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-ai-suggestion]") : null;
+    if (button) sendAiHelperQuestion(button.dataset.aiSuggestion);
+  });
+  aiHelperMessages?.addEventListener("click", handleAiHelperAction);
+  window.addEventListener("online", updateAiHelperAvailability);
+  window.addEventListener("offline", updateAiHelperAvailability);
+  updateAiHelperAvailability();
 }
 
 function setHelpTab(section) {
@@ -14809,6 +15856,8 @@ function setupAuthDialog() {
   diagnosticReportButton?.addEventListener("click", downloadDiagnosticReport);
   legalSupportButton?.addEventListener("click", openLegalSupportDialog);
   accountDeleteButton?.addEventListener("click", deleteCloudAccount);
+  accountPlanUpgradeButton?.addEventListener("click", requestLicenceUpgrade);
+  licenceBannerUpgradeButton?.addEventListener("click", requestLicenceUpgrade);
 
   authSignOutButton?.addEventListener("click", () => {
     signOutFromSupabase();
@@ -15343,7 +16392,7 @@ function closeHomeDashboard() {
 function updateHomeDashboard() {
   const localProjects = loadSavedBrowserProjects();
   const cloudCount = Array.isArray(cloudProjectCache) ? cloudProjectCache.length : null;
-  const useCloudCount = Boolean(cloudUser && hasActiveCloudLicense() && cloudCount !== null);
+  const useCloudCount = Boolean(cloudUser && hasCloudReadAccess() && cloudCount !== null);
   const savedCount = useCloudCount ? cloudCount : localProjects.length;
   const savedLabel = `${savedCount} saved spool${savedCount === 1 ? "" : "s"}`;
 
@@ -15361,10 +16410,12 @@ function updateHomeDashboard() {
   }
 
   if (homeDashboardStats) {
-    const scope = cloudUser && hasActiveCloudLicense()
+    const scope = cloudUser && hasCloudReadAccess()
       ? cloudCount === null
         ? "Open Jobs to refresh cloud projects."
-        : "Cloud project list loaded."
+        : hasActiveCloudLicense()
+        ? "Cloud project list loaded."
+        : "Cloud projects are available in read-only mode."
       : "Browser storage only.";
     homeDashboardStats.textContent = `${savedLabel}. ${scope}`;
   }
@@ -15407,6 +16458,19 @@ function ensureProjectLibraryDashboardShell() {
   }
 
   const existingToolbar = card.querySelector(".project-dashboard-toolbar");
+  if (existingToolbar && !projectLibrarySourceButton) {
+    const sourceButton = document.createElement("button");
+    sourceButton.className = "icon-button labeled";
+    sourceButton.id = "projectLibrarySourceButton";
+    sourceButton.type = "button";
+    sourceButton.hidden = true;
+    sourceButton.innerHTML = `
+      <svg><use href="#icon-sample"></use></svg>
+      <span>This device</span>
+    `;
+    existingToolbar.insertBefore(sourceButton, projectLibraryGuideButton ?? existingToolbar.firstElementChild?.nextSibling ?? null);
+    projectLibrarySourceButton = sourceButton;
+  }
   if (existingToolbar && !projectLibraryGuideButton) {
     const guideButton = document.createElement("a");
     guideButton.className = "icon-button labeled";
@@ -15445,7 +16509,7 @@ function ensureProjectLibraryDashboardShell() {
     projectLibraryCommsButton = commsButton;
   }
 
-  if (!projectLibrarySearchInput || !projectLibraryNewButton || !projectLibrarySaveButton || !projectLibraryCommsButton) {
+  if (!projectLibrarySearchInput || !projectLibrarySourceButton || !projectLibraryNewButton || !projectLibrarySaveButton || !projectLibraryCommsButton) {
     const toolbar = document.createElement("div");
     toolbar.className = "project-dashboard-toolbar";
     toolbar.setAttribute("aria-label", "Job dashboard tools");
@@ -15454,6 +16518,10 @@ function ensureProjectLibraryDashboardShell() {
         <span>Search jobs, spools or clients</span>
         <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client, assignee or status" autocomplete="off" />
       </label>
+      <button class="icon-button labeled" id="projectLibrarySourceButton" type="button" hidden>
+        <svg><use href="#icon-sample"></use></svg>
+        <span>This device</span>
+      </button>
       <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
         <svg><use href="#icon-help"></use></svg>
         <span>Guide</span>
@@ -15477,6 +16545,7 @@ function ensureProjectLibraryDashboardShell() {
     `;
     card.insertBefore(toolbar, card.querySelector("#projectLibraryGuideSlot") ?? projectLibraryList);
     projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+    projectLibrarySourceButton = document.querySelector("#projectLibrarySourceButton");
     projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButton");
     projectLibraryCommsButton = document.querySelector("#projectLibraryCommsButton");
     projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
@@ -15744,6 +16813,13 @@ function setupProjectDialog() {
     projectLibraryOpenFolderKey = "";
     renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
   });
+  projectLibrarySourceButton?.addEventListener("click", () => {
+    const nextSource = projectLibrarySource === "cloud" ? "browser" : "cloud";
+    openBrowserProject({ keepSearch: true, source: nextSource }).catch((error) => {
+      console.warn("Project source switch failed.", error);
+      showAppNotice(error?.message || "Could not switch the project source.");
+    });
+  });
   projectLibraryNewButton?.addEventListener("click", () => {
     closeProjectLibrary();
     startNewDrawing();
@@ -15751,7 +16827,7 @@ function setupProjectDialog() {
   projectLibrarySaveButton?.addEventListener("click", () => {
     saveBrowserProject({ silent: true })
       .then((saved) => {
-        if (saved) return openBrowserProject({ keepSearch: true });
+        if (saved) return openBrowserProject({ keepSearch: true, source: hasActiveCloudLicense() ? undefined : "browser" });
         return null;
       })
       .catch((error) => {
@@ -15894,6 +16970,22 @@ function handleProjectLibraryActivation(event) {
 
 function handleProjectLibraryAction(actionElement) {
   const action = actionElement?.dataset?.projectLibraryAction;
+  if (action === "dashboard-view") {
+    setTeamDashboardView(actionElement.dataset.dashboardView);
+    return;
+  }
+  if (action === "toggle-dashboard-more") {
+    projectLibraryMoreVisible = !projectLibraryMoreVisible;
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+    return;
+  }
+  if (action === "scan-qr") {
+    openQrScanner().catch((error) => {
+      console.warn("QR scanner could not open.", error);
+      showAppNotice(error?.message || "The QR scanner could not be opened.");
+    });
+    return;
+  }
   if (action === "hide-guide") {
     hideProjectLibraryGuide();
     return;
@@ -19739,6 +20831,7 @@ function updateCloudStatus(message = null, mode = "") {
   ensureCloudSaveTrackingProject();
   const signedIn = Boolean(cloudUser);
   const active = signedIn && hasActiveCloudLicense();
+  const readable = signedIn && hasCloudReadAccess();
   const teamSuffix = activeCompany && activeCompanyMembership?.status === "approved"
     ? ` / ${activeCompany.name}`
     : activeCompany && activeCompanyMembership?.status === "pending"
@@ -19762,8 +20855,10 @@ function updateCloudStatus(message = null, mode = "") {
         : hasDrawingContent()
         ? "Not cloud saved"
         : "Cloud ready"
+      : readable
+      ? "Cloud read only"
       : cloudProfile
-      ? "Trial expired"
+      ? "Licence inactive"
       : "Cloud setup needed"
     : "Local only";
   const text = message || defaultMessage;
@@ -19805,39 +20900,204 @@ function updateCloudStatus(message = null, mode = "") {
   if (authSignInButton) authSignInButton.disabled = signedIn;
   if (authSignUpButton) authSignUpButton.disabled = signedIn;
   setAuthMode(authMode, { keepStatus: true });
+  updateLicencePresentation();
   if (saveBrowserProjectButton) {
     saveBrowserProjectButton.title = signedIn && active
       ? "Save project to cloud and this browser"
+      : signedIn && readable
+      ? "Save local projects in this browser; cloud editing is paused"
       : "Save project in this browser";
   }
   if (openBrowserProjectButton) {
-    openBrowserProjectButton.title = signedIn && active
-      ? "Open cloud saved project"
+    openBrowserProjectButton.title = signedIn && readable
+      ? active
+        ? "Open cloud saved project"
+        : "Open cloud saved project in read-only mode"
       : "Open saved project from this browser";
   }
+}
+
+function cloudProfileDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+}
+
+function cloudLicenceState(profile = cloudProfile, nowValue = Date.now()) {
+  if (!profile) return "setup";
+  const status = String(profile.license_status ?? "trial").toLowerCase();
+  if (status === "full" || status === "paid") return status;
+  const now = Number(nowValue) || Date.now();
+  if (status === "grace" || status === "past_due") {
+    const graceEnds = cloudProfileDate(profile.grace_ends_at);
+    return graceEnds && graceEnds.getTime() > now ? "grace" : "expired";
+  }
+  if (status === "trial") {
+    const trialEnds = cloudProfileDate(profile.trial_ends_at);
+    return trialEnds && trialEnds.getTime() > now ? "trial" : "expired";
+  }
+  return "expired";
+}
+
+function licenceDaysRemaining(value, nowValue = Date.now()) {
+  const endsAt = cloudProfileDate(value);
+  if (!endsAt) return 0;
+  return Math.max(0, Math.ceil((endsAt.getTime() - (Number(nowValue) || Date.now())) / 86400000));
+}
+
+function licenceDaysText(days) {
+  const count = Math.max(0, Number(days) || 0);
+  return `${count} day${count === 1 ? "" : "s"}`;
 }
 
 function cloudLicenseText(profile = cloudProfile) {
   if (!cloudUser) return "Local only";
   if (!profile) return "No licence profile";
-  const status = String(profile.license_status ?? "trial").toLowerCase();
-  if (status === "full") return "Full licence";
-  if (status === "paid") return "Paid licence";
-  const trialEnds = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-  if (status === "trial" && trialEnds && trialEnds > new Date()) {
-    const days = Math.max(1, Math.ceil((trialEnds - new Date()) / 86400000));
+  const state = cloudLicenceState(profile);
+  if (state === "full") return "Full licence";
+  if (state === "paid") return "Paid licence";
+  if (state === "grace") {
+    const days = Math.max(1, licenceDaysRemaining(profile.grace_ends_at));
+    return `Payment grace ${days} day${days === 1 ? "" : "s"} left`;
+  }
+  if (state === "trial") {
+    const days = Math.max(1, licenceDaysRemaining(profile.trial_ends_at));
     return `Trial ${days} day${days === 1 ? "" : "s"} left`;
   }
-  return "Trial expired";
+  return "Read-only cloud access";
+}
+
+function hasCloudReadAccess(profile = cloudProfile) {
+  return Boolean(cloudUser && profile);
 }
 
 function hasActiveCloudLicense(profile = cloudProfile) {
   if (!cloudUser || !profile) return false;
-  const status = String(profile.license_status ?? "trial").toLowerCase();
-  if (status === "full" || status === "paid") return true;
-  if (status !== "trial") return false;
-  const trialEnds = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-  return Boolean(trialEnds && trialEnds > new Date());
+  return ["full", "paid", "trial", "grace"].includes(cloudLicenceState(profile));
+}
+
+function cloudReadOnlyMessage(action = "change this cloud spool") {
+  if (!hasActiveCloudLicense()) {
+    return `Your trial or licence has expired. Existing cloud spools remain available to view and export, but you cannot ${action} until the licence is upgraded.`;
+  }
+  return `This team spool is view/comment only for your role. Ask the project owner or a team admin before you ${action}.`;
+}
+
+function licenceWarningModel(profile = cloudProfile) {
+  const state = cloudLicenceState(profile);
+  if (state === "trial") {
+    const days = licenceDaysRemaining(profile?.trial_ends_at);
+    if (days > 7) return null;
+    const level = days <= 1 ? "trial-1" : days <= 3 ? "trial-3" : "trial-7";
+    return {
+      state,
+      level,
+      title: days <= 1 ? "Trial ends within one day" : `Trial ends in ${days} days`,
+      message: "Upgrade to keep cloud editing, saving and collaboration active. Your existing cloud spools will remain available to view and export.",
+    };
+  }
+  if (state === "grace") {
+    const days = Math.max(1, licenceDaysRemaining(profile?.grace_ends_at));
+    return {
+      state,
+      level: `grace-${days}`,
+      title: `Payment grace period: ${days} day${days === 1 ? "" : "s"} left`,
+      message: "Cloud editing remains active during the grace period. Update the licence before it changes to read-only access.",
+    };
+  }
+  if (state === "expired") {
+    return {
+      state,
+      level: "expired",
+      title: "Cloud projects are read only",
+      message: "You can still open, view and export existing cloud spools. Cloud saves, edits, comments, photos and team changes are paused.",
+    };
+  }
+  return null;
+}
+
+function setAccountCapabilities(items) {
+  if (!accountPlanCapabilities) return;
+  accountPlanCapabilities.replaceChildren(...items.map((text) => {
+    const item = document.createElement("li");
+    item.textContent = text;
+    return item;
+  }));
+}
+
+function updateLicencePresentation() {
+  const signedIn = Boolean(cloudUser);
+  const state = cloudLicenceState();
+  const warning = signedIn ? licenceWarningModel() : null;
+
+  if (accountPlanPanel) {
+    accountPlanPanel.hidden = !signedIn;
+    accountPlanPanel.classList.toggle("expired", state === "expired");
+    accountPlanPanel.classList.toggle("grace", state === "grace");
+  }
+  if (accountPlanUpgradeButton) accountPlanUpgradeButton.hidden = !signedIn || state === "full" || state === "paid";
+  if (signedIn) {
+    const plan = state === "full"
+      ? { badge: "Owner", title: "Full licence", message: "Permanent cloud access is active.", countdown: "No trial expiry." }
+      : state === "paid"
+      ? { badge: "Paid", title: "Paid licence", message: "Full cloud access is active.", countdown: "Licence active." }
+      : state === "grace"
+      ? { badge: "Grace", title: "Payment grace period", message: "Cloud access remains active temporarily.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(cloudProfile?.grace_ends_at)))} remaining.` }
+      : state === "trial"
+      ? { badge: "Trial", title: `${TRIAL_LENGTH_DAYS}-day cloud trial`, message: "Full cloud saving and collaboration are active.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(cloudProfile?.trial_ends_at)))} remaining.` }
+      : { badge: "Expired", title: "Read-only cloud access", message: "Existing cloud spools stay available; cloud editing is paused.", countdown: "Upgrade to restore cloud saving and collaboration." };
+    if (accountPlanBadge) accountPlanBadge.textContent = plan.badge;
+    if (accountPlanTitle) accountPlanTitle.textContent = plan.title;
+    if (accountPlanMessage) accountPlanMessage.textContent = plan.message;
+    if (accountPlanCountdown) accountPlanCountdown.textContent = plan.countdown;
+    setAccountCapabilities(state === "expired"
+      ? [
+          "Open, view, download and export existing cloud spools",
+          "Continue creating local browser projects on this device",
+          "Use built-in Ask SpoolMate guides while extra AI answers are paused",
+          "Cloud saves, edits, comments, photos and team changes are paused",
+        ]
+      : [
+          "Create, edit and synchronise cloud spools across devices",
+          "Use team projects, comments and workshop photos",
+          state === "trial" ? "Use up to 10 Ask SpoolMate AI answers each day" : "Use up to 50 Ask SpoolMate AI answers each day",
+          "Download project and account-data exports at any time",
+        ]);
+  }
+
+  if (licenceBanner) {
+    licenceBanner.hidden = !warning;
+    licenceBanner.classList.toggle("expired", warning?.state === "expired");
+    licenceBanner.classList.toggle("grace", warning?.state === "grace");
+  }
+  if (licenceBannerTitle && warning) licenceBannerTitle.textContent = warning.title;
+  if (licenceBannerMessage && warning) licenceBannerMessage.textContent = warning.message;
+  updateAiHelperAvailability();
+}
+
+function maybeShowLicenceWarning() {
+  if (!cloudUser) return;
+  const warning = licenceWarningModel();
+  if (!warning) return;
+  const key = `${cloudUser.id}:${warning.level}`;
+  try {
+    if (localStorage.getItem(LICENCE_NOTICE_KEY) === key) return;
+    localStorage.setItem(LICENCE_NOTICE_KEY, key);
+  } catch {
+    // The persistent banner still provides the warning when storage is unavailable.
+  }
+  showAppNotice(warning.message, { title: warning.title, tone: "warning", timeoutMs: 9000 });
+}
+
+function requestLicenceUpgrade() {
+  if (LICENCE_UPGRADE_URL) {
+    window.open(LICENCE_UPGRADE_URL, "_blank", "noopener,noreferrer");
+    return;
+  }
+  showAppNotice("Online licence checkout is not connected yet. Contact the SpoolMate operator to activate or renew this account.", {
+    title: "Licence upgrade",
+    tone: "warning",
+    timeoutMs: 9000,
+  });
 }
 
 function activeCompanyIsApproved() {
@@ -19845,11 +21105,11 @@ function activeCompanyIsApproved() {
 }
 
 function activeCompanyCanAdmin() {
-  return activeCompanyIsApproved() && ["owner", "admin"].includes(activeCompanyMembership?.role);
+  return hasActiveCloudLicense() && activeCompanyIsApproved() && ["owner", "admin"].includes(activeCompanyMembership?.role);
 }
 
 function activeCompanyCanManageRoles() {
-  return activeCompanyIsApproved() && activeCompanyMembership?.role === "owner";
+  return hasActiveCloudLicense() && activeCompanyIsApproved() && activeCompanyMembership?.role === "owner";
 }
 
 function companyMembershipForCurrentUser(companyId) {
@@ -19887,18 +21147,21 @@ function projectPermission(project, options = {}) {
   const ownsProject = Boolean(cloudUser?.id && ownerId === cloudUser.id);
   const companyMember = currentUserIsCompanyMember(companyId);
   const companyAdmin = currentUserCanAdminCompany(companyId);
-  const canEdit = ownsProject || companyAdmin;
+  const canWriteCloud = hasActiveCloudLicense();
+  const canEdit = canWriteCloud && (ownsProject || companyAdmin);
 
   return {
-    canView: ownsProject || companyMember,
-    canComment: ownsProject || companyMember,
+    canView: hasCloudReadAccess() && (ownsProject || companyMember),
+    canComment: canWriteCloud && (ownsProject || companyMember),
     canEdit,
     canIssue: canEdit,
-    canDelete: ownsProject || companyAdmin,
+    canDelete: canWriteCloud && (ownsProject || companyAdmin),
     label: canEdit
       ? ownsProject
         ? "Owner editable"
         : "Team admin editable"
+      : !canWriteCloud
+      ? "Licence expired / read only"
       : companyMember
       ? "Member view/comment"
       : "Cloud read only",
@@ -19990,7 +21253,7 @@ async function activateCompanyFromId(companyId) {
 }
 
 async function loadTeamWorkspace(options = {}) {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense()) {
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess()) {
     clearTeamWorkspace();
     return;
   }
@@ -20074,13 +21337,15 @@ function renderTeamWorkspace(errorMessage = "") {
   const active = hasActiveCloudLicense();
   if (teamCreateButton) teamCreateButton.disabled = !active;
   if (teamJoinButton) teamJoinButton.disabled = !active;
-  if (teamRefreshButton) teamRefreshButton.disabled = !active;
+  if (teamRefreshButton) teamRefreshButton.disabled = !hasCloudReadAccess();
 
   if (teamWorkspaceStatus) {
     if (errorMessage) {
       teamWorkspaceStatus.textContent = errorMessage;
     } else if (!active) {
-      teamWorkspaceStatus.textContent = "An active trial or licence is required for team projects.";
+      teamWorkspaceStatus.textContent = activeCompany
+        ? `${activeCompany.name} is available read only. Upgrade to change team projects, members or messages.`
+        : "Team access is read only. Upgrade to create or join a team.";
     } else if (!activeCompany) {
       teamWorkspaceStatus.textContent = "No team workspace yet. Create one or join with an invite code.";
     } else if (activeCompanyMembership?.status === "pending") {
@@ -20168,7 +21433,7 @@ function renderTeamWorkspace(errorMessage = "") {
 async function createTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required to create a team.");
+    showAppNotice(cloudReadOnlyMessage("create a team"));
     return;
   }
 
@@ -20193,7 +21458,7 @@ async function createTeamCompany() {
 async function joinTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required to join a team.");
+    showAppNotice(cloudReadOnlyMessage("join a team"));
     return;
   }
 
@@ -20221,7 +21486,10 @@ async function joinTeamCompany() {
 }
 
 async function reviewTeamMember(userId, approved) {
-  if (!supabaseClient || !activeCompanyCanAdmin()) return;
+  if (!supabaseClient || !activeCompanyCanAdmin()) {
+    showAppNotice(cloudReadOnlyMessage("change team membership"));
+    return;
+  }
   const memberId = normalizeUuid(userId);
   if (!memberId || !activeCompany) return;
 
@@ -20239,7 +21507,7 @@ async function reviewTeamMember(userId, approved) {
 
 async function updateTeamMemberRole(userId, role) {
   if (!supabaseClient || !activeCompanyCanManageRoles()) {
-    showAppNotice("Only the team owner can change member roles.");
+    showAppNotice(hasActiveCloudLicense() ? "Only the team owner can change member roles." : cloudReadOnlyMessage("change team roles"));
     return;
   }
   const memberId = normalizeUuid(userId);
@@ -20401,6 +21669,10 @@ async function insertProjectCommentRecord(body, options = {}) {
 
 async function toggleProjectCommentResolved(commentId, resolved) {
   if (!supabaseClient || !cloudUser) return;
+  if (!hasActiveCloudLicense()) {
+    showAppNotice(cloudReadOnlyMessage("resolve or reopen cloud comments"));
+    return;
+  }
   projectCommentsBusy = true;
   renderProjectComments();
   try {
@@ -20424,8 +21696,14 @@ function renderProjectComments(errorMessage = "") {
   if (projectCommentAddButton) {
     projectCommentAddButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy || (!String(projectCommentInput?.value ?? "").trim() && !pendingProjectCommentPhoto);
   }
+  if (projectCommentInput) {
+    projectCommentInput.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy;
+    projectCommentInput.placeholder = cloudUser && !hasActiveCloudLicense()
+      ? "Read only until the licence is upgraded"
+      : "Message, note or @mention";
+  }
   if (projectCommentRefreshButton) {
-    projectCommentRefreshButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy || !state.projectId;
+    projectCommentRefreshButton.disabled = !cloudUser || !hasCloudReadAccess() || projectCommentsBusy || !state.projectId;
   }
   if (projectCommentPhotoButton) {
     projectCommentPhotoButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy;
@@ -20446,10 +21724,11 @@ function renderProjectComments(errorMessage = "") {
     empty("Sign in to use cloud comments.");
     return;
   }
-  if (!hasActiveCloudLicense()) {
-    empty("An active trial or licence is required for cloud comments.");
+  if (!hasCloudReadAccess()) {
+    empty("Cloud comments are unavailable until the account profile is ready.");
     return;
   }
+  if (!hasActiveCloudLicense()) empty("Read-only: existing comments and workshop photos remain visible, but new activity is paused.");
   if (!state.projectId) {
     empty("Save this spool to the cloud before adding comments.");
     return;
@@ -20513,7 +21792,8 @@ function renderProjectComments(errorMessage = "") {
     resolveButton.dataset.projectCommentAction = comment.resolved ? "reopen" : "resolve";
     resolveButton.dataset.projectCommentId = comment.id;
     resolveButton.textContent = comment.resolved ? "Reopen" : "Resolve";
-    resolveButton.disabled = projectCommentsBusy;
+    resolveButton.disabled = projectCommentsBusy || !hasActiveCloudLicense();
+    if (!hasActiveCloudLicense()) resolveButton.title = "Upgrade the licence to change cloud comments.";
     actions.append(resolveButton);
 
     item.append(header, body);
@@ -20524,7 +21804,7 @@ function renderProjectComments(errorMessage = "") {
 }
 
 async function loadProjectComments(options = {}) {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !state.projectId) {
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess() || !state.projectId) {
     projectComments = [];
     projectCommentsProjectId = state.projectId ?? null;
     renderProjectComments();
@@ -20559,7 +21839,7 @@ async function loadProjectComments(options = {}) {
 async function addProjectComment() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required for cloud comments.");
+    showAppNotice(cloudReadOnlyMessage("add cloud comments or workshop photos"));
     return;
   }
 
@@ -20604,7 +21884,7 @@ async function addProjectComment() {
 }
 
 async function loadTeamMessages(options = {}) {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !activeCompanyIsApproved()) {
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess() || !activeCompanyIsApproved()) {
     teamMessages = [];
     teamMessagesCompanyId = activeCompany?.id ?? null;
     teamMessagesError = "";
@@ -20649,7 +21929,7 @@ async function addTeamMessage(bodyText = "") {
     return;
   }
   if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required for team messages.");
+    showAppNotice(cloudReadOnlyMessage("post team messages"));
     return;
   }
 
@@ -20683,6 +21963,10 @@ async function addTeamMessage(bodyText = "") {
 
 async function completeTeamMessage(messageId) {
   if (!(await ensureSupabaseClient()) || !cloudUser || !activeCompanyIsApproved()) return;
+  if (!hasActiveCloudLicense()) {
+    showAppNotice(cloudReadOnlyMessage("complete team messages"));
+    return;
+  }
   const id = normalizeUuid(messageId);
   if (!id) return;
 
@@ -20793,7 +22077,13 @@ async function applyCloudSession(session) {
   cloudProfile = await ensureCloudProfile();
   await loadTeamWorkspace({ silent: true });
   loadCloudSaveMetaForCurrentProject();
+  if (currentProjectHasCloudRecord() && !hasActiveCloudLicense()) {
+    cloudPermissionReadOnly = true;
+    state.locked = true;
+    updateControls();
+  }
   updateCloudStatus();
+  maybeShowLicenceWarning();
   if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
     queueCloudAutosave();
   }
@@ -20808,7 +22098,7 @@ async function ensureCloudProfile() {
   const selectProfile = async () => {
     const { data, error } = await supabaseClient
       .from(CLOUD_PROFILES_TABLE)
-      .select("id,email,license_status,trial_started_at,trial_ends_at")
+      .select("*")
       .eq("id", cloudUser.id)
       .maybeSingle();
     if (error) throw error;
@@ -20849,12 +22139,12 @@ async function saveCloudProject(options = {}) {
   if (!supabaseClient || !cloudUser) return false;
   if (!hasActiveCloudLicense()) {
     updateCloudStatus(cloudLicenseText(), "warning");
-    if (!options.silent) showAppNotice("This account does not have an active trial or licence.");
+    if (!options.silent) showAppNotice(cloudReadOnlyMessage("save cloud changes"));
     return false;
   }
   if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
     updateCloudStatus("View/comment only", "warning");
-    if (!options.silent) showAppNotice("This team spool is view/comment only for your role. Ask the owner or a team admin to save changes.");
+    if (!options.silent) showAppNotice(cloudReadOnlyMessage("save changes"));
     return false;
   }
   if (cloudAutosaveBusy) return false;
@@ -20891,7 +22181,7 @@ async function saveCloudProject(options = {}) {
 }
 
 async function loadSavedCloudProjects() {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense()) return [];
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess()) return [];
   if (cloudProjectCache) return cloudProjectCache;
 
   const { data, error } = await supabaseClient
@@ -20951,9 +22241,231 @@ async function openSavedCloudProject(projectId, options = {}) {
   updateControls();
   withCloudDirtySuppressed(() => updateAll());
   closeProjectLibrary();
-  updateCloudStatus("Cloud project opened", "saved");
+  updateCloudStatus(cloudPermissionReadOnly ? "Cloud project opened read only" : "Cloud project opened", cloudPermissionReadOnly ? "warning" : "saved");
   await loadProjectComments({ silent: true });
   window.setTimeout(() => updateCloudStatus(), 1600);
+}
+
+function closeQrScanner() {
+  if (!activeQrScanner) return;
+  activeQrScanner.stopped = true;
+  if (activeQrScanner.frame) cancelAnimationFrame(activeQrScanner.frame);
+  for (const track of activeQrScanner.stream?.getTracks?.() ?? []) track.stop();
+  activeQrScanner.dialog?.remove();
+  activeQrScanner = null;
+}
+
+function scannedSpoolTravellerUrl(value) {
+  const scanned = new URL(String(value ?? "").trim(), location.href);
+  const currentPath = location.pathname.replace(/\/+$/, "");
+  const scannedPath = scanned.pathname.replace(/\/+$/, "");
+  if (scanned.origin !== location.origin || scannedPath !== currentPath) {
+    throw new Error("That QR code is not a SpoolMate link from this app.");
+  }
+  const projectId = normalizeProjectId(scanned.searchParams.get("project"));
+  if (!projectId || scanned.searchParams.get("traveller") !== "1") {
+    throw new Error("That QR code does not contain a valid spool traveller.");
+  }
+  scanned.hash = "";
+  return scanned;
+}
+
+async function qrReader() {
+  if (!qrReaderModulePromise) {
+    qrReaderModulePromise = import(QR_CODE_READER_JS_URL)
+      .then((module) => module.default ?? module)
+      .catch((error) => {
+        qrReaderModulePromise = null;
+        throw error;
+      });
+  }
+  return qrReaderModulePromise;
+}
+
+async function decodeQrCanvas(canvas) {
+  if (!canvas?.width || !canvas?.height) return "";
+  if ("BarcodeDetector" in globalThis) {
+    try {
+      const detector = new BarcodeDetector({ formats: ["qr_code"] });
+      const detected = await detector.detect(canvas);
+      if (detected[0]?.rawValue) return detected[0].rawValue;
+    } catch {
+      // Safari and older Android browsers fall through to the canvas reader.
+    }
+  }
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const read = await qrReader();
+  return read(pixels.data, pixels.width, pixels.height, { inversionAttempts: "attemptBoth" })?.data ?? "";
+}
+
+function drawQrSourceToCanvas(source, canvas) {
+  const sourceWidth = Number(source.videoWidth || source.naturalWidth || source.width || 0);
+  const sourceHeight = Number(source.videoHeight || source.naturalHeight || source.height || 0);
+  if (!sourceWidth || !sourceHeight) return false;
+  const scale = Math.min(1, 960 / Math.max(sourceWidth, sourceHeight));
+  canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+  canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+  canvas.getContext("2d", { willReadFrequently: true }).drawImage(source, 0, 0, canvas.width, canvas.height);
+  return true;
+}
+
+async function scanQrImageFile(file, canvas) {
+  if (!file) return "";
+  if ("createImageBitmap" in globalThis) {
+    const bitmap = await createImageBitmap(file);
+    try {
+      drawQrSourceToCanvas(bitmap, canvas);
+      return await decodeQrCanvas(canvas);
+    } finally {
+      bitmap.close?.();
+    }
+  }
+  const image = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error("That image could not be opened."));
+      image.src = objectUrl;
+    });
+    drawQrSourceToCanvas(image, canvas);
+    return await decodeQrCanvas(canvas);
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function openScannedSpoolTraveller(value) {
+  const url = scannedSpoolTravellerUrl(value);
+  closeQrScanner();
+  location.assign(url.toString());
+}
+
+async function openQrScanner() {
+  closeQrScanner();
+  const dialog = document.createElement("div");
+  dialog.id = "qrScannerDialog";
+  dialog.className = "qr-scanner-backdrop";
+  dialog.tabIndex = -1;
+  dialog.innerHTML = `
+    <main class="qr-scanner" role="dialog" aria-modal="true" aria-labelledby="qrScannerTitle">
+      <header><div><span>Workshop shortcut</span><h1 id="qrScannerTitle">Scan spool QR</h1></div><button type="button" data-qr-close aria-label="Close QR scanner">Close</button></header>
+      <div class="qr-scanner-camera">
+        <video autoplay muted playsinline aria-label="Camera preview"></video>
+        <div class="qr-scanner-target" aria-hidden="true"></div>
+        <canvas hidden></canvas>
+      </div>
+      <p class="qr-scanner-status" role="status">Starting the rear camera…</p>
+      <div class="qr-scanner-alternatives">
+        <label class="qr-scanner-file"><strong>Choose QR photo</strong><span>Use a saved screenshot or camera photo</span><input type="file" accept="image/*" data-qr-file /></label>
+        <label class="qr-scanner-link"><span>Or paste a spool traveller link</span><div><input type="url" inputmode="url" autocomplete="off" placeholder="https://…?project=…&traveller=1" data-qr-link /><button type="button" data-qr-open-link>Open</button></div></label>
+      </div>
+      <small class="qr-scanner-privacy">Camera frames stay on this device and are used only to read the QR code.</small>
+    </main>`;
+  document.body.append(dialog);
+  const scanner = {
+    dialog,
+    video: dialog.querySelector("video"),
+    canvas: dialog.querySelector("canvas"),
+    status: dialog.querySelector(".qr-scanner-status"),
+    stream: null,
+    frame: 0,
+    stopped: false,
+    busy: false,
+    lastAttempt: 0,
+  };
+  activeQrScanner = scanner;
+
+  const showScanError = (error) => {
+    if (!activeQrScanner || scanner.stopped) return;
+    scanner.status.textContent = error?.message || "No SpoolMate QR code was found. Try holding the camera steadier.";
+    scanner.status.classList.add("error");
+  };
+  const openValue = (value) => {
+    try {
+      openScannedSpoolTraveller(value);
+    } catch (error) {
+      showScanError(error);
+    }
+  };
+
+  dialog.querySelector("[data-qr-close]")?.addEventListener("click", closeQrScanner);
+  dialog.addEventListener("click", (event) => { if (event.target === dialog) closeQrScanner(); });
+  dialog.addEventListener("keydown", (event) => { if (event.key === "Escape") closeQrScanner(); });
+  dialog.querySelector("[data-qr-open-link]")?.addEventListener("click", () => openValue(dialog.querySelector("[data-qr-link]")?.value));
+  dialog.querySelector("[data-qr-link]")?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    openValue(event.currentTarget.value);
+  });
+  dialog.querySelector("[data-qr-file]")?.addEventListener("change", async (event) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    scanner.status.classList.remove("error");
+    scanner.status.textContent = "Reading the QR photo…";
+    try {
+      const value = await scanQrImageFile(file, scanner.canvas);
+      if (!value) throw new Error("No QR code was found in that image. Try a closer, sharper photo.");
+      openValue(value);
+    } catch (error) {
+      showScanError(error);
+    } finally {
+      event.currentTarget.value = "";
+    }
+  });
+
+  dialog.focus();
+  if (!navigator.mediaDevices?.getUserMedia) {
+    scanner.status.textContent = "Live camera scanning is not available here. Choose a QR photo below instead.";
+    scanner.status.classList.add("error");
+    return;
+  }
+
+  try {
+    scanner.stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+    });
+    if (scanner.stopped) {
+      for (const track of scanner.stream.getTracks()) track.stop();
+      return;
+    }
+    scanner.video.srcObject = scanner.stream;
+    await scanner.video.play();
+    scanner.status.textContent = "Point the camera at a SpoolMate fabrication-sheet QR code.";
+    scanner.status.classList.remove("error");
+  } catch (error) {
+    console.warn("QR camera permission was not available.", error);
+    scanner.status.textContent = "Camera access was unavailable. Allow camera permission or choose a QR photo below.";
+    scanner.status.classList.add("error");
+    return;
+  }
+
+  const scanFrame = async (time) => {
+    if (scanner.stopped || activeQrScanner !== scanner) return;
+    if (!scanner.busy && time - scanner.lastAttempt > 240 && scanner.video.readyState >= 2) {
+      scanner.lastAttempt = time;
+      scanner.busy = true;
+      try {
+        if (drawQrSourceToCanvas(scanner.video, scanner.canvas)) {
+          const value = await decodeQrCanvas(scanner.canvas);
+          if (value) {
+            openValue(value);
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn("QR frame could not be decoded.", error);
+        scanner.status.textContent = "The scanner needs a connection to load its reader. You can still paste the traveller link.";
+        scanner.status.classList.add("error");
+      } finally {
+        scanner.busy = false;
+      }
+    }
+    scanner.frame = requestAnimationFrame(scanFrame);
+  };
+  scanner.frame = requestAnimationFrame(scanFrame);
 }
 
 async function maybeOpenProjectFromUrl() {
@@ -20973,41 +22485,74 @@ async function maybeOpenProjectFromUrl() {
     skipConfirm: true,
     readOnly: params.get("readonly") === "1",
   });
-  if (traveller && state.projectId === projectId) openSpoolTraveller();
+  if (traveller && state.projectId === projectId) {
+    openSpoolTraveller({ requestedRevisionUid: params.get("revision") });
+  }
   return true;
 }
 
-function openSpoolTraveller() {
+function resolveSpoolTravellerRevision(requestedRevisionUid) {
+  const requested = normalizeTraceabilityId(requestedRevisionUid);
+  const currentUid = currentRevisionUid(state);
+  if (!requested || requested === currentUid) {
+    return { drawingState: state, requested, currentUid, displayedUid: currentUid, historical: false, missing: false };
+  }
+  for (const entry of normalizeRevisionHistory(state.revisionHistory)) {
+    if (!entry.state) continue;
+    const snapshot = stateFromPayload(entry.state);
+    if (!snapshot) continue;
+    const snapshotUid = currentRevisionUid(snapshot);
+    if (snapshotUid === requested) {
+      return { drawingState: snapshot, requested, currentUid, displayedUid: snapshotUid, historical: true, missing: false };
+    }
+  }
+  return { drawingState: state, requested, currentUid, displayedUid: currentUid, historical: false, missing: true };
+}
+
+function openSpoolTraveller(options = {}) {
   document.querySelector("#spoolTravellerDialog")?.remove();
-  const project = normalizeProjectInfo(state.projectInfo);
+  const revision = resolveSpoolTravellerRevision(options.requestedRevisionUid);
+  const drawingState = revision.drawingState;
+  const project = normalizeProjectInfo(drawingState.projectInfo);
   const production = normalizeProductionInfo(state.productionInfo);
-  const welds = synchronizeWeldRegister(state);
+  const welds = synchronizeWeldRegister(drawingState);
+  const acceptedWelds = welds.filter((weld) => weld.status === "accepted").length;
   const activeNotes = projectComments.filter((comment) => !comment.resolved);
   const photos = projectComments.filter((comment) => comment.photoPath);
-  const drawingImage = buildSpoolReportCanvas("client").toDataURL("image/jpeg", 0.78);
+  const drawingImage = withTemporaryState(drawingState, () => buildSpoolReportCanvas("client").toDataURL("image/jpeg", 0.78));
+  const revisionBanner = revision.missing
+    ? `<section class="spool-traveller-revision warning"><strong>Revision could not be verified</strong><p>This QR asks for ${escapeHtml(revision.requested)}, but that saved snapshot is unavailable. Current revision ${escapeHtml(revision.currentUid)} is shown. Check the fabrication sheet before work continues.</p></section>`
+    : revision.historical
+    ? `<section class="spool-traveller-revision history"><strong>Issued revision snapshot</strong><p>You scanned ${escapeHtml(revision.displayedUid)}. The live spool is now ${escapeHtml(revision.currentUid)}.</p><button type="button" data-traveller-latest>Show latest revision</button></section>`
+    : "";
   const dialog = document.createElement("div");
   dialog.id = "spoolTravellerDialog";
   dialog.className = "spool-traveller-backdrop";
   dialog.innerHTML = `
     <main class="spool-traveller" role="dialog" aria-modal="true" aria-label="Spool traveller">
       <header class="spool-traveller-header">
-        <div><span>Spool traveller</span><h1>${escapeHtml(project.spoolNumber || "Unnamed spool")}</h1><code>${escapeHtml(currentRevisionUid(state))}</code></div>
+        <div><span>Spool traveller</span><h1>${escapeHtml(project.spoolNumber || "Unnamed spool")}</h1><code>${escapeHtml(revision.displayedUid)}</code></div>
         <button type="button" data-traveller-close aria-label="Close traveller">Close</button>
       </header>
-      <img class="spool-traveller-drawing" src="${drawingImage}" alt="Current spool drawing revision ${escapeHtml(project.revision || "-")}" />
+      ${revisionBanner}
+      ${production.hold ? `<section class="spool-traveller-hold"><strong>ON HOLD — DO NOT FABRICATE</strong><p>${escapeHtml(production.holdReason || "No reason recorded")}</p></section>` : ""}
       <section class="spool-traveller-grid">
         <article><span>Revision</span><strong>${escapeHtml(project.revision || "-")}</strong></article>
-        <article><span>Stage</span><strong>${escapeHtml(projectStatusLabel())}</strong></article>
+        <article><span>Live stage</span><strong>${escapeHtml(projectStatusLabel(state.projectStatus))}</strong></article>
         <article><span>Assigned</span><strong>${escapeHtml(production.assignee || "Unassigned")}</strong></article>
         <article><span>Due</span><strong>${escapeHtml(formatProductionDue(production) || "Not set")}</strong></article>
+        <article><span>Welds accepted</span><strong>${acceptedWelds} / ${welds.length}</strong></article>
       </section>
-      ${production.hold ? `<section class="spool-traveller-hold"><strong>ON HOLD</strong><p>${escapeHtml(production.holdReason || "No reason recorded")}</p></section>` : ""}
-      <section class="spool-traveller-section"><h2>Current notes</h2>${activeNotes.length ? `<ul>${activeNotes.slice(-12).map((comment) => `<li><p>${escapeHtml(comment.body)}</p><span>${escapeHtml(comment.authorEmail || "Team member")} / ${escapeHtml(comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "")}</span></li>`).join("")}</ul>` : `<p>No active spool notes.</p>`}</section>
-      <section class="spool-traveller-section"><h2>Workshop photos</h2><div class="spool-traveller-photos">${photos.length ? photos.slice(-12).map((comment) => `<figure><img data-traveller-photo="${escapeHtml(comment.photoPath)}" alt="Workshop photo" loading="lazy" /><figcaption>${escapeHtml(comment.body)}</figcaption></figure>`).join("") : `<p>No workshop photos attached.</p>`}</div></section>
-      <section class="spool-traveller-section"><h2>Weld register</h2>${welds.length ? `<div class="traveller-weld-list">${welds.map((weld) => `<article><strong>${escapeHtml(weld.number)}</strong><span>${escapeHtml(weldStatusLabel(weld.status))}</span><small>${escapeHtml([weld.welderId && `Welder ${weld.welderId}`, weld.wps, weld.inspectionType].filter(Boolean).join(" / ") || "Details pending")}</small></article>`).join("")}</div>` : `<p>No weld markers registered.</p>`}</section>
+      <nav class="spool-traveller-actions" aria-label="Spool traveller actions"><a href="#travellerDrawing">View drawing</a><button type="button" data-traveller-open-full>Open full spool</button></nav>
+      <img id="travellerDrawing" class="spool-traveller-drawing" src="${drawingImage}" alt="Spool drawing revision ${escapeHtml(project.revision || "-")}" />
+      <details class="spool-traveller-section"${activeNotes.length ? " open" : ""}><summary><span>Current notes</span><b>${activeNotes.length}</b></summary>${activeNotes.length ? `<ul>${activeNotes.slice(-12).map((comment) => `<li><p>${escapeHtml(comment.body)}</p><span>${escapeHtml(comment.authorEmail || "Team member")} / ${escapeHtml(comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "")}</span></li>`).join("")}</ul>` : `<p>No active spool notes.</p>`}</details>
+      <details class="spool-traveller-section"><summary><span>Workshop photos</span><b>${photos.length}</b></summary><div class="spool-traveller-photos">${photos.length ? photos.slice(-12).map((comment) => `<figure><img data-traveller-photo="${escapeHtml(comment.photoPath)}" alt="Workshop photo" loading="lazy" /><figcaption>${escapeHtml(comment.body)}</figcaption></figure>`).join("") : `<p>No workshop photos attached.</p>`}</div></details>
+      <details class="spool-traveller-section"><summary><span>Weld register</span><b>${welds.length}</b></summary>${welds.length ? `<div class="traveller-weld-list">${welds.map((weld) => `<article><strong>${escapeHtml(weld.number)}</strong><span>${escapeHtml(weldStatusLabel(weld.status))}</span><small>${escapeHtml([weld.welderId && `Welder ${weld.welderId}`, weld.wps, weld.inspectionType].filter(Boolean).join(" / ") || "Details pending")}</small></article>`).join("")}</div>` : `<p>No weld markers registered.</p>`}</details>
     </main>`;
   document.body.append(dialog);
   dialog.querySelector("[data-traveller-close]")?.addEventListener("click", () => dialog.remove());
+  dialog.querySelector("[data-traveller-open-full]")?.addEventListener("click", () => dialog.remove());
+  dialog.querySelector("[data-traveller-latest]")?.addEventListener("click", () => openSpoolTraveller({ requestedRevisionUid: revision.currentUid }));
   dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.remove(); });
   dialog.querySelectorAll("[data-traveller-photo]").forEach((image) => hydrateProjectCommentPhoto(image, image.dataset.travellerPhoto));
 }
@@ -21020,7 +22565,9 @@ async function deleteSavedCloudProject(projectId) {
   }
   if (!record) return;
   if (!projectPermission(record, { source: "cloud" }).canDelete) {
-    showAppNotice("Only the project owner or a team admin can delete this cloud spool.");
+    showAppNotice(hasActiveCloudLicense()
+      ? "Only the project owner or a team admin can delete this cloud spool."
+      : cloudReadOnlyMessage("delete cloud spools"));
     return;
   }
 
@@ -21105,7 +22652,7 @@ function autoSaveCurrentBrowserProject() {
 
 async function saveBrowserProject(options = {}) {
   if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
-    showAppNotice("This team spool is view/comment only for your role. Ask the project owner or a team admin to save changes.");
+    showAppNotice(cloudReadOnlyMessage("save changes"));
     return false;
   }
   const info = await openProjectDetailsDialog({
@@ -21132,6 +22679,7 @@ async function saveBrowserProject(options = {}) {
   if (!options.silent) {
     showAppNotice(`Saved ${projectDisplayName(info)} ${savedToCloud ? "to the cloud and this browser" : "in this browser"}.`);
   }
+  markFirstUseGuideLearned("save");
   return true;
 }
 
@@ -21150,11 +22698,17 @@ async function openBrowserProject(options = {}) {
   if (!options.keepFolder) {
     projectLibraryOpenFolderKey = "";
   }
-  const useCloud = Boolean(cloudUser && hasActiveCloudLicense());
+  const useCloud = options.source === "browser"
+    ? false
+    : options.source === "cloud"
+    ? Boolean(cloudUser && hasCloudReadAccess())
+    : Boolean(cloudUser && hasCloudReadAccess());
   projectLibrarySource = useCloud ? "cloud" : "browser";
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = useCloud
-      ? "Loading cloud saved spools. The list will appear here."
+      ? hasActiveCloudLicense()
+        ? "Loading cloud saved spools. The list will appear here."
+        : "Loading cloud saved spools in read-only mode."
       : "Loading saved spools from this device/browser.";
   }
   renderProjectLibraryMessage(useCloud ? "Loading cloud saved spools..." : "Loading saved spools...");
@@ -21267,6 +22821,26 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   ensureProjectLibraryReportSlot();
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
   projectLibraryProjects = Array.isArray(projects) ? [...projects] : [];
+  const canSwitchProjectSource = Boolean(cloudUser && hasCloudReadAccess());
+  if (projectLibrarySourceButton) {
+    projectLibrarySourceButton.hidden = !canSwitchProjectSource;
+    const label = projectLibrarySourceButton.querySelector("span");
+    if (label) label.textContent = projectLibrarySource === "cloud" ? "This device" : "Cloud";
+    projectLibrarySourceButton.title = projectLibrarySource === "cloud"
+      ? "Show projects stored only in this browser"
+      : hasActiveCloudLicense()
+      ? "Show cloud saved projects"
+      : "Show cloud saved projects in read-only mode";
+  }
+  if (projectLibrarySaveButton) {
+    const currentCloudReadOnly = currentProjectHasCloudRecord() && !currentDrawingProjectPermission().canEdit;
+    projectLibrarySaveButton.disabled = currentCloudReadOnly;
+    projectLibrarySaveButton.title = currentCloudReadOnly
+      ? "This cloud spool is read only. You can still export it."
+      : hasActiveCloudLicense()
+      ? "Save the current spool"
+      : "Save the current local spool in this browser";
+  }
   const filteredProjects = filterProjectLibraryProjects(projectLibraryProjects);
   const query = projectLibrarySearch.trim();
   if (projectLibraryCommsVisible) renderProjectLibraryComms(filteredProjects);
@@ -21276,7 +22850,9 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   }
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = projectLibrarySource === "cloud"
-      ? activeCompanyIsApproved()
+      ? !hasActiveCloudLicense()
+        ? "Cloud projects are read only. You can open, review and export them; upgrade to save changes."
+        : activeCompanyIsApproved()
         ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Use the production board or open a job folder.`
         : "Projects are saved to your SpoolMate cloud account. Use the production board or open a job folder."
       : "Projects are saved on this device/browser. Use the production board or open a job folder.";
@@ -21312,7 +22888,9 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     return;
   }
 
-  projectLibraryList.append(projectProductionBoard(filteredProjects));
+  projectLibraryList.append(projectLibraryDashboardView === "board"
+    ? projectProductionBoard(filteredProjects)
+    : projectTodayBoard(filteredProjects));
 
   const folders = projectFolders(filteredProjects);
   for (const folder of folders) {
@@ -21431,6 +23009,24 @@ function savedProjectProductionInfo(project) {
 
 function savedProjectProductionMessages(project) {
   return activeProductionMessages(savedProjectState(project)?.productionMessages);
+}
+
+function readTeamDashboardView() {
+  try {
+    return localStorage.getItem(TEAM_DASHBOARD_VIEW_KEY) === "board" ? "board" : "today";
+  } catch {
+    return "today";
+  }
+}
+
+function setTeamDashboardView(view) {
+  projectLibraryDashboardView = view === "board" ? "board" : "today";
+  try {
+    localStorage.setItem(TEAM_DASHBOARD_VIEW_KEY, projectLibraryDashboardView);
+  } catch (error) {
+    console.warn("Could not remember the team dashboard view.", error);
+  }
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
 function savedProjectProductionActivity(project) {
@@ -21840,11 +23436,15 @@ async function persistProjectWorkflowUpdate(project, nextDrawingState, updatedAt
 
   if (source === "cloud") {
     if (!(await ensureSupabaseClient()) || !cloudUser || !hasActiveCloudLicense()) {
-      showAppNotice("Sign in with an active licence to update cloud production items.");
+      showAppNotice(cloudUser
+        ? cloudReadOnlyMessage("update cloud production items")
+        : "Sign in with an active licence to update cloud production items.");
       return false;
     }
     if (!projectPermission(project, { source: "cloud" }).canEdit) {
-      showAppNotice("Only the project owner or a team admin can update this cloud spool.");
+      showAppNotice(hasActiveCloudLicense()
+        ? "Only the project owner or a team admin can update this cloud spool."
+        : cloudReadOnlyMessage("update cloud production items"));
       return false;
     }
     updateCloudStatus("Updating production...", "");
@@ -22044,7 +23644,8 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
       : "Cloud"
     : "Browser";
   const spoolMessages = dashboardCommsItems(projects);
-  const cloudReady = Boolean(cloudUser && hasActiveCloudLicense() && activeCompanyIsApproved());
+  const cloudReadable = Boolean(cloudUser && hasCloudReadAccess() && activeCompanyIsApproved());
+  const cloudWritable = Boolean(cloudReadable && hasActiveCloudLicense());
   const visibleTeamMessages = (teamMessagesCompanyId === activeCompany?.id ? teamMessages : [])
     .filter((message) => !message.completed || message.pinned)
     .slice(0, 12);
@@ -22057,7 +23658,7 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
           <span>${escapeHtml(sourceLabel)} messages, active yard notes and spool actions in one place.</span>
         </div>
         <div class="team-comms-actions">
-          <button type="button" data-project-library-action="refresh-team-messages"${cloudReady ? "" : " disabled"}>Refresh</button>
+          <button type="button" data-project-library-action="refresh-team-messages"${cloudReadable ? "" : " disabled"}>Refresh</button>
           <button type="button" data-project-library-action="hide-comms">Hide</button>
         </div>
       </div>
@@ -22066,18 +23667,18 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
         <section class="team-comms-panel">
           <div class="team-comms-panel-head">
             <strong>General team messages</strong>
-            <span>${cloudReady ? teamMessagesBusy ? "Refreshing..." : "Shared with the active company" : "Cloud team required"}</span>
+            <span>${cloudReadable ? teamMessagesBusy ? "Refreshing..." : cloudWritable ? "Shared with the active company" : "Read-only team history" : "Cloud team required"}</span>
           </div>
-          ${cloudReady ? `
+          ${cloudWritable ? `
             <div class="team-comms-compose">
               <input data-team-message-input type="text" maxlength="500" placeholder="Message for the team" />
               <button type="button" data-project-library-action="add-team-message">Post</button>
             </div>
           ` : `
-            <div class="team-comms-empty">Sign in to an approved company team to post shared team messages.</div>
+            <div class="team-comms-empty">${cloudReadable ? "Team messages are read only until the licence is upgraded." : "Sign in to an approved company team to post shared team messages."}</div>
           `}
           <div class="team-comms-list">
-            ${visibleTeamMessages.length ? visibleTeamMessages.map(teamMessageHtml).join("") : `<div class="team-comms-empty">${cloudReady ? "No team messages yet." : "Team messages will appear here."}</div>`}
+            ${visibleTeamMessages.length ? visibleTeamMessages.map((message) => teamMessageHtml(message, cloudWritable)).join("") : `<div class="team-comms-empty">${cloudReadable ? "No team messages yet." : "Team messages will appear here."}</div>`}
           </div>
         </section>
         <section class="team-comms-panel">
@@ -22094,7 +23695,7 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
   `;
 }
 
-function teamMessageHtml(message) {
+function teamMessageHtml(message, canWrite = hasActiveCloudLicense()) {
   const meta = [
     message.authorEmail || "Team member",
     message.createdAt ? new Date(message.createdAt).toLocaleString() : "Just now",
@@ -22104,13 +23705,14 @@ function teamMessageHtml(message) {
     <article class="team-comms-message${message.completed ? " done" : ""}${message.pinned ? " pinned" : ""}">
       <p>${escapeHtml(message.body)}</p>
       <small>${escapeHtml(meta)}</small>
-      ${message.completed ? `<span class="team-comms-done">Done</span>` : `<button type="button" data-project-library-action="complete-team-message" data-team-message-id="${escapeHtml(message.id)}">Done</button>`}
+      ${message.completed ? `<span class="team-comms-done">Done</span>` : `<button type="button" data-project-library-action="complete-team-message" data-team-message-id="${escapeHtml(message.id)}"${canWrite ? "" : ' disabled title="Upgrade the licence to change team messages"'}>Done</button>`}
     </article>
   `;
 }
 
 function spoolMessageHtml(item) {
   const { project, message } = item;
+  const canEdit = projectPermission(project).canEdit;
   const production = savedProjectProductionInfo(project);
   const meta = [
     savedProjectDetailLine(project),
@@ -22123,7 +23725,7 @@ function spoolMessageHtml(item) {
       <button type="button" class="team-comms-open" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">${escapeHtml(savedProjectSpoolTitle(project))}</button>
       <p>${escapeHtml(message.body)}</p>
       <small>${escapeHtml(meta)}</small>
-      <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(message.id)}">Done</button>
+      <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(message.id)}"${canEdit ? "" : ' disabled title="This cloud spool is read only"'}>Done</button>
     </article>
   `;
 }
@@ -22759,6 +24361,8 @@ function projectProductionCard(project) {
       ${production.hold ? `<span class="hold">Hold</span>` : ""}
     </div>
     <small class="production-card-meta">${escapeHtml(parts.join(" / "))}</small>
+    <details class="production-card-details">
+      <summary>Details and updates</summary>
     ${latestActivity ? `
       <div class="production-card-activity">
         <span>${escapeHtml(latestActivity.actor || "Team")}</span>
@@ -22812,6 +24416,7 @@ function projectProductionCard(project) {
         <button type="button" data-production-action="add-message" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add</button>
       </div>
     </div>
+    </details>
     <div class="production-card-actions">
       ${quickActions}
       <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">Open</button>
@@ -22871,58 +24476,164 @@ function projectRecentActivityItems(projects = [], limit = 7) {
     .slice(0, limit);
 }
 
+function productionProjectWasReturned(project) {
+  if (normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "draft") return false;
+  return savedProjectProductionActivity(project)
+    .slice(-3)
+    .some((entry) => /returned for changes/i.test(String(entry?.text ?? "")));
+}
+
+function productionProjectNeedsAttention(project) {
+  if (productionProjectHidden(project)) return false;
+  const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+  if (status === "complete") return false;
+  const production = savedProjectProductionInfo(project);
+  const dueState = productionDueState(production);
+  return production.hold || dueState.key === "overdue" || dueState.key === "today" || productionProjectWasReturned(project);
+}
+
+function productionProjectReadyNext(project) {
+  if (productionProjectHidden(project)) return false;
+  const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+  return ["readycheck", "checked", "issued", "cutting", "fitup", "welded", "finish"].includes(status);
+}
+
+function projectTodayGroups(projects = []) {
+  const visible = sortedProductionProjects(projects.filter((project) => !productionProjectHidden(project)));
+  const attention = visible.filter(productionProjectNeedsAttention);
+  const attentionIds = new Set(attention.map((project) => project.id));
+  const mine = visible.filter((project) => !attentionIds.has(project.id) && productionAssignedToCurrentUser(savedProjectProductionInfo(project)) && normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "complete");
+  const mineIds = new Set(mine.map((project) => project.id));
+  const ready = visible.filter((project) => !attentionIds.has(project.id) && !mineIds.has(project.id) && productionProjectReadyNext(project));
+  return { attention, mine, ready };
+}
+
+function projectTodayCard(project) {
+  const savedState = savedProjectState(project);
+  const production = savedProjectProductionInfo(project);
+  const status = normalizeProjectStatus(savedState?.projectStatus);
+  const dueState = productionDueState(production);
+  const returned = productionProjectWasReturned(project);
+  const actionLabel = status === "readycheck"
+    ? "Review spool"
+    : status === "checked"
+    ? "Open to issue"
+    : status === "draft"
+    ? "Open drawing"
+    : "Open spool";
+  const card = document.createElement("article");
+  card.className = "team-today-spool";
+  card.classList.toggle("attention", productionProjectNeedsAttention(project));
+  card.innerHTML = `
+    <div class="team-today-spool-main">
+      <span>${escapeHtml(savedProjectDetailLine(project))}</span>
+      <strong>${escapeHtml(savedProjectSpoolTitle(project))}</strong>
+      <small>${escapeHtml(production.assignee || "Unassigned")} / ${escapeHtml(production.dueDate ? formatProductionDue(production) : "No due date")}</small>
+    </div>
+    <div class="team-today-spool-badges" aria-label="Spool status">
+      <span class="status">${escapeHtml(projectStatusLabel(status))}</span>
+      ${dueState.key !== "none" ? `<span class="${escapeHtml(dueState.key)}">${escapeHtml(dueState.label)}</span>` : ""}
+      ${production.hold ? `<span class="hold">On hold</span>` : ""}
+      ${returned ? `<span class="returned">Returned</span>` : ""}
+    </div>
+    ${production.hold && production.holdReason ? `<p class="team-today-hold">${escapeHtml(production.holdReason)}</p>` : ""}
+    <button type="button" class="team-today-primary" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">${escapeHtml(actionLabel)}</button>
+  `;
+  return card;
+}
+
+function projectTodaySection(title, description, projects, emptyText, tone) {
+  const section = document.createElement("section");
+  section.className = `team-today-section ${tone}`;
+  section.innerHTML = `
+    <header>
+      <div><strong>${escapeHtml(title)}</strong><span>${escapeHtml(description)}</span></div>
+      <b>${projects.length}</b>
+    </header>
+  `;
+  const list = document.createElement("div");
+  list.className = "team-today-list";
+  if (!projects.length) {
+    list.innerHTML = `<div class="team-today-empty">${escapeHtml(emptyText)}</div>`;
+  } else {
+    for (const project of projects.slice(0, 6)) list.append(projectTodayCard(project));
+    if (projects.length > 6) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "team-today-more";
+      more.dataset.projectLibraryAction = "dashboard-view";
+      more.dataset.dashboardView = "board";
+      more.textContent = `See ${projects.length - 6} more on the full board`;
+      list.append(more);
+    }
+  }
+  section.append(list);
+  return section;
+}
+
+function projectTodayBoard(projects) {
+  const section = document.createElement("section");
+  section.className = "team-today-board";
+  const groups = projectTodayGroups(projects);
+  section.append(
+    projectTodaySection("Needs attention", "Overdue, due today, held or returned", groups.attention, "Nothing needs urgent attention.", "attention"),
+    projectTodaySection("My work", "Active spools assigned to you", groups.mine, "No active spools are assigned to you.", "mine"),
+    projectTodaySection("Ready next", "Waiting for checking, issuing or the next workshop stage", groups.ready, "Nothing is waiting for its next stage.", "ready"),
+  );
+  return section;
+}
+
 function projectDashboardCard(projects, options = {}) {
   const card = document.createElement("section");
-  card.className = "project-dashboard-card team-work-dashboard";
+  card.className = "project-dashboard-card team-work-dashboard team-dashboard-simple";
   const counts = productionBoardFilterCounts(projects);
+  const groups = projectTodayGroups(projects);
   const recentActivity = projectRecentActivityItems(projects);
   const totalCount = options.totalCount ?? projects.length;
   const resultText = options.query && totalCount !== projects.length
     ? `${projects.length} matching of ${totalCount} saved spool${totalCount === 1 ? "" : "s"}`
-    : `${projects.length} saved spool${projects.length === 1 ? "" : "s"}`;
+    : `${counts.active ?? 0} active spool${counts.active === 1 ? "" : "s"}`;
   const title = projectLibrarySource === "cloud"
-    ? activeCompanyIsApproved() ? `${activeCompany.name} team dashboard` : "Cloud team dashboard"
-    : "Browser production dashboard";
-  const queues = [
-    ["mine", "Assigned to me", "Nothing assigned to you."],
-    ["today", "Due today", "Nothing due today."],
-    ["overdue", "Overdue", "No overdue spools."],
-    ["readycheck", "Ready to check", "No checking queue."],
-    ["hold", "On hold", "No hold items."],
-  ];
+    ? activeCompanyIsApproved() ? `${activeCompany.name} team` : "Cloud team"
+    : "This device";
 
   card.innerHTML = `
     <div class="team-dashboard-head">
       <div>
+        <span class="team-dashboard-eyebrow">Production</span>
         <strong>${escapeHtml(title)}</strong>
-        <span>${escapeHtml(resultText)} / ${counts.active ?? 0} active</span>
+        <span>${escapeHtml(resultText)}</span>
       </div>
-      <div class="team-dashboard-actions">
-        <button type="button" data-project-library-action="show-report" data-report-period="daily">Daily report</button>
-        <button type="button" data-project-library-action="show-report" data-report-period="weekly">Weekly report</button>
-        <button type="button" data-project-library-action="show-comms">Team comms</button>
-      </div>
+      <button type="button" class="team-scan-button" data-project-library-action="scan-qr" aria-label="Scan a spool QR code">
+        <span aria-hidden="true">▣</span><strong>Scan QR</strong><small>Open a spool</small>
+      </button>
     </div>
-    <div class="team-dashboard-layout">
-      <div class="team-dashboard-queues production-command-grid" aria-label="Team work queues">
-        ${queues.map(([filter, label, hint]) => productionCommandStripItem(projects, filter, label, hint, counts, projectLibraryBoardFilter)).join("")}
+    <nav class="team-dashboard-tabs" aria-label="Team dashboard view">
+      <button type="button" class="${projectLibraryDashboardView === "today" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="today">Today <b>${groups.attention.length + groups.mine.length + groups.ready.length}</b></button>
+      <button type="button" class="${projectLibraryDashboardView === "board" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="board">Full board <b>${counts.active ?? 0}</b></button>
+      <button type="button" class="${projectLibraryMoreVisible ? "active" : ""}" data-project-library-action="toggle-dashboard-more" aria-expanded="${projectLibraryMoreVisible}">More</button>
+    </nav>
+    ${projectLibraryMoreVisible ? `
+      <div class="team-dashboard-more-panel">
+        <div class="team-dashboard-actions">
+          <button type="button" data-project-library-action="show-report" data-report-period="daily">Daily report</button>
+          <button type="button" data-project-library-action="show-report" data-report-period="weekly">Weekly report</button>
+          <button type="button" data-project-library-action="show-comms">Team comms</button>
+        </div>
+        <section class="team-dashboard-activity" aria-label="Recent team activity">
+          <div class="team-dashboard-activity-head"><strong>Recent activity</strong><span>Latest team changes</span></div>
+          <div class="team-dashboard-activity-list">
+            ${recentActivity.length ? recentActivity.map(({ project, entry }) => `
+              <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
+                <span>${escapeHtml(savedProjectSpoolTitle(project))}</span>
+                <strong>${escapeHtml(entry.text)}</strong>
+                <small>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</small>
+              </button>
+            `).join("") : `<div class="team-dashboard-empty">No team activity yet.</div>`}
+          </div>
+        </section>
       </div>
-      <section class="team-dashboard-activity" aria-label="Recent team activity">
-        <div class="team-dashboard-activity-head">
-          <strong>Recent team activity</strong>
-          <span>Latest assignment, due-date, hold, note and stage changes</span>
-        </div>
-        <div class="team-dashboard-activity-list">
-          ${recentActivity.length ? recentActivity.map(({ project, entry }) => `
-            <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
-              <span>${escapeHtml(savedProjectSpoolTitle(project))}</span>
-              <strong>${escapeHtml(entry.text)}</strong>
-              <small>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</small>
-            </button>
-          `).join("") : `<div class="team-dashboard-empty">No team activity yet. Assign a spool or move one to begin the history.</div>`}
-        </div>
-      </section>
-    </div>
+    ` : ""}
   `;
   return card;
 }
@@ -23092,7 +24803,11 @@ function projectLibraryRow(project) {
     deleteButton.dataset.deleteProjectId = project.id;
     deleteButton.dataset.projectSource = project.source ?? projectLibrarySource;
     deleteButton.disabled = !permission.canDelete;
-    if (!permission.canDelete) deleteButton.title = "Only the project owner or a team admin can delete this cloud spool.";
+    if (!permission.canDelete) {
+      deleteButton.title = hasActiveCloudLicense()
+        ? "Only the project owner or a team admin can delete this cloud spool."
+        : "Cloud deletion is paused while the licence is inactive.";
+    }
 
     openButton.dataset.projectSource = project.source ?? projectLibrarySource;
     row.append(main, openButton, deleteButton);
@@ -25340,6 +27055,7 @@ async function startNewDrawing() {
   updateControls();
   updateAll({ save: false });
   await promptForProjectDetails({ force: true, defaults: nextProjectDefaults });
+  activateFirstUseGuide({ compact: true });
 }
 
 function loadSampleDrawing() {
@@ -26487,6 +28203,7 @@ function export3dImage() {
 }
 
 function exportIsoImage() {
+  markFirstUseGuideLearned("export");
   exportFabSheetPdf().catch((error) => {
     console.warn("Could not export fab sheet PDF.", error);
     showAppNotice("Could not create the PDF. The PNG fab sheet export will be used instead.");
@@ -30585,8 +32302,12 @@ document.querySelectorAll("[data-axis]").forEach((button) => {
   button.addEventListener("click", (event) => {
     const axis = axisByKey.get(button.dataset.axis);
     if (!axis) return;
-    if (event.shiftKey && addShiftAngleRun(axis)) return;
+    if (event.shiftKey && addShiftAngleRun(axis)) {
+      markFirstUseGuideLearned("length");
+      return;
+    }
     addRun(axis, state.stepLength);
+    markFirstUseGuideLearned("length");
   });
 });
 
@@ -30651,7 +32372,7 @@ pipeSizeSelect.addEventListener("change", () => {
 
 projectStatusSelect?.addEventListener("change", async () => {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change the drawing status.");
+    showAppNotice(cloudReadOnlyMessage("change the drawing status"));
     updateControls();
     return;
   }
@@ -30689,7 +32410,7 @@ projectStatusSelect?.addEventListener("change", async () => {
 
 projectLockToggle?.addEventListener("change", () => {
   if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to unlock or edit it.");
+    showAppNotice(cloudReadOnlyMessage("unlock or edit the drawing"));
     updateControls();
     return;
   }
@@ -30953,6 +32674,10 @@ document.addEventListener("keydown", (event) => {
       closeDrawingAssistantDialog();
       return;
     }
+    if (aiHelperDialog && !aiHelperDialog.hidden) {
+      closeAiHelper();
+      return;
+    }
     if (helpDialog && !helpDialog.hidden) {
       closeHelpDialog();
       return;
@@ -31019,6 +32744,7 @@ function keyboardBlockingOverlayOpen() {
     (fieldInputDialog && !fieldInputDialog.hidden) ||
     (appConfirmDialog && !appConfirmDialog.hidden) ||
     (noteDialog && !noteDialog.hidden) ||
+    (aiHelperDialog && !aiHelperDialog.hidden) ||
     (helpDialog && !helpDialog.hidden) ||
     (tutorialDialog && !tutorialDialog.hidden) ||
     (loadPlanDialog && !loadPlanDialog.hidden) ||
@@ -31068,14 +32794,17 @@ setupActionMenu();
 setupAuthDialog();
 setupLegalSupportDialog();
 setupHomeDashboard();
+setupFirstUseGuide();
 setupProjectDialog();
 setupToolSettingsDialog();
 setupFieldInputDialog();
 setupAppConfirmDialog();
 setupNoteDialog();
 setupTutorialDialog();
+setupTouchShiftAngleButton();
 setupRegressionDialog();
 setupHelpDialog();
+setupAiHelper();
 setupLaunchDiagnostics();
 setupPanelFullscreen();
 setupFloatingPreviewPanel();

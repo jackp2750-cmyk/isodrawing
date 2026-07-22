@@ -12,7 +12,10 @@ const REQUIRED_FILES = [
   "README.md",
   "CHANGELOG.md",
   "supabase-setup.sql",
+  "supabase-migration-v295-trial-access.sql",
+  "supabase-migration-v296-ai-helper.sql",
   "supabase/functions/delete-account/index.ts",
+  "supabase/functions/ai-help/index.ts",
 ];
 
 const failures = [];
@@ -89,7 +92,10 @@ const manifest = JSON.parse(read("manifest.webmanifest"));
 const readme = read("README.md");
 const changelog = read("CHANGELOG.md");
 const supabaseSql = read("supabase-setup.sql");
+const trialAccessMigration = read("supabase-migration-v295-trial-access.sql");
+const aiHelperMigration = read("supabase-migration-v296-ai-helper.sql");
 const deleteAccountFunction = read("supabase/functions/delete-account/index.ts");
+const aiHelpFunction = read("supabase/functions/ai-help/index.ts");
 
 try {
   new Function(app);
@@ -162,6 +168,35 @@ assert(manifest.theme_color === htmlThemeColor, "Manifest and HTML theme colours
 assert(manifest.background_color === htmlThemeColor, "Manifest splash background does not match the default theme");
 
 assert(!/\b(?:service[_-]?role|sb_secret)[A-Za-z0-9_.-]*/i.test(app), "A privileged Supabase key appears in app.js");
+assert(!/\bsk-[A-Za-z0-9_-]{12,}/.test(app + html + supabaseSql), "An OpenAI API key appears in public app files");
+assert(
+  /id="aiHelperButton"/.test(html) &&
+    /id="aiHelperDialog"/.test(html) &&
+    /id="aiHelperForm"/.test(html) &&
+    /\.ai-helper-panel/.test(css) &&
+    /function\s+setupAiHelper\s*\(/.test(app) &&
+    /functions\.invoke\(AI_HELPER_FUNCTION/.test(app),
+  "Ask SpoolMate interface or frontend invocation wiring is incomplete",
+);
+assert(
+  /Deno\.env\.get\(["']OPENAI_API_KEY["']\)/.test(aiHelpFunction) &&
+    /https:\/\/api\.openai\.com\/v1\/responses/.test(aiHelpFunction) &&
+    /model:\s*MODEL/.test(aiHelpFunction) &&
+    /const\s+MODEL\s*=\s*["']gpt-5\.6-luna["']/.test(aiHelpFunction) &&
+    /store:\s*false/.test(aiHelpFunction) &&
+    /safety_identifier/.test(aiHelpFunction) &&
+    /auth\.getUser\s*\(/.test(aiHelpFunction),
+  "Protected Ask SpoolMate Edge Function is incomplete",
+);
+assert(
+  /create table if not exists public\.ai_help_usage/.test(aiHelperMigration) &&
+    /create or replace function public\.consume_ai_help_allowance/.test(aiHelperMigration) &&
+    /create or replace function public\.release_ai_help_allowance/.test(aiHelperMigration) &&
+    /revoke all on function public\.consume_ai_help_allowance[\s\S]*authenticated/.test(aiHelperMigration) &&
+    /grant execute on function public\.consume_ai_help_allowance[\s\S]*service_role/.test(aiHelperMigration) &&
+    /create table if not exists public\.ai_help_usage/.test(supabaseSql),
+  "Ask SpoolMate allowance migration or complete Supabase setup is incomplete",
+);
 assert(
   /resetPasswordForEmail\s*\(/.test(app) && /PASSWORD_RECOVERY/.test(app) && /updateUser\s*\(\s*\{\s*password\s*\}/.test(app),
   "Password recovery request, redirect or password update wiring is incomplete",
@@ -178,6 +213,36 @@ assert(
     /id="legalSupportDialog"/.test(html) &&
     /const\s+REGRESSION_LAUNCH_CHECKS\s*=/.test(app),
   "Launch diagnostics, privacy/support or acceptance checklist is missing",
+);
+assert(
+  /function\s+hasCloudReadAccess\s*\(/.test(app) &&
+    /function\s+cloudLicenceState\s*\(/.test(app) &&
+    /function\s+licenceWarningModel\s*\(/.test(app) &&
+    /async function\s+loadSavedCloudProjects\s*\(\)\s*\{[\s\S]{0,220}hasCloudReadAccess\(\)/.test(app),
+  "Expired-account read-only cloud access wiring is incomplete",
+);
+assert(
+  /id="licenceBanner"/.test(html) &&
+    /id="accountPlanPanel"/.test(html) &&
+    /id="accountPlanUpgradeButton"/.test(html) &&
+    /id="projectLibrarySourceButton"/.test(html) &&
+    /\.licence-banner/.test(css) &&
+    /\.account-plan-panel/.test(css),
+  "Trial countdown, upgrade or cloud/device source UI is incomplete",
+);
+assert(
+  /license_status\s+in\s*\('trial',\s*'paid',\s*'grace',\s*'full',\s*'expired'\)/.test(supabaseSql) &&
+    /license_status\s*=\s*'grace'\s+and\s+grace_ends_at\s*>\s*now\(\)/.test(supabaseSql) &&
+    /create policy "Users can read their own spool projects"[\s\S]{0,240}using\s*\(\s*owner_id\s*=/.test(supabaseSql) &&
+    /create policy "Users can read project comments"[\s\S]{0,260}using\s*\(\s*author_id\s*=/.test(supabaseSql),
+  "Complete Supabase setup does not preserve expired read access or grace licensing",
+);
+assert(
+  /add column if not exists grace_ends_at/.test(trialAccessMigration) &&
+    /create policy "Users can read their own spool projects"[\s\S]{0,240}using\s*\(\s*owner_id\s*=/.test(trialAccessMigration) &&
+    /create policy "Users can manage their comments"[\s\S]{0,260}public\.has_active_license/.test(trialAccessMigration) &&
+    /create policy "Authors and admins can manage spool photos"[\s\S]{0,260}public\.has_active_license/.test(trialAccessMigration),
+  "v2.95 trial-access migration is incomplete",
 );
 assert(
   /function\s+setupNetworkAwareness\s*\(/.test(app) &&
@@ -231,6 +296,75 @@ assert(
 assert(
   /target:\s*"#fittingsToolButton"/.test(app) && /data-tutorial-trainer-choice="open-fittings"/.test(app),
   "Tutorial no longer teaches the Fittings flyout",
+);
+assert(
+  /id="touchShiftAngleButton"/.test(html) &&
+    /function\s+setupTouchShiftAngleButton\s*\(/.test(app) &&
+    /setShiftAngleSnap\(true\)/.test(app) &&
+    /touch-shift-angle-button/.test(css),
+  "Touch Hold 45 degree drawing control is incomplete",
+);
+assert(
+  /TUTORIAL_PROGRESS_KEY/.test(app) &&
+    /function\s+restoreTutorialProgress\s*\(/.test(app) &&
+    /function\s+persistTutorialProgress\s*\(/.test(app) &&
+    /function\s+tutorialResumeStepIndex\s*\(/.test(app) &&
+    /Finish tour/.test(app),
+  "Saved and resumable tutorial progress is incomplete",
+);
+assert(
+  /QUICK_START_TUTORIAL_STEP_INDEXES/.test(app) &&
+    /data-tutorial-mode="quick"/.test(app) &&
+    /5-minute Quick Start/.test(app),
+  "The 5-minute Quick Start tutorial path is incomplete",
+);
+assert(
+  /data-tutorial-use-real/.test(app) &&
+    /function\s+tryTutorialStepInDrawing\s*\(/.test(app) &&
+    /tutorial-use-real-button/.test(css),
+  "Try in drawing handoff is incomplete",
+);
+assert(
+  /id="firstSpoolGuide"/.test(html) &&
+    /FIRST_USE_GUIDE_KEY/.test(app) &&
+    /function\s+setupFirstUseGuide\s*\(/.test(app) &&
+    /body\.first-spool-mode/.test(css),
+  "The progressive First Spool workspace is incomplete",
+);
+assert(
+  /function\s+tutorialLaunchChecklistMarkup\s*\(/.test(app) &&
+    /tutorial-launch-checklist/.test(css) &&
+    /Workshop PDF exported/.test(app),
+  "The final first-spool checklist is incomplete",
+);
+assert(
+  /Weld markers are numbered W01, W02/.test(app) && /permanent spool\/revision QR traveller/.test(app),
+  "Tutorial is missing weld-register or QR-traveller launch guidance",
+);
+assert(
+  /function\s+projectTodayBoard\s*\(/.test(app) &&
+    /Needs attention/.test(app) &&
+    /My work/.test(app) &&
+    /Ready next/.test(app) &&
+    /data-project-library-action="scan-qr"/.test(app) &&
+    /team-today-board/.test(css),
+  "Simplified Today team dashboard or Scan QR entry point is incomplete",
+);
+assert(
+  /async function\s+openQrScanner\s*\(/.test(app) &&
+    /facingMode:\s*\{\s*ideal:\s*"environment"/.test(app) &&
+    /function\s+scanQrImageFile\s*\(/.test(app) &&
+    /function\s+scannedSpoolTravellerUrl\s*\(/.test(app) &&
+    /scanned\.origin\s*!==\s*location\.origin/.test(app) &&
+    /qr-scanner-backdrop/.test(css),
+  "Camera/photo QR scanner or same-origin traveller validation is incomplete",
+);
+assert(
+  /function\s+resolveSpoolTravellerRevision\s*\(/.test(app) &&
+    /requestedRevisionUid:\s*params\.get\("revision"\)/.test(app) &&
+    /Revision could not be verified/.test(app) &&
+    /Issued revision snapshot/.test(app),
+  "QR traveller revision verification or snapshot handling is incomplete",
 );
 assert(
   /function\s+setFocusMode\s*\(/.test(app) && /body\.focus-mode/.test(css) && /data-tutorial-trainer-choice="focus-toggle"/.test(app),

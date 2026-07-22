@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=294" />
+    <link rel="stylesheet" href="./styles.css?v=2991" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +189,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v2.94</span>
+              <span class="version-badge" id="appVersionBadge">v2.99.1</span>
             </div>
           </div>
 
@@ -427,6 +427,14 @@
         </div>
       </header>
 
+      <section class="licence-banner" id="licenceBanner" aria-live="polite" hidden>
+        <div class="licence-banner-copy">
+          <strong id="licenceBannerTitle">Trial ending soon</strong>
+          <span id="licenceBannerMessage">Your cloud projects remain available after the trial in read-only mode.</span>
+        </div>
+        <button class="primary-button" id="licenceBannerUpgradeButton" type="button">Upgrade licence</button>
+      </section>
+
       <main class="workspace">
         <aside class="tool-rail" aria-label="Drawing tools">
           <div class="tool-grid" role="toolbar" aria-label="Drawing tools">
@@ -523,6 +531,10 @@
                 <span class="button-sign" aria-hidden="true">+</span>
                 <span>Zoom</span>
               </button>
+              <button class="icon-button compact labeled touch-shift-angle-button" id="touchShiftAngleButton" type="button" title="Hold while drawing a 45 degree offset" aria-label="Hold for 45 degree drawing" aria-pressed="false">
+                <span class="button-sign" aria-hidden="true">45°</span>
+                <span>Hold 45°</span>
+              </button>
               <button class="icon-button compact labeled focus-mode-button" id="drawingFullscreenButton" type="button" title="Enter Focus mode" aria-label="Enter Focus mode" aria-pressed="false">
                 <svg><use href="#icon-fullscreen"></use></svg>
                 <span>Focus</span>
@@ -541,6 +553,20 @@
               </button>
             </div>
           </div>
+          <section class="first-spool-guide" id="firstSpoolGuide" aria-live="polite" hidden>
+            <div class="first-spool-guide-progress" aria-hidden="true"><i id="firstSpoolGuideProgressBar"></i></div>
+            <div class="first-spool-guide-copy">
+              <small id="firstSpoolGuideKicker">First spool</small>
+              <strong id="firstSpoolGuideTitle">Start by drawing a pipe run</strong>
+              <span id="firstSpoolGuideMessage">Choose Draw, then drag from the yellow point.</span>
+            </div>
+            <div class="first-spool-guide-actions">
+              <button class="icon-button compact labeled" id="firstSpoolGuideExpandButton" type="button">Show all controls</button>
+              <button class="icon-button compact labeled" id="firstSpoolGuideActionButton" type="button">Start drawing</button>
+              <button class="primary-button" id="firstSpoolGuideNextButton" type="button">Next</button>
+              <button class="first-spool-guide-close" id="firstSpoolGuideCloseButton" type="button" aria-label="End first spool tips">End tips</button>
+            </div>
+          </section>
           <div class="canvas-frame">
             <canvas id="drawCanvas"></canvas>
           </div>
@@ -871,7 +897,7 @@
             <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
               <svg><use href="#icon-help"></use></svg>
               <strong>Tutorial</strong>
-              <span>Walk through the main workflow.</span>
+              <span>Learn the workflow or continue where you left off.</span>
             </button>
             <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
               <svg><use href="#icon-sample"></use></svg>
@@ -928,6 +954,21 @@
             </label>
             <p class="auth-help project-dialog-wide" id="authModeHelp">Use the email and password you created for SpoolMate.</p>
           </div>
+          <section class="account-plan-panel" id="accountPlanPanel" hidden>
+            <div class="account-plan-heading">
+              <span class="account-plan-badge" id="accountPlanBadge">Trial</span>
+              <div>
+                <strong id="accountPlanTitle">Cloud trial</strong>
+                <small id="accountPlanMessage">Full cloud access is active.</small>
+              </div>
+            </div>
+            <div class="account-plan-countdown" id="accountPlanCountdown"></div>
+            <ul class="account-plan-capabilities" id="accountPlanCapabilities">
+              <li>Open and export your existing cloud spools</li>
+              <li>Cloud editing, saving and collaboration while active</li>
+            </ul>
+            <button class="primary-button" id="accountPlanUpgradeButton" type="button">Upgrade licence</button>
+          </section>
           <section class="team-workspace-panel" id="teamWorkspacePanel" hidden>
             <div class="team-panel-head">
               <div>
@@ -989,6 +1030,10 @@
               <span>Search jobs, spools or clients</span>
               <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client, assignee or status" autocomplete="off" />
             </label>
+            <button class="icon-button labeled" id="projectLibrarySourceButton" type="button" hidden>
+              <svg><use href="#icon-sample"></use></svg>
+              <span>This device</span>
+            </button>
             <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
               <svg><use href="#icon-help"></use></svg>
               <span>Guide</span>
@@ -1167,7 +1212,7 @@
           <div class="project-dialog-header">
             <div>
               <strong>Interactive tutorial</strong>
-              <small>Pick a topic, watch the mini demo, then try the highlighted tool when you are ready.</small>
+              <small>Pick a topic, watch the mini demo, then use the safe practice without changing your drawing.</small>
             </div>
           </div>
           <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
@@ -1213,7 +1258,14 @@
               <h2>Privacy summary</h2>
               <p>Guest drawings are stored in this browser. When you sign in, SpoolMate stores your email, trial/licence status, cloud drawings, team membership, comments and any workshop photos you choose to upload in Supabase.</p>
               <p>Cloud data is used to authenticate you, synchronise projects and support team collaboration. Workshop photos are stored in a private bucket and access is controlled by project and company permissions.</p>
+              <p>Ask SpoolMate uses built-in help first. If a signed-in user asks for extra AI help, the question, a short recent help conversation and limited app context such as the current mode and tool are sent through a protected Supabase function to OpenAI. Drawing geometry, project names, notes, photos and authentication tokens are not sent automatically. Do not type customer-confidential information into the helper.</p>
               <p>You can download an account-data export from Account. Deleting your cloud account permanently removes the account and its owned cloud data; local browser projects remain on this device.</p>
+            </section>
+            <section>
+              <h2>Trial and licence access</h2>
+              <p>New accounts receive a 30-day cloud trial. The app warns as the trial approaches its end.</p>
+              <p>Trial expiry does not delete cloud drawings. Permitted projects, comments and workshop photos remain available to open, view and export in read-only mode. Cloud saving, editing, new comments/photos and team changes resume when the licence is activated.</p>
+              <p>No automatic inactive-account deletion is currently enabled. Users can export their data or permanently delete their own cloud account from Account.</p>
             </section>
             <section>
               <h2>Important fabrication terms</h2>
@@ -1286,6 +1338,46 @@
         </form>
       </div>
 
+      <button class="ai-helper-launcher" id="aiHelperButton" type="button" aria-expanded="false" aria-controls="aiHelperDialog">
+        <svg aria-hidden="true"><use href="#icon-help"></use></svg>
+        <span>Ask SpoolMate</span>
+      </button>
+
+      <div class="ai-helper-backdrop" id="aiHelperDialog" hidden>
+        <section class="ai-helper-panel" role="dialog" aria-modal="true" aria-labelledby="aiHelperTitle">
+          <header class="ai-helper-header">
+            <div>
+              <span class="ai-helper-kicker">In-app help</span>
+              <strong id="aiHelperTitle">Ask SpoolMate</strong>
+              <small>Help with drawing, fittings, checks, cloud saves and PDFs.</small>
+            </div>
+            <div class="ai-helper-header-actions">
+              <button class="icon-button compact labeled" id="aiHelperClearButton" type="button">Clear</button>
+              <button class="icon-button compact labeled" id="aiHelperCloseButton" type="button">Close</button>
+            </div>
+          </header>
+          <div class="ai-helper-status" aria-live="polite">
+            <span id="aiHelperMode">Built-in help</span>
+            <span id="aiHelperQuota">Available on this device</span>
+          </div>
+          <div class="ai-helper-messages" id="aiHelperMessages" role="log" aria-live="polite" aria-relevant="additions"></div>
+          <div class="ai-helper-suggestions" id="aiHelperSuggestions" aria-label="Suggested questions">
+            <button type="button" data-ai-suggestion="How do I draw a 45 degree offset?">45° offset</button>
+            <button type="button" data-ai-suggestion="How do I add a flange?">Add a flange</button>
+            <button type="button" data-ai-suggestion="Why can't I issue this spool?">Issue blocked</button>
+            <button type="button" data-ai-suggestion="Where are my cloud spools?">Cloud spools</button>
+          </div>
+          <form class="ai-helper-form" id="aiHelperForm">
+            <label for="aiHelperInput">What are you stuck on?</label>
+            <div class="ai-helper-compose">
+              <textarea id="aiHelperInput" rows="2" maxlength="500" placeholder="Example: How do I change an existing pipe size?"></textarea>
+              <button class="primary-button" id="aiHelperSendButton" type="submit">Send</button>
+            </div>
+            <small>Do not include client names, drawing details, passwords, tokens or confidential project information.</small>
+          </form>
+        </section>
+      </div>
+
       <div class="app-toast-stack" id="appToastStack" aria-live="polite" aria-atomic="false"></div>
 
       <div class="project-dialog-backdrop app-confirm-backdrop" id="appConfirmDialog" hidden>
@@ -1346,6 +1438,10 @@
                   <strong>Open Help quickly</strong>
                   <p>Tap Menu, then Help. On iPad or phone, Help opens to this touch section first.</p>
                 </article>
+                <article>
+                  <strong>Draw a 45 degree offset</strong>
+                  <p>Enter the offset set, then press and hold Hold 45° beside the drawing controls with one finger while dragging the angled travel with another. Release it before drawing the straight return.</p>
+                </article>
               </div>
             </section>
             <section class="help-panel" data-help-panel="draw">
@@ -1361,7 +1457,7 @@
                 </article>
                 <article>
                   <strong>45 degree offsets</strong>
-                  <p>Enter the offset set in Next run / offset set mm. For 45 degrees, SpoolMate calculates travel as set x 1.414 and stores both values.</p>
+                  <p>Enter the offset set in Next run / offset set mm. Hold Shift on a keyboard, or hold the Hold 45° drawing control on touch, while dragging the angled travel. Release it for the straight return. SpoolMate calculates travel as set x 1.414 and stores both values.</p>
                 </article>
                 <article>
                   <strong>Project details</strong>
@@ -1554,6 +1650,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=294"></script>
+    <script defer src="./app.js?v=2991"></script>
   </body>
 </html>
