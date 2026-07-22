@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.90`
+Current app version: `v2.94`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -187,6 +187,8 @@ With Supabase configured:
 - Company/team workspaces can share projects.
 - Team members can use a spool conversation with mentions, private workshop photos and resolved messages.
 - Jobs Comms can share general team messages across an approved company.
+- Users can request password-reset emails and securely choose a new password after returning to the app.
+- Account includes a JSON data export, privacy/support information, diagnostics and protected account deletion.
 
 ## Supabase Setup
 
@@ -195,8 +197,23 @@ For an existing SpoolMate database, run `supabase-migration-v279.sql` as a new q
 In Supabase Auth settings:
 
 - Set the Site URL to the hosted SpoolMate URL.
-- Add the same hosted SpoolMate URL as a Redirect URL.
+- Add the exact hosted SpoolMate URL as a Redirect URL so confirmation and password-recovery links can return to the app.
 - Keep using the public anon/publishable key in the frontend. Do not put a service-role key in `app.js`.
+- Configure a production SMTP provider before public launch; Supabase's default mail service is intended for testing and is rate limited.
+
+Deploy the protected account-deletion function after linking the repository to the Supabase project:
+
+```powershell
+supabase functions deploy delete-account
+```
+
+The function lives at `supabase/functions/delete-account/index.ts`. Supabase supplies its URL, public key and service-role secret inside the Edge Function environment. Never copy the service-role secret into `app.js`.
+
+Before launch, use two disposable accounts to test password recovery and account deletion. A team owner with other approved members must transfer ownership or remove those members before deletion.
+
+## Launch Smoke Test
+
+Open Menu > Test kit and complete the Launch smoke test on the production URL. It covers account email, password recovery, cloud sync, cross-company RLS isolation, QR travellers, iPad/Android PWA updates, offline behaviour, backups, account deletion and privacy-safe diagnostics.
 
 For a different Supabase project, update these constants near the top of `app.js`:
 

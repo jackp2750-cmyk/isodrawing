@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=290" />
+    <link rel="stylesheet" href="./styles.css?v=294" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +189,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v2.90</span>
+              <span class="version-badge" id="appVersionBadge">v2.94</span>
             </div>
           </div>
 
@@ -412,6 +412,10 @@
                   <button class="icon-button labeled save-action" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Defaults</span>
+                  </button>
+                  <button class="icon-button labeled" id="legalSupportMenuButton" type="button" title="Privacy, terms and support" aria-label="Open privacy, terms and support">
+                    <svg><use href="#icon-user"></use></svg>
+                    <span>Privacy &amp; support</span>
                   </button>
                   <button class="icon-button labeled" id="helpButton" type="button" title="Open help" aria-label="Open SpoolMate help">
                     <svg><use href="#icon-help"></use></svg>
@@ -906,15 +910,19 @@
             <button id="authCreateModeButton" type="button" aria-selected="false">Create account</button>
           </div>
           <div class="project-dialog-grid">
-            <label class="field project-dialog-wide">
+            <label class="field project-dialog-wide" id="authEmailField">
               <span>Email</span>
               <input id="authEmailInput" type="email" autocomplete="email" />
             </label>
-            <label class="field project-dialog-wide">
+            <label class="field project-dialog-wide" id="authPasswordField">
               <span>Password</span>
               <input id="authPasswordInput" type="password" autocomplete="current-password" minlength="6" />
             </label>
-            <label class="toggle auth-remember project-dialog-wide">
+            <label class="field project-dialog-wide" id="authPasswordConfirmField" hidden>
+              <span>Confirm new password</span>
+              <input id="authPasswordConfirmInput" type="password" autocomplete="new-password" minlength="8" />
+            </label>
+            <label class="toggle auth-remember project-dialog-wide" id="authRememberField">
               <input id="authRememberDeviceInput" type="checkbox" />
               <span>Remember me on this device</span>
             </label>
@@ -942,10 +950,26 @@
             </div>
             <div class="team-members-list" id="teamMembersList" aria-live="polite"></div>
           </section>
+          <section class="account-launch-panel" id="accountLaunchPanel">
+            <div>
+              <strong>Account, privacy and support</strong>
+              <small>Recover access, export your cloud data, get diagnostics or manage your account.</small>
+            </div>
+            <div class="account-launch-actions">
+              <button class="icon-button labeled" id="authForgotPasswordButton" type="button">Forgot password</button>
+              <button class="icon-button labeled" id="authBackToSignInButton" type="button" hidden>Back to sign in</button>
+              <button class="icon-button labeled" id="accountExportDataButton" type="button" hidden>Export my data</button>
+              <button class="icon-button labeled" id="diagnosticReportButton" type="button">Download diagnostics</button>
+              <button class="icon-button labeled" id="legalSupportButton" type="button">Privacy, terms &amp; support</button>
+              <button class="icon-button labeled danger" id="accountDeleteButton" type="button" hidden>Delete cloud account</button>
+            </div>
+          </section>
           <div class="project-dialog-actions auth-actions">
             <button class="icon-button labeled" id="authCloseButton" type="button">Continue as guest</button>
             <button class="icon-button labeled" id="authSignOutButton" type="button" hidden>Sign out</button>
             <button class="icon-button labeled" id="authResendButton" type="button" hidden>Resend email</button>
+            <button class="primary-button" id="authSendResetButton" type="button" hidden>Send reset email</button>
+            <button class="primary-button" id="authUpdatePasswordButton" type="button" hidden>Update password</button>
             <button class="icon-button labeled" id="authSignUpButton" type="button" hidden>Sign up</button>
             <button class="primary-button" id="authSignInButton" type="submit">Sign in</button>
           </div>
@@ -1164,11 +1188,49 @@
               <strong>Regression test kit</strong>
               <small>Load known spools after an update and check the expected behaviours.</small>
             </div>
-            <button class="icon-button labeled" id="regressionCloseButton" type="button">Close</button>
+            <div class="regression-head-actions">
+              <button class="icon-button labeled" id="regressionDiagnosticsButton" type="button">Diagnostics</button>
+              <button class="icon-button labeled" id="regressionCloseButton" type="button">Close</button>
+            </div>
           </div>
           <div class="regression-summary" id="regressionSummary"></div>
           <div class="regression-sample-list" id="regressionSampleList"></div>
           <div class="regression-checklist" id="regressionChecklist"></div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop legal-support-backdrop" id="legalSupportDialog" hidden>
+        <section class="project-dialog-card legal-support-card" aria-label="Privacy, terms and support">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Privacy, terms and support</strong>
+              <small>How SpoolMate handles account data and where to get help.</small>
+            </div>
+            <button class="icon-button labeled" id="legalSupportCloseButton" type="button">Close</button>
+          </div>
+          <div class="legal-support-sections">
+            <section>
+              <h2>Privacy summary</h2>
+              <p>Guest drawings are stored in this browser. When you sign in, SpoolMate stores your email, trial/licence status, cloud drawings, team membership, comments and any workshop photos you choose to upload in Supabase.</p>
+              <p>Cloud data is used to authenticate you, synchronise projects and support team collaboration. Workshop photos are stored in a private bucket and access is controlled by project and company permissions.</p>
+              <p>You can download an account-data export from Account. Deleting your cloud account permanently removes the account and its owned cloud data; local browser projects remain on this device.</p>
+            </section>
+            <section>
+              <h2>Important fabrication terms</h2>
+              <p>SpoolMate is a drawing and fabrication-assistance tool, not engineering certification. Check dimensions, specifications, material selections, weld/NDT requirements, lifting calculations and issued PDFs before fabrication, ordering or lifting.</p>
+              <p>Your organisation remains responsible for approvals, applicable standards and workshop use of exported information.</p>
+            </section>
+            <section>
+              <h2>Support and problem reports</h2>
+              <p>Download a diagnostic report before requesting help. It contains app/device status and drawing counts, but excludes drawing geometry, notes, photos, passwords and authentication tokens.</p>
+              <div class="legal-support-actions">
+                <button class="icon-button labeled" id="legalDiagnosticsButton" type="button">Download diagnostics</button>
+                <a class="icon-button labeled" id="legalIssueLink" href="https://github.com/jackp2750-cmyk/isodrawing/issues" target="_blank" rel="noopener noreferrer">Open support page</a>
+              </div>
+              <small>GitHub issues are public. Do not include customer drawings, photos, passwords, tokens or commercially sensitive project information.</small>
+            </section>
+            <p class="legal-draft-notice"><strong>Pre-launch action:</strong> have the final privacy policy and terms reviewed and add the operator's business name and support email before a public paid launch.</p>
+          </div>
         </section>
       </div>
 
@@ -1446,6 +1508,10 @@
                   <p>Signing in lets projects save to your cloud account and makes them available on other devices.</p>
                 </article>
                 <article>
+                  <strong>Password recovery</strong>
+                  <p>Open Account and choose Forgot password. Use the emailed recovery link to return to SpoolMate and set a new password.</p>
+                </article>
+                <article>
                   <strong>Team workspace</strong>
                   <p>Company accounts let a team share projects and comments while drawings are being worked on.</p>
                 </article>
@@ -1464,6 +1530,10 @@
                 <article>
                   <strong>Review and approval</strong>
                   <p>Checkers can approve a drawing or return it with a required comment. Issued drawings stay locked; returning one preserves it and starts the next revision.</p>
+                </article>
+                <article>
+                  <strong>Privacy and account data</strong>
+                  <p>Account includes data export, diagnostics and cloud-account deletion. Privacy &amp; support explains what stays local and what is stored in Supabase.</p>
                 </article>
               </div>
             </section>
@@ -1484,6 +1554,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=290"></script>
+    <script defer src="./app.js?v=294"></script>
   </body>
 </html>

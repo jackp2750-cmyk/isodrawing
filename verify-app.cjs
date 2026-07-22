@@ -12,6 +12,7 @@ const REQUIRED_FILES = [
   "README.md",
   "CHANGELOG.md",
   "supabase-setup.sql",
+  "supabase/functions/delete-account/index.ts",
 ];
 
 const failures = [];
@@ -88,6 +89,7 @@ const manifest = JSON.parse(read("manifest.webmanifest"));
 const readme = read("README.md");
 const changelog = read("CHANGELOG.md");
 const supabaseSql = read("supabase-setup.sql");
+const deleteAccountFunction = read("supabase/functions/delete-account/index.ts");
 
 try {
   new Function(app);
@@ -160,6 +162,29 @@ assert(manifest.theme_color === htmlThemeColor, "Manifest and HTML theme colours
 assert(manifest.background_color === htmlThemeColor, "Manifest splash background does not match the default theme");
 
 assert(!/\b(?:service[_-]?role|sb_secret)[A-Za-z0-9_.-]*/i.test(app), "A privileged Supabase key appears in app.js");
+assert(
+  /resetPasswordForEmail\s*\(/.test(app) && /PASSWORD_RECOVERY/.test(app) && /updateUser\s*\(\s*\{\s*password\s*\}/.test(app),
+  "Password recovery request, redirect or password update wiring is incomplete",
+);
+assert(
+  /functions\.invoke\(\s*["']delete-account["']/.test(app) &&
+    /SUPABASE_SERVICE_ROLE_KEY/.test(deleteAccountFunction) &&
+    /auth\.admin\.deleteUser\s*\(/.test(deleteAccountFunction),
+  "Protected cloud-account deletion wiring is incomplete",
+);
+assert(
+  /function\s+diagnosticReportPayload\s*\(/.test(app) &&
+    /privacyNote:/.test(app) &&
+    /id="legalSupportDialog"/.test(html) &&
+    /const\s+REGRESSION_LAUNCH_CHECKS\s*=/.test(app),
+  "Launch diagnostics, privacy/support or acceptance checklist is missing",
+);
+assert(
+  /function\s+setupNetworkAwareness\s*\(/.test(app) &&
+    /addEventListener\(\s*["']offline["']/.test(app) &&
+    /addEventListener\(\s*["']online["']/.test(app),
+  "Offline and reconnection status wiring is missing",
+);
 assert(
   /isEnterKey\s*&&\s*shouldStopDrawingOnEnter/.test(app) && /stopDrawingMode\(\)/.test(app),
   "Enter-to-stop drawing wiring is missing",

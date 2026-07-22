@@ -1,6 +1,39 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.90`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.94`.
+
+## v2.94 - Launch Readiness Accounts and Support
+- Added Supabase password-reset email requests and a recovery callback flow for choosing a new password.
+- Added account-data export covering owned cloud drawings, memberships, authored messages and local browser projects.
+- Added privacy, fabrication terms and support guidance inside the app, with a clear pre-launch legal/contact-details reminder.
+- Added privacy-safe diagnostic downloads with app, device, PWA, cloud, drawing-health and regression status while excluding drawing content, credentials and raw error messages.
+- Added clear offline/online status so workshop users know local projects remain available while cloud sync, team data and QR travellers are unavailable.
+- Added a ten-step production launch smoke test to the existing regression Test Kit.
+- Added a protected Supabase Edge Function for permanent account deletion, private-photo cleanup and team-owner safeguards.
+- Bumped app cache to `spoolmate-v243`.
+
+## v2.93 - True Shift 45 Tutorial
+- Changed the 45-degree offset tutorial to match the real drawing workflow: enter the offset set, hold Shift for the angled travel, release Shift, draw the return and finish.
+- Required Shift to remain held while the tutorial travel piece is dragged, with corrective guidance when it is not.
+- Added a holdable on-screen Shift key so iPad and Android tablet users can complete the same practice with two-finger touch.
+- Bumped app cache to `spoolmate-v242`.
+
+## v2.92 - Tablet Tutorial Launch Polish
+- Fixed the Beginner tutorial so it starts with drawing instead of checker approval.
+- Replaced the oversized touch-device topic grid with a compact topic selector so the current lesson stays visible.
+- Kept Back, Practice and Next controls reachable throughout the tutorial.
+- Tuned the tutorial for iPad and Android tablets in portrait and landscape, including larger touch targets and safe-area padding.
+- Bumped app cache to `spoolmate-v241`.
+
+## v2.91 - Spool Traveller and Weld Traceability
+- Added permanent spool and revision traceability identifiers that migrate automatically into existing saved drawings.
+- Added automatic W01, W02 and later numbering for placed weld markers, with labels shown directly on the drawing.
+- Added a weld register for welder ID, WPS, fabrication state, visual/NDT inspection, inspector and repair history.
+- Added the weld register as a fabrication PDF page.
+- Added QR spool travellers to issued fabrication PDFs, linked to the current authenticated cloud spool and revision.
+- Added a mobile scan destination showing the current drawing, revision, production stage, assignment, due date, holds, active notes, private workshop photos and weld status.
+- Kept traveller access behind the existing Supabase company/project permissions so private drawing and photo data is not made public.
+- Bumped app cache to `spoolmate-v240`.
 
 ## v2.90 - Clear Revision Fix
 - Added Revision missing as a visible, actionable Drawing checks card instead of reporting it only in a blocked-issue toast.

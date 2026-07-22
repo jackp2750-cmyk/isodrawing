@@ -100,15 +100,29 @@ const authDialogTitle = document.querySelector("#authDialogTitle");
 const authDialogStatus = document.querySelector("#authDialogStatus");
 const authSignInModeButton = document.querySelector("#authSignInModeButton");
 const authCreateModeButton = document.querySelector("#authCreateModeButton");
+const authEmailField = document.querySelector("#authEmailField");
+const authPasswordField = document.querySelector("#authPasswordField");
+const authPasswordConfirmField = document.querySelector("#authPasswordConfirmField");
+const authRememberField = document.querySelector("#authRememberField");
 const authEmailInput = document.querySelector("#authEmailInput");
 const authPasswordInput = document.querySelector("#authPasswordInput");
+const authPasswordConfirmInput = document.querySelector("#authPasswordConfirmInput");
 const authRememberDeviceInput = document.querySelector("#authRememberDeviceInput");
 const authModeHelp = document.querySelector("#authModeHelp");
 const authCloseButton = document.querySelector("#authCloseButton");
 const authSignInButton = document.querySelector("#authSignInButton");
 const authSignUpButton = document.querySelector("#authSignUpButton");
 const authResendButton = document.querySelector("#authResendButton");
+const authForgotPasswordButton = document.querySelector("#authForgotPasswordButton");
+const authBackToSignInButton = document.querySelector("#authBackToSignInButton");
+const authSendResetButton = document.querySelector("#authSendResetButton");
+const authUpdatePasswordButton = document.querySelector("#authUpdatePasswordButton");
 const authSignOutButton = document.querySelector("#authSignOutButton");
+const accountLaunchPanel = document.querySelector("#accountLaunchPanel");
+const accountExportDataButton = document.querySelector("#accountExportDataButton");
+const diagnosticReportButton = document.querySelector("#diagnosticReportButton");
+const legalSupportButton = document.querySelector("#legalSupportButton");
+const accountDeleteButton = document.querySelector("#accountDeleteButton");
 const teamWorkspacePanel = document.querySelector("#teamWorkspacePanel");
 const teamWorkspaceStatus = document.querySelector("#teamWorkspaceStatus");
 const teamCompanyNameInput = document.querySelector("#teamCompanyNameInput");
@@ -235,6 +249,11 @@ const drawingAssistantBuildButton = document.querySelector("#drawingAssistantBui
 const helpButton = document.querySelector("#helpButton");
 const helpDialog = document.querySelector("#helpDialog");
 const helpCloseButton = document.querySelector("#helpCloseButton");
+const legalSupportMenuButton = document.querySelector("#legalSupportMenuButton");
+const legalSupportDialog = document.querySelector("#legalSupportDialog");
+const legalSupportCloseButton = document.querySelector("#legalSupportCloseButton");
+const legalDiagnosticsButton = document.querySelector("#legalDiagnosticsButton");
+const regressionDiagnosticsButton = document.querySelector("#regressionDiagnosticsButton");
 const helpTabButtons = [...document.querySelectorAll("[data-help-tab]")];
 const helpPanels = [...document.querySelectorAll("[data-help-panel]")];
 const projectDialogInputs = {
@@ -266,11 +285,12 @@ const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const PREVIEW_FLOAT_BOUNDS_KEY = "spoolmate-preview-bounds-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.90";
-const APP_BUILD_DATE = "2026-07-18";
+const APP_VERSION = "v2.94";
+const APP_BUILD_DATE = "2026-07-22";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const QR_CODE_JS_URL = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
 const CLOUD_PROJECTS_TABLE = "spool_projects";
 const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_COMPANIES_TABLE = "companies";
@@ -739,17 +759,17 @@ const TUTORIAL_STEPS = [
     kicker: "Angles",
     menuLabel: "Angles / offsets",
     title: "Add 45 degree offsets",
-    body: "Offsets are used when a pipe has to move across and come back parallel. Start with 45 degrees, because it is the most common offset to learn first.",
-    target: "#angleInput",
-    targetLabel: "Angle degrees input",
+    body: "In the real drawing, hold Shift while drawing to snap the angled travel to 45 degrees. Enter the offset set first, then keep Shift held while dragging the travel piece.",
+    target: "#stepLengthInput",
+    targetLabel: "Next run / offset set mm",
     mode: "draw",
-    action: "focusAngle",
-    actionLabel: "Focus Angle",
+    action: "focusLength",
+    actionLabel: "Focus offset set",
     demo: "offset",
     items: [
-      "Choose 45 degrees, then enter the offset set distance.",
-      "Drag the angled travel piece first, then drag the straight return run.",
-      "SpoolMate calculates the 45 travel using the offset set distance and shows the centre-to-centre offset dimension.",
+      "Enter the required offset set distance.",
+      "Hold Shift while dragging the angled travel piece so it snaps to 45 degrees.",
+      "Release Shift after the angled travel, then draw the straight return run. SpoolMate calculates and labels the 45 travel.",
     ],
   },
   {
@@ -942,7 +962,7 @@ const TUTORIAL_STEPS = [
     ],
   },
 ];
-const BEGINNER_TUTORIAL_STEP_INDEXES = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+const BEGINNER_TUTORIAL_STEP_INDEXES = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
 const LOAD_PLAN_TRAYS = {
   medium: { key: "medium", label: "3460 x 2040 mm tray", lengthMm: 3460, widthMm: 2040 },
   long: { key: "long", label: "4490 x 2040 mm tray", lengthMm: 4490, widthMm: 2040 },
@@ -1341,6 +1361,7 @@ let healthHighlightAnimationFrame = 0;
 let startupProjectPromptPending = false;
 let authGateOpen = false;
 let authMode = "signin";
+const recentClientErrors = [];
 let supabaseClient = null;
 let cloudUser = null;
 let cloudProfile = null;
@@ -1357,6 +1378,7 @@ let companyMembers = [];
 let projectComments = [];
 let projectCommentsProjectId = null;
 let projectCommentsBusy = false;
+let travellerRouteHandled = false;
 let pendingProjectCommentPhoto = null;
 let pendingProjectCommentPhotoUrl = "";
 const projectCommentPhotoUrlCache = new Map();
@@ -1488,6 +1510,8 @@ function sampleState() {
     checkedAt: "",
     locked: false,
     revisionHistory: [],
+    spoolUid: createTraceabilityId("SPL"),
+    weldRegister: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
     productionActivity: [],
@@ -1672,6 +1696,8 @@ function blankState(options = {}) {
     issuedAt: "",
     locked: false,
     revisionHistory: [],
+    spoolUid: createTraceabilityId("SPL"),
+    weldRegister: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
     productionActivity: [],
@@ -1709,6 +1735,7 @@ function loadState() {
 }
 
 function statePayload(options = {}) {
+  synchronizeWeldRegister(state);
   return {
     appVersion: APP_VERSION,
     points: state.points,
@@ -1751,6 +1778,8 @@ function statePayload(options = {}) {
     issuedAt: String(state.issuedAt ?? "").trim(),
     locked: state.locked === true,
     revisionHistory: options.includeRevisionHistory === false ? [] : normalizeRevisionHistory(state.revisionHistory),
+    spoolUid: normalizeTraceabilityId(state.spoolUid) || createTraceabilityId("SPL"),
+    weldRegister: normalizeWeldRegister(state.weldRegister, state.fittings),
     productionInfo: normalizeProductionInfo(state.productionInfo),
     productionMessages: normalizeProductionMessages(state.productionMessages),
     productionActivity: normalizeProductionActivity(state.productionActivity),
@@ -1835,6 +1864,8 @@ function stateFromPayload(payload, options = {}) {
     issuedAt: String(saved.issuedAt ?? "").trim(),
     locked: saved.locked === true,
     revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
+    spoolUid: normalizeTraceabilityId(saved.spoolUid) || createTraceabilityId("SPL"),
+    weldRegister: normalizeWeldRegister(saved.weldRegister, normalizeFittings(saved.fittings, edges.length)),
     productionInfo: normalizeProductionInfo(saved.productionInfo),
     productionMessages: normalizeProductionMessages(saved.productionMessages),
     productionActivity: normalizeProductionActivity(saved.productionActivity),
@@ -2090,6 +2121,71 @@ function normalizeFittings(fittings, edgeCount) {
 
 function defaultProjectInfo() {
   return { ...PROJECT_INFO_DEFAULT };
+}
+
+function createTraceabilityId(prefix = "ID") {
+  const random = globalThis.crypto?.randomUUID?.().replace(/-/g, "").slice(0, 16)
+    || `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
+  return `${String(prefix).toUpperCase()}-${random.toUpperCase()}`;
+}
+
+function normalizeTraceabilityId(value) {
+  return String(value ?? "").trim().toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 48);
+}
+
+function ensureSpoolUid(source = state) {
+  const existing = normalizeTraceabilityId(source?.spoolUid);
+  if (existing) return existing;
+  const created = createTraceabilityId("SPL");
+  if (source && typeof source === "object") source.spoolUid = created;
+  return created;
+}
+
+function currentRevisionUid(source = state) {
+  const spoolUid = ensureSpoolUid(source);
+  const revision = normalizeProjectInfo(source?.projectInfo).revision || "UNSET";
+  const revisionKey = revision.toUpperCase().replace(/[^A-Z0-9_-]/g, "-").slice(0, 16) || "UNSET";
+  return `${spoolUid}-REV-${revisionKey}`;
+}
+
+const WELD_STATUSES = new Set(["pending", "welded", "visual", "ndt", "accepted", "repair"]);
+
+function normalizeWeldStatus(value) {
+  const status = String(value ?? "pending").trim().toLowerCase();
+  return WELD_STATUSES.has(status) ? status : "pending";
+}
+
+function normalizeWeldRegister(records, fittings = state?.fittings ?? []) {
+  const existing = new Map((Array.isArray(records) ? records : []).map((record) => [Number(record?.fittingId), record]));
+  return (Array.isArray(fittings) ? fittings : [])
+    .filter((fitting) => fitting?.type === "weld")
+    .sort((first, second) => Number(first.segmentIndex) - Number(second.segmentIndex) || Number(first.t) - Number(second.t) || Number(first.id) - Number(second.id))
+    .map((fitting, index) => {
+      const source = existing.get(Number(fitting.id)) ?? {};
+      return {
+        fittingId: Number(fitting.id),
+        number: `W${String(index + 1).padStart(2, "0")}`,
+        welderId: String(source.welderId ?? "").trim().slice(0, 40),
+        wps: String(source.wps ?? "").trim().slice(0, 48),
+        status: normalizeWeldStatus(source.status),
+        inspectionType: String(source.inspectionType ?? "").trim().slice(0, 40),
+        inspectedBy: String(source.inspectedBy ?? "").trim().slice(0, 64),
+        completedAt: String(source.completedAt ?? "").trim().slice(0, 32),
+        repairHistory: String(source.repairHistory ?? "").trim().slice(0, 400),
+        notes: String(source.notes ?? "").trim().slice(0, 240),
+      };
+    });
+}
+
+function synchronizeWeldRegister(source = state) {
+  if (!source || typeof source !== "object") return [];
+  source.spoolUid = ensureSpoolUid(source);
+  source.weldRegister = normalizeWeldRegister(source.weldRegister, source.fittings);
+  return source.weldRegister;
+}
+
+function weldRecordForFitting(fittingId, source = state) {
+  return synchronizeWeldRegister(source).find((record) => record.fittingId === Number(fittingId)) ?? null;
 }
 
 function defaultProductionInfo() {
@@ -2583,6 +2679,19 @@ const REGRESSION_MANUAL_CHECKS = [
   "Select a flange, switch between Table E, ANSI 150 and PN 16, then confirm plate/drilling values and 3D bolt holes update.",
   "Export Fab PDF and confirm the drawing is zoomed in, readable and includes cut list/BOM/weights.",
   "On iPad/Android, confirm tool buttons are easy to tap and panels do not cover the drawing unexpectedly.",
+];
+
+const REGRESSION_LAUNCH_CHECKS = [
+  "Create and confirm a new test account using the production email service.",
+  "Request a password reset, open the email link and set a new password successfully.",
+  "Save a cloud spool on Windows, reopen it on iPad and confirm the same revision and weld register.",
+  "Use two test companies to confirm drawings, comments and private photos cannot cross company boundaries.",
+  "Issue a fabrication PDF, scan its QR code on a phone and confirm the correct spool/revision traveller opens.",
+  "Install the PWA on iPad and Android, then publish a cache bump and confirm the update prompt loads it.",
+  "Disconnect the internet and confirm local projects remain available with clear cloud/QR limitations.",
+  "Export account data and a project backup, then restore the project on a second browser.",
+  "Delete a disposable test account and confirm its cloud projects/photos are no longer accessible.",
+  "Download diagnostics after a forced offline failure and confirm no email, drawing geometry, notes or tokens appear.",
 ];
 
 const REGRESSION_AUTO_CHECKS = [
@@ -6198,6 +6307,19 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
       ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.58, along.y * offset + normal.y * fittingWidth * -0.58);
       ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.58, along.y * offset + normal.y * fittingWidth * 0.58);
       ctx.stroke();
+    }
+    const weldRecord = weldRecordForFitting(fitting.id);
+    if (weldRecord) {
+      const labelX = normal.x * (fittingWidth + 16);
+      const labelY = normal.y * (fittingWidth + 16);
+      ctx.font = "950 10px Inter, system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "rgba(255, 253, 248, 0.96)";
+      ctx.strokeText(weldRecord.number, labelX, labelY);
+      ctx.fillStyle = selected ? "#b42318" : "#1d4ed8";
+      ctx.fillText(weldRecord.number, labelX, labelY);
     }
   } else if (fitting.type === "socket") {
     const branch = socketDirection ?? normal;
@@ -9865,6 +9987,7 @@ function productionActivityCardHtml() {
 
 function updateWorkflowSummary() {
   if (!workflowSummary) return;
+  synchronizeWeldRegister(state);
   const history = normalizeRevisionHistory(state.revisionHistory);
   const reviewReady = projectStatusAtLeast(state.projectStatus, "readycheck");
   const reviewDisabledAttr = cloudPermissionReadOnly
@@ -9889,6 +10012,7 @@ function updateWorkflowSummary() {
       <button type="button" data-workflow-action="save-defaults">Save defaults</button>
     </div>
     ${productionWorkflowCardHtml()}
+    ${weldRegisterCardHtml()}
     <div class="revision-card">
       <strong>Revision history</strong>
       <div class="revision-current">
@@ -9928,6 +10052,61 @@ function updateWorkflowSummary() {
       });
     });
   });
+  workflowSummary.querySelectorAll("[data-weld-field]").forEach((field) => {
+    field.addEventListener("change", () => handleWeldRegisterFieldChange(field));
+  });
+}
+
+function weldStatusLabel(value) {
+  const status = normalizeWeldStatus(value);
+  if (status === "visual") return "Visual passed";
+  if (status === "ndt") return "NDT passed";
+  if (status === "accepted") return "Accepted";
+  if (status === "repair") return "Repair required";
+  if (status === "welded") return "Welded";
+  return "Pending";
+}
+
+function weldRegisterCardHtml() {
+  const welds = synchronizeWeldRegister(state);
+  const spoolUid = ensureSpoolUid(state);
+  const revisionUid = currentRevisionUid(state);
+  return `
+    <div class="workflow-card weld-register-card">
+      <div class="weld-register-head">
+        <div><strong>Weld register</strong><span>${welds.length} numbered weld${welds.length === 1 ? "" : "s"}</span></div>
+        <div class="traceability-ids"><code>${escapeHtml(spoolUid)}</code><code>${escapeHtml(revisionUid)}</code></div>
+      </div>
+      ${welds.length ? `<div class="weld-register-list">${welds.map((weld) => `
+        <section class="weld-register-row" data-weld-row="${weld.fittingId}">
+          <div class="weld-register-number"><strong>${escapeHtml(weld.number)}</strong><span>Marker ${weld.fittingId}</span></div>
+          <label><span>Welder ID</span><input data-weld-id="${weld.fittingId}" data-weld-field="welderId" value="${escapeHtml(weld.welderId)}" maxlength="40" placeholder="Welder" /></label>
+          <label><span>WPS</span><input data-weld-id="${weld.fittingId}" data-weld-field="wps" value="${escapeHtml(weld.wps)}" maxlength="48" placeholder="WPS reference" /></label>
+          <label><span>Status</span><select data-weld-id="${weld.fittingId}" data-weld-field="status">${["pending","welded","visual","ndt","accepted","repair"].map((status) => `<option value="${status}"${weld.status === status ? " selected" : ""}>${weldStatusLabel(status)}</option>`).join("")}</select></label>
+          <label><span>Inspection / NDT</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectionType" value="${escapeHtml(weld.inspectionType)}" maxlength="40" placeholder="VT, PT, RT, UT..." /></label>
+          <label><span>Inspector</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectedBy" value="${escapeHtml(weld.inspectedBy)}" maxlength="64" placeholder="Name / ID" /></label>
+          <label class="weld-register-wide"><span>Repair history / notes</span><input data-weld-id="${weld.fittingId}" data-weld-field="repairHistory" value="${escapeHtml(weld.repairHistory)}" maxlength="400" placeholder="Repair, retest and acceptance history" /></label>
+        </section>
+      `).join("")}</div>` : `<p class="weld-register-empty">Place Weld markers on the drawing. SpoolMate will number them W01, W02 and build the register automatically.</p>`}
+    </div>
+  `;
+}
+
+function handleWeldRegisterFieldChange(field) {
+  if (cloudPermissionReadOnly) {
+    showAppNotice("This team spool is view/comment only for your role.");
+    updateWorkflowSummary();
+    return;
+  }
+  const fittingId = Number(field?.dataset?.weldId);
+  const key = String(field?.dataset?.weldField ?? "");
+  const weld = weldRecordForFitting(fittingId);
+  if (!weld || !["welderId", "wps", "status", "inspectionType", "inspectedBy", "repairHistory", "notes"].includes(key)) return;
+  weld[key] = key === "status" ? normalizeWeldStatus(field.value) : String(field.value ?? "").trim();
+  if (key === "status" && weld.status !== "pending" && !weld.completedAt) weld.completedAt = new Date().toISOString();
+  state.productionActivity = addProductionActivity(state.productionActivity, "weld", `${weld.number} ${key} updated${key === "status" ? ` to ${weldStatusLabel(weld.status)}` : ""}.`, new Date().toISOString());
+  persistState();
+  updateAll({ save: false });
 }
 
 async function handleWorkflowAction(action) {
@@ -12104,8 +12283,8 @@ function tutorialPracticeDetails(step = currentTutorialStep()) {
     case "offset":
       return {
         title: "Practice 45 offset",
-        cue: "Pick 45 degrees, set the offset distance, drag the travel piece, then drag the return run.",
-        hint: "This teaches the same order used on the real drawing: angle, set distance, travel, return.",
+        cue: "Set the offset distance, hold Shift while dragging the 45 travel, then draw the straight return run.",
+        hint: "This matches the real drawing: set distance, hold Shift for the 45 travel, release Shift, then draw the return.",
         done: "45 degree offset drawn and drawing stopped.",
       };
     case "dimensions":
@@ -12195,7 +12374,7 @@ function tutorialTrainerStepLabels(kind) {
     approval: ["Ready spool", "Approve", "Comment", "Issue", "Return", "Reason"],
     draw: ["Draw", "Drag pipe", "Finish"],
     exact: ["Length", "+X"],
-    offset: ["45 deg", "Set", "Travel", "Return", "Finish"],
+    offset: ["Set", "Shift + travel", "Return", "Finish"],
     select: ["Select", "Pipe", "Shift"],
     tee: ["Tee", "Main run", "Branch", "Finish"],
     fittings: ["Flange", "Pipe end", "Standard"],
@@ -12219,7 +12398,7 @@ function tutorialTrainerCurrentChoice(kind = tutorialTrainerKind(currentTutorial
     approval: ["ready-spool", "approve-drawing", "approval-note", "issue-reviewed", "return-drawing", "return-reason"],
     draw: ["draw-tool", "draw-start", "finish-draw"],
     exact: ["length", "exact-run"],
-    offset: ["angle", "set-distance", "offset-travel-start", "offset-return-start", "finish-offset"],
+    offset: ["set-distance", "offset-travel-start", "offset-return-start", "finish-offset"],
     select: ["select-tool", "pipe", "shift-select"],
     tee: ["tee-tool", "pipe", "tee-branch-start", "finish-tee"],
     fittings: ["flange-tool", "end", "flange-standard"],
@@ -12292,7 +12471,7 @@ function tutorialMiniIsoSvg(kind, phase, complete) {
     if (kind === "fittings") return phase === 1 ? "end" : "";
     if (kind === "sockets") return phase === 0 ? "pipe" : phase === 6 ? "socket" : "";
     if (kind === "measure") return phase === 1 ? "start" : phase === 2 ? "end" : "";
-    if (kind === "offset") return phase === 2 ? "offset-travel-start" : phase === 3 ? "offset-return-start" : "";
+    if (kind === "offset") return phase === 1 ? "offset-travel-start" : phase === 2 ? "offset-return-start" : "";
     return "";
   })();
   const hitAttrs = (choice) => {
@@ -12356,29 +12535,29 @@ function tutorialMiniIsoSvg(kind, phase, complete) {
   const measure = kind === "measure" && phase >= 1 ? `<circle class="trainer-point active" cx="66" cy="105" r="7" />` : "";
   const measureLine = kind === "measure" && complete ? `<path class="trainer-measure" d="M66 120 L252 68" /><text x="134" y="86">2,450 mm</text>` : "";
   const offsetBase = kind === "offset" ? `<path class="trainer-pipe" d="M48 112 L108 112" />` : "";
-  const offsetTravel = kind === "offset" && (phase >= 3 || complete) ? `<path class="trainer-pipe new" d="M108 112 L178 42" />` : "";
-  const offsetReturn = kind === "offset" && (phase >= 4 || complete) ? `<path class="trainer-pipe new" d="M178 42 L258 42" />` : "";
-  const offsetTravelGuide = kind === "offset" && phase === 2 && !complete ? `
+  const offsetTravel = kind === "offset" && (phase >= 2 || complete) ? `<path class="trainer-pipe new" d="M108 112 L178 42" />` : "";
+  const offsetReturn = kind === "offset" && (phase >= 3 || complete) ? `<path class="trainer-pipe new" d="M178 42 L258 42" />` : "";
+  const offsetTravelGuide = kind === "offset" && phase === 1 && !complete ? `
     <path class="trainer-guide trainer-drag-target" d="M108 112 L178 42" />
     <path class="trainer-drag-preview" d="M108 112 L108 112" hidden />
     <circle class="trainer-end-target" cx="178" cy="42" r="11" />
     <path class="trainer-angle-arc" d="M130 112 A22 22 0 0 0 124 96" />
     <text x="132" y="103" class="trainer-small-label">45 deg</text>
   ` : "";
-  const offsetReturnGuide = kind === "offset" && phase === 3 && !complete ? `
+  const offsetReturnGuide = kind === "offset" && phase === 2 && !complete ? `
     <path class="trainer-guide trainer-drag-target" d="M178 42 L258 42" />
     <path class="trainer-drag-preview" d="M178 42 L178 42" hidden />
     <circle class="trainer-end-target" cx="258" cy="42" r="11" />
   ` : "";
-  const offsetSet = kind === "offset" && phase >= 2 ? `
+  const offsetSet = kind === "offset" && phase >= 1 ? `
     <path class="trainer-measure" d="M90 112 L90 42" />
     <path class="trainer-measure trainer-set-tick" d="M82 112 L108 112 M82 42 L178 42" />
     <text x="18" y="80" class="trainer-small-label">Set 400 mm</text>
   ` : "";
-  const offsetTravelLabel = kind === "offset" && phase >= 3 ? `
+  const offsetTravelLabel = kind === "offset" && phase >= 2 ? `
     <text x="120" y="78" class="trainer-small-label">Travel 566 mm</text>
   ` : "";
-  const offsetReturnLabel = kind === "offset" && phase >= 4 ? `
+  const offsetReturnLabel = kind === "offset" && phase >= 3 ? `
     <text x="204" y="31" class="trainer-small-label">Return run</text>
   ` : "";
   const trainerPointMarkers = (() => {
@@ -12404,13 +12583,13 @@ function tutorialMiniIsoSvg(kind, phase, complete) {
   })();
   const offsetPointMarkers = kind === "offset" ? `
       <circle class="trainer-point active" cx="108" cy="112" r="6" />
-      ${phase >= 3 || complete ? `<circle class="trainer-point complete" cx="178" cy="42" r="5" />` : ""}
-      ${phase >= 4 || complete ? `<circle class="trainer-point complete" cx="258" cy="42" r="5" />` : ""}
+      ${phase >= 2 || complete ? `<circle class="trainer-point complete" cx="178" cy="42" r="5" />` : ""}
+      ${phase >= 3 || complete ? `<circle class="trainer-point complete" cx="258" cy="42" r="5" />` : ""}
   ` : "";
   const offsetPointLabels = kind === "offset" ? `
       <text x="101" y="136" class="trainer-point-label">A</text>
-      ${phase >= 2 || complete ? `<text x="173" y="31" class="trainer-point-label">B</text>` : ""}
-      ${phase >= 3 || complete ? `<text x="255" y="31" class="trainer-point-label">C</text>` : ""}
+      ${phase >= 1 || complete ? `<text x="173" y="31" class="trainer-point-label">B</text>` : ""}
+      ${phase >= 2 || complete ? `<text x="255" y="31" class="trainer-point-label">C</text>` : ""}
   ` : "";
   const dimension = kind === "dimensions" ? `
     <path class="trainer-measure" d="M66 126 L252 73" />
@@ -12448,8 +12627,8 @@ function tutorialMiniIsoSvg(kind, phase, complete) {
       <circle ${hitAttrs("end")} cx="252" cy="52" r="18" />
       ${kind === "sockets" && phase === 6 && !complete ? `<circle ${hitAttrs("socket")} cx="138" cy="36" r="22" />` : ""}
       ${kind === "draw" && phase === 1 && !complete ? `<circle ${hitAttrs("draw-start")} cx="66" cy="105" r="22" />` : ""}
-      ${kind === "offset" && phase === 2 && !complete ? `<circle ${hitAttrs("offset-travel-start")} cx="108" cy="112" r="22" />` : ""}
-      ${kind === "offset" && phase === 3 && !complete ? `<circle ${hitAttrs("offset-return-start")} cx="178" cy="42" r="22" />` : ""}
+      ${kind === "offset" && phase === 1 && !complete ? `<circle ${hitAttrs("offset-travel-start")} cx="108" cy="112" r="22" />` : ""}
+      ${kind === "offset" && phase === 2 && !complete ? `<circle ${hitAttrs("offset-return-start")} cx="178" cy="42" r="22" />` : ""}
       ${kind === "tee" && phase === 2 && !complete ? `<circle ${hitAttrs("tee-branch-start")} cx="158" cy="76" r="22" />` : ""}
       ${trainerPointMarkers}
       ${offsetPointMarkers}
@@ -12774,16 +12953,23 @@ function tutorialTrainerContent(kind, phase, complete) {
           <div class="tutorial-trainer-instructions">${complete ? "Exact 2,500 mm run created." : phase === 0 ? "Click the length box, type 2500, then press Enter." : "Press +X to add that exact run."}</div>
         </div>
       `;
-    case "offset":
+    case "offset": {
+      const shiftHeld = Boolean(tutorialTrainer?.values?.shiftHeld);
       return `
         <div class="tutorial-trainer-controls">
-          <label class="tutorial-trainer-field"><span>Angle</span><select data-tutorial-trainer-choice="angle" ${phase >= 1 || complete ? "disabled" : ""}><option value="">Choose angle</option><option value="45" ${phase >= 1 || complete ? "selected" : ""}>45 deg</option></select></label>
-          <label class="tutorial-trainer-field"><span>Offset set mm</span><input data-tutorial-trainer-value="offset-set" data-tutorial-trainer-choice="set-distance" type="number" min="1" step="1" inputmode="numeric" value="${escapeHtml(tutorialTrainer?.values?.["offset-set"] || (phase >= 2 || complete ? "400" : ""))}" placeholder="Type 400" ${phase < 1 || phase >= 2 || complete ? "readonly" : ""} /></label>
+          <label class="tutorial-trainer-field"><span>Offset set mm</span><input data-tutorial-trainer-value="offset-set" data-tutorial-trainer-choice="set-distance" type="number" min="1" step="1" inputmode="numeric" value="${escapeHtml(tutorialTrainer?.values?.["offset-set"] || (phase >= 1 || complete ? "400" : ""))}" placeholder="Type 400" ${phase >= 1 || complete ? "readonly" : ""} /></label>
+          ${phase === 1 && !complete ? `
+            <div class="tutorial-shift-practice">
+              <button type="button" class="tutorial-shift-key ${shiftHeld ? "active" : ""}" data-tutorial-trainer-choice="hold-shift" aria-pressed="${shiftHeld ? "true" : "false"}><kbd>Shift</kbd><span>Hold</span></button>
+              <p><strong>Keyboard:</strong> hold your Shift key while dragging. <strong>Touch:</strong> keep this Shift button held with one finger and drag the travel with another.</p>
+            </div>
+          ` : ""}
           ${tutorialMiniIsoSvg(kind, phase, complete)}
-          <div class="tutorial-trainer-instructions">${complete ? "45 degree offset drawn and drawing stopped." : phase === 0 ? "Open the angle menu and choose 45 deg." : phase === 1 ? "Type 400 for the offset set, then press Enter." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold the yellow point and drag the angled 45 travel piece to the blue point." : phase === 3 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Now drag the straight return run from the yellow point to the blue point." : "Press Finish drawing, like pressing Enter."}</div>
-          ${phase >= 4 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="finish-offset">Finish drawing</button>` : ""}
+          <div class="tutorial-trainer-instructions">${complete ? "45 degree offset drawn with Shift and drawing stopped." : phase === 0 ? "Type 400 for the offset set, then press Enter." : phase === 1 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold Shift, then drag the yellow point to the blue point to create the 45 degree travel." : phase === 2 ? tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Release Shift, then drag the straight return run from the yellow point to the blue point." : "Press Finish drawing, like pressing Enter."}</div>
+          ${phase >= 3 && !complete ? `<button type="button" class="tutorial-trainer-button" data-tutorial-trainer-choice="finish-offset">Finish drawing</button>` : ""}
         </div>
       `;
+    }
     case "dimensions":
       return `
         <div class="tutorial-trainer-controls">
@@ -13010,7 +13196,12 @@ function checkTutorialPractice() {
 
 function completeTutorialTrainer() {
   if (tutorialTrainer?.holding?.timer) window.clearTimeout(tutorialTrainer.holding.timer);
-  if (tutorialTrainer) tutorialTrainer.holding = null;
+  if (tutorialTrainer) {
+    tutorialTrainer.holding = null;
+    if (tutorialTrainer.values) tutorialTrainer.values.shiftHeld = false;
+    tutorialTrainer.shiftPointerId = null;
+    tutorialTrainer.shiftCaptureTarget = null;
+  }
   tutorialCompletedSteps.add(tutorialStepIndex);
   if (tutorialPractice) tutorialPractice.complete = true;
   renderTutorialStep();
@@ -13022,6 +13213,9 @@ function advanceTutorialTrainer(phase) {
   tutorialTrainer.phase = phase;
   tutorialTrainer.dragging = null;
   tutorialTrainer.holding = null;
+  if (tutorialTrainer.values) tutorialTrainer.values.shiftHeld = false;
+  tutorialTrainer.shiftPointerId = null;
+  tutorialTrainer.shiftCaptureTarget = null;
   tutorialTrainer.missedDrag = false;
   renderTutorialStep();
 }
@@ -13068,21 +13262,23 @@ function tutorialTrainerDragDefinition(choice) {
     },
     "offset-travel-start": {
       kind: "offset",
-      phase: 2,
+      phase: 1,
       start: { x: 108, y: 112 },
       end: { x: 178, y: 42 },
       threshold: 32,
-      nextPhase: 3,
-      missText: "Start on the yellow point and drag the angled 45 travel to the blue point.",
+      nextPhase: 2,
+      requiresShift: true,
+      shiftMissText: "Hold Shift while dragging the angled travel. That is what activates the 45 degree snap in the real drawing.",
+      missText: "Keep Shift held, start on the yellow point and drag the angled 45 travel to the blue point.",
     },
     "offset-return-start": {
       kind: "offset",
-      phase: 3,
+      phase: 2,
       start: { x: 178, y: 42 },
       end: { x: 258, y: 42 },
       threshold: 34,
-      nextPhase: 4,
-      missText: "Start on the yellow point and drag the straight return run to the blue point.",
+      nextPhase: 3,
+      missText: "Release Shift, start on the yellow point and drag the straight return run to the blue point.",
     },
   };
   return definitions[choice] ?? null;
@@ -13123,6 +13319,36 @@ function releaseTutorialPointerCapture(target, pointerId) {
   } catch {
     // The target can be replaced when a tutorial phase advances.
   }
+}
+
+function startTutorialTrainerShiftHold(event, target, choice) {
+  if (choice !== "hold-shift" || tutorialTrainerKind(currentTutorialStep()) !== "offset" || tutorialTrainerPhase() !== 1 || !tutorialTrainer) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  tutorialTrainer.values = tutorialTrainer.values || {};
+  tutorialTrainer.values.shiftHeld = true;
+  tutorialTrainer.shiftPointerId = event.pointerId;
+  tutorialTrainer.shiftCaptureTarget = target;
+  tutorialTrainer.missedDrag = "";
+  target.classList.add("active");
+  target.setAttribute("aria-pressed", "true");
+  setTutorialPointerCapture(target, event.pointerId);
+  return true;
+}
+
+function finishTutorialTrainerShiftHold(event) {
+  if (!tutorialTrainer || tutorialTrainer.shiftPointerId !== event.pointerId) return false;
+  event.preventDefault();
+  event.stopPropagation();
+  const target = tutorialTrainer.shiftCaptureTarget;
+  releaseTutorialPointerCapture(target, event.pointerId);
+  tutorialTrainer.values = tutorialTrainer.values || {};
+  tutorialTrainer.values.shiftHeld = false;
+  tutorialTrainer.shiftPointerId = null;
+  tutorialTrainer.shiftCaptureTarget = null;
+  target?.classList.remove("active");
+  target?.setAttribute("aria-pressed", "false");
+  return true;
 }
 
 function startTutorialTrainerHold(event, target, choice) {
@@ -13218,6 +13444,7 @@ function handleTutorialTrainerPointerDown(event) {
   const target = event.target instanceof Element ? event.target.closest("[data-tutorial-trainer-choice]") : null;
   if (!target || !tutorialStepCard?.contains(target)) return;
   const choice = target.getAttribute("data-tutorial-trainer-choice");
+  if (startTutorialTrainerShiftHold(event, target, choice)) return;
   if (startTutorialTrainerHold(event, target, choice)) return;
   const definition = tutorialTrainerDragDefinition(choice);
   if (!definition) {
@@ -13226,6 +13453,14 @@ function handleTutorialTrainerPointerDown(event) {
   }
   const step = currentTutorialStep();
   if (tutorialTrainerKind(step) !== definition.kind || tutorialTrainerPhase() !== definition.phase) return;
+  const shiftHeld = Boolean(event.shiftKey || tutorialTrainer?.values?.shiftHeld);
+  if (definition.requiresShift && !shiftHeld) {
+    event.preventDefault();
+    event.stopPropagation();
+    tutorialTrainer.missedDrag = definition.shiftMissText || "Hold Shift while drawing this run.";
+    renderTutorialStep();
+    return;
+  }
   const svg = target.closest("svg");
   const point = tutorialTrainerSvgPoint(event, svg);
   if (!svg || !point || !tutorialTrainer) return;
@@ -13236,6 +13471,7 @@ function handleTutorialTrainerPointerDown(event) {
     pointerId: event.pointerId,
     captureTarget: target,
     svg,
+    shiftHeldAtStart: shiftHeld,
   };
   tutorialTrainer.missedDrag = "";
   setTutorialPointerCapture(target, event.pointerId);
@@ -13255,6 +13491,7 @@ function handleTutorialTrainerPointerMove(event) {
 }
 
 function finishTutorialTrainerDrawDrag(event, cancelled = false) {
+  if (finishTutorialTrainerShiftHold(event)) return;
   if (finishTutorialTrainerHold(event, cancelled)) return;
   const drag = tutorialTrainer?.dragging;
   if (!drag || drag.pointerId !== event.pointerId) return;
@@ -13273,7 +13510,13 @@ function finishTutorialTrainerDrawDrag(event, cancelled = false) {
     return;
   }
   const point = tutorialTrainerSvgPoint(event, drag.svg);
+  const shiftHeldAtFinish = Boolean(event.shiftKey || tutorialTrainer?.values?.shiftHeld);
   tutorialTrainer.dragging = null;
+  if (!cancelled && drag.requiresShift && (!drag.shiftHeldAtStart || !shiftHeldAtFinish)) {
+    tutorialTrainer.missedDrag = drag.shiftMissText || "Keep Shift held until the angled run is placed.";
+    renderTutorialStep();
+    return;
+  }
   if (!cancelled && tutorialTrainerDistance(point, drag.end) <= (drag.threshold || 34)) {
     if (drag.complete) {
       completeTutorialTrainer();
@@ -13433,11 +13676,7 @@ function handleTutorialTrainerChoice(choice) {
       }
       break;
     case "offset":
-      if (choice === "angle" && phase < 1) {
-        advanceTutorialTrainer(1);
-      } else if (choice === "set-distance" && phase >= 1 && phase < 2) {
-        advanceTutorialTrainer(2);
-      } else if (choice === "finish-offset" && phase >= 4) {
+      if (choice === "finish-offset" && phase >= 3) {
         completeTutorialTrainer();
       }
       break;
@@ -13526,8 +13765,8 @@ function handleTutorialTrainerChange(event) {
       completeTutorialTrainer();
       return;
     }
-    if (event.type === "change" && kind === "offset" && valueKey === "offset-set" && phase === 1 && numericValue > 0) {
-      advanceTutorialTrainer(2);
+    if (event.type === "change" && kind === "offset" && valueKey === "offset-set" && phase === 0 && numericValue > 0) {
+      advanceTutorialTrainer(1);
       return;
     }
     if (event.type === "change" && kind === "production" && valueKey === "hold-reason" && phase >= 5 && String(tutorialTrainer.values[valueKey]).trim()) {
@@ -13571,8 +13810,8 @@ function handleTutorialTrainerKeyDown(event) {
     completeTutorialTrainer();
     return;
   }
-  if (kind === "offset" && valueKey === "offset-set" && phase === 1 && Number(value) > 0) {
-    advanceTutorialTrainer(2);
+  if (kind === "offset" && valueKey === "offset-set" && phase === 0 && Number(value) > 0) {
+    advanceTutorialTrainer(1);
     return;
   }
   if (kind === "production" && valueKey === "hold-reason" && phase >= 5 && value) {
@@ -14035,6 +14274,16 @@ function tutorialMenuMarkup() {
       <span>Topic ${position + 1} of ${visibleIndexes.length}</span>
       <small>${tutorialPathMode === "all" ? "Pick any feature, or use Next and Back." : "Follow these in order to learn your first spool."}</small>
     </div>
+    <label class="tutorial-topic-select-wrap">
+      <span>Choose topic</span>
+      <select data-tutorial-topic-select aria-label="Tutorial topic">
+        ${visibleIndexes.map((index, optionIndex) => {
+          const step = TUTORIAL_STEPS[index];
+          const done = tutorialCompletedSteps.has(index);
+          return `<option value="${index}" ${index === tutorialStepIndex ? "selected" : ""}>${optionIndex + 1}. ${escapeHtml(tutorialMenuLabel(step, index))}${done ? " - Done" : ""}</option>`;
+        }).join("")}
+      </select>
+    </label>
     <div class="tutorial-topic-menu" role="tablist" aria-label="Tutorial topics">
       ${visibleIndexes.map((index) => {
         const step = TUTORIAL_STEPS[index];
@@ -14200,6 +14449,12 @@ function setupTutorialDialog() {
     if (!target) return;
     event.preventDefault();
     selectTutorialStep(target.dataset.tutorialStep);
+  });
+  tutorialProgress?.addEventListener("change", (event) => {
+    const select = event.target instanceof HTMLSelectElement && event.target.matches("[data-tutorial-topic-select]")
+      ? event.target
+      : null;
+    if (select) selectTutorialStep(select.value);
   });
   tutorialCloseButton?.addEventListener("click", closeTutorialDialog);
   tutorialPrevButton?.addEventListener("click", tutorialPreviousStep);
@@ -14416,6 +14671,25 @@ function setupMobilePanels() {
   }
 }
 
+function openLegalSupportDialog() {
+  closeActionMenu();
+  closeAuthDialog();
+  if (legalSupportDialog) legalSupportDialog.hidden = false;
+}
+
+function closeLegalSupportDialog() {
+  if (legalSupportDialog) legalSupportDialog.hidden = true;
+}
+
+function setupLegalSupportDialog() {
+  legalSupportMenuButton?.addEventListener("click", openLegalSupportDialog);
+  legalSupportCloseButton?.addEventListener("click", closeLegalSupportDialog);
+  legalDiagnosticsButton?.addEventListener("click", downloadDiagnosticReport);
+  legalSupportDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === legalSupportDialog) closeLegalSupportDialog();
+  });
+}
+
 function hasInspectorSelection() {
   return Boolean(
     selectedSegmentIndexes().length ||
@@ -14508,7 +14782,11 @@ function setupAuthDialog() {
 
   authDialogForm?.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (authMode === "signup") {
+    if (authMode === "recovery-request") {
+      sendPasswordResetEmail();
+    } else if (authMode === "recovery-update") {
+      updateRecoveredPassword();
+    } else if (authMode === "signup") {
       signUpWithSupabase();
     } else {
       signInWithSupabase();
@@ -14522,6 +14800,15 @@ function setupAuthDialog() {
   authResendButton?.addEventListener("click", () => {
     resendSignupEmail();
   });
+
+  authForgotPasswordButton?.addEventListener("click", () => setAuthMode("recovery-request"));
+  authBackToSignInButton?.addEventListener("click", () => setAuthMode("signin"));
+  authSendResetButton?.addEventListener("click", sendPasswordResetEmail);
+  authUpdatePasswordButton?.addEventListener("click", updateRecoveredPassword);
+  accountExportDataButton?.addEventListener("click", exportCloudAccountData);
+  diagnosticReportButton?.addEventListener("click", downloadDiagnosticReport);
+  legalSupportButton?.addEventListener("click", openLegalSupportDialog);
+  accountDeleteButton?.addEventListener("click", deleteCloudAccount);
 
   authSignOutButton?.addEventListener("click", () => {
     signOutFromSupabase();
@@ -14563,17 +14850,36 @@ function setupAuthDialog() {
 }
 
 function setAuthMode(mode, options = {}) {
-  authMode = mode === "signup" ? "signup" : "signin";
+  const allowedModes = new Set(["signin", "signup", "recovery-request", "recovery-update"]);
+  authMode = allowedModes.has(mode) ? mode : "signin";
   const createMode = authMode === "signup";
+  const resetRequestMode = authMode === "recovery-request";
+  const resetUpdateMode = authMode === "recovery-update";
+  const credentialMode = authMode === "signin" || createMode;
 
-  authSignInModeButton?.classList.toggle("active", !createMode);
+  authSignInModeButton?.classList.toggle("active", authMode === "signin");
   authCreateModeButton?.classList.toggle("active", createMode);
-  authSignInModeButton?.setAttribute("aria-selected", String(!createMode));
+  authSignInModeButton?.setAttribute("aria-selected", String(authMode === "signin"));
   authCreateModeButton?.setAttribute("aria-selected", String(createMode));
 
-  if (authDialogTitle) authDialogTitle.textContent = createMode ? "Create account" : "Sign in";
+  if (authEmailField) authEmailField.hidden = resetUpdateMode;
+  if (authPasswordField) authPasswordField.hidden = resetRequestMode;
+  if (authPasswordConfirmField) authPasswordConfirmField.hidden = !resetUpdateMode;
+  if (authRememberField) authRememberField.hidden = !credentialMode;
+  if (authPasswordInput) authPasswordInput.required = !resetRequestMode;
+  if (authPasswordConfirmInput) authPasswordConfirmInput.required = resetUpdateMode;
+
+  if (authDialogTitle) {
+    authDialogTitle.textContent = createMode
+      ? "Create account"
+      : resetRequestMode
+      ? "Reset password"
+      : resetUpdateMode
+      ? "Choose new password"
+      : "Sign in";
+  }
   if (authSignInButton) {
-    authSignInButton.hidden = createMode;
+    authSignInButton.hidden = authMode !== "signin";
     authSignInButton.disabled = Boolean(cloudUser);
   }
   if (authSignUpButton) {
@@ -14581,16 +14887,32 @@ function setAuthMode(mode, options = {}) {
     authSignUpButton.disabled = Boolean(cloudUser);
   }
   if (authResendButton) authResendButton.hidden = !createMode || Boolean(cloudUser);
+  if (authForgotPasswordButton) authForgotPasswordButton.hidden = authMode !== "signin" || Boolean(cloudUser);
+  if (authBackToSignInButton) authBackToSignInButton.hidden = credentialMode;
+  if (authSendResetButton) authSendResetButton.hidden = !resetRequestMode;
+  if (authUpdatePasswordButton) authUpdatePasswordButton.hidden = !resetUpdateMode;
+  if (accountExportDataButton) accountExportDataButton.hidden = !cloudUser;
+  if (accountDeleteButton) accountDeleteButton.hidden = !cloudUser;
   if (authPasswordInput) {
-    authPasswordInput.autocomplete = createMode ? "new-password" : "current-password";
+    authPasswordInput.autocomplete = createMode || resetUpdateMode ? "new-password" : "current-password";
+    if (resetUpdateMode) authPasswordInput.placeholder = "At least 8 characters";
+    else authPasswordInput.removeAttribute("placeholder");
   }
   if (authModeHelp) {
     authModeHelp.textContent = createMode
       ? "Create an account, then check your inbox for the confirmation email. If it does not arrive, press Resend email."
+      : resetRequestMode
+      ? "Enter your account email. The reset link returns you to SpoolMate to choose a new password."
+      : resetUpdateMode
+      ? "Choose a new password with at least 8 characters, then enter it again to confirm."
       : "Use the email and password you created for SpoolMate.";
   }
   if (authDialogStatus && !options.keepStatus) {
-    authDialogStatus.textContent = cloudUser
+    authDialogStatus.textContent = resetRequestMode
+      ? "Request a secure password-reset email."
+      : resetUpdateMode
+      ? "Your recovery link has been accepted. Set your new password now."
+      : cloudUser
       ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}`
       : createMode
       ? "Create an account to start a free trial and save spool projects to the cloud."
@@ -14617,7 +14939,9 @@ function openAuthDialog(options = {}) {
     }
   }
   authDialog.hidden = false;
-  if (cloudUser) {
+  if (authMode === "recovery-update") {
+    authPasswordInput?.focus();
+  } else if (cloudUser) {
     authSignOutButton?.focus();
   } else {
     authEmailInput?.focus();
@@ -15168,6 +15492,78 @@ function ensureProjectLibraryDashboardShell() {
   bindProjectLibraryGuideButton();
   bindProjectLibraryCommsButton();
   bindProjectLibraryReportButton();
+}
+
+function passwordRecoveryRedirectUrl() {
+  const url = new URL(location.href);
+  url.hash = "";
+  url.search = "";
+  return url.toString();
+}
+
+async function sendPasswordResetEmail() {
+  const email = authEmail();
+  if (!email || !(await ensureSupabaseClient())) return;
+  authSendResetButton.disabled = true;
+  updateCloudStatus("Sending reset email...", "saving");
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: passwordRecoveryRedirectUrl(),
+    });
+    if (error) throw error;
+    saveAuthRememberPreference();
+    if (authDialogStatus) authDialogStatus.textContent = "If that email has a SpoolMate account, a reset link has been sent. Check the inbox and junk/spam folders.";
+    updateCloudStatus("Reset email sent", "saved");
+    showAppNotice("If that email has an account, a password-reset link has been sent.", { tone: "success" });
+  } catch (error) {
+    recordClientError("password-reset-request", error);
+    updateCloudStatus("Reset email failed", "warning");
+    showAppNotice(error?.message || "Could not send the password-reset email.");
+  } finally {
+    authSendResetButton.disabled = false;
+  }
+}
+
+function openPasswordRecoveryUpdate() {
+  if (authPasswordInput) authPasswordInput.value = "";
+  if (authPasswordConfirmInput) authPasswordConfirmInput.value = "";
+  openAuthDialog({ mode: "recovery-update" });
+  if (authDialogStatus) authDialogStatus.textContent = "Recovery link accepted. Choose a new password to finish.";
+}
+
+async function updateRecoveredPassword() {
+  if (!(await ensureSupabaseClient())) return;
+  const password = String(authPasswordInput?.value ?? "");
+  const confirmPassword = String(authPasswordConfirmInput?.value ?? "");
+  if (password.length < 8) {
+    showAppNotice("Use at least 8 characters for the new password.");
+    authPasswordInput?.focus();
+    return;
+  }
+  if (password !== confirmPassword) {
+    showAppNotice("The two passwords do not match.");
+    authPasswordConfirmInput?.focus();
+    return;
+  }
+  authUpdatePasswordButton.disabled = true;
+  try {
+    const { error } = await supabaseClient.auth.updateUser({ password });
+    if (error) throw error;
+    authPasswordInput.value = "";
+    authPasswordConfirmInput.value = "";
+    const cleanUrl = new URL(location.href);
+    cleanUrl.hash = "";
+    cleanUrl.searchParams.delete("password-recovery");
+    history.replaceState(null, "", cleanUrl);
+    setAuthMode("signin");
+    updateCloudStatus("Password updated", "saved");
+    showAppNotice("Password updated successfully.", { tone: "success" });
+  } catch (error) {
+    recordClientError("password-update", error);
+    showAppNotice(error?.message || "Could not update the password.");
+  } finally {
+    authUpdatePasswordButton.disabled = false;
+  }
 }
 
 function bindProjectLibraryGuideButton() {
@@ -16128,6 +16524,18 @@ function endpointRenderBasePoint(start, end, renderedSegment, side, clearanceMet
   return side === "start"
     ? start.clone().addScaledVector(axis, offset)
     : end.clone().addScaledVector(axis, -offset);
+}
+
+function setupNetworkAwareness() {
+  window.addEventListener("offline", () => {
+    updateCloudStatus("Offline / local projects available", "warning");
+    showAppNotice("You are offline. Local projects remain available; cloud sync, team data and QR travellers need a connection.", { tone: "warning" });
+  });
+  window.addEventListener("online", () => {
+    updateCloudStatus();
+    showAppNotice("Connection restored. Cloud changes can sync again.", { tone: "success" });
+  });
+  if (!navigator.onLine) updateCloudStatus("Offline / local projects available", "warning");
 }
 
 function nodeFittingClearanceMetres(nodeIndex, segment, connections, segmentByIndex, segmentData, style) {
@@ -18915,6 +19323,198 @@ function safeFilePart(value, fallback) {
   return cleaned || fallback;
 }
 
+function redactDiagnosticText(value) {
+  return String(value ?? "")
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email removed]")
+    .replace(/Bearer\s+[A-Za-z0-9._~-]+/gi, "Bearer [token removed]")
+    .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[token removed]")
+    .slice(0, 500);
+}
+
+function recordClientError(kind, error) {
+  const detail = String(error?.message || error?.reason || error || "").toLowerCase();
+  const category = /network|fetch|offline|connection/.test(detail)
+    ? "network"
+    : /auth|session|jwt|token|sign.?in/.test(detail)
+    ? "authentication"
+    : /storage|quota|indexeddb|localstorage/.test(detail)
+    ? "storage"
+    : /permission|policy|row.level|forbidden|unauthori[sz]ed/.test(detail)
+    ? "permission"
+    : "application";
+  recentClientErrors.unshift({
+    at: new Date().toISOString(),
+    kind: String(kind || "error").slice(0, 60),
+    type: redactDiagnosticText(error?.name || "Error").replace(/[^a-z0-9 _-]/gi, "").slice(0, 40) || "Error",
+    category,
+  });
+  recentClientErrors.splice(12);
+}
+
+function setupLaunchDiagnostics() {
+  window.addEventListener("error", (event) => {
+    recordClientError("window-error", event.error || event.message);
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    recordClientError("unhandled-rejection", event.reason);
+  });
+}
+
+async function diagnosticReportPayload() {
+  const health = drawingHealthItems();
+  const regression = runRegressionAutoChecks();
+  let serviceWorker = { supported: "serviceWorker" in navigator, controlled: Boolean(navigator.serviceWorker?.controller) };
+  try {
+    const registration = await navigator.serviceWorker?.getRegistration?.();
+    serviceWorker = {
+      ...serviceWorker,
+      registered: Boolean(registration),
+      installing: Boolean(registration?.installing),
+      waiting: Boolean(registration?.waiting),
+      active: Boolean(registration?.active),
+    };
+  } catch (error) {
+    recordClientError("service-worker-diagnostic", error);
+  }
+  return {
+    generatedAt: new Date().toISOString(),
+    app: { version: APP_VERSION, buildDate: APP_BUILD_DATE },
+    environment: {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      online: navigator.onLine,
+      viewport: { width: window.innerWidth, height: window.innerHeight, pixelRatio: window.devicePixelRatio },
+      touchPoints: navigator.maxTouchPoints || 0,
+      standalone: window.matchMedia?.("(display-mode: standalone)")?.matches === true,
+    },
+    serviceWorker,
+    cloud: {
+      configured: supabaseConfigured(),
+      signedIn: Boolean(cloudUser),
+      activeLicense: hasActiveCloudLicense(),
+      teamApproved: activeCompanyIsApproved(),
+      currentProjectHasCloudRecord: currentProjectHasCloudRecord(),
+      saveDirty: cloudSaveDirty,
+      saveBusy: cloudAutosaveBusy,
+      saveConflict: cloudSaveConflict,
+      saveError: Boolean(cloudSaveError),
+    },
+    drawing: {
+      points: state.points.length,
+      runs: state.edges.length,
+      fittings: state.fittings.length,
+      measurements: state.measurements.length,
+      notes: (state.notes ?? []).length,
+      status: normalizeProjectStatus(state.projectStatus),
+      locked: state.locked === true,
+      revisionCount: normalizeRevisionHistory(state.revisionHistory).length,
+      health: health.reduce((summary, item) => {
+        const key = item.level === "error" ? "errors" : item.level === "warning" ? "warnings" : "info";
+        summary[key] += 1;
+        return summary;
+      }, { errors: 0, warnings: 0, info: 0 }),
+    },
+    regression: {
+      passed: regression.filter((item) => item.passed).length,
+      total: regression.length,
+      failedChecks: regression.filter((item) => !item.passed).map((item) => item.title),
+    },
+    recentErrors: recentClientErrors.slice(),
+    privacyNote: "This report excludes drawing geometry, project names, notes, photos, email addresses, passwords and authentication tokens.",
+  };
+}
+
+async function downloadDiagnosticReport() {
+  try {
+    const report = await diagnosticReportPayload();
+    downloadTextFile(JSON.stringify(report, null, 2), `spoolmate-diagnostics-${safeFilePart(APP_VERSION, "version")}-${Date.now()}.json`);
+    showAppNotice("Diagnostic report downloaded. Review it before attaching it to a public support request.", { tone: "success" });
+  } catch (error) {
+    recordClientError("diagnostic-download", error);
+    showAppNotice(error?.message || "Could not create the diagnostic report.");
+  }
+}
+
+async function exportCloudAccountData() {
+  if (!(await ensureSupabaseClient()) || !cloudUser) {
+    showAppNotice("Sign in before exporting account data.");
+    return;
+  }
+  accountExportDataButton.disabled = true;
+  try {
+    const own = (table, fields, column) => supabaseClient.from(table).select(fields).eq(column, cloudUser.id);
+    const [projectsResult, membershipsResult, commentsResult, messagesResult] = await Promise.all([
+      own(CLOUD_PROJECTS_TABLE, "id,owner_id,company_id,name,project_info,drawing_state,created_at,updated_at", "owner_id"),
+      own(CLOUD_COMPANY_MEMBERS_TABLE, "company_id,user_id,email,role,status,created_at,updated_at", "user_id"),
+      own(CLOUD_PROJECT_COMMENTS_TABLE, "id,project_id,company_id,author_id,author_email,body,mentions,photo_path,resolved,resolved_at,resolved_by,created_at,updated_at", "author_id"),
+      own(CLOUD_TEAM_MESSAGES_TABLE, "id,company_id,author_id,author_email,body,pinned,completed,completed_at,remove_after,created_at,updated_at", "author_id"),
+    ]);
+    const failed = [projectsResult, membershipsResult, commentsResult, messagesResult].find((result) => result.error);
+    if (failed?.error) throw failed.error;
+    const companyIds = [...new Set((membershipsResult.data ?? []).map((row) => row.company_id).filter(Boolean))];
+    let companies = [];
+    if (companyIds.length) {
+      const result = await supabaseClient.from(CLOUD_COMPANIES_TABLE).select("id,name,created_by,created_at,updated_at").in("id", companyIds);
+      if (result.error) throw result.error;
+      companies = result.data ?? [];
+    }
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      appVersion: APP_VERSION,
+      account: { id: cloudUser.id, email: cloudUser.email, createdAt: cloudUser.created_at, profile: cloudProfile },
+      memberships: membershipsResult.data ?? [],
+      companies,
+      ownedCloudProjects: projectsResult.data ?? [],
+      authoredProjectComments: commentsResult.data ?? [],
+      authoredTeamMessages: messagesResult.data ?? [],
+      localBrowserProjects: loadSavedBrowserProjects(),
+      note: "Workshop photo paths are listed, but private photo binaries are not included in this JSON export.",
+    };
+    downloadTextFile(JSON.stringify(payload, null, 2), `spoolmate-account-export-${new Date().toISOString().slice(0, 10)}.json`);
+    showAppNotice("Account data export downloaded.", { tone: "success" });
+  } catch (error) {
+    recordClientError("account-data-export", error);
+    showAppNotice(error?.message || "Could not export account data.");
+  } finally {
+    accountExportDataButton.disabled = false;
+  }
+}
+
+async function deleteCloudAccount() {
+  if (!(await ensureSupabaseClient()) || !cloudUser) return;
+  const proceed = await confirmAppAction(
+    "Permanently delete this cloud account, its owned cloud projects and uploaded photos? Team owners must transfer or remove other members first. Local browser projects will remain on this device.",
+    { title: "Delete cloud account", confirmLabel: "Continue", tone: "danger" },
+  );
+  if (!proceed) return;
+  const confirmation = await openFieldInputDialog({
+    title: "Confirm permanent deletion",
+    label: "Type DELETE",
+    value: "",
+    type: "text",
+    help: "This cannot be undone. Export your account data first if you need a copy.",
+    submitLabel: "Delete account",
+  });
+  if (String(confirmation ?? "").trim().toUpperCase() !== "DELETE") {
+    showAppNotice("Account deletion cancelled because DELETE was not entered.");
+    return;
+  }
+  accountDeleteButton.disabled = true;
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("delete-account", { body: { confirmation: "DELETE" } });
+    if (error) throw error;
+    if (!data?.deleted) throw new Error(data?.message || "The delete-account function did not confirm deletion.");
+    await applyCloudSession(null);
+    closeAuthDialog();
+    showAppNotice("Cloud account deleted. Local projects remain on this device.", { tone: "success" });
+  } catch (error) {
+    recordClientError("account-delete", error);
+    showAppNotice(error?.message || "Could not delete the cloud account. Confirm the protected delete-account Edge Function is deployed.");
+  } finally {
+    accountDeleteButton.disabled = false;
+  }
+}
+
 function supabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 }
@@ -20155,15 +20755,18 @@ async function initSupabase() {
     try {
       const { createClient } = await import(SUPABASE_JS_URL);
       supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        window.setTimeout(() => {
+          if (event === "PASSWORD_RECOVERY") openPasswordRecoveryUpdate();
+          applyCloudSession(session).catch((sessionError) => {
+            console.warn("Cloud session update failed.", sessionError);
+            updateCloudStatus("Cloud setup needed", "warning");
+          });
+        }, 0);
+      });
       const { data, error } = await supabaseClient.auth.getSession();
       if (error) throw error;
       await applyCloudSession(data?.session ?? null);
-      supabaseClient.auth.onAuthStateChange((_event, session) => {
-        applyCloudSession(session).catch((sessionError) => {
-          console.warn("Cloud session update failed.", sessionError);
-          updateCloudStatus("Cloud setup needed", "warning");
-        });
-      });
     } catch (error) {
       console.warn("Supabase failed to initialise.", error);
       updateCloudStatus("Cloud unavailable", "warning");
@@ -20193,6 +20796,9 @@ async function applyCloudSession(session) {
   updateCloudStatus();
   if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
     queueCloudAutosave();
+  }
+  if (!travellerRouteHandled && new URLSearchParams(location.search).get("traveller") === "1") {
+    window.setTimeout(() => maybeOpenProjectFromUrl().catch((error) => console.warn("Could not open spool traveller.", error)), 100);
   }
 }
 
@@ -20354,6 +20960,7 @@ async function maybeOpenProjectFromUrl() {
   if (location.protocol === "file:") return false;
   const params = new URLSearchParams(location.search);
   const projectId = normalizeProjectId(params.get("project"));
+  const traveller = params.get("traveller") === "1";
   if (!projectId) return false;
 
   await initSupabase();
@@ -20361,11 +20968,48 @@ async function maybeOpenProjectFromUrl() {
     openAuthDialog({ startup: true });
     return true;
   }
+  if (traveller) travellerRouteHandled = true;
   await openSavedCloudProject(projectId, {
     skipConfirm: true,
     readOnly: params.get("readonly") === "1",
   });
+  if (traveller && state.projectId === projectId) openSpoolTraveller();
   return true;
+}
+
+function openSpoolTraveller() {
+  document.querySelector("#spoolTravellerDialog")?.remove();
+  const project = normalizeProjectInfo(state.projectInfo);
+  const production = normalizeProductionInfo(state.productionInfo);
+  const welds = synchronizeWeldRegister(state);
+  const activeNotes = projectComments.filter((comment) => !comment.resolved);
+  const photos = projectComments.filter((comment) => comment.photoPath);
+  const drawingImage = buildSpoolReportCanvas("client").toDataURL("image/jpeg", 0.78);
+  const dialog = document.createElement("div");
+  dialog.id = "spoolTravellerDialog";
+  dialog.className = "spool-traveller-backdrop";
+  dialog.innerHTML = `
+    <main class="spool-traveller" role="dialog" aria-modal="true" aria-label="Spool traveller">
+      <header class="spool-traveller-header">
+        <div><span>Spool traveller</span><h1>${escapeHtml(project.spoolNumber || "Unnamed spool")}</h1><code>${escapeHtml(currentRevisionUid(state))}</code></div>
+        <button type="button" data-traveller-close aria-label="Close traveller">Close</button>
+      </header>
+      <img class="spool-traveller-drawing" src="${drawingImage}" alt="Current spool drawing revision ${escapeHtml(project.revision || "-")}" />
+      <section class="spool-traveller-grid">
+        <article><span>Revision</span><strong>${escapeHtml(project.revision || "-")}</strong></article>
+        <article><span>Stage</span><strong>${escapeHtml(projectStatusLabel())}</strong></article>
+        <article><span>Assigned</span><strong>${escapeHtml(production.assignee || "Unassigned")}</strong></article>
+        <article><span>Due</span><strong>${escapeHtml(formatProductionDue(production) || "Not set")}</strong></article>
+      </section>
+      ${production.hold ? `<section class="spool-traveller-hold"><strong>ON HOLD</strong><p>${escapeHtml(production.holdReason || "No reason recorded")}</p></section>` : ""}
+      <section class="spool-traveller-section"><h2>Current notes</h2>${activeNotes.length ? `<ul>${activeNotes.slice(-12).map((comment) => `<li><p>${escapeHtml(comment.body)}</p><span>${escapeHtml(comment.authorEmail || "Team member")} / ${escapeHtml(comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "")}</span></li>`).join("")}</ul>` : `<p>No active spool notes.</p>`}</section>
+      <section class="spool-traveller-section"><h2>Workshop photos</h2><div class="spool-traveller-photos">${photos.length ? photos.slice(-12).map((comment) => `<figure><img data-traveller-photo="${escapeHtml(comment.photoPath)}" alt="Workshop photo" loading="lazy" /><figcaption>${escapeHtml(comment.body)}</figcaption></figure>`).join("") : `<p>No workshop photos attached.</p>`}</div></section>
+      <section class="spool-traveller-section"><h2>Weld register</h2>${welds.length ? `<div class="traveller-weld-list">${welds.map((weld) => `<article><strong>${escapeHtml(weld.number)}</strong><span>${escapeHtml(weldStatusLabel(weld.status))}</span><small>${escapeHtml([weld.welderId && `Welder ${weld.welderId}`, weld.wps, weld.inspectionType].filter(Boolean).join(" / ") || "Details pending")}</small></article>`).join("")}</div>` : `<p>No weld markers registered.</p>`}</section>
+    </main>`;
+  document.body.append(dialog);
+  dialog.querySelector("[data-traveller-close]")?.addEventListener("click", () => dialog.remove());
+  dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.remove(); });
+  dialog.querySelectorAll("[data-traveller-photo]").forEach((image) => hydrateProjectCommentPhoto(image, image.dataset.travellerPhoto));
 }
 
 async function deleteSavedCloudProject(projectId) {
@@ -24805,6 +25449,15 @@ function renderRegressionDialog() {
         </label>
       `).join("")}
     </div>
+    <strong>Launch smoke test</strong>
+    <div class="regression-check-grid launch-check-grid">
+      ${REGRESSION_LAUNCH_CHECKS.map((check, index) => `
+        <label>
+          <input type="checkbox" data-launch-check="${index}" />
+          <span>${escapeHtml(check)}</span>
+        </label>
+      `).join("")}
+    </div>
   `;
 }
 
@@ -24840,6 +25493,7 @@ async function loadRegressionSample(key) {
 
 function setupRegressionDialog() {
   regressionChecklistButton?.addEventListener("click", openRegressionDialog);
+  regressionDiagnosticsButton?.addEventListener("click", downloadDiagnosticReport);
   regressionCloseButton?.addEventListener("click", closeRegressionDialog);
   regressionDialog?.addEventListener("pointerdown", (event) => {
     if (event.target === regressionDialog) closeRegressionDialog();
@@ -25849,6 +26503,7 @@ async function exportFabSheetPdf() {
   const { name } = exportedProjectPayload();
   const template = normalizeFabSheetTemplate(fabSheetTemplate);
   const reportCanvas = buildSpoolReportCanvas(template);
+  await drawTraceabilityQr(reportCanvas);
   const pages = [
     {
       dataUrl: reportCanvas.toDataURL("image/jpeg", 0.92),
@@ -25856,6 +26511,15 @@ async function exportFabSheetPdf() {
       height: reportCanvas.height,
     },
   ];
+
+  const weldRegisterCanvas = buildWeldRegisterReportCanvas();
+  if (weldRegisterCanvas) {
+    pages.push({
+      dataUrl: weldRegisterCanvas.toDataURL("image/jpeg", 0.92),
+      width: weldRegisterCanvas.width,
+      height: weldRegisterCanvas.height,
+    });
+  }
 
   const modelViews = capture3dReportViews();
   if (modelViews.length) {
@@ -25873,6 +26537,91 @@ async function exportFabSheetPdf() {
 
   const pdfBytes = buildImagePdf(pages);
   downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}.pdf`, "application/pdf");
+}
+
+function spoolTravellerUrl() {
+  const url = new URL(location.href);
+  url.hash = "";
+  url.search = "";
+  const projectId = normalizeProjectId(state.projectId);
+  if (projectId) url.searchParams.set("project", projectId);
+  url.searchParams.set("traveller", "1");
+  url.searchParams.set("revision", currentRevisionUid(state));
+  return url.toString();
+}
+
+async function drawTraceabilityQr(canvas) {
+  if (!canvas || !state.issuedAt) return canvas;
+  try {
+    const module = await import(QR_CODE_JS_URL);
+    const qr = module.default ?? module;
+    const qrCanvas = document.createElement("canvas");
+    await qr.toCanvas(qrCanvas, spoolTravellerUrl(), { width: 150, margin: 1, errorCorrectionLevel: "M" });
+    const ctx = canvas.getContext("2d");
+    const size = 150;
+    const x = canvas.width - size - 36;
+    const y = canvas.height - size - 36;
+    ctx.save();
+    roundRect(ctx, x - 12, y - 36, size + 24, size + 48, 10);
+    ctx.fillStyle = "#ffffff";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(31, 42, 47, 0.22)";
+    ctx.stroke();
+    ctx.fillStyle = "#1f3438";
+    ctx.font = "900 13px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("SCAN SPOOL TRAVELLER", x + size / 2, y - 14);
+    ctx.drawImage(qrCanvas, x, y, size, size);
+    ctx.font = "800 9px ui-monospace, monospace";
+    ctx.fillText(currentRevisionUid(state), x + size / 2, y + size + 8);
+    ctx.restore();
+  } catch (error) {
+    console.warn("Could not add spool traveller QR code.", error);
+    showAppNotice("The PDF was created, but its QR code could not be loaded. Check internet access and export again.");
+  }
+  return canvas;
+}
+
+function buildWeldRegisterReportCanvas() {
+  const welds = synchronizeWeldRegister(state);
+  if (!welds.length) return null;
+  const canvas = document.createElement("canvas");
+  canvas.width = REPORT_CANVAS_WIDTH;
+  canvas.height = Math.max(REPORT_CANVAS_HEIGHT, 250 + welds.length * 86);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f7f3e9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawReportHeader(ctx, canvas.width, { title: "Weld register", subtitle: `${currentRevisionUid(state)} / fabrication and inspection traceability`, shortLabel: "Weld" });
+  const x = 28;
+  let y = 146;
+  const widths = [88, 145, 160, 150, 170, 170, 1];
+  const headers = ["Weld", "Welder", "WPS", "Status", "Inspection / NDT", "Inspector", "Repair history / notes"];
+  const available = canvas.width - 56;
+  widths[widths.length - 1] = available - widths.slice(0, -1).reduce((sum, width) => sum + width, 0);
+  ctx.font = "900 12px Inter, system-ui, sans-serif";
+  ctx.fillStyle = "#123a40";
+  ctx.fillRect(x, y, available, 36);
+  ctx.fillStyle = "#ffffff";
+  let columnX = x;
+  headers.forEach((header, index) => { ctx.fillText(header, columnX + 8, y + 23); columnX += widths[index]; });
+  y += 36;
+  welds.forEach((weld, rowIndex) => {
+    const rowHeight = 72;
+    ctx.fillStyle = rowIndex % 2 ? "#f1f6f4" : "#fffdf8";
+    ctx.fillRect(x, y, available, rowHeight);
+    ctx.strokeStyle = "rgba(31,42,47,.14)";
+    ctx.strokeRect(x, y, available, rowHeight);
+    const values = [weld.number, weld.welderId || "-", weld.wps || "-", weldStatusLabel(weld.status), weld.inspectionType || "-", weld.inspectedBy || "-", weld.repairHistory || weld.notes || "-"];
+    columnX = x;
+    values.forEach((value, index) => {
+      ctx.fillStyle = index === 0 ? "#1d4ed8" : "#1f3438";
+      ctx.font = index === 0 ? "950 16px Inter, system-ui, sans-serif" : "800 12px Inter, system-ui, sans-serif";
+      drawWrappedReportText(ctx, String(value), columnX + 8, y + 22, widths[index] - 16, 16, 3);
+      columnX += widths[index];
+    });
+    y += rowHeight;
+  });
+  return canvas;
 }
 
 async function buildModelReportCanvas(modelViews) {
@@ -30180,6 +30929,10 @@ document.addEventListener("keydown", (event) => {
       closeAuthDialog();
       return;
     }
+    if (legalSupportDialog && !legalSupportDialog.hidden) {
+      closeLegalSupportDialog();
+      return;
+    }
     if (toolSettingsDialog && !toolSettingsDialog.hidden) {
       closeToolSettingsDialog();
       return;
@@ -30258,6 +31011,7 @@ function keyboardBlockingOverlayOpen() {
     (projectDialog && !projectDialog.hidden) ||
     (newDrawingDialog && !newDrawingDialog.hidden) ||
     (authDialog && !authDialog.hidden) ||
+    (legalSupportDialog && !legalSupportDialog.hidden) ||
     (homeDashboardDialog && !homeDashboardDialog.hidden) ||
     (projectLibraryDialog && !projectLibraryDialog.hidden) ||
     (regressionDialog && !regressionDialog.hidden) ||
@@ -30312,6 +31066,7 @@ setupFittingsToolMenu();
 setupAppTheme();
 setupActionMenu();
 setupAuthDialog();
+setupLegalSupportDialog();
 setupHomeDashboard();
 setupProjectDialog();
 setupToolSettingsDialog();
@@ -30321,12 +31076,14 @@ setupNoteDialog();
 setupTutorialDialog();
 setupRegressionDialog();
 setupHelpDialog();
+setupLaunchDiagnostics();
 setupPanelFullscreen();
 setupFloatingPreviewPanel();
 setupHealthIssueClicks();
 setupTouchComfort();
 setupTouchSelectionGuards();
 setupLoadPlanner();
+setupNetworkAwareness();
 registerServiceWorker();
 setupAppVersionChecks();
 populatePipeSizeOptions();
