@@ -5,6 +5,7 @@ const previewStage = document.querySelector("#previewStage");
 const drawingPanel = document.querySelector(".drawing-panel");
 const controlPanel = document.querySelector(".control-panel");
 const previewPanel = document.querySelector(".preview-panel");
+const workspaceTitle = document.querySelector("#workspaceTitle");
 const cursorReadout = document.querySelector("#cursorReadout");
 const renderStatus = document.querySelector("#renderStatus");
 const spoolStats = document.querySelector("#spoolStats");
@@ -77,21 +78,17 @@ const projectLockToggle = document.querySelector("#projectLockToggle");
 const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
 const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
-const healthCheckButton = document.querySelector("#healthCheckButton");
 const regressionChecklistButton = document.querySelector("#regressionChecklistButton");
 const regressionDialog = document.querySelector("#regressionDialog");
 const regressionCloseButton = document.querySelector("#regressionCloseButton");
 const regressionSummary = document.querySelector("#regressionSummary");
 const regressionSampleList = document.querySelector("#regressionSampleList");
 const regressionChecklist = document.querySelector("#regressionChecklist");
-const newRevisionButton = document.querySelector("#newRevisionButton");
-const shareReadOnlyButton = document.querySelector("#shareReadOnlyButton");
 const fabSheetTemplateSelect = document.querySelector("#fabSheetTemplateSelect");
 const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
 const homeDashboardButton = document.querySelector("#homeDashboardButton");
 const drawingAssistantButton = document.querySelector("#drawingAssistantButton");
 const accountButton = document.querySelector("#accountButton");
-const accountMenuButton = document.querySelector("#accountMenuButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
 const authDialog = document.querySelector("#authDialog");
@@ -321,8 +318,8 @@ const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.99.1";
-const APP_BUILD_DATE = "2026-07-22";
+const APP_VERSION = "v3.01";
+const APP_BUILD_DATE = "2026-07-23";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -665,6 +662,12 @@ const APP_MODE_INSPECTOR_HINT = {
   edit: "Selection and fitting properties",
   review: "Checks, workflow, notes and retained history",
   export: "Cut list, weights and material order",
+};
+const APP_MODE_WORKSPACE_TITLE = {
+  draw: "Draw spool",
+  edit: "Edit spool",
+  review: "Review and issue",
+  export: "Export fabrication",
 };
 const SIDE_TOOL_DETAILS = {
   draw: ["Draw", "Create pipe runs from points"],
@@ -1629,6 +1632,7 @@ function sampleState() {
     productionMessages: [],
     productionActivity: [],
     healthAcknowledgements: {},
+    issueAudits: [],
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -1815,6 +1819,7 @@ function blankState(options = {}) {
     productionMessages: [],
     productionActivity: [],
     healthAcknowledgements: {},
+    issueAudits: [],
     projectInfo: defaultProjectInfo(),
     history: [],
     redoHistory: [],
@@ -1897,6 +1902,7 @@ function statePayload(options = {}) {
     productionMessages: normalizeProductionMessages(state.productionMessages),
     productionActivity: normalizeProductionActivity(state.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(state.healthAcknowledgements),
+    issueAudits: normalizeIssueAudits(state.issueAudits),
     projectInfo: normalizeProjectInfo(state.projectInfo),
   };
 }
@@ -1983,6 +1989,7 @@ function stateFromPayload(payload, options = {}) {
     productionMessages: normalizeProductionMessages(saved.productionMessages),
     productionActivity: normalizeProductionActivity(saved.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(saved.healthAcknowledgements),
+    issueAudits: normalizeIssueAudits(saved.issueAudits),
     projectInfo: normalizeProjectInfo(saved.projectInfo),
     history: [],
     redoHistory: [],
@@ -2046,6 +2053,48 @@ function normalizeHealthAcknowledgements(value) {
     };
   }
   return normalized;
+}
+
+function normalizeIssueAuditFinding(value) {
+  if (!value || typeof value !== "object") return null;
+  const title = String(value.title ?? "").trim().slice(0, 140);
+  if (!title) return null;
+  const severity = value.severity === "blocker" ? "blocker" : "warning";
+  return {
+    severity,
+    category: String(value.category ?? "Drawing").trim().slice(0, 48),
+    title,
+    detail: String(value.detail ?? "").trim().slice(0, 300),
+  };
+}
+
+function normalizeIssueAudit(value) {
+  if (!value || typeof value !== "object") return null;
+  const revision = String(value.revision ?? "").trim().slice(0, 16);
+  const createdAt = String(value.createdAt ?? "").trim().slice(0, 40);
+  if (!revision && !createdAt) return null;
+  const findings = (Array.isArray(value.findings) ? value.findings : [])
+    .map(normalizeIssueAuditFinding)
+    .filter(Boolean)
+    .slice(0, 40);
+  const result = value.result === "overridden" ? "overridden" : "ready";
+  return {
+    id: String(value.id ?? "").trim().slice(0, 80) || `audit-${Date.now().toString(36)}`,
+    revision,
+    revisionUid: normalizeTraceabilityId(value.revisionUid),
+    createdAt,
+    result,
+    issuedBy: String(value.issuedBy ?? "").trim().slice(0, 80),
+    checkedBy: String(value.checkedBy ?? "").trim().slice(0, 80),
+    checkedAt: String(value.checkedAt ?? "").trim().slice(0, 40),
+    overrideReason: String(value.overrideReason ?? "").trim().slice(0, 700),
+    findings,
+  };
+}
+
+function normalizeIssueAudits(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(normalizeIssueAudit).filter(Boolean).slice(0, 24);
 }
 
 function normalizeReducerSideOverrides(overrides, pointCount) {
@@ -3212,6 +3261,7 @@ function normalizeRevisionHistory(history) {
       checkedAt: String(entry?.checkedAt ?? entry?.state?.checkedAt ?? "").trim(),
       issuedBy: String(entry?.issuedBy ?? entry?.state?.issuedBy ?? "").trim().slice(0, 120),
       issuedAt: String(entry?.issuedAt ?? entry?.state?.issuedAt ?? "").trim(),
+      issueAudit: normalizeIssueAudit(entry?.issueAudit ?? entry?.state?.issueAudits?.[0]),
       state: entry?.state && typeof entry.state === "object" ? entry.state : null,
     }))
     .filter((entry) => entry.revision || entry.state)
@@ -9571,10 +9621,31 @@ function drawingHealthItems() {
   if (!segmentData.length) {
     items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting.", { type: "tool", tool: "draw" }));
   }
+  const invalidLengthRuns = segmentData.filter((segment) => pointLength(segment.vector) <= 0.001);
+  if (invalidLengthRuns.length) {
+    items.push(healthIssue(
+      "error",
+      "Invalid pipe run length",
+      `${invalidLengthRuns.length} run${invalidLengthRuns.length === 1 ? "" : "s"} have no usable centreline length.`,
+      { type: "segments", segmentIndexes: invalidLengthRuns.map((segment) => segment.index) },
+    ));
+  }
+  const unusuallyShortRuns = segmentData.filter((segment) => {
+    const length = pointLength(segment.vector);
+    return length > 0.001 && length < MIN_LENGTH_MM;
+  });
+  if (unusuallyShortRuns.length) {
+    items.push(healthIssue(
+      "warning",
+      "Confirm very short pipe runs",
+      `${unusuallyShortRuns.length} run${unusuallyShortRuns.length === 1 ? "" : "s"} are shorter than ${MIN_LENGTH_MM} mm.`,
+      { type: "segments", segmentIndexes: unusuallyShortRuns.map((segment) => segment.index) },
+    ));
+  }
   const pressureLimit = weakestPressureEstimate(segmentData);
   if (pressureLimit) {
     items.push(healthIssue(
-      "warning",
+      "info",
       "Weakest pressure point",
       `${pressureEstimateDetail(pressureLimit)} Verify fittings, flanges, temperature and design code before using this as a rating.`,
       {
@@ -10002,31 +10073,190 @@ function currentWorkflowRows() {
   ];
 }
 
+function readyIssueFinding(severity, category, title, detail, action = null, source = null) {
+  return {
+    severity: severity === "blocker" ? "blocker" : "warning",
+    category: String(category ?? "Drawing").trim() || "Drawing",
+    title: String(title ?? "").trim(),
+    detail: String(detail ?? "").trim(),
+    action,
+    source,
+  };
+}
+
+function weldReadyIssueFindings(welds = synchronizeWeldRegister(state)) {
+  const blockers = [];
+  const warnings = [];
+  for (const weld of welds) {
+    const action = { type: "weld", fittingId: weld.fittingId };
+    if (!weld.wps) {
+      blockers.push(readyIssueFinding(
+        "blocker",
+        "Weld register",
+        `${weld.number} is missing a WPS`,
+        "Enter the approved welding procedure before issuing the fabrication drawing.",
+        { ...action, field: "wps" },
+      ));
+    }
+    if (weld.status === "repair") {
+      blockers.push(readyIssueFinding(
+        "blocker",
+        "Weld register",
+        `${weld.number} has an unresolved repair`,
+        weld.repairHistory || "Record the repair, retest and accepted result before issue.",
+        { ...action, field: "status" },
+      ));
+    }
+    const inspectionIncomplete = !weld.inspectionType || !weld.inspectedBy;
+    if (weld.status === "accepted" && inspectionIncomplete) {
+      blockers.push(readyIssueFinding(
+        "blocker",
+        "Weld register",
+        `${weld.number} acceptance record is incomplete`,
+        "Accepted welds require both the inspection/NDT method and inspector name or ID.",
+        { ...action, field: weld.inspectionType ? "inspectedBy" : "inspectionType" },
+      ));
+    } else if (["visual", "ndt"].includes(weld.status) && inspectionIncomplete) {
+      warnings.push(readyIssueFinding(
+        "warning",
+        "Weld register",
+        `${weld.number} inspection details are incomplete`,
+        "Record the inspection/NDT method and inspector name or ID.",
+        { ...action, field: weld.inspectionType ? "inspectedBy" : "inspectionType" },
+      ));
+    } else if (weld.status === "welded") {
+      warnings.push(readyIssueFinding(
+        "warning",
+        "Weld register",
+        `${weld.number} inspection is still pending`,
+        "The weld is marked complete but has not progressed to visual, NDT or accepted.",
+        { ...action, field: "status" },
+      ));
+    }
+  }
+  return { blockers, warnings };
+}
+
 function preIssueChecklist() {
   const project = normalizeProjectInfo(state.projectInfo);
   const health = drawingHealthItems();
-  const projectMissing = [
-    project.jobNumber ? "" : "job number",
-    project.spoolNumber ? "" : "spool number",
-    project.revision ? "" : "revision",
+  const segmentData = segments();
+  const production = normalizeProductionInfo(state.productionInfo);
+  const welds = synchronizeWeldRegister(state);
+  const projectFields = [
+    ["jobNumber", "job number"],
+    ["spoolNumber", "spool number"],
+    ["revision", "revision"],
+  ];
+  const projectMissing = projectFields.filter(([field]) => !project[field]).map(([, label]) => label);
+  const projectBlockers = projectFields
+    .filter(([field]) => !project[field])
+    .map(([field, label]) => readyIssueFinding(
+      "blocker",
+      "Project",
+      `${label[0].toUpperCase()}${label.slice(1)} missing`,
+      `Add the ${label} before issuing the fabrication drawing.`,
+      { type: "project", field },
+    ));
+  const projectWarnings = [
+    !project.drawnBy
+      ? readyIssueFinding("warning", "Project", "Drawn by is not recorded", "Add the drawing author for traceability.", { type: "project", field: "drawnBy" })
+      : null,
+    !project.client
+      ? readyIssueFinding("warning", "Project", "Client / area is not recorded", "Add the client, plant or work area when it is known.", { type: "project", field: "client" })
+      : null,
   ].filter(Boolean);
+  const healthErrors = health.filter((item) => item.severity === "error" && !item.acknowledged && item.target?.type !== "project");
+  const healthWarnings = health.filter((item) => item.severity === "warning" && !item.acknowledged);
+  const healthBlockers = healthErrors.map((item) => readyIssueFinding(
+    "blocker",
+    "Drawing",
+    item.title,
+    item.detail,
+    { type: "health" },
+    item,
+  ));
+  const drawingWarnings = healthWarnings.map((item) => readyIssueFinding(
+    "warning",
+    "Drawing",
+    item.title,
+    item.detail,
+    { type: "health" },
+    item,
+  ));
+  const weldFindings = weldReadyIssueFindings(welds);
+  const productionBlockers = production.hold
+    ? [readyIssueFinding(
+        "blocker",
+        "Production",
+        "Spool is on hold",
+        production.holdReason || "Remove the hold or record how it has been resolved.",
+        { type: "production" },
+      )]
+    : [];
+  const dueState = productionDueState(production);
+  const productionWarnings = [
+    !production.assignee
+      ? readyIssueFinding("warning", "Production", "No worker is assigned", "Assign the spool so the workshop knows who owns the next action.", { type: "production" })
+      : null,
+    !production.dueDate
+      ? readyIssueFinding("warning", "Production", "No due date is set", "Set the required workshop or issue date.", { type: "production" })
+      : dueState.key === "overdue"
+      ? readyIssueFinding("warning", "Production", "The due date is overdue", "Review the due date before issuing this revision.", { type: "production" })
+      : null,
+  ].filter(Boolean);
+  const approvalBlockers = state.checkedAt
+    ? []
+    : [readyIssueFinding(
+        "blocker",
+        "Approval",
+        "Drawing has not been approved",
+        projectStatusAtLeast(state.projectStatus, "readycheck")
+          ? "Record the checker before issuing."
+          : "Move the spool to Ready to check, then record the checker.",
+        { type: "approval" },
+      )];
+  const blockers = [
+    ...projectBlockers,
+    ...healthBlockers,
+    ...weldFindings.blockers,
+    ...productionBlockers,
+    ...approvalBlockers,
+  ];
+  const warnings = [
+    ...projectWarnings,
+    ...drawingWarnings,
+    ...weldFindings.warnings,
+    ...productionWarnings,
+  ];
   const regressionResults = runRegressionAutoChecks();
+  const sizeLabels = [...new Set(segmentData.map((segment) => pipeSizeDisplayLabel(pipeSizeForSegment(segment))))];
   return {
     projectMissing,
     health,
-    // Missing project fields are reported by projectMissing, avoiding a second
-    // generic drawing-error count for the same fixable item.
-    errors: health.filter((item) => item.severity === "error" && !item.acknowledged && item.target?.type !== "project"),
-    warnings: health.filter((item) => item.severity === "warning" && !item.acknowledged),
+    errors: healthErrors,
+    healthWarnings,
     acknowledged: health.filter((item) => item.acknowledged),
+    projectBlockers,
+    projectWarnings,
+    welds,
+    weldBlockers: weldFindings.blockers,
+    weldWarnings: weldFindings.warnings,
+    productionBlockers,
+    productionWarnings,
+    approvalBlockers,
+    blockers,
+    warnings,
+    findings: [...blockers, ...warnings],
+    materialText: `${pipeSpec().shortLabel} / ${sizeLabels.length ? sizeLabels.join(", ") : pipeSizeDisplayLabelByNb(state.pipeSizeNb)}`,
     regressionResults,
     regressionFailures: regressionResults.filter((result) => result.passed !== true),
   };
 }
 
 function preIssueChecklistStatus(checks = preIssueChecklist()) {
-  if (checks.projectMissing.length || checks.errors.length) return "blocked";
-  if (checks.warnings.length || checks.regressionFailures.length || !state.checkedAt) return "review";
+  if (checks.blockers.length) return "blocked";
+  if (checks.warnings.length || checks.regressionFailures.length) return "review";
   return "ready";
 }
 
@@ -10039,17 +10269,77 @@ function preIssueChecklistRowHtml(label, value, status) {
   `;
 }
 
+function preIssueFindingActionLabel(finding) {
+  if (finding.action?.type === "project") return `Edit ${projectFieldLabel(finding.action.field)}`;
+  if (finding.action?.type === "health") return healthIssueTargetHint(finding.source) || "Review drawing";
+  if (finding.action?.type === "weld") return `Open ${finding.title.split(" ")[0]}`;
+  if (finding.action?.type === "production") return "Open Jobs";
+  if (finding.action?.type === "approval") return "Approve drawing";
+  return "";
+}
+
+function preIssueFindingHtml(finding, index) {
+  const actionLabel = preIssueFindingActionLabel(finding);
+  return `
+    <li class="ready-issue-finding ${escapeHtml(finding.severity)}">
+      <div>
+        <small>${escapeHtml(finding.category)}</small>
+        <strong>${escapeHtml(finding.title)}</strong>
+        ${finding.detail ? `<span>${escapeHtml(finding.detail)}</span>` : ""}
+      </div>
+      ${actionLabel ? `<button type="button" data-preissue-finding="${index}">${escapeHtml(actionLabel)}</button>` : ""}
+    </li>
+  `;
+}
+
+function latestIssueAudit(source = state) {
+  if (!source?.issuedAt || !projectStatusAtLeast(source.projectStatus, "issued")) return null;
+  const audits = normalizeIssueAudits(source.issueAudits);
+  const revisionUid = currentRevisionUid(source);
+  const revision = normalizeProjectInfo(source.projectInfo).revision;
+  return audits.find((audit) => audit.revisionUid && audit.revisionUid === revisionUid)
+    ?? audits.find((audit) => !audit.revisionUid && audit.revision === revision)
+    ?? null;
+}
+
+function issueAuditSummaryHtml(audit = latestIssueAudit()) {
+  if (!audit) return "";
+  const when = audit.createdAt ? new Date(audit.createdAt).toLocaleString() : "time not recorded";
+  const result = audit.result === "overridden" ? "Warnings overridden" : "Passed";
+  return `
+    <div class="ready-issue-audit ${escapeHtml(audit.result)}">
+      <strong>Last issue audit: ${escapeHtml(result)}</strong>
+      <span>Rev ${escapeHtml(audit.revision || "-")} / ${escapeHtml(audit.issuedBy || "unknown")} / ${escapeHtml(when)}</span>
+      ${audit.overrideReason ? `<small>${escapeHtml(audit.overrideReason)}</small>` : ""}
+    </div>
+  `;
+}
+
 function preIssueChecklistCardHtml() {
   const checks = preIssueChecklist();
   const status = preIssueChecklistStatus(checks);
   const projectText = checks.projectMissing.length
     ? `Missing ${checks.projectMissing.join(", ")}`
-    : "Job, spool and revision set";
+    : checks.projectWarnings.length
+    ? `${checks.projectWarnings.length} detail warning${checks.projectWarnings.length === 1 ? "" : "s"}`
+    : "Job, spool, revision and authorship set";
   const healthText = checks.errors.length
     ? `${checks.errors.length} issue${checks.errors.length === 1 ? "" : "s"} to fix`
-    : checks.warnings.length
-    ? `${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} to review`
+    : checks.healthWarnings.length
+    ? `${checks.healthWarnings.length} warning${checks.healthWarnings.length === 1 ? "" : "s"} to review`
     : "No drawing issues";
+  const weldText = checks.weldBlockers.length
+    ? `${checks.weldBlockers.length} critical weld item${checks.weldBlockers.length === 1 ? "" : "s"}`
+    : checks.weldWarnings.length
+    ? `${checks.weldWarnings.length} weld warning${checks.weldWarnings.length === 1 ? "" : "s"}`
+    : checks.welds.length
+    ? `${checks.welds.length} weld record${checks.welds.length === 1 ? "" : "s"} ready`
+    : "No weld markers";
+  const productionText = checks.productionBlockers.length
+    ? "On hold"
+    : checks.productionWarnings.length
+    ? `${checks.productionWarnings.length} allocation warning${checks.productionWarnings.length === 1 ? "" : "s"}`
+    : "Assigned, scheduled and not on hold";
   const testText = checks.regressionFailures.length
     ? `${checks.regressionFailures.length} app self-test${checks.regressionFailures.length === 1 ? "" : "s"} need review; not a spool blocker`
     : "Test kit passed";
@@ -10059,29 +10349,39 @@ function preIssueChecklistCardHtml() {
   const issuedText = state.issuedAt
     ? `Issued by ${state.issuedBy || "unknown"}`
     : status === "ready"
-    ? "Ready to issue"
+    ? "GREEN / Ready"
     : status === "review"
-    ? "Needs review before issue"
-    : "Blocked";
+    ? "AMBER / Review"
+    : "RED / Blocked";
 
   return `
     <div class="workflow-card preissue-card preissue-${escapeHtml(status)}">
       <div class="preissue-heading">
-        <strong>Pre-issue check</strong>
+        <strong>Ready to Issue</strong>
         <span>${escapeHtml(issuedText)}</span>
       </div>
       <ul class="workflow-list preissue-list">
-        ${preIssueChecklistRowHtml("Project", projectText, checks.projectMissing.length ? "blocked" : "ready")}
-        ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.warnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Project", projectText, checks.projectBlockers.length ? "blocked" : checks.projectWarnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Material / sizes", checks.materialText, "ready")}
+        ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.healthWarnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Weld register", weldText, checks.weldBlockers.length ? "blocked" : checks.weldWarnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Production", productionText, checks.productionBlockers.length ? "blocked" : checks.productionWarnings.length ? "review" : "ready")}
         ${checks.acknowledged.length ? preIssueChecklistRowHtml("Acknowledged", `${checks.acknowledged.length} recorded exception${checks.acknowledged.length === 1 ? "" : "s"}`, "review") : ""}
         ${preIssueChecklistRowHtml("Test kit", testText, checks.regressionFailures.length ? "review" : "ready")}
-        ${preIssueChecklistRowHtml("Checked", checkedText, state.checkedAt ? "ready" : "review")}
+        ${preIssueChecklistRowHtml("Approval", checkedText, state.checkedAt ? "ready" : "blocked")}
       </ul>
-      <p class="preissue-help">Drawing errors must be fixed or acknowledged with a reason. Test-kit results diagnose SpoolMate itself and do not block this spool.</p>
+      ${checks.findings.length ? `
+        <details class="ready-issue-findings"${status === "blocked" ? " open" : ""}>
+          <summary>${checks.blockers.length ? `${checks.blockers.length} blocker${checks.blockers.length === 1 ? "" : "s"}` : "No blockers"} / ${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"}</summary>
+          <ul>${checks.findings.map(preIssueFindingHtml).join("")}</ul>
+        </details>
+      ` : `<div class="ready-issue-clear"><strong>All issue checks are clear.</strong><span>The fabrication PDF can be issued without an override.</span></div>`}
+      <p class="preissue-help">Red items block issue. Amber items require a recorded override reason. App self-tests remain visible as diagnostics and never describe the spool itself.</p>
       <div class="preissue-actions">
         <button type="button" data-workflow-action="open-health">Review drawing checks</button>
         ${checks.regressionFailures.length ? `<button type="button" data-workflow-action="open-test-kit">Open app test kit</button>` : ""}
       </div>
+      ${issueAuditSummaryHtml()}
     </div>
   `;
 }
@@ -10150,10 +10450,53 @@ function productionActivityCardHtml() {
   `;
 }
 
+async function handlePreIssueFinding(index) {
+  const finding = preIssueChecklist().findings[Number(index)];
+  if (!finding?.action) return;
+  if (finding.action.type === "project") {
+    await editProjectDetailsFromHealth(finding.action.field);
+    return;
+  }
+  if (finding.action.type === "health" && finding.source) {
+    await focusHealthIssue(finding.source);
+    return;
+  }
+  if (finding.action.type === "production") {
+    await openBrowserProject();
+    return;
+  }
+  if (finding.action.type === "approval") {
+    if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
+      const proceed = await confirmAppAction("Move this spool to Ready to check and open the approval form?", {
+        title: "Prepare drawing approval",
+        confirmLabel: "Move and approve",
+      });
+      if (!proceed) return;
+      applyProjectStatusChange("readycheck");
+      updateControls();
+      updateAll();
+    }
+    await markDrawingChecked();
+    return;
+  }
+  if (finding.action.type === "weld") {
+    showHealthPanel();
+    updateWorkflowSummary();
+    window.requestAnimationFrame(() => {
+      const row = workflowSummary?.querySelector(`[data-weld-row="${Number(finding.action.fittingId)}"]`);
+      row?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      row?.querySelector(`[data-weld-field="${CSS.escape(String(finding.action.field || "wps"))}"]`)?.focus?.();
+      row?.classList.add("ready-issue-focus");
+      window.setTimeout(() => row?.classList.remove("ready-issue-focus"), 2800);
+    });
+  }
+}
+
 function updateWorkflowSummary() {
   if (!workflowSummary) return;
   synchronizeWeldRegister(state);
   const history = normalizeRevisionHistory(state.revisionHistory);
+  const currentAudit = latestIssueAudit();
   const reviewReady = projectStatusAtLeast(state.projectStatus, "readycheck");
   const reviewDisabledAttr = cloudPermissionReadOnly
     ? ' disabled title="View/comment only for your team role"'
@@ -10174,7 +10517,6 @@ function updateWorkflowSummary() {
       <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Issue drawing</button>
       <button type="button" data-workflow-action="new-revision"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>New revision</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
-      <button type="button" data-workflow-action="save-defaults">Save defaults</button>
     </div>
     ${productionWorkflowCardHtml()}
     ${weldRegisterCardHtml()}
@@ -10184,6 +10526,7 @@ function updateWorkflowSummary() {
         <strong>Current Rev ${escapeHtml(normalizeProjectInfo(state.projectInfo).revision || "-")}</strong>
         <span>${escapeHtml(state.checkedAt ? `Checked by ${state.checkedBy || "unknown"}` : "Not checked")}</span>
         <span>${escapeHtml(state.issuedAt ? `Issued by ${state.issuedBy || "unknown"}` : "Not issued")}</span>
+        ${currentAudit ? `<small class="revision-audit ${escapeHtml(currentAudit.result)}">Issue audit: ${escapeHtml(currentAudit.result === "overridden" ? "Warnings overridden" : "Passed")}</small>` : ""}
       </div>
       ${history.length ? `<ul class="revision-list">${history.map((entry) => `
         <li>
@@ -10191,6 +10534,7 @@ function updateWorkflowSummary() {
             <strong>Rev ${escapeHtml(entry.revision || "-")} / ${escapeHtml(projectStatusLabel(entry.status))}</strong>
             <span>${escapeHtml(entry.createdAt ? new Date(entry.createdAt).toLocaleString() : "not dated")}</span>
             <small>${escapeHtml(entry.checkedAt ? `Checked by ${entry.checkedBy || "unknown"}` : "Not checked")} / ${escapeHtml(entry.issuedAt ? `Issued by ${entry.issuedBy || "unknown"}` : "Not issued")}</small>
+            ${entry.issueAudit ? `<small class="revision-audit ${escapeHtml(entry.issueAudit.result)}">Ready to Issue: ${escapeHtml(entry.issueAudit.result === "overridden" ? `Overridden - ${entry.issueAudit.overrideReason || "reason recorded"}` : "Passed")}</small>` : ""}
           </div>
           <button type="button" data-restore-revision="${escapeHtml(entry.id)}">Restore</button>
         </li>
@@ -10203,6 +10547,14 @@ function updateWorkflowSummary() {
       handleWorkflowAction(button.dataset.workflowAction).catch((error) => {
         console.warn("Drawing workflow action failed.", error);
         showAppNotice(error?.message || "Could not update drawing workflow.");
+      });
+    });
+  });
+  workflowSummary.querySelectorAll("[data-preissue-finding]").forEach((button) => {
+    button.addEventListener("click", () => {
+      handlePreIssueFinding(button.dataset.preissueFinding).catch((error) => {
+        console.warn("Ready to Issue action failed.", error);
+        showAppNotice(error?.message || "Could not open that issue.");
       });
     });
   });
@@ -10284,7 +10636,6 @@ async function handleWorkflowAction(action) {
   if (action === "issue-drawing") await issueDrawing();
   if (action === "new-revision") createNextRevision();
   if (action === "share-readonly") shareReadOnlyProject();
-  if (action === "save-defaults") saveCurrentSettingsAsDefaults();
   if (action === "open-jobs") await openBrowserProject();
   if (action === "open-health") showHealthPanel();
   if (action === "open-test-kit") openRegressionDialog();
@@ -10548,14 +10899,10 @@ function applyProjectStatusChange(nextStatus, options = {}) {
 }
 
 function preIssueBlockingMessage(checks) {
-  const parts = [];
-  if (checks.projectMissing.length) {
-    parts.push(`missing ${checks.projectMissing.join(", ")}`);
-  }
-  if (checks.errors.length) {
-    parts.push(`${checks.errors.length} drawing error${checks.errors.length === 1 ? "" : "s"}`);
-  }
-  return parts.join(", ");
+  if (!checks.blockers.length) return "";
+  const titles = checks.blockers.slice(0, 3).map((finding) => finding.title);
+  const remaining = Math.max(0, checks.blockers.length - titles.length);
+  return `${checks.blockers.length} blocker${checks.blockers.length === 1 ? "" : "s"}: ${titles.join("; ")}${remaining ? `; and ${remaining} more` : ""}`;
 }
 
 async function promptForMissingIssueRevision() {
@@ -10581,6 +10928,79 @@ async function promptForMissingIssueRevision() {
   return true;
 }
 
+async function promptForIssueWarningOverride(checks) {
+  const diagnosticWarnings = checks.regressionFailures.map((result) => readyIssueFinding(
+    "warning",
+    "App self-test",
+    result.name || "SpoolMate self-test needs review",
+    result.detail || "This diagnostic describes the app, not the current spool.",
+  ));
+  const warnings = [...checks.warnings, ...diagnosticWarnings];
+  if (!warnings.length) return "";
+  const warningList = warnings.slice(0, 5).map((finding) => finding.title).join("; ");
+  const response = await openFieldInputDialog({
+    title: "Record issue warning override",
+    label: "Required reason for issuing with warnings",
+    value: "",
+    placeholder: "Reviewed open ends against client mark-up; workshop assignment will follow...",
+    help: `${warnings.length} warning${warnings.length === 1 ? "" : "s"}: ${warningList}${warnings.length > 5 ? "; and more" : ""}. The reason, issuer and time are saved with this revision.`,
+    submitLabel: "Record reason and continue",
+    multiline: true,
+  });
+  if (response === null) return null;
+  const reason = String(response).trim().slice(0, 700);
+  if (!reason) {
+    showAppNotice("Enter a reason before issuing a drawing with warnings.");
+    return null;
+  }
+  return reason;
+}
+
+function issueAuditFindingSnapshot(finding) {
+  return normalizeIssueAuditFinding({
+    severity: finding.severity,
+    category: finding.category,
+    title: finding.title,
+    detail: finding.detail,
+  });
+}
+
+function recordReadyIssueAudit(checks, options = {}) {
+  const now = String(options.now ?? new Date().toISOString());
+  const overrideReason = String(options.overrideReason ?? "").trim().slice(0, 700);
+  const acknowledgedFindings = checks.acknowledged.map((item) => readyIssueFinding(
+    "warning",
+    "Acknowledged drawing exception",
+    item.title,
+    item.acknowledgement?.reason || item.detail,
+  ));
+  const diagnosticFindings = checks.regressionFailures.map((result) => readyIssueFinding(
+    "warning",
+    "App self-test",
+    result.name || "SpoolMate self-test needs review",
+    result.detail || "",
+  ));
+  const audit = normalizeIssueAudit({
+    id: `audit-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+    revision: normalizeProjectInfo(state.projectInfo).revision || "-",
+    revisionUid: currentRevisionUid(state),
+    createdAt: now,
+    result: overrideReason ? "overridden" : "ready",
+    issuedBy: options.issuedBy,
+    checkedBy: state.checkedBy,
+    checkedAt: state.checkedAt,
+    overrideReason,
+    findings: [...checks.warnings, ...acknowledgedFindings, ...diagnosticFindings]
+      .map(issueAuditFindingSnapshot)
+      .filter(Boolean),
+  });
+  state.issueAudits = normalizeIssueAudits([
+    audit,
+    ...normalizeIssueAudits(state.issueAudits).filter((entry) => entry.revisionUid !== audit.revisionUid),
+  ]);
+  return audit;
+}
+
 async function issueDrawing(options = {}) {
   if (cloudPermissionReadOnly) {
     showAppNotice(cloudReadOnlyMessage("issue the drawing"));
@@ -10600,9 +11020,7 @@ async function issueDrawing(options = {}) {
   }
   const blocking = preIssueBlockingMessage(checks);
   if (blocking) {
-    const nextStep = checks.projectMissing.length
-      ? "Complete the project details shown in Drawing checks."
-      : "Fix the drawing item, or acknowledge an intentional reducer/tee exception with a reason.";
+    const nextStep = "Open Ready to Issue and use the action beside each red item.";
     showAppNotice(`Pre-issue check blocked: ${blocking}. ${nextStep}`);
     showHealthPanel();
     updateWorkflowSummary();
@@ -10616,24 +11034,11 @@ async function issueDrawing(options = {}) {
     return false;
   }
 
-  if (checks.warnings.length || checks.regressionFailures.length) {
-    const warningBits = [];
-    if (checks.warnings.length) {
-      warningBits.push(`${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} still need review`);
-    }
-    if (checks.regressionFailures.length) {
-      warningBits.push(`${checks.regressionFailures.length} SpoolMate self-test${checks.regressionFailures.length === 1 ? "" : "s"} need review but do not describe this spool`);
-    }
-    const proceed = await confirmAppAction(`${warningBits.join(". ")}. Issue drawing anyway?`, {
-      title: "Pre-issue review",
-      confirmLabel: "Issue drawing",
-      tone: "warning",
-    });
-    if (!proceed) {
-      showHealthPanel();
-      updateControls();
-      return false;
-    }
+  const overrideReason = await promptForIssueWarningOverride(checks);
+  if (overrideReason === null) {
+    showHealthPanel();
+    updateControls();
+    return false;
   }
 
   const name = await openFieldInputDialog({
@@ -10664,15 +11069,19 @@ async function issueDrawing(options = {}) {
   state.productionActivity = addProductionActivity(
     state.productionActivity,
     "revision",
-    `Revision ${issuedRevision} issued by ${issuedBy}.`,
+    `Revision ${issuedRevision} issued by ${issuedBy}${overrideReason ? ` with warning override: ${overrideReason}` : "."}`,
     now,
   );
+  const issueAudit = recordReadyIssueAudit(checks, { now, issuedBy, overrideReason });
+  addRevisionSnapshot("Issued after Ready to Issue gate", { issueAudit });
   if (options.targetStatus && normalizeProjectStatus(options.targetStatus) !== "issued") {
     applyProjectStatusChange(options.targetStatus, { now: new Date().toISOString() });
   }
   updateControls();
   updateAll();
-  showAppNotice("Drawing issued. Fab sheets will now show the issued-by details.");
+  showAppNotice(overrideReason
+    ? "Drawing issued with the warning override recorded against this revision."
+    : "Ready to Issue passed. The drawing and fabrication PDF are now approved for issue.");
   return true;
 }
 
@@ -10700,10 +11109,9 @@ function nextRevisionValue(value) {
   return `${current}-1`;
 }
 
-function addRevisionSnapshot(note = "Saved revision") {
+function addRevisionSnapshot(note = "Saved revision", options = {}) {
   const project = normalizeProjectInfo(state.projectInfo);
-  const history = normalizeRevisionHistory(state.revisionHistory);
-  history.unshift({
+  const snapshot = {
     id: `rev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
     revision: project.revision || "-",
     createdAt: new Date().toISOString(),
@@ -10713,8 +11121,15 @@ function addRevisionSnapshot(note = "Saved revision") {
     checkedAt: String(state.checkedAt ?? "").trim(),
     issuedBy: String(state.issuedBy ?? "").trim(),
     issuedAt: String(state.issuedAt ?? "").trim(),
+    issueAudit: normalizeIssueAudit(options.issueAudit ?? latestIssueAudit()),
     state: statePayload({ includeRevisionHistory: false }),
-  });
+  };
+  const history = normalizeRevisionHistory(state.revisionHistory).filter((entry) => !(
+    snapshot.issuedAt &&
+    entry.revision === snapshot.revision &&
+    entry.issuedAt === snapshot.issuedAt
+  ));
+  history.unshift(snapshot);
   state.revisionHistory = history.slice(0, 12);
 }
 
@@ -10771,6 +11186,10 @@ async function restoreRevision(revisionId) {
   state = restored;
   state.revisionHistory = history;
   state.projectStatus = "draft";
+  state.checkedBy = "";
+  state.checkedAt = "";
+  state.issuedBy = "";
+  state.issuedAt = "";
   state.locked = false;
   state.productionActivity = addProductionActivity(
     state.productionActivity,
@@ -11543,6 +11962,9 @@ function updateAppModeVisibility(mode = appMode) {
   if (inspectorModeHint) {
     inspectorModeHint.textContent = APP_MODE_INSPECTOR_HINT[normalized] ?? APP_MODE_INSPECTOR_HINT.draw;
   }
+  if (workspaceTitle) {
+    workspaceTitle.textContent = APP_MODE_WORKSPACE_TITLE[normalized] ?? APP_MODE_WORKSPACE_TITLE.draw;
+  }
 }
 
 function defaultToolForMode(mode = appMode) {
@@ -11657,8 +12079,8 @@ function applyAppMode(mode, options = {}) {
 
   if (normalized === "review" || normalized === "export" || hasInspectorSelection()) {
     showMobilePanel("inspector");
-  } else if (!isTabletLayout()) {
-    setInspectorDrawerOpen(false);
+  } else {
+    showMobilePanel("drawing");
   }
 
   closeDrawingContextMenu();
@@ -11879,6 +12301,7 @@ function setPreviewHidden(hidden) {
   if (previewPanelHidden) {
     previewPanelMinimized = false;
   } else if (!previewFloatingActive()) {
+    if (!isTabletLayout()) setInspectorDrawerOpen(false);
     previewFloatManual = true;
     storePreviewFloatPreference(true);
   }
@@ -12039,7 +12462,13 @@ function setupFloatingPreviewPanel() {
   previewFloatButton?.addEventListener("click", togglePreviewFloating);
   previewMinimizeButton?.addEventListener("click", togglePreviewMinimized);
   previewHideButton?.addEventListener("click", () => setPreviewHidden(true));
-  previewShowButton?.addEventListener("click", () => setPreviewHidden(false));
+  previewShowButton?.addEventListener("click", () => {
+    if (isTabletLayout()) {
+      showMobilePanel("preview");
+    } else {
+      setPreviewHidden(false);
+    }
+  });
   previewBar?.addEventListener("pointerdown", beginPreviewFloatMove);
   previewFloatResize?.addEventListener("pointerdown", beginPreviewFloatResize);
   window.addEventListener("pointermove", updatePreviewFloatDrag);
@@ -15749,6 +16178,11 @@ function hasInspectorSelection() {
 
 function setInspectorDrawerOpen(open) {
   const next = Boolean(open);
+  if (next && !isTabletLayout() && !previewPanelHidden && !panelFullscreenActive(previewPanel)) {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+  }
   document.body.classList.toggle("inspector-drawer-open", next);
   document.body.classList.toggle("inspector-drawer-closed", !next);
   controlPanel?.setAttribute("aria-hidden", String(!next));
@@ -15770,14 +16204,25 @@ function showMobilePanel(panel = "drawing") {
     return;
   }
   let normalized = requested;
-  if (normalized === "preview" && previewPanelHidden) {
-    previewPanelHidden = false;
+  const previousPanel = document.body.dataset.mobilePanel || "drawing";
+  let previewLayoutChanged = false;
+  if (normalized === "preview") {
+    if (previewFloatManual && !document.body.classList.contains("drawing-panel-fullscreen")) {
+      previewFloatManual = false;
+      storePreviewFloatPreference(false);
+      previewLayoutChanged = true;
+    }
+    if (previewPanelHidden) {
+      previewPanelHidden = false;
+      previewPanelMinimized = false;
+      previewLayoutChanged = true;
+    }
+  } else if (normalized === "drawing" && previousPanel === "preview" && !previewPanelHidden) {
+    previewPanelHidden = true;
     previewPanelMinimized = false;
-    updatePreviewFloatingState();
+    previewLayoutChanged = true;
   }
-  if (normalized === "preview" && isTabletLayout() && previewFloatManual && !document.body.classList.contains("drawing-panel-fullscreen")) {
-    previewFloatManual = false;
-    storePreviewFloatPreference(false);
+  if (previewLayoutChanged) {
     updatePreviewFloatingState();
   }
   const sheetOpen = normalized !== "drawing";
@@ -15809,10 +16254,6 @@ function setupAuthDialog() {
   setAuthMode("signin");
 
   accountButton?.addEventListener("click", () => {
-    openAuthDialog();
-  });
-  accountMenuButton?.addEventListener("click", () => {
-    closeActionMenu();
     openAuthDialog();
   });
 
@@ -22516,6 +22957,7 @@ function openSpoolTraveller(options = {}) {
   const project = normalizeProjectInfo(drawingState.projectInfo);
   const production = normalizeProductionInfo(state.productionInfo);
   const welds = synchronizeWeldRegister(drawingState);
+  const issueAudit = latestIssueAudit(drawingState);
   const acceptedWelds = welds.filter((weld) => weld.status === "accepted").length;
   const activeNotes = projectComments.filter((comment) => !comment.resolved);
   const photos = projectComments.filter((comment) => comment.photoPath);
@@ -22542,9 +22984,18 @@ function openSpoolTraveller(options = {}) {
         <article><span>Assigned</span><strong>${escapeHtml(production.assignee || "Unassigned")}</strong></article>
         <article><span>Due</span><strong>${escapeHtml(formatProductionDue(production) || "Not set")}</strong></article>
         <article><span>Welds accepted</span><strong>${acceptedWelds} / ${welds.length}</strong></article>
+        <article><span>Issue audit</span><strong>${escapeHtml(issueAudit ? issueAudit.result === "overridden" ? "Warnings overridden" : "Passed" : "Not recorded")}</strong></article>
       </section>
       <nav class="spool-traveller-actions" aria-label="Spool traveller actions"><a href="#travellerDrawing">View drawing</a><button type="button" data-traveller-open-full>Open full spool</button></nav>
       <img id="travellerDrawing" class="spool-traveller-drawing" src="${drawingImage}" alt="Spool drawing revision ${escapeHtml(project.revision || "-")}" />
+      <details class="spool-traveller-section"${issueAudit?.result === "overridden" ? " open" : ""}>
+        <summary><span>Ready to Issue audit</span><b>${escapeHtml(issueAudit ? issueAudit.result === "overridden" ? "Override" : "Passed" : "None")}</b></summary>
+        ${issueAudit ? `
+          <p>Recorded ${escapeHtml(issueAudit.createdAt ? new Date(issueAudit.createdAt).toLocaleString() : "without a timestamp")} by ${escapeHtml(issueAudit.issuedBy || "unknown")}.</p>
+          ${issueAudit.overrideReason ? `<p><strong>Override reason:</strong> ${escapeHtml(issueAudit.overrideReason)}</p>` : ""}
+          ${issueAudit.findings.length ? `<ul>${issueAudit.findings.map((finding) => `<li><p>${escapeHtml(finding.title)}</p><span>${escapeHtml(`${finding.category}${finding.detail ? ` / ${finding.detail}` : ""}`)}</span></li>`).join("")}</ul>` : `<p>No warnings were recorded when this revision was issued.</p>`}
+        ` : `<p>This revision predates Ready to Issue auditing or has not been issued.</p>`}
+      </details>
       <details class="spool-traveller-section"${activeNotes.length ? " open" : ""}><summary><span>Current notes</span><b>${activeNotes.length}</b></summary>${activeNotes.length ? `<ul>${activeNotes.slice(-12).map((comment) => `<li><p>${escapeHtml(comment.body)}</p><span>${escapeHtml(comment.authorEmail || "Team member")} / ${escapeHtml(comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "")}</span></li>`).join("")}</ul>` : `<p>No active spool notes.</p>`}</details>
       <details class="spool-traveller-section"><summary><span>Workshop photos</span><b>${photos.length}</b></summary><div class="spool-traveller-photos">${photos.length ? photos.slice(-12).map((comment) => `<figure><img data-traveller-photo="${escapeHtml(comment.photoPath)}" alt="Workshop photo" loading="lazy" /><figcaption>${escapeHtml(comment.body)}</figcaption></figure>`).join("") : `<p>No workshop photos attached.</p>`}</div></details>
       <details class="spool-traveller-section"><summary><span>Weld register</span><b>${welds.length}</b></summary>${welds.length ? `<div class="traveller-weld-list">${welds.map((weld) => `<article><strong>${escapeHtml(weld.number)}</strong><span>${escapeHtml(weldStatusLabel(weld.status))}</span><small>${escapeHtml([weld.welderId && `Welder ${weld.welderId}`, weld.wps, weld.inspectionType].filter(Boolean).join(" / ") || "Details pending")}</small></article>`).join("")}</div>` : `<p>No weld markers registered.</p>`}</details>
@@ -28202,13 +28653,29 @@ function export3dImage() {
   downloadCanvas(fallbackCanvas, "pipe-spool-3d.png");
 }
 
-function exportIsoImage() {
+async function exportIsoImage() {
   markFirstUseGuideLearned("export");
-  exportFabSheetPdf().catch((error) => {
+  if (!state.issuedAt || !projectStatusAtLeast(state.projectStatus, "issued")) {
+    let issued = false;
+    try {
+      issued = await issueDrawing({ source: "fabrication-pdf" });
+    } catch (error) {
+      console.warn("Could not complete the Ready to Issue gate.", error);
+      showAppNotice("Fabrication PDF not created because the issue checks could not be completed.");
+      return;
+    }
+    if (!issued) {
+      showAppNotice("Fabrication PDF not created. Clear the Ready to Issue gate first.");
+      return;
+    }
+  }
+  try {
+    await exportFabSheetPdf();
+  } catch (error) {
     console.warn("Could not export fab sheet PDF.", error);
     showAppNotice("Could not create the PDF. The PNG fab sheet export will be used instead.");
     exportSpoolReportImage();
-  });
+  }
 }
 
 function exportSpoolReportImage() {
@@ -28658,6 +29125,7 @@ function buildTakeoffReportCanvas() {
 
 function drawReportClientPanel(ctx, area, quantities) {
   const project = normalizeProjectInfo(state.projectInfo);
+  const issueAudit = latestIssueAudit();
   ctx.save();
   roundRect(ctx, area.x, area.y, area.width, area.height, 10);
   ctx.fillStyle = "#fffdf8";
@@ -28681,6 +29149,7 @@ function drawReportClientPanel(ctx, area, quantities) {
     ["Status", projectStatusLabel()],
     ["Checked", state.checkedAt ? `${new Date(state.checkedAt).toLocaleDateString()}${state.checkedBy ? ` by ${state.checkedBy}` : ""}` : "Unchecked"],
     ["Issued", state.issuedAt ? `${new Date(state.issuedAt).toLocaleDateString()}${state.issuedBy ? ` by ${state.issuedBy}` : ""}` : "Not issued"],
+    ["Ready to Issue", issueAudit ? issueAudit.result === "overridden" ? "Warnings overridden" : "Passed" : "Not recorded"],
     ["Material", pipeSpec().label],
     ["Pipe centreline", `${formatLength(quantities.centrelineMm)} mm`],
     ["Estimated weight", `${formatMass(quantities.totalWeightKg)} kg`],
@@ -28774,7 +29243,12 @@ function drawReportHeader(ctx, width, options = {}) {
     ? `Issued ${new Date(state.issuedAt).toLocaleDateString()}${state.issuedBy ? ` by ${state.issuedBy}` : ""}`
     : "Not issued";
   const status = `${projectStatusLabel()}${state.locked ? " / Locked" : ""}`;
-  const exported = new Date().toLocaleString();
+  const issueAudit = latestIssueAudit();
+  const issueAuditText = issueAudit
+    ? issueAudit.result === "overridden"
+      ? "Warnings overridden"
+      : "Passed"
+    : "Not recorded";
   const subtitleWithVersion = `${subtitle} / ${APP_VERSION}`;
 
   ctx.save();
@@ -28828,7 +29302,7 @@ function drawReportHeader(ctx, width, options = {}) {
   drawReportInfoTile(ctx, "Drawn by", project.drawnBy || "-", right - tileW * 4 - gap * 3, tileY + tileH + 8, tileW, tileH);
   drawReportInfoTile(ctx, "Checked", checked, right - tileW * 3 - gap * 2, tileY + tileH + 8, tileW, tileH);
   drawReportInfoTile(ctx, "Issued", issued, right - tileW * 2 - gap, tileY + tileH + 8, tileW, tileH);
-  drawReportInfoTile(ctx, "Exported", exported, right - tileW, tileY + tileH + 8, tileW, tileH);
+  drawReportInfoTile(ctx, "Ready to issue", issueAuditText, right - tileW, tileY + tileH + 8, tileW, tileH, { strong: Boolean(issueAudit && issueAudit.result === "ready") });
   ctx.restore();
 }
 
@@ -32548,9 +33022,6 @@ document.querySelector("#sampleButton").addEventListener("click", loadSampleDraw
 undoButton?.addEventListener("click", undo);
 redoButton?.addEventListener("click", redo);
 document.querySelector("#resetButton").addEventListener("click", startNewDrawing);
-healthCheckButton?.addEventListener("click", showHealthPanel);
-newRevisionButton?.addEventListener("click", createNextRevision);
-shareReadOnlyButton?.addEventListener("click", shareReadOnlyProject);
 saveDefaultsButton?.addEventListener("click", saveCurrentSettingsAsDefaults);
 saveBrowserProjectButton?.addEventListener("click", () => {
   saveBrowserProject().catch((error) => {

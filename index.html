@@ -18,7 +18,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=2991" />
+    <link rel="stylesheet" href="./styles.css?v=301" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +189,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v2.99.1</span>
+              <span class="version-badge" id="appVersionBadge">v3.01</span>
             </div>
           </div>
 
@@ -356,10 +356,6 @@
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Dashboard</span>
                   </button>
-                  <button class="icon-button labeled" id="accountMenuButton" type="button" title="Account and cloud sync" aria-label="Account and cloud sync">
-                    <svg><use href="#icon-user"></use></svg>
-                    <span>Account</span>
-                  </button>
                   <button class="icon-button labeled" id="tutorialButton" type="button" title="Open SpoolMate tutorial" aria-label="Open SpoolMate tutorial">
                     <svg><use href="#icon-help"></use></svg>
                     <span>Tutorial</span>
@@ -378,23 +374,12 @@
                   </button>
                 </section>
                 <section class="action-menu-group">
-                  <h2>Review</h2>
-                  <button class="icon-button labeled" id="healthCheckButton" type="button" title="Run drawing health check" aria-label="Run drawing health check">
-                    <svg><use href="#icon-select"></use></svg>
-                    <span>Check</span>
-                  </button>
+                  <h2>Diagnostics</h2>
                   <button class="icon-button labeled" id="regressionChecklistButton" type="button" title="Open regression test samples" aria-label="Open regression test samples">
                     <svg><use href="#icon-report"></use></svg>
                     <span>Test kit</span>
                   </button>
-                  <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
-                    <svg><use href="#icon-reset"></use></svg>
-                    <span>Revision</span>
-                  </button>
-                  <button class="icon-button labeled export-action" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
-                    <svg><use href="#icon-export"></use></svg>
-                    <span>Share</span>
-                  </button>
+                  <p class="action-menu-group-help">Drawing checks, approval, revisions and sharing now live together in Review.</p>
                 </section>
                 <section class="action-menu-group">
                   <h2>Setup</h2>
@@ -518,7 +503,7 @@
         <section class="drawing-panel" aria-label="Isometric drawing area">
           <div class="panel-bar">
             <div class="bar-title">
-              <span>2D Iso Drawing - Draw Here</span>
+              <span id="workspaceTitle">Draw spool</span>
               <small id="cursorReadout">0, 0, 0</small>
               <span class="dimension-edit-pill" id="dimensionEditHint">Numbered key: Select D/O rows to edit C/C</span>
             </div>
@@ -1650,6 +1635,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=2991"></script>
+    <script defer src="./app.js?v=301"></script>
   </body>
 </html>

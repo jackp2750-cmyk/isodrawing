@@ -1,6 +1,28 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.99.1`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.01`.
+
+## v3.01 - Calm Workspace Layout
+- Narrowed the desktop tool rail to one clear column, returning more width to the isometric drawing.
+- Enforced one contextual surface at a time on desktop: opening Details closes 3D and opening 3D closes Details.
+- Removed the duplicated drawing-header PDF action while keeping the primary fabrication PDF action in Export.
+- Removed repeated Account, Check, Revision and Share entries from Menu; account stays in the permanent header and drawing workflow actions stay together in Review.
+- Removed the duplicate Save defaults action from Review while retaining it under Menu > Setup.
+- Replaced the tablet's stacked tool and panel docks with one bottom drawing-tool dock.
+- Made tablet Details and 3D open as larger slide-up sheets from the drawing header, with the canvas reclaiming the second dock's height.
+- Made Draw, Edit, Review and Export update the drawing workspace title and return Draw/Edit to the canvas after leaving a sheet-oriented mode.
+- Preserved phone panel navigation, fullscreen/focus behaviour, safe-area spacing and large touch targets.
+- Bumped the PWA cache to `spoolmate-v301`.
+
+## v3.00 - Ready to Issue Gate
+- Replaced the basic pre-issue summary with one red/amber/green Ready to Issue gate covering project identity, material and pipe sizes, drawing health, weld/WPS and inspection records, production holds and allocation, drawing approval and app diagnostics.
+- Added a focused fix action beside every blocker and warning so users can jump directly to the missing project field, drawing finding, weld row, Jobs production card or approval step.
+- Blocked issue and fabrication-PDF creation while red findings remain.
+- Required a written override reason before an amber revision can be issued.
+- Saved the issuer, checker, timestamp, override reason and warning snapshot as a permanent issue audit attached to the revision.
+- Showed the audit result in revision history, fabrication PDF headers, client approval sheets and QR spool travellers.
+- Added checks for zero/invalid and unusually short pipe runs to the drawing-health pass.
+- Bumped the PWA cache to `spoolmate-v300`.
 
 ## v2.99.1 - Simple Team Dashboard and QR Workshop Flow
 - Replaced the dense default team dashboard with Today, Full board and More views.

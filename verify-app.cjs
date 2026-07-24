@@ -420,9 +420,79 @@ assert(
   "Tee/branch health-check fixes are not retained or wired",
 );
 assert(
-  /if\s*\(checks\.projectMissing\.length\s*\|\|\s*checks\.errors\.length\)\s*return\s+["']blocked["']/.test(app) &&
+  /function\s+weldReadyIssueFindings\s*\(/.test(app) &&
+    /if\s*\(checks\.blockers\.length\)\s*return\s+["']blocked["']/.test(app) &&
+    /checks\.warnings\.length\s*\|\|\s*checks\.regressionFailures\.length/.test(app) &&
     /data-workflow-action="open-test-kit"/.test(app),
-  "App self-test failures may still hard-block a spool issue",
+  "Ready to Issue severity or app-diagnostic handling is incomplete",
+);
+assert(
+  /<strong>Ready to Issue<\/strong>/.test(app) &&
+    /Spool is on hold/.test(app) &&
+    /is missing a WPS/.test(app) &&
+    /Drawing has not been approved/.test(app) &&
+    /data-preissue-finding=/.test(app) &&
+    /function\s+handlePreIssueFinding\s*\(/.test(app),
+  "Ready to Issue gate or focused fix actions are incomplete",
+);
+assert(
+  /function\s+promptForIssueWarningOverride\s*\(/.test(app) &&
+    /Required reason for issuing with warnings/.test(app) &&
+    /function\s+recordReadyIssueAudit\s*\(/.test(app) &&
+    /issueAudits:\s*normalizeIssueAudits\(state\.issueAudits\)/.test(app) &&
+    /issueAudits:\s*normalizeIssueAudits\(saved\.issueAudits\)/.test(app) &&
+    /addRevisionSnapshot\(["']Issued after Ready to Issue gate["']/.test(app),
+  "Warning override or revision issue-audit persistence is incomplete",
+);
+assert(
+  /function\s+latestIssueAudit\s*\([\s\S]*?currentRevisionUid\(source\)[\s\S]*?audit\.revisionUid\s*&&\s*audit\.revisionUid\s*===\s*revisionUid/.test(app) &&
+    /state\s*=\s*restored;[\s\S]*?state\.checkedAt\s*=\s*"";[\s\S]*?state\.issuedAt\s*=\s*"";/.test(app),
+  "Current-revision audit matching or restored-revision approval reset is incomplete",
+);
+assert(
+  /async function\s+exportIsoImage\s*\([\s\S]*?issueDrawing\(\{\s*source:\s*["']fabrication-pdf["']\s*\}\)/.test(app) &&
+    /drawReportInfoTile\(ctx,\s*["']Ready to issue["']/.test(app) &&
+    /<span>Issue audit<\/span>/.test(app),
+  "Fabrication PDF or QR traveller can bypass or omit the Ready to Issue audit",
+);
+assert(
+  /\.preissue-card\.preissue-ready/.test(css) &&
+    /\.preissue-review\s+\.preissue-heading span/.test(css) &&
+    /\.preissue-blocked\s+\.preissue-heading span/.test(css) &&
+    /\.ready-issue-finding[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(css),
+  "Ready to Issue colours or touch layout are incomplete",
+);
+assert(
+  /--tool-rail-width:\s*84px/.test(css) &&
+    /v3\.01 workspace layout polish/.test(css) &&
+    /\.tool-rail \.tool-grid\s*\{[\s\S]*?grid-template-columns:\s*1fr/.test(css),
+  "Calm desktop tool rail or canvas-width recovery is incomplete",
+);
+assert(
+  /const\s+APP_MODE_WORKSPACE_TITLE\s*=/.test(app) &&
+    /workspaceTitle\.textContent\s*=\s*APP_MODE_WORKSPACE_TITLE/.test(app) &&
+    /id="workspaceTitle"/.test(html),
+  "Mode-specific workspace heading is incomplete",
+);
+assert(
+  /function\s+setPreviewHidden\s*\([\s\S]*?!isTabletLayout\(\)\)\s*setInspectorDrawerOpen\(false\)/.test(app) &&
+    /function\s+setInspectorDrawerOpen\s*\([\s\S]*?previewPanelHidden\s*=\s*true/.test(app) &&
+    /previewShowButton\?\.addEventListener\([\s\S]*?showMobilePanel\("preview"\)/.test(app),
+  "Details and 3D no longer enforce one contextual surface",
+);
+assert(
+  /body\.tablet-layout\.field-layout \.mobile-panel-dock\s*\{\s*display:\s*none/.test(css) &&
+    /body\.tablet-layout\.field-layout \.inspector-show-button\s*\{\s*display:\s*inline-flex/.test(css) &&
+    /height:\s*min\(74dvh,\s*680px\)/.test(css),
+  "Tablet single-dock or large-sheet layout is incomplete",
+);
+assert(
+  !/id="accountMenuButton"/.test(html) &&
+    !/id="newRevisionButton"/.test(html) &&
+    !/id="shareReadOnlyButton"/.test(html) &&
+    !/data-workflow-action="save-defaults"/.test(app) &&
+    /#exportIsoButton\s*\{\s*display:\s*none\s*!important/.test(css),
+  "Duplicate permanent, Review or PDF actions remain visible",
 );
 assert(
   /function\s+branchMainLinkedSegmentIndexes\s*\(/.test(app) &&

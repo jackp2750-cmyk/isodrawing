@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v2.99.1`
+Current app version: `v3.01`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -52,6 +52,11 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Work in four focused modes: Draw for pipe and dimensions, Edit for selection and fittings, Review for checks/workflow/notes/history, and Export for cut lists, BOM and fabrication files.
 - Use the desktop Inspector as an on-demand drawer: it stays closed when nothing is selected, opens for selected pipe/fittings, and gives Cut List, Weights and BOM full-height views.
 - Keep only Save, Jobs, Account, cloud-save state and Menu in the permanent action bar; New spool and theme controls now live in Menu.
+- Keep the desktop canvas dominant with a narrow single-column drawing rail and contextual Details/3D surfaces that close one another.
+- Use one bottom drawing-tool dock on iPad and Android tablets instead of stacking duplicate panel navigation beneath it.
+- Open tablet Details and 3D as large slide-up sheets from the drawing header, returning the recovered space to the canvas when they close.
+- Change the drawing heading with the active Draw, Edit, Review or Export task so users always know which workspace they are in.
+- Keep account access in the permanent header and approval, revisions and read-only sharing inside Review instead of duplicating them in Menu.
 - Keep current status and assignee visible beside the job/spool while assignments, messages, reports and activity remain in the Jobs workspace.
 - Read actions consistently across both themes: blue is reserved for active or primary actions, Save is green, destructive actions are red, exports are visually distinct, and supporting information is quieter.
 - Pick tutorial topics from the tutorial menu instead of stepping through every feature in order.
@@ -67,7 +72,10 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Approve or return Ready to check spools with checker comments, then require approval before issue or fabrication.
 - Keep issued drawings locked and preserve checked/issued names for every revision; returning an issued drawing starts the next revision.
 - Run the Review Test Kit automatic checks for tee reducers, welded branches, flush flanges, 45 degree offsets and socket dimensions after changes.
-- Use the pre-issue check flow to block issuing drawings until project details, drawing health and the test kit are clear.
+- Use the red/amber/green Ready to Issue gate to check project identity, material/sizes, drawing health, weld/WPS and inspection records, production holds/allocation, approval and app diagnostics.
+- Jump directly from each Ready to Issue finding to the project field, drawing check, weld row, production card or approval action that needs attention.
+- Require a written warning-override reason before issuing an amber revision, and preserve the issuer, checker, time, reason and findings with the saved revision.
+- Keep the issue-audit result visible in revision history, fabrication PDFs and the QR spool traveller.
 - See Team alerts for spools assigned to you, due soon, overdue, ready to check, returned by a checker, carrying a new comment/message, or on a newly issued revision.
 - Keep an actor-and-time activity timeline on each spool for status, assignment, due date, hold, pipe-size, review, issue/revision and production-note changes; expand older retained events when needed.
 - Open a job folder to see job-level totals for total, ready check, checked, issued, fabricated, overdue and on-hold spools, plus a clean needs-doing-today list.
