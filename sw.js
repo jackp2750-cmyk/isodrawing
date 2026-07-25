@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v301";
+const CACHE_NAME = "spoolmate-v302";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=301",
-  "./app.js?v=301",
+  "./styles.css?v=302",
+  "./app.js?v=302",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [
@@ -37,6 +37,10 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  if (request.destination === "video" || request.headers.has("range")) {
+    event.respondWith(fetch(request));
+    return;
+  }
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(request, "./index.html"));
     return;

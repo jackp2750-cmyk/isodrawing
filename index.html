@@ -11,6 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <link rel="preconnect" href="https://wsrfxqnsquzzwqijfmec.supabase.co" crossorigin />
     <script>
       try {
         document.documentElement.dataset.theme = localStorage.getItem("spoolmate-theme-v1") === "dark" ? "dark" : "light";
@@ -18,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=301" />
+    <link rel="stylesheet" href="./styles.css?v=302" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.01</span>
+              <span class="version-badge" id="appVersionBadge">v3.02</span>
             </div>
           </div>
 
@@ -359,6 +360,10 @@
                   <button class="icon-button labeled" id="tutorialButton" type="button" title="Open SpoolMate tutorial" aria-label="Open SpoolMate tutorial">
                     <svg><use href="#icon-help"></use></svg>
                     <span>Tutorial</span>
+                  </button>
+                  <button class="icon-button labeled" id="videoTutorialButton" type="button" title="Watch the complete SpoolMate video guide" aria-label="Watch the complete SpoolMate video guide">
+                    <svg><use href="#icon-image"></use></svg>
+                    <span>Video guide</span>
                   </button>
                   <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
                     <svg><use href="#icon-sample"></use></svg>
@@ -884,6 +889,11 @@
               <strong>Tutorial</strong>
               <span>Learn the workflow or continue where you left off.</span>
             </button>
+            <button class="home-dashboard-action video-guide" id="homeDashboardVideoButton" type="button">
+              <svg><use href="#icon-image"></use></svg>
+              <strong>Video guide</strong>
+              <span>Watch the complete real-world spool workflow.</span>
+            </button>
             <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
               <svg><use href="#icon-sample"></use></svg>
               <strong>Sample</strong>
@@ -1199,6 +1209,10 @@
               <strong>Interactive tutorial</strong>
               <small>Pick a topic, watch the mini demo, then use the safe practice without changing your drawing.</small>
             </div>
+            <button class="icon-button labeled tutorial-video-button" id="tutorialVideoButton" type="button">
+              <svg><use href="#icon-image"></use></svg>
+              <span>Watch full video</span>
+            </button>
           </div>
           <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
           <article class="tutorial-step-card" id="tutorialStepCard"></article>
@@ -1207,6 +1221,35 @@
             <button class="icon-button labeled" id="tutorialPrevButton" type="button">Back</button>
             <button class="icon-button labeled" id="tutorialActionButton" type="button">Try it</button>
             <button class="primary-button" id="tutorialNextButton" type="button">Next</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop video-tutorial-backdrop" id="videoTutorialDialog" hidden>
+        <section class="project-dialog-card video-tutorial-card" role="dialog" aria-modal="true" aria-labelledby="videoTutorialTitle" aria-describedby="videoTutorialDescription">
+          <div class="project-dialog-header video-tutorial-header">
+            <div>
+              <span class="video-tutorial-kicker">8 minute real-world walkthrough</span>
+              <strong id="videoTutorialTitle">Build a complete spool in SpoolMate</strong>
+              <small id="videoTutorialDescription">Follow drag drawing, true 45° offsets, measured edits, fittings, review, the live 3D model, weld tracking and export.</small>
+            </div>
+            <button class="icon-button labeled" id="videoTutorialCloseButton" type="button">Close</button>
+          </div>
+          <div class="video-tutorial-frame">
+            <video id="videoTutorialPlayer" controls preload="metadata" playsinline>
+              <source src="https://wsrfxqnsquzzwqijfmec.supabase.co/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4" type="video/mp4" />
+              Your browser cannot play this video.
+            </video>
+          </div>
+          <div class="video-tutorial-meta">
+            <span>720p web edition</span>
+            <span>Natasha voice guide</span>
+            <span>Works on PC, iPad and Android tablets</span>
+          </div>
+          <div class="project-dialog-actions video-tutorial-actions">
+            <button class="icon-button labeled" id="videoTutorialRestartButton" type="button">Start from beginning</button>
+            <button class="icon-button labeled" id="videoTutorialCopyLinkButton" type="button">Copy video link</button>
+            <a class="primary-button video-tutorial-share" id="videoTutorialShareLink" href="https://wsrfxqnsquzzwqijfmec.supabase.co/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4" target="_blank" rel="noopener">Open or share video</a>
           </div>
         </section>
       </div>
@@ -1620,6 +1663,10 @@
             </section>
           </div>
           <div class="project-dialog-actions">
+            <button class="icon-button labeled" id="helpVideoButton" type="button">
+              <svg><use href="#icon-image"></use></svg>
+              <span>Watch video guide</span>
+            </button>
             <button class="primary-button" id="helpCloseButton" type="button">Done</button>
           </div>
         </section>
@@ -1635,6 +1682,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=301"></script>
+    <script defer src="./app.js?v=302"></script>
   </body>
 </html>

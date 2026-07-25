@@ -1,6 +1,15 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.01`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.02`.
+
+## v3.02 - Full Video Guide
+- Added an in-app 8-minute real-world video guide with the approved Natasha narration.
+- Added Video guide entry points to the startup dashboard, Menu, interactive tutorial and Help.
+- Added a responsive 16:9 player with inline playback for desktop, iPad and Android tablets.
+- Added restart, copy-link and open/share controls for training and customer onboarding.
+- Kept the 1080p master outside the app and prepared a 720p streaming edition for the Supabase Free file limit.
+- Excluded video and byte-range requests from the PWA cache so large media does not crowd out drawing files.
+- Bumped the PWA cache to `spoolmate-v302`.
 
 ## v3.01 - Calm Workspace Layout
 - Narrowed the desktop tool rail to one clear column, returning more width to the isometric drawing.

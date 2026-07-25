@@ -179,6 +179,19 @@ assert(
   "Ask SpoolMate interface or frontend invocation wiring is incomplete",
 );
 assert(
+  /id="videoTutorialButton"/.test(html) &&
+    /id="homeDashboardVideoButton"/.test(html) &&
+    /id="tutorialVideoButton"/.test(html) &&
+    /id="helpVideoButton"/.test(html) &&
+    /id="videoTutorialDialog"/.test(html) &&
+    /id="videoTutorialPlayer"[\s\S]*playsinline/.test(html) &&
+    /const\s+TUTORIAL_VIDEO_URL\s*=/.test(app) &&
+    /function\s+setupVideoTutorialDialog\s*\(/.test(app) &&
+    /\.video-tutorial-card/.test(css) &&
+    /request\.destination\s*===\s*["']video["']/.test(serviceWorker),
+  "Responsive video tutorial player, entry points or streaming cache bypass is incomplete",
+);
+assert(
   /Deno\.env\.get\(["']OPENAI_API_KEY["']\)/.test(aiHelpFunction) &&
     /https:\/\/api\.openai\.com\/v1\/responses/.test(aiHelpFunction) &&
     /model:\s*MODEL/.test(aiHelpFunction) &&

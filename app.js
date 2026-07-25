@@ -159,6 +159,7 @@ let homeDashboardContinueButton = document.querySelector("#homeDashboardContinue
 let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
 let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
 let homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
+let homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
 let homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
 let homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
 let homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
@@ -207,6 +208,7 @@ const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
 const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
 const tutorialButton = document.querySelector("#tutorialButton");
+const videoTutorialButton = document.querySelector("#videoTutorialButton");
 const tutorialDialog = document.querySelector("#tutorialDialog");
 const tutorialProgress = document.querySelector("#tutorialProgress");
 const tutorialStepCard = document.querySelector("#tutorialStepCard");
@@ -214,8 +216,15 @@ const tutorialCloseButton = document.querySelector("#tutorialCloseButton");
 const tutorialPrevButton = document.querySelector("#tutorialPrevButton");
 const tutorialActionButton = document.querySelector("#tutorialActionButton");
 const tutorialNextButton = document.querySelector("#tutorialNextButton");
+const tutorialVideoButton = document.querySelector("#tutorialVideoButton");
 const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
 const tutorialCoach = document.querySelector("#tutorialCoach");
+const videoTutorialDialog = document.querySelector("#videoTutorialDialog");
+const videoTutorialPlayer = document.querySelector("#videoTutorialPlayer");
+const videoTutorialCloseButton = document.querySelector("#videoTutorialCloseButton");
+const videoTutorialRestartButton = document.querySelector("#videoTutorialRestartButton");
+const videoTutorialCopyLinkButton = document.querySelector("#videoTutorialCopyLinkButton");
+const videoTutorialShareLink = document.querySelector("#videoTutorialShareLink");
 const firstSpoolGuide = document.querySelector("#firstSpoolGuide");
 const firstSpoolGuideProgressBar = document.querySelector("#firstSpoolGuideProgressBar");
 const firstSpoolGuideKicker = document.querySelector("#firstSpoolGuideKicker");
@@ -268,6 +277,7 @@ const drawingAssistantBuildButton = document.querySelector("#drawingAssistantBui
 const helpButton = document.querySelector("#helpButton");
 const helpDialog = document.querySelector("#helpDialog");
 const helpCloseButton = document.querySelector("#helpCloseButton");
+const helpVideoButton = document.querySelector("#helpVideoButton");
 const aiHelperButton = document.querySelector("#aiHelperButton");
 const aiHelperDialog = document.querySelector("#aiHelperDialog");
 const aiHelperCloseButton = document.querySelector("#aiHelperCloseButton");
@@ -318,11 +328,12 @@ const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.01";
-const APP_BUILD_DATE = "2026-07-23";
+const APP_VERSION = "v3.02";
+const APP_BUILD_DATE = "2026-07-25";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4`;
 const QR_CODE_JS_URL = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
 const QR_CODE_READER_JS_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/+esm";
 const CLOUD_PROJECTS_TABLE = "spool_projects";
@@ -15509,6 +15520,70 @@ function setupTutorialDialog() {
   window.addEventListener("scroll", updateTutorialCoachPosition, true);
 }
 
+let videoTutorialTrigger = null;
+
+function openVideoTutorialDialog(trigger = null) {
+  if (!videoTutorialDialog) return;
+  if (trigger instanceof HTMLElement) videoTutorialTrigger = trigger;
+  if (homeDashboardDialog && !homeDashboardDialog.hidden) closeHomeDashboard();
+  if (tutorialDialog && !tutorialDialog.hidden) closeTutorialDialog();
+  if (helpDialog && !helpDialog.hidden) closeHelpDialog();
+  closeActionMenu();
+  if (videoTutorialShareLink) videoTutorialShareLink.href = TUTORIAL_VIDEO_URL;
+  const source = videoTutorialPlayer?.querySelector("source");
+  if (source && source.src !== TUTORIAL_VIDEO_URL) {
+    source.src = TUTORIAL_VIDEO_URL;
+    videoTutorialPlayer.load();
+  }
+  videoTutorialDialog.hidden = false;
+  document.body.classList.add("video-tutorial-open");
+  videoTutorialCloseButton?.focus();
+}
+
+function closeVideoTutorialDialog() {
+  if (!videoTutorialDialog) return;
+  videoTutorialPlayer?.pause();
+  videoTutorialDialog.hidden = true;
+  document.body.classList.remove("video-tutorial-open");
+  if (videoTutorialTrigger?.isConnected) videoTutorialTrigger.focus();
+  videoTutorialTrigger = null;
+}
+
+async function restartVideoTutorial() {
+  if (!videoTutorialPlayer) return;
+  videoTutorialPlayer.currentTime = 0;
+  try {
+    await videoTutorialPlayer.play();
+  } catch {
+    showAppNotice("Press play to start the video.");
+  }
+}
+
+async function copyVideoTutorialLink() {
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+    await navigator.clipboard.writeText(TUTORIAL_VIDEO_URL);
+    showAppNotice("Video link copied.");
+  } catch {
+    showAppNotice("Open the video, then copy its address from the browser.");
+  }
+}
+
+function setupVideoTutorialDialog() {
+  videoTutorialButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
+  tutorialVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
+  helpVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
+  videoTutorialCloseButton?.addEventListener("click", closeVideoTutorialDialog);
+  videoTutorialRestartButton?.addEventListener("click", restartVideoTutorial);
+  videoTutorialCopyLinkButton?.addEventListener("click", copyVideoTutorialLink);
+  videoTutorialDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === videoTutorialDialog) closeVideoTutorialDialog();
+  });
+  videoTutorialPlayer?.addEventListener("error", () => {
+    showAppNotice("The video could not load. Check the internet connection or use Open or share video.");
+  });
+}
+
 const AI_HELPER_LOCAL_GUIDE = [
   {
     patterns: [["45", "offset"], ["45", "degree"], ["shift", "angle"]],
@@ -16708,6 +16783,11 @@ function ensureHomeDashboardShell() {
             <strong>Tutorial</strong>
             <span>Walk through the main workflow.</span>
           </button>
+          <button class="home-dashboard-action video-guide" id="homeDashboardVideoButton" type="button">
+            <svg><use href="#icon-image"></use></svg>
+            <strong>Video guide</strong>
+            <span>Watch the complete real-world spool workflow.</span>
+          </button>
           <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
             <svg><use href="#icon-sample"></use></svg>
             <strong>Sample</strong>
@@ -16758,6 +16838,7 @@ function ensureHomeDashboardShell() {
   homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
   homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
   homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
+  homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
   homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
   homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
   homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
@@ -16789,6 +16870,9 @@ function setupHomeDashboard() {
   homeDashboardTutorialButton?.addEventListener("click", () => {
     closeHomeDashboard();
     openTutorialDialog();
+  });
+  homeDashboardVideoButton?.addEventListener("click", (event) => {
+    openVideoTutorialDialog(event.currentTarget);
   });
   homeDashboardSampleButton?.addEventListener("click", () => {
     closeHomeDashboard();
@@ -33272,6 +33356,7 @@ setupFieldInputDialog();
 setupAppConfirmDialog();
 setupNoteDialog();
 setupTutorialDialog();
+setupVideoTutorialDialog();
 setupTouchShiftAngleButton();
 setupRegressionDialog();
 setupHelpDialog();
