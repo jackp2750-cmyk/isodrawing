@@ -156,6 +156,7 @@ let homeDashboardAccount = document.querySelector("#homeDashboardAccount");
 let homeDashboardStats = document.querySelector("#homeDashboardStats");
 let homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
 let homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+let homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
 let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
 let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
 let homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
@@ -322,6 +323,7 @@ const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
 const NUMBERED_DIMENSION_DEFAULT_KEY = "spoolmate-numbered-dimension-default-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
+const LAST_SESSION_RECOVERY_KEY = "spoolmate-last-session-recovery-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
@@ -331,7 +333,7 @@ const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.04";
+const APP_VERSION = "v3.05";
 const APP_BUILD_DATE = "2026-07-25";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -1848,6 +1850,18 @@ function loadState() {
       const applyNewDefaults = key !== STORAGE_KEY;
       const restored = stateFromPayload(saved, { legacyUnits, applyNewDefaults });
       if (!restored) continue;
+
+      if (saved?.points?.length) {
+        try {
+          localStorage.setItem(LAST_SESSION_RECOVERY_KEY, JSON.stringify({
+            createdAt: new Date().toISOString(),
+            sourceKey: key,
+            state: saved,
+          }));
+        } catch {
+          // The current drawing still loads if recovery storage is unavailable.
+        }
+      }
 
       const alreadyApplied = numberedDimensionDefaultApplied();
       if (!alreadyApplied && shouldUseNumberedDimensionDefault(saved)) {
@@ -11238,6 +11252,55 @@ function loadProjectBackups() {
   }
 }
 
+function loadLastSessionRecovery() {
+  try {
+    const recovery = JSON.parse(localStorage.getItem(LAST_SESSION_RECOVERY_KEY));
+    if (!recovery?.state || !Array.isArray(recovery.state.points) || recovery.state.points.length < 2) return null;
+    return recovery;
+  } catch {
+    return null;
+  }
+}
+
+async function restoreLastSession() {
+  const recovery = loadLastSessionRecovery();
+  if (!recovery?.state) {
+    showAppNotice("No previous session is available to restore.");
+    updateHomeDashboard();
+    return;
+  }
+  const when = recovery.createdAt ? new Date(recovery.createdAt).toLocaleString() : "the previous session";
+  const proceed = await confirmAppAction(
+    `Restore the drawing captured at ${when}? Your current drawing will be backed up first. The recovered drawing opens as a local copy and will not overwrite a cloud spool automatically.`,
+    {
+      title: "Restore last session",
+      confirmLabel: "Restore local copy",
+      cancelLabel: "Keep current",
+      tone: "warning",
+    },
+  );
+  if (!proceed) return;
+
+  createProjectBackup("before last-session restore");
+  const restored = stateFromPayload(recovery.state);
+  if (!restored) {
+    showAppNotice("The previous session could not be restored.");
+    return;
+  }
+  restored.projectId = null;
+  state = restored;
+  currentCloudProjectOwnerId = null;
+  currentCloudProjectCompanyId = null;
+  cloudPermissionReadOnly = false;
+  resetCloudSaveTracking();
+  three.userMovedCamera = false;
+  setNextIdsFromState(state);
+  closeHomeDashboard();
+  updateControls();
+  updateAll();
+  showAppNotice("Last session restored as a local recovery copy. Use Save when you are ready to keep it.");
+}
+
 function storeProjectBackups(backups) {
   try {
     localStorage.setItem(PROJECT_BACKUPS_KEY, JSON.stringify(backups.slice(0, 36)));
@@ -16841,6 +16904,11 @@ function ensureHomeDashboardShell() {
             <strong>Continue drawing</strong>
             <span>Return to the spool on screen.</span>
           </button>
+          <button class="home-dashboard-action recovery" id="homeDashboardRestoreButton" type="button" hidden>
+            <svg><use href="#icon-undo"></use></svg>
+            <strong>Restore last session</strong>
+            <span>Recover the drawing saved when this app session started.</span>
+          </button>
           <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
             <svg><use href="#icon-reset"></use></svg>
             <strong>New spool</strong>
@@ -16908,6 +16976,7 @@ function ensureHomeDashboardShell() {
   homeDashboardStats = document.querySelector("#homeDashboardStats");
   homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
   homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+  homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
   homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
   homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
   homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
@@ -16926,6 +16995,12 @@ function setupHomeDashboard() {
   });
   homeDashboardCloseButton?.addEventListener("click", closeHomeDashboard);
   homeDashboardContinueButton?.addEventListener("click", closeHomeDashboard);
+  homeDashboardRestoreButton?.addEventListener("click", () => {
+    restoreLastSession().catch((error) => {
+      console.warn("Last session restore failed.", error);
+      showAppNotice(error?.message || "Could not restore the last session.");
+    });
+  });
   homeDashboardNewButton?.addEventListener("click", () => {
     closeHomeDashboard();
     startNewDrawing().catch((error) => {
@@ -17016,6 +17091,16 @@ function updateHomeDashboard() {
         : "Cloud projects are available in read-only mode."
       : "Browser storage only.";
     homeDashboardStats.textContent = `${savedLabel}. ${scope}`;
+  }
+
+  if (homeDashboardRestoreButton) {
+    const recovery = loadLastSessionRecovery();
+    homeDashboardRestoreButton.hidden = !recovery;
+    const detail = homeDashboardRestoreButton.querySelector("span");
+    if (detail && recovery) {
+      const when = recovery.createdAt ? new Date(recovery.createdAt).toLocaleString() : "previous session";
+      detail.textContent = `Recover ${recovery.state?.projectInfo?.spoolNumber || "the previous drawing"} from ${when}.`;
+    }
   }
 }
 
@@ -21459,7 +21544,6 @@ function updateCloudStatus(message = null, mode = "") {
       ? "Licence inactive"
       : "Cloud setup needed"
     : "Local only";
-  const text = message || defaultMessage;
   const inferredMode = mode
     || (message && /conflict|newer/i.test(message) ? "conflict" : "")
     || (message && /failed|unavailable/i.test(message) ? "error" : "")
@@ -21471,17 +21555,35 @@ function updateCloudStatus(message = null, mode = "") {
     || (cloudSaveError ? "error" : "")
     || (cloudSaveDirty ? "dirty" : "")
     || (hasCloudRecord && cloudLastSavedAt ? "saved" : "signed-in");
+  const canonicalMode = inferredMode === "saving" || inferredMode === "dirty"
+    ? "saving"
+    : inferredMode === "error" || inferredMode === "conflict"
+    ? "error"
+    : inferredMode === "saved" || (active && hasCloudRecord && cloudLastSavedAt && !cloudSaveDirty)
+    ? "saved"
+    : "local";
+  const text = canonicalMode === "saving"
+    ? "Saving…"
+    : canonicalMode === "error"
+    ? "Save failed"
+    : canonicalMode === "saved"
+    ? "Saved to cloud"
+    : "Local only";
 
   if (cloudSyncStatus) {
     cloudSyncStatus.textContent = text;
-    cloudSyncStatus.title = cloudSaveTitle(signedIn && cloudUser?.email ? `${cloudUser.email}${teamSuffix}` : "Not signed in");
-    cloudSyncStatus.classList.toggle("signed-in", inferredMode === "signed-in");
-    cloudSyncStatus.classList.toggle("saving", inferredMode === "saving");
-    cloudSyncStatus.classList.toggle("saved", inferredMode === "saved");
-    cloudSyncStatus.classList.toggle("dirty", inferredMode === "dirty");
-    cloudSyncStatus.classList.toggle("conflict", inferredMode === "conflict");
-    cloudSyncStatus.classList.toggle("error", inferredMode === "error");
-    cloudSyncStatus.classList.toggle("warning", inferredMode === "warning");
+    cloudSyncStatus.dataset.status = canonicalMode;
+    cloudSyncStatus.title = cloudSaveTitle([
+      canonicalMode === "saving" ? "Saving changes to cloud" : "",
+      canonicalMode === "saved" ? "All changes saved to cloud" : "",
+      canonicalMode === "error" ? (message || cloudSaveError || defaultMessage) : "",
+      canonicalMode === "local" ? defaultMessage : "",
+      signedIn && cloudUser?.email ? `${cloudUser.email}${teamSuffix}` : "Not signed in",
+    ].filter(Boolean).join(" / "));
+    cloudSyncStatus.setAttribute("aria-label", `${text}. ${cloudSyncStatus.title}`);
+    for (const status of ["signed-in", "saving", "saved", "dirty", "conflict", "error", "warning", "local"]) {
+      cloudSyncStatus.classList.toggle(status, status === canonicalMode);
+    }
   }
   if (accountButtonLabel) {
     accountButtonLabel.textContent = signedIn ? "Account" : "Sign in";

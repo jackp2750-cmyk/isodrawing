@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=304" />
+    <link rel="stylesheet" href="./styles.css?v=305" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.04</span>
+              <span class="version-badge" id="appVersionBadge">v3.05</span>
             </div>
           </div>
 
@@ -332,7 +332,7 @@
               <svg><use href="#icon-user"></use></svg>
               <span id="accountButtonLabel">Account</span>
             </button>
-            <span class="cloud-status-pill" id="cloudSyncStatus">Local only</span>
+            <span class="cloud-status-pill local" id="cloudSyncStatus" role="status" aria-live="polite">Local only</span>
             <input id="projectFileInput" type="file" accept=".html,text/html,.json,application/json" hidden />
             <button class="icon-button labeled action-menu-toggle" id="actionMenuButton" type="button" aria-expanded="false" aria-controls="actionMenuPanel">
               <svg><use href="#icon-settings"></use></svg>
@@ -873,6 +873,11 @@
               <svg><use href="#icon-draw"></use></svg>
               <strong>Continue drawing</strong>
               <span>Return to the spool on screen.</span>
+            </button>
+            <button class="home-dashboard-action recovery" id="homeDashboardRestoreButton" type="button" hidden>
+              <svg><use href="#icon-undo"></use></svg>
+              <strong>Restore last session</strong>
+              <span>Recover the drawing saved when this app session started.</span>
             </button>
             <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
               <svg><use href="#icon-reset"></use></svg>
@@ -1698,6 +1703,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=304"></script>
+    <script defer src="./app.js?v=305"></script>
   </body>
 </html>

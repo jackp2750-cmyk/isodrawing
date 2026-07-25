@@ -208,8 +208,28 @@ assert(
     /DRAFT-NOT-FOR-FABRICATION/.test(app) &&
     /exportFabSheetPdf\(\{\s*draft\s*\}\)/.test(app) &&
     /issuedPdfReady\s*\?\s*["']Issued PDF["']\s*:\s*["']Draft PDF["']/.test(app) &&
-    /spoolmate-v304/.test(serviceWorker),
+    /spoolmate-v305/.test(serviceWorker),
   "Simplified draft/issued PDF flow or draft safety marking is incomplete",
+);
+assert(
+  /id="cloudSyncStatus"[^>]*role="status"[^>]*aria-live="polite"/.test(html) &&
+    /canonicalMode\s*===\s*["']saving["'][\s\S]*?["']Saving…["']/.test(app) &&
+    /canonicalMode\s*===\s*["']error["'][\s\S]*?["']Save failed["']/.test(app) &&
+    /canonicalMode\s*===\s*["']saved["'][\s\S]*?["']Saved to cloud["']/.test(app) &&
+    /["']Local only["']/.test(app) &&
+    /\.cloud-status-pill::before/.test(css),
+  "Clear cloud save-state indicator is incomplete",
+);
+assert(
+  /id="homeDashboardRestoreButton"/.test(html) &&
+    /const\s+LAST_SESSION_RECOVERY_KEY\s*=/.test(app) &&
+    /function\s+loadLastSessionRecovery\s*\(/.test(app) &&
+    /async function\s+restoreLastSession\s*\(/.test(app) &&
+    /restored\.projectId\s*=\s*null/.test(app) &&
+    /createProjectBackup\(["']before last-session restore["']\)/.test(app) &&
+    /\.home-dashboard-action\.recovery/.test(css) &&
+    /spoolmate-v305/.test(serviceWorker),
+  "Last-session recovery protection or dashboard action is incomplete",
 );
 assert(
   /Deno\.env\.get\(["']OPENAI_API_KEY["']\)/.test(aiHelpFunction) &&

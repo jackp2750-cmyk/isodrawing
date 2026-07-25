@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.04`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.05`.
+
+## v3.05 - Clear Saving and Session Recovery
+- Reduced the header save indicator to four unmistakable states: Saving…, Saved to cloud, Local only and Save failed.
+- Added colour and status dots plus accessible live announcements for save-state changes.
+- Captures the drawing present when a new app session starts as a recovery snapshot.
+- Added Restore last session to the dashboard when a valid recovery snapshot exists.
+- Backs up the current drawing before recovery and opens the recovered spool as a local copy to prevent accidental cloud overwrites.
+- Updated the PWA cache to `spoolmate-v305`.
 
 ## v3.04 - Simpler PDF and Issue Flow
 - Allowed users to download a PDF before completing the full Ready to Issue process.

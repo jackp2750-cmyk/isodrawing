@@ -2606,6 +2606,22 @@ body.numbered-dimensions-active .dimension-edit-pill {
   white-space: nowrap;
 }
 
+.cloud-status-pill::before {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+.cloud-status-pill.local {
+  border-color: rgba(91, 105, 112, 0.26);
+  background: #f2f4f4;
+  color: #586970;
+}
+
 .revision-current .revision-audit {
   grid-column: 1 / -1;
   color: var(--save-action);
@@ -7360,6 +7376,16 @@ body.tutorial-practice-active .tutorial-demo {
   border: 1px dashed var(--line-strong);
   border-radius: 7px;
   text-align: center;
+}
+
+.home-dashboard-action.recovery {
+  border-color: rgba(185, 116, 20, 0.42);
+  background: rgba(255, 247, 223, 0.92);
+  color: #7c4b09;
+}
+
+.home-dashboard-action.recovery span {
+  color: #805817;
 }
 
 .team-dashboard-simple {
