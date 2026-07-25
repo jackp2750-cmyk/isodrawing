@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.02`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.03`.
+
+## v3.03 - Video Playback and Chapters
+- Simplified the video guide by removing the quality, voice and device badges plus the duplicate footer actions.
+- Added clear play/pause, 10-second rewind and 10-second fast-forward controls.
+- Added a Jump to section menu covering drawing, offsets, editing, 3D, checks, welds, exports, jobs and the AI helper.
+- Added an always-visible elapsed and total time display.
+- Refined the control layout for desktop, iPad and Android tablets.
+- Updated the PWA cache to `spoolmate-v303`.
 
 ## v3.02 - Full Video Guide
 - Added an in-app 8-minute real-world video guide with the approved Natasha narration.

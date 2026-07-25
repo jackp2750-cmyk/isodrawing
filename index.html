@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=302" />
+    <link rel="stylesheet" href="./styles.css?v=303" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.02</span>
+              <span class="version-badge" id="appVersionBadge">v3.03</span>
             </div>
           </div>
 
@@ -1233,7 +1233,10 @@
               <strong id="videoTutorialTitle">Build a complete spool in SpoolMate</strong>
               <small id="videoTutorialDescription">Follow drag drawing, true 45° offsets, measured edits, fittings, review, the live 3D model, weld tracking and export.</small>
             </div>
-            <button class="icon-button labeled" id="videoTutorialCloseButton" type="button">Close</button>
+            <div class="video-tutorial-header-actions">
+              <button class="icon-button labeled" id="videoTutorialCopyLinkButton" type="button">Copy link</button>
+              <button class="icon-button labeled" id="videoTutorialCloseButton" type="button">Close</button>
+            </div>
           </div>
           <div class="video-tutorial-frame">
             <video id="videoTutorialPlayer" controls preload="metadata" playsinline>
@@ -1241,15 +1244,28 @@
               Your browser cannot play this video.
             </video>
           </div>
-          <div class="video-tutorial-meta">
-            <span>720p web edition</span>
-            <span>Natasha voice guide</span>
-            <span>Works on PC, iPad and Android tablets</span>
-          </div>
-          <div class="project-dialog-actions video-tutorial-actions">
-            <button class="icon-button labeled" id="videoTutorialRestartButton" type="button">Start from beginning</button>
-            <button class="icon-button labeled" id="videoTutorialCopyLinkButton" type="button">Copy video link</button>
-            <a class="primary-button video-tutorial-share" id="videoTutorialShareLink" href="https://wsrfxqnsquzzwqijfmec.supabase.co/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4" target="_blank" rel="noopener">Open or share video</a>
+          <div class="video-tutorial-controls" aria-label="Video playback controls">
+            <button class="icon-button labeled" id="videoTutorialBackButton" type="button" aria-label="Rewind video 10 seconds">← 10 sec</button>
+            <button class="primary-button" id="videoTutorialPlayButton" type="button" aria-label="Play video">Play</button>
+            <button class="icon-button labeled" id="videoTutorialForwardButton" type="button" aria-label="Fast forward video 10 seconds">10 sec →</button>
+            <label class="video-tutorial-chapter">
+              <span>Jump to section</span>
+              <select id="videoTutorialChapterSelect">
+                <option value="0">Overview</option>
+                <option value="21">Start the project</option>
+                <option value="46">Material and pipe size</option>
+                <option value="71">Drag drawing</option>
+                <option value="124">True 45° offset</option>
+                <option value="148">Right-click and exact lengths</option>
+                <option value="201">Fittings and markup</option>
+                <option value="252">Details and live 3D</option>
+                <option value="307">Review and ready to issue</option>
+                <option value="360">Weld register</option>
+                <option value="386">Save and export</option>
+                <option value="437">Jobs and AI helper</option>
+              </select>
+            </label>
+            <output class="video-tutorial-time" id="videoTutorialTime" aria-live="off">0:00 / 8:31</output>
           </div>
         </section>
       </div>
@@ -1682,6 +1698,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=302"></script>
+    <script defer src="./app.js?v=303"></script>
   </body>
 </html>

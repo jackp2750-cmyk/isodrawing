@@ -185,9 +185,20 @@ assert(
     /id="helpVideoButton"/.test(html) &&
     /id="videoTutorialDialog"/.test(html) &&
     /id="videoTutorialPlayer"[\s\S]*playsinline/.test(html) &&
+    /id="videoTutorialBackButton"/.test(html) &&
+    /id="videoTutorialPlayButton"/.test(html) &&
+    /id="videoTutorialForwardButton"/.test(html) &&
+    /id="videoTutorialChapterSelect"/.test(html) &&
+    /id="videoTutorialTime"/.test(html) &&
     /const\s+TUTORIAL_VIDEO_URL\s*=/.test(app) &&
     /function\s+setupVideoTutorialDialog\s*\(/.test(app) &&
+    /function\s+seekVideoTutorial\s*\(/.test(app) &&
+    /function\s+toggleVideoTutorialPlayback\s*\(/.test(app) &&
+    /function\s+jumpToVideoTutorialChapter\s*\(/.test(app) &&
     /\.video-tutorial-card/.test(css) &&
+    /\.video-tutorial-controls/.test(css) &&
+    !/720p web edition/.test(html) &&
+    !/Start from beginning/.test(html) &&
     /request\.destination\s*===\s*["']video["']/.test(serviceWorker),
   "Responsive video tutorial player, entry points or streaming cache bypass is incomplete",
 );

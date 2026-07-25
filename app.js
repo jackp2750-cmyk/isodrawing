@@ -222,9 +222,12 @@ const tutorialCoach = document.querySelector("#tutorialCoach");
 const videoTutorialDialog = document.querySelector("#videoTutorialDialog");
 const videoTutorialPlayer = document.querySelector("#videoTutorialPlayer");
 const videoTutorialCloseButton = document.querySelector("#videoTutorialCloseButton");
-const videoTutorialRestartButton = document.querySelector("#videoTutorialRestartButton");
 const videoTutorialCopyLinkButton = document.querySelector("#videoTutorialCopyLinkButton");
-const videoTutorialShareLink = document.querySelector("#videoTutorialShareLink");
+const videoTutorialBackButton = document.querySelector("#videoTutorialBackButton");
+const videoTutorialPlayButton = document.querySelector("#videoTutorialPlayButton");
+const videoTutorialForwardButton = document.querySelector("#videoTutorialForwardButton");
+const videoTutorialChapterSelect = document.querySelector("#videoTutorialChapterSelect");
+const videoTutorialTime = document.querySelector("#videoTutorialTime");
 const firstSpoolGuide = document.querySelector("#firstSpoolGuide");
 const firstSpoolGuideProgressBar = document.querySelector("#firstSpoolGuideProgressBar");
 const firstSpoolGuideKicker = document.querySelector("#firstSpoolGuideKicker");
@@ -328,7 +331,7 @@ const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.02";
+const APP_VERSION = "v3.03";
 const APP_BUILD_DATE = "2026-07-25";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -15529,7 +15532,6 @@ function openVideoTutorialDialog(trigger = null) {
   if (tutorialDialog && !tutorialDialog.hidden) closeTutorialDialog();
   if (helpDialog && !helpDialog.hidden) closeHelpDialog();
   closeActionMenu();
-  if (videoTutorialShareLink) videoTutorialShareLink.href = TUTORIAL_VIDEO_URL;
   const source = videoTutorialPlayer?.querySelector("source");
   if (source && source.src !== TUTORIAL_VIDEO_URL) {
     source.src = TUTORIAL_VIDEO_URL;
@@ -15537,6 +15539,7 @@ function openVideoTutorialDialog(trigger = null) {
   }
   videoTutorialDialog.hidden = false;
   document.body.classList.add("video-tutorial-open");
+  syncVideoTutorialControls();
   videoTutorialCloseButton?.focus();
 }
 
@@ -15549,14 +15552,66 @@ function closeVideoTutorialDialog() {
   videoTutorialTrigger = null;
 }
 
-async function restartVideoTutorial() {
+function formatVideoTutorialTime(seconds) {
+  const value = Math.max(0, Math.round(Number(seconds) || 0));
+  const minutes = Math.floor(value / 60);
+  return `${minutes}:${String(value % 60).padStart(2, "0")}`;
+}
+
+function syncVideoTutorialControls() {
   if (!videoTutorialPlayer) return;
-  videoTutorialPlayer.currentTime = 0;
+  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : 511;
+  const currentTime = Number.isFinite(videoTutorialPlayer.currentTime) ? videoTutorialPlayer.currentTime : 0;
+  if (videoTutorialTime) {
+    videoTutorialTime.textContent = `${formatVideoTutorialTime(currentTime)} / ${formatVideoTutorialTime(duration)}`;
+  }
+  if (videoTutorialPlayButton) {
+    const playing = !videoTutorialPlayer.paused && !videoTutorialPlayer.ended;
+    videoTutorialPlayButton.textContent = playing ? "Pause" : "Play";
+    videoTutorialPlayButton.setAttribute("aria-label", playing ? "Pause video" : "Play video");
+    videoTutorialPlayButton.setAttribute("aria-pressed", String(playing));
+  }
+  if (videoTutorialChapterSelect) {
+    const chapters = [...videoTutorialChapterSelect.options]
+      .map((option) => Number(option.value))
+      .filter(Number.isFinite);
+    const chapter = chapters.reduce((selected, value) => value <= currentTime + 0.5 ? value : selected, chapters[0] ?? 0);
+    videoTutorialChapterSelect.value = String(chapter);
+  }
+}
+
+function seekVideoTutorial(deltaSeconds) {
+  if (!videoTutorialPlayer) return;
+  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : 511;
+  videoTutorialPlayer.currentTime = Math.max(0, Math.min(duration, videoTutorialPlayer.currentTime + deltaSeconds));
+  syncVideoTutorialControls();
+}
+
+async function toggleVideoTutorialPlayback() {
+  if (!videoTutorialPlayer) return;
+  try {
+    if (videoTutorialPlayer.paused || videoTutorialPlayer.ended) {
+      await videoTutorialPlayer.play();
+    } else {
+      videoTutorialPlayer.pause();
+    }
+  } catch {
+    showAppNotice("Press play on the video to continue.");
+  }
+  syncVideoTutorialControls();
+}
+
+async function jumpToVideoTutorialChapter(event) {
+  if (!videoTutorialPlayer || !videoTutorialChapterSelect) return;
+  const chapterTime = Number(event?.currentTarget?.value ?? videoTutorialChapterSelect.value);
+  if (!Number.isFinite(chapterTime)) return;
+  videoTutorialPlayer.currentTime = chapterTime;
   try {
     await videoTutorialPlayer.play();
   } catch {
-    showAppNotice("Press play to start the video.");
+    showAppNotice("The section is ready. Press play to continue.");
   }
+  syncVideoTutorialControls();
 }
 
 async function copyVideoTutorialLink() {
@@ -15574,8 +15629,14 @@ function setupVideoTutorialDialog() {
   tutorialVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
   helpVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
   videoTutorialCloseButton?.addEventListener("click", closeVideoTutorialDialog);
-  videoTutorialRestartButton?.addEventListener("click", restartVideoTutorial);
   videoTutorialCopyLinkButton?.addEventListener("click", copyVideoTutorialLink);
+  videoTutorialBackButton?.addEventListener("click", () => seekVideoTutorial(-10));
+  videoTutorialPlayButton?.addEventListener("click", toggleVideoTutorialPlayback);
+  videoTutorialForwardButton?.addEventListener("click", () => seekVideoTutorial(10));
+  videoTutorialChapterSelect?.addEventListener("input", jumpToVideoTutorialChapter);
+  for (const eventName of ["loadedmetadata", "durationchange", "timeupdate", "play", "pause", "ended"]) {
+    videoTutorialPlayer?.addEventListener(eventName, syncVideoTutorialControls);
+  }
   videoTutorialDialog?.addEventListener("pointerdown", (event) => {
     if (event.target === videoTutorialDialog) closeVideoTutorialDialog();
   });
