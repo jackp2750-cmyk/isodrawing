@@ -203,6 +203,15 @@ assert(
   "Responsive video tutorial player, entry points or streaming cache bypass is incomplete",
 );
 assert(
+  /function\s+markDraftPdfCanvas\s*\(/.test(app) &&
+    /DRAFT — NOT FOR FABRICATION/.test(app) &&
+    /DRAFT-NOT-FOR-FABRICATION/.test(app) &&
+    /exportFabSheetPdf\(\{\s*draft\s*\}\)/.test(app) &&
+    /issuedPdfReady\s*\?\s*["']Issued PDF["']\s*:\s*["']Draft PDF["']/.test(app) &&
+    /spoolmate-v304/.test(serviceWorker),
+  "Simplified draft/issued PDF flow or draft safety marking is incomplete",
+);
+assert(
   /Deno\.env\.get\(["']OPENAI_API_KEY["']\)/.test(aiHelpFunction) &&
     /https:\/\/api\.openai\.com\/v1\/responses/.test(aiHelpFunction) &&
     /model:\s*MODEL/.test(aiHelpFunction) &&
@@ -474,10 +483,11 @@ assert(
   "Current-revision audit matching or restored-revision approval reset is incomplete",
 );
 assert(
-  /async function\s+exportIsoImage\s*\([\s\S]*?issueDrawing\(\{\s*source:\s*["']fabrication-pdf["']\s*\}\)/.test(app) &&
+  /async function\s+exportIsoImage\s*\([\s\S]*?const\s+draft\s*=\s*!state\.issuedAt[\s\S]*?exportFabSheetPdf\(\{\s*draft\s*\}\)/.test(app) &&
+    /if\s*\(draft\)\s*\{[\s\S]*?markDraftPdfCanvas\(reportCanvas\)[\s\S]*?\}\s*else\s*\{[\s\S]*?drawTraceabilityQr\(reportCanvas\)/.test(app) &&
     /drawReportInfoTile\(ctx,\s*["']Ready to issue["']/.test(app) &&
     /<span>Issue audit<\/span>/.test(app),
-  "Fabrication PDF or QR traveller can bypass or omit the Ready to Issue audit",
+  "Draft marking, issued QR protection or Ready to Issue audit display is incomplete",
 );
 assert(
   /\.preissue-card\.preissue-ready/.test(css) &&

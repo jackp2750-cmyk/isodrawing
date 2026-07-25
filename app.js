@@ -331,7 +331,7 @@ const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.03";
+const APP_VERSION = "v3.04";
 const APP_BUILD_DATE = "2026-07-25";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -16158,6 +16158,18 @@ function updateControls() {
   flangeModeSelect.value = normalizeFlangeMode(state.flangeMode);
   if (flangeStandardSelect) flangeStandardSelect.value = normalizeFlangeStandard(state.flangeStandard);
   if (fabSheetTemplateSelect) fabSheetTemplateSelect.value = normalizeFabSheetTemplate(fabSheetTemplate);
+  const issuedPdfReady = Boolean(state.issuedAt) && projectStatusAtLeast(state.projectStatus, "issued");
+  const pdfButtonLabel = issuedPdfReady ? "Issued PDF" : "Draft PDF";
+  document.querySelectorAll("#exportReportButton span, #exportIsoButton span").forEach((label) => {
+    label.textContent = pdfButtonLabel;
+  });
+  for (const button of [document.querySelector("#exportReportButton"), document.querySelector("#exportIsoButton")]) {
+    if (!button) continue;
+    button.title = issuedPdfReady
+      ? "Download the approved fabrication sheet PDF"
+      : "Download a watermarked draft PDF";
+    button.setAttribute("aria-label", button.title);
+  }
   const previewMode = normalizePreviewMode(state.previewMode);
   if (previewModeSelect) previewModeSelect.value = previewMode;
   if (previewModePanelSelect) previewModePanelSelect.value = previewMode;
@@ -28800,39 +28812,84 @@ function export3dImage() {
 
 async function exportIsoImage() {
   markFirstUseGuideLearned("export");
-  if (!state.issuedAt || !projectStatusAtLeast(state.projectStatus, "issued")) {
-    let issued = false;
-    try {
-      issued = await issueDrawing({ source: "fabrication-pdf" });
-    } catch (error) {
-      console.warn("Could not complete the Ready to Issue gate.", error);
-      showAppNotice("Fabrication PDF not created because the issue checks could not be completed.");
-      return;
-    }
-    if (!issued) {
-      showAppNotice("Fabrication PDF not created. Clear the Ready to Issue gate first.");
-      return;
-    }
+  const draft = !state.issuedAt || !projectStatusAtLeast(state.projectStatus, "issued");
+  if (draft) {
+    const checks = preIssueChecklist();
+    const summary = checks.blockers.length
+      ? `${checks.blockers.length} issue check${checks.blockers.length === 1 ? "" : "s"} remain.`
+      : "The drawing has not been formally issued.";
+    const proceed = await confirmAppAction(
+      `${summary} You can still download it now as a clearly marked DRAFT — NOT FOR FABRICATION PDF. The official workshop PDF and QR traveller remain available after approval and issue.`,
+      {
+        title: "Download draft PDF?",
+        confirmLabel: "Download draft",
+        cancelLabel: "Not now",
+        tone: "warning",
+      },
+    );
+    if (!proceed) return;
   }
   try {
-    await exportFabSheetPdf();
+    await exportFabSheetPdf({ draft });
+    if (draft) {
+      showAppNotice("Draft PDF downloaded. It is marked NOT FOR FABRICATION and does not include an issued QR traveller.");
+    }
   } catch (error) {
     console.warn("Could not export fab sheet PDF.", error);
     showAppNotice("Could not create the PDF. The PNG fab sheet export will be used instead.");
-    exportSpoolReportImage();
+    exportSpoolReportImage({ draft });
   }
 }
 
-function exportSpoolReportImage() {
-  const template = normalizeFabSheetTemplate(fabSheetTemplate);
-  downloadCanvas(buildSpoolReportCanvas(template), `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}.png`);
+function markDraftPdfCanvas(canvas) {
+  if (!canvas) return canvas;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  const diagonalSize = Math.max(42, Math.round(Math.min(canvas.width, canvas.height) * 0.075));
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(-Math.PI / 7);
+  ctx.globalAlpha = 0.13;
+  ctx.fillStyle = "#c62828";
+  ctx.font = `950 ${diagonalSize}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("DRAFT — NOT FOR FABRICATION", 0, 0);
+  ctx.restore();
+
+  const bandHeight = Math.max(38, Math.round(canvas.height * 0.045));
+  ctx.save();
+  ctx.fillStyle = "rgba(198, 40, 40, 0.94)";
+  ctx.fillRect(0, 0, canvas.width, bandHeight);
+  ctx.fillRect(0, canvas.height - bandHeight, canvas.width, bandHeight);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `950 ${Math.max(16, Math.round(bandHeight * 0.43))}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("DRAFT — NOT FOR FABRICATION", canvas.width / 2, bandHeight / 2);
+  ctx.fillText("UNISSUED COPY — COMPLETE READY TO ISSUE BEFORE WORKSHOP USE", canvas.width / 2, canvas.height - bandHeight / 2);
+  ctx.restore();
+  return canvas;
 }
 
-async function exportFabSheetPdf() {
+function exportSpoolReportImage(options = {}) {
+  const template = normalizeFabSheetTemplate(fabSheetTemplate);
+  const canvas = buildSpoolReportCanvas(template);
+  if (options.draft) markDraftPdfCanvas(canvas);
+  const draftSuffix = options.draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
+  downloadCanvas(canvas, `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}${draftSuffix}.png`);
+}
+
+async function exportFabSheetPdf(options = {}) {
   const { name } = exportedProjectPayload();
   const template = normalizeFabSheetTemplate(fabSheetTemplate);
+  const draft = options.draft === true;
   const reportCanvas = buildSpoolReportCanvas(template);
-  await drawTraceabilityQr(reportCanvas);
+  if (draft) {
+    markDraftPdfCanvas(reportCanvas);
+  } else {
+    await drawTraceabilityQr(reportCanvas);
+  }
   const pages = [
     {
       dataUrl: reportCanvas.toDataURL("image/jpeg", 0.92),
@@ -28843,6 +28900,7 @@ async function exportFabSheetPdf() {
 
   const weldRegisterCanvas = buildWeldRegisterReportCanvas();
   if (weldRegisterCanvas) {
+    if (draft) markDraftPdfCanvas(weldRegisterCanvas);
     pages.push({
       dataUrl: weldRegisterCanvas.toDataURL("image/jpeg", 0.92),
       width: weldRegisterCanvas.width,
@@ -28854,6 +28912,7 @@ async function exportFabSheetPdf() {
   if (modelViews.length) {
     try {
       const modelCanvas = await buildModelReportCanvas(modelViews);
+      if (draft) markDraftPdfCanvas(modelCanvas);
       pages.push({
         dataUrl: modelCanvas.toDataURL("image/jpeg", 0.92),
         width: modelCanvas.width,
@@ -28865,7 +28924,8 @@ async function exportFabSheetPdf() {
   }
 
   const pdfBytes = buildImagePdf(pages);
-  downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}.pdf`, "application/pdf");
+  const draftSuffix = draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
+  downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}${draftSuffix}.pdf`, "application/pdf");
 }
 
 function spoolTravellerUrl() {

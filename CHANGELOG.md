@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.03`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.04`.
+
+## v3.04 - Simpler PDF and Issue Flow
+- Allowed users to download a PDF before completing the full Ready to Issue process.
+- Clearly marks every page of an unissued export as `DRAFT — NOT FOR FABRICATION`.
+- Adds `DRAFT-NOT-FOR-FABRICATION` to draft filenames and excludes the issued QR traveller.
+- Keeps the full QA, approval, issue audit and QR controls for official workshop PDFs.
+- Changes the export label between Draft PDF and Issued PDF so the current state is obvious.
+- Updated the PWA cache to `spoolmate-v304`.
 
 ## v3.03 - Video Playback and Chapters
 - Simplified the video guide by removing the quality, voice and device badges plus the duplicate footer actions.
