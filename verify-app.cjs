@@ -193,8 +193,10 @@ assert(
     /id="videoTutorialTime"/.test(html) &&
     /const\s+TUTORIAL_VIDEO_URL\s*=/.test(app) &&
     /const\s+JOBS_TUTORIAL_VIDEO_URL\s*=/.test(app) &&
+    /const\s+DRAWING_TUTORIAL_VIDEO_URL\s*=/.test(app) &&
     /const\s+VIDEO_TUTORIALS\s*=/.test(app) &&
     /data-open-video-tutorial="jobs"/.test(html) &&
+    /data-open-video-tutorial="drawing"/.test(html) &&
     /function\s+renderVideoTutorialLibrary\s*\(/.test(app) &&
     /function\s+selectVideoTutorial\s*\(/.test(app) &&
     /function\s+setupVideoTutorialDialog\s*\(/.test(app) &&
@@ -216,7 +218,7 @@ assert(
     /DRAFT-NOT-FOR-FABRICATION/.test(app) &&
     /exportFabSheetPdf\(\{\s*draft\s*\}\)/.test(app) &&
     /issuedPdfReady\s*\?\s*["']Issued PDF["']\s*:\s*["']Draft PDF["']/.test(app) &&
-    /spoolmate-v308/.test(serviceWorker),
+    /spoolmate-v309/.test(serviceWorker),
   "Simplified draft/issued PDF flow or draft safety marking is incomplete",
 );
 assert(
@@ -236,7 +238,7 @@ assert(
     /restored\.projectId\s*=\s*null/.test(app) &&
     /createProjectBackup\(["']before last-session restore["']\)/.test(app) &&
     /\.home-dashboard-action\.recovery/.test(css) &&
-    /spoolmate-v308/.test(serviceWorker),
+    /spoolmate-v309/.test(serviceWorker),
   "Last-session recovery protection or dashboard action is incomplete",
 );
 assert(

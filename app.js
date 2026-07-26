@@ -339,13 +339,14 @@ const VIDEO_TUTORIAL_SELECTION_KEY = "spoolmate-video-tutorial-selection-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.08";
-const APP_BUILD_DATE = "2026-07-26";
+const APP_VERSION = "v3.09";
+const APP_BUILD_DATE = "2026-07-27";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4`;
 const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-Tutorial-720p.mp4`;
+const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Tutorial-720p%20(1).mp4`;
 const VIDEO_TUTORIALS = [
   {
     id: "complete",
@@ -395,6 +396,37 @@ const VIDEO_TUTORIALS = [
       [368.34, "Open a spool by QR"],
       [396.42, "Return to the drawing"],
       [425.73, "Recommended daily routine"],
+    ],
+  },
+  {
+    id: "drawing",
+    eyebrow: "Drawing masterclass",
+    title: "Master every drawing tool",
+    duration: 608.344,
+    description: "Drag drawing, exact runs, true 45 degree offsets, navigation, precise edits, every fitting, sockets, welds, dimensions, notes and the live 3D check.",
+    shortDescription: "Every drawing feature in one guide",
+    url: DRAWING_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Drawing guide overview"],
+      [33.542, "Set up the spool"],
+      [63.748, "Draw pipe by dragging"],
+      [91.962, "Directions and live length"],
+      [121.472, "Exact X, Y and Z runs"],
+      [150.502, "True 45 degree offset"],
+      [183.036, "Zoom, pan and Fit"],
+      [212.546, "Select and Box Select"],
+      [242.968, "Right-click length edit"],
+      [274.686, "Pipe size and bend angle"],
+      [304.196, "Flanges"],
+      [338.842, "Roll grooves"],
+      [365.448, "Valves"],
+      [392.822, "Socket layouts"],
+      [422.86, "Move and rotate sockets"],
+      [453.21, "Tees and branches"],
+      [481.52, "Reducers"],
+      [510.574, "Weld numbering"],
+      [540.156, "Dimensions and labels"],
+      [573.002, "Measure, notes and 3D check"],
     ],
   },
 ];

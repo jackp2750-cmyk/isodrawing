@@ -1,6 +1,15 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.08`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.09`.
+
+## v3.09 - Complete Drawing Masterclass
+- Added a 10-minute drawing tutorial with 20 directly selectable chapters and Natasha narration.
+- Demonstrates drag drawing, live snap length, exact X/Y/Z runs and the true Shift or touch 45 degree offset workflow.
+- Covers zoom, pan, Fit, single and box selection, right-click or long-press length edits, size changes and bend angles.
+- Demonstrates flanges, roll grooves, valves, socket layouts and rotation, tees, welded branches, reducers and automatic weld numbering.
+- Finishes with dimensions, pipe labels, measurements, notes, Undo/Redo and a moving capture of SpoolMate's live 3D model.
+- Added the drawing guide to both the tutorial shelf and the reusable video library with play/pause, skip and chapter controls.
+- Updated the PWA cache to `spoolmate-v309`.
 
 ## v3.08 - Video Tutorial Library
 - Replaced the single video popup with a reusable tutorial library that can grow as new focused training videos are produced.
