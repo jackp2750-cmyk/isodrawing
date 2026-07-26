@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=305" />
+    <link rel="stylesheet" href="./styles.css?v=308" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.05</span>
+              <span class="version-badge" id="appVersionBadge">v3.07</span>
             </div>
           </div>
 
@@ -363,7 +363,7 @@
                   </button>
                   <button class="icon-button labeled" id="videoTutorialButton" type="button" title="Watch the complete SpoolMate video guide" aria-label="Watch the complete SpoolMate video guide">
                     <svg><use href="#icon-image"></use></svg>
-                    <span>Video guide</span>
+                    <span>Video tutorials</span>
                   </button>
                   <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
                     <svg><use href="#icon-sample"></use></svg>
@@ -520,6 +520,10 @@
               <button class="icon-button compact labeled" id="zoomInButton" type="button" title="Zoom in" aria-label="Zoom in">
                 <span class="button-sign" aria-hidden="true">+</span>
                 <span>Zoom</span>
+              </button>
+              <button class="icon-button compact labeled" id="fitDrawingButton" type="button" title="Fit the whole spool on screen" aria-label="Fit whole spool on screen">
+                <span class="button-sign" aria-hidden="true">↔</span>
+                <span>Fit</span>
               </button>
               <button class="icon-button compact labeled touch-shift-angle-button" id="touchShiftAngleButton" type="button" title="Hold while drawing a 45 degree offset" aria-label="Hold for 45 degree drawing" aria-pressed="false">
                 <span class="button-sign" aria-hidden="true">45°</span>
@@ -896,8 +900,8 @@
             </button>
             <button class="home-dashboard-action video-guide" id="homeDashboardVideoButton" type="button">
               <svg><use href="#icon-image"></use></svg>
-              <strong>Video guide</strong>
-              <span>Watch the complete real-world spool workflow.</span>
+              <strong>Video tutorials</strong>
+              <span>Complete workflow and focused feature guides.</span>
             </button>
             <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
               <svg><use href="#icon-sample"></use></svg>
@@ -1216,9 +1220,28 @@
             </div>
             <button class="icon-button labeled tutorial-video-button" id="tutorialVideoButton" type="button">
               <svg><use href="#icon-image"></use></svg>
-              <span>Watch full video</span>
+              <span>Video tutorials</span>
             </button>
           </div>
+          <section class="tutorial-video-shelf" aria-label="Video tutorials">
+            <div class="tutorial-video-shelf-copy">
+              <span>Watch and follow along</span>
+              <strong>Video tutorials</strong>
+              <small>Start with the complete workflow, or learn one part of SpoolMate at a time.</small>
+            </div>
+            <div class="tutorial-video-shelf-actions">
+              <button class="tutorial-video-shelf-button" type="button" data-open-video-tutorial="complete">
+                <span>8:31</span>
+                <strong>Complete spool</strong>
+                <small>Drawing, 3D, checks, welds and export</small>
+              </button>
+              <button class="tutorial-video-shelf-button" type="button" data-open-video-tutorial="jobs">
+                <span>7:35</span>
+                <strong>Jobs dashboard</strong>
+                <small>Planning, holds, comms, reports and QR</small>
+              </button>
+            </div>
+          </section>
           <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
           <article class="tutorial-step-card" id="tutorialStepCard"></article>
           <div class="project-dialog-actions tutorial-actions">
@@ -1234,43 +1257,42 @@
         <section class="project-dialog-card video-tutorial-card" role="dialog" aria-modal="true" aria-labelledby="videoTutorialTitle" aria-describedby="videoTutorialDescription">
           <div class="project-dialog-header video-tutorial-header">
             <div>
-              <span class="video-tutorial-kicker">8 minute real-world walkthrough</span>
-              <strong id="videoTutorialTitle">Build a complete spool in SpoolMate</strong>
-              <small id="videoTutorialDescription">Follow drag drawing, true 45° offsets, measured edits, fittings, review, the live 3D model, weld tracking and export.</small>
+              <span class="video-tutorial-kicker">SpoolMate learning centre</span>
+              <strong id="videoTutorialTitle">Video tutorials</strong>
+              <small id="videoTutorialDescription">Choose a guide, watch at your own pace and jump directly to the section you need.</small>
             </div>
             <div class="video-tutorial-header-actions">
-              <button class="icon-button labeled" id="videoTutorialCopyLinkButton" type="button">Copy link</button>
               <button class="icon-button labeled" id="videoTutorialCloseButton" type="button">Close</button>
             </div>
           </div>
-          <div class="video-tutorial-frame">
-            <video id="videoTutorialPlayer" controls preload="metadata" playsinline>
-              <source src="https://wsrfxqnsquzzwqijfmec.supabase.co/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4" type="video/mp4" />
-              Your browser cannot play this video.
-            </video>
-          </div>
-          <div class="video-tutorial-controls" aria-label="Video playback controls">
-            <button class="icon-button labeled" id="videoTutorialBackButton" type="button" aria-label="Rewind video 10 seconds">← 10 sec</button>
-            <button class="primary-button" id="videoTutorialPlayButton" type="button" aria-label="Play video">Play</button>
-            <button class="icon-button labeled" id="videoTutorialForwardButton" type="button" aria-label="Fast forward video 10 seconds">10 sec →</button>
-            <label class="video-tutorial-chapter">
-              <span>Jump to section</span>
-              <select id="videoTutorialChapterSelect">
-                <option value="0">Overview</option>
-                <option value="21">Start the project</option>
-                <option value="46">Material and pipe size</option>
-                <option value="71">Drag drawing</option>
-                <option value="124">True 45° offset</option>
-                <option value="148">Right-click and exact lengths</option>
-                <option value="201">Fittings and markup</option>
-                <option value="252">Details and live 3D</option>
-                <option value="307">Review and ready to issue</option>
-                <option value="360">Weld register</option>
-                <option value="386">Save and export</option>
-                <option value="437">Jobs and AI helper</option>
-              </select>
-            </label>
-            <output class="video-tutorial-time" id="videoTutorialTime" aria-live="off">0:00 / 8:31</output>
+          <div class="video-tutorial-layout">
+            <nav class="video-tutorial-library" id="videoTutorialLibrary" aria-label="Available video tutorials"></nav>
+            <div class="video-tutorial-viewer">
+              <div class="video-tutorial-now-playing">
+                <div>
+                  <span id="videoTutorialNowPlayingKicker">Complete workflow · 8:31</span>
+                  <strong id="videoTutorialNowPlayingTitle">Build a complete spool</strong>
+                  <small id="videoTutorialNowPlayingDescription">Drawing, true offsets, precise edits, fittings, 3D, review, welds and export.</small>
+                </div>
+                <button class="icon-button labeled" id="videoTutorialCopyLinkButton" type="button">Copy video link</button>
+              </div>
+              <div class="video-tutorial-frame">
+                <video id="videoTutorialPlayer" controls preload="metadata" playsinline>
+                  <source src="https://wsrfxqnsquzzwqijfmec.supabase.co/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4" type="video/mp4" />
+                  Your browser cannot play this video.
+                </video>
+              </div>
+              <div class="video-tutorial-controls" aria-label="Video playback controls">
+                <button class="icon-button labeled" id="videoTutorialBackButton" type="button" aria-label="Rewind video 10 seconds">← 10 sec</button>
+                <button class="primary-button" id="videoTutorialPlayButton" type="button" aria-label="Play video">Play</button>
+                <button class="icon-button labeled" id="videoTutorialForwardButton" type="button" aria-label="Fast forward video 10 seconds">10 sec →</button>
+                <label class="video-tutorial-chapter">
+                  <span>Jump to section</span>
+                  <select id="videoTutorialChapterSelect"></select>
+                </label>
+                <output class="video-tutorial-time" id="videoTutorialTime" aria-live="off">0:00 / 8:31</output>
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -1473,7 +1495,11 @@
                 </article>
                 <article>
                   <strong>Move sockets and dimensions</strong>
-                  <p>With Select active, drag a socket along the pipe. Drag red dimension labels away from clashes when red line dimensions are on.</p>
+                  <p>With Select active, drag a socket along the pipe. Drag fabrication dimension labels away from clashes when line dimensions are on.</p>
+                </article>
+                <article>
+                  <strong>Move and fit the 2D drawing</strong>
+                  <p>With Select active, drag empty paper to move the spool. Use two fingers together to pan and pinch to zoom. Tap Fit above the drawing whenever you want the whole spool and its callouts back on screen.</p>
                 </article>
                 <article>
                   <strong>3D view</strong>
@@ -1514,7 +1540,7 @@
                 </article>
                 <article>
                   <strong>Offset measurements</strong>
-                  <p>Turn Dimensions on. The angled run shows the travel C/C, and red-line dimensions also show the offset set C/C between centres.</p>
+                  <p>Turn Dimensions on. The angled run shows the travel C/C, and fabrication line dimensions also show the offset set C/C between centres.</p>
                 </article>
                 <article>
                   <strong>Measure tool</strong>
@@ -1633,7 +1659,7 @@
                 </article>
                 <article>
                   <strong>Clean export drawings</strong>
-                  <p>Before exporting, turn off 3D pipe labels if the model is too busy and drag red dimensions away from overlaps.</p>
+                  <p>Before exporting, turn off 3D pipe labels if the model is too busy and drag fabrication dimensions away from overlaps.</p>
                 </article>
                 <article>
                   <strong>Fab sheet contents</strong>
@@ -1686,7 +1712,7 @@
           <div class="project-dialog-actions">
             <button class="icon-button labeled" id="helpVideoButton" type="button">
               <svg><use href="#icon-image"></use></svg>
-              <span>Watch video guide</span>
+              <span>Video tutorials</span>
             </button>
             <button class="primary-button" id="helpCloseButton" type="button">Done</button>
           </div>
@@ -1703,6 +1729,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=305"></script>
+    <script defer src="./app.js?v=308"></script>
   </body>
 </html>

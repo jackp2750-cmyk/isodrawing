@@ -184,6 +184,7 @@ assert(
     /id="tutorialVideoButton"/.test(html) &&
     /id="helpVideoButton"/.test(html) &&
     /id="videoTutorialDialog"/.test(html) &&
+    /id="videoTutorialLibrary"/.test(html) &&
     /id="videoTutorialPlayer"[\s\S]*playsinline/.test(html) &&
     /id="videoTutorialBackButton"/.test(html) &&
     /id="videoTutorialPlayButton"/.test(html) &&
@@ -191,11 +192,18 @@ assert(
     /id="videoTutorialChapterSelect"/.test(html) &&
     /id="videoTutorialTime"/.test(html) &&
     /const\s+TUTORIAL_VIDEO_URL\s*=/.test(app) &&
+    /const\s+JOBS_TUTORIAL_VIDEO_URL\s*=/.test(app) &&
+    /const\s+VIDEO_TUTORIALS\s*=/.test(app) &&
+    /data-open-video-tutorial="jobs"/.test(html) &&
+    /function\s+renderVideoTutorialLibrary\s*\(/.test(app) &&
+    /function\s+selectVideoTutorial\s*\(/.test(app) &&
     /function\s+setupVideoTutorialDialog\s*\(/.test(app) &&
     /function\s+seekVideoTutorial\s*\(/.test(app) &&
     /function\s+toggleVideoTutorialPlayback\s*\(/.test(app) &&
     /function\s+jumpToVideoTutorialChapter\s*\(/.test(app) &&
     /\.video-tutorial-card/.test(css) &&
+    /\.video-tutorial-library-item/.test(css) &&
+    /\.tutorial-video-shelf/.test(css) &&
     /\.video-tutorial-controls/.test(css) &&
     !/720p web edition/.test(html) &&
     !/Start from beginning/.test(html) &&
@@ -208,7 +216,7 @@ assert(
     /DRAFT-NOT-FOR-FABRICATION/.test(app) &&
     /exportFabSheetPdf\(\{\s*draft\s*\}\)/.test(app) &&
     /issuedPdfReady\s*\?\s*["']Issued PDF["']\s*:\s*["']Draft PDF["']/.test(app) &&
-    /spoolmate-v305/.test(serviceWorker),
+    /spoolmate-v308/.test(serviceWorker),
   "Simplified draft/issued PDF flow or draft safety marking is incomplete",
 );
 assert(
@@ -228,7 +236,7 @@ assert(
     /restored\.projectId\s*=\s*null/.test(app) &&
     /createProjectBackup\(["']before last-session restore["']\)/.test(app) &&
     /\.home-dashboard-action\.recovery/.test(css) &&
-    /spoolmate-v305/.test(serviceWorker),
+    /spoolmate-v308/.test(serviceWorker),
   "Last-session recovery protection or dashboard action is incomplete",
 );
 assert(

@@ -1,6 +1,34 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.05`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.08`.
+
+## v3.08 - Video Tutorial Library
+- Replaced the single video popup with a reusable tutorial library that can grow as new focused training videos are produced.
+- Added the narrated Jobs dashboard guide with chapters for Today, the production board, filters, allocation, holds, notes, Comms, reports and QR access.
+- Added a compact video shelf inside the interactive tutorial with direct Complete spool and Jobs dashboard choices.
+- Kept play/pause, ten-second skip controls, chapter jumping, elapsed time and copy-link actions for every guide.
+- Made the library responsive across desktop, iPad, Android tablets, portrait phones and short landscape phone screens.
+- Kept tutorial videos out of the offline PWA cache so large media does not consume drawing storage.
+- Updated the PWA cache to `spoolmate-v308`.
+
+## v3.07 - Apple and Android Compatibility Pass
+- Calmed the default numbered drawing view with slate fabrication dimensions, a stronger deep-teal pipe, and a lighter paper grid; traditional red-line dimensions remain available as an optional view.
+- Changed active manual measurements and socket-position edits to blue so red is reserved for warnings, blockers and the optional red-line view.
+- Tested 32 recent Apple and Android viewport/orientation combinations covering iPhones, iPads, Galaxy phones and tablets, Pixels, foldables and large tablets.
+- Added a compact landscape layout that preserves useful drawing height on short phone screens.
+- Improved large-touch-device detection using touch points as well as pointer and hover capabilities.
+- Prevented the 3D canvas from retaining an oversized desktop width inside phone and tablet preview sheets.
+- Reworked the phone Export strip so PDF style, Export 3D, Fab PDF and project-file actions remain on screen.
+- Rechecked Draw, Edit, Review, Export, tutorial, AI helper, jobs, inspector, Fit and 3D sheet workflows.
+- Updated the PWA cache to `spoolmate-v307`.
+
+## v3.06 - Samsung Phone Drawing Navigation
+- Added two-finger pan and pinch zoom to the 2D spool drawing.
+- Added one-finger pan on empty drawing space while Select is active.
+- Reduced the minimum drawing scale so long spools can zoom out properly on phones.
+- Added a one-tap Fit control that centres the whole spool with phone-safe padding.
+- Limited the on-canvas numbered dimension key to the available height so quotation and callout boxes are not cut off.
+- Added the new phone gestures to in-app Help and updated the PWA cache to `spoolmate-v306`.
 
 ## v3.05 - Clear Saving and Session Recovery
 - Reduced the header save indicator to four unmistakable states: Saving…, Saved to cloud, Local only and Save failed.

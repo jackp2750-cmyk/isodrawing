@@ -218,9 +218,11 @@ const tutorialPrevButton = document.querySelector("#tutorialPrevButton");
 const tutorialActionButton = document.querySelector("#tutorialActionButton");
 const tutorialNextButton = document.querySelector("#tutorialNextButton");
 const tutorialVideoButton = document.querySelector("#tutorialVideoButton");
+const tutorialVideoLaunchButtons = [...document.querySelectorAll("[data-open-video-tutorial]")];
 const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
 const tutorialCoach = document.querySelector("#tutorialCoach");
 const videoTutorialDialog = document.querySelector("#videoTutorialDialog");
+const videoTutorialLibrary = document.querySelector("#videoTutorialLibrary");
 const videoTutorialPlayer = document.querySelector("#videoTutorialPlayer");
 const videoTutorialCloseButton = document.querySelector("#videoTutorialCloseButton");
 const videoTutorialCopyLinkButton = document.querySelector("#videoTutorialCopyLinkButton");
@@ -229,6 +231,9 @@ const videoTutorialPlayButton = document.querySelector("#videoTutorialPlayButton
 const videoTutorialForwardButton = document.querySelector("#videoTutorialForwardButton");
 const videoTutorialChapterSelect = document.querySelector("#videoTutorialChapterSelect");
 const videoTutorialTime = document.querySelector("#videoTutorialTime");
+const videoTutorialNowPlayingKicker = document.querySelector("#videoTutorialNowPlayingKicker");
+const videoTutorialNowPlayingTitle = document.querySelector("#videoTutorialNowPlayingTitle");
+const videoTutorialNowPlayingDescription = document.querySelector("#videoTutorialNowPlayingDescription");
 const firstSpoolGuide = document.querySelector("#firstSpoolGuide");
 const firstSpoolGuideProgressBar = document.querySelector("#firstSpoolGuideProgressBar");
 const firstSpoolGuideKicker = document.querySelector("#firstSpoolGuideKicker");
@@ -330,15 +335,69 @@ const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const PREVIEW_FLOAT_BOUNDS_KEY = "spoolmate-preview-bounds-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
 const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
+const VIDEO_TUTORIAL_SELECTION_KEY = "spoolmate-video-tutorial-selection-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.05";
-const APP_BUILD_DATE = "2026-07-25";
+const APP_VERSION = "v3.08";
+const APP_BUILD_DATE = "2026-07-26";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4`;
+const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-Tutorial-720p.mp4`;
+const VIDEO_TUTORIALS = [
+  {
+    id: "complete",
+    eyebrow: "Complete workflow",
+    title: "Build a complete spool",
+    duration: 511,
+    description: "Drawing, true 45° offsets, precise edits, fittings, 3D, review, weld tracking and fabrication export.",
+    shortDescription: "The best place to start",
+    url: TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Overview"],
+      [21, "Start the project"],
+      [46, "Material and pipe size"],
+      [71, "Drag drawing"],
+      [124, "True 45° offset"],
+      [148, "Right-click and exact lengths"],
+      [201, "Fittings and markup"],
+      [252, "Details and live 3D"],
+      [307, "Review and ready to issue"],
+      [360, "Weld register"],
+      [386, "Save and export"],
+      [437, "Jobs and AI helper"],
+    ],
+  },
+  {
+    id: "jobs",
+    eyebrow: "Focused guide",
+    title: "Use the Jobs dashboard",
+    duration: 455.267,
+    description: "Plan daily work, use the production board, assign spools, manage holds, communicate, report progress and open issued work by QR.",
+    shortDescription: "Planning, teams and workshop flow",
+    url: JOBS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "What the Jobs tab is for"],
+      [26.45, "Save the spool first"],
+      [54.94, "Know where the list comes from"],
+      [84.65, "Start with Today"],
+      [111.92, "Use the built-in guide"],
+      [139.19, "Understand the full board"],
+      [168.5, "Reduce the board with filters"],
+      [197.4, "Allocate the spool"],
+      [226.71, "Put blocked work on hold"],
+      [255.2, "Add a yard note"],
+      [283.28, "Find a job and open its folder"],
+      [311.77, "Use Comms for the wider team"],
+      [340.26, "Review daily and weekly reports"],
+      [368.34, "Open a spool by QR"],
+      [396.42, "Return to the drawing"],
+      [425.73, "Recommended daily routine"],
+    ],
+  },
+];
 const QR_CODE_JS_URL = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
 const QR_CODE_READER_JS_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/+esm";
 const CLOUD_PROJECTS_TABLE = "spool_projects";
@@ -944,16 +1003,17 @@ const TUTORIAL_STEPS = [
     kicker: "Dimensions",
     menuLabel: "Dimensions",
     title: "Choose the clearest dimension style",
-    body: "Dimensions can be red centre-to-centre lines, numbered dimensions or chain dimensions. Pipe-size labels now have their own visibility menu so the drawing can stay clean.",
+    body: "Dimensions can use calm numbered callouts, traditional red centre-to-centre lines or chain dimensions. Pipe-size labels have their own visibility menu so the drawing can stay clean.",
     target: "#dimensionStyleSelect",
     targetLabel: "Dimension style menu",
     action: "focusDimensions",
     actionLabel: "Show Styles",
     demo: "dimensions",
     items: [
-      "Red C/C lines are good for fabrication checking.",
-      "Drag red dimension labels away from clashes.",
-      "Use numbered or chain dimensions when labels get crowded.",
+      "Numbered key is the clearest everyday view and keeps the pipe visually dominant.",
+      "Use red C/C lines when you specifically want a traditional red-line check.",
+      "Drag fabrication dimension labels away from clashes.",
+      "Use numbered or chain dimensions when the drawing gets crowded.",
       "Use Pipe labels to show key sizes, all sizes, export-only labels or hide them while drawing.",
     ],
   },
@@ -1453,6 +1513,8 @@ let touchContextPress = null;
 let pendingDraw = null;
 let activeTouchPointers = new Map();
 let pinchGesture = null;
+let drawingPanGesture = null;
+let drawingViewOffset = { x: 0, y: 0 };
 let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
 let noteDialogResolver = null;
@@ -3771,24 +3833,36 @@ function applyDrawingDetailPreset(value) {
 }
 
 function dimensionLinePalette() {
-  const chain = normalizeDimensionStyle(state.dimensionStyle) === "chain";
-  return chain
-    ? {
-        line: "#1f2a2f",
-        halo: "rgba(255, 253, 248, 0.94)",
-        text: "#1f2a2f",
-        fill: "rgba(255, 253, 248, 0.96)",
-        border: "rgba(31, 42, 47, 0.28)",
-        shadow: "rgba(31, 42, 47, 0.08)",
-      }
-    : {
-        line: "#c1121f",
-        halo: "rgba(255, 253, 248, 0.9)",
-        text: "#c1121f",
-        fill: "rgba(255, 253, 248, 0.96)",
-        border: "rgba(193, 18, 31, 0.28)",
-        shadow: "rgba(31, 42, 47, 0.12)",
-      };
+  const style = normalizeDimensionStyle(state.dimensionStyle);
+  const dark = isDarkAppTheme();
+  if (style === "chain") {
+    return {
+      line: dark ? "#c7d4d8" : "#1f2a2f",
+      halo: dark ? "rgba(6, 16, 24, 0.9)" : "rgba(255, 253, 248, 0.94)",
+      text: dark ? "#e8f1f3" : "#1f2a2f",
+      fill: dark ? "rgba(6, 18, 28, 0.95)" : "rgba(255, 253, 248, 0.96)",
+      border: dark ? "rgba(199, 212, 216, 0.3)" : "rgba(31, 42, 47, 0.28)",
+      shadow: dark ? "rgba(0, 0, 0, 0.28)" : "rgba(31, 42, 47, 0.08)",
+    };
+  }
+  if (style === "redline") {
+    return {
+      line: dark ? "#ff6f78" : "#c1121f",
+      halo: dark ? "rgba(6, 16, 24, 0.9)" : "rgba(255, 253, 248, 0.9)",
+      text: dark ? "#ff9aa1" : "#c1121f",
+      fill: dark ? "rgba(6, 18, 28, 0.95)" : "rgba(255, 253, 248, 0.96)",
+      border: dark ? "rgba(255, 111, 120, 0.38)" : "rgba(193, 18, 31, 0.28)",
+      shadow: dark ? "rgba(0, 0, 0, 0.3)" : "rgba(31, 42, 47, 0.12)",
+    };
+  }
+  return {
+    line: dark ? "#88c9d3" : "#526c78",
+    halo: dark ? "rgba(6, 16, 24, 0.9)" : "rgba(247, 245, 239, 0.92)",
+    text: dark ? "#bce4ea" : "#415b66",
+    fill: dark ? "rgba(6, 18, 28, 0.95)" : "rgba(251, 252, 250, 0.97)",
+    border: dark ? "rgba(136, 201, 211, 0.34)" : "rgba(82, 108, 120, 0.3)",
+    shadow: dark ? "rgba(0, 0, 0, 0.3)" : "rgba(31, 42, 47, 0.09)",
+  };
 }
 
 function normalizeLiftingSlingAngle(value) {
@@ -4255,9 +4329,28 @@ function getProjection() {
   const maxY = Math.max(...rawPoints.map((point) => point.y));
 
   return {
-    offsetX: rect.width * 0.5 - (minX + maxX) * 0.5,
-    offsetY: rect.height * 0.55 - (minY + maxY) * 0.5,
+    offsetX: rect.width * 0.5 - (minX + maxX) * 0.5 + drawingViewOffset.x,
+    offsetY: rect.height * 0.55 - (minY + maxY) * 0.5 + drawingViewOffset.y,
   };
+}
+
+function fitDrawingToViewport({ announce = true } = {}) {
+  const rect = drawCanvas.getBoundingClientRect();
+  const points = state.points.length ? state.points : [{ x: 0, y: 0, z: 0 }];
+  const rawPoints = points.map((point) => rawIso(point, 1));
+  const rawWidth = Math.max(1, Math.max(...rawPoints.map((point) => point.x)) - Math.min(...rawPoints.map((point) => point.x)));
+  const rawHeight = Math.max(1, Math.max(...rawPoints.map((point) => point.y)) - Math.min(...rawPoints.map((point) => point.y)));
+  const phone = document.body.classList.contains("phone-layout") || rect.width <= 640;
+  const availableWidth = Math.max(120, rect.width - (phone ? 76 : 112));
+  const availableHeight = Math.max(120, rect.height - (phone ? 96 : 120));
+  state.gridScale = clampNumber(Math.min(56, availableWidth / rawWidth, availableHeight / rawHeight), 10, 72);
+  drawingViewOffset = { x: 0, y: 0 };
+  state.previewCandidate = null;
+  updateAll();
+  if (announce) {
+    cursorReadout.textContent = "Whole spool fitted";
+    showAppNotice("Whole spool fitted. Drag empty space to move it, or use two fingers to pan and zoom.");
+  }
 }
 
 function projectIso(point, projection = getProjection()) {
@@ -4292,14 +4385,14 @@ function drawIso() {
 function drawGrid(ctx, width, height, projection) {
   ctx.save();
   const darkTheme = isDarkAppTheme();
-  ctx.fillStyle = darkTheme ? "#061018" : "#f7f3e9";
+  ctx.fillStyle = darkTheme ? "#061018" : "#f7f5ef";
   ctx.fillRect(0, 0, width, height);
 
   const bounds = worldBounds(8);
   const range = Math.min(34, Math.max(8, Math.ceil(Math.max(bounds.maxAbsX, bounds.maxAbsY) + 8)));
 
   ctx.lineWidth = 1;
-  ctx.strokeStyle = darkTheme ? "rgba(0, 174, 255, 0.12)" : "rgba(112, 124, 116, 0.08)";
+  ctx.strokeStyle = darkTheme ? "rgba(0, 174, 255, 0.1)" : "rgba(112, 124, 116, 0.055)";
 
   for (let i = -range; i <= range; i += 1) {
     drawLine(
@@ -4335,9 +4428,9 @@ function drawIsoPaperDots(ctx, width, height, projection, range) {
       const major = x % 5 === 0 && y % 5 === 0;
       ctx.beginPath();
       ctx.fillStyle = isDarkAppTheme()
-        ? major ? "rgba(35, 190, 255, 0.54)" : "rgba(0, 132, 255, 0.28)"
-        : major ? "rgba(38, 80, 78, 0.38)" : "rgba(72, 86, 82, 0.24)";
-      ctx.arc(dot.x, dot.y, major ? 1.9 : 1.25, 0, Math.PI * 2);
+        ? major ? "rgba(35, 190, 255, 0.42)" : "rgba(0, 132, 255, 0.2)"
+        : major ? "rgba(38, 80, 78, 0.24)" : "rgba(72, 86, 82, 0.12)";
+      ctx.arc(dot.x, dot.y, major ? 1.7 : 1.05, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -4404,12 +4497,12 @@ function drawingPipePalette() {
   }
 
   return {
-    pipe: "#1f5f68",
+    pipe: "#174e59",
     selected: "#b95436",
     hovered: "#2563eb",
     highlight: "#fffdf8",
-    shadow: "rgba(31, 42, 47, 0.12)",
-    tee: "#1f5f68",
+    shadow: "rgba(31, 42, 47, 0.1)",
+    tee: "#174e59",
     branch: "#b95436",
   };
 }
@@ -4446,7 +4539,7 @@ function dimensionViewport(ctx, padding = 18) {
 }
 
 function drawSpool2d(ctx, projection, options = {}) {
-  const pipeWidth = 4;
+  const pipeWidth = 5;
   const segmentListForDraw = segments();
   const connections = nodeConnections(segmentListForDraw);
   const viewport = options.viewport ?? dimensionViewport(ctx, 18);
@@ -5032,7 +5125,7 @@ function drawMeasurement2d(ctx, projection, measurement, selected = false, optio
   const midpoint = { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 };
   const label = measurementLabel(measurement);
   const tick = 8;
-  const color = selected ? "#0f766e" : "#c1121f";
+  const color = selected ? "#008fb3" : "#526c78";
   const labelFill = selected ? "rgba(216, 241, 237, 0.96)" : "rgba(255, 253, 248, 0.96)";
   let labelAngle = Math.atan2(dy, dx);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
@@ -5068,7 +5161,7 @@ function drawMeasurement2d(ctx, projection, measurement, selected = false, optio
   roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
   ctx.fillStyle = labelFill;
   ctx.fill();
-  ctx.strokeStyle = selected ? "rgba(15, 118, 110, 0.55)" : "rgba(193, 18, 31, 0.28)";
+  ctx.strokeStyle = selected ? "rgba(0, 143, 179, 0.55)" : "rgba(82, 108, 120, 0.28)";
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.fillStyle = color;
@@ -5633,7 +5726,9 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
 
   const viewport = dimensionLayout?.viewport ?? dimensionViewport(ctx, 12);
   const dark = isDarkAppTheme();
-  const maxItems = 18;
+  const palette = dimensionLinePalette();
+  const availableHeight = Math.max(80, viewport.bottom - viewport.top);
+  const maxItems = Math.max(3, Math.min(18, Math.floor((availableHeight - 64) / 16)));
   const visibleItems = items.slice(0, maxItems);
   const overflowCount = items.length - visibleItems.length;
 
@@ -5663,11 +5758,11 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   ctx.fillStyle = dark ? "rgba(6, 18, 28, 0.94)" : "rgba(255, 253, 248, 0.94)";
   ctx.fill();
   ctx.shadowColor = "transparent";
-  ctx.strokeStyle = dark ? "rgba(19, 216, 255, 0.34)" : "rgba(193, 18, 31, 0.2)";
+  ctx.strokeStyle = palette.border;
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  ctx.fillStyle = dark ? "#dffbff" : "#7f1d1d";
+  ctx.fillStyle = palette.text;
   ctx.font = "950 11px Inter, system-ui, sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
@@ -5708,7 +5803,7 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
         lines: [],
       });
     }
-    ctx.fillStyle = item.code === "..." ? (dark ? "#7f93a4" : "#657579") : (dark ? "#ff8a8a" : "#c1121f");
+    ctx.fillStyle = item.code === "..." ? (dark ? "#7f93a4" : "#657579") : palette.text;
     ctx.fillText(item.code, itemX, itemY);
     ctx.fillStyle = dark ? "#ecfeff" : "#263538";
     const showEditTag = editableKey && item.code !== "..." && colWidth > 138;
@@ -6027,7 +6122,7 @@ function drawRedArrowDimension(ctx, start, end, segmentIndex, text, dimensionLay
 
   for (const stroke of [
     { color: "rgba(255, 253, 248, 0.94)", width: 6 },
-    { color: "#c1121f", width: 2.4 },
+    { color: "#008fb3", width: 2.4 },
   ]) {
     ctx.strokeStyle = stroke.color;
     ctx.lineWidth = stroke.width;
@@ -6046,10 +6141,10 @@ function drawRedArrowDimension(ctx, start, end, segmentIndex, text, dimensionLay
   roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
   ctx.fillStyle = "rgba(255, 253, 248, 0.98)";
   ctx.fill();
-  ctx.strokeStyle = "rgba(193, 18, 31, 0.36)";
+  ctx.strokeStyle = "rgba(0, 143, 179, 0.36)";
   ctx.lineWidth = 1;
   ctx.stroke();
-  ctx.fillStyle = "#c1121f";
+  ctx.fillStyle = "#008fb3";
   ctx.fillText(text, 0, 0.5);
   layoutState.labels.push(layout.bounds);
   layoutState.lines.push(...layout.lines);
@@ -6692,6 +6787,7 @@ function pointerPosition(event, canvas = drawCanvas) {
 
 function isCoarseInput() {
   return Boolean(
+    (navigator.maxTouchPoints || 0) > 0 ||
     window.matchMedia?.("(pointer: coarse)")?.matches ||
       window.matchMedia?.("(hover: none)")?.matches,
   );
@@ -15587,19 +15683,88 @@ function setupTutorialDialog() {
 }
 
 let videoTutorialTrigger = null;
+let activeVideoTutorialId = (() => {
+  try {
+    return localStorage.getItem(VIDEO_TUTORIAL_SELECTION_KEY) || VIDEO_TUTORIALS[0].id;
+  } catch {
+    return VIDEO_TUTORIALS[0].id;
+  }
+})();
 
-function openVideoTutorialDialog(trigger = null) {
+function getVideoTutorial(videoId = activeVideoTutorialId) {
+  return VIDEO_TUTORIALS.find((tutorial) => tutorial.id === videoId) || VIDEO_TUTORIALS[0];
+}
+
+function renderVideoTutorialLibrary() {
+  if (!videoTutorialLibrary) return;
+  videoTutorialLibrary.innerHTML = VIDEO_TUTORIALS.map((tutorial, index) => `
+    <button
+      class="video-tutorial-library-item"
+      type="button"
+      data-video-tutorial-id="${escapeHtml(tutorial.id)}"
+      aria-pressed="${tutorial.id === activeVideoTutorialId ? "true" : "false"}"
+    >
+      <span class="video-tutorial-library-number">${String(index + 1).padStart(2, "0")}</span>
+      <span class="video-tutorial-library-copy">
+        <span>${escapeHtml(tutorial.eyebrow)} · ${formatVideoTutorialTime(tutorial.duration)}</span>
+        <strong>${escapeHtml(tutorial.title)}</strong>
+        <small>${escapeHtml(tutorial.shortDescription)}</small>
+      </span>
+      <span class="video-tutorial-library-play" aria-hidden="true">▶</span>
+    </button>
+  `).join("");
+}
+
+function renderVideoTutorialChapters(tutorial) {
+  if (!videoTutorialChapterSelect) return;
+  videoTutorialChapterSelect.innerHTML = tutorial.chapters
+    .map(([time, label]) => `<option value="${Number(time)}">${escapeHtml(label)}</option>`)
+    .join("");
+}
+
+function selectVideoTutorial(videoId, { reset = true, autoplay = false } = {}) {
+  if (!videoTutorialPlayer) return;
+  const tutorial = getVideoTutorial(videoId);
+  const changed = tutorial.id !== activeVideoTutorialId;
+  activeVideoTutorialId = tutorial.id;
+  try {
+    localStorage.setItem(VIDEO_TUTORIAL_SELECTION_KEY, activeVideoTutorialId);
+  } catch {
+    // Private browsing can disable local storage; the library still works for this session.
+  }
+  renderVideoTutorialLibrary();
+  renderVideoTutorialChapters(tutorial);
+  if (videoTutorialNowPlayingKicker) {
+    videoTutorialNowPlayingKicker.textContent = `${tutorial.eyebrow} · ${formatVideoTutorialTime(tutorial.duration)}`;
+  }
+  if (videoTutorialNowPlayingTitle) videoTutorialNowPlayingTitle.textContent = tutorial.title;
+  if (videoTutorialNowPlayingDescription) videoTutorialNowPlayingDescription.textContent = tutorial.description;
+
+  const source = videoTutorialPlayer.querySelector("source");
+  const sourceChanged = source?.getAttribute("src") !== tutorial.url;
+  if (source && sourceChanged) {
+    videoTutorialPlayer.pause();
+    source.setAttribute("src", tutorial.url);
+    videoTutorialPlayer.load();
+  } else if (reset && (changed || videoTutorialPlayer.ended)) {
+    videoTutorialPlayer.currentTime = 0;
+  }
+  if (autoplay) {
+    videoTutorialPlayer.play().catch(() => {
+      showAppNotice("The video is ready. Press play to begin.");
+    });
+  }
+  syncVideoTutorialControls();
+}
+
+function openVideoTutorialDialog(trigger = null, videoId = activeVideoTutorialId) {
   if (!videoTutorialDialog) return;
   if (trigger instanceof HTMLElement) videoTutorialTrigger = trigger;
   if (homeDashboardDialog && !homeDashboardDialog.hidden) closeHomeDashboard();
   if (tutorialDialog && !tutorialDialog.hidden) closeTutorialDialog();
   if (helpDialog && !helpDialog.hidden) closeHelpDialog();
   closeActionMenu();
-  const source = videoTutorialPlayer?.querySelector("source");
-  if (source && source.src !== TUTORIAL_VIDEO_URL) {
-    source.src = TUTORIAL_VIDEO_URL;
-    videoTutorialPlayer.load();
-  }
+  selectVideoTutorial(videoId, { reset: false });
   videoTutorialDialog.hidden = false;
   document.body.classList.add("video-tutorial-open");
   syncVideoTutorialControls();
@@ -15623,7 +15788,8 @@ function formatVideoTutorialTime(seconds) {
 
 function syncVideoTutorialControls() {
   if (!videoTutorialPlayer) return;
-  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : 511;
+  const tutorial = getVideoTutorial();
+  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : tutorial.duration;
   const currentTime = Number.isFinite(videoTutorialPlayer.currentTime) ? videoTutorialPlayer.currentTime : 0;
   if (videoTutorialTime) {
     videoTutorialTime.textContent = `${formatVideoTutorialTime(currentTime)} / ${formatVideoTutorialTime(duration)}`;
@@ -15645,7 +15811,7 @@ function syncVideoTutorialControls() {
 
 function seekVideoTutorial(deltaSeconds) {
   if (!videoTutorialPlayer) return;
-  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : 511;
+  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : getVideoTutorial().duration;
   videoTutorialPlayer.currentTime = Math.max(0, Math.min(duration, videoTutorialPlayer.currentTime + deltaSeconds));
   syncVideoTutorialControls();
 }
@@ -15678,19 +15844,35 @@ async function jumpToVideoTutorialChapter(event) {
 }
 
 async function copyVideoTutorialLink() {
+  const tutorial = getVideoTutorial();
   try {
     if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
-    await navigator.clipboard.writeText(TUTORIAL_VIDEO_URL);
-    showAppNotice("Video link copied.");
+    await navigator.clipboard.writeText(tutorial.url);
+    showAppNotice(`${tutorial.title} link copied.`);
   } catch {
     showAppNotice("Open the video, then copy its address from the browser.");
   }
 }
 
 function setupVideoTutorialDialog() {
+  if (!VIDEO_TUTORIALS.some((tutorial) => tutorial.id === activeVideoTutorialId)) {
+    activeVideoTutorialId = VIDEO_TUTORIALS[0].id;
+  }
+  renderVideoTutorialLibrary();
+  renderVideoTutorialChapters(getVideoTutorial());
   videoTutorialButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
   tutorialVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
   helpVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
+  for (const button of tutorialVideoLaunchButtons) {
+    button.addEventListener("click", (event) => {
+      openVideoTutorialDialog(event.currentTarget, event.currentTarget.dataset.openVideoTutorial);
+    });
+  }
+  videoTutorialLibrary?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-video-tutorial-id]") : null;
+    if (!button) return;
+    selectVideoTutorial(button.dataset.videoTutorialId);
+  });
   videoTutorialCloseButton?.addEventListener("click", closeVideoTutorialDialog);
   videoTutorialCopyLinkButton?.addEventListener("click", copyVideoTutorialLink);
   videoTutorialBackButton?.addEventListener("click", () => seekVideoTutorial(-10));
@@ -15704,7 +15886,7 @@ function setupVideoTutorialDialog() {
     if (event.target === videoTutorialDialog) closeVideoTutorialDialog();
   });
   videoTutorialPlayer?.addEventListener("error", () => {
-    showAppNotice("The video could not load. Check the internet connection or use Open or share video.");
+    showAppNotice(`${getVideoTutorial().title} could not load. Check the internet connection or try again shortly.`);
   });
 }
 
@@ -16926,8 +17108,8 @@ function ensureHomeDashboardShell() {
           </button>
           <button class="home-dashboard-action video-guide" id="homeDashboardVideoButton" type="button">
             <svg><use href="#icon-image"></use></svg>
-            <strong>Video guide</strong>
-            <span>Watch the complete real-world spool workflow.</span>
+            <strong>Video tutorials</strong>
+            <span>Complete workflow and focused feature guides.</span>
           </button>
           <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
             <svg><use href="#icon-sample"></use></svg>
@@ -31057,6 +31239,14 @@ function touchDistance(pointerEntries) {
   return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
 }
 
+function touchCentre(pointerEntries) {
+  if (pointerEntries.length < 2) return { x: 0, y: 0 };
+  return {
+    x: (pointerEntries[0][1].clientX + pointerEntries[1][1].clientX) * 0.5,
+    y: (pointerEntries[0][1].clientY + pointerEntries[1][1].clientY) * 0.5,
+  };
+}
+
 function beginPinchGesture() {
   const pointerEntries = firstTwoTouchPointers();
   const startDistance = touchDistance(pointerEntries);
@@ -31093,7 +31283,10 @@ function beginPinchGesture() {
     ids: pointerEntries.map(([id]) => id),
     startDistance,
     startScale: state.gridScale,
+    startCentre: touchCentre(pointerEntries),
+    startOffset: { ...drawingViewOffset },
   };
+  drawingPanGesture = null;
 }
 
 function updatePinchGesture() {
@@ -31105,10 +31298,55 @@ function updatePinchGesture() {
 
   const distance = touchDistance(pointerEntries);
   if (distance <= 0) return false;
-  state.gridScale = clampNumber(pinchGesture.startScale * (distance / pinchGesture.startDistance), 24, 72);
+  const centre = touchCentre(pointerEntries);
+  state.gridScale = clampNumber(pinchGesture.startScale * (distance / pinchGesture.startDistance), 10, 72);
+  drawingViewOffset = {
+    x: pinchGesture.startOffset.x + centre.x - pinchGesture.startCentre.x,
+    y: pinchGesture.startOffset.y + centre.y - pinchGesture.startCentre.y,
+  };
   state.previewCandidate = null;
-  cursorReadout.textContent = `Zoom ${Math.round(state.gridScale)}`;
+  cursorReadout.textContent = `Move / zoom ${Math.round(state.gridScale)}`;
   drawIso();
+  return true;
+}
+
+function beginDrawingPan(event, pointer) {
+  if (!isTouchLikeEvent(event) || state.activeTool !== "select") return false;
+  if (findNearestNote(pointer) || findNearestDimensionTarget(pointer) || findNearestMeasurement(pointer) ||
+      findNearestPoint(pointer) || findNearestSegment(pointer) || findNearestFitting(pointer)) return false;
+  cancelTouchContextPress();
+  drawingPanGesture = {
+    pointerId: event.pointerId,
+    startClient: { x: event.clientX, y: event.clientY },
+    startOffset: { ...drawingViewOffset },
+  };
+  drawCanvas.setPointerCapture?.(event.pointerId);
+  cursorReadout.textContent = "Drag to move drawing";
+  return true;
+}
+
+function updateDrawingPan(event) {
+  if (!drawingPanGesture || drawingPanGesture.pointerId !== event.pointerId || pinchGesture) return false;
+  drawingViewOffset = {
+    x: drawingPanGesture.startOffset.x + event.clientX - drawingPanGesture.startClient.x,
+    y: drawingPanGesture.startOffset.y + event.clientY - drawingPanGesture.startClient.y,
+  };
+  cursorReadout.textContent = "Moving drawing";
+  drawIso();
+  event.preventDefault();
+  return true;
+}
+
+function finishDrawingPan(event) {
+  if (!drawingPanGesture || drawingPanGesture.pointerId !== event.pointerId) return false;
+  try {
+    drawCanvas.releasePointerCapture?.(event.pointerId);
+  } catch {
+    // Pointer capture may already be released.
+  }
+  drawingPanGesture = null;
+  cursorReadout.textContent = "Drawing moved";
+  event.preventDefault();
   return true;
 }
 
@@ -32797,6 +33035,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
     event.preventDefault();
     return;
   }
+  if (updateDrawingPan(event)) return;
   if (updateBoxSelect(event)) return;
   if (updateNoteDrag(event)) return;
   if (updateSocketDrag(event)) return;
@@ -32881,6 +33120,10 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   const pointer = pointerPosition(event);
   trackTouchPointer(event);
   if (pinchGesture) {
+    event.preventDefault();
+    return;
+  }
+  if (beginDrawingPan(event, pointer)) {
     event.preventDefault();
     return;
   }
@@ -33039,6 +33282,10 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
 drawCanvas.addEventListener("pointerup", (event) => {
   if (finishPinchGestureForPointer(event)) return;
+  if (finishDrawingPan(event)) {
+    releaseTrackedTouchPointer(event);
+    return;
+  }
   if (finishBoxSelect(event)) {
     releaseTrackedTouchPointer(event);
     return;
@@ -33064,6 +33311,7 @@ drawCanvas.addEventListener("pointerup", (event) => {
 });
 drawCanvas.addEventListener("pointercancel", (event) => {
   releaseTrackedTouchPointer(event);
+  finishDrawingPan(event);
   cancelTouchContextPress();
   cancelPendingDraw();
   cancelBoxSelect();
@@ -33380,9 +33628,10 @@ document.querySelector("#zoomInButton").addEventListener("click", () => {
   updateAll();
 });
 document.querySelector("#zoomOutButton").addEventListener("click", () => {
-  state.gridScale = Math.max(24, state.gridScale - 5);
+  state.gridScale = Math.max(10, state.gridScale - 5);
   updateAll();
 });
+document.querySelector("#fitDrawingButton")?.addEventListener("click", () => fitDrawingToViewport());
 
 document.addEventListener("keydown", (event) => {
   const isEnterKey = event.key === "Enter" || event.code === "NumpadEnter";

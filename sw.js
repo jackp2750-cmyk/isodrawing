@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v305";
+const CACHE_NAME = "spoolmate-v308";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=305",
-  "./app.js?v=305",
+  "./styles.css?v=308",
+  "./app.js?v=308",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [
