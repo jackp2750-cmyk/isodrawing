@@ -346,7 +346,7 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4`;
 const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-Tutorial-720p.mp4`;
-const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Tutorial-720p%20(1).mp4`;
+const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Masterclass-720p.mp4`;
 const VIDEO_TUTORIALS = [
   {
     id: "complete",
