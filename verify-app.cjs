@@ -162,6 +162,34 @@ assert(serviceWorker.includes(`./app.js?v=${assetVersion}`), "Service worker app
 assert(serviceWorker.includes(`./styles.css?v=${assetVersion}`), "Service worker CSS version differs from index.html");
 assert(readme.includes(`Current app version: \`${appVersion}\``), "README current version differs from app.js");
 assert(changelog.includes(`Current app version: \`${appVersion}\``), "CHANGELOG current version differs from app.js");
+assert(
+  /function\s+regressionLargeOutletTeeState\s*\(/.test(app) &&
+    /function\s+regressionAutoCheckLargeOutletTee\s*\(/.test(app) &&
+    /const\s+largestEntry\s*=\s*\[\.\.\.entries\]\.sort/.test(app) &&
+    /addTeeReducer\(largestEntry,\s*entry\)/.test(app),
+  "Largest-outlet tee reducer regression coverage or all-leg reducer logic is missing",
+);
+assert(
+  /function\s+teeNodeLegLengthMetres\s*\(/.test(app) &&
+    /Math\.max\(startReducerTrim,\s*nodeClearances\.start\)/.test(app) &&
+    /Math\.max\(endReducerTrim,\s*nodeClearances\.end\)/.test(app) &&
+    /computeAutoReducerRenderTrims\(autoReducers,\s*style\)/.test(app),
+  "3D tee/reducer endpoint trimming is incomplete",
+);
+assert(
+  /A fabricated branch is a continuous main pipe with a welded outlet/.test(app) &&
+    /quantities\.tees\.length\s*===\s*0/.test(app) &&
+    /branchTakeoffOnlyOnOutlet/.test(app) &&
+    /mergedMainIsFullLength/.test(app),
+  "Tee and fabricated-branch calculation paths or regression checks are not explicitly separated",
+);
+assert(
+  /offsetElbows\.length\s*===\s*2/.test(app) &&
+    /offsetElbows\.every\(\(elbow\)\s*=>\s*Math\.abs\(elbow\.bend\s*-\s*45\)/.test(app) &&
+    /offsetQuantity\?\.cutLengthMm/.test(app) &&
+    /expectedCutLength/.test(app),
+  "45 degree offset regression does not verify true travel, both bend take-offs and final cut length",
+);
 const htmlThemeColor = html.match(/<meta\s+name="theme-color"\s+content="([^"]+)"/)?.[1];
 assert(Boolean(htmlThemeColor), "HTML theme colour is missing");
 assert(manifest.theme_color === htmlThemeColor, "Manifest and HTML theme colours differ");
@@ -218,7 +246,7 @@ assert(
     /DRAFT-NOT-FOR-FABRICATION/.test(app) &&
     /exportFabSheetPdf\(\{\s*draft\s*\}\)/.test(app) &&
     /issuedPdfReady\s*\?\s*["']Issued PDF["']\s*:\s*["']Draft PDF["']/.test(app) &&
-    /spoolmate-v309/.test(serviceWorker),
+    serviceWorker.includes(`spoolmate-v${assetVersion}`),
   "Simplified draft/issued PDF flow or draft safety marking is incomplete",
 );
 assert(
@@ -238,7 +266,7 @@ assert(
     /restored\.projectId\s*=\s*null/.test(app) &&
     /createProjectBackup\(["']before last-session restore["']\)/.test(app) &&
     /\.home-dashboard-action\.recovery/.test(css) &&
-    /spoolmate-v309/.test(serviceWorker),
+    serviceWorker.includes(`spoolmate-v${assetVersion}`),
   "Last-session recovery protection or dashboard action is incomplete",
 );
 assert(
@@ -324,6 +352,69 @@ assert(
 assert(
   /const\s+stainless\s*=\s*normalizePipeSpec\(state\.pipeSpec\)\s*!==\s*["']carbon40["']/.test(app),
   "3D/fallback stainless material handling is missing",
+);
+assert(
+  /const\s+PREVIEW_MODES\s*=\s*new Set\(\[["']illustrated["']/.test(app) &&
+    /previewMode:\s*["']tricolor["']/.test(app) &&
+    /const\s+TRICOLOR_3D_DEFAULT_KEY/.test(app) &&
+    /function\s+migrateTriColor3dDrawingDefaults\s*\(/.test(app) &&
+    /const\s+LEGACY_PREVIEW_MODE_MAP/.test(app) &&
+    /function\s+addIllustratedModelOutlines\s*\(/.test(app) &&
+    /new THREE\.EdgesGeometry\(mesh\.geometry,\s*thresholdAngle\)/.test(app) &&
+    /mesh\.geometry\.type\s*!==\s*["']TubeGeometry["']/.test(app) &&
+    /shell\.scale\.setScalar\(1\.008\)/.test(app) &&
+    /illustratedWeldSeam/.test(app) &&
+    /elbowData\.radius\s*\*\s*1\.012/.test(app) &&
+    /function\s+illustratedEdgesGeometry\s*\(/.test(app) &&
+    /illustratedHideStartEdge/.test(app) &&
+    /value="illustrated">Illustrated workshop/.test(html) &&
+    /value="tricolor">Tri-colour by pipe size/.test(html) &&
+    /triColorPalette/.test(app) &&
+    /function\s+updatePreviewSizeColourLegend\s*\(/.test(app) &&
+    /contactShadowOpacity:\s*0\.13/.test(app) &&
+    /projectedHalfWidth\s*\/\s*Math\.max\(aspect,\s*0\.25\)/.test(app) &&
+    /body:not\(\.preview-panel-hidden\)\s+\.ai-helper-launcher/.test(css),
+  "Default tri-colour or illustrated 3D model rendering is incomplete",
+);
+assert(
+  /ROLL_GROOVE_SETBACK_MM\s*=\s*18/.test(app) &&
+    /ROLL_GROOVE_VISUAL_WIDTH_MM\s*=\s*9/.test(app) &&
+    /function\s+rollGrooveAssembly\s*\(/.test(app) &&
+    /gasket-seat land/.test(app) &&
+    /grooveBand/.test(app),
+  "Victaulic-style roll-groove representation is incomplete",
+);
+assert(
+  /const\s+FITTING_TOOLS\s*=\s*new Set\(\[[^\]]*["']threadedEnd["']/.test(app) &&
+    /label:\s*["']Add threaded pipe end["']/.test(app) &&
+    /label:\s*["']Threaded pipe end["']/.test(app) &&
+    /function\s+threadedPipeEndAssembly\s*\(/.test(app) &&
+    /new THREE\.TubeGeometry\(curve,\s*pointCount/.test(app) &&
+    /threadLength\s*\/\s*0\.017/.test(app) &&
+    /clampNumber\([\s\S]*?0\.068,\s*0\.105\)/.test(app) &&
+    /0x53615f/.test(app) &&
+    /function\s+threadedPipeEndLength\s*\(/.test(app) &&
+    /threadedEndSides\.has\(`\$\{segment\.index\}:start`\)/.test(app) &&
+    /threadedEndSides\.has\(`\$\{segment\.index\}:end`\)/.test(app) &&
+    /const\s+shoulderRadius\s*=\s*pipeRadius\s*\*\s*0\.92/.test(app) &&
+    /const\s+endRadius\s*=\s*pipeRadius\s*\*\s*0\.84/.test(app) &&
+    /threadedMachinedSection/.test(app) &&
+    /for\s*\(const\s+fitting\s+of\s+state\.fittings\)[\s\S]*?const\s+segmentPipeMaterial\s*=\s*pipeMaterialForSegment\(segment\)/.test(app) &&
+    /threadedEnd:\$\{size\.nb\}/.test(app) &&
+    /fitting\.type\s*===\s*["']threadedEnd["']/.test(app),
+  "Threaded pipe-end menu, takeoff or 3D rendering is incomplete",
+);
+const takeoffDataSource = app.match(/function\s+takeoffData\s*\([\s\S]*?\nfunction\s+autoReducerTransitions\s*\(/)?.[0] ?? "";
+assert(
+  /for\s*\(const\s+reducer\s+of\s+autoReducersForTeeNode\(nodeIndex,\s*connected,\s*segmentData\)\)/.test(takeoffDataSource) &&
+    /applyReducerTakeoff\(segmentTakeoffs,\s*reducer\)/.test(takeoffDataSource) &&
+    /reducers\.push\(reducer\)/.test(takeoffDataSource),
+  "Reducing tee reducers are no longer included in shared take-off quantities",
+);
+const teeAssemblySource = app.match(/function\s+teeNodeAssembly\s*\([\s\S]*?\nfunction\s+outlineTeeMarker\s*\(/)?.[0] ?? "";
+assert(
+  /illustratedHideStartEdge/.test(teeAssemblySource) && !/torusRing\(/.test(teeAssemblySource),
+  "Equal tee assembly has regained an internal construction ring",
 );
 assert(/\.slice\(-240\)/.test(app), "Expanded spool activity retention is missing");
 assert(
@@ -539,10 +630,25 @@ assert(
   "Mode-specific workspace heading is incomplete",
 );
 assert(
-  /function\s+setPreviewHidden\s*\([\s\S]*?!isTabletLayout\(\)\)\s*setInspectorDrawerOpen\(false\)/.test(app) &&
+  /function\s+showMobilePanel\s*\([\s\S]*?requested\s*===\s*["']preview["'][\s\S]*?setInspectorDrawerOpen\(false\)[\s\S]*?previewPanelHidden\s*=\s*false/.test(app) &&
     /function\s+setInspectorDrawerOpen\s*\([\s\S]*?previewPanelHidden\s*=\s*true/.test(app) &&
     /previewShowButton\?\.addEventListener\([\s\S]*?showMobilePanel\("preview"\)/.test(app),
   "Details and 3D no longer enforce one contextual surface",
+);
+assert(
+  /function\s+revealInspectorForSelection\s*\([\s\S]*?isTabletLayout\(\)\s*\|\|\s*!previewPanelHidden/.test(app) &&
+    /function\s+reconcileWorkspaceLayout\s*\(/.test(app) &&
+    /function\s+captureWorkspaceSurfaceState\s*\(/.test(app) &&
+    /function\s+restoreWorkspaceSurfaceState\s*\(/.test(app) &&
+    /function\s+resetWorkspaceLayout\s*\(/.test(app) &&
+    /id="resetWorkspaceLayoutButton"/.test(html) &&
+    /id="inspectorOpenPreviewButton"/.test(html) &&
+    /id="previewOpenInspectorButton"/.test(html) &&
+    /function\s+closePrimaryWorkspaceDialogs\s*\(/.test(app) &&
+    /body\.mobile-touch-layout #previewMinimizeButton/.test(css) &&
+    /body\.mobile-panel-open \.ai-helper-launcher/.test(css) &&
+    /\.control-panel,[\s\S]*?\.preview-panel\s*\{[\s\S]*?z-index:\s*360/.test(css),
+  "Cross-platform workspace surface coordination is incomplete",
 );
 assert(
   /body\.tablet-layout\.field-layout \.mobile-panel-dock\s*\{\s*display:\s*none/.test(css) &&

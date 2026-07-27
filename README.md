@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.09`
+Current app version: `v3.14`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -11,6 +11,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 ## What It Does
 
 - Draw 2D isometric pipe runs in millimetres.
+- Preview new drawings in the default Tri-colour by pipe size 3D style, distinguishing each NB/OD size with a matching on-model colour key.
+- Switch to Illustrated workshop for light fabrication surfaces, black component outlines and subtle contact shadows, or choose Realistic, Transparent or Fabrication outline.
 - Add exact X, Y and Z runs, plus angled offset runs.
 - Hold Shift on a keyboard, or Hold 45° beside the drawing on touch, while drawing to use 45 degree offset snap guides.
 - Edit run length, angle, pipe size and fitting details from the inspector or right-click/long-press menus.
@@ -19,6 +21,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - The Fittings button shows the currently selected fitting so it stays clear what will be placed next.
 - Pick common flange standards from menus, including ANSI, PN, DIN, JIS and AS 2129 Table types; 3D flange OD, thickness, PCD, bolt-hole diameter and hole count come from the selected standard's size table.
 - Pick socket size, quantity and spacing from a visual socket menu.
+- Add endpoint-only threaded pipe ends from the right-click or touch long-press fitting menu; they appear as threads in both the drawing and 3D model.
 - Work with Carbon Sch 40 and Stainless Sch 10S pipe data up to NB 300, plus Atlas stainless steel tube OD sizes and tube fitting weights.
 - Show pipe size labels, red centre-to-centre dimensions, numbered dimension keys or chain-style dimensions.
 - Control pipe-size labels separately with Auto, Key sizes, All sizes, Export only and Hide modes.
@@ -56,6 +59,10 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Use the desktop Inspector as an on-demand drawer: it stays closed when nothing is selected, opens for selected pipe/fittings, and gives Cut List, Weights and BOM full-height views.
 - Keep only Save, Jobs, Account, cloud-save state and Menu in the permanent action bar; New spool and theme controls now live in Menu.
 - Keep the desktop canvas dominant with a narrow single-column drawing rail and contextual Details/3D surfaces that close one another.
+- Keep the drawing in place when selecting items on phones and tablets; Details only opens when explicitly requested.
+- Preserve the desktop 3D Float/Dock choice when moving between desktop and touch layouts, while touch devices always use one expanded sheet at a time.
+- Exit Focus mode back to the exact Drawing, Details or 3D surface that was open before entering it.
+- Use Menu > Reset layout to close temporary panels, clear minimized/collapsed layout state and restore the drawing without changing spool data.
 - Use one bottom drawing-tool dock on iPad and Android tablets instead of stacking duplicate panel navigation beneath it.
 - Open tablet Details and 3D as large slide-up sheets from the drawing header, returning the recovered space to the canvas when they close.
 - Change the drawing heading with the active Draw, Edit, Review or Export task so users always know which workspace they are in.

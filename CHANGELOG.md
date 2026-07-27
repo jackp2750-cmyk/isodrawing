@@ -1,6 +1,53 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.09`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.14`.
+
+## v3.14 - Focused Jobs Dashboard
+
+- Replaced the crowded all-at-once Jobs screen with a compact job-first overview.
+- Added Needs attention, Active, My jobs, Completed and All filters with job counts.
+- Added pinning, recently opened ordering, fabrication progress, due dates, assignees and attention badges.
+- Limited the overview to 12 jobs per page so large job lists remain manageable.
+- Moved the detailed production board and spool drawings inside the selected job.
+- Added compact responsive rows for phones, Android tablets and iPads.
+
+## v3.13 - Reliable Mixed-Size Tees
+- Reworked automatic tee sizing so the largest connected pipe defines the equal tee body even when that pipe is the outlet rather than a straight-through leg.
+- Added a separate reducer to every smaller tee leg, covering smaller outlets, larger outlets and three different connected pipe sizes consistently in take-offs, BOM and weight totals.
+- Split fabricated-branch calculations from tee calculations explicitly: branches retain one continuous main-pipe cut, deduct only the welded outlet take-off, and never create a tee fitting or reducer.
+- Trimmed connected pipe cylinders back to the actual tee and reducer ends so the 3D model no longer layers pipe through the fitting or creates striped/z-fighting surfaces.
+- Rendered the whole equal tee body at its correct largest size before transitioning to the smaller coloured pipe legs.
+- Added a built-in large-outlet regression sample that verifies an NB 150 tee with NB 100 and NB 80 reducers.
+- Strengthened the 45-degree offset self-test to verify true travel, both 45-degree elbow take-offs and the final angled pipe cut length.
+- Updated the PWA cache to `spoolmate-v313`.
+
+## v3.12 - Predictable Workspace and Clearer Threaded Ends
+- Unified Drawing, Details and 3D behaviour across desktop, iPad, Android tablets and phones so only one auxiliary surface takes control at a time.
+- Stopped touch selections from replacing the drawing with the Details sheet, and stopped ordinary redraws from closing a Details drawer the user deliberately opened.
+- Preserved the desktop 3D Float/Dock preference when switching through touch layouts; touch 3D now always opens expanded and never inherits minimized/floating state.
+- Made Focus mode restore the exact Drawing, Details or 3D surface that was active before Focus began.
+- Coordinated Dashboard, Jobs, Tutorial, video, Help, Account and AI helper dialogs so opening one closes competing top-level screens.
+- Added Menu > Reset layout to safely return to Drawing, close temporary surfaces, expand collapsed Details sections and clear stale preview bounds without changing spool data.
+- Rebuilt threaded pipe ends as a reduced machined section with a tapered core, visible shoulder and extra-coarse exposed helix that remains inside the original pipe diameter and stays readable while the model rotates.
+- Updated the PWA cache to `spoolmate-v312`.
+
+## v3.11 - Clearer 3D Connections and Pipe Sizes
+- Made Tri-colour by pipe size the default 3D view, assigning teal, amber and violet consistently to different NB/OD sizes.
+- Added a compact colour key inside the 3D preview so each colour remains tied to its actual pipe-size label.
+- Simplified the visible 3D choices to Tri-colour, Illustrated, Realistic, Transparent and Fabrication outline while safely mapping older saved style names to their closest retained view.
+- Rebuilt roll-groove ends as a narrow, set-back cold-formed groove with a clear gasket-seat land and rounded groove edges instead of a raised black collar.
+- Removed the internal branch-cylinder construction line from equal tees while retaining the real fitting-to-pipe seam lines.
+- Kept the welded-branch root detail, but suppressed its hidden internal collar edge so it cannot appear through the main pipe.
+- Added reliable dark weld-seam rings at both ends of illustrated elbows and removed the oversized curved silhouette shells that could appear as black crescents at intersecting fittings.
+- Updated the PWA cache to `spoolmate-v311`.
+
+## v3.10 - Illustrated Workshop 3D
+- Added a new default Illustrated workshop 3D style inspired by clean fabrication illustrations, with light-grey components, crisp black silhouettes and edges, a white background and subtle contact shadows.
+- Kept Realistic 3D, Workshop model, Carbon dark, Stainless silver, Painted red, Transparent, Fabrication outline and CAD green line as selectable alternatives.
+- Migrated the previous default Realistic/Workshop choice once while preserving explicitly selected specialist styles.
+- Fixed reducing tees so their automatic reducers are included consistently in cut deductions, BOM, weight totals, drawing health checks and the built-in test kit.
+- Reframed long 3D spools against their visible projection so tee and branch models fill phone and tablet previews, and kept the Ask SpoolMate button from covering small-screen models.
+- Updated the PWA cache to `spoolmate-v310`.
 
 ## v3.09 - Complete Drawing Masterclass
 - Added a 10-minute drawing tutorial with 20 directly selectable chapters and Natasha narration.

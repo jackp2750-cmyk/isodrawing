@@ -12,6 +12,7 @@ const spoolStats = document.querySelector("#spoolStats");
 const previewModeSelect = document.querySelector("#previewModeSelect");
 const previewModePanelSelect = document.querySelector("#previewModePanelSelect");
 const previewLabelToggle = document.querySelector("#previewLabelToggle");
+const previewSizeColourLegend = document.querySelector("#previewSizeColourLegend");
 const previewRotateButton = document.querySelector("#previewRotateButton");
 const previewMoveButton = document.querySelector("#previewMoveButton");
 const previewResetButton = document.querySelector("#previewResetButton");
@@ -21,6 +22,8 @@ const previewFloatButton = document.querySelector("#previewFloatButton");
 const previewMinimizeButton = document.querySelector("#previewMinimizeButton");
 const previewHideButton = document.querySelector("#previewHideButton");
 const previewShowButton = document.querySelector("#previewShowButton");
+const inspectorOpenPreviewButton = document.querySelector("#inspectorOpenPreviewButton");
+const previewOpenInspectorButton = document.querySelector("#previewOpenInspectorButton");
 const undoButton = document.querySelector("#undoButton");
 const redoButton = document.querySelector("#redoButton");
 const fittingsToolButton = document.querySelector("#fittingsToolButton");
@@ -208,6 +211,7 @@ const themeColorMeta = document.querySelector("meta[name='theme-color']");
 const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
 const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
+const resetWorkspaceLayoutButton = document.querySelector("#resetWorkspaceLayoutButton");
 const tutorialButton = document.querySelector("#tutorialButton");
 const videoTutorialButton = document.querySelector("#videoTutorialButton");
 const tutorialDialog = document.querySelector("#tutorialDialog");
@@ -327,6 +331,7 @@ const PROJECT_LIBRARY_FOLDER_STATE_KEY = "isospool-project-library-folder-state-
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
 const NUMBERED_DIMENSION_DEFAULT_KEY = "spoolmate-numbered-dimension-default-v1";
+const TRICOLOR_3D_DEFAULT_KEY = "spoolmate-tricolor-3d-default-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const LAST_SESSION_RECOVERY_KEY = "spoolmate-last-session-recovery-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
@@ -337,9 +342,12 @@ const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
 const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
 const VIDEO_TUTORIAL_SELECTION_KEY = "spoolmate-video-tutorial-selection-v1";
 const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
-const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v1";
+const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v2";
+const JOB_DASHBOARD_FILTER_KEY = "spoolmate-job-dashboard-filter-v1";
+const JOB_DASHBOARD_PINS_KEY = "spoolmate-job-dashboard-pins-v1";
+const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.09";
+const APP_VERSION = "v3.14";
 const APP_BUILD_DATE = "2026-07-27";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -464,7 +472,7 @@ const MAX_LENGTH_MM = 12000;
 const RUN_CONNECTION_TOLERANCE_MM = 8;
 const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
-const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer", "socket"]);
+const FITTING_TOOLS = new Set(["flange", "rollGroove", "threadedEnd", "valve", "weld", "reducer", "socket"]);
 const FITTINGS_FLYOUT_TOOLS = new Set(["tee", "branch", "flange", "reducer", "rollGroove", "valve", "socket", "weld"]);
 const FITTINGS_FLYOUT_ICONS = {
   tee: "#icon-tee",
@@ -676,11 +684,18 @@ const FLANGE_DRILLING_TABLES = {
   ],
 };
 const FLANGE_STANDARD_KEYS = new Set(Object.keys(FLANGE_STANDARDS));
-const ROLL_GROOVE_SETBACK_MM = 10;
-const ROLL_GROOVE_VISUAL_WIDTH_MM = 18;
+const ROLL_GROOVE_SETBACK_MM = 18;
+const ROLL_GROOVE_VISUAL_WIDTH_MM = 9;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
 const DRAW_STOP_TOOLS = new Set(["draw", "tee", "branch"]);
-const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
+const PREVIEW_MODES = new Set(["illustrated", "tricolor", "carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
+const LEGACY_PREVIEW_MODE_MAP = {
+  workshop: "illustrated",
+  black: "carbon",
+  stainless: "carbon",
+  red: "tricolor",
+  cad: "outline",
+};
 const DRAWING_DETAIL_MODES = new Set(["clean", "fab", "sizes", "callouts", "full"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const PIPE_LABEL_MODES = new Set(["auto", "key", "all", "export", "off"]);
@@ -1572,6 +1587,8 @@ let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
 let focusModeActive = false;
+let focusModeRestoreState = null;
+let lastWorkspaceLayoutKind = null;
 let previewFloatDrag = null;
 let previewFloatBounds = loadPreviewFloatBoundsPreference();
 let previewFloatManual = loadPreviewFloatPreference();
@@ -1632,6 +1649,10 @@ let projectLibraryReportPeriod = "daily";
 let projectLibraryBoardFilter = "active";
 let projectLibraryDashboardView = readTeamDashboardView();
 let projectLibraryMoreVisible = false;
+let projectLibraryJobFilter = readProjectLibraryJobFilter();
+let projectLibraryJobPins = readProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, 80);
+let projectLibraryRecentJobs = readProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, 12);
+let projectLibraryJobPage = 1;
 let qrReaderModulePromise = null;
 let activeQrScanner = null;
 let fabSheetTemplate = loadFabSheetTemplate();
@@ -1656,6 +1677,8 @@ let three = {
   navigationMode: "orbit",
   userMovedCamera: false,
   modelCenter: null,
+  previewGrid: null,
+  previewShadowPlane: null,
   interacting: false,
   interactionTimer: 0,
   labelFrameSkip: 0,
@@ -1720,7 +1743,7 @@ function sampleState() {
     anglePlane: "xy",
     flangeMode: "single",
     flangeStandard: "ansi150",
-    previewMode: "carbon",
+    previewMode: "tricolor",
     show3dLabels: true,
     gridScale: 42,
     drawingDetail: "callouts",
@@ -1762,7 +1785,7 @@ function hardCodedDrawingDefaults() {
     angleDegrees: 45,
     anglePlane: "xy",
     flangeMode: "single",
-    previewMode: "carbon",
+    previewMode: "tricolor",
     show3dLabels: true,
     gridScale: 42,
     drawingDetail: "callouts",
@@ -1816,6 +1839,46 @@ function markNumberedDimensionDefaultApplied() {
   }
 }
 
+function triColor3dDefaultApplied() {
+  try {
+    return localStorage.getItem(TRICOLOR_3D_DEFAULT_KEY) === "true";
+  } catch {
+    return true;
+  }
+}
+
+function markTriColor3dDefaultApplied() {
+  try {
+    localStorage.setItem(TRICOLOR_3D_DEFAULT_KEY, "true");
+  } catch {
+    // The tri-colour style still works without localStorage.
+  }
+}
+
+function shouldUseTriColor3dDefault(source) {
+  const mode = String(source?.previewMode ?? "").trim();
+  return !mode || ["illustrated", "carbon", "workshop", "black", "stainless", "red", "cad"].includes(mode);
+}
+
+function applyTriColor3dDefault(target) {
+  if (target && typeof target === "object") target.previewMode = "tricolor";
+  return target;
+}
+
+function migrateTriColor3dDrawingDefaults() {
+  try {
+    const rawDefaults = JSON.parse(localStorage.getItem(USER_DRAWING_DEFAULTS_KEY)) ?? {};
+    if (shouldUseTriColor3dDefault(rawDefaults)) {
+      localStorage.setItem(
+        USER_DRAWING_DEFAULTS_KEY,
+        JSON.stringify({ ...rawDefaults, previewMode: "tricolor" }),
+      );
+    }
+  } catch {
+    // A missing drawing-defaults record does not prevent the current drawing migration.
+  }
+}
+
 function shouldUseNumberedDimensionDefault(rawDefaults) {
   if (!rawDefaults || typeof rawDefaults !== "object") return true;
   return rawDefaults.dimensionStyle === undefined || normalizeDimensionStyle(rawDefaults.dimensionStyle) === "labels";
@@ -1834,6 +1897,14 @@ function readUserDrawingDefaults() {
   try {
     const rawDefaults = JSON.parse(localStorage.getItem(USER_DRAWING_DEFAULTS_KEY)) ?? {};
     const defaults = normalizeDrawingDefaults(rawDefaults);
+    const triColorAlreadyApplied = triColor3dDefaultApplied();
+    if (!triColorAlreadyApplied && shouldUseTriColor3dDefault(rawDefaults)) {
+      applyTriColor3dDefault(defaults);
+      migrateTriColor3dDrawingDefaults();
+      markTriColor3dDefaultApplied();
+    } else if (!triColorAlreadyApplied) {
+      markTriColor3dDefaultApplied();
+    }
     const alreadyApplied = numberedDimensionDefaultApplied();
     if (!alreadyApplied && shouldUseNumberedDimensionDefault(rawDefaults)) {
       markNumberedDimensionDefaultApplied();
@@ -1842,6 +1913,7 @@ function readUserDrawingDefaults() {
     if (!alreadyApplied) markNumberedDimensionDefaultApplied();
     return defaults;
   } catch {
+    markTriColor3dDefaultApplied();
     markNumberedDimensionDefaultApplied();
     return normalizeDrawingDefaults();
   }
@@ -1963,6 +2035,14 @@ function loadState() {
         markNumberedDimensionDefaultApplied();
       } else if (!alreadyApplied) {
         markNumberedDimensionDefaultApplied();
+      }
+      const triColorAlreadyApplied = triColor3dDefaultApplied();
+      if (!triColorAlreadyApplied && shouldUseTriColor3dDefault(saved)) {
+        applyTriColor3dDefault(restored);
+        migrateTriColor3dDrawingDefaults();
+        markTriColor3dDefaultApplied();
+      } else if (!triColorAlreadyApplied) {
+        markTriColor3dDefaultApplied();
       }
       setNextIdsFromState(restored);
       return restored;
@@ -2764,6 +2844,7 @@ function regressionTeeReducerState() {
     notes: [
       { id: 1, text: "TEE REDUCER CHECK", point: { x: 4300, y: 900, z: 0 }, colour: "blue" },
     ],
+    nodeTypes: { 1: "tee" },
     activeTool: "select",
     selectedSegments: [2],
     selectedSegment: 2,
@@ -2773,7 +2854,7 @@ function regressionTeeReducerState() {
     pipeSpec: "carbon40",
     flangeMode: "single",
     flangeStandard: "ansi150",
-    previewMode: "carbon",
+    previewMode: "illustrated",
     show3dLabels: true,
     drawingDetail: "callouts",
     showDimensions: true,
@@ -2785,6 +2866,53 @@ function regressionTeeReducerState() {
     projectInfo: {
       jobNumber: "TEST-KIT",
       spoolNumber: "TEE-REDUCER",
+      revision: "A",
+      drawnBy: "",
+      client: "Regression sample",
+    },
+  };
+}
+
+function regressionLargeOutletTeeState() {
+  return {
+    ...blankState({ userDefaults: false }),
+    points: [
+      { x: 0, y: 0, z: 0 },
+      { x: 4000, y: 0, z: 0 },
+      { x: 8000, y: 0, z: 0 },
+      { x: 4000, y: 3200, z: 0 },
+    ],
+    edges: [
+      { from: 0, to: 1, pipeSizeNb: 80 },
+      { from: 1, to: 2, pipeSizeNb: 100 },
+      { from: 1, to: 3, pipeSizeNb: 150 },
+    ],
+    fittings: [],
+    notes: [
+      { id: 1, text: "LARGE OUTLET TEE CHECK", point: { x: 4300, y: 1000, z: 0 }, colour: "purple" },
+    ],
+    nodeTypes: { 1: "tee" },
+    activeTool: "select",
+    selectedSegments: [2],
+    selectedSegment: 2,
+    selectedPoint: 1,
+    activePoint: 3,
+    pipeSizeNb: 150,
+    pipeSpec: "carbon40",
+    flangeMode: "single",
+    flangeStandard: "ansi150",
+    previewMode: "tricolor",
+    show3dLabels: true,
+    drawingDetail: "callouts",
+    showDimensions: true,
+    dimensionStyle: "numbered",
+    pipeLabelMode: "auto",
+    showLiftingPoints: false,
+    projectInfoPrompted: true,
+    projectStatus: "draft",
+    projectInfo: {
+      jobNumber: "TEST-KIT",
+      spoolNumber: "TEE-LARGE-OUTLET",
       revision: "A",
       drawnBy: "",
       client: "Regression sample",
@@ -2824,7 +2952,7 @@ function regressionBranchNoReducerState() {
     pipeSpec: "carbon40",
     flangeMode: "single",
     flangeStandard: "ansi150",
-    previewMode: "carbon",
+    previewMode: "illustrated",
     show3dLabels: true,
     drawingDetail: "callouts",
     showDimensions: true,
@@ -2932,6 +3060,17 @@ const REGRESSION_SAMPLES = [
     ],
   },
   {
+    key: "teeLargeOutlet",
+    title: "Large tee outlet",
+    detail: "NB 150 outlet tee with separate reducers to NB 100 and NB 80 straight legs.",
+    build: regressionLargeOutletTeeState,
+    checks: [
+      "Largest connected size defines the equal tee body, even when it is the outlet.",
+      "Both smaller straight legs receive their own reducer.",
+      "Tri-colour 3D shows a full-size tee body without overlapping striped pipe surfaces.",
+    ],
+  },
+  {
     key: "branchNoReducer",
     title: "Welded branch",
     detail: "NB 50 branch cut into NB 150 main run.",
@@ -2985,6 +3124,12 @@ const REGRESSION_AUTO_CHECKS = [
     title: "Tee reducer check",
     sampleKey: "teeReducer",
     run: regressionAutoCheckTeeReducer,
+  },
+  {
+    key: "teeLargeOutlet",
+    title: "Large tee outlet reducer check",
+    sampleKey: "teeLargeOutlet",
+    run: regressionAutoCheckLargeOutletTee,
   },
   {
     key: "branchNoReducer",
@@ -3128,33 +3273,76 @@ function regressionAutoCheckTeeReducer(segmentData, quantities, definition) {
   );
 }
 
+function regressionAutoCheckLargeOutletTee(segmentData, quantities, definition) {
+  const reducers = quantities.reducers
+    .filter((reducer) => reducer.kind === "tee" && reducer.nodeIndex === 1)
+    .sort((a, b) => a.smallNb - b.smallNb);
+  const reducedSegments = reducers.map((reducer) => reducer.smallSegment.index).sort((a, b) => a - b);
+  const sizePairs = reducers.map((reducer) => `${reducer.largeNb}:${reducer.smallNb}`).sort();
+  const tee = quantities.tees.find((item) => item.nodeIndex === 1);
+  const teeSize = PIPE_SIZES.find((size) => size.nb === 150);
+  const expectedTakeoff = teeTakeoffMm(teeSize);
+  const takeoffRows = takeoffCountRows(quantities);
+  const passed =
+    reducers.length === 2 &&
+    reducedSegments.join(",") === "0,1" &&
+    sizePairs.join(",") === "150:100,150:80" &&
+    tee?.nb === 150 &&
+    tee?.connections?.length === 3 &&
+    tee.connections.every((connection) => Math.abs(Number(connection.takeoffMm) - expectedTakeoff) < 0.001) &&
+    takeoffRows.some((row) => row.key === "tee:150:equal" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:150:100" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:150:80" && row.quantity === 1);
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${reducers.length} reducers (${sizePairs.join(", ") || "none"}); NB ${tee?.nb ?? 0} equal tee body.`,
+  );
+}
+
 function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition) {
   const nodeReducers = quantities.reducers.filter((reducer) => reducer.nodeIndex === 1);
   const branchInfo = branchNodeInfo(1, nodeConnections(segmentData).get(1) ?? [], segmentData);
   const mainIndexes = (branchInfo?.mainPair ?? []).map((entry) => entry.segment.index).sort((a, b) => a - b);
   const branchIndexes = (branchInfo?.branchEntries ?? []).map((entry) => entry.segment.index).sort((a, b) => a - b);
+  const branch = quantities.branches.find((item) => item.nodeIndex === 1);
   const linkedFromFirstMain = branchMainLinkedSegmentIndexes([mainIndexes[0]], segmentData);
   const mainSizePropagationExact =
     mainIndexes.length === 2 &&
     mainIndexes.every((index) => linkedFromFirstMain.includes(index)) &&
     branchIndexes.every((index) => !linkedFromFirstMain.includes(index));
-  const mergedMainRun = (quantities.cutSegments ?? []).some((row) =>
+  const mergedMainRow = (quantities.cutSegments ?? []).find((row) =>
     Array.isArray(row.segment?.mergedIndexes) &&
     row.segment.mergedIndexes.includes(0) &&
-    row.segment.mergedIndexes.includes(1),
+    row.segment.mergedIndexes.includes(1)
   );
+  const branchTakeoffOnlyOnOutlet =
+    branch?.connections?.length === 1 &&
+    branch.connections[0].segmentIndex === branchIndexes[0] &&
+    Number(branch.connections[0].takeoffMm) > 0;
+  const mainTakeoffsAreZero = mainIndexes.every((index) =>
+    Math.abs(Number(quantities.segments.find((row) => row.segment.index === index)?.quantity.bendTakeoffMm)) < 0.001
+  );
+  const mergedMainIsFullLength =
+    Math.abs(Number(mergedMainRow?.quantity.centrelineMm) - 8400) < 0.001 &&
+    Math.abs(Number(mergedMainRow?.quantity.cutLengthMm) - 8400) < 0.001;
   const passed =
     nodeConnectionType(1) === "branch" &&
     quantities.branches.length === 1 &&
+    quantities.tees.length === 0 &&
     nodeReducers.length === 0 &&
-    mergedMainRun &&
+    Boolean(mergedMainRow) &&
+    branchTakeoffOnlyOnOutlet &&
+    mainTakeoffsAreZero &&
+    mergedMainIsFullLength &&
     mainSizePropagationExact;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `${nodeConnectionType(1)} node, ${nodeReducers.length} reducers at branch, main run ${mergedMainRun ? "merged" : "split"}, ` +
-      `size link ${linkedFromFirstMain.join("+")} with outlet ${branchIndexes.join("+")} excluded.`,
+    `${nodeConnectionType(1)} node, ${quantities.tees.length} tees, ${nodeReducers.length} reducers; ` +
+      `continuous main cut ${formatLength(mergedMainRow?.quantity.cutLengthMm ?? 0)} mm; outlet-only take-off ${branchTakeoffOnlyOnOutlet ? "confirmed" : "failed"}.`,
   );
 }
 
@@ -3221,18 +3409,34 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
   const angle = normalizeAngle(offsetSegment?.offsetAngleDeg);
   const expectedTravel = offsetTravelLengthMm(setMm, angle);
   const actualTravel = pointLength(offsetSegment?.vector ?? { x: 0, y: 0, z: 0 });
+  const offsetQuantity = quantities.segments.find((row) => row.segment.index === offsetSegment?.index)?.quantity;
+  const offsetElbows = quantities.elbows.filter((elbow) =>
+    elbow.firstSegmentIndex === offsetSegment?.index || elbow.secondSegmentIndex === offsetSegment?.index
+  );
+  const expectedTakeoff = offsetSegment
+    ? offsetElbows.reduce((sum, elbow) =>
+      sum + (elbow.firstSegmentIndex === offsetSegment.index ? elbow.firstTakeoffMm : elbow.secondTakeoffMm),
+    0)
+    : 0;
+  const expectedCutLength = Math.max(0, actualTravel - expectedTakeoff);
   const measurementCount = Array.isArray(state.measurements) ? state.measurements.length : 0;
   const passed =
     Boolean(offsetSegment) &&
     Math.abs(angle - 45) < 0.001 &&
     Math.abs(setMm - 1000) <= 1 &&
     Math.abs(actualTravel - expectedTravel) <= 2 &&
+    offsetElbows.length === 2 &&
+    offsetElbows.every((elbow) => Math.abs(elbow.bend - 45) < 0.01) &&
+    Math.abs(Number(offsetQuantity?.centrelineMm) - actualTravel) < 0.001 &&
+    Math.abs(Number(offsetQuantity?.bendTakeoffMm) - expectedTakeoff) < 0.001 &&
+    Math.abs(Number(offsetQuantity?.cutLengthMm) - expectedCutLength) < 0.001 &&
     measurementCount >= 1;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `Set ${formatLength(setMm)} mm, travel ${formatLength(actualTravel)} mm, ${measurementCount} manual C/C measurement${measurementCount === 1 ? "" : "s"}.`,
+    `Set ${formatLength(setMm)} mm; true travel ${formatLength(actualTravel)} mm; ` +
+      `two 45 deg take-offs ${formatLength(expectedTakeoff)} mm; angled cut ${formatLength(offsetQuantity?.cutLengthMm ?? 0)} mm.`,
   );
 }
 
@@ -3476,7 +3680,7 @@ function createProjectId() {
 
 function normalizeFittingPosition(type, value) {
   const fallback = Number.isFinite(Number(value)) ? Number(value) : 0.5;
-  if (type === "flange" || type === "rollGroove") {
+  if (type === "flange" || type === "rollGroove" || type === "threadedEnd") {
     const clamped = clampNumber(fallback, 0, 1);
     return clamped <= 0.5 ? 0 : 1;
   }
@@ -3485,7 +3689,7 @@ function normalizeFittingPosition(type, value) {
 
 function endpointSnappedFittingTForLength(fitting, lengthMm) {
   const t = normalizeFittingPosition(fitting?.type, fitting?.t);
-  if (fitting?.type !== "flange" && fitting?.type !== "rollGroove") return t;
+  if (fitting?.type !== "flange" && fitting?.type !== "rollGroove" && fitting?.type !== "threadedEnd") return t;
   return t <= 0.5 ? 0 : 1;
 }
 
@@ -3782,7 +3986,8 @@ function flangeStandardKeyFromText(value) {
 }
 
 function normalizePreviewMode(value) {
-  return PREVIEW_MODES.has(value) ? value : "carbon";
+  const mapped = LEGACY_PREVIEW_MODE_MAP[value] ?? value;
+  return PREVIEW_MODES.has(mapped) ? mapped : "tricolor";
 }
 
 function normalizeDrawingDetail(value) {
@@ -6578,19 +6783,10 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
       }
     }
   } else if (fitting.type === "rollGroove") {
-    const grooveHalfSpan = Math.max(3, Math.min(7, pipeWidth * 0.22));
-    const shoulderHalfSpan = grooveHalfSpan * 1.75;
+    const grooveHalfSpan = Math.max(2.5, Math.min(5, pipeWidth * 0.14));
     ctx.lineCap = "butt";
-    ctx.strokeStyle = selected ? "#b42318" : "#d7dde0";
-    ctx.lineWidth = selected ? 3 : 2.8;
-    for (const offset of [-shoulderHalfSpan, shoulderHalfSpan]) {
-      ctx.beginPath();
-      ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.54, along.y * offset + normal.y * fittingWidth * -0.54);
-      ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.54, along.y * offset + normal.y * fittingWidth * 0.54);
-      ctx.stroke();
-    }
-    ctx.strokeStyle = selected ? "#7f1d1d" : "#1f272a";
-    ctx.lineWidth = selected ? 4 : 3.4;
+    ctx.strokeStyle = selected ? "#7f1d1d" : "#4d5754";
+    ctx.lineWidth = selected ? 3.5 : 2.8;
     for (const offset of [-grooveHalfSpan, grooveHalfSpan]) {
       ctx.beginPath();
       ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.6, along.y * offset + normal.y * fittingWidth * -0.6);
@@ -6607,6 +6803,36 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
     const labelY = normal.y * (fittingWidth * 0.95 + 8);
     ctx.strokeText("RG", labelX, labelY);
     ctx.fillText("RG", labelX, labelY);
+  } else if (fitting.type === "threadedEnd") {
+    const threadLength = Math.max(20, pipeWidth * 1.35);
+    const endDirection = fitting.t <= 0.5 ? 1 : -1;
+    ctx.lineCap = "butt";
+    ctx.strokeStyle = selected ? "#b42318" : "#4b5563";
+    ctx.lineWidth = selected ? 3 : 2;
+    for (let index = 0; index < 7; index += 1) {
+      const offset = endDirection * (3 + index * (threadLength / 7));
+      const lean = 3.4;
+      ctx.beginPath();
+      ctx.moveTo(
+        along.x * offset + normal.x * (fittingWidth * -0.55 - lean),
+        along.y * offset + normal.y * (fittingWidth * -0.55 - lean),
+      );
+      ctx.lineTo(
+        along.x * (offset + endDirection * 4.2) + normal.x * (fittingWidth * 0.55 + lean),
+        along.y * (offset + endDirection * 4.2) + normal.y * (fittingWidth * 0.55 + lean),
+      );
+      ctx.stroke();
+    }
+    ctx.font = "900 8px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
+    ctx.fillStyle = selected ? "#b42318" : "#4b5563";
+    const labelX = normal.x * (fittingWidth * 0.95 + 9);
+    const labelY = normal.y * (fittingWidth * 0.95 + 9);
+    ctx.strokeText("THD", labelX, labelY);
+    ctx.fillText("THD", labelX, labelY);
   } else if (fitting.type === "valve") {
     ctx.beginPath();
     ctx.moveTo(along.x * -11, along.y * -11);
@@ -6686,6 +6912,7 @@ function fittingColor(type) {
   if (type === "reducer") return "#7a4dc2";
   if (type === "socket") return "#0f766e";
   if (type === "rollGroove") return "#0f766e";
+  if (type === "threadedEnd") return "#4b5563";
   return "#3f484b";
 }
 
@@ -6695,6 +6922,7 @@ function fittingFill(type) {
   if (type === "reducer") return "#f1ebff";
   if (type === "socket") return "#dcfce7";
   if (type === "rollGroove") return "#d8f1ed";
+  if (type === "threadedEnd") return "#e5e7eb";
   return "#eef2f0";
 }
 
@@ -6793,6 +7021,39 @@ function formatAngle(value) {
 function visualPipeWidth(segment = null) {
   const od = (segment ? pipeSizeForSegment(segment) : selectedPipeSize()).od;
   return Math.max(9, Math.min(34, 6 + Math.sqrt(od) * 1.35));
+}
+
+function triColorSegmentSizeKey(segment) {
+  const size = pipeSizeForSegment(segment);
+  const od = Number(size?.od);
+  return Number.isFinite(od) ? od : Number(size?.nb) || 0;
+}
+
+function updatePreviewSizeColourLegend(segmentData = segments()) {
+  if (!previewSizeColourLegend) return;
+  const showLegend = normalizePreviewMode(state.previewMode) === "tricolor";
+  if (!showLegend) {
+    previewSizeColourLegend.hidden = true;
+    previewSizeColourLegend.innerHTML = "";
+    return;
+  }
+
+  const palette = ["#3c9698", "#d19438", "#7864a8"];
+  const sizes = new Map();
+  for (const segment of segmentData) {
+    const key = triColorSegmentSizeKey(segment);
+    if (!sizes.has(key)) sizes.set(key, pipeSizeForSegment(segment));
+  }
+  const ordered = [...sizes.entries()].sort((first, second) => first[0] - second[0]);
+  previewSizeColourLegend.innerHTML = ordered
+    .map(([, size], index) => `
+      <span>
+        <i style="--size-colour:${palette[index % palette.length]}"></i>
+        ${escapeHtml(pipeSizeDisplayLabel(size))}
+      </span>
+    `)
+    .join("");
+  previewSizeColourLegend.hidden = ordered.length === 0;
 }
 
 function pipeRadiusMetres(segment = null) {
@@ -7692,18 +7953,29 @@ function takeoffData(segmentData = segments()) {
 
   for (const [nodeIndex, connected] of connections.entries()) {
     if (connected.length >= 3) {
-      const nodeTakeoff = nodeConnectionType(nodeIndex) === "branch"
-        ? branchTakeoffForNode(nodeIndex, connected, segmentData)
-        : teeTakeoffForNode(nodeIndex, connected, segmentData);
-      if (nodeTakeoff) {
-        for (const connection of nodeTakeoff.connections) {
+      if (nodeConnectionType(nodeIndex) === "branch") {
+        const branch = branchTakeoffForNode(nodeIndex, connected, segmentData);
+        if (branch) {
+          for (const connection of branch.connections) {
+            segmentTakeoffs.set(connection.segmentIndex, (segmentTakeoffs.get(connection.segmentIndex) ?? 0) + connection.takeoffMm);
+          }
+          branches.push(branch);
+        }
+        // A fabricated branch is a continuous main pipe with a welded outlet.
+        // It never receives tee take-offs, a tee fitting, or automatic reducers.
+        continue;
+      }
+
+      const tee = teeTakeoffForNode(nodeIndex, connected, segmentData);
+      if (tee) {
+        for (const connection of tee.connections) {
           segmentTakeoffs.set(connection.segmentIndex, (segmentTakeoffs.get(connection.segmentIndex) ?? 0) + connection.takeoffMm);
         }
-        if (nodeTakeoff.type === "branch") {
-          branches.push(nodeTakeoff);
-        } else {
-          tees.push(nodeTakeoff);
-        }
+        tees.push(tee);
+      }
+      for (const reducer of autoReducersForTeeNode(nodeIndex, connected, segmentData)) {
+        applyReducerTakeoff(segmentTakeoffs, reducer);
+        reducers.push(reducer);
       }
       continue;
     }
@@ -7782,8 +8054,7 @@ function autoReducersForTeeNode(nodeIndex, connected, segmentData = segments()) 
   if (nodeConnectionType(nodeIndex) === "branch") return [];
 
   const entries = nodeConnectionEntries(nodeIndex, connected, segmentData);
-  const mainPair = mostOppositeEntryPair(entries);
-  if (!mainPair) return [];
+  if (entries.length < 3) return [];
 
   const reducers = [];
   const addTeeReducer = (first, second) => {
@@ -7793,15 +8064,17 @@ function autoReducersForTeeNode(nodeIndex, connected, segmentData = segments()) 
     if (!duplicate) reducers.push(reducer);
   };
 
-  const [first, second] = mainPair;
-  addTeeReducer(first, second);
-
-  const mainSegments = new Set(mainPair.map((entry) => entry.segment.index));
-  const largestMainEntry = [...mainPair].sort((a, b) => b.size.od - a.size.od)[0];
+  // Model a mixed-size connection as an equal tee at the largest connected
+  // size, then reduce every smaller leg. This remains correct when the largest
+  // pipe is the outlet rather than one of the straight-through legs.
+  const largestEntry = [...entries].sort((a, b) =>
+    b.size.od - a.size.od ||
+    b.size.nb - a.size.nb ||
+    a.segment.index - b.segment.index
+  )[0];
   for (const entry of entries) {
-    if (mainSegments.has(entry.segment.index)) continue;
-    if (entry.size.od >= largestMainEntry.size.od || entry.size.nb === largestMainEntry.size.nb) continue;
-    addTeeReducer(largestMainEntry, entry);
+    if (entry.segment.index === largestEntry.segment.index) continue;
+    addTeeReducer(largestEntry, entry);
   }
 
   return reducers;
@@ -8129,13 +8402,13 @@ function segmentQuantity(segment, takeoffs = takeoffData(segments()).segmentTake
 }
 
 function fittingWeightOverride(fitting) {
-  if (fitting?.type === "rollGroove") return null;
+  if (fitting?.type === "rollGroove" || fitting?.type === "threadedEnd") return null;
   const weightKg = Number(fitting?.weightKg);
   return Number.isFinite(weightKg) && weightKg >= 0 ? weightKg : null;
 }
 
 function fittingWeightSource(fitting, segment = null) {
-  if (fitting?.type === "rollGroove") return "zero weight";
+  if (fitting?.type === "rollGroove" || fitting?.type === "threadedEnd") return "zero weight";
   if (fittingWeightOverride(fitting) !== null) return "manual";
   if (atlasFittingWeightKg(fitting, segment) === null) return "estimated";
   if (fitting?.type === "flange" && fittingFlangeStandard(fitting) !== "ansi150") {
@@ -8145,7 +8418,7 @@ function fittingWeightSource(fitting, segment = null) {
 }
 
 function fittingWeightKg(fitting, segment) {
-  if (fitting?.type === "rollGroove") return 0;
+  if (fitting?.type === "rollGroove" || fitting?.type === "threadedEnd") return 0;
   return fittingWeightOverride(fitting) ?? atlasFittingWeightKg(fitting, segment) ?? estimatedFittingWeightKg(fitting, segment);
 }
 
@@ -8200,6 +8473,7 @@ function estimatedFittingWeightKg(fitting, segment) {
     return Math.max(0.06, pipeMassPerMetreForSize(socketSize) * 0.05 + 0.03);
   }
   if (fitting.type === "rollGroove") return 0;
+  if (fitting.type === "threadedEnd") return 0;
   return 0;
 }
 
@@ -8494,6 +8768,18 @@ function takeoffCountRows(quantities = quantitySummary()) {
       continue;
     }
 
+    if (type === "threadedEnd") {
+      add(
+        `threadedEnd:${size.nb}`,
+        `Threaded pipe end ${pipeSizeDisplayLabel(size)}`,
+        1,
+        0,
+        "0 kg end preparation",
+        61,
+      );
+      continue;
+    }
+
     if (type === "valve") {
       add(`valve:${size.nb}`, `Valve ${pipeSizeDisplayLabel(size)}`, 1, item.weightKg, item.weightSource, 50);
       continue;
@@ -8617,13 +8903,13 @@ function reducerRenderLengthMetres(reducer) {
   return clampNumber(nominalLength, minimumVisibleLength, maxLength);
 }
 
-function teeReducerStartOffsetMetres(reducer) {
+function teeReducerStartOffsetMetres(reducer, style = null) {
   if (!reducerStartsAtJoint(reducer)) return 0;
   const coreRadius = Math.max(
     pipeRadiusMetres(reducer.largeSegment),
     pipeRadiusMetres(reducer.smallSegment),
   );
-  return Math.max(coreRadius * 3.15, 0.18);
+  return teeNodeLegLengthMetres(coreRadius, style);
 }
 
 function reducerSideForNode(nodeIndex) {
@@ -8668,7 +8954,7 @@ function reducerScreenOffsetPixels(reducer, joint, placementOther, reducerLength
   return clampNumber(visibleOffset, 2, Math.max(2, screenLength - reducerLengthPx - 2));
 }
 
-function computeAutoReducerRenderTrims(reducers) {
+function computeAutoReducerRenderTrims(reducers, style = null) {
   const trims = new Map();
   const addTrim = (segment, nodeIndex, amount) => {
     if (!segment || !Number.isInteger(nodeIndex) || !Number.isFinite(amount) || amount <= 0) return;
@@ -8681,7 +8967,7 @@ function computeAutoReducerRenderTrims(reducers) {
     if (reducer.kind === "bend") {
       addTrim(reducerPlacementSegment(reducer), reducer.nodeIndex, modelLength);
     } else if (reducerStartsAtJoint(reducer)) {
-      addTrim(reducer.smallSegment, reducer.nodeIndex, teeReducerStartOffsetMetres(reducer) + modelLength);
+      addTrim(reducer.smallSegment, reducer.nodeIndex, teeReducerStartOffsetMetres(reducer, style) + modelLength);
     } else {
       addTrim(reducer.largeSegment, reducer.nodeIndex, modelLength * 0.5);
       addTrim(reducer.smallSegment, reducer.nodeIndex, modelLength * 0.5);
@@ -9039,7 +9325,7 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   nextFittingId += 1;
   recordHistory({ type: "fitting" });
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function placeSocketFittings(segmentIndex, positions, options = {}) {
@@ -9068,7 +9354,7 @@ function placeSocketFittings(segmentIndex, positions, options = {}) {
   state.selectedMeasurement = null;
   recordHistory({ type: "fittings", fittingIds });
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function placeNote(point, textOverride = null) {
@@ -9093,7 +9379,7 @@ function placeNote(point, textOverride = null) {
   nextNoteId += 1;
   recordHistory({ type: "note", noteId: note.id });
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function measurementLengthMm(measurement) {
@@ -9161,7 +9447,7 @@ function beginOrFinishMeasurement(pointer) {
   recordHistory({ type: "snapshot", snapshot });
   cursorReadout.textContent = `Measured ${measurementLabel(measurement)}`;
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function createUndoSnapshot() {
@@ -9706,7 +9992,7 @@ function endpointHasFinish(segment, pointIndex) {
   const endpointT = segment.from === pointIndex ? 0 : 1;
   return state.fittings.some((fitting) =>
     fitting.segmentIndex === segment.index &&
-    (fitting.type === "flange" || fitting.type === "rollGroove") &&
+    (fitting.type === "flange" || fitting.type === "rollGroove" || fitting.type === "threadedEnd") &&
     Math.abs(fittingDisplayT(segment, fitting) - endpointT) < 0.001,
   );
 }
@@ -9748,7 +10034,7 @@ function missingReducerIssues(segmentData, quantities) {
         key: `missing-reducer:${nodeIndex}:${segmentIndexes.join("-")}:${connectedSizes.join("-")}`,
         canAcknowledge: true,
         guidance: entries.length >= 3
-          ? "Choose Set as tee when this is a tee fitting; the smaller leg should receive the reducer. Choose Set as branch when the smaller pipe is welded directly into the main and no reducer is required."
+          ? "Choose Set as tee when this is a separate tee fitting; every smaller connected leg receives its own reducer. Choose Set as branch only when an outlet pipe is welded directly into a continuous main and no tee or reducer is required."
           : "Show the joint and confirm both run sizes. Keep the automatic reducer for a real size transition, or acknowledge this exception only when the transition is intentionally handled outside this spool.",
       },
     ));
@@ -10048,7 +10334,7 @@ async function handleHealthIssueAction(item, action) {
     showHealthPanel();
     showAppNotice(action === "set-branch"
       ? "Connection set as a welded branch. Tee and reducer take-off will not be used there."
-      : "Connection set as a tee. The app will add the smaller-leg reducer when the connected sizes require one.");
+      : "Connection set as a tee. The app will add a separate reducer to every smaller connected leg.");
     return;
   }
   if (action === "acknowledge") {
@@ -12213,6 +12499,7 @@ function renderToolSettingsOptions() {
 }
 
 function openToolSettingsDialog() {
+  closePrimaryWorkspaceDialogs("tools");
   renderToolSettingsOptions();
   if (toolSettingsDialog) toolSettingsDialog.hidden = false;
 }
@@ -12282,7 +12569,7 @@ function applyAppMode(mode, options = {}) {
     activateInspectorTab(APP_MODE_DEFAULT_TAB[normalized] ?? "properties");
   }
 
-  if (normalized === "review" || normalized === "export" || hasInspectorSelection()) {
+  if (normalized === "review" || normalized === "export") {
     showMobilePanel("inspector");
   } else {
     showMobilePanel("drawing");
@@ -12355,8 +12642,62 @@ function setFocusModeButtonState() {
   if (label) label.textContent = focusModeActive ? "Exit" : "Focus";
 }
 
+function currentWorkspaceSurface() {
+  if (isTabletLayout()) {
+    const mobilePanel = document.body.dataset.mobilePanel;
+    return mobilePanel === "inspector" || mobilePanel === "preview" ? mobilePanel : "drawing";
+  }
+  if (!previewPanelHidden) return "preview";
+  if (document.body.classList.contains("inspector-drawer-open")) return "inspector";
+  return "drawing";
+}
+
+function captureWorkspaceSurfaceState() {
+  return {
+    surface: currentWorkspaceSurface(),
+    previewHidden: previewPanelHidden,
+    previewMinimized: previewPanelMinimized,
+    previewFloatManual,
+    previewFloatBounds: previewFloatBounds ? { ...previewFloatBounds } : null,
+  };
+}
+
+function restoreWorkspaceSurfaceState(restore) {
+  if (!restore) return;
+  previewPanelHidden = restore.previewHidden;
+  previewPanelMinimized = restore.previewHidden ? false : restore.previewMinimized;
+  previewFloatManual = restore.previewFloatManual;
+  previewFloatBounds = restore.previewFloatBounds ? { ...restore.previewFloatBounds } : null;
+
+  if (isTabletLayout()) {
+    showMobilePanel(restore.surface);
+    return;
+  }
+
+  if (restore.surface === "preview" && !restore.previewHidden) {
+    setInspectorDrawerOpen(false);
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+  } else if (restore.surface === "inspector") {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(true);
+  } else {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(false);
+  }
+}
+
 function setFocusMode(active) {
-  focusModeActive = active === true;
+  const next = active === true;
+  if (next === focusModeActive) return;
+  if (next) {
+    focusModeRestoreState = captureWorkspaceSurfaceState();
+  }
+  focusModeActive = next;
   document.body.classList.toggle("focus-mode", focusModeActive);
   if (focusModeActive) {
     setInspectorDrawerOpen(false);
@@ -12365,6 +12706,10 @@ function setFocusMode(active) {
     closeActionMenu();
     closeDrawingContextMenu();
     if (isTabletLayout()) showMobilePanel("drawing");
+  } else if (focusModeRestoreState) {
+    const restore = focusModeRestoreState;
+    focusModeRestoreState = null;
+    restoreWorkspaceSurfaceState(restore);
   }
   setFocusModeButtonState();
   syncDrawingContextMenuHost();
@@ -12439,6 +12784,7 @@ function previewFloatingActive() {
   return Boolean(
     previewPanel &&
       !previewPanelHidden &&
+      !isTabletLayout() &&
       (previewFloatManual || document.body.classList.contains("drawing-panel-fullscreen")) &&
       !panelFullscreenActive(previewPanel),
   );
@@ -12456,6 +12802,7 @@ function setPreviewFloatButtonState() {
 
 function setPreviewMinimizeButtonState() {
   if (!previewMinimizeButton) return;
+  previewMinimizeButton.hidden = !previewFloatingActive();
   previewMinimizeButton.setAttribute("aria-pressed", String(previewPanelMinimized));
   previewMinimizeButton.title = previewPanelMinimized ? "Restore 3D preview" : "Minimize 3D preview";
   previewMinimizeButton.setAttribute("aria-label", previewMinimizeButton.title);
@@ -12485,6 +12832,9 @@ function togglePreviewFloating() {
   previewPanelHidden = false;
   previewFloatManual = !previewFloatManual;
   storePreviewFloatPreference(previewFloatManual);
+  if (!previewFloatManual) {
+    previewPanelMinimized = false;
+  }
   if (previewFloatManual) {
     showMobilePanel("drawing");
   }
@@ -12493,10 +12843,8 @@ function togglePreviewFloating() {
 
 function togglePreviewMinimized() {
   if (!previewPanel || previewPanelHidden || panelFullscreenActive(previewPanel)) return;
-  if (!previewFloatingActive()) {
-    previewFloatManual = true;
-    storePreviewFloatPreference(true);
-  }
+  if (isTabletLayout()) return;
+  if (!previewFloatingActive()) return;
   previewPanelMinimized = !previewPanelMinimized;
   updatePreviewFloatingState();
 }
@@ -12505,10 +12853,11 @@ function setPreviewHidden(hidden) {
   previewPanelHidden = hidden === true;
   if (previewPanelHidden) {
     previewPanelMinimized = false;
-  } else if (!previewFloatingActive()) {
-    if (!isTabletLayout()) setInspectorDrawerOpen(false);
-    previewFloatManual = true;
-    storePreviewFloatPreference(true);
+  } else {
+    previewPanelMinimized = false;
+  }
+  if (!previewPanelHidden && !isTabletLayout()) {
+    setInspectorDrawerOpen(false);
   }
   updatePreviewFloatingState();
 }
@@ -12666,7 +13015,10 @@ function setupFloatingPreviewPanel() {
   const previewBar = previewPanel?.querySelector(".panel-bar");
   previewFloatButton?.addEventListener("click", togglePreviewFloating);
   previewMinimizeButton?.addEventListener("click", togglePreviewMinimized);
-  previewHideButton?.addEventListener("click", () => setPreviewHidden(true));
+  previewHideButton?.addEventListener("click", () => {
+    if (isTabletLayout()) showMobilePanel("drawing");
+    else setPreviewHidden(true);
+  });
   previewShowButton?.addEventListener("click", () => {
     if (isTabletLayout()) {
       showMobilePanel("preview");
@@ -12704,6 +13056,8 @@ function setupTouchSelectionGuards() {
 }
 
 function updateTouchComfortClass() {
+  const previousLayout = lastWorkspaceLayoutKind;
+  const previousSurface = previousLayout ? workspaceSurfaceForLayout(previousLayout) : currentWorkspaceSurface();
   const touchMode = isTabletLayout();
   const phoneMode = isPhoneLayout();
   const tabletMode = touchMode && !phoneMode;
@@ -12726,6 +13080,9 @@ function updateTouchComfortClass() {
       window.requestAnimationFrame(updatePreviewFloatingState);
     }
   }
+  const nextLayout = workspaceLayoutKind();
+  reconcileWorkspaceLayout(previousLayout, nextLayout, previousSurface);
+  lastWorkspaceLayoutKind = nextLayout;
 }
 
 function setupTouchComfort() {
@@ -12762,7 +13119,6 @@ function storeAppMode(mode) {
 }
 
 function loadPreviewFloatPreference() {
-  if (isTabletLayout()) return false;
   try {
     const saved = localStorage.getItem(PREVIEW_FLOAT_KEY);
     if (saved === "false") return false;
@@ -12770,6 +13126,8 @@ function loadPreviewFloatPreference() {
   } catch {
     // Default below keeps first use cleaner if local storage is not available.
   }
+  // Touch layouts ignore floating while active, but retaining this value means
+  // a convertible device can return to its previous desktop Float/Dock choice.
   return true;
 }
 
@@ -12881,6 +13239,46 @@ function toggleActionMenu() {
   }
 }
 
+async function resetWorkspaceLayout() {
+  focusModeRestoreState = null;
+  focusModeActive = false;
+  document.body.classList.remove("focus-mode");
+  setFocusModeButtonState();
+  await closePanelFullscreen();
+
+  previewPanelHidden = true;
+  previewPanelMinimized = false;
+  previewFloatBounds = null;
+  if (!isTabletLayout()) {
+    previewFloatManual = true;
+    storePreviewFloatPreference(true);
+  }
+  try {
+    localStorage.removeItem(PREVIEW_FLOAT_BOUNDS_KEY);
+    localStorage.removeItem(CONTROL_COLLAPSE_KEY);
+  } catch {
+    // The visible layout still resets when storage is unavailable.
+  }
+
+  for (const section of document.querySelectorAll(".control-panel .control-section.collapsed")) {
+    section.classList.remove("collapsed");
+    section.querySelector(".control-section-toggle")?.setAttribute("aria-expanded", "true");
+  }
+
+  updatePreviewFloatingState();
+  showMobilePanel("drawing");
+  setInspectorDrawerOpen(false);
+  activateInspectorTab(APP_MODE_DEFAULT_TAB[appMode] ?? "properties");
+  setFittingsToolMenuOpen(false);
+  closeDrawingContextMenu();
+  closeActionMenu();
+  requestAnimationFrame(() => {
+    drawIso();
+    schedulePreviewStabilize();
+  });
+  showAppNotice("Workspace layout reset. Drawing restored and temporary panels closed.");
+}
+
 function handleActionMenuToggle(event) {
   event?.preventDefault?.();
   event?.stopPropagation?.();
@@ -12888,6 +13286,12 @@ function handleActionMenuToggle(event) {
 }
 
 function setupActionMenu() {
+  resetWorkspaceLayoutButton?.addEventListener("click", () => {
+    resetWorkspaceLayout().catch((error) => {
+      console.warn("Could not reset workspace layout.", error);
+      showAppNotice("Could not completely reset the layout.");
+    });
+  });
   actionMenuButton?.addEventListener("pointerdown", (event) => {
     if (event.button !== undefined && event.button !== 0) return;
     actionMenuLastPointerToggleAt = performance.now();
@@ -14091,7 +14495,7 @@ function tutorialTrainerContent(kind, phase, complete) {
           <div class="tutorial-trainer-mode-block">
             <small>3D view</small>
             <button type="button" class="tutorial-trainer-selectlike ${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="realistic-view">
-              <span>${phase >= 1 || complete ? "Realistic 3D" : "Choose view style"}</span>
+              <span>${phase >= 1 || complete ? "Illustrated workshop" : "Choose view style"}</span>
             </button>
           </div>
           <div class="tutorial-trainer-mode-block">
@@ -14131,7 +14535,7 @@ function tutorialTrainerContent(kind, phase, complete) {
               <b>${phase === 0 ? "choose view first" : "choose rotate"}</b>
             </div>
           `}
-          <div class="tutorial-trainer-instructions">${complete ? "3D model rotated." : phase === 0 ? "Open the 3D view menu and choose Realistic 3D." : phase === 1 ? "Choose Rotate under Navigation mode." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold on the mini model and drag sideways to rotate it."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "3D model rotated." : phase === 0 ? "Open the 3D view menu and choose Illustrated workshop." : phase === 1 ? "Choose Rotate under Navigation mode." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold on the mini model and drag sideways to rotate it."}</div>
         </div>
       `;
     case "focus":
@@ -15620,8 +16024,22 @@ function runTutorialStepAction() {
   }, 120);
 }
 
+function closePrimaryWorkspaceDialogs(except = "") {
+  if (except !== "home" && homeDashboardDialog && !homeDashboardDialog.hidden) closeHomeDashboard();
+  if (except !== "jobs" && projectLibraryDialog && !projectLibraryDialog.hidden) closeProjectLibrary();
+  if (except !== "tutorial" && tutorialDialog && !tutorialDialog.hidden) closeTutorialDialog();
+  if (except !== "video" && videoTutorialDialog && !videoTutorialDialog.hidden) closeVideoTutorialDialog();
+  if (except !== "help" && helpDialog && !helpDialog.hidden) closeHelpDialog();
+  if (except !== "ai" && aiHelperDialog && !aiHelperDialog.hidden) closeAiHelper();
+  if (except !== "auth" && authDialog && !authDialog.hidden && !authGateOpen) closeAuthDialog();
+  if (except !== "tools" && toolSettingsDialog && !toolSettingsDialog.hidden) closeToolSettingsDialog();
+  if (except !== "legal" && legalSupportDialog && !legalSupportDialog.hidden) closeLegalSupportDialog();
+  closeActionMenu();
+}
+
 function openTutorialDialog(index = null) {
   if (!tutorialDialog) return;
+  closePrimaryWorkspaceDialogs("tutorial");
   const requestedIndex = Math.round(Number(index));
   if (index !== null && Number.isFinite(requestedIndex) && TUTORIAL_STEPS[requestedIndex] && !tutorialVisibleStepIndexes().includes(requestedIndex)) {
     tutorialPathMode = BEGINNER_TUTORIAL_STEP_INDEXES.includes(requestedIndex) ? "beginner" : "all";
@@ -15792,10 +16210,7 @@ function selectVideoTutorial(videoId, { reset = true, autoplay = false } = {}) {
 function openVideoTutorialDialog(trigger = null, videoId = activeVideoTutorialId) {
   if (!videoTutorialDialog) return;
   if (trigger instanceof HTMLElement) videoTutorialTrigger = trigger;
-  if (homeDashboardDialog && !homeDashboardDialog.hidden) closeHomeDashboard();
-  if (tutorialDialog && !tutorialDialog.hidden) closeTutorialDialog();
-  if (helpDialog && !helpDialog.hidden) closeHelpDialog();
-  closeActionMenu();
+  closePrimaryWorkspaceDialogs("video");
   selectVideoTutorial(videoId, { reset: false });
   videoTutorialDialog.hidden = false;
   document.body.classList.add("video-tutorial-open");
@@ -16276,6 +16691,7 @@ async function sendAiHelperQuestion(value, options = {}) {
 
 function openAiHelper() {
   if (!aiHelperDialog) return;
+  closePrimaryWorkspaceDialogs("ai");
   if (!aiHelperConversation.length) resetAiHelperConversation();
   aiHelperLastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   aiHelperDialog.hidden = false;
@@ -16375,6 +16791,7 @@ function setHelpTab(section) {
 
 function openHelpDialog(section = helpSectionForCurrentMode()) {
   if (!helpDialog) return;
+  closePrimaryWorkspaceDialogs("help");
   setHelpTab(section);
   helpDialog.hidden = false;
   closeActionMenu();
@@ -16486,9 +16903,6 @@ function updateAll(options = {}) {
   updatePipeSizeControls();
   updatePropertiesPanel();
   update3dPreview();
-  if (!isTabletLayout() && (appMode === "draw" || appMode === "edit") && !hasInspectorSelection()) {
-    setInspectorDrawerOpen(false);
-  }
   if (save) persistState();
   checkTutorialPractice();
 }
@@ -16563,16 +16977,19 @@ function setupMobilePanels() {
   }
 
   inspectorShowButton?.addEventListener("click", () => showMobilePanel("inspector"));
+  inspectorOpenPreviewButton?.addEventListener("click", () => showMobilePanel("preview"));
+  previewOpenInspectorButton?.addEventListener("click", () => showMobilePanel("inspector"));
 
   mobilePanelScrim?.addEventListener("click", () => showMobilePanel("drawing"));
   if (isTabletLayout()) {
     showMobilePanel("drawing");
   } else {
-    setInspectorDrawerOpen(appMode === "review" || appMode === "export" || hasInspectorSelection());
+    setInspectorDrawerOpen(appMode === "review" || appMode === "export");
   }
 }
 
 function openLegalSupportDialog() {
+  closePrimaryWorkspaceDialogs("legal");
   closeActionMenu();
   closeAuthDialog();
   if (legalSupportDialog) legalSupportDialog.hidden = false;
@@ -16601,6 +17018,71 @@ function hasInspectorSelection() {
   );
 }
 
+function revealInspectorForSelection() {
+  // Selection should not replace the drawing with a sheet on touch devices,
+  // and it should not dismiss a 3D model the user explicitly opened.
+  if (isTabletLayout() || !previewPanelHidden) return;
+  setInspectorDrawerOpen(true);
+}
+
+function workspaceLayoutKind() {
+  if (isPhoneLayout()) return "phone";
+  if (isTabletLayout()) return "tablet";
+  return "desktop";
+}
+
+function workspaceSurfaceForLayout(layout = workspaceLayoutKind()) {
+  if (layout === "phone" || layout === "tablet") {
+    const panel = document.body.dataset.mobilePanel;
+    return panel === "inspector" || panel === "preview" ? panel : "drawing";
+  }
+  if (!previewPanelHidden) return "preview";
+  if (document.body.classList.contains("inspector-drawer-open")) return "inspector";
+  return "drawing";
+}
+
+function clearMobileSheetPresentation() {
+  document.body.classList.remove("mobile-panel-open");
+  controlPanel?.classList.remove("mobile-sheet-open");
+  previewPanel?.classList.remove("mobile-sheet-open");
+  if (mobilePanelScrim) mobilePanelScrim.hidden = true;
+}
+
+function reconcileWorkspaceLayout(previousLayout, nextLayout, previousSurface = "drawing") {
+  if (!previousLayout || previousLayout === nextLayout) {
+    updatePreviewFloatingState();
+    return;
+  }
+
+  const movingToTouch = nextLayout === "phone" || nextLayout === "tablet";
+  if (movingToTouch) {
+    document.body.classList.remove("inspector-drawer-open");
+    document.body.classList.add("inspector-drawer-closed");
+    previewPanelMinimized = false;
+    showMobilePanel(previousSurface);
+    return;
+  }
+
+  clearMobileSheetPresentation();
+  document.body.dataset.mobilePanel = "drawing";
+  if (previousSurface === "preview") {
+    previewPanelHidden = false;
+    previewPanelMinimized = false;
+    setInspectorDrawerOpen(false);
+    updatePreviewFloatingState();
+  } else if (previousSurface === "inspector") {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(true);
+  } else {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(false);
+  }
+}
+
 function setInspectorDrawerOpen(open) {
   const next = Boolean(open);
   if (next && !isTabletLayout() && !previewPanelHidden && !panelFullscreenActive(previewPanel)) {
@@ -16623,6 +17105,11 @@ function showMobilePanel(panel = "drawing") {
   if (!isTabletLayout()) {
     if (requested === "inspector") {
       setInspectorDrawerOpen(true);
+    } else if (requested === "preview") {
+      setInspectorDrawerOpen(false);
+      previewPanelHidden = false;
+      previewPanelMinimized = false;
+      updatePreviewFloatingState();
     } else if (requested === "drawing") {
       setInspectorDrawerOpen(false);
     }
@@ -16632,17 +17119,15 @@ function showMobilePanel(panel = "drawing") {
   const previousPanel = document.body.dataset.mobilePanel || "drawing";
   let previewLayoutChanged = false;
   if (normalized === "preview") {
-    if (previewFloatManual && !document.body.classList.contains("drawing-panel-fullscreen")) {
-      previewFloatManual = false;
-      storePreviewFloatPreference(false);
-      previewLayoutChanged = true;
-    }
     if (previewPanelHidden) {
       previewPanelHidden = false;
+      previewLayoutChanged = true;
+    }
+    if (previewPanelMinimized) {
       previewPanelMinimized = false;
       previewLayoutChanged = true;
     }
-  } else if (normalized === "drawing" && previousPanel === "preview" && !previewPanelHidden) {
+  } else if (previousPanel === "preview" && !previewPanelHidden) {
     previewPanelHidden = true;
     previewPanelMinimized = false;
     previewLayoutChanged = true;
@@ -16654,6 +17139,8 @@ function showMobilePanel(panel = "drawing") {
 
   document.body.dataset.mobilePanel = normalized;
   document.body.classList.toggle("mobile-panel-open", sheetOpen);
+  document.body.classList.remove("inspector-drawer-open");
+  document.body.classList.add("inspector-drawer-closed");
   controlPanel?.classList.toggle("mobile-sheet-open", normalized === "inspector");
   previewPanel?.classList.toggle("mobile-sheet-open", normalized === "preview");
 
@@ -16837,6 +17324,7 @@ function setAuthMode(mode, options = {}) {
 
 function openAuthDialog(options = {}) {
   if (!authDialog) return;
+  if (!options.startup) closePrimaryWorkspaceDialogs("auth");
   loadAuthRememberPreference();
   updateCloudStatus();
   setAuthMode(options.mode ?? authMode, { keepStatus: options.startup });
@@ -17260,6 +17748,7 @@ function setupHomeDashboard() {
 }
 
 function openHomeDashboard(options = {}) {
+  closePrimaryWorkspaceDialogs("home");
   ensureHomeDashboardShell();
   if (!homeDashboardDialog) {
     if (options.startup) promptForProjectDetails();
@@ -17708,6 +18197,7 @@ function setupProjectDialog() {
   projectLibrarySearchInput?.addEventListener("input", () => {
     projectLibrarySearch = projectLibrarySearchInput.value;
     projectLibraryOpenFolderKey = "";
+    projectLibraryJobPage = 1;
     renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
   });
   projectLibrarySourceButton?.addEventListener("click", () => {
@@ -17869,6 +18359,22 @@ function handleProjectLibraryAction(actionElement) {
   const action = actionElement?.dataset?.projectLibraryAction;
   if (action === "dashboard-view") {
     setTeamDashboardView(actionElement.dataset.dashboardView);
+    return;
+  }
+  if (action === "job-filter") {
+    setProjectLibraryJobFilter(actionElement.dataset.jobFilter);
+    return;
+  }
+  if (action === "pin-job") {
+    toggleProjectLibraryJobPin(actionElement.dataset.jobKey);
+    return;
+  }
+  if (action === "job-page") {
+    const page = Number.parseInt(actionElement.dataset.jobPage, 10);
+    if (Number.isFinite(page) && page > 0) {
+      projectLibraryJobPage = page;
+      renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+    }
     return;
   }
   if (action === "toggle-dashboard-more") {
@@ -18318,6 +18824,7 @@ function setupThree(THREE, OrbitControls) {
   });
   three.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   three.renderer.shadowMap.enabled = true;
+  if (THREE.PCFSoftShadowMap) three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   three.renderer.outputColorSpace = THREE.SRGBColorSpace;
   three.renderer.toneMapping = THREE.ACESFilmicToneMapping;
   three.renderer.toneMappingExposure = 1.05;
@@ -18328,6 +18835,12 @@ function setupThree(THREE, OrbitControls) {
   const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
   keyLight.position.set(9, -12, 13);
   keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(1024, 1024);
+  keyLight.shadow.camera.left = -18;
+  keyLight.shadow.camera.right = 18;
+  keyLight.shadow.camera.top = 18;
+  keyLight.shadow.camera.bottom = -18;
+  keyLight.shadow.bias = -0.0003;
   three.scene.add(keyLight);
 
   const fillLight = new THREE.DirectionalLight(0xe5efec, 1.15);
@@ -18343,6 +18856,16 @@ function setupThree(THREE, OrbitControls) {
   grid.position.z = -0.02;
   three.previewGrid = grid;
   three.scene.add(grid);
+
+  const shadowPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(32, 32),
+    new THREE.ShadowMaterial({ color: 0x4b5250, transparent: true, opacity: 0 }),
+  );
+  shadowPlane.position.z = -0.035;
+  shadowPlane.receiveShadow = true;
+  shadowPlane.visible = false;
+  three.previewShadowPlane = shadowPlane;
+  three.scene.add(shadowPlane);
 
   three.controls = new OrbitControls(three.camera, three.renderer.domElement);
   three.controls.enableDamping = true;
@@ -18483,6 +19006,14 @@ function updateThreeSceneStyle(style) {
     material.opacity = gridOpacity;
     material.needsUpdate = true;
   }
+
+  if (three.previewShadowPlane?.material) {
+    const shadowOpacity = clampNumber(Number(style.contactShadowOpacity) || 0, 0, 0.28);
+    three.previewShadowPlane.visible = shadowOpacity > 0.001;
+    three.previewShadowPlane.material.opacity = shadowOpacity;
+    three.previewShadowPlane.material.color?.setHex(style.contactShadowColor ?? 0x4b5250);
+    three.previewShadowPlane.material.needsUpdate = true;
+  }
 }
 
 function update3dPreview() {
@@ -18546,9 +19077,13 @@ function nodeFittingClearanceMetres(nodeIndex, segment, connections, segmentByIn
     .filter(Boolean)
     .map((connectedSegment) => pipeRadiusMetres(connectedSegment));
   const coreRadius = Math.max(radiusForNode(nodeIndex, connections, segmentByIndex), ...radii);
+  return teeNodeLegLengthMetres(coreRadius, style);
+}
+
+function teeNodeLegLengthMetres(coreRadius, style = null) {
   return style?.lineDrawing
     ? Math.max(coreRadius * 3.8, 0.2)
-    : Math.max(coreRadius * 3.0, 0.16);
+    : Math.max(coreRadius * 3.15, 0.18);
 }
 
 function segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style) {
@@ -18564,6 +19099,11 @@ function fittingRenderPosition(fitting, start, end, renderedSegment, pipeRadius,
   const segmentLengthMm = axis.length() * 1000;
   const t = endpointSnappedFittingTForLength(fitting, segmentLengthMm);
   axis.normalize();
+
+  if (fitting.type === "threadedEnd") {
+    if (t <= 0.000001) return start.clone();
+    if (t >= 0.999999) return end.clone();
+  }
 
   if (renderedSegment) {
     const startBase = endpointRenderBasePoint(start, end, renderedSegment, "start", endpointClearances?.start);
@@ -18731,20 +19271,60 @@ function rebuildThreeSpool() {
   const reducerMaterial = previewMaterial(style, "reducer");
   const socketMaterial = previewMaterial(style, "socket");
   const grooveMaterial = previewMaterial(style, "groove");
+  const illustratedSeamMaterial = style.illustrated
+    ? new THREE.LineBasicMaterial({
+        color: style.weldSeamColor ?? 0x343938,
+        transparent: true,
+        opacity: 0.88,
+        depthTest: true,
+      })
+    : null;
 
   const modelPoints = state.points.map((point) => {
     const modelPoint = toModelUnits(point);
     return new THREE.Vector3(modelPoint.x, modelPoint.y, modelPoint.z);
   });
   const segmentData = segments();
+  updatePreviewSizeColourLegend(segmentData);
   const connections = nodeConnections(segmentData);
   const elbowTrims = computeGraphElbowTrims(modelPoints, segmentData, connections);
   const autoReducers = autoReducerTransitions(segmentData);
-  const reducerTrims = computeAutoReducerRenderTrims(autoReducers);
+  const reducerTrims = computeAutoReducerRenderTrims(autoReducers, style);
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
   const renderedSegments = new Map();
+  const threadedEndSides = new Set(
+    state.fittings
+      .filter((fitting) => fitting.type === "threadedEnd")
+      .map((fitting) => {
+        const segment = segmentByIndex.get(fitting.segmentIndex);
+        const side = segment ? fittingEndpointSide(fitting, pointLength(segment.vector)) : null;
+        return side ? `${fitting.segmentIndex}:${side}` : null;
+      })
+      .filter(Boolean),
+  );
+  const triColorSizeKeys = [...new Set(segmentData.map(triColorSegmentSizeKey))].sort((a, b) => a - b);
+  const triColorMaterials = new Map();
+  const pipeMaterialForSegment = (segment) => {
+    if (!style.triColor) return pipeMaterial;
+    const sizeKey = triColorSegmentSizeKey(segment);
+    if (triColorMaterials.has(sizeKey)) return triColorMaterials.get(sizeKey);
+
+    const palette = style.triColorPalette ?? [0x3c9698, 0xd19438, 0x7864a8];
+    const sizeIndex = Math.max(0, triColorSizeKeys.indexOf(sizeKey));
+    const color = palette[sizeIndex % palette.length];
+    const material = previewMaterial({
+      ...style,
+      colors: {
+        ...style.colors,
+        pipe: color,
+      },
+    }, "pipe");
+    triColorMaterials.set(sizeKey, material);
+    return material;
+  };
 
   for (const segment of segmentData) {
+    const segmentPipeMaterial = pipeMaterialForSegment(segment);
     const segmentRadius = pipeRadiusMetres(segment);
     const start = modelPoints[segment.from].clone();
     const end = modelPoints[segment.to].clone();
@@ -18753,8 +19333,16 @@ function rebuildThreeSpool() {
     const endTrim = elbowTrims.segment.get(`${segment.index}:${segment.to}`) ?? 0;
     const startReducerTrim = reducerTrims.get(`${segment.index}:${segment.from}`) ?? 0;
     const endReducerTrim = reducerTrims.get(`${segment.index}:${segment.to}`) ?? 0;
-    start.addScaledVector(direction, startTrim + startReducerTrim);
-    end.addScaledVector(direction, -(endTrim + endReducerTrim));
+    const nodeClearances = segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style);
+    start.addScaledVector(direction, startTrim + Math.max(startReducerTrim, nodeClearances.start));
+    end.addScaledVector(direction, -(endTrim + Math.max(endReducerTrim, nodeClearances.end)));
+    const threadLength = threadedPipeEndLength(segmentRadius);
+    if (threadedEndSides.has(`${segment.index}:start`)) {
+      start.addScaledVector(direction, threadLength);
+    }
+    if (threadedEndSides.has(`${segment.index}:end`)) {
+      end.addScaledVector(direction, -threadLength);
+    }
     renderedSegments.set(segment.index, { start: start.clone(), end: end.clone() });
 
     if (start.distanceTo(end) < segmentRadius * 0.5) {
@@ -18762,7 +19350,7 @@ function rebuildThreeSpool() {
     }
 
     if (style.lineDrawing) {
-      group.add(outlinePipeBetween(start, end, segmentRadius, pipeMaterial, {
+      group.add(outlinePipeBetween(start, end, segmentRadius, segmentPipeMaterial, {
         startCap: (connections.get(segment.from)?.length ?? 0) <= 1,
         endCap: (connections.get(segment.to)?.length ?? 0) <= 1,
       }));
@@ -18771,7 +19359,7 @@ function rebuildThreeSpool() {
         start,
         end,
         segmentRadius,
-        pipeMaterial,
+        segmentPipeMaterial,
         32,
       );
       pipe.castShadow = true;
@@ -18781,20 +19369,27 @@ function rebuildThreeSpool() {
   }
 
   for (const elbowData of elbowTrims.elbows) {
+    const elbowSegment = segmentData.reduce((closest, segment) => {
+      if (!closest) return segment;
+      const candidateDifference = Math.abs(pipeRadiusMetres(segment) - elbowData.radius);
+      const closestDifference = Math.abs(pipeRadiusMetres(closest) - elbowData.radius);
+      return candidateDifference < closestDifference ? segment : closest;
+    }, null);
+    const elbowPipeMaterial = elbowSegment ? pipeMaterialForSegment(elbowSegment) : pipeMaterial;
     const elbow = style.lineDrawing
       ? outlineElbowBetween(
         elbowData.entry,
         elbowData.joint,
         elbowData.exit,
         elbowData.radius,
-        pipeMaterial,
+        elbowPipeMaterial,
       )
       : curvedElbowBetween(
         elbowData.entry,
         elbowData.joint,
         elbowData.exit,
         elbowData.radius,
-        pipeMaterial,
+        elbowPipeMaterial,
         32,
       );
     if (!style.lineDrawing) {
@@ -18802,6 +19397,33 @@ function rebuildThreeSpool() {
       elbow.receiveShadow = true;
     }
     group.add(elbow);
+
+    if (illustratedSeamMaterial) {
+      const entryAxis = elbowData.joint.clone().sub(elbowData.entry);
+      const exitAxis = elbowData.exit.clone().sub(elbowData.joint);
+      if (entryAxis.length() > 0.0001) {
+        const seam = outlineRing(
+          elbowData.entry,
+          entryAxis,
+          elbowData.radius * 1.012,
+          illustratedSeamMaterial,
+        );
+        seam.renderOrder = 4;
+        seam.userData.illustratedWeldSeam = true;
+        group.add(seam);
+      }
+      if (exitAxis.length() > 0.0001) {
+        const seam = outlineRing(
+          elbowData.exit,
+          exitAxis,
+          elbowData.radius * 1.012,
+          illustratedSeamMaterial,
+        );
+        seam.renderOrder = 4;
+        seam.userData.illustratedWeldSeam = true;
+        group.add(seam);
+      }
+    }
   }
 
   for (const [index, point] of modelPoints.entries()) {
@@ -18842,6 +19464,7 @@ function rebuildThreeSpool() {
   for (const fitting of state.fittings) {
     const segment = segmentByIndex.get(fitting.segmentIndex);
     if (!segment) continue;
+    const segmentPipeMaterial = pipeMaterialForSegment(segment);
     const startModel = toModelUnits(segment.start);
     const endModel = toModelUnits(segment.end);
     const start = new THREE.Vector3(startModel.x, startModel.y, startModel.z);
@@ -18910,6 +19533,12 @@ function rebuildThreeSpool() {
       group.add(socketAssembly(position, direction, radius, fitting, socketMaterial, style));
     } else if (fitting.type === "rollGroove") {
       group.add(rollGrooveAssembly(position, direction, radius, grooveMaterial, style));
+    } else if (fitting.type === "threadedEnd") {
+      const endpointSide = fittingEndpointSide(fitting, start.distanceTo(end) * 1000);
+      const outward = endpointSide === "start"
+        ? direction.clone().multiplyScalar(-1)
+        : direction.clone();
+      group.add(threadedPipeEndAssembly(position, outward, radius, segmentPipeMaterial, grooveMaterial, style));
     }
   }
 
@@ -18930,6 +19559,7 @@ function rebuildThreeSpool() {
     }
   }
 
+  addIllustratedModelOutlines(group, style);
   three.spoolGroup = group;
   three.scene.add(group);
   build3dPipeLabels(segmentData, modelPoints);
@@ -18974,7 +19604,71 @@ function previewViewStyle() {
     socket: 0xb6c4bd,
     groove: 0x7e817d,
   };
+  const illustratedColors = {
+    pipe: 0xd9dad6,
+    joint: 0xd0d2ce,
+    flange: 0xe5e5e0,
+    bolt: 0x676b69,
+    gasket: 0x3b3f3e,
+    valve: 0xc9cbc7,
+    weld: 0x8d9390,
+    reducer: 0xd3d5d1,
+    socket: 0xc8cfcb,
+    groove: 0x555a58,
+  };
+  const triColorPalette = [0x3c9698, 0xd19438, 0x7864a8];
   const styles = {
+    illustrated: {
+      background: 0xfbfaf6,
+      gridColors: [0xc7cbc7, 0xe4e6e2],
+      gridOpacity: 0,
+      basic: false,
+      physical: true,
+      wireframe: false,
+      opacity: 1,
+      metalness: 0.04,
+      roughness: 0.58,
+      clearcoat: 0.12,
+      clearcoatRoughness: 0.56,
+      emissive: 0x2a2c2b,
+      emissiveIntensity: 0.025,
+      detailModel: true,
+      illustrated: true,
+      outlineColor: 0x252827,
+      weldSeamColor: 0x343938,
+      contactShadowColor: 0x59605d,
+      contactShadowOpacity: 0.13,
+      colors: illustratedColors,
+    },
+    tricolor: {
+      background: 0xfbfaf6,
+      gridColors: [0xc7cbc7, 0xe4e6e2],
+      gridOpacity: 0,
+      basic: false,
+      physical: true,
+      wireframe: false,
+      opacity: 1,
+      metalness: 0.035,
+      roughness: 0.56,
+      clearcoat: 0.11,
+      clearcoatRoughness: 0.55,
+      emissive: 0x202322,
+      emissiveIntensity: 0.02,
+      detailModel: true,
+      illustrated: true,
+      triColor: true,
+      triColorPalette,
+      outlineColor: 0x252827,
+      weldSeamColor: 0x343938,
+      contactShadowColor: 0x59605d,
+      contactShadowOpacity: 0.13,
+      colors: {
+        ...illustratedColors,
+        pipe: triColorPalette[0],
+        joint: 0xc9ccc8,
+        reducer: 0xd5d7d3,
+      },
+    },
     carbon: {
       basic: false,
       physical: stainless,
@@ -19113,7 +19807,7 @@ function previewViewStyle() {
       },
     },
   };
-  return styles[mode] ?? styles.carbon;
+  return styles[mode] ?? styles.illustrated;
 }
 
 function previewMaterial(style, part) {
@@ -19145,6 +19839,9 @@ function previewMaterial(style, part) {
     roughness: part === "gasket" ? Math.max(0.62, style.roughness + 0.16) : style.roughness,
     emissive: style.emissive ?? 0x000000,
     emissiveIntensity: style.emissiveIntensity ?? 0,
+    polygonOffset: style.illustrated === true,
+    polygonOffsetFactor: style.illustrated === true ? 1 : 0,
+    polygonOffsetUnits: style.illustrated === true ? 1 : 0,
   };
 
   if (style.physical || style.clearcoat) {
@@ -19156,6 +19853,93 @@ function previewMaterial(style, part) {
   }
 
   return new THREE.MeshStandardMaterial(materialParams);
+}
+
+function addIllustratedModelOutlines(group, style) {
+  if (!style.illustrated || !group) return;
+  const THREE = three.module;
+  const meshes = [];
+  group.traverse((child) => {
+    if (child?.isMesh && child.geometry && child.userData?.illustratedOutline !== true) {
+      meshes.push(child);
+    }
+  });
+  if (!meshes.length) return;
+
+  const outlineColor = style.outlineColor ?? 0x252827;
+  const shellMaterial = new THREE.MeshBasicMaterial({
+    color: outlineColor,
+    side: THREE.BackSide,
+    depthWrite: false,
+  });
+  const edgeMaterial = new THREE.LineBasicMaterial({
+    color: outlineColor,
+    transparent: true,
+    opacity: 0.92,
+  });
+
+  for (const mesh of meshes) {
+    // The back-face shell gives long straight pipes a crisp silhouette, but it
+    // creates black crescents where curved elbows and nested fittings overlap.
+    // Keep it subtle and only use it on direct, non-curved spool components.
+    const useShell = mesh.parent === group && mesh.geometry.type !== "TubeGeometry";
+    if (useShell) {
+      const shell = new THREE.Mesh(mesh.geometry, shellMaterial);
+      shell.scale.setScalar(1.008);
+      shell.castShadow = false;
+      shell.receiveShadow = false;
+      shell.renderOrder = 1;
+      shell.userData.illustratedOutline = true;
+      mesh.add(shell);
+    }
+
+    const edges = new THREE.LineSegments(
+      illustratedEdgesGeometry(mesh, 26),
+      edgeMaterial,
+    );
+    edges.scale.setScalar(1.003);
+    edges.renderOrder = 2;
+    edges.userData.illustratedOutline = true;
+    mesh.add(edges);
+  }
+}
+
+function illustratedEdgesGeometry(mesh, thresholdAngle = 26) {
+  const THREE = three.module;
+  const edges = new THREE.EdgesGeometry(mesh.geometry, thresholdAngle);
+  if (!mesh.userData?.illustratedHideStartEdge || mesh.geometry.type !== "CylinderGeometry") {
+    return edges;
+  }
+
+  const position = edges.getAttribute("position");
+  const height = Number(mesh.geometry.parameters?.height) || 0;
+  if (!position || height <= 0) return edges;
+
+  const startY = -height * 0.5;
+  const tolerance = Math.max(height * 0.0001, 0.00001);
+  const filtered = [];
+  for (let index = 0; index + 1 < position.count; index += 2) {
+    const firstY = position.getY(index);
+    const secondY = position.getY(index + 1);
+    const isInternalStartRing =
+      Math.abs(firstY - startY) <= tolerance &&
+      Math.abs(secondY - startY) <= tolerance;
+    if (isInternalStartRing) continue;
+
+    filtered.push(
+      position.getX(index),
+      firstY,
+      position.getZ(index),
+      position.getX(index + 1),
+      secondY,
+      position.getZ(index + 1),
+    );
+  }
+
+  const cleaned = new THREE.BufferGeometry();
+  cleaned.setAttribute("position", new THREE.Float32BufferAttribute(filtered, 3));
+  edges.dispose();
+  return cleaned;
 }
 
 function cylinderBetween(start, end, radius, material, radialSegments) {
@@ -19285,19 +20069,12 @@ function outlineBandMarker(position, direction, radius, material, width = 0.18) 
   return group;
 }
 
-function outlineRollGrooveMarker(position, direction, radius, material, width = 0.12) {
+function outlineRollGrooveMarker(position, direction, radius, material, width = 0.009) {
   const group = new three.module.Group();
   const axis = direction.clone().normalize();
   const basis = radialBasis(axis);
-  const visualWidth = clampNumber(width, 0.016, 0.032);
-  const grooveWidth = visualWidth * 0.42;
-  const ringOffsets = [
-    -visualWidth * 0.5,
-    -grooveWidth * 0.5,
-    grooveWidth * 0.5,
-    visualWidth * 0.5,
-  ];
-  for (const offset of ringOffsets) {
+  const grooveWidth = clampNumber(width, 0.008, 0.014);
+  for (const offset of [-grooveWidth * 0.5, grooveWidth * 0.5]) {
     group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, radius * 1.006, material));
   }
 
@@ -19640,83 +20417,170 @@ function socketAssembly(position, direction, pipeRadius, fitting, material, styl
 function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
-  const markerLength = clampNumber(
-    Math.max(ROLL_GROOVE_VISUAL_WIDTH_MM / 1000, pipeRadius * 0.075),
-    0.016,
-    0.03,
+  const grooveWidth = clampNumber(
+    ROLL_GROOVE_VISUAL_WIDTH_MM / 1000 + pipeRadius * 0.015,
+    0.008,
+    0.014,
   );
-  const grooveSpacing = markerLength * 0.38;
 
   if (style.lineDrawing) {
-    return outlineRollGrooveMarker(position, axis, pipeRadius, material, markerLength);
+    return outlineRollGrooveMarker(position, axis, pipeRadius, material, grooveWidth);
   }
 
   const group = new THREE.Group();
-  const brightColor = 0xdce3e6;
-  const highlightColor = 0xf7fafb;
-  const darkColor = 0x15191b;
-  const baseMaterialParams = {
-    transparent: true,
-    opacity: Math.min(0.96, Math.max(0.72, style.opacity ?? 1)),
-    metalness: Math.min(0.9, Math.max(0.58, style.metalness ?? 0.35)),
-    roughness: Math.min(0.3, Math.max(0.12, style.roughness ?? 0.24)),
-  };
-  const darkBandMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: darkColor, transparent: true, opacity: Math.min(0.92, style.opacity ?? 1) })
+  const grooveColor = material?.color?.getHex?.() ?? 0x555a58;
+  const grooveMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({
+        color: grooveColor,
+        transparent: true,
+        opacity: Math.min(0.78, style.opacity ?? 1),
+      })
     : new THREE.MeshStandardMaterial({
-      transparent: true,
-      opacity: Math.min(0.92, style.opacity ?? 1),
-      color: darkColor,
-      metalness: 0.36,
-      roughness: 0.46,
-    });
-  const bandMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: brightColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
-    : new THREE.MeshPhysicalMaterial({
-      ...baseMaterialParams,
-      color: brightColor,
-      clearcoat: 0.76,
-      clearcoatRoughness: 0.1,
-    });
-  const lipMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: highlightColor, transparent: baseMaterialParams.transparent, opacity: 1 })
-    : new THREE.MeshPhysicalMaterial({
-      ...baseMaterialParams,
-      color: highlightColor,
-      opacity: 1,
-      metalness: 0.86,
-      roughness: 0.11,
-      clearcoat: 0.86,
-      clearcoatRoughness: 0.08,
-    });
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: highlightColor,
-    transparent: style.opacity < 1,
-    opacity: Math.min(0.94, (style.opacity ?? 1) + 0.08),
+        color: grooveColor,
+        transparent: true,
+        opacity: Math.min(0.82, style.opacity ?? 1),
+        metalness: Math.min(0.46, style.metalness ?? 0.18),
+        roughness: Math.max(0.52, style.roughness ?? 0.56),
+        polygonOffset: style.illustrated === true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1,
+      });
+  const edgeMaterial = new THREE.LineBasicMaterial({
+    color: style.outlineColor ?? 0x343938,
+    transparent: true,
+    opacity: 0.82,
   });
 
-  const polishedBand = cylinderBetween(
-    position.clone().addScaledVector(axis, -markerLength * 0.5),
-    position.clone().addScaledVector(axis, markerLength * 0.5),
-    pipeRadius * 1.006,
-    bandMaterial,
+  // A Victaulic-style roll groove is cold formed into the pipe: it has a
+  // gasket-seat land at the end, a narrow recessed band and rounded corners.
+  // Keep the overlay almost flush so it reads as an indentation, not a collar.
+  const grooveBand = cylinderBetween(
+    position.clone().addScaledVector(axis, -grooveWidth * 0.5),
+    position.clone().addScaledVector(axis, grooveWidth * 0.5),
+    pipeRadius * 1.001,
+    grooveMaterial,
     48,
   );
-  polishedBand.castShadow = true;
-  polishedBand.receiveShadow = true;
-  group.add(polishedBand);
+  grooveBand.castShadow = false;
+  grooveBand.receiveShadow = true;
+  grooveBand.userData.rollGrooveFloor = true;
+  group.add(grooveBand);
 
-  const grooveTube = clampNumber(pipeRadius * 0.036, 0.0045, 0.013);
-  const lipTube = clampNumber(pipeRadius * 0.014, 0.0025, 0.006);
-  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
-    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.012, grooveTube, darkBandMaterial, 8, 48));
+  const cornerTube = clampNumber(pipeRadius * 0.008, 0.0015, 0.0035);
+  for (const offset of [-grooveWidth * 0.5, grooveWidth * 0.5]) {
+    group.add(torusRing(
+      position.clone().addScaledVector(axis, offset),
+      axis,
+      pipeRadius * 0.996,
+      cornerTube,
+      grooveMaterial,
+      6,
+      48,
+    ));
+    group.add(outlineRing(
+      position.clone().addScaledVector(axis, offset),
+      axis,
+      pipeRadius * 1.004,
+      edgeMaterial,
+    ));
   }
-  for (const offset of [-markerLength * 0.5, markerLength * 0.5]) {
-    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.018, lipTube, lipMaterial, 8, 48));
+  return group;
+}
+
+function threadedPipeEndLength(pipeRadius) {
+  return clampNumber(0.065 + pipeRadius * 0.2, 0.068, 0.105);
+}
+
+function threadedPipeEndAssembly(position, outwardDirection, pipeRadius, pipeMaterial, detailMaterial, style) {
+  const THREE = three.module;
+  const group = new THREE.Group();
+  const outward = outwardDirection.clone().normalize();
+  const basis = radialBasis(outward);
+  const threadLength = threadedPipeEndLength(pipeRadius);
+  const turns = clampNumber(Math.round(threadLength / 0.017), 4, 6);
+  const pointCount = turns * 32;
+  const shoulder = position.clone().addScaledVector(outward, -threadLength);
+  const shoulderRadius = pipeRadius * 0.92;
+  const endRadius = pipeRadius * 0.84;
+  const threadTube = clampNumber(pipeRadius * 0.024, 0.0018, 0.0046);
+  const points = [];
+
+  for (let index = 0; index <= pointCount; index += 1) {
+    const progress = index / pointCount;
+    const angle = progress * turns * Math.PI * 2;
+    // The dark helix sits partly inside a reduced machined section. Its outer
+    // edge remains below the original pipe OD, so it reads as a cut thread
+    // instead of a spring or collar wrapped around the pipe.
+    const machinedRadius = endRadius + (shoulderRadius - endRadius) * progress;
+    const grooveRadius = machinedRadius + threadTube * 0.12;
+    const radial = basis.u.clone().multiplyScalar(Math.cos(angle))
+      .add(basis.v.clone().multiplyScalar(Math.sin(angle)))
+      .multiplyScalar(grooveRadius);
+    points.push(
+      position.clone()
+        .addScaledVector(outward, -progress * threadLength)
+        .add(radial),
+    );
   }
-  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
-    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.026, lineMaterial));
+
+  if (style.lineDrawing) {
+    group.add(outlinePipeBetween(shoulder, position, shoulderRadius, pipeMaterial, {
+      startCap: false,
+      endCap: true,
+    }));
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: detailMaterial?.color?.getHex?.() ?? 0x596563,
+      transparent: true,
+      opacity: 0.9,
+    });
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), lineMaterial));
+  } else {
+    const machinedSection = taperedCylinderBetween(
+      shoulder,
+      position,
+      shoulderRadius,
+      endRadius,
+      pipeMaterial,
+      48,
+    );
+    machinedSection.castShadow = true;
+    machinedSection.receiveShadow = true;
+    machinedSection.userData.threadedMachinedSection = true;
+    group.add(machinedSection);
+
+    const curve = new THREE.CatmullRomCurve3(points);
+    const threadColor = style.triColor
+      ? 0x53615f
+      : detailMaterial?.color?.getHex?.() ?? 0x596563;
+    const threadMaterial = style.basic
+      ? new THREE.MeshBasicMaterial({ color: threadColor })
+      : new THREE.MeshStandardMaterial({
+          color: threadColor,
+          metalness: 0.3,
+          roughness: 0.48,
+        });
+    const thread = new THREE.Mesh(
+      new THREE.TubeGeometry(curve, pointCount, threadTube, 8, false),
+      threadMaterial,
+    );
+    thread.castShadow = true;
+    thread.receiveShadow = true;
+    thread.userData.threadedPipeEnd = true;
+    group.add(thread);
   }
+
+  const runoutMaterial = new THREE.LineBasicMaterial({
+    color: style.outlineColor ?? detailMaterial?.color?.getHex?.() ?? 0x596563,
+    transparent: true,
+    opacity: 0.82,
+  });
+  group.add(outlineRing(
+    shoulder,
+    outward,
+    pipeRadius * 0.995,
+    runoutMaterial,
+  ));
+  group.add(outlineRing(position, outward, endRadius * 1.004, runoutMaterial));
   return group;
 }
 
@@ -19766,7 +20630,7 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     end = start.clone().addScaledVector(placementDirection, modelLength);
   } else if (startsAtJoint) {
     const offset = clampNumber(
-      teeReducerStartOffsetMetres(reducer),
+      teeReducerStartOffsetMetres(reducer, style),
       0.015,
       Math.max(0.015, placementLength - modelLength),
     );
@@ -19896,14 +20760,13 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
   const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
   const mainPair = mostOppositeRenderEntryPair(entries);
   const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
-  const length = Math.max(coreRadius * 3.0, 0.16);
+  const length = teeNodeLegLengthMetres(coreRadius);
 
   if (mainPair) {
-    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius));
     const main = cylinderBetween(
       position.clone().addScaledVector(mainPair[0].direction, length),
       position.clone().addScaledVector(mainPair[1].direction, length),
-      mainRadius,
+      coreRadius,
       material,
       28,
     );
@@ -19914,15 +20777,14 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
 
   for (const entry of entries) {
     if (mainPair && mainPair.includes(entry)) continue;
-    const branchRadius = entry.radius;
-    const branchLength = Math.max(length, branchRadius * 4.0, 0.16);
     const branch = cylinderBetween(
-      position.clone().addScaledVector(entry.direction, -branchRadius * 0.04),
-      position.clone().addScaledVector(entry.direction, branchLength),
-      branchRadius,
+      position.clone().addScaledVector(entry.direction, -coreRadius * 0.04),
+      position.clone().addScaledVector(entry.direction, length),
+      coreRadius,
       material,
       28,
     );
+    branch.userData.illustratedHideStartEdge = true;
     branch.castShadow = true;
     branch.receiveShadow = true;
     group.add(branch);
@@ -19934,22 +20796,6 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
   core.receiveShadow = true;
   group.add(core);
 
-  if (mainPair) {
-    const ringTube = clampNumber(coreRadius * 0.045, 0.004, 0.014);
-    for (const entry of entries) {
-      if (mainPair.includes(entry)) continue;
-      group.add(torusRing(
-        position.clone().addScaledVector(entry.direction, entry.radius * 0.18),
-        entry.direction,
-        entry.radius * 1.02,
-        ringTube,
-        material,
-        8,
-        36,
-      ));
-    }
-  }
-
   return group;
 }
 
@@ -19959,30 +20805,27 @@ function outlineTeeMarker(position, connected, modelPoints, radius, material, se
   const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
   const mainPair = mostOppositeRenderEntryPair(entries);
   const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
-  const length = Math.max(coreRadius * 3.8, 0.2);
+  const length = teeNodeLegLengthMetres(coreRadius, { lineDrawing: true });
 
   if (mainPair) {
-    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius));
     group.add(outlinePipeBetween(
       position.clone().addScaledVector(mainPair[0].direction, length),
       position.clone().addScaledVector(mainPair[1].direction, length),
-      mainRadius,
+      coreRadius,
       material,
     ));
   }
 
   for (const entry of entries) {
     if (mainPair && mainPair.includes(entry)) continue;
-    const branchRadius = entry.radius;
-    const branchLength = Math.max(length, branchRadius * 4.0, 0.2);
-    const branchStart = position.clone().addScaledVector(entry.direction, branchRadius * 0.2);
-    const branchEnd = position.clone().addScaledVector(entry.direction, branchLength);
+    const branchStart = position.clone().addScaledVector(entry.direction, coreRadius * 0.2);
+    const branchEnd = position.clone().addScaledVector(entry.direction, length);
 
-    group.add(outlineRing(branchStart, entry.direction, branchRadius, material));
+    group.add(outlineRing(branchStart, entry.direction, coreRadius, material));
     group.add(outlinePipeBetween(
       branchStart,
       branchEnd,
-      branchRadius,
+      coreRadius,
       material,
       { endCap: true },
     ));
@@ -20017,6 +20860,7 @@ function branchNodeAssembly(nodeIndex, position, connected, modelPoints, segment
       material,
       24,
     );
+    collar.userData.illustratedHideStartEdge = true;
     collar.castShadow = true;
     collar.receiveShadow = true;
     group.add(collar);
@@ -20528,8 +21372,6 @@ function frameThreeCamera(options = {}) {
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z, 5);
-  const halfHeight = maxDim * 0.78;
-  const halfWidth = halfHeight * aspect;
   const preserveView = three.userMovedCamera && options.reset !== true && three.controls;
   const previousTarget = preserveView ? three.controls.target.clone() : null;
   const previousOffset = preserveView ? three.camera.position.clone().sub(previousTarget) : null;
@@ -20539,10 +21381,6 @@ function frameThreeCamera(options = {}) {
   const previousZoom = preserveView ? three.camera.zoom : 1;
   const target = preserveView ? center.clone().add(previousTargetOffset) : center.clone();
 
-  three.camera.left = -halfWidth;
-  three.camera.right = halfWidth;
-  three.camera.top = halfHeight;
-  three.camera.bottom = -halfHeight;
   three.camera.near = 0.1;
   three.camera.far = maxDim * 20 + 100;
   if (preserveView && previousOffset.length() > 0.001) {
@@ -20554,6 +21392,35 @@ function frameThreeCamera(options = {}) {
     three.camera.zoom = 1;
   }
   three.camera.lookAt(target);
+  three.camera.updateMatrixWorld(true);
+
+  // Fit the visible projection rather than a square based on the longest run.
+  // Long horizontal spools otherwise become tiny inside a wide phone/tablet panel.
+  const viewRight = new THREE.Vector3(1, 0, 0).applyQuaternion(three.camera.quaternion);
+  const viewUp = new THREE.Vector3(0, 1, 0).applyQuaternion(three.camera.quaternion);
+  const corners = [
+    new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+    new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+    new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+    new THREE.Vector3(box.min.x, box.max.y, box.max.z),
+    new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+    new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+    new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+    new THREE.Vector3(box.max.x, box.max.y, box.max.z),
+  ];
+  let projectedHalfWidth = 0;
+  let projectedHalfHeight = 0;
+  corners.forEach((corner) => {
+    const relative = corner.sub(target);
+    projectedHalfWidth = Math.max(projectedHalfWidth, Math.abs(relative.dot(viewRight)));
+    projectedHalfHeight = Math.max(projectedHalfHeight, Math.abs(relative.dot(viewUp)));
+  });
+  const halfHeight = Math.max(projectedHalfHeight, projectedHalfWidth / Math.max(aspect, 0.25), 0.55) * 1.18;
+  const halfWidth = halfHeight * aspect;
+  three.camera.left = -halfWidth;
+  three.camera.right = halfWidth;
+  three.camera.top = halfHeight;
+  three.camera.bottom = -halfHeight;
   three.camera.updateProjectionMatrix();
 
   if (three.controls) {
@@ -20580,6 +21447,7 @@ function renderFallbackPreview() {
   if (fallbackCanvas.hidden) return;
 
   const style = fallbackPreviewStyle();
+  updatePreviewSizeColourLegend();
   const { ctx, width, height } = resizeCanvas(fallbackCanvas);
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = style.background;
@@ -20590,8 +21458,9 @@ function renderFallbackPreview() {
   const maxX = Math.max(...projected.map((point) => point.x));
   const minY = Math.min(...projected.map((point) => point.y));
   const maxY = Math.max(...projected.map((point) => point.y));
-  const span = Math.max(maxX - minX, maxY - minY, 1);
-  const scale = Math.min(width, height) / (span * 1.55);
+  const spanX = Math.max(maxX - minX, 1);
+  const spanY = Math.max(maxY - minY, 1);
+  const scale = Math.min((width * 0.84) / spanX, (height * 0.72) / spanY);
   const offset = {
     x: width * 0.5 - ((minX + maxX) * 0.5) * scale,
     y: height * 0.55 - ((minY + maxY) * 0.5) * scale,
@@ -20720,6 +21589,44 @@ function fallbackPreviewStyle() {
     ghost: false,
   };
   const styles = {
+    illustrated: {
+      background: "#fbfaf6",
+      shadow: "rgba(53, 59, 56, 0.08)",
+      gridStroke: "rgba(82, 91, 87, 0)",
+      pipeStops: ["#c4c7c3", "#eeeeea", "#b8bcb8"],
+      highlight: "rgba(255, 255, 255, 0.88)",
+      fittingStroke: "#252827",
+      fittingFill: "#d8dad6",
+      nodeFill: "#d0d2ce",
+      nodeStroke: "#252827",
+      weldStroke: "#4d5350",
+      inkStroke: "#252827",
+      inked: true,
+      outline: false,
+      ghost: false,
+    },
+    tricolor: {
+      background: "#fbfaf6",
+      shadow: "rgba(53, 59, 56, 0.08)",
+      gridStroke: "rgba(82, 91, 87, 0)",
+      pipeStops: ["#2d777a", "#64b8ba", "#245f62"],
+      triColor: true,
+      triColorPipeStops: [
+        ["#2d777a", "#64b8ba", "#245f62"],
+        ["#a9681c", "#e2ac55", "#8a5115"],
+        ["#54437f", "#9582c5", "#45366c"],
+      ],
+      highlight: "rgba(255, 255, 255, 0.72)",
+      fittingStroke: "#252827",
+      fittingFill: "#d8dad6",
+      nodeFill: "#c9ccc8",
+      nodeStroke: "#252827",
+      weldStroke: "#4d5350",
+      inkStroke: "#252827",
+      inked: true,
+      outline: false,
+      ghost: false,
+    },
     carbon: stainless ? stainlessStyle : carbonStyle,
     black: carbonStyle,
     workshop: {
@@ -20787,10 +21694,13 @@ function fallbackPreviewStyle() {
       ghost: false,
     },
   };
-  return styles[mode] ?? styles.carbon;
+  return styles[mode] ?? styles.illustrated;
 }
 
 function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
+  const pipeStops = style.triColor
+    ? triColorFallbackPipeStops(segment, style)
+    : style.pipeStops;
   if (style.outline) {
     const dx = segment.end2.x - segment.start2.x;
     const dy = segment.end2.y - segment.start2.y;
@@ -20800,7 +21710,7 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
     const normal = { x: -along.y, y: along.x };
     const halfWidth = segmentPipeWidth * 0.5;
 
-    ctx.strokeStyle = style.pipeStops[0];
+    ctx.strokeStyle = pipeStops[0];
     ctx.lineCap = "round";
     ctx.lineWidth = 2.5;
     drawLine(
@@ -20836,14 +21746,20 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
     return;
   }
 
-  ctx.lineWidth = segmentPipeWidth + 7;
-  ctx.strokeStyle = style.shadow;
-  drawLine(ctx, { x: segment.start2.x + 4, y: segment.start2.y + 6 }, { x: segment.end2.x + 4, y: segment.end2.y + 6 });
+  if (style.inked) {
+    ctx.lineWidth = segmentPipeWidth + 4;
+    ctx.strokeStyle = style.inkStroke ?? style.fittingStroke;
+    drawLine(ctx, segment.start2, segment.end2);
+  } else {
+    ctx.lineWidth = segmentPipeWidth + 7;
+    ctx.strokeStyle = style.shadow;
+    drawLine(ctx, { x: segment.start2.x + 4, y: segment.start2.y + 6 }, { x: segment.end2.x + 4, y: segment.end2.y + 6 });
+  }
 
   const gradient = ctx.createLinearGradient(segment.start2.x, segment.start2.y, segment.end2.x, segment.end2.y);
-  gradient.addColorStop(0, style.pipeStops[0]);
-  gradient.addColorStop(0.52, style.pipeStops[1]);
-  gradient.addColorStop(1, style.pipeStops[2]);
+  gradient.addColorStop(0, pipeStops[0]);
+  gradient.addColorStop(0.52, pipeStops[1]);
+  gradient.addColorStop(1, pipeStops[2]);
   ctx.lineWidth = segmentPipeWidth;
   ctx.strokeStyle = gradient;
   drawLine(ctx, segment.start2, segment.end2);
@@ -20853,12 +21769,25 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
   drawLine(ctx, segment.start2, segment.end2);
 }
 
+function triColorFallbackPipeStops(segment, style) {
+  const sizeKeys = [...new Set(segments().map(triColorSegmentSizeKey))].sort((a, b) => a - b);
+  const sizeIndex = Math.max(0, sizeKeys.indexOf(triColorSegmentSizeKey(segment)));
+  const palette = style.triColorPipeStops ?? [
+    ["#2d777a", "#64b8ba", "#245f62"],
+    ["#a9681c", "#e2ac55", "#8a5115"],
+    ["#54437f", "#9582c5", "#45366c"],
+  ];
+  return palette[sizeIndex % palette.length];
+}
+
 function drawFallbackFlushEndCaps(ctx, fallbackSegments, connections, style) {
   ctx.save();
   ctx.lineCap = "butt";
-  ctx.strokeStyle = style.pipeStops[0];
 
   for (const segment of fallbackSegments) {
+    ctx.strokeStyle = style.inked
+      ? (style.inkStroke ?? style.fittingStroke)
+      : (style.triColor ? triColorFallbackPipeStops(segment, style)[0] : style.pipeStops[0]);
     const segmentPipeWidth = Math.max(12, visualPipeWidth(segment) * 1.02);
     const capLineWidth = style.outline ? 2.5 : Math.max(2, segmentPipeWidth * 0.2);
     const capHalf = style.outline ? segmentPipeWidth * 0.52 : segmentPipeWidth * 0.52;
@@ -21053,7 +21982,7 @@ function drawFallbackTeeMarkers(ctx, fallbackSegments, connections, style, pipeW
   ctx.save();
   ctx.lineCap = "butt";
   ctx.lineJoin = "round";
-  ctx.strokeStyle = style.pipeStops[0];
+  ctx.strokeStyle = style.inked ? (style.inkStroke ?? style.fittingStroke) : style.pipeStops[0];
   ctx.lineWidth = style.outline ? 3 : Math.max(7, pipeWidth * 0.48);
 
   for (const [nodeIndex, connected] of connections.entries()) {
@@ -21085,7 +22014,7 @@ function drawFallbackTeeMarkers(ctx, fallbackSegments, connections, style, pipeW
         drawLine(ctx, joint, { x: joint.x + vector.x * 22, y: joint.y + vector.y * 22 });
       }
 
-      ctx.strokeStyle = style.pipeStops[0];
+      ctx.strokeStyle = style.inked ? (style.inkStroke ?? style.fittingStroke) : style.pipeStops[0];
       ctx.lineWidth = style.outline ? 3 : Math.max(7, pipeWidth * 0.48);
       continue;
     }
@@ -21190,22 +22119,11 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
       }
     }
   } else if (fitting.type === "rollGroove") {
-    const grooveHalfSpan = Math.max(4, pipeWidth * 0.16);
-    const shoulderHalfSpan = grooveHalfSpan * 1.9;
+    const grooveHalfSpan = Math.max(3, pipeWidth * 0.11);
     const halfWidth = pipeWidth * 0.7;
     ctx.lineCap = "butt";
-    const silverStroke = style.outline ? style.fittingStroke : "#d9e0e3";
-    const darkStroke = style.outline ? style.fittingStroke : "#171d20";
-    ctx.strokeStyle = silverStroke;
-    ctx.lineWidth = style.outline ? 2.4 : 3.2;
-    for (const offset of [-shoulderHalfSpan, shoulderHalfSpan]) {
-      ctx.beginPath();
-      ctx.moveTo(along.x * offset + normal.x * -halfWidth, along.y * offset + normal.y * -halfWidth);
-      ctx.lineTo(along.x * offset + normal.x * halfWidth, along.y * offset + normal.y * halfWidth);
-      ctx.stroke();
-    }
-    ctx.strokeStyle = darkStroke;
-    ctx.lineWidth = style.outline ? 3 : 3.8;
+    ctx.strokeStyle = style.outline ? style.fittingStroke : "#4d5754";
+    ctx.lineWidth = style.outline ? 2.4 : 2.8;
     for (const offset of [-grooveHalfSpan, grooveHalfSpan]) {
       ctx.beginPath();
       ctx.moveTo(along.x * offset + normal.x * -halfWidth, along.y * offset + normal.y * -halfWidth);
@@ -21222,6 +22140,36 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
     const labelY = normal.y * (pipeWidth * 0.95 + 8);
     ctx.strokeText("RG", labelX, labelY);
     ctx.fillText("RG", labelX, labelY);
+  } else if (fitting.type === "threadedEnd") {
+    const threadLength = Math.max(20, pipeWidth * 1.35);
+    const endDirection = fitting.t <= 0.5 ? 1 : -1;
+    const halfWidth = pipeWidth * 0.62;
+    ctx.lineCap = "butt";
+    ctx.strokeStyle = style.outline ? style.fittingStroke : "#4b5563";
+    ctx.lineWidth = style.outline ? 2.2 : 2.6;
+    for (let index = 0; index < 7; index += 1) {
+      const offset = endDirection * (2 + index * (threadLength / 7));
+      ctx.beginPath();
+      ctx.moveTo(
+        along.x * offset + normal.x * -halfWidth,
+        along.y * offset + normal.y * -halfWidth,
+      );
+      ctx.lineTo(
+        along.x * (offset + endDirection * 4.4) + normal.x * halfWidth,
+        along.y * (offset + endDirection * 4.4) + normal.y * halfWidth,
+      );
+      ctx.stroke();
+    }
+    ctx.font = "900 9px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = style.background;
+    ctx.fillStyle = style.outline ? style.fittingStroke : "#4b5563";
+    const labelX = normal.x * (pipeWidth * 0.95 + 9);
+    const labelY = normal.y * (pipeWidth * 0.95 + 9);
+    ctx.strokeText("THD", labelX, labelY);
+    ctx.fillText("THD", labelX, labelY);
   } else if (fitting.type === "socket") {
     const socketAngle = fittingSocketAngle(fitting) * Math.PI / 180;
     const branch = normalizeScreenVector({
@@ -23608,6 +24556,7 @@ async function saveBrowserProject(options = {}) {
 }
 
 async function openBrowserProject(options = {}) {
+  closePrimaryWorkspaceDialogs("jobs");
   ensureProjectLibraryDashboardShell();
   projectLibraryGuideVisible = false;
   projectLibraryCommsVisible = false;
@@ -23812,46 +24761,12 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     return;
   }
 
-  projectLibraryList.append(projectLibraryDashboardView === "board"
-    ? projectProductionBoard(filteredProjects)
-    : projectTodayBoard(filteredProjects));
-
-  const folders = projectFolders(filteredProjects);
-  for (const folder of folders) {
-    const section = document.createElement("section");
-    section.className = "project-folder";
-    section.dataset.projectFolderKey = folder.key;
-
-    const summary = document.createElement("button");
-    summary.type = "button";
-    summary.className = "project-folder-summary project-folder-launcher";
-    summary.dataset.projectFolderOpen = folder.key;
-    summary.setAttribute("aria-label", `Open ${folder.title} saved spools`);
-    summary.title = "Open this job";
-
-    const folderMain = document.createElement("div");
-    folderMain.className = "project-folder-main";
-
-    const title = document.createElement("strong");
-    title.textContent = folder.title;
-
-    const meta = document.createElement("span");
-    meta.textContent = folder.meta;
-
-    folderMain.append(title, meta);
-
-    const count = document.createElement("span");
-    count.className = "project-folder-count";
-    count.textContent = `${folder.projects.length} spool${folder.projects.length === 1 ? "" : "s"}`;
-
-    const openIcon = document.createElement("span");
-    openIcon.className = "project-folder-toggle-icon";
-    openIcon.setAttribute("aria-hidden", "true");
-    openIcon.textContent = "Open";
-
-    summary.append(folderMain, count, openIcon);
-    section.append(summary);
-    projectLibraryList.append(section);
+  if (projectLibraryDashboardView === "board") {
+    projectLibraryList.append(projectProductionBoard(filteredProjects));
+  } else if (projectLibraryDashboardView === "today") {
+    projectLibraryList.append(projectTodayBoard(filteredProjects));
+  } else {
+    projectLibraryList.append(projectJobsOverview(filteredProjects));
   }
 }
 
@@ -23886,9 +24801,14 @@ function renderProjectLibraryFolderWindow(folder) {
   header.append(copy, backButton);
   windowCard.append(header);
   windowCard.append(projectJobSummaryCard(folder));
+  windowCard.append(projectProductionBoard(folder.projects));
 
   const drawings = document.createElement("div");
   drawings.className = "project-job-window-spools";
+  const drawingsTitle = document.createElement("div");
+  drawingsTitle.className = "project-job-drawings-title";
+  drawingsTitle.innerHTML = `<strong>Spool drawings</strong><span>Open a drawing for dimensions, checks, revisions and fabrication sheets.</span>`;
+  drawings.append(drawingsTitle);
   for (const project of folder.projects) {
     drawings.append(projectLibraryRow(project));
   }
@@ -23899,6 +24819,7 @@ function renderProjectLibraryFolderWindow(folder) {
 function openProjectLibraryFolder(folderKey) {
   if (!folderKey) return;
   projectLibraryOpenFolderKey = folderKey;
+  rememberProjectLibraryRecentJob(folderKey);
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
@@ -23937,20 +24858,78 @@ function savedProjectProductionMessages(project) {
 
 function readTeamDashboardView() {
   try {
-    return localStorage.getItem(TEAM_DASHBOARD_VIEW_KEY) === "board" ? "board" : "today";
+    const view = localStorage.getItem(TEAM_DASHBOARD_VIEW_KEY);
+    return ["jobs", "today", "board"].includes(view) ? view : "jobs";
   } catch {
-    return "today";
+    return "jobs";
   }
 }
 
 function setTeamDashboardView(view) {
-  projectLibraryDashboardView = view === "board" ? "board" : "today";
+  projectLibraryDashboardView = ["jobs", "today", "board"].includes(view) ? view : "jobs";
+  projectLibraryJobPage = 1;
   try {
     localStorage.setItem(TEAM_DASHBOARD_VIEW_KEY, projectLibraryDashboardView);
   } catch (error) {
     console.warn("Could not remember the team dashboard view.", error);
   }
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function readProjectLibraryStringList(key, limit = 80) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(parsed)
+      ? parsed.map((value) => String(value ?? "")).filter(Boolean).slice(0, limit)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeProjectLibraryStringList(key, values, limit = 80) {
+  try {
+    localStorage.setItem(key, JSON.stringify([...new Set(values)].slice(0, limit)));
+  } catch (error) {
+    console.warn("Could not remember the Jobs dashboard preference.", error);
+  }
+}
+
+function readProjectLibraryJobFilter() {
+  try {
+    const filter = localStorage.getItem(JOB_DASHBOARD_FILTER_KEY);
+    return ["attention", "active", "mine", "completed", "all"].includes(filter) ? filter : "attention";
+  } catch {
+    return "attention";
+  }
+}
+
+function setProjectLibraryJobFilter(filter) {
+  projectLibraryJobFilter = ["attention", "active", "mine", "completed", "all"].includes(filter)
+    ? filter
+    : "attention";
+  projectLibraryJobPage = 1;
+  try {
+    localStorage.setItem(JOB_DASHBOARD_FILTER_KEY, projectLibraryJobFilter);
+  } catch (error) {
+    console.warn("Could not remember the Jobs filter.", error);
+  }
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function toggleProjectLibraryJobPin(folderKey) {
+  if (!folderKey) return;
+  projectLibraryJobPins = projectLibraryJobPins.includes(folderKey)
+    ? projectLibraryJobPins.filter((key) => key !== folderKey)
+    : [folderKey, ...projectLibraryJobPins];
+  storeProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, projectLibraryJobPins, 80);
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function rememberProjectLibraryRecentJob(folderKey) {
+  if (!folderKey) return;
+  projectLibraryRecentJobs = [folderKey, ...projectLibraryRecentJobs.filter((key) => key !== folderKey)].slice(0, 12);
+  storeProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, projectLibraryRecentJobs, 12);
 }
 
 function savedProjectProductionActivity(project) {
@@ -24150,6 +25129,134 @@ function projectJobMetrics(projects = []) {
     if (status !== "complete" && production.hold) summary.onHold += 1;
     return summary;
   }, { total: 0, readycheck: 0, checked: 0, issued: 0, fabricated: 0, overdue: 0, dueToday: 0, onHold: 0 });
+}
+
+function projectJobOverviewData(folder) {
+  const metrics = projectJobMetrics(folder.projects);
+  const visible = folder.projects.filter((project) => !productionProjectHidden(project));
+  const active = visible.filter((project) => normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "complete");
+  const attention = active.filter(productionProjectNeedsAttention);
+  const mine = active.filter((project) => productionAssignedToCurrentUser(savedProjectProductionInfo(project)));
+  const assignees = [...new Set(active
+    .map((project) => savedProjectProductionInfo(project).assignee)
+    .filter(Boolean))];
+  const nextDue = active
+    .map((project) => savedProjectProductionInfo(project))
+    .filter((production) => production.dueDate)
+    .sort((first, second) => `${first.dueDate} ${first.dueTime}`.localeCompare(`${second.dueDate} ${second.dueTime}`))[0] ?? null;
+  return {
+    folder,
+    metrics,
+    active: active.length,
+    completed: visible.filter((project) => normalizeProjectStatus(savedProjectState(project)?.projectStatus) === "complete").length,
+    attention: attention.length,
+    mine: mine.length,
+    assignees,
+    nextDue,
+    pinned: projectLibraryJobPins.includes(folder.key),
+    recentIndex: projectLibraryRecentJobs.indexOf(folder.key),
+  };
+}
+
+function projectJobMatchesOverviewFilter(job, filter = projectLibraryJobFilter) {
+  if (filter === "attention") return job.attention > 0;
+  if (filter === "active") return job.active > 0;
+  if (filter === "mine") return job.mine > 0;
+  if (filter === "completed") return job.active === 0 && job.completed > 0;
+  return true;
+}
+
+function projectJobOverviewRow(job) {
+  const { folder, metrics } = job;
+  const progress = metrics.total ? Math.round((job.completed / metrics.total) * 100) : 0;
+  const dueText = job.nextDue ? formatProductionDue(job.nextDue) : "No due date";
+  const assigneeText = job.assignees.length
+    ? job.assignees.slice(0, 2).join(", ") + (job.assignees.length > 2 ? ` +${job.assignees.length - 2}` : "")
+    : "Unassigned";
+  const row = document.createElement("article");
+  row.className = "job-overview-row";
+  row.classList.toggle("needs-attention", job.attention > 0);
+  row.classList.toggle("complete", job.active === 0 && job.completed > 0);
+  row.innerHTML = `
+    <button type="button" class="job-overview-pin ${job.pinned ? "active" : ""}" data-project-library-action="pin-job" data-job-key="${escapeHtml(folder.key)}" aria-label="${job.pinned ? "Unpin" : "Pin"} ${escapeHtml(folder.title)}" title="${job.pinned ? "Unpin job" : "Pin job"}">
+      <span aria-hidden="true">${job.pinned ? "★" : "☆"}</span>
+    </button>
+    <button type="button" class="job-overview-open" data-project-folder-open="${escapeHtml(folder.key)}" aria-label="Open ${escapeHtml(folder.title)}">
+      <span class="job-overview-name"><strong>${escapeHtml(folder.title)}</strong><small>${escapeHtml(folder.meta)}</small></span>
+      <span class="job-overview-progress"><i style="--job-progress:${progress}%"></i><small>${progress}% fabricated</small></span>
+      <span class="job-overview-meta"><strong>${job.active} active</strong><small>${job.completed} of ${metrics.total} complete</small></span>
+      <span class="job-overview-meta"><strong>${escapeHtml(dueText)}</strong><small>${escapeHtml(assigneeText)}</small></span>
+      <span class="job-overview-badges">
+        ${job.attention ? `<b class="attention">${job.attention} attention</b>` : ""}
+        ${metrics.readycheck ? `<b>${metrics.readycheck} to check</b>` : ""}
+        ${metrics.onHold ? `<b class="hold">${metrics.onHold} hold</b>` : ""}
+        ${!job.attention && !metrics.readycheck && !metrics.onHold ? `<b class="clear">${job.active ? "On track" : "Complete"}</b>` : ""}
+      </span>
+      <span class="job-overview-arrow" aria-hidden="true">Open</span>
+    </button>
+  `;
+  return row;
+}
+
+function projectJobsOverview(projects) {
+  const allJobs = projectFolders(projects).map(projectJobOverviewData);
+  const counts = {
+    attention: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "attention")).length,
+    active: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "active")).length,
+    mine: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "mine")).length,
+    completed: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "completed")).length,
+    all: allJobs.length,
+  };
+  const filtered = allJobs
+    .filter((job) => projectJobMatchesOverviewFilter(job))
+    .sort((first, second) => {
+      if (first.pinned !== second.pinned) return first.pinned ? -1 : 1;
+      if (first.attention !== second.attention) return second.attention - first.attention;
+      const firstRecent = first.recentIndex < 0 ? Number.MAX_SAFE_INTEGER : first.recentIndex;
+      const secondRecent = second.recentIndex < 0 ? Number.MAX_SAFE_INTEGER : second.recentIndex;
+      if (firstRecent !== secondRecent) return firstRecent - secondRecent;
+      return String(second.folder.latest).localeCompare(String(first.folder.latest));
+    });
+  const pageSize = 12;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  projectLibraryJobPage = Math.min(Math.max(1, projectLibraryJobPage), pageCount);
+  const pageJobs = filtered.slice((projectLibraryJobPage - 1) * pageSize, projectLibraryJobPage * pageSize);
+  const section = document.createElement("section");
+  section.className = "job-overview-card";
+  section.innerHTML = `
+    <div class="job-overview-head">
+      <div><strong>Jobs</strong><span>Open one job to see its production board and spool drawings.</span></div>
+      <span>${filtered.length} showing</span>
+    </div>
+    <div class="job-overview-filters" aria-label="Filter jobs">
+      ${[
+        ["attention", "Needs attention"],
+        ["active", "Active"],
+        ["mine", "My jobs"],
+        ["completed", "Completed"],
+        ["all", "All"],
+      ].map(([key, label]) => `<button type="button" class="${projectLibraryJobFilter === key ? "active" : ""}" data-project-library-action="job-filter" data-job-filter="${key}">${label} <b>${counts[key]}</b></button>`).join("")}
+    </div>
+  `;
+  const list = document.createElement("div");
+  list.className = "job-overview-list";
+  if (pageJobs.length) {
+    pageJobs.forEach((job) => list.append(projectJobOverviewRow(job)));
+  } else {
+    list.innerHTML = `<div class="project-library-empty">${projectLibraryJobFilter === "attention" ? "No jobs need attention. Choose Active or All to see the rest." : "No jobs match this filter."}</div>`;
+  }
+  section.append(list);
+  if (pageCount > 1) {
+    const pager = document.createElement("div");
+    pager.className = "job-overview-pager";
+    pager.innerHTML = `
+      <button type="button" data-project-library-action="job-page" data-job-page="${projectLibraryJobPage - 1}"${projectLibraryJobPage === 1 ? " disabled" : ""}>Previous</button>
+      <span>Page ${projectLibraryJobPage} of ${pageCount}</span>
+      <button type="button" data-project-library-action="job-page" data-job-page="${projectLibraryJobPage + 1}"${projectLibraryJobPage === pageCount ? " disabled" : ""}>Next</button>
+    `;
+    section.append(pager);
+  }
+  return section;
 }
 
 function projectNeedsTodayItems(projects = []) {
@@ -25533,6 +26640,7 @@ function projectDashboardCard(projects, options = {}) {
       </button>
     </div>
     <nav class="team-dashboard-tabs" aria-label="Team dashboard view">
+      <button type="button" class="${projectLibraryDashboardView === "jobs" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="jobs">Jobs <b>${projectFolders(projects).length}</b></button>
       <button type="button" class="${projectLibraryDashboardView === "today" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="today">Today <b>${groups.attention.length + groups.mine.length + groups.ready.length}</b></button>
       <button type="button" class="${projectLibraryDashboardView === "board" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="board">Full board <b>${counts.active ?? 0}</b></button>
       <button type="button" class="${projectLibraryMoreVisible ? "active" : ""}" data-project-library-action="toggle-dashboard-more" aria-expanded="${projectLibraryMoreVisible}">More</button>
@@ -30545,7 +31653,7 @@ function endpointSegmentHitForPoint(pointHit) {
 }
 
 function isEndpointFittingType(type) {
-  return type === "flange" || type === "rollGroove";
+  return type === "flange" || type === "rollGroove" || type === "threadedEnd";
 }
 
 function snapEndpointFittingPlacementT(type, hit, pointer = null) {
@@ -30632,6 +31740,11 @@ function renderDrawingContextMenu() {
         action: () => placeContextFitting("rollGroove"),
       },
       {
+        label: "Add threaded pipe end",
+        detail: "Thread preparation on nearest pipe end / 0 kg",
+        action: () => placeContextFitting("threadedEnd"),
+      },
+      {
         label: "Add reducer",
         detail: "On this run",
         action: () => placeContextFitting("reducer"),
@@ -30678,7 +31791,7 @@ function renderDrawingContextMenu() {
       segment: target.fittingHit.segmentHit.segment,
     };
     const weightKg = fittingWeightKg(fittingData.fitting, fittingData.segment);
-    if (fittingData.fitting.type !== "rollGroove") {
+    if (fittingData.fitting.type !== "rollGroove" && fittingData.fitting.type !== "threadedEnd") {
       actions.push({
         label: "Set fitting weight",
         detail: `${formatMass(weightKg)} kg ${fittingWeightSource(fittingData.fitting, fittingData.segment)}`,
@@ -30991,7 +32104,7 @@ function renderMobileDrawingContextMenu(target) {
       },
       {
         label: "Add fitting",
-        detail: "Flange, groove, reducer or sockets",
+        detail: "Flange, groove, thread, reducer or sockets",
         action: () => renderMobileFittingMenu(),
         keepOpen: true,
       },
@@ -31054,6 +32167,11 @@ function renderMobileFittingMenu() {
       label: "Roll groove",
       detail: "Grooved pipe end / 0 kg",
       action: () => placeContextFitting("rollGroove"),
+    },
+    {
+      label: "Threaded pipe end",
+      detail: "Thread preparation on nearest pipe end / 0 kg",
+      action: () => placeContextFitting("threadedEnd"),
     },
     {
       label: "Reducer",
@@ -31551,7 +32669,7 @@ function selectContextHitOnTouch(pointer, event) {
     clearSelectedSegments();
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -31563,7 +32681,7 @@ function selectContextHitOnTouch(pointer, event) {
     clearSelectedSegments();
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -31576,7 +32694,7 @@ function selectContextHitOnTouch(pointer, event) {
     clearSelectedSegments();
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -31589,7 +32707,7 @@ function selectContextHitOnTouch(pointer, event) {
     state.activePoint = state.selectedPoint;
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
   }
 }
 
@@ -31915,6 +33033,7 @@ function evenlySpacedSocketPositions(count, minT, maxT) {
 function fittingActionLabel(type) {
   if (type === "flange") return "flange";
   if (type === "rollGroove") return "roll groove";
+  if (type === "threadedEnd") return "threaded pipe end";
   if (type === "valve") return "valve";
   if (type === "weld") return "weld";
   if (type === "reducer") return "reducer";
@@ -31926,6 +33045,7 @@ function fittingModeText(fittingData) {
   const fitting = fittingData?.fitting ?? fittingData;
   if (fitting?.type === "flange") return `${fittingFlangeMode(fitting)} / ${flangeStandardLabel(fittingFlangeStandard(fitting))}`;
   if (fitting?.type === "rollGroove") return "0 kg roll groove";
+  if (fitting?.type === "threadedEnd") return "0 kg threaded end preparation";
   if (fitting?.type === "socket") return `NB ${fittingSocketSizeNb(fitting)} socket / ${formatAngle(fittingSocketAngle(fitting))} deg`;
   return fittingData?.weightSource ?? "estimated";
 }
@@ -32191,7 +33311,7 @@ async function editSegmentLengthFromDimensionSource(segment, options = {}) {
   } else {
     setSelectedSegmentLength(text);
   }
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
   return true;
 }
 
@@ -32866,7 +33986,7 @@ function finishBoxSelect(event) {
     const last = selectedSegments[selectedSegments.length - 1];
     state.activePoint = last.to;
     state.selectedPoint = selectedSegments.length === 1 ? last.to : null;
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
   } else {
     state.selectedPoint = null;
   }
@@ -33219,7 +34339,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
       state.selectedMeasurement = null;
       clearSelectedSegments();
       updateAll({ save: false });
-      showMobilePanel("inspector");
+      revealInspectorForSelection();
       return;
     }
     cancelTouchContextPress();
@@ -33235,7 +34355,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
       state.selectedMeasurement = null;
       clearSelectedSegments();
       updateAll({ save: false });
-      showMobilePanel("inspector");
+      revealInspectorForSelection();
       return;
     }
     beginSocketDrag(event, fittingHit, pointer);
@@ -33270,7 +34390,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     state.selectedPoint = null;
     clearSelectedSegments();
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -33283,7 +34403,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     state.selectedNote = null;
     state.selectedMeasurement = null;
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -33303,7 +34423,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   if (state.activeTool === "select") {
     state.selectedFitting = event.shiftKey || event.ctrlKey || event.metaKey ? null : fittingAtHit ? fittingAtHit.id : null;
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -33824,9 +34944,6 @@ window.addEventListener("resize", () => {
   schedulePreviewStabilize();
   redrawLoadPlanIfOpen();
   renderDrawingAssistant();
-  if (!isTabletLayout()) {
-    setInspectorDrawerOpen(appMode === "review" || appMode === "export" || hasInspectorSelection());
-  }
 });
 window.addEventListener("blur", () => setShiftAngleSnap(false));
 document.addEventListener("scroll", handleDocumentScrollForContextMenu, true);

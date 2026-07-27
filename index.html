@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=309" />
+    <link rel="stylesheet" href="./styles.css?v=314" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -399,6 +399,10 @@
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Side tools</span>
                   </button>
+                  <button class="icon-button labeled" id="resetWorkspaceLayoutButton" type="button" title="Close temporary panels and restore the drawing workspace" aria-label="Reset workspace layout">
+                    <svg><use href="#icon-reset"></use></svg>
+                    <span>Reset layout</span>
+                  </button>
                   <button class="icon-button labeled save-action" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Defaults</span>
@@ -572,7 +576,10 @@
               <strong>Inspector</strong>
               <small id="inspectorModeHint">Draw lengths, angles and selected properties</small>
             </div>
-            <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close inspector">Close</button>
+            <div class="sheet-header-actions">
+              <button class="sheet-switch-button" id="inspectorOpenPreviewButton" type="button" aria-label="Switch from Details to 3D preview">3D</button>
+              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close inspector">Close</button>
+            </div>
           </div>
           <div class="inspector-tabs" role="tablist" aria-label="Inspector views">
             <button class="active" data-inspector-tab="properties" data-mode-tabs="draw edit" type="button">Properties</button>
@@ -750,14 +757,11 @@
               <label class="preview-panel-mode">
                 <span>3D view</span>
                 <select id="previewModePanelSelect" aria-label="3D preview style">
+                  <option value="tricolor">Tri-colour by pipe size</option>
+                  <option value="illustrated">Illustrated workshop</option>
                   <option value="carbon">Realistic 3D</option>
-                  <option value="workshop">Workshop model</option>
-                  <option value="black">Carbon dark</option>
-                  <option value="stainless">Stainless silver</option>
-                  <option value="red">Painted red</option>
                   <option value="ghost">Transparent</option>
                   <option value="outline">Fabrication outline</option>
-                  <option value="cad">CAD green line</option>
                 </select>
               </label>
               <div class="preview-nav" aria-label="3D navigation">
@@ -782,6 +786,7 @@
                 <span>3D labels</span>
               </label>
               <span class="pill" id="spoolStats">0 runs</span>
+              <button class="sheet-switch-button" id="previewOpenInspectorButton" type="button" aria-label="Switch from 3D preview to Details">Details</button>
               <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close 3D preview">Close</button>
             </div>
           </div>
@@ -789,6 +794,7 @@
             <canvas id="threeCanvas" hidden></canvas>
             <canvas id="fallbackCanvas"></canvas>
             <div class="preview-label-layer" id="previewLabelLayer" aria-hidden="true"></div>
+            <div class="preview-size-colour-legend" id="previewSizeColourLegend" aria-label="Pipe size colour key" hidden></div>
           </div>
           <div class="preview-float-resize" id="previewFloatResize" aria-hidden="true"></div>
         </section>
@@ -1496,7 +1502,7 @@
                 </article>
                 <article>
                   <strong>Add fittings</strong>
-                  <p>Press and hold on a pipe run or pipe end. Use Add fitting for flanges, roll grooves, reducers and sockets.</p>
+                  <p>Press and hold on a pipe run or pipe end. Use Add fitting for flanges, roll grooves, threaded pipe ends, reducers and sockets.</p>
                 </article>
                 <article>
                   <strong>Move sockets and dimensions</strong>
@@ -1578,7 +1584,7 @@
                 </article>
                 <article>
                   <strong>Flanges and grooves</strong>
-                  <p>Right-click or long-press a pipe end to add a single flange, double flange or roll groove. Existing flanges can be changed from the flange pick menu.</p>
+                  <p>Right-click or long-press a pipe end to add a single flange, double flange, roll groove or threaded pipe end. Existing flanges can be changed from the flange pick menu.</p>
                 </article>
                 <article>
                   <strong>Sockets</strong>
@@ -1631,7 +1637,7 @@
                 </article>
                 <article>
                   <strong>Takeoff list</strong>
-                  <p>The takeoff list groups pipes and fittings by size and type, including flange standards, tees, bends, reducers, sockets and roll grooves.</p>
+                  <p>The takeoff list groups pipes and fittings by size and type, including flange standards, tees, bends, reducers, sockets, roll grooves and threaded pipe ends.</p>
                 </article>
                 <article>
                   <strong>Weight notes</strong>
@@ -1734,6 +1740,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=309"></script>
+    <script defer src="./app.js?v=314"></script>
   </body>
 </html>
