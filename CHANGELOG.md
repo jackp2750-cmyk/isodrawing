@@ -1,6 +1,15 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.14`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.15`.
+
+## v3.15 - Atlas Fitting Calculation Audit
+
+- Corrected 45-degree long-radius pipe elbow deductions to use Atlas/ASME B16.9 centre-to-end dimension B instead of deriving them from the 90-degree radius.
+- Added an independent regression check for a 1000 mm set: set × √2 travel, two published 45-degree elbow deductions, and the resulting angled cut length.
+- Corrected the carbon fitting-weight table so DN15 no longer treats a stub-end value as a reducer weight and DN20 uses the published 0.06 kg reducer value.
+- Rechecked pipe tee centre-to-end and reducer face-to-face dimensions through DN300 against the supplied Atlas manual.
+- Kept welded branch take-offs and sanitary tube fitting dimensions explicitly separate from the ASME B16.9 pipe tables, with issue-review warnings requiring their workshop or supplier dimensions to be confirmed.
+- Updated the PWA cache to `spoolmate-v315`.
 
 ## v3.14 - Focused Jobs Dashboard
 

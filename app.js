@@ -347,7 +347,7 @@ const JOB_DASHBOARD_FILTER_KEY = "spoolmate-job-dashboard-filter-v1";
 const JOB_DASHBOARD_PINS_KEY = "spoolmate-job-dashboard-pins-v1";
 const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.14";
+const APP_VERSION = "v3.15";
 const APP_BUILD_DATE = "2026-07-27";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -1276,8 +1276,8 @@ const PROJECT_INFO_DEFAULT = {
 };
 const ATLAS_BUTTWELD_WEIGHTS = {
   carbon40: {
-    15: { elbow90: 0.08, elbow45: 0.04, reducer: 0.12, tee: 0.09 },
-    20: { elbow90: 0.11, elbow45: 0.06, reducer: 0.15, tee: 0.13 },
+    15: { elbow90: 0.08, elbow45: 0.04, tee: 0.09 },
+    20: { elbow90: 0.11, elbow45: 0.06, reducer: 0.06, tee: 0.13 },
     25: { elbow90: 0.16, elbow45: 0.08, reducer: 0.12, tee: 0.25 },
     32: { elbow90: 0.26, elbow45: 0.13, reducer: 0.16, tee: 0.43 },
     40: { elbow90: 0.37, elbow45: 0.19, reducer: 0.25, tee: 0.61 },
@@ -1397,6 +1397,27 @@ const TEE_TAKEOFF_MM = {
   200: 178,
   250: 216,
   300: 254,
+};
+// ASME B16.9 long-radius 45 degree elbow centre-to-end dimension B,
+// published in the Atlas carbon and stainless pipe fitting tables.
+// Keep this separate from the 90 degree radius A: A * tan(22.5 degrees)
+// does not reproduce the standard fitting's published B dimension.
+const ELBOW_45_TAKEOFF_MM = {
+  15: 16,
+  20: 19,
+  25: 22,
+  32: 25,
+  40: 29,
+  50: 35,
+  65: 44,
+  80: 51,
+  90: 57,
+  100: 64,
+  125: 79,
+  150: 95,
+  200: 127,
+  250: 159,
+  300: 190,
 };
 const REDUCER_LENGTH_MM = {
   6: 38,
@@ -3413,11 +3434,9 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
   const offsetElbows = quantities.elbows.filter((elbow) =>
     elbow.firstSegmentIndex === offsetSegment?.index || elbow.secondSegmentIndex === offsetSegment?.index
   );
-  const expectedTakeoff = offsetSegment
-    ? offsetElbows.reduce((sum, elbow) =>
-      sum + (elbow.firstSegmentIndex === offsetSegment.index ? elbow.firstTakeoffMm : elbow.secondTakeoffMm),
-    0)
-    : 0;
+  const offsetSize = offsetSegment ? pipeSizeForSegment(offsetSegment) : null;
+  const atlasElbowTakeoff = offsetSize ? ELBOW_45_TAKEOFF_MM[offsetSize.nb] : null;
+  const expectedTakeoff = Number.isFinite(atlasElbowTakeoff) ? atlasElbowTakeoff * 2 : 0;
   const expectedCutLength = Math.max(0, actualTravel - expectedTakeoff);
   const measurementCount = Array.isArray(state.measurements) ? state.measurements.length : 0;
   const passed =
@@ -3425,8 +3444,15 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
     Math.abs(angle - 45) < 0.001 &&
     Math.abs(setMm - 1000) <= 1 &&
     Math.abs(actualTravel - expectedTravel) <= 2 &&
+    Number.isFinite(atlasElbowTakeoff) &&
     offsetElbows.length === 2 &&
     offsetElbows.every((elbow) => Math.abs(elbow.bend - 45) < 0.01) &&
+    offsetElbows.every((elbow) => {
+      const takeoff = elbow.firstSegmentIndex === offsetSegment.index
+        ? elbow.firstTakeoffMm
+        : elbow.secondTakeoffMm;
+      return Math.abs(Number(takeoff) - atlasElbowTakeoff) < 0.001;
+    }) &&
     Math.abs(Number(offsetQuantity?.centrelineMm) - actualTravel) < 0.001 &&
     Math.abs(Number(offsetQuantity?.bendTakeoffMm) - expectedTakeoff) < 0.001 &&
     Math.abs(Number(offsetQuantity?.cutLengthMm) - expectedCutLength) < 0.001 &&
@@ -3436,7 +3462,7 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
     definition.sampleKey,
     passed,
     `Set ${formatLength(setMm)} mm; true travel ${formatLength(actualTravel)} mm; ` +
-      `two 45 deg take-offs ${formatLength(expectedTakeoff)} mm; angled cut ${formatLength(offsetQuantity?.cutLengthMm ?? 0)} mm.`,
+      `two Atlas 45 deg B take-offs ${formatLength(expectedTakeoff)} mm; angled cut ${formatLength(offsetQuantity?.cutLengthMm ?? 0)} mm.`,
   );
 }
 
@@ -8362,7 +8388,19 @@ function reducerLengthMm(firstSize, secondSize) {
 
 function bendTakeoffMm(segment, bendDegrees) {
   const size = pipeSizeForSegment(segment);
-  return size.lrRadius * Math.tan((normalizeBendAngle(bendDegrees) * Math.PI / 180) / 2);
+  const bend = normalizeBendAngle(bendDegrees);
+  if (!isTubePipeSize(size)) {
+    if (Math.abs(bend - 45) < 0.5 && Number.isFinite(ELBOW_45_TAKEOFF_MM[size.nb])) {
+      return ELBOW_45_TAKEOFF_MM[size.nb];
+    }
+    if (Math.abs(bend - 90) < 0.5 && Number.isFinite(size.lrRadius)) {
+      return size.lrRadius;
+    }
+  }
+  // Non-standard pipe angles and sanitary tube bends do not have an explicit
+  // centre-to-end table in the supplied Atlas manual, so retain the geometric
+  // centre-line estimate rather than presenting it as an Atlas dimension.
+  return size.lrRadius * Math.tan((bend * Math.PI / 180) / 2);
 }
 
 function largerPipeSize(firstSegment, secondSegment) {
@@ -10583,6 +10621,7 @@ function preIssueChecklist() {
   const project = normalizeProjectInfo(state.projectInfo);
   const health = drawingHealthItems();
   const segmentData = segments();
+  const connectionData = nodeConnections(segmentData);
   const production = normalizeProductionInfo(state.productionInfo);
   const welds = synchronizeWeldRegister(state);
   const projectFields = [
@@ -10626,6 +10665,26 @@ function preIssueChecklist() {
     { type: "health" },
     item,
   ));
+  const dimensionSourceWarnings = [
+    segmentData.some((segment) => isTubePipeSize(pipeSizeForSegment(segment)))
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "Sanitary tube fitting dimensions need supplier confirmation",
+          "The supplied Atlas manual verifies AS 1528.3 tube fitting weights but does not publish bend centre-to-end, tee centre-to-end or reducer face-to-face dimensions. Confirm the selected supplier dimensions before issue.",
+        )
+      : null,
+    [...connectionData.entries()].some(([nodeIndex, connected]) =>
+      connected.length >= 3 && nodeConnectionType(nodeIndex) === "branch"
+    )
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "Fabricated branch take-off uses a workshop estimate",
+          "Atlas/ASME B16.9 dimensions cover manufactured tees, not welded-on branches. Confirm the branch saddle and cut allowance against the workshop procedure before issue.",
+        )
+      : null,
+  ].filter(Boolean);
   const weldFindings = weldReadyIssueFindings(welds);
   const productionBlockers = production.hold
     ? [readyIssueFinding(
@@ -10668,6 +10727,7 @@ function preIssueChecklist() {
   const warnings = [
     ...projectWarnings,
     ...drawingWarnings,
+    ...dimensionSourceWarnings,
     ...weldFindings.warnings,
     ...productionWarnings,
   ];
@@ -10678,6 +10738,7 @@ function preIssueChecklist() {
     health,
     errors: healthErrors,
     healthWarnings,
+    dimensionSourceWarnings,
     acknowledged: health.filter((item) => item.acknowledged),
     projectBlockers,
     projectWarnings,
@@ -17837,7 +17898,7 @@ function ensureProjectLibraryDashboardShell() {
     title.textContent = "Job dashboard";
     projectLibrarySubtitle = document.createElement("small");
     projectLibrarySubtitle.id = "projectLibrarySubtitle";
-    projectLibrarySubtitle.textContent = "Use the production board or open a job folder, then tap a spool drawing.";
+    projectLibrarySubtitle.textContent = "Start with jobs needing attention, then open one job to see its spools.";
     headerText.append(title, projectLibrarySubtitle);
     header.append(headerText);
     card.insertBefore(header, projectLibraryList);
@@ -24726,9 +24787,9 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
       ? !hasActiveCloudLicense()
         ? "Cloud projects are read only. You can open, review and export them; upgrade to save changes."
         : activeCompanyIsApproved()
-        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Use the production board or open a job folder.`
-        : "Projects are saved to your SpoolMate cloud account. Use the production board or open a job folder."
-      : "Projects are saved on this device/browser. Use the production board or open a job folder.";
+        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Start with jobs needing attention, then open one job.`
+        : "Projects are saved to your SpoolMate cloud account. Start with jobs needing attention, then open one job."
+      : "Projects are saved on this device/browser. Start with jobs needing attention, then open one job.";
   }
   projectLibraryList.innerHTML = "";
 

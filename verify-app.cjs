@@ -190,6 +190,17 @@ assert(
     /expectedCutLength/.test(app),
   "45 degree offset regression does not verify true travel, both bend take-offs and final cut length",
 );
+assert(
+  /function\s+projectJobsOverview\s*\(/.test(app) &&
+    /function\s+projectJobOverviewRow\s*\(/.test(app) &&
+    /function\s+toggleProjectLibraryJobPin\s*\(/.test(app) &&
+    /data-project-library-action="job-filter"/.test(app) &&
+    /data-project-library-action="job-page"/.test(app) &&
+    /windowCard\.append\(projectProductionBoard\(folder\.projects\)\)/.test(app) &&
+    /\.job-overview-row/.test(css) &&
+    /@media\s*\(max-width:\s*720px\)[\s\S]*?\.job-overview-open/.test(css),
+  "Focused Jobs overview, job-level production board, or responsive controls are incomplete",
+);
 const htmlThemeColor = html.match(/<meta\s+name="theme-color"\s+content="([^"]+)"/)?.[1];
 assert(Boolean(htmlThemeColor), "HTML theme colour is missing");
 assert(manifest.theme_color === htmlThemeColor, "Manifest and HTML theme colours differ");
@@ -709,11 +720,46 @@ try {
   const specs = constValue(app, "PIPE_SPECS");
   const sizes = constValue(app, "PIPE_SIZES");
   const teeTakeoffs = constValue(app, "TEE_TAKEOFF_MM");
+  const elbow45Takeoffs = constValue(app, "ELBOW_45_TAKEOFF_MM");
   const reducerLengths = constValue(app, "REDUCER_LENGTH_MM");
+  const buttweldWeights = constValue(app, "ATLAS_BUTTWELD_WEIGHTS");
   const stainlessReducers = constValue(app, "ATLAS_STAINLESS10_REDUCER_WEIGHTS");
   const flangeTables = constValue(app, "FLANGE_DRILLING_TABLES");
   const pipeSizes = sizes.filter((size) => size.kind !== "tube");
   const tubeSizes = sizes.filter((size) => size.kind === "tube");
+  const atlasPipe45Dimensions = {
+    15: 16, 20: 19, 25: 22, 32: 25, 40: 29, 50: 35, 65: 44, 80: 51,
+    90: 57, 100: 64, 125: 79, 150: 95, 200: 127, 250: 159, 300: 190,
+  };
+  const atlasPipe90Dimensions = {
+    15: 38, 20: 38, 25: 38, 32: 48, 40: 57, 50: 76, 65: 95, 80: 114,
+    90: 133, 100: 152, 125: 190, 150: 229, 200: 305, 250: 381, 300: 457,
+  };
+  const atlasTeeDimensions = {
+    15: 25, 20: 29, 25: 38, 32: 48, 40: 57, 50: 64, 65: 76, 80: 86,
+    90: 95, 100: 105, 125: 124, 150: 143, 200: 178, 250: 216, 300: 254,
+  };
+  const atlasReducerDimensions = {
+    15: 38, 20: 38, 25: 51, 32: 51, 40: 64, 50: 76, 65: 89, 80: 89,
+    90: 102, 100: 102, 125: 127, 150: 140, 200: 152, 250: 178, 300: 203,
+  };
+  const atlasCarbonWeights = {
+    15: { elbow90: 0.08, elbow45: 0.04, tee: 0.09 },
+    20: { elbow90: 0.11, elbow45: 0.06, reducer: 0.06, tee: 0.13 },
+    25: { elbow90: 0.16, elbow45: 0.08, reducer: 0.12, tee: 0.25 },
+    32: { elbow90: 0.26, elbow45: 0.13, reducer: 0.16, tee: 0.43 },
+    40: { elbow90: 0.37, elbow45: 0.19, reducer: 0.25, tee: 0.61 },
+    50: { elbow90: 0.66, elbow45: 0.33, reducer: 0.38, tee: 0.88 },
+    65: { elbow90: 1.29, elbow45: 0.69, reducer: 0.73, tee: 1.74 },
+    80: { elbow90: 2.04, elbow45: 1.02, reducer: 0.94, tee: 2.41 },
+    90: { elbow90: 2.94, elbow45: 1.47, reducer: 1.19, tee: 3.26 },
+    100: { elbow90: 3.84, elbow45: 1.92, reducer: 1.45, tee: 4.12 },
+    125: { elbow90: 6.48, elbow45: 3.24, reducer: 2.5, tee: 6.54 },
+    150: { elbow90: 9.94, elbow45: 4.97, reducer: 3.6, tee: 9.58 },
+    200: { elbow90: 20.1, elbow45: 10.1, reducer: 5.7, tee: 17.9 },
+    250: { elbow90: 35.4, elbow45: 17.7, reducer: 9.6, tee: 30.4 },
+    300: { elbow90: 52, elbow45: 26, reducer: 13.6, tee: 43.6 },
+  };
 
   assert(new Set(sizes.map((size) => size.nb)).size === sizes.length, "Pipe/tube size keys are not unique");
   for (const size of pipeSizes) {
@@ -721,11 +767,39 @@ try {
     assert(size.kgPerM40 > 0 && size.kgPerM10 > 0, `Missing pipe weight for NB ${size.nb}`);
     assert(teeTakeoffs[size.nb] > 0, `Missing tee takeoff for NB ${size.nb}`);
     assert(reducerLengths[size.nb] > 0, `Missing reducer length for NB ${size.nb}`);
+    if (Object.hasOwn(atlasPipe45Dimensions, size.nb)) {
+      assert(
+        elbow45Takeoffs[size.nb] === atlasPipe45Dimensions[size.nb],
+        `Atlas 45 degree elbow takeoff differs for NB ${size.nb}`,
+      );
+      assert(size.lrRadius === atlasPipe90Dimensions[size.nb], `Atlas 90 degree elbow takeoff differs for NB ${size.nb}`);
+      assert(teeTakeoffs[size.nb] === atlasTeeDimensions[size.nb], `Atlas tee takeoff differs for NB ${size.nb}`);
+      assert(reducerLengths[size.nb] === atlasReducerDimensions[size.nb], `Atlas reducer length differs for NB ${size.nb}`);
+      assert(
+        JSON.stringify(buttweldWeights.carbon40[size.nb]) === JSON.stringify(atlasCarbonWeights[size.nb]),
+        `Atlas carbon fitting weights differ for NB ${size.nb}`,
+      );
+    }
     const carbonCalculated = specs.carbon40.weightCoefficient * (size.od - size.wall40) * size.wall40;
     const stainlessCalculated = specs.stainless10.weightCoefficient * (size.od - size.wall10) * size.wall10;
     assert(Math.abs(carbonCalculated - size.kgPerM40) <= 0.08, `Carbon kg/m is inconsistent for NB ${size.nb}`);
     assert(Math.abs(stainlessCalculated - size.kgPerM10) <= 0.08, `Stainless kg/m is inconsistent for NB ${size.nb}`);
   }
+
+  assert(!Object.hasOwn(buttweldWeights.carbon40[15], "reducer"), "DN15 carbon reducer must not use the Atlas stub-end weight");
+  assert(buttweldWeights.carbon40[20].reducer === 0.06, "DN20 carbon reducer weight must match the Atlas reducer column");
+  assert(
+    app.includes("ELBOW_45_TAKEOFF_MM[size.nb]"),
+    "45 degree pipe elbows are not using the explicit Atlas centre-to-end table",
+  );
+  assert(
+    app.includes("Sanitary tube fitting dimensions need supplier confirmation"),
+    "Sanitary tube fitting dimension source warning is missing",
+  );
+  assert(
+    app.includes("Fabricated branch take-off uses a workshop estimate"),
+    "Fabricated branch dimension source warning is missing",
+  );
 
   for (const size of tubeSizes) {
     assert(size.od > size.wallTube * 2, `Invalid stainless tube wall at OD ${size.od}`);
