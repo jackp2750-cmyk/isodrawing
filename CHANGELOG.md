@@ -1,6 +1,73 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.15`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.22`.
+
+## v3.22 - Correct Prepared-End QA
+
+- Fixed roll-grooved pipe ends being incorrectly reported as open because their visual groove is drawn slightly inset from the actual endpoint.
+- Health checks now use the fitting's true snapped endpoint while preserving the inset roll-groove appearance.
+- Added a built-in regression check covering roll-grooved, flanged and threaded pipe ends.
+- Updated the PWA cache to `spoolmate-v322`.
+
+## v3.21 - Searchable Command and Tool Menu
+
+- Added one searchable command palette inside Menu for drawing tools, fittings, screens, fabrication data, exports, help and diagnostics.
+- Added workshop-language aliases including reducer, Victaulic, thread, NDT, WPS, fab PDF and 45 offset so users do not need to know the exact interface wording.
+- Added `Ctrl+K` / `Command+K`, arrow-key and Enter operation, with large touch results and a compact phone/tablet layout.
+- Restricted actions remain visible with a clear role explanation instead of failing silently.
+- Search results open the relevant tool, screen or inspector section while preserving the current spool workspace.
+- Updated the PWA cache to `spoolmate-v321`.
+
+## v3.20 - Save Recovery, Role Clarity and Direct QA Fixes
+
+- Cloud status now displays the exact last-saved time instead of a generic saved label.
+- Added a persistent device-side offline queue for cloud drawing changes, including automatic retry when connectivity returns.
+- Failed or queued cloud status is now a one-click recovery control; a local backup is made before a manual retry and failed copies remain queued.
+- Added a clear access notice for restricted business roles without adding visual noise for unrestricted drawing/checking roles.
+- Corrected role enforcement so Designers cannot approve or issue, while Workshop users can update production and weld records without gaining drawing-edit access.
+- Disabled workflow, status, weld and production controls now explain which role can perform the action.
+- Every Ready-to-Issue blocker now has one prominent `Fix:` button that opens the exact problem, including focusing the current production card in Jobs.
+- Updated the PWA cache to `spoolmate-v320`.
+
+## v3.19 - Predictable Navigation and Multi-Spool Windows
+
+- Added a universal location strip to Drawing, Home, Jobs, Account and Tutorial screens showing the active workspace, job, spool, revision and production status.
+- Added a direct Back to drawing action on secondary screens.
+- Returning from Jobs, Account, Help, Tutorials or 3D now restores the same spool, drawing zoom and pan, selection, active tool, inspector tab, open surface and Focus mode.
+- Added New window actions for saved spools so Jobs can remain open while different spools are worked on side by side, with job/spool browser-tab titles to keep them identifiable.
+- Added direct cloud and local spool URLs for those separate windows, with a clear fallback when browser pop-up protection blocks them.
+- Updated responsive layout so the location strip remains compact and horizontally accessible on phones and tablets.
+- Updated the PWA cache to `spoolmate-v319`.
+
+## v3.18 - Personal and Business Workspaces
+
+- Added a permanent Personal/Business workspace switcher so private and business jobs no longer appear mixed together.
+- Added Business account setup during signup and automatic creation after email confirmation.
+- Business subscriptions now belong to the business and apply to approved members independently of their Personal trial.
+- Added five included people per Business workspace, with pending invitations reserving seats and configurable paid extra-seat entitlement.
+- Added Owner, Admin, Designer, Checker, Workshop and Viewer role choices.
+- Business spool records now survive an employee account deletion by retaining business ownership.
+- Updated collaboration, project, photo and message policies to use the active workspace licence.
+- Updated the PWA cache to `spoolmate-v318`.
+
+## v3.17 - Selectable Weld-Gap Cut Allowance
+
+- Added a project-level 1.6 mm or 2.4 mm weld-gap option, defaulting to 2.4 mm.
+- Deducts the selected gap once at each pipe end that meets an elbow, tee, fabricated branch outlet, reducer or end flange; open/plain, roll-grooved and threaded pipe ends receive no weld-gap deduction.
+- De-duplicates combined fitting arrangements at one pipe end and keeps fabricated-branch main pipe continuous, so a single pipe end is never charged twice.
+- Shows `Weld gap` explicitly in run details, selection properties, take-off totals, Ready to Issue and every fabrication PDF cut table/summary.
+- Expanded the branch and 45-degree offset self-tests to verify welded-end counts, gap totals and final cut lengths.
+- Updated the PWA cache to `spoolmate-v317`.
+
+## v3.16 - Fitting Data Profiles
+
+- Added a saved Fitting Data Profile to project details for Atlas/ASME B16.9 pipe, AS 1528.3 sanitary tube and fabricated workshop branches.
+- Automatically follows the selected material when a project still uses the previous material's default profile, while preserving deliberate project choices.
+- Added an optional supplier, workshop procedure or approved-detail reference.
+- Shows the profile, reference and Verified dimensions or Estimate review status in Ready to Issue and fabrication PDFs.
+- Warns when the selected profile does not match the drawing, when supplier tube dimensions are required, when fabricated branch allowances need workshop confirmation, or when an elbow deduction falls outside the verified 45/90-degree tables.
+- Added an independent DN25, DN50, DN100, DN150 and DN300 45-degree offset size-matrix regression test.
+- Updated the PWA cache to `spoolmate-v316`.
 
 ## v3.15 - Atlas Fitting Calculation Audit
 

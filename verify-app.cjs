@@ -14,6 +14,7 @@ const REQUIRED_FILES = [
   "supabase-setup.sql",
   "supabase-migration-v295-trial-access.sql",
   "supabase-migration-v296-ai-helper.sql",
+  "supabase-migration-v318-business-workspaces.sql",
   "supabase/functions/delete-account/index.ts",
   "supabase/functions/ai-help/index.ts",
 ];
@@ -94,6 +95,7 @@ const changelog = read("CHANGELOG.md");
 const supabaseSql = read("supabase-setup.sql");
 const trialAccessMigration = read("supabase-migration-v295-trial-access.sql");
 const aiHelperMigration = read("supabase-migration-v296-ai-helper.sql");
+const businessWorkspaceMigration = read("supabase-migration-v318-business-workspaces.sql");
 const deleteAccountFunction = read("supabase/functions/delete-account/index.ts");
 const aiHelpFunction = read("supabase/functions/ai-help/index.ts");
 
@@ -163,6 +165,59 @@ assert(serviceWorker.includes(`./styles.css?v=${assetVersion}`), "Service worker
 assert(readme.includes(`Current app version: \`${appVersion}\``), "README current version differs from app.js");
 assert(changelog.includes(`Current app version: \`${appVersion}\``), "CHANGELOG current version differs from app.js");
 assert(
+  html.includes('id="actionCommandInput"')
+    && html.includes('id="actionCommandResults"')
+    && app.includes("const ACTION_COMMANDS = [")
+    && app.includes('id: "reducer"')
+    && app.includes('id: "weld-register"')
+    && app.includes('id: "export-pdf"')
+    && app.includes("function matchingActionCommands")
+    && app.includes("function runActionCommand")
+    && app.includes('event.key.toLowerCase() === "k"')
+    && css.includes(".action-command-result")
+    && css.includes("max-height: min(52dvh, 420px)"),
+  "Searchable command palette or keyboard/touch behavior is incomplete",
+);
+assert(
+  /function\s+endpointHasFinish\s*\([\s\S]*?endpointSnappedFittingT\(segment, fitting\)/.test(app)
+    && app.includes('key: "preparedEnds"')
+    && app.includes("function regressionAutoCheckPreparedEnds"),
+  "Prepared roll-grooved, flanged and threaded ends are not protected from open-end warnings",
+);
+assert(
+  matches(html, /\bdata-workspace-location\b/g).length >= 6 &&
+    /function\s+captureTemporaryWorkspaceNavigation\s*\(/.test(app) &&
+    /function\s+restoreTemporaryWorkspaceNavigation\s*\(/.test(app) &&
+    /drawingViewOffset:\s*\{\s*\.\.\.drawingViewOffset\s*\}/.test(app) &&
+    /surfaceState:\s*captureWorkspaceSurfaceState\(\)/.test(app) &&
+    /function\s+renderWorkspaceLocationStrips\s*\(/.test(app) &&
+    /data-workspace-return/.test(app),
+  "Universal location strip or exact workspace-navigation restoration is incomplete",
+);
+assert(
+    /function\s+openProjectInNewWindow\s*\(/.test(app) &&
+    /function\s+updateWorkspaceDocumentTitle\s*\(/.test(app) &&
+    /url\.searchParams\.set\("localProject",\s*id\)/.test(app) &&
+    /data-open-project-window/.test(app) &&
+    /params\.get\("localProject"\)/.test(app),
+  "Separate local/cloud spool-window support is incomplete",
+);
+assert(
+  html.includes('id="workspaceSwitcher"') &&
+    html.includes('id="authAccountTypeInput"') &&
+    html.includes('id="businessSeatSummary"') &&
+    /const\s+BUSINESS_INCLUDED_SEATS\s*=\s*5/.test(app) &&
+    /function\s+renderWorkspaceChoices\s*\(/.test(app) &&
+    /function\s+completePendingBusinessSignup\s*\(/.test(app) &&
+    /included_seats\s+integer/.test(businessWorkspaceMigration) &&
+    /extra_seats\s+integer/.test(businessWorkspaceMigration) &&
+    /create or replace function public\.enforce_company_seat_capacity/.test(businessWorkspaceMigration) &&
+    /on delete set null/.test(businessWorkspaceMigration) &&
+    /\.is\("company_id", null\)/.test(deleteAccountFunction) &&
+    /\.in\("company_id", ownedCompanyIds\)/.test(deleteAccountFunction),
+  "Personal/Business workspace switching, five-seat entitlement or business-owned project protection is incomplete",
+);
+assert(
   /function\s+regressionLargeOutletTeeState\s*\(/.test(app) &&
     /function\s+regressionAutoCheckLargeOutletTee\s*\(/.test(app) &&
     /const\s+largestEntry\s*=\s*\[\.\.\.entries\]\.sort/.test(app) &&
@@ -186,9 +241,24 @@ assert(
 assert(
   /offsetElbows\.length\s*===\s*2/.test(app) &&
     /offsetElbows\.every\(\(elbow\)\s*=>\s*Math\.abs\(elbow\.bend\s*-\s*45\)/.test(app) &&
+    /expectedWeldGap\s*=\s*projectWeldGapMm\(\)\s*\*\s*2/.test(app) &&
+    /offsetQuantity\?\.weldEndCount\)\s*===\s*2/.test(app) &&
     /offsetQuantity\?\.cutLengthMm/.test(app) &&
     /expectedCutLength/.test(app),
-  "45 degree offset regression does not verify true travel, both bend take-offs and final cut length",
+  "45 degree offset regression does not verify true travel, both bend take-offs, both weld gaps and final cut length",
+);
+assert(
+  /const\s+WELD_GAP_CHOICES_MM\s*=\s*new\s+Set\(\[1\.6,\s*2\.4\]\)/.test(app) &&
+    /function\s+weldedSegmentEndCounts\s*\(/.test(app) &&
+    /weldedEnds\.add\(`\$\{segmentIndex\}:\$\{Number\(nodeIndex\)\}`\)/.test(app) &&
+    /fitting\?\.type\s*!==\s*"flange"/.test(app) &&
+    /flangeEndsHaveOneGap/.test(app) &&
+    /centrelineMm\s*-\s*bendTakeoffMmTotal\s*-\s*weldGapMm/.test(app) &&
+    /Open pipe ends receive no weld-gap deduction/.test(app) &&
+    html.includes('id="projectDialogWeldGapMm"') &&
+    html.includes('<option value="1.6">1.6 mm</option>') &&
+    html.includes('<option value="2.4">2.4 mm</option>'),
+  "Selectable per-welded-end gap calculation, de-duplication, open-end rule or project control is incomplete",
 );
 assert(
   /function\s+projectJobsOverview\s*\(/.test(app) &&
@@ -268,6 +338,18 @@ assert(
     /["']Local only["']/.test(app) &&
     /\.cloud-status-pill::before/.test(css),
   "Clear cloud save-state indicator is incomplete",
+);
+assert(
+  /<button[^>]*id="cloudSyncStatus"[^>]*type="button"/.test(html) &&
+    /const\s+CLOUD_SAVE_QUEUE_KEY\s*=/.test(app) &&
+    /function\s+queueCurrentCloudSave\s*\(/.test(app) &&
+    /function\s+retryQueuedCloudSave\s*\(/.test(app) &&
+    /localStorage\.setItem\(CLOUD_SAVE_QUEUE_KEY/.test(app) &&
+    /Queued \/ Retry/.test(app) &&
+    /Saved \$\{formatCloudSaveTime\(cloudLastSavedAt\)/.test(app) &&
+    /retryQueuedCloudSave\(\{\s*automatic:\s*true\s*\}\)/.test(app) &&
+    /\.cloud-status-pill\.queued/.test(css),
+  "Visible last-saved time, offline queue or one-click cloud recovery is incomplete",
 );
 assert(
   /id="homeDashboardRestoreButton"/.test(html) &&
@@ -601,6 +683,19 @@ assert(
   "Ready to Issue gate or focused fix actions are incomplete",
 );
 assert(
+  /id="roleAccessNotice"/.test(html) &&
+    /function\s+currentRoleAccessText\s*\(/.test(app) &&
+    /function\s+currentPermissionRestrictionText\s*\(/.test(app) &&
+    /function\s+updateRoleRestrictedDrawingTools\s*\(/.test(app) &&
+    /!permission\.canIssue/.test(app) &&
+    /!currentDrawingProjectPermission\(\)\.canManageProduction/.test(app) &&
+    /productionOnly:\s*true/.test(app) &&
+    /`Fix:\s*\$\{actionLabel\s*\|\|\s*"Review checks"\}`/.test(app) &&
+    /class="\$\{finding\.severity\s*===\s*"blocker"\s*\?\s*"primary-fix"/.test(app) &&
+    /data-production-project-id/.test(app),
+  "Role-specific controls or single-action QA blocker fixes are incomplete",
+);
+assert(
   /function\s+promptForIssueWarningOverride\s*\(/.test(app) &&
     /Required reason for issuing with warnings/.test(app) &&
     /function\s+recordReadyIssueAudit\s*\(/.test(app) &&
@@ -718,6 +813,7 @@ for (const icon of manifest.icons ?? []) {
 
 try {
   const specs = constValue(app, "PIPE_SPECS");
+  const fittingProfiles = constValue(app, "FITTING_DATA_PROFILES");
   const sizes = constValue(app, "PIPE_SIZES");
   const teeTakeoffs = constValue(app, "TEE_TAKEOFF_MM");
   const elbow45Takeoffs = constValue(app, "ELBOW_45_TAKEOFF_MM");
@@ -760,6 +856,32 @@ try {
     250: { elbow90: 35.4, elbow45: 17.7, reducer: 9.6, tee: 30.4 },
     300: { elbow90: 52, elbow45: 26, reducer: 13.6, tee: 43.6 },
   };
+
+  assert(
+    Object.keys(fittingProfiles).join(",") === "atlasAsmeB169,as1528Supplier,workshopBranch",
+    "Fitting data profiles are missing or out of order",
+  );
+  assert(
+    fittingProfiles.atlasAsmeB169.sourceStatus === "verified" &&
+      fittingProfiles.as1528Supplier.sourceStatus === "supplier confirmation" &&
+      fittingProfiles.workshopBranch.sourceStatus === "workshop confirmation",
+    "Fitting data profile source statuses are incorrect",
+  );
+  assert(html.includes('id="projectDialogFittingProfile"'), "Project fitting data profile selector is missing");
+  assert(html.includes('id="projectDialogFittingProfileReference"'), "Project fitting profile reference input is missing");
+  assert(html.includes('id="projectDialogWeldGapMm"'), "Project weld-gap selector is missing");
+  assert(
+    app.includes('key === "fittingProfile"') && app.includes("normalizeFittingDataProfile(source[key]"),
+    "Fitting profile is not normalized with project data",
+  );
+  assert(app.includes("fittingCalculationSourceSummary"), "Fitting calculation source summary is missing");
+  assert(app.includes('[\"Fitting data\", fittingSource.shortProfileText]'), "Client PDF fitting data row is missing");
+  assert(app.includes('[\"Weld gap\", `${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end'), "Client PDF weld-gap row is missing");
+  assert(app.includes("regressionAutoCheck45OffsetSizeMatrix"), "Multi-size 45 degree offset regression is missing");
+  assert(
+    [25, 50, 100, 150, 300].every((nb) => app.includes(`[${nb}, ${atlasPipe45Dimensions[nb]}]`)),
+    "45 degree offset regression size matrix is incomplete",
+  );
 
   assert(new Set(sizes.map((size) => size.nb)).size === sizes.length, "Pipe/tube size keys are not unique");
   for (const size of pipeSizes) {

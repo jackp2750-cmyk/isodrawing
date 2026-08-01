@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.15`
+Current app version: `v3.22`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -30,6 +30,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Add manual measurements by clicking two points on the drawing.
 - Add and drag text notes.
 - Calculate cut lengths, bend deductions, fitting takeoffs and table-backed or estimated weights.
+- Select a 1.6 mm or 2.4 mm weld gap per welded pipe end; open pipe ends remain undeducted and every cut row labels the gap explicitly.
 - Show the weakest estimated pipe-wall pressure as a tidy drawing note using kPa with bar in brackets.
 - Show drawing checks and click many check warnings to highlight the issue on the drawing.
 - Keep Review and the Checks list open when using Show on drawing; highlighting a finding no longer switches to Edit, Properties or another mobile panel.
@@ -49,15 +50,19 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Follow contextual real-workspace prompts that clear as drawing, exact runs, fittings, selection, saving, checks and export are learned.
 - Finish the tutorial with a live checklist for drawing content, project details, checks, saving and the workshop PDF.
 - Open Jobs on a simplified Today dashboard with Needs attention, My work and Ready next queues; use Full board only when every production stage and field is needed.
+- Keep a compact location strip on every major screen showing the current workspace, job, spool, revision and status, with one-step return to the drawing.
+- Return from Jobs, Account, Help and Tutorials to the same spool, drawing zoom, pan, selection, active tool, Details/3D surface and Focus state.
+- Open a saved spool in a separate browser window or tab while keeping Jobs open, making side-by-side work on multiple spools possible; each tab is titled with its job and spool number.
 - Scan issued fabrication-sheet QR codes with the device camera or a saved QR photo to open the permitted cloud spool traveller.
 - Verify the scanned spool revision before workshop use: historical issued snapshots are shown when available and a clear warning appears if the requested revision cannot be found.
 - Use Ask SpoolMate for instant built-in guidance and, for unfamiliar questions on active accounts, protected AI answers through a Supabase Edge Function. The helper sends only the question, short help history and safe screen/tool context—not drawing geometry, project names, notes or photos.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
-- See cloud save confidence at a glance with saved, unsaved, saving, failed and conflict states.
+- See cloud save confidence at a glance with the exact last-saved time, saving, offline-queued, failed and conflict states; press a failed or queued status once to retry from its protected device copy.
 - Use the startup dashboard to continue drawing, start a new spool, open jobs, load the sample, manage account settings, open help or follow the interactive tool tutorial.
 - Work in four focused modes: Draw for pipe and dimensions, Edit for selection and fittings, Review for checks/workflow/notes/history, and Export for cut lists, BOM and fabrication files.
 - Use the desktop Inspector as an on-demand drawer: it stays closed when nothing is selected, opens for selected pipe/fittings, and gives Cut List, Weights and BOM full-height views.
 - Keep only Save, Jobs, Account, cloud-save state and Menu in the permanent action bar; New spool and theme controls now live in Menu.
+- Press `Ctrl+K` or `Command+K`, or open Menu, to search tools and actions using familiar workshop terms such as reducer, Victaulic, NDT, 45 offset or fab PDF; keyboard, touch and role-restriction states are supported.
 - Keep the desktop canvas dominant with a narrow single-column drawing rail and contextual Details/3D surfaces that close one another.
 - Keep the drawing in place when selecting items on phones and tablets; Details only opens when explicitly requested.
 - Preserve the desktop 3D Float/Dock choice when moving between desktop and touch layouts, while touch devices always use one expanded sheet at a time.
@@ -91,7 +96,13 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Open a job folder to see job-level totals for total, ready check, checked, issued, fabricated, overdue and on-hold spools, plus a clean needs-doing-today list.
 - Use improved daily/weekly Jobs reports with next actions, checking queue, issue/fabrication queue, blockers, assignee workload and recent progress.
 - Add short team/yard notes to production cards and mark notes done so they are cleaned up after one week.
-- Use accounts, trials/licences, company/team projects, project comments and owner/admin/member team permissions through Supabase.
+- Keep a private Personal workspace and switch into approved Business workspaces from the permanent header.
+- Create a Business workspace with five people included (the owner uses one seat); pending invitations reserve seats and billing can add extra-seat entitlement without an app-code change.
+- Give Business members clear Owner, Admin, Designer, Checker, Workshop or Viewer roles, while business jobs remain owned by the business if an employee leaves.
+- Apply the Business licence to all approved members instead of requiring every employee to maintain a separate Personal licence.
+- Restricted business roles see a plain-language access summary in the drawing workspace; disabled controls explain whether Designer, Workshop, Checker, Admin or Owner access is required.
+- Keep Workshop production and weld controls available while drawing/approval actions remain locked, and keep issue controls restricted to Checker, Admin and Owner roles.
+- Resolve every red Ready-to-Issue blocker through one prominent `Fix:` button that opens the exact field, drawing item, weld row, production spool or approval step.
 - Start with a 30-day full cloud trial, see countdown warnings near expiry, and retain read-only open/view/export access to permitted cloud spools after expiry.
 - Switch the Jobs dashboard between cloud projects and projects stored only on the current device.
 - Use a seven-day `grace` licence state for failed-payment recovery without immediately interrupting cloud editing.
@@ -108,6 +119,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - `supabase-setup.sql` - database tables, policies and helper functions for cloud accounts/team projects.
 - `supabase-migration-v295-trial-access.sql` - existing-database migration for expired read-only access, grace periods and hardened cloud writes.
 - `supabase-migration-v296-ai-helper.sql` - private daily AI allowance counters and protected service-role RPCs.
+- `supabase-migration-v318-business-workspaces.sql` - Personal/Business workspace ownership, business licences, roles and five-seat enforcement.
 - `supabase/functions/ai-help/index.ts` - authenticated OpenAI proxy for Ask SpoolMate; the API key stays in Supabase secrets.
 - `verify-app.cjs` - release integrity checks for code, controls, PWA assets, engineering tables and Supabase RPC wiring.
 - `CHANGELOG.md` - current update log.
@@ -216,7 +228,8 @@ With Supabase configured:
 - Users can create accounts and sign in.
 - A trial/licence profile is created in Supabase.
 - Projects can save to the cloud and be opened on other devices.
-- Company/team workspaces can share projects.
+- Personal jobs stay private; Business workspaces share business-owned projects.
+- A Business workspace includes five people and can receive extra paid-seat entitlement.
 - Team members can use a spool conversation with mentions, private workshop photos and resolved messages.
 - Jobs Comms can share general team messages across an approved company.
 - Users can request password-reset emails and securely choose a new password after returning to the app.
@@ -226,11 +239,13 @@ With Supabase configured:
 
 ## Supabase Setup
 
-For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql` and `supabase-migration-v296-ai-helper.sql` as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`.
+For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql`, `supabase-migration-v296-ai-helper.sql` and `supabase-migration-v318-business-workspaces.sql` in that order as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`, followed by `supabase-migration-v318-business-workspaces.sql`.
 
 The v2.95 migration must be applied before publishing the matching frontend. It separates authenticated read access from active-licence write access, adds the seven-day grace-state field and keeps expired cloud data visible without allowing edits. Trial expiry does not delete cloud data.
 
 The v2.96 migration adds private per-user daily AI counters. Trial accounts receive up to 10 AI answers per UTC day; paid, full and grace accounts receive up to 50. Guest and expired users keep the complete built-in helper without creating API cost.
+
+The v3.18 migration separates Personal and Business licences, includes five seats in each Business workspace, reserves seats for pending members, and keeps Business projects attached to the business if their original creator leaves.
 
 Until online billing is connected, activate the owner account or a manually paid customer from the SQL Editor using the UUID shown in Authentication > Users:
 
@@ -247,6 +262,16 @@ update public.profiles
 set license_status = 'grace', grace_ends_at = now() + interval '7 days'
 where id = '<user-uuid>'::uuid;
 ```
+
+Until checkout is connected, add paid Business seats from SQL Editor:
+
+```sql
+update public.companies
+set extra_seats = 3
+where id = '<company-uuid>'::uuid;
+```
+
+This example gives the business eight total seats: five included plus three additional.
 
 In Supabase Auth settings:
 

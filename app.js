@@ -93,7 +93,9 @@ const homeDashboardButton = document.querySelector("#homeDashboardButton");
 const drawingAssistantButton = document.querySelector("#drawingAssistantButton");
 const accountButton = document.querySelector("#accountButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
+const workspaceSwitcher = document.querySelector("#workspaceSwitcher");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
+const roleAccessNotice = document.querySelector("#roleAccessNotice");
 const authDialog = document.querySelector("#authDialog");
 const authDialogForm = document.querySelector("#authDialogForm");
 const authDialogTitle = document.querySelector("#authDialogTitle");
@@ -108,6 +110,10 @@ const authEmailInput = document.querySelector("#authEmailInput");
 const authPasswordInput = document.querySelector("#authPasswordInput");
 const authPasswordConfirmInput = document.querySelector("#authPasswordConfirmInput");
 const authRememberDeviceInput = document.querySelector("#authRememberDeviceInput");
+const authAccountTypeField = document.querySelector("#authAccountTypeField");
+const authAccountTypeInput = document.querySelector("#authAccountTypeInput");
+const authBusinessNameField = document.querySelector("#authBusinessNameField");
+const authBusinessNameInput = document.querySelector("#authBusinessNameInput");
 const authModeHelp = document.querySelector("#authModeHelp");
 const authCloseButton = document.querySelector("#authCloseButton");
 const authSignInButton = document.querySelector("#authSignInButton");
@@ -125,6 +131,8 @@ const accountPlanMessage = document.querySelector("#accountPlanMessage");
 const accountPlanCountdown = document.querySelector("#accountPlanCountdown");
 const accountPlanCapabilities = document.querySelector("#accountPlanCapabilities");
 const accountPlanUpgradeButton = document.querySelector("#accountPlanUpgradeButton");
+const accountWorkspacePanel = document.querySelector("#accountWorkspacePanel");
+const accountWorkspaceList = document.querySelector("#accountWorkspaceList");
 const accountLaunchPanel = document.querySelector("#accountLaunchPanel");
 const accountExportDataButton = document.querySelector("#accountExportDataButton");
 const diagnosticReportButton = document.querySelector("#diagnosticReportButton");
@@ -142,6 +150,7 @@ const teamCreateButton = document.querySelector("#teamCreateButton");
 const teamJoinButton = document.querySelector("#teamJoinButton");
 const teamRefreshButton = document.querySelector("#teamRefreshButton");
 const teamMembersList = document.querySelector("#teamMembersList");
+const businessSeatSummary = document.querySelector("#businessSeatSummary");
 const projectDialog = document.querySelector("#projectDialog");
 const projectDialogForm = document.querySelector("#projectDialogForm");
 const projectDialogTitle = document.querySelector("#projectDialogTitle");
@@ -211,6 +220,8 @@ const themeColorMeta = document.querySelector("meta[name='theme-color']");
 const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
 const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
+const actionCommandInput = document.querySelector("#actionCommandInput");
+const actionCommandResults = document.querySelector("#actionCommandResults");
 const resetWorkspaceLayoutButton = document.querySelector("#resetWorkspaceLayoutButton");
 const tutorialButton = document.querySelector("#tutorialButton");
 const videoTutorialButton = document.querySelector("#videoTutorialButton");
@@ -315,7 +326,11 @@ const projectDialogInputs = {
   revision: document.querySelector("#projectDialogRevision"),
   drawnBy: document.querySelector("#projectDialogDrawnBy"),
   client: document.querySelector("#projectDialogClient"),
+  fittingProfile: document.querySelector("#projectDialogFittingProfile"),
+  fittingProfileReference: document.querySelector("#projectDialogFittingProfileReference"),
+  weldGapMm: document.querySelector("#projectDialogWeldGapMm"),
 };
+const projectDialogFittingProfileHelp = document.querySelector("#projectDialogFittingProfileHelp");
 const mobilePanelScrim = document.querySelector("#mobilePanelScrim");
 const mobilePanelButtons = [...document.querySelectorAll("[data-mobile-panel]")];
 const mobilePanelCloseButtons = [...document.querySelectorAll("[data-mobile-close-panel]")];
@@ -326,6 +341,7 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const CLOUD_SAVE_META_KEY = "spoolmate-cloud-save-meta-v1";
+const CLOUD_SAVE_QUEUE_KEY = "spoolmate-cloud-save-queue-v1";
 const FAB_SHEET_TEMPLATE_KEY = "spoolmate-fab-sheet-template-v1";
 const PROJECT_LIBRARY_FOLDER_STATE_KEY = "isospool-project-library-folder-state-v1";
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
@@ -347,8 +363,8 @@ const JOB_DASHBOARD_FILTER_KEY = "spoolmate-job-dashboard-filter-v1";
 const JOB_DASHBOARD_PINS_KEY = "spoolmate-job-dashboard-pins-v1";
 const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.15";
-const APP_BUILD_DATE = "2026-07-27";
+const APP_VERSION = "v3.22";
+const APP_BUILD_DATE = "2026-08-01";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -448,6 +464,7 @@ const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
 const CLOUD_PROJECT_PHOTOS_BUCKET = "spool-photos";
 const CLOUD_TEAM_MESSAGES_TABLE = "team_messages";
 const TRIAL_LENGTH_DAYS = 30;
+const BUSINESS_INCLUDED_SEATS = 5;
 const AI_HELPER_FUNCTION = "ai-help";
 const AI_HELPER_TRIAL_DAILY_LIMIT = 10;
 const AI_HELPER_PAID_DAILY_LIMIT = 50;
@@ -459,6 +476,8 @@ const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
 const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
 const ACTIVE_COMPANY_KEY = "isospool-active-company-v1";
+const ACTIVE_WORKSPACE_KEY = "spoolmate-active-workspace-v1";
+const PENDING_BUSINESS_SIGNUP_KEY = "spoolmate-pending-business-signup-v1";
 const VERSION_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const PROJECT_FILE_VERSION = 1;
 const FAB_PDF_PAGE_WIDTH_PT = 1190.55;
@@ -1250,6 +1269,27 @@ const PIPE_SPECS = {
   },
 };
 const PIPE_SPEC_KEYS = new Set(Object.keys(PIPE_SPECS));
+const FITTING_DATA_PROFILES = {
+  atlasAsmeB169: {
+    label: "Atlas / ASME B16.9 pipe",
+    shortLabel: "Atlas B16.9",
+    help: "Verified pipe elbow, tee and reducer dimensions from the supplied Atlas manual.",
+    sourceStatus: "verified",
+  },
+  as1528Supplier: {
+    label: "AS 1528.3 sanitary tube",
+    shortLabel: "AS 1528.3 / supplier",
+    help: "Atlas verifies fitting weights; centre-to-end and face-to-face dimensions require the selected supplier.",
+    sourceStatus: "supplier confirmation",
+  },
+  workshopBranch: {
+    label: "Fabricated branch / workshop rule",
+    shortLabel: "Workshop branch",
+    help: "Welded branch saddle and cut allowances require the workshop procedure or approved detail.",
+    sourceStatus: "workshop confirmation",
+  },
+};
+const FITTING_DATA_PROFILE_KEYS = new Set(Object.keys(FITTING_DATA_PROFILES));
 const DEFAULT_PIPE_WEIGHT_COEFFICIENT = 0.0246615;
 const PRESSURE_RATING_ASSUMPTIONS = {
   carbon40: {
@@ -1267,12 +1307,17 @@ const PRESSURE_RATING_ASSUMPTIONS = {
 };
 const PRESSURE_WALL_TOLERANCE_FACTOR = 0.875;
 const PRESSURE_Y_COEFFICIENT = 0.4;
+const WELD_GAP_CHOICES_MM = new Set([1.6, 2.4]);
+const DEFAULT_WELD_GAP_MM = 2.4;
 const PROJECT_INFO_DEFAULT = {
   jobNumber: "",
   spoolNumber: "",
   revision: "A",
   drawnBy: "",
   client: "",
+  fittingProfile: "atlasAsmeB169",
+  fittingProfileReference: "",
+  weldGapMm: String(DEFAULT_WELD_GAP_MM),
 };
 const ATLAS_BUTTWELD_WEIGHTS = {
   carbon40: {
@@ -1609,6 +1654,8 @@ let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
 let focusModeActive = false;
 let focusModeRestoreState = null;
+let temporaryWorkspaceNavigationState = null;
+let previewReturnSurfaceState = null;
 let lastWorkspaceLayoutKind = null;
 let previewFloatDrag = null;
 let previewFloatBounds = loadPreviewFloatBoundsPreference();
@@ -1634,6 +1681,7 @@ let cloudCompanies = [];
 let cloudCompanyMemberships = [];
 let activeCompany = null;
 let activeCompanyMembership = null;
+let pendingBusinessSignupBusy = false;
 let companyMembers = [];
 let projectComments = [];
 let projectCommentsProjectId = null;
@@ -2023,7 +2071,7 @@ function blankState(options = {}) {
     productionActivity: [],
     healthAcknowledgements: {},
     issueAudits: [],
-    projectInfo: defaultProjectInfo(),
+    projectInfo: defaultProjectInfo(defaults.pipeSpec),
     history: [],
     redoHistory: [],
   };
@@ -2126,7 +2174,7 @@ function statePayload(options = {}) {
     productionActivity: normalizeProductionActivity(state.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(state.healthAcknowledgements),
     issueAudits: normalizeIssueAudits(state.issueAudits),
-    projectInfo: normalizeProjectInfo(state.projectInfo),
+    projectInfo: normalizeProjectInfo(state.projectInfo, state.pipeSpec),
   };
 }
 
@@ -2213,7 +2261,7 @@ function stateFromPayload(payload, options = {}) {
     productionActivity: normalizeProductionActivity(saved.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(saved.healthAcknowledgements),
     issueAudits: normalizeIssueAudits(saved.issueAudits),
-    projectInfo: normalizeProjectInfo(saved.projectInfo),
+    projectInfo: normalizeProjectInfo(saved.projectInfo, saved.pipeSpec),
     history: [],
     redoHistory: [],
   };
@@ -2504,8 +2552,48 @@ function normalizeFittings(fittings, edgeCount) {
     );
 }
 
-function defaultProjectInfo() {
-  return { ...PROJECT_INFO_DEFAULT };
+function defaultFittingDataProfileForSpec(specKey = "carbon40") {
+  return isTubePipeSpec(specKey) ? "as1528Supplier" : "atlasAsmeB169";
+}
+
+function normalizeFittingDataProfile(value, specKey = "carbon40") {
+  const profile = String(value ?? "").trim();
+  return FITTING_DATA_PROFILE_KEYS.has(profile) ? profile : defaultFittingDataProfileForSpec(specKey);
+}
+
+function fittingDataProfileInfo(source = state) {
+  const project = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  const key = normalizeFittingDataProfile(project.fittingProfile, source?.pipeSpec);
+  return {
+    key,
+    ...FITTING_DATA_PROFILES[key],
+    reference: project.fittingProfileReference,
+  };
+}
+
+function syncFittingDataProfileForSpec(previousSpec, nextSpec) {
+  const project = normalizeProjectInfo(state.projectInfo, previousSpec);
+  const previousDefault = defaultFittingDataProfileForSpec(previousSpec);
+  if (!project.fittingProfile || project.fittingProfile === previousDefault) {
+    project.fittingProfile = defaultFittingDataProfileForSpec(nextSpec);
+  }
+  state.projectInfo = normalizeProjectInfo(project, nextSpec);
+}
+
+function defaultProjectInfo(specKey = "carbon40") {
+  return {
+    ...PROJECT_INFO_DEFAULT,
+    fittingProfile: defaultFittingDataProfileForSpec(specKey),
+  };
+}
+
+function normalizeWeldGapMm(value) {
+  const gapMm = Number(value);
+  return WELD_GAP_CHOICES_MM.has(gapMm) ? gapMm : DEFAULT_WELD_GAP_MM;
+}
+
+function projectWeldGapMm(source = state) {
+  return normalizeWeldGapMm(source?.projectInfo?.weldGapMm);
 }
 
 function createTraceabilityId(prefix = "ID") {
@@ -2588,12 +2676,19 @@ function defaultProductionInfo() {
   };
 }
 
-function normalizeProjectInfo(info) {
+function normalizeProjectInfo(info, specKey = "carbon40") {
   const source = info && typeof info === "object" ? info : {};
   return Object.fromEntries(
     Object.keys(PROJECT_INFO_DEFAULT).map((key) => [
       key,
-      String(source[key] ?? "").trim().slice(0, key === "client" ? 56 : 32),
+      key === "fittingProfile"
+        ? normalizeFittingDataProfile(source[key], specKey)
+        : key === "weldGapMm"
+        ? String(normalizeWeldGapMm(source[key]))
+        : String(source[key] ?? "").trim().slice(
+            0,
+            key === "client" ? 56 : key === "fittingProfileReference" ? 80 : 32,
+          ),
     ]),
   );
 }
@@ -2793,6 +2888,12 @@ function normalizeCompany(row) {
     name: String(row.name ?? "SpoolMate Company").trim().slice(0, 80) || "SpoolMate Company",
     inviteCode: String(row.invite_code ?? "").trim().toUpperCase().slice(0, 16),
     createdBy: normalizeUuid(row.created_by),
+    licenseStatus: String(row.license_status ?? "full").trim().toLowerCase(),
+    trialStartedAt: String(row.trial_started_at ?? ""),
+    trialEndsAt: String(row.trial_ends_at ?? ""),
+    graceEndsAt: String(row.grace_ends_at ?? ""),
+    includedSeats: Math.max(1, Math.floor(Number(row.included_seats) || BUSINESS_INCLUDED_SEATS)),
+    extraSeats: Math.max(0, Math.floor(Number(row.extra_seats) || 0)),
     createdAt: String(row.created_at ?? ""),
     updatedAt: String(row.updated_at ?? ""),
   };
@@ -2803,8 +2904,8 @@ function normalizeCompanyMember(row) {
   const companyId = normalizeUuid(row.company_id);
   const userId = normalizeUuid(row.user_id);
   if (!companyId || !userId) return null;
-  const role = ["owner", "admin", "member"].includes(row.role) ? row.role : "member";
-  const status = ["pending", "approved", "rejected"].includes(row.status) ? row.status : "pending";
+  const role = ["owner", "admin", "designer", "checker", "workshop", "viewer", "member"].includes(row.role) ? row.role : "workshop";
+  const status = ["pending", "invited", "approved", "suspended", "rejected"].includes(row.status) ? row.status : "pending";
   return {
     companyId,
     userId,
@@ -3165,6 +3266,12 @@ const REGRESSION_AUTO_CHECKS = [
     run: regressionAutoCheckFlangeFlush,
   },
   {
+    key: "preparedEnds",
+    title: "Prepared pipe-end check",
+    sampleKey: "teeReducer",
+    run: regressionAutoCheckPreparedEnds,
+  },
+  {
     key: "flangeDrilling",
     title: "Flange drilling table check",
     sampleKey: "workshop",
@@ -3175,6 +3282,12 @@ const REGRESSION_AUTO_CHECKS = [
     title: "45 offset check",
     sampleKey: "offsetSockets",
     run: regressionAutoCheck45Offset,
+  },
+  {
+    key: "offset45SizeMatrix",
+    title: "45 offset size matrix",
+    sampleKey: "offsetSockets",
+    run: regressionAutoCheck45OffsetSizeMatrix,
   },
   {
     key: "socketDimensions",
@@ -3342,12 +3455,19 @@ function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition)
     branch?.connections?.length === 1 &&
     branch.connections[0].segmentIndex === branchIndexes[0] &&
     Number(branch.connections[0].takeoffMm) > 0;
+  const branchOutletQuantity = quantities.segments.find((row) => row.segment.index === branchIndexes[0])?.quantity;
+  const branchOutletHasOneWeldGap =
+    Number(branchOutletQuantity?.weldEndCount) === 1 &&
+    Math.abs(Number(branchOutletQuantity?.weldGapMm) - projectWeldGapMm()) < 0.001;
   const mainTakeoffsAreZero = mainIndexes.every((index) =>
     Math.abs(Number(quantities.segments.find((row) => row.segment.index === index)?.quantity.bendTakeoffMm)) < 0.001
   );
+  const expectedMainWeldGap = projectWeldGapMm() * 2;
   const mergedMainIsFullLength =
     Math.abs(Number(mergedMainRow?.quantity.centrelineMm) - 8400) < 0.001 &&
-    Math.abs(Number(mergedMainRow?.quantity.cutLengthMm) - 8400) < 0.001;
+    Number(mergedMainRow?.quantity.weldEndCount) === 2 &&
+    Math.abs(Number(mergedMainRow?.quantity.weldGapMm) - expectedMainWeldGap) < 0.001 &&
+    Math.abs(Number(mergedMainRow?.quantity.cutLengthMm) - (8400 - expectedMainWeldGap)) < 0.001;
   const passed =
     nodeConnectionType(1) === "branch" &&
     quantities.branches.length === 1 &&
@@ -3355,6 +3475,7 @@ function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition)
     nodeReducers.length === 0 &&
     Boolean(mergedMainRow) &&
     branchTakeoffOnlyOnOutlet &&
+    branchOutletHasOneWeldGap &&
     mainTakeoffsAreZero &&
     mergedMainIsFullLength &&
     mainSizePropagationExact;
@@ -3363,7 +3484,7 @@ function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition)
     definition.sampleKey,
     passed,
     `${nodeConnectionType(1)} node, ${quantities.tees.length} tees, ${nodeReducers.length} reducers; ` +
-      `continuous main cut ${formatLength(mergedMainRow?.quantity.cutLengthMm ?? 0)} mm; outlet-only take-off ${branchTakeoffOnlyOnOutlet ? "confirmed" : "failed"}.`,
+      `continuous main cut ${formatLength(mergedMainRow?.quantity.cutLengthMm ?? 0)} mm with ${formatWeldGapMm(expectedMainWeldGap)} mm for two end-flange Weld gaps; outlet-only branch take-off ${branchTakeoffOnlyOnOutlet ? "confirmed" : "failed"}.`,
   );
 }
 
@@ -3376,12 +3497,16 @@ function regressionAutoCheckFlangeFlush(segmentData, quantities, definition) {
     const expectedPoint = t <= 0.5 ? segment.start : segment.end;
     return (t === 0 || t === 1) && almostSamePoint(fittingDisplayPoint(segment, fitting), expectedPoint);
   });
-  const passed = flanges.length > 0 && flushFlanges.length === flanges.length;
+  const flangeEndsHaveOneGap = flushFlanges.every((fitting) => {
+    const quantity = quantities.segments.find((row) => row.segment.index === fitting.segmentIndex)?.quantity;
+    return Number(quantity?.weldEndCount) >= 1 && Number(quantity?.weldGapMm) >= projectWeldGapMm();
+  });
+  const passed = flanges.length > 0 && flushFlanges.length === flanges.length && flangeEndsHaveOneGap;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `${flushFlanges.length}/${flanges.length} flange${flanges.length === 1 ? "" : "s"} snapped to pipe ends.`,
+    `${flushFlanges.length}/${flanges.length} flange${flanges.length === 1 ? "" : "s"} snapped to pipe ends with one Weld gap per welded flange connection.`,
   );
 }
 
@@ -3437,7 +3562,8 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
   const offsetSize = offsetSegment ? pipeSizeForSegment(offsetSegment) : null;
   const atlasElbowTakeoff = offsetSize ? ELBOW_45_TAKEOFF_MM[offsetSize.nb] : null;
   const expectedTakeoff = Number.isFinite(atlasElbowTakeoff) ? atlasElbowTakeoff * 2 : 0;
-  const expectedCutLength = Math.max(0, actualTravel - expectedTakeoff);
+  const expectedWeldGap = projectWeldGapMm() * 2;
+  const expectedCutLength = Math.max(0, actualTravel - expectedTakeoff - expectedWeldGap);
   const measurementCount = Array.isArray(state.measurements) ? state.measurements.length : 0;
   const passed =
     Boolean(offsetSegment) &&
@@ -3455,6 +3581,8 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
     }) &&
     Math.abs(Number(offsetQuantity?.centrelineMm) - actualTravel) < 0.001 &&
     Math.abs(Number(offsetQuantity?.bendTakeoffMm) - expectedTakeoff) < 0.001 &&
+    Number(offsetQuantity?.weldEndCount) === 2 &&
+    Math.abs(Number(offsetQuantity?.weldGapMm) - expectedWeldGap) < 0.001 &&
     Math.abs(Number(offsetQuantity?.cutLengthMm) - expectedCutLength) < 0.001 &&
     measurementCount >= 1;
   return regressionCheckResult(
@@ -3462,7 +3590,42 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
     definition.sampleKey,
     passed,
     `Set ${formatLength(setMm)} mm; true travel ${formatLength(actualTravel)} mm; ` +
-      `two Atlas 45 deg B take-offs ${formatLength(expectedTakeoff)} mm; angled cut ${formatLength(offsetQuantity?.cutLengthMm ?? 0)} mm.`,
+      `two Atlas 45 deg B take-offs ${formatLength(expectedTakeoff)} mm; Weld gap ${formatWeldGapMm(expectedWeldGap)} mm; angled cut ${formatLength(offsetQuantity?.cutLengthMm ?? 0)} mm.`,
+  );
+}
+
+function regressionAutoCheck45OffsetSizeMatrix(segmentData, quantities, definition) {
+  const setMm = 1000;
+  const travelMm = setMm * Math.SQRT2;
+  const weldGapMm = projectWeldGapMm() * 2;
+  const atlasCases = [
+    [25, 22],
+    [50, 35],
+    [100, 64],
+    [150, 95],
+    [300, 190],
+  ];
+  const rows = atlasCases.map(([nb, expectedB]) => {
+    const actualB = bendTakeoffMm({ pipeSizeNb: nb }, 45);
+    const cutMm = travelMm - actualB * 2 - weldGapMm;
+    return {
+      nb,
+      expectedB,
+      actualB,
+      cutMm,
+      passed:
+        ELBOW_45_TAKEOFF_MM[nb] === expectedB &&
+        Math.abs(actualB - expectedB) < 0.001 &&
+        Math.abs(cutMm - (travelMm - expectedB * 2 - weldGapMm)) < 0.001 &&
+        cutMm > 0,
+    };
+  });
+  const passed = rows.every((row) => row.passed);
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    rows.map((row) => `DN${row.nb}: B ${formatLength(row.actualB)} mm / cut ${formatLength(row.cutMm)} mm`).join("; "),
   );
 }
 
@@ -3487,6 +3650,31 @@ function regressionAutoCheckSocketDimensions(segmentData, quantities, definition
     definition.sampleKey,
     passed,
     `First socket ${formatLength(firstPosition)} mm from end, then SOCK C/C ${formatLength(firstGap)} mm between sockets.`,
+  );
+}
+
+function regressionAutoCheckPreparedEnds(segmentData, quantities, definition) {
+  const groove = state.fittings.find((fitting) => fitting.type === "rollGroove");
+  const flange = state.fittings.find((fitting) => fitting.type === "flange");
+  const grooveSegment = segmentData.find((segment) => segment.index === groove?.segmentIndex);
+  const flangeSegment = segmentData.find((segment) => segment.index === flange?.segmentIndex);
+  const groovePointIndex = endpointSnappedFittingT(grooveSegment, groove) <= 0.5 ? grooveSegment?.from : grooveSegment?.to;
+  const flangePointIndex = endpointSnappedFittingT(flangeSegment, flange) <= 0.5 ? flangeSegment?.from : flangeSegment?.to;
+  const threadedSegment = segmentData.find((segment) => segment.index === 2);
+  const threaded = { id: -1, type: "threadedEnd", segmentIndex: threadedSegment?.index, t: 1 };
+  state.fittings.push(threaded);
+  const grooveFinished = Boolean(grooveSegment) && endpointHasFinish(grooveSegment, groovePointIndex);
+  const flangeFinished = Boolean(flangeSegment) && endpointHasFinish(flangeSegment, flangePointIndex);
+  const threadedFinished = Boolean(threadedSegment) && endpointHasFinish(threadedSegment, threadedSegment.to);
+  state.fittings.pop();
+  const passed = grooveFinished && flangeFinished && threadedFinished;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    passed
+      ? "Roll-grooved, flanged and threaded endpoints are excluded from open-end warnings."
+      : "A prepared roll-grooved, flanged or threaded endpoint was incorrectly classified as open.",
   );
 }
 
@@ -6987,6 +7175,11 @@ function formatLength(value) {
   return text.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
+function formatWeldGapMm(value) {
+  const gapMm = Math.round((Number(value) || 0) * 10) / 10;
+  return gapMm.toFixed(1);
+}
+
 function formatMass(value) {
   const rounded = Math.round(value * 10) / 10;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
@@ -8047,6 +8240,50 @@ function takeoffData(segmentData = segments()) {
   return { segmentTakeoffs, elbows, reducers, tees, branches };
 }
 
+function weldedSegmentEndCounts(segmentData = segments(), data = takeoffData(segmentData)) {
+  const segmentIndexes = new Set(segmentData.map((segment) => segment.index));
+  const weldedEnds = new Set();
+  const add = (segmentIndex, nodeIndex) => {
+    if (!segmentIndexes.has(segmentIndex) || !Number.isInteger(Number(nodeIndex))) return;
+    weldedEnds.add(`${segmentIndex}:${Number(nodeIndex)}`);
+  };
+
+  for (const elbow of data.elbows ?? []) {
+    add(elbow.firstSegmentIndex, elbow.nodeIndex);
+    add(elbow.secondSegmentIndex, elbow.nodeIndex);
+  }
+  for (const tee of data.tees ?? []) {
+    for (const connection of tee.connections ?? []) add(connection.segmentIndex, tee.nodeIndex);
+  }
+  // A fabricated branch keeps the main pipe continuous. Only each outlet pipe
+  // meets the welded branch, so the straight-through main receives no gap here.
+  for (const branch of data.branches ?? []) {
+    for (const connection of branch.connections ?? []) add(connection.segmentIndex, branch.nodeIndex);
+  }
+  for (const reducer of data.reducers ?? []) {
+    add(reducer.firstSegmentIndex, reducer.nodeIndex);
+    add(reducer.secondSegmentIndex, reducer.nodeIndex);
+  }
+  // End flanges are welded fitting connections even though the spool terminates
+  // there. Roll-grooved, threaded and genuinely plain/open pipe ends are not.
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  for (const fitting of state.fittings ?? []) {
+    if (fitting?.type !== "flange") continue;
+    const segment = segmentByIndex.get(Number(fitting.segmentIndex));
+    if (!segment) continue;
+    const t = normalizeFittingPosition("flange", fitting.t);
+    if (t === 0) add(segment.index, segment.from);
+    if (t === 1) add(segment.index, segment.to);
+  }
+
+  const counts = new Map(segmentData.map((segment) => [segment.index, 0]));
+  for (const key of weldedEnds) {
+    const segmentIndex = Number(key.split(":")[0]);
+    counts.set(segmentIndex, (counts.get(segmentIndex) ?? 0) + 1);
+  }
+  return counts;
+}
+
 function autoReducerTransitions(segmentData = segments()) {
   const connections = nodeConnections(segmentData);
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
@@ -8426,14 +8663,26 @@ function elbowWeightKg(size, bendDegrees) {
   return pipeMassPerMetreForSize(size) * (size.lrRadius / 1000) * bendRadians;
 }
 
-function segmentQuantity(segment, takeoffs = takeoffData(segments()).segmentTakeoffs) {
+function segmentQuantity(segment, takeoffs = null, weldEndCounts = null) {
+  if (!(takeoffs instanceof Map) || !(weldEndCounts instanceof Map)) {
+    const segmentData = segments();
+    const data = takeoffData(segmentData);
+    if (!(takeoffs instanceof Map)) takeoffs = data.segmentTakeoffs;
+    if (!(weldEndCounts instanceof Map)) weldEndCounts = weldedSegmentEndCounts(segmentData, data);
+  }
   const centrelineMm = pointLength(segment.vector);
   const bendTakeoffMmTotal = takeoffs.get(segment.index) ?? 0;
-  const cutLengthMm = Math.max(0, centrelineMm - bendTakeoffMmTotal);
+  const weldEndCount = Math.max(0, Math.floor(Number(weldEndCounts.get(segment.index)) || 0));
+  const weldGapPerEndMm = projectWeldGapMm();
+  const weldGapMm = weldEndCount * weldGapPerEndMm;
+  const cutLengthMm = Math.max(0, centrelineMm - bendTakeoffMmTotal - weldGapMm);
   const pipeWeightKg = (cutLengthMm / 1000) * pipeMassPerMetre(segment);
   return {
     centrelineMm,
     bendTakeoffMm: bendTakeoffMmTotal,
+    weldEndCount,
+    weldGapPerEndMm,
+    weldGapMm,
     cutLengthMm,
     pipeWeightKg,
   };
@@ -8534,14 +8783,17 @@ function fittingQuantities(segmentData = segments()) {
 
 function quantitySummary(segmentData = segments()) {
   const data = takeoffData(segmentData);
+  const weldEndCounts = weldedSegmentEndCounts(segmentData, data);
   const segmentsWithQuantity = segmentData.map((segment) => ({
     segment,
-    quantity: segmentQuantity(segment, data.segmentTakeoffs),
+    quantity: segmentQuantity(segment, data.segmentTakeoffs, weldEndCounts),
   }));
-  const cutSegmentsWithQuantity = branchMergedCutSegments(segmentData, data.segmentTakeoffs);
+  const cutSegmentsWithQuantity = branchMergedCutSegments(segmentData, data.segmentTakeoffs, weldEndCounts);
   const centrelineMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.centrelineMm, 0);
   const cutLengthMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.cutLengthMm, 0);
   const bendTakeoffMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.bendTakeoffMm, 0);
+  const weldEndCount = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.weldEndCount, 0);
+  const weldGapMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.weldGapMm, 0);
   const pipeWeightKg = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.pipeWeightKg, 0);
   const bendWeightKg = data.elbows.reduce((sum, elbow) => sum + elbow.weightKg, 0);
   const reducerWeightKg = data.reducers.reduce((sum, reducer) => sum + reducer.weightKg, 0);
@@ -8561,6 +8813,9 @@ function quantitySummary(segmentData = segments()) {
     centrelineMm,
     cutLengthMm,
     bendTakeoffMm,
+    weldEndCount,
+    weldGapPerEndMm: projectWeldGapMm(),
+    weldGapMm,
     pipeWeightKg,
     bendWeightKg,
     reducerWeightKg,
@@ -8571,10 +8826,14 @@ function quantitySummary(segmentData = segments()) {
   };
 }
 
-function branchMergedCutSegments(segmentData = segments(), segmentTakeoffs = takeoffData(segmentData).segmentTakeoffs) {
+function branchMergedCutSegments(
+  segmentData = segments(),
+  segmentTakeoffs = takeoffData(segmentData).segmentTakeoffs,
+  weldEndCounts = weldedSegmentEndCounts(segmentData),
+) {
   const rawRows = segmentData.map((segment) => ({
     segment,
-    quantity: segmentQuantity(segment, segmentTakeoffs),
+    quantity: segmentQuantity(segment, segmentTakeoffs, weldEndCounts),
   }));
   const rowByIndex = new Map(rawRows.map((row) => [row.segment.index, row]));
   const connections = nodeConnections(segmentData);
@@ -8613,6 +8872,9 @@ function branchMergedCutSegments(segmentData = segments(), segmentTakeoffs = tak
       quantity: {
         centrelineMm: firstRow.quantity.centrelineMm + secondRow.quantity.centrelineMm,
         bendTakeoffMm: firstRow.quantity.bendTakeoffMm + secondRow.quantity.bendTakeoffMm,
+        weldEndCount: firstRow.quantity.weldEndCount + secondRow.quantity.weldEndCount,
+        weldGapPerEndMm: projectWeldGapMm(),
+        weldGapMm: firstRow.quantity.weldGapMm + secondRow.quantity.weldGapMm,
         cutLengthMm: firstRow.quantity.cutLengthMm + secondRow.quantity.cutLengthMm,
         pipeWeightKg: firstRow.quantity.pipeWeightKg + secondRow.quantity.pipeWeightKg,
       },
@@ -9634,6 +9896,20 @@ function updateHistoryButtons() {
   if (redoButton) redoButton.disabled = cloudPermissionReadOnly || !redoStack().length;
 }
 
+function updateRoleRestrictedDrawingTools() {
+  const canEdit = currentDrawingProjectPermission().canEdit;
+  for (const button of sideToolButtons) {
+    const tool = sideToolIdForButton(button);
+    if (!tool) continue;
+    if (!button.dataset.editableTitle) button.dataset.editableTitle = button.title || sideToolLabel(tool);
+    const roleRestricted = !canEdit && tool !== "select";
+    button.disabled = roleRestricted;
+    button.title = roleRestricted ? currentPermissionRestrictionText("edit") : button.dataset.editableTitle;
+    button.setAttribute("aria-disabled", String(roleRestricted));
+  }
+  if (!canEdit && state.activeTool !== "select") state.activeTool = "select";
+}
+
 function deleteSelection() {
   if (!ensureDrawingEditable("delete items")) return;
   if (state.selectedNote) {
@@ -9835,7 +10111,7 @@ function updateSegmentList() {
       <span class="segment-main">
         <strong>${escapeHtml(cutRunDisplayTitle(segment))}</strong>
         <small>Cut ${formatLength(quantity.cutLengthMm)} mm / CL ${formatLength(quantity.centrelineMm)} mm / ${formatMass(quantity.pipeWeightKg)} kg</small>
-        <small>${pointDetail ? `${escapeHtml(pointDetail)} / ` : ""}${escapeHtml(pipeSizeSpecLabel(pipeSizeForSegment(segment)))} / deductions ${formatLength(quantity.bendTakeoffMm)} mm</small>
+        <small>${pointDetail ? `${escapeHtml(pointDetail)} / ` : ""}${escapeHtml(pipeSizeSpecLabel(pipeSizeForSegment(segment)))} / fitting deductions ${formatLength(quantity.bendTakeoffMm)} mm / Weld gap ${formatWeldGapMm(quantity.weldGapMm)} mm (${quantity.weldEndCount} welded end${quantity.weldEndCount === 1 ? "" : "s"})</small>
       </span>
       <span class="segment-fit">${fittingCount}</span>
     `;
@@ -9967,7 +10243,8 @@ function updateTakeoffSummary() {
   takeoffSummary.innerHTML = `
     <div class="takeoff-grid">
       <span>Centreline</span><strong>${formatLength(quantities.centrelineMm)} mm</strong>
-      <span>Deductions</span><strong>${formatLength(quantities.bendTakeoffMm)} mm</strong>
+      <span>Fitting deductions</span><strong>${formatLength(quantities.bendTakeoffMm)} mm</strong>
+      <span>Weld gap</span><strong>${formatWeldGapMm(quantities.weldGapMm)} mm (${formatWeldGapMm(quantities.weldGapPerEndMm)} mm x ${quantities.weldEndCount} welded ends)</strong>
       <span>Cut pipe</span><strong>${formatLength(quantities.cutLengthMm)} mm</strong>
       <span>Pipe weight</span><strong>${formatMass(quantities.pipeWeightKg)} kg</strong>
       <span>Elbows</span><strong>${quantities.elbows.length} / ${formatMass(quantities.bendWeightKg)} kg</strong>
@@ -10031,7 +10308,7 @@ function endpointHasFinish(segment, pointIndex) {
   return state.fittings.some((fitting) =>
     fitting.segmentIndex === segment.index &&
     (fitting.type === "flange" || fitting.type === "rollGroove" || fitting.type === "threadedEnd") &&
-    Math.abs(fittingDisplayT(segment, fitting) - endpointT) < 0.001,
+    Math.abs(endpointSnappedFittingT(segment, fitting) - endpointT) < 0.001,
   );
 }
 
@@ -10246,6 +10523,9 @@ function projectFieldLabel(field) {
   if (field === "revision") return "revision";
   if (field === "drawnBy") return "drawn by";
   if (field === "client") return "client / area";
+  if (field === "fittingProfile") return "fitting data profile";
+  if (field === "fittingProfileReference") return "supplier / workshop reference";
+  if (field === "weldGapMm") return "weld gap";
   return "project details";
 }
 
@@ -10386,8 +10666,8 @@ async function handleHealthIssueAction(item, action) {
 
 async function acknowledgeHealthIssue(item) {
   if (!item?.canAcknowledge || !item.key) return;
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("acknowledge drawing exceptions"));
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return;
   }
   const response = await openFieldInputDialog({
@@ -10423,8 +10703,8 @@ async function acknowledgeHealthIssue(item) {
 
 function reopenHealthIssue(item) {
   if (!item?.key) return;
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("reopen drawing checks"));
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return;
   }
   state.healthAcknowledgements = normalizeHealthAcknowledgements(state.healthAcknowledgements);
@@ -10617,11 +10897,62 @@ function weldReadyIssueFindings(welds = synchronizeWeldRegister(state)) {
   return { blockers, warnings };
 }
 
+function fittingCalculationSourceSummary(segmentData = segments()) {
+  const profile = fittingDataProfileInfo(state);
+  const connections = nodeConnections(segmentData);
+  const takeoffs = takeoffData(segmentData);
+  const hasTube = segmentData.some((segment) => isTubePipeSize(pipeSizeForSegment(segment)));
+  const hasBranch = [...connections.entries()].some(([nodeIndex, connected]) =>
+    connected.length >= 3 && nodeConnectionType(nodeIndex) === "branch"
+  );
+  const hasNonStandardElbow = takeoffs.elbows.some((elbow) =>
+    Math.abs(Number(elbow.bend) - 45) >= 0.5 && Math.abs(Number(elbow.bend) - 90) >= 0.5
+  );
+  const hasUntabled45 = takeoffs.elbows.some((elbow) =>
+    Math.abs(Number(elbow.bend) - 45) < 0.5 && !Number.isFinite(ELBOW_45_TAKEOFF_MM[elbow.nb])
+  );
+  const reasons = [];
+  const mismatches = [];
+
+  if (hasTube) reasons.push("supplier tube fitting dimensions");
+  if (hasBranch) reasons.push("fabricated branch take-off");
+  if (hasNonStandardElbow) reasons.push("non-standard elbow angle");
+  if (hasUntabled45) reasons.push("45 degree size outside the Atlas B table");
+  if (hasTube && profile.key !== "as1528Supplier") {
+    mismatches.push("select the AS 1528.3 sanitary tube profile");
+  }
+  if (!hasTube && profile.key === "as1528Supplier") {
+    mismatches.push("the AS 1528.3 profile is selected for a pipe drawing");
+  }
+  if (hasBranch && profile.key !== "workshopBranch") {
+    mismatches.push("select the fabricated branch workshop profile");
+  }
+  if (!hasBranch && profile.key === "workshopBranch") {
+    mismatches.push("the workshop branch profile is selected but no branch is present");
+  }
+
+  const verified = profile.key === "atlasAsmeB169" && reasons.length === 0 && mismatches.length === 0;
+  const referenceText = profile.reference ? ` / ${profile.reference}` : "";
+  return {
+    profile,
+    hasTube,
+    hasBranch,
+    hasNonStandardElbow,
+    hasUntabled45,
+    reasons,
+    mismatches,
+    verified,
+    profileText: `${profile.label}${referenceText}`,
+    shortProfileText: `${profile.shortLabel}${profile.reference ? ` / ${profile.reference}` : ""}`,
+    statusLabel: verified ? "Verified dimensions" : `Estimate review: ${[...reasons, ...mismatches].join("; ") || profile.sourceStatus}`,
+  };
+}
+
 function preIssueChecklist() {
   const project = normalizeProjectInfo(state.projectInfo);
   const health = drawingHealthItems();
   const segmentData = segments();
-  const connectionData = nodeConnections(segmentData);
+  const fittingSource = fittingCalculationSourceSummary(segmentData);
   const production = normalizeProductionInfo(state.productionInfo);
   const welds = synchronizeWeldRegister(state);
   const projectFields = [
@@ -10666,22 +10997,39 @@ function preIssueChecklist() {
     item,
   ));
   const dimensionSourceWarnings = [
-    segmentData.some((segment) => isTubePipeSize(pipeSizeForSegment(segment)))
+    fittingSource.mismatches.length
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "Fitting data profile does not match this drawing",
+          `${fittingSource.profile.label}: ${fittingSource.mismatches.join("; ")}.`,
+          { type: "project", field: "fittingProfile" },
+        )
+      : null,
+    fittingSource.hasTube
       ? readyIssueFinding(
           "warning",
           "Dimensions",
           "Sanitary tube fitting dimensions need supplier confirmation",
-          "The supplied Atlas manual verifies AS 1528.3 tube fitting weights but does not publish bend centre-to-end, tee centre-to-end or reducer face-to-face dimensions. Confirm the selected supplier dimensions before issue.",
+          `The supplied Atlas manual verifies AS 1528.3 tube fitting weights but does not publish bend centre-to-end, tee centre-to-end or reducer face-to-face dimensions. Confirm the selected supplier dimensions before issue${fittingSource.profile.reference ? ` (${fittingSource.profile.reference})` : " and record the supplier reference"}.`,
+          { type: "project", field: "fittingProfileReference" },
         )
       : null,
-    [...connectionData.entries()].some(([nodeIndex, connected]) =>
-      connected.length >= 3 && nodeConnectionType(nodeIndex) === "branch"
-    )
+    fittingSource.hasBranch
       ? readyIssueFinding(
           "warning",
           "Dimensions",
           "Fabricated branch take-off uses a workshop estimate",
-          "Atlas/ASME B16.9 dimensions cover manufactured tees, not welded-on branches. Confirm the branch saddle and cut allowance against the workshop procedure before issue.",
+          `Atlas/ASME B16.9 dimensions cover manufactured tees, not welded-on branches. Confirm the branch saddle and cut allowance against the workshop procedure before issue${fittingSource.profile.reference ? ` (${fittingSource.profile.reference})` : " and record the workshop reference"}.`,
+          { type: "project", field: "fittingProfileReference" },
+        )
+      : null,
+    fittingSource.hasNonStandardElbow || fittingSource.hasUntabled45
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "One or more elbow deductions use geometry",
+          "Only published 45 degree B and 90 degree A pipe dimensions are Atlas-verified. Confirm non-standard angles or untabled sizes before issue.",
         )
       : null,
   ].filter(Boolean);
@@ -10752,6 +11100,10 @@ function preIssueChecklist() {
     warnings,
     findings: [...blockers, ...warnings],
     materialText: `${pipeSpec().shortLabel} / ${sizeLabels.length ? sizeLabels.join(", ") : pipeSizeDisplayLabelByNb(state.pipeSizeNb)}`,
+    fittingProfileText: fittingSource.profileText,
+    fittingSourceStatus: fittingSource.statusLabel,
+    fittingSourceVerified: fittingSource.verified,
+    weldGapText: `${formatWeldGapMm(projectWeldGapMm())} mm per welded pipe end; open ends 0.0 mm`,
     regressionResults,
     regressionFailures: regressionResults.filter((result) => result.passed !== true),
   };
@@ -10783,6 +11135,9 @@ function preIssueFindingActionLabel(finding) {
 
 function preIssueFindingHtml(finding, index) {
   const actionLabel = preIssueFindingActionLabel(finding);
+  const buttonLabel = finding.severity === "blocker"
+    ? `Fix: ${actionLabel || "Review checks"}`
+    : actionLabel;
   return `
     <li class="ready-issue-finding ${escapeHtml(finding.severity)}">
       <div>
@@ -10790,7 +11145,7 @@ function preIssueFindingHtml(finding, index) {
         <strong>${escapeHtml(finding.title)}</strong>
         ${finding.detail ? `<span>${escapeHtml(finding.detail)}</span>` : ""}
       </div>
-      ${actionLabel ? `<button type="button" data-preissue-finding="${index}">${escapeHtml(actionLabel)}</button>` : ""}
+      ${buttonLabel ? `<button type="button" class="${finding.severity === "blocker" ? "primary-fix" : ""}" data-preissue-finding="${index}">${escapeHtml(buttonLabel)}</button>` : ""}
     </li>
   `;
 }
@@ -10866,6 +11221,8 @@ function preIssueChecklistCardHtml() {
       <ul class="workflow-list preissue-list">
         ${preIssueChecklistRowHtml("Project", projectText, checks.projectBlockers.length ? "blocked" : checks.projectWarnings.length ? "review" : "ready")}
         ${preIssueChecklistRowHtml("Material / sizes", checks.materialText, "ready")}
+        ${preIssueChecklistRowHtml("Fitting data", `${checks.fittingProfileText} / ${checks.fittingSourceStatus}`, checks.fittingSourceVerified ? "ready" : "review")}
+        ${preIssueChecklistRowHtml("Weld gap", checks.weldGapText, "ready")}
         ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.healthWarnings.length ? "review" : "ready")}
         ${preIssueChecklistRowHtml("Weld register", weldText, checks.weldBlockers.length ? "blocked" : checks.weldWarnings.length ? "review" : "ready")}
         ${preIssueChecklistRowHtml("Production", productionText, checks.productionBlockers.length ? "blocked" : checks.productionWarnings.length ? "review" : "ready")}
@@ -10955,7 +11312,11 @@ function productionActivityCardHtml() {
 
 async function handlePreIssueFinding(index) {
   const finding = preIssueChecklist().findings[Number(index)];
-  if (!finding?.action) return;
+  if (!finding) return;
+  if (!finding.action) {
+    showHealthPanel();
+    return;
+  }
   if (finding.action.type === "project") {
     await editProjectDetailsFromHealth(finding.action.field);
     return;
@@ -10965,7 +11326,18 @@ async function handlePreIssueFinding(index) {
     return;
   }
   if (finding.action.type === "production") {
-    await openBrowserProject();
+    const project = normalizeProjectInfo(state.projectInfo);
+    projectLibrarySearch = project.spoolNumber || project.jobNumber || "";
+    setTeamDashboardView("board");
+    await openBrowserProject({ keepSearch: true });
+    window.requestAnimationFrame(() => {
+      const card = [...(projectLibraryList?.querySelectorAll("[data-production-project-id]") ?? [])]
+        .find((item) => item.dataset.productionProjectId === state.projectId);
+      card?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      card?.classList.add("ready-issue-focus");
+      card?.querySelector("[data-production-field='holdReason'], [data-production-field='hold']")?.focus?.();
+      window.setTimeout(() => card?.classList.remove("ready-issue-focus"), 2800);
+    });
     return;
   }
   if (finding.action.type === "approval") {
@@ -10998,14 +11370,21 @@ async function handlePreIssueFinding(index) {
 function updateWorkflowSummary() {
   if (!workflowSummary) return;
   synchronizeWeldRegister(state);
+  const permission = currentDrawingProjectPermission();
   const history = normalizeRevisionHistory(state.revisionHistory);
   const currentAudit = latestIssueAudit();
   const reviewReady = projectStatusAtLeast(state.projectStatus, "readycheck");
-  const reviewDisabledAttr = cloudPermissionReadOnly
-    ? ' disabled title="View/comment only for your team role"'
+  const reviewDisabledAttr = !permission.canIssue
+    ? ` disabled title="${escapeHtml(currentPermissionRestrictionText("issue"))}"`
     : !reviewReady
     ? ' disabled title="Move the spool to Ready to check before review"'
     : "";
+  const issueDisabledAttr = permission.canIssue
+    ? ""
+    : ` disabled title="${escapeHtml(currentPermissionRestrictionText("issue"))}"`;
+  const editDisabledAttr = permission.canEdit
+    ? ""
+    : ` disabled title="${escapeHtml(currentPermissionRestrictionText("edit"))}"`;
   workflowSummary.innerHTML = `
     <div class="workflow-card">
       <strong>Drawing workflow</strong>
@@ -11017,8 +11396,8 @@ function updateWorkflowSummary() {
     <div class="workflow-actions">
       <button type="button" data-workflow-action="mark-checked"${reviewDisabledAttr}>Approve drawing</button>
       <button type="button" data-workflow-action="return-changes"${reviewDisabledAttr}>Return for changes</button>
-      <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Issue drawing</button>
-      <button type="button" data-workflow-action="new-revision"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>New revision</button>
+      <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${issueDisabledAttr}>Issue drawing</button>
+      <button type="button" data-workflow-action="new-revision"${editDisabledAttr}>New revision</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
     </div>
     ${productionWorkflowCardHtml()}
@@ -11089,6 +11468,10 @@ function weldStatusLabel(value) {
 
 function weldRegisterCardHtml() {
   const welds = synchronizeWeldRegister(state);
+  const permission = currentDrawingProjectPermission();
+  const disabledAttr = permission.canManageProduction
+    ? ""
+    : ` disabled title="${escapeHtml(currentPermissionRestrictionText("production"))}"`;
   const spoolUid = ensureSpoolUid(state);
   const revisionUid = currentRevisionUid(state);
   return `
@@ -11100,21 +11483,31 @@ function weldRegisterCardHtml() {
       ${welds.length ? `<div class="weld-register-list">${welds.map((weld) => `
         <section class="weld-register-row" data-weld-row="${weld.fittingId}">
           <div class="weld-register-number"><strong>${escapeHtml(weld.number)}</strong><span>Marker ${weld.fittingId}</span></div>
-          <label><span>Welder ID</span><input data-weld-id="${weld.fittingId}" data-weld-field="welderId" value="${escapeHtml(weld.welderId)}" maxlength="40" placeholder="Welder" /></label>
-          <label><span>WPS</span><input data-weld-id="${weld.fittingId}" data-weld-field="wps" value="${escapeHtml(weld.wps)}" maxlength="48" placeholder="WPS reference" /></label>
-          <label><span>Status</span><select data-weld-id="${weld.fittingId}" data-weld-field="status">${["pending","welded","visual","ndt","accepted","repair"].map((status) => `<option value="${status}"${weld.status === status ? " selected" : ""}>${weldStatusLabel(status)}</option>`).join("")}</select></label>
-          <label><span>Inspection / NDT</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectionType" value="${escapeHtml(weld.inspectionType)}" maxlength="40" placeholder="VT, PT, RT, UT..." /></label>
-          <label><span>Inspector</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectedBy" value="${escapeHtml(weld.inspectedBy)}" maxlength="64" placeholder="Name / ID" /></label>
-          <label class="weld-register-wide"><span>Repair history / notes</span><input data-weld-id="${weld.fittingId}" data-weld-field="repairHistory" value="${escapeHtml(weld.repairHistory)}" maxlength="400" placeholder="Repair, retest and acceptance history" /></label>
+          <label><span>Welder ID</span><input data-weld-id="${weld.fittingId}" data-weld-field="welderId" value="${escapeHtml(weld.welderId)}" maxlength="40" placeholder="Welder"${disabledAttr} /></label>
+          <label><span>WPS</span><input data-weld-id="${weld.fittingId}" data-weld-field="wps" value="${escapeHtml(weld.wps)}" maxlength="48" placeholder="WPS reference"${disabledAttr} /></label>
+          <label><span>Status</span><select data-weld-id="${weld.fittingId}" data-weld-field="status"${disabledAttr}>${["pending","welded","visual","ndt","accepted","repair"].map((status) => `<option value="${status}"${weld.status === status ? " selected" : ""}>${weldStatusLabel(status)}</option>`).join("")}</select></label>
+          <label><span>Inspection / NDT</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectionType" value="${escapeHtml(weld.inspectionType)}" maxlength="40" placeholder="VT, PT, RT, UT..."${disabledAttr} /></label>
+          <label><span>Inspector</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectedBy" value="${escapeHtml(weld.inspectedBy)}" maxlength="64" placeholder="Name / ID"${disabledAttr} /></label>
+          <label class="weld-register-wide"><span>Repair history / notes</span><input data-weld-id="${weld.fittingId}" data-weld-field="repairHistory" value="${escapeHtml(weld.repairHistory)}" maxlength="400" placeholder="Repair, retest and acceptance history"${disabledAttr} /></label>
         </section>
       `).join("")}</div>` : `<p class="weld-register-empty">Place Weld markers on the drawing. SpoolMate will number them W01, W02 and build the register automatically.</p>`}
     </div>
   `;
 }
 
+function persistProductionState() {
+  persistState();
+  window.clearTimeout(cloudAutosaveTimer);
+  if (!cloudUser || !currentProjectHasCloudRecord()) return Promise.resolve(false);
+  return saveCloudProject({ silent: true, productionOnly: true }).catch((error) => {
+    console.warn("Production cloud save failed.", error);
+    return false;
+  });
+}
+
 function handleWeldRegisterFieldChange(field) {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("change the weld register"));
+  if (!currentDrawingProjectPermission().canManageProduction) {
+    showAppNotice(currentPermissionRestrictionText("production"));
     updateWorkflowSummary();
     return;
   }
@@ -11125,13 +11518,18 @@ function handleWeldRegisterFieldChange(field) {
   weld[key] = key === "status" ? normalizeWeldStatus(field.value) : String(field.value ?? "").trim();
   if (key === "status" && weld.status !== "pending" && !weld.completedAt) weld.completedAt = new Date().toISOString();
   state.productionActivity = addProductionActivity(state.productionActivity, "weld", `${weld.number} ${key} updated${key === "status" ? ` to ${weldStatusLabel(weld.status)}` : ""}.`, new Date().toISOString());
-  persistState();
+  persistProductionState();
   updateAll({ save: false });
 }
 
 async function handleWorkflowAction(action) {
-  if (cloudPermissionReadOnly && (action === "mark-checked" || action === "return-changes" || action === "issue-drawing" || action === "new-revision")) {
-    showAppNotice(cloudReadOnlyMessage("change workflow status"));
+  const permission = currentDrawingProjectPermission();
+  if (["mark-checked", "return-changes", "issue-drawing"].includes(action) && !permission.canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
+    return;
+  }
+  if (action === "new-revision" && !permission.canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     return;
   }
   if (action === "mark-checked") await markDrawingChecked();
@@ -11147,8 +11545,8 @@ async function handleWorkflowAction(action) {
 async function handleProductionFieldChange(field) {
   const key = field?.dataset?.productionField;
   if (!key) return;
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("update production allocation"));
+  if (!currentDrawingProjectPermission().canManageProduction) {
+    showAppNotice(currentPermissionRestrictionText("production"));
     updateWorkflowSummary();
     return;
   }
@@ -11203,7 +11601,7 @@ async function handleProductionFieldChange(field) {
     state.productionActivity = addProductionActivity(state.productionActivity, "hold", `Hold reason changed from ${previous.holdReason || "none"} to ${next.holdReason || "none"}.`, now);
   }
   updateProjectReadout();
-  persistState();
+  await persistProductionState();
   updateWorkflowSummary();
 }
 
@@ -11225,8 +11623,8 @@ async function recordReviewConversationMessage(body) {
 }
 
 async function markDrawingChecked() {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("approve the drawing"));
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return;
   }
   if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
@@ -11292,8 +11690,8 @@ async function markDrawingChecked() {
 }
 
 async function returnDrawingForChanges() {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("return the drawing for changes"));
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return false;
   }
   if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
@@ -11505,8 +11903,8 @@ function recordReadyIssueAudit(checks, options = {}) {
 }
 
 async function issueDrawing(options = {}) {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("issue the drawing"));
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     updateControls();
     return false;
   }
@@ -11637,8 +12035,8 @@ function addRevisionSnapshot(note = "Saved revision", options = {}) {
 }
 
 function createNextRevision() {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("create a new revision"));
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     return;
   }
   const project = normalizeProjectInfo(state.projectInfo);
@@ -11666,8 +12064,8 @@ function createNextRevision() {
 }
 
 async function restoreRevision(revisionId) {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("restore revisions"));
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     return;
   }
   const entry = normalizeRevisionHistory(state.revisionHistory).find((item) => item.id === revisionId);
@@ -11985,10 +12383,20 @@ function updateProjectReadout() {
 }
 
 function updateWorkflowControls() {
+  const permission = currentDrawingProjectPermission();
   if (projectStatusSelect) projectStatusSelect.value = normalizeProjectStatus(state.projectStatus);
   if (projectStatusSelect) {
-    projectStatusSelect.disabled = cloudPermissionReadOnly;
-    projectStatusSelect.title = cloudPermissionReadOnly ? "Team members can view/comment only. Ask an owner/admin to issue or change status." : "";
+    const canChangeAnyStatus = permission.canEdit || permission.canIssue || permission.canManageProduction;
+    projectStatusSelect.disabled = !canChangeAnyStatus;
+    projectStatusSelect.title = canChangeAnyStatus ? "" : currentPermissionRestrictionText("production");
+    for (const option of projectStatusSelect.options) {
+      const status = normalizeProjectStatus(option.value);
+      option.disabled = status === "checked" || status === "issued"
+        ? !permission.canIssue
+        : status === "draft" || status === "readycheck"
+        ? !(permission.canEdit || permission.canIssue)
+        : !permission.canManageProduction;
+    }
   }
   if (projectAssigneeReadout) {
     const assignee = normalizeProductionInfo(state.productionInfo).assignee.trim();
@@ -11998,10 +12406,10 @@ function updateWorkflowControls() {
   if (projectLockToggle) {
     const issuedLocked = Boolean(state.issuedAt) || projectStatusAtLeast(state.projectStatus, "issued");
     if (issuedLocked) state.locked = true;
-    projectLockToggle.checked = state.locked === true || cloudPermissionReadOnly || issuedLocked;
-    projectLockToggle.disabled = cloudPermissionReadOnly || issuedLocked;
-    projectLockToggle.title = cloudPermissionReadOnly
-      ? "This cloud spool is view/comment only for your team role."
+    projectLockToggle.checked = state.locked === true || !permission.canEdit || issuedLocked;
+    projectLockToggle.disabled = !permission.canEdit || issuedLocked;
+    projectLockToggle.title = !permission.canEdit
+      ? currentPermissionRestrictionText("edit")
       : issuedLocked
       ? "Issued drawings stay locked. Use Return for changes or New revision."
       : "";
@@ -12189,8 +12597,10 @@ function updatePropertiesPanel() {
     const selectedTotals = selectedQuantities.reduce((totals, item) => ({
       centrelineMm: totals.centrelineMm + item.quantity.centrelineMm,
       cutLengthMm: totals.cutLengthMm + item.quantity.cutLengthMm,
+      weldEndCount: totals.weldEndCount + item.quantity.weldEndCount,
+      weldGapMm: totals.weldGapMm + item.quantity.weldGapMm,
       pipeWeightKg: totals.pipeWeightKg + item.quantity.pipeWeightKg,
-    }), { centrelineMm: 0, cutLengthMm: 0, pipeWeightKg: 0 });
+    }), { centrelineMm: 0, cutLengthMm: 0, weldEndCount: 0, weldGapMm: 0, pipeWeightKg: 0 });
     if (selectedSegments.length === 1) {
       const segment = selectedSegments[0];
       const quantity = selectedQuantities[0].quantity;
@@ -12207,7 +12617,8 @@ function updatePropertiesPanel() {
             ["Offset angle", `${formatAngle(offsetMeta.angleDeg)} deg`],
           ] : []),
           ["Cut", `${formatLength(quantity.cutLengthMm)} mm`],
-          ["Deduct", `${formatLength(quantity.bendTakeoffMm)} mm`],
+          ["Fitting deduct", `${formatLength(quantity.bendTakeoffMm)} mm`],
+          ["Weld gap", `${formatWeldGapMm(quantity.weldGapMm)} mm (${formatWeldGapMm(quantity.weldGapPerEndMm)} mm x ${quantity.weldEndCount} welded end${quantity.weldEndCount === 1 ? "" : "s"})`],
           ["Weight", `${formatMass(quantity.pipeWeightKg)} kg`],
         ],
         [
@@ -12223,6 +12634,7 @@ function updatePropertiesPanel() {
       [
         ["Centreline", `${formatLength(selectedTotals.centrelineMm)} mm`],
         ["Cut pipe", `${formatLength(selectedTotals.cutLengthMm)} mm`],
+        ["Weld gap", `${formatWeldGapMm(selectedTotals.weldGapMm)} mm (${formatWeldGapMm(projectWeldGapMm())} mm x ${selectedTotals.weldEndCount} welded end${selectedTotals.weldEndCount === 1 ? "" : "s"})`],
         ["Pipe weight", `${formatMass(selectedTotals.pipeWeightKg)} kg`],
         ["Sizes", new Set(selectedSegments.map((segment) => pipeSizeForSegment(segment).nb)).size === 1 ? pipeSizeDisplayLabel(pipeSizeForSegment(selectedSegments[0])) : "Mixed"],
       ],
@@ -12560,6 +12972,7 @@ function renderToolSettingsOptions() {
 }
 
 function openToolSettingsDialog() {
+  captureTemporaryWorkspaceNavigation();
   closePrimaryWorkspaceDialogs("tools");
   renderToolSettingsOptions();
   if (toolSettingsDialog) toolSettingsDialog.hidden = false;
@@ -12567,6 +12980,7 @@ function openToolSettingsDialog() {
 
 function closeToolSettingsDialog() {
   if (toolSettingsDialog) toolSettingsDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function resetSideToolVisibility() {
@@ -12752,6 +13166,181 @@ function restoreWorkspaceSurfaceState(restore) {
   }
 }
 
+function activeInspectorTabName() {
+  return document.querySelector('[data-inspector-tab].active:not([hidden])')?.dataset.inspectorTab || "properties";
+}
+
+function currentSpoolNavigationIdentity() {
+  return {
+    projectId: normalizeProjectId(state.projectId),
+    spoolUid: normalizeTraceabilityId(state.spoolUid),
+  };
+}
+
+function captureTemporaryWorkspaceNavigation() {
+  if (temporaryWorkspaceNavigationState) return temporaryWorkspaceNavigationState;
+  temporaryWorkspaceNavigationState = {
+    ...currentSpoolNavigationIdentity(),
+    appMode,
+    activeTool: state.activeTool,
+    gridScale: state.gridScale,
+    drawingViewOffset: { ...drawingViewOffset },
+    selectedSegments: selectedSegmentIndexes(),
+    selectedFitting: state.selectedFitting,
+    selectedNote: state.selectedNote,
+    selectedMeasurement: state.selectedMeasurement,
+    selectedPoint: state.selectedPoint,
+    activePoint: state.activePoint,
+    inspectorTab: activeInspectorTabName(),
+    surfaceState: captureWorkspaceSurfaceState(),
+    focusMode: focusModeActive,
+  };
+  return temporaryWorkspaceNavigationState;
+}
+
+function discardTemporaryWorkspaceNavigation() {
+  temporaryWorkspaceNavigationState = null;
+}
+
+function primaryWorkspaceDialogOpen() {
+  return [
+    homeDashboardDialog,
+    projectLibraryDialog,
+    tutorialDialog,
+    videoTutorialDialog,
+    authDialog,
+    helpDialog,
+    toolSettingsDialog,
+  ].some((dialog) => dialog && !dialog.hidden);
+}
+
+function restoreTemporaryWorkspaceNavigation() {
+  const restore = temporaryWorkspaceNavigationState;
+  if (!restore || primaryWorkspaceDialogOpen()) return false;
+  temporaryWorkspaceNavigationState = null;
+  const identity = currentSpoolNavigationIdentity();
+  if (restore.projectId !== identity.projectId || restore.spoolUid !== identity.spoolUid) {
+    renderWorkspaceLocationStrips();
+    return false;
+  }
+
+  state.gridScale = clampNumber(Number(restore.gridScale) || state.gridScale, 10, 72);
+  drawingViewOffset = {
+    x: Number(restore.drawingViewOffset?.x) || 0,
+    y: Number(restore.drawingViewOffset?.y) || 0,
+  };
+  setSelectedSegments(restore.selectedSegments);
+  state.selectedFitting = Number.isInteger(restore.selectedFitting) &&
+    state.fittings.some((fitting) => fitting.id === restore.selectedFitting)
+    ? restore.selectedFitting
+    : null;
+  state.selectedNote = Number.isInteger(restore.selectedNote) &&
+    state.notes.some((note) => note.id === restore.selectedNote)
+    ? restore.selectedNote
+    : null;
+  state.selectedMeasurement = Number.isInteger(restore.selectedMeasurement) &&
+    normalizeMeasurements(state.measurements).some((measurement) => measurement.id === restore.selectedMeasurement)
+    ? restore.selectedMeasurement
+    : null;
+  state.selectedPoint = Number.isInteger(restore.selectedPoint) && state.points[restore.selectedPoint]
+    ? restore.selectedPoint
+    : null;
+  state.activePoint = Number.isInteger(restore.activePoint) && state.points[restore.activePoint]
+    ? restore.activePoint
+    : Math.max(0, state.points.length - 1);
+
+  applyAppMode(restore.appMode, { persist: false, activateTab: false, keepTool: true });
+  setTool(restore.activeTool);
+  activateInspectorTab(restore.inspectorTab);
+  updateAll({ save: false });
+  restoreWorkspaceSurfaceState(restore.surfaceState);
+  if (restore.focusMode && !focusModeActive) setFocusMode(true);
+  renderWorkspaceLocationStrips();
+  return true;
+}
+
+function scheduleTemporaryWorkspaceRestore() {
+  queueMicrotask(() => restoreTemporaryWorkspaceNavigation());
+}
+
+function workspaceLocationValues() {
+  const project = normalizeProjectInfo(state.projectInfo);
+  return {
+    workspace: cloudUser ? activeWorkspaceLabel() : "This device",
+    job: project.jobNumber || "No job",
+    spool: project.spoolNumber || "Untitled",
+    revision: project.revision || "-",
+    status: projectStatusLabel(state.projectStatus),
+  };
+}
+
+function updateWorkspaceDocumentTitle() {
+  const project = normalizeProjectInfo(state.projectInfo);
+  const identity = [project.jobNumber, project.spoolNumber].filter(Boolean).join(" / ");
+  document.title = identity ? `${identity} - SpoolMate` : "SpoolMate";
+}
+
+function renderWorkspaceLocationStrips() {
+  const values = workspaceLocationValues();
+  updateWorkspaceDocumentTitle();
+  for (const strip of document.querySelectorAll("[data-workspace-location]")) {
+    const configuredContext = strip.dataset.locationContext || "Drawing";
+    const surface = currentWorkspaceSurface();
+    const context = configuredContext === "Drawing"
+      ? surface === "preview"
+        ? "3D"
+        : surface === "inspector"
+        ? "Details"
+        : APP_MODE_WORKSPACE_TITLE[normalizeAppMode(appMode)] || "Drawing"
+      : configuredContext;
+    strip.replaceChildren();
+
+    const contextBadge = document.createElement("span");
+    contextBadge.className = "workspace-location-context";
+    contextBadge.textContent = context;
+    strip.append(contextBadge);
+
+    for (const [key, label] of [
+      ["workspace", "Workspace"],
+      ["job", "Job"],
+      ["spool", "Spool"],
+      ["revision", "Revision"],
+      ["status", "Status"],
+    ]) {
+      const crumb = document.createElement("span");
+      crumb.className = `workspace-location-crumb ${key}`;
+      const caption = document.createElement("small");
+      caption.textContent = label;
+      const value = document.createElement("b");
+      value.textContent = values[key];
+      value.title = values[key];
+      crumb.append(caption, value);
+      strip.append(crumb);
+    }
+
+    if (configuredContext !== "Drawing") {
+      const back = document.createElement("button");
+      back.type = "button";
+      back.className = "workspace-location-return";
+      back.dataset.workspaceReturn = "drawing";
+      back.textContent = "Back to drawing";
+      strip.append(back);
+    }
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const back = event.target instanceof Element ? event.target.closest("[data-workspace-return]") : null;
+  if (!back) return;
+  event.preventDefault();
+  if (authDialog && !authDialog.hidden) {
+    startupProjectPromptPending = false;
+    closeAuthDialog();
+  }
+  else closePrimaryWorkspaceDialogs();
+  scheduleTemporaryWorkspaceRestore();
+});
+
 function setFocusMode(active) {
   const next = active === true;
   if (next === focusModeActive) return;
@@ -12923,6 +13512,30 @@ function setPreviewHidden(hidden) {
   updatePreviewFloatingState();
 }
 
+function openPreviewPreservingWorkspace() {
+  if (previewPanelHidden || currentWorkspaceSurface() !== "preview") {
+    previewReturnSurfaceState = captureWorkspaceSurfaceState();
+  }
+  if (isTabletLayout()) {
+    showMobilePanel("preview");
+  } else {
+    setPreviewHidden(false);
+  }
+  renderWorkspaceLocationStrips();
+}
+
+function closePreviewToPreviousWorkspace() {
+  const restore = previewReturnSurfaceState;
+  previewReturnSurfaceState = null;
+  if (isTabletLayout()) {
+    showMobilePanel("drawing");
+  } else {
+    setPreviewHidden(true);
+  }
+  if (restore) restoreWorkspaceSurfaceState(restore);
+  renderWorkspaceLocationStrips();
+}
+
 function defaultPreviewFloatBounds() {
   const coarse = isTabletLayout();
   const sideReserve = coarse ? 0 : 86;
@@ -13076,17 +13689,8 @@ function setupFloatingPreviewPanel() {
   const previewBar = previewPanel?.querySelector(".panel-bar");
   previewFloatButton?.addEventListener("click", togglePreviewFloating);
   previewMinimizeButton?.addEventListener("click", togglePreviewMinimized);
-  previewHideButton?.addEventListener("click", () => {
-    if (isTabletLayout()) showMobilePanel("drawing");
-    else setPreviewHidden(true);
-  });
-  previewShowButton?.addEventListener("click", () => {
-    if (isTabletLayout()) {
-      showMobilePanel("preview");
-    } else {
-      setPreviewHidden(false);
-    }
-  });
+  previewHideButton?.addEventListener("click", closePreviewToPreviousWorkspace);
+  previewShowButton?.addEventListener("click", openPreviewPreservingWorkspace);
   previewBar?.addEventListener("pointerdown", beginPreviewFloatMove);
   previewFloatResize?.addEventListener("pointerdown", beginPreviewFloatResize);
   window.addEventListener("pointermove", updatePreviewFloatDrag);
@@ -13274,15 +13878,228 @@ function setupAppTheme() {
   }
 }
 
+let actionCommandMatches = [];
+let actionCommandActiveIndex = -1;
+
+function openCommandDrawingTool(tool, mode = "edit") {
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
+    return;
+  }
+  applyAppMode(mode, { keepTool: true });
+  setTool(tool);
+  setFittingsToolMenuOpen(false);
+  showMobilePanel("drawing");
+}
+
+function openCommandInspector(mode, tab, focusSelector = "") {
+  applyAppMode(mode, { keepTool: true });
+  activateInspectorTab(tab);
+  showMobilePanel("inspector");
+  if (focusSelector) {
+    window.requestAnimationFrame(() => {
+      const target = document.querySelector(focusSelector);
+      target?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      target?.focus?.({ preventScroll: true });
+    });
+  }
+}
+
+function openCommandExport(targetSelector, tab = "bom") {
+  openCommandInspector("export", tab);
+  window.requestAnimationFrame(() => document.querySelector(targetSelector)?.focus?.({ preventScroll: true }));
+}
+
+const ACTION_COMMANDS = [
+  { id: "draw", label: "Draw pipe", detail: "Start drag drawing from a pipe endpoint", category: "Drawing", keywords: "run pipe line centreline drag", capability: "edit", run: () => openCommandDrawingTool("draw", "draw") },
+  { id: "select", label: "Select pipe or fitting", detail: "Inspect and edit an existing drawing item", category: "Drawing", keywords: "pick edit properties right click", run: () => { applyAppMode("edit", { keepTool: true }); setTool("select"); showMobilePanel("drawing"); } },
+  { id: "box-select", label: "Box select multiple runs", detail: "Drag a selection around several pipe runs", category: "Drawing", keywords: "multi multiple group selection", run: () => { applyAppMode("edit", { keepTool: true }); setTool("boxSelect"); showMobilePanel("drawing"); } },
+  { id: "reducer", label: "Reducer tool", detail: "Place a reducer at a pipe-size transition", category: "Fitting", keywords: "reduce transition concentric eccentric size change", capability: "edit", run: () => openCommandDrawingTool("reducer") },
+  { id: "tee", label: "Tee tool", detail: "Create or identify a manufactured tee connection", category: "Fitting", keywords: "t piece junction outlet", capability: "edit", run: () => openCommandDrawingTool("tee", "draw") },
+  { id: "branch", label: "Fabricated branch tool", detail: "Create a welded outlet on a continuous main", category: "Fitting", keywords: "welded branch saddle fishmouth outlet", capability: "edit", run: () => openCommandDrawingTool("branch", "draw") },
+  { id: "flange", label: "Flange tool", detail: "Place a flange and choose its standard", category: "Fitting", keywords: "ansi pn din jis table slip on weld neck", capability: "edit", run: () => openCommandDrawingTool("flange") },
+  { id: "groove", label: "Roll-grooved end tool", detail: "Add a grooved pipe-end preparation", category: "Fitting", keywords: "groove victaulic roll groove coupling", capability: "edit", run: () => openCommandDrawingTool("rollGroove") },
+  { id: "thread", label: "Threaded pipe-end tool", detail: "Add a coarse threaded preparation to an endpoint", category: "Fitting", keywords: "thread screw bsp npt threaded end", capability: "edit", run: () => openCommandDrawingTool("threadedEnd") },
+  { id: "socket", label: "Socket tool", detail: "Place and rotate socket outlets", category: "Fitting", keywords: "sockolet outlet rotate spacing", capability: "edit", run: () => openCommandDrawingTool("socket") },
+  { id: "valve", label: "Valve tool", detail: "Place a valve marker on a pipe run", category: "Fitting", keywords: "valve isolation gate ball", capability: "edit", run: () => openCommandDrawingTool("valve") },
+  { id: "weld", label: "Weld marker tool", detail: "Place a numbered weld on the drawing", category: "Weld", keywords: "weld number w01 joint marker", capability: "edit", run: () => openCommandDrawingTool("weld") },
+  { id: "measure", label: "Measure between points", detail: "Pick two points for a manual measurement", category: "Drawing", keywords: "measurement distance tape", capability: "edit", run: () => openCommandDrawingTool("measure", "draw") },
+  { id: "45-offset", label: "Draw a 45 degree offset", detail: "Open Draw and use Shift or Hold 45 degrees", category: "Drawing", keywords: "45 offset travel set shift angled", capability: "edit", run: () => { openCommandDrawingTool("draw", "draw"); showAppNotice("Draw from the yellow endpoint while holding Shift, or use Hold 45 degrees on touch."); } },
+  { id: "dimensions", label: "Dimension settings", detail: "Open drawing dimensions and label controls", category: "Drawing", keywords: "dimension redline chain numbered c c centre", run: () => openCommandInspector("draw", "properties", "#dimensionStyleSelect") },
+  { id: "checks", label: "Drawing checks", detail: "Open QA findings and direct fixes", category: "Review", keywords: "qa quality blocker issue health ready to issue", run: () => showHealthPanel() },
+  { id: "weld-register", label: "Weld register", detail: "Open welder, WPS and inspection/NDT tracking", category: "Review", keywords: "wps ndt inspection welder repair w01 register", run: () => { showHealthPanel(); updateWorkflowSummary(); window.requestAnimationFrame(() => workflowSummary?.querySelector(".weld-register-card")?.scrollIntoView?.({ behavior: "smooth", block: "start" })); } },
+  { id: "notes", label: "Review notes and workflow", detail: "Open revision, approval and production notes", category: "Review", keywords: "comments revision approval workflow return", run: () => openCommandInspector("review", "notes") },
+  { id: "cut-list", label: "Cut list", detail: "Open calculated pipe cut lengths", category: "Fabrication", keywords: "cutting list pipe lengths deductions", run: () => openCommandInspector("review", "cutlist") },
+  { id: "weights", label: "Weights and lifting", detail: "Open spool mass, centre of gravity and lifting data", category: "Fabrication", keywords: "weight mass cog centre gravity lift lug", run: () => openCommandInspector("review", "weights") },
+  { id: "bom", label: "Bill of materials", detail: "Open the fabrication material take-off", category: "Fabrication", keywords: "bom material takeoff take off order list", run: () => openCommandInspector("export", "bom") },
+  { id: "preview-3d", label: "Open 3D model", detail: "Show the interactive spool preview", category: "View", keywords: "3d model rotate orbit preview", run: () => openPreviewPreservingWorkspace() },
+  { id: "fit-drawing", label: "Fit drawing to screen", detail: "Zoom and centre the complete spool", category: "View", keywords: "zoom out centre center whole spool", run: () => document.querySelector("#fitDrawingButton")?.click() },
+  { id: "focus", label: "Drawing Focus mode", detail: "Give the drawing the full workspace", category: "View", keywords: "fullscreen full screen maximise maximize", run: () => setFocusMode(true) },
+  { id: "export-pdf", label: "Export fabrication PDF", detail: "Open Export with the Draft or Issued PDF action ready", category: "Export", keywords: "fab sheet pdf workshop drawing print download issued draft", run: () => openCommandExport("#exportReportButton", "bom") },
+  { id: "export-3d", label: "Export 3D image", detail: "Open the 3D image export action", category: "Export", keywords: "png picture render model image", run: () => { openPreviewPreservingWorkspace(); window.requestAnimationFrame(() => document.querySelector("#export3dButton")?.focus?.({ preventScroll: true })); } },
+  { id: "export-project", label: "Export openable project", detail: "Open the project-file export action", category: "Export", keywords: "backup html json share project file", run: () => openCommandExport("#exportProjectButton", "bom") },
+  { id: "save", label: "Save spool", detail: "Save locally and to cloud when available", category: "Project", keywords: "cloud autosave store project", run: () => saveBrowserProjectButton?.click() },
+  { id: "jobs", label: "Open Jobs dashboard", detail: "Find jobs, spools, assignments and production stages", category: "Project", keywords: "job dashboard production team spools", run: () => openBrowserProject() },
+  { id: "dashboard", label: "Open home dashboard", detail: "Continue, restore, start or open a spool", category: "Project", keywords: "home start restore session", run: () => openHomeDashboard() },
+  { id: "project-details", label: "Edit project details", detail: "Job, spool, revision, client and drawing data", category: "Project", keywords: "job number spool number rev revision drawn by client weld gap", capability: "edit", run: () => promptForProjectDetails({ force: true }) },
+  { id: "new-spool", label: "New spool", detail: "Save or discard the current drawing and start again", category: "Project", keywords: "new drawing reset blank", run: () => document.querySelector("#resetButton")?.click() },
+  { id: "import-project", label: "Import spool project", detail: "Open a SpoolMate HTML or JSON project file", category: "Project", keywords: "load upload open file backup", run: () => document.querySelector("#importProjectButton")?.click() },
+  { id: "drawing-assistant", label: "Drawing import assistant", detail: "Trace a supplied drawing, photo or PDF", category: "Project", keywords: "trace image photo supplied drawing calibration", run: () => openDrawingAssistantDialog() },
+  { id: "account", label: "Account and workspace", detail: "Sign in, switch business workspace or manage plan", category: "Account", keywords: "login sign in business team subscription trial", run: () => document.querySelector("#accountButton")?.click() },
+  { id: "tutorial", label: "Interactive tutorial", detail: "Open the guided SpoolMate lessons", category: "Help", keywords: "training learn beginner quick start", run: () => openTutorialDialog() },
+  { id: "videos", label: "Video tutorials", detail: "Watch complete, Jobs and drawing guides", category: "Help", keywords: "training video watch guide", run: () => openVideoTutorialDialog() },
+  { id: "help", label: "Help", detail: "Open help for the current workflow", category: "Help", keywords: "instructions stuck how to support", run: () => openHelpDialog() },
+  { id: "test-kit", label: "Launch test kit", detail: "Open regression and device smoke tests", category: "Diagnostics", keywords: "qa testing regression diagnostics launch", run: () => openRegressionDialog() },
+  { id: "reset-layout", label: "Reset workspace layout", detail: "Close temporary panels and restore the drawing", category: "Setup", keywords: "panels minimized hidden restore layout", run: () => resetWorkspaceLayout() },
+];
+
+function normalizeActionCommandText(value) {
+  return String(value ?? "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function actionCommandAllowed(command) {
+  if (command.capability === "edit") return currentDrawingProjectPermission().canEdit;
+  if (command.capability === "issue") return currentDrawingProjectPermission().canIssue;
+  if (command.capability === "production") return currentDrawingProjectPermission().canManageProduction;
+  return true;
+}
+
+function actionCommandDisabledReason(command) {
+  return command.capability ? currentPermissionRestrictionText(command.capability) : "";
+}
+
+function matchingActionCommands(query) {
+  const normalized = normalizeActionCommandText(query);
+  if (!normalized) return [];
+  const terms = normalized.split(/\s+/).filter(Boolean);
+  return ACTION_COMMANDS
+    .map((command) => {
+      const label = normalizeActionCommandText(command.label);
+      const keywords = normalizeActionCommandText(`${command.keywords || ""} ${command.detail || ""} ${command.category || ""}`);
+      const haystack = `${label} ${keywords}`;
+      if (!terms.every((term) => haystack.includes(term))) return null;
+      let score = 0;
+      if (label === normalized) score += 120;
+      else if (label.startsWith(normalized)) score += 90;
+      else if (label.includes(normalized)) score += 65;
+      for (const term of terms) {
+        if (label.startsWith(term)) score += 18;
+        else if (label.includes(term)) score += 10;
+        if (keywords.includes(term)) score += 4;
+      }
+      return { command, score };
+    })
+    .filter(Boolean)
+    .sort((first, second) => second.score - first.score || first.command.label.localeCompare(second.command.label))
+    .slice(0, 12)
+    .map((entry) => entry.command);
+}
+
+function setActiveActionCommand(index) {
+  if (!actionCommandMatches.length) {
+    actionCommandActiveIndex = -1;
+    return;
+  }
+  const enabledIndexes = actionCommandMatches
+    .map((command, commandIndex) => actionCommandAllowed(command) ? commandIndex : -1)
+    .filter((commandIndex) => commandIndex >= 0);
+  if (!enabledIndexes.length) {
+    actionCommandActiveIndex = -1;
+  } else if (enabledIndexes.includes(index)) {
+    actionCommandActiveIndex = index;
+  } else {
+    actionCommandActiveIndex = enabledIndexes[0];
+  }
+  actionCommandResults?.querySelectorAll("[data-action-command]").forEach((button, buttonIndex) => {
+    const active = buttonIndex === actionCommandActiveIndex;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+}
+
+function renderActionCommandResults() {
+  if (!actionCommandInput || !actionCommandResults) return;
+  const query = actionCommandInput.value;
+  actionCommandMatches = matchingActionCommands(query);
+  const searching = Boolean(normalizeActionCommandText(query));
+  document.body.classList.toggle("action-command-searching", searching && actionMenuOpen());
+  actionCommandResults.hidden = !searching;
+  actionCommandResults.replaceChildren();
+  if (!searching) {
+    actionCommandActiveIndex = -1;
+    return;
+  }
+  if (!actionCommandMatches.length) {
+    const empty = document.createElement("div");
+    empty.className = "action-command-empty";
+    empty.textContent = "No matching action. Try a tool, fitting, screen or export name.";
+    actionCommandResults.append(empty);
+    actionCommandActiveIndex = -1;
+    return;
+  }
+  for (const command of actionCommandMatches) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "action-command-result";
+    button.dataset.actionCommand = command.id;
+    button.setAttribute("role", "option");
+    const allowed = actionCommandAllowed(command);
+    button.disabled = !allowed;
+    if (!allowed) button.title = actionCommandDisabledReason(command);
+    const title = document.createElement("strong");
+    title.textContent = command.label;
+    const detail = document.createElement("small");
+    detail.textContent = allowed ? command.detail : actionCommandDisabledReason(command);
+    const category = document.createElement("span");
+    category.textContent = allowed ? command.category : "Restricted";
+    button.append(title, detail, category);
+    actionCommandResults.append(button);
+  }
+  setActiveActionCommand(0);
+}
+
+async function runActionCommand(commandId) {
+  const command = ACTION_COMMANDS.find((item) => item.id === commandId);
+  if (!command) return;
+  if (!actionCommandAllowed(command)) {
+    showAppNotice(actionCommandDisabledReason(command));
+    return;
+  }
+  closeActionMenu();
+  try {
+    await command.run();
+  } catch (error) {
+    console.warn("Command action failed.", error);
+    showAppNotice(error?.message || `Could not open ${command.label}.`);
+  }
+}
+
+function moveActiveActionCommand(direction) {
+  const enabledIndexes = actionCommandMatches
+    .map((command, index) => actionCommandAllowed(command) ? index : -1)
+    .filter((index) => index >= 0);
+  if (!enabledIndexes.length) return;
+  const currentPosition = enabledIndexes.indexOf(actionCommandActiveIndex);
+  const nextPosition = currentPosition < 0
+    ? 0
+    : (currentPosition + direction + enabledIndexes.length) % enabledIndexes.length;
+  setActiveActionCommand(enabledIndexes[nextPosition]);
+  actionCommandResults?.querySelector(".action-command-result.active")?.scrollIntoView?.({ block: "nearest" });
+}
+
 function actionMenuOpen() {
   return Boolean(actionMenuPanel && !actionMenuPanel.hidden);
 }
 
-function openActionMenu() {
+function openActionMenu(options = {}) {
   if (!actionMenuPanel || !actionMenuButton) return;
   actionMenuPanel.hidden = false;
   actionMenuButton.setAttribute("aria-expanded", "true");
   document.body.classList.add("action-menu-open");
+  renderActionCommandResults();
+  if (options.focusSearch !== false) {
+    window.requestAnimationFrame(() => actionCommandInput?.focus({ preventScroll: true }));
+  }
 }
 
 function closeActionMenu() {
@@ -13290,6 +14107,14 @@ function closeActionMenu() {
   actionMenuPanel.hidden = true;
   actionMenuButton.setAttribute("aria-expanded", "false");
   document.body.classList.remove("action-menu-open");
+  document.body.classList.remove("action-command-searching");
+  if (actionCommandInput) actionCommandInput.value = "";
+  if (actionCommandResults) {
+    actionCommandResults.hidden = true;
+    actionCommandResults.replaceChildren();
+  }
+  actionCommandMatches = [];
+  actionCommandActiveIndex = -1;
 }
 
 function toggleActionMenu() {
@@ -13368,6 +14193,42 @@ function setupActionMenu() {
     handleActionMenuToggle(event);
   });
   actionMenuCloseButton?.addEventListener("click", closeActionMenu);
+  actionCommandInput?.addEventListener("input", renderActionCommandResults);
+  actionCommandInput?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      moveActiveActionCommand(1);
+      return;
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      moveActiveActionCommand(-1);
+      return;
+    }
+    if (event.key === "Enter" && actionCommandActiveIndex >= 0) {
+      event.preventDefault();
+      runActionCommand(actionCommandMatches[actionCommandActiveIndex]?.id);
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeActionMenu();
+      actionMenuButton?.focus({ preventScroll: true });
+    }
+  });
+  actionCommandResults?.addEventListener("pointermove", (event) => {
+    const result = event.target.closest("[data-action-command]");
+    if (!result || result.disabled) return;
+    const index = actionCommandMatches.findIndex((command) => command.id === result.dataset.actionCommand);
+    if (index >= 0) setActiveActionCommand(index);
+  });
+  actionCommandResults?.addEventListener("click", (event) => {
+    const result = event.target.closest("[data-action-command]");
+    if (!result || result.disabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    runActionCommand(result.dataset.actionCommand);
+  });
   actionMenuPanel?.addEventListener("click", (event) => {
     const actionButton = event.target.closest("button");
     if (!actionButton || actionButton === actionMenuCloseButton) return;
@@ -13382,6 +14243,19 @@ function setupActionMenu() {
     const target = event.target;
     if (actionMenuPanel?.contains(target) || actionMenuButton?.contains(target)) return;
     closeActionMenu();
+  });
+  document.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      if (!actionMenuOpen()) openActionMenu();
+      else actionCommandInput?.focus({ preventScroll: true });
+      actionCommandInput?.select?.();
+      return;
+    }
+    if (event.key === "Escape" && actionMenuOpen()) {
+      closeActionMenu();
+      actionMenuButton?.focus({ preventScroll: true });
+    }
   });
 }
 
@@ -15314,6 +16188,7 @@ function firstUseGuideStepForTutorial(step = currentTutorialStep()) {
 async function tryTutorialStepInDrawing() {
   const step = currentTutorialStep();
   const guideStep = firstUseGuideStepForTutorial(step);
+  discardTemporaryWorkspaceNavigation();
   closeTutorialDialog();
   if (guideStep) {
     activateFirstUseGuide({
@@ -16100,6 +16975,7 @@ function closePrimaryWorkspaceDialogs(except = "") {
 
 function openTutorialDialog(index = null) {
   if (!tutorialDialog) return;
+  captureTemporaryWorkspaceNavigation();
   closePrimaryWorkspaceDialogs("tutorial");
   const requestedIndex = Math.round(Number(index));
   if (index !== null && Number.isFinite(requestedIndex) && TUTORIAL_STEPS[requestedIndex] && !tutorialVisibleStepIndexes().includes(requestedIndex)) {
@@ -16122,6 +16998,7 @@ function closeTutorialDialog() {
   clearTutorialTarget();
   stopTutorialPractice();
   restorePreviewAfterTutorial();
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function tutorialNextStep() {
@@ -16270,6 +17147,7 @@ function selectVideoTutorial(videoId, { reset = true, autoplay = false } = {}) {
 
 function openVideoTutorialDialog(trigger = null, videoId = activeVideoTutorialId) {
   if (!videoTutorialDialog) return;
+  captureTemporaryWorkspaceNavigation();
   if (trigger instanceof HTMLElement) videoTutorialTrigger = trigger;
   closePrimaryWorkspaceDialogs("video");
   selectVideoTutorial(videoId, { reset: false });
@@ -16286,6 +17164,7 @@ function closeVideoTutorialDialog() {
   document.body.classList.remove("video-tutorial-open");
   if (videoTutorialTrigger?.isConnected) videoTutorialTrigger.focus();
   videoTutorialTrigger = null;
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function formatVideoTutorialTime(seconds) {
@@ -16852,6 +17731,7 @@ function setHelpTab(section) {
 
 function openHelpDialog(section = helpSectionForCurrentMode()) {
   if (!helpDialog) return;
+  captureTemporaryWorkspaceNavigation();
   closePrimaryWorkspaceDialogs("help");
   setHelpTab(section);
   helpDialog.hidden = false;
@@ -16860,6 +17740,7 @@ function openHelpDialog(section = helpSectionForCurrentMode()) {
 
 function closeHelpDialog() {
   if (helpDialog) helpDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function setupHelpDialog() {
@@ -16943,7 +17824,10 @@ function updateControls() {
   liftingAngleSelect.disabled = !state.showLiftingPoints;
   updateWorkflowControls();
   updateHistoryButtons();
+  updateRoleRestrictedDrawingTools();
   setTool(state.activeTool);
+  renderRoleAccessNotice();
+  renderWorkspaceLocationStrips();
 }
 
 function updateAll(options = {}) {
@@ -16964,6 +17848,8 @@ function updateAll(options = {}) {
   updatePipeSizeControls();
   updatePropertiesPanel();
   update3dPreview();
+  renderRoleAccessNotice();
+  renderWorkspaceLocationStrips();
   if (save) persistState();
   checkTutorialPractice();
 }
@@ -17232,7 +18118,22 @@ function setupAuthDialog() {
 
   authSignInModeButton?.addEventListener("click", () => setAuthMode("signin"));
   authCreateModeButton?.addEventListener("click", () => setAuthMode("signup"));
+  authAccountTypeInput?.addEventListener("change", updateBusinessSignupFields);
   authRememberDeviceInput?.addEventListener("change", saveAuthRememberPreference);
+  workspaceSwitcher?.addEventListener("change", () => {
+    selectWorkspace(workspaceSwitcher.value).catch((error) => {
+      console.warn("Workspace change failed.", error);
+      showAppNotice(error?.message || "Could not change workspace.");
+    });
+  });
+  accountWorkspaceList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-workspace-id]");
+    if (!button) return;
+    selectWorkspace(button.dataset.workspaceId).catch((error) => {
+      console.warn("Workspace change failed.", error);
+      showAppNotice(error?.message || "Could not change workspace.");
+    });
+  });
 
   authCloseButton?.addEventListener("click", closeAuthDialog);
   authDialog?.addEventListener("pointerdown", (event) => {
@@ -17329,6 +18230,8 @@ function setAuthMode(mode, options = {}) {
   if (authPasswordField) authPasswordField.hidden = resetRequestMode;
   if (authPasswordConfirmField) authPasswordConfirmField.hidden = !resetUpdateMode;
   if (authRememberField) authRememberField.hidden = !credentialMode;
+  if (authAccountTypeField) authAccountTypeField.hidden = !createMode;
+  updateBusinessSignupFields();
   if (authPasswordInput) authPasswordInput.required = !resetRequestMode;
   if (authPasswordConfirmInput) authPasswordConfirmInput.required = resetUpdateMode;
 
@@ -17383,8 +18286,15 @@ function setAuthMode(mode, options = {}) {
   }
 }
 
+function updateBusinessSignupFields() {
+  const business = authMode === "signup" && authAccountTypeInput?.value === "business";
+  if (authBusinessNameField) authBusinessNameField.hidden = !business;
+  if (authBusinessNameInput) authBusinessNameInput.required = business;
+}
+
 function openAuthDialog(options = {}) {
   if (!authDialog) return;
+  captureTemporaryWorkspaceNavigation();
   if (!options.startup) closePrimaryWorkspaceDialogs("auth");
   loadAuthRememberPreference();
   updateCloudStatus();
@@ -17422,6 +18332,7 @@ function closeAuthDialog() {
     authCloseButton.title = "Close account panel";
   }
   if (authDialog) authDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
   if (startupProjectPromptPending) {
     startupProjectPromptPending = false;
     window.setTimeout(() => openHomeDashboard({ startup: true }), 150);
@@ -17560,7 +18471,13 @@ async function signUpWithSupabase() {
   const credentials = authCredentials();
   if (!credentials || !(await ensureSupabaseClient())) return;
   if (await reloadIfOutdatedBeforeAuth()) return;
-
+  const businessSignup = authAccountTypeInput?.value === "business";
+  const businessName = String(authBusinessNameInput?.value ?? "").trim();
+  if (businessSignup && !businessName) {
+    showAppNotice("Enter the business name.");
+    authBusinessNameInput?.focus();
+    return;
+  }
   authSignUpButton.disabled = true;
   updateCloudStatus("Creating account...", "");
   try {
@@ -17569,9 +18486,26 @@ async function signUpWithSupabase() {
       password: credentials.password,
       options: {
         emailRedirectTo: location.href.split("#")[0],
+        data: {
+          account_type: businessSignup ? "business" : "personal",
+          business_name: businessSignup ? businessName.slice(0, 80) : "",
+          business_workspace_created: false,
+        },
       },
     });
     if (error) throw error;
+    try {
+      if (businessSignup) {
+        localStorage.setItem(PENDING_BUSINESS_SIGNUP_KEY, JSON.stringify({
+          email: credentials.email.toLowerCase(),
+          name: businessName.slice(0, 80),
+        }));
+      } else {
+        localStorage.removeItem(PENDING_BUSINESS_SIGNUP_KEY);
+      }
+    } catch {
+      // Account metadata still carries the setup across email confirmation.
+    }
     if (data?.session) {
       await applyCloudSession(data.session);
       saveAuthRememberPreference();
@@ -17594,6 +18528,64 @@ async function signUpWithSupabase() {
   } finally {
     authSignUpButton.disabled = false;
     setAuthMode("signup", { keepStatus: true });
+  }
+}
+
+function pendingBusinessSignup() {
+  try {
+    const pending = JSON.parse(localStorage.getItem(PENDING_BUSINESS_SIGNUP_KEY));
+    if (pending && typeof pending === "object") {
+      const name = String(pending.name ?? "").trim().slice(0, 80);
+      const email = String(pending.email ?? "").trim().toLowerCase();
+      if (name && email) return { name, email };
+    }
+  } catch {
+    // Fall through to the account metadata saved during signup.
+  }
+  const metadata = cloudUser?.user_metadata;
+  if (metadata?.account_type !== "business" || metadata?.business_workspace_created === true) return null;
+  const name = String(metadata.business_name ?? "").trim().slice(0, 80);
+  const email = String(cloudUser?.email ?? "").trim().toLowerCase();
+  return name && email ? { name, email } : null;
+}
+
+async function completePendingBusinessSignup() {
+  const pending = pendingBusinessSignup();
+  if (!pending || !supabaseClient || !cloudUser || pendingBusinessSignupBusy) return false;
+  if (pending.email !== String(cloudUser.email ?? "").trim().toLowerCase()) return false;
+  pendingBusinessSignupBusy = true;
+  try {
+    const existing = workspaceCompanyOptions().find(({ company, membership }) =>
+      membership.role === "owner" && company.name.toLowerCase() === pending.name.toLowerCase()
+    );
+    let companyId = existing?.company.id || null;
+    if (!companyId) {
+      const { data, error } = await supabaseClient.rpc("create_company", { company_name: pending.name });
+      if (error) throw error;
+      const created = Array.isArray(data) ? data[0] : data;
+      companyId = normalizeUuid(created?.company_id);
+      await loadTeamWorkspace({ silent: true });
+    }
+    if (companyId) await activateCompanyFromId(companyId);
+    await supabaseClient.auth.updateUser({
+      data: {
+        account_type: "business",
+        business_name: pending.name,
+        business_workspace_created: true,
+      },
+    });
+    try {
+      localStorage.removeItem(PENDING_BUSINESS_SIGNUP_KEY);
+    } catch {
+      // The duplicate-name check prevents accidental repeat creation.
+    }
+    return Boolean(companyId);
+  } catch (error) {
+    console.warn("Business workspace setup is waiting to complete.", error);
+    showAppNotice(error?.message || "Your account was created, but the business workspace could not be created yet.");
+    return false;
+  } finally {
+    pendingBusinessSignupBusy = false;
   }
 }
 
@@ -17809,6 +18801,7 @@ function setupHomeDashboard() {
 }
 
 function openHomeDashboard(options = {}) {
+  captureTemporaryWorkspaceNavigation();
   closePrimaryWorkspaceDialogs("home");
   ensureHomeDashboardShell();
   if (!homeDashboardDialog) {
@@ -17824,6 +18817,7 @@ function openHomeDashboard(options = {}) {
 function closeHomeDashboard() {
   if (homeDashboardDialog) homeDashboardDialog.hidden = true;
   document.body.classList.remove("home-dashboard-open");
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function updateHomeDashboard() {
@@ -18401,10 +19395,26 @@ function handleProjectLibraryActivation(event) {
     return;
   }
 
+  const newWindowTarget = target.closest("[data-open-project-window]");
+  if (newWindowTarget) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (shouldSkipProjectLibraryActivation(`window:${newWindowTarget.dataset.openProjectWindow ?? ""}`)) return;
+    openProjectInNewWindow(
+      newWindowTarget.dataset.openProjectWindow,
+      newWindowTarget.dataset.projectSource,
+    );
+    return;
+  }
+
   const openTarget = target.closest("[data-open-project-id]");
   if (!openTarget) return;
   event.preventDefault();
   event.stopPropagation();
+  if (event.ctrlKey || event.metaKey || event.shiftKey) {
+    openProjectInNewWindow(openTarget.dataset.openProjectId, openTarget.dataset.projectSource);
+    return;
+  }
   if (shouldSkipProjectLibraryActivation(`open:${openTarget.dataset.openProjectId ?? ""}`)) return;
   if (openTarget.dataset.projectSource === "cloud") {
     openSavedCloudProject(openTarget.dataset.openProjectId).catch((error) => {
@@ -19109,12 +20119,28 @@ function endpointRenderBasePoint(start, end, renderedSegment, side, clearanceMet
 
 function setupNetworkAwareness() {
   window.addEventListener("offline", () => {
-    updateCloudStatus("Offline / local projects available", "warning");
-    showAppNotice("You are offline. Local projects remain available; cloud sync, team data and QR travellers need a connection.", { tone: "warning" });
+    if (cloudSaveDirty && state.projectId) queueCurrentCloudSave("offline");
+    else updateCloudStatus("Offline / local projects available", "warning");
+    showAppNotice("You are offline. Drawing changes stay on this device and cloud changes are queued until the connection returns.", { tone: "warning" });
   });
   window.addEventListener("online", () => {
     updateCloudStatus();
-    showAppNotice("Connection restored. Cloud changes can sync again.", { tone: "success" });
+    const queued = currentCloudSaveQueueEntry();
+    if (queued) {
+      showAppNotice("Connection restored. Retrying the queued cloud save.", { tone: "success" });
+      retryQueuedCloudSave({ automatic: true });
+    } else {
+      showAppNotice("Connection restored. Cloud changes can sync again.", { tone: "success" });
+    }
+  });
+  cloudSyncStatus?.addEventListener("click", () => {
+    if (currentCloudSaveQueueEntry() || cloudSaveError) {
+      retryQueuedCloudSave();
+      return;
+    }
+    showAppNotice(cloudLastSavedAt
+      ? `Last saved to cloud at ${formatCloudSaveTime(cloudLastSavedAt, { full: true })}.`
+      : cloudSyncStatus.title || "This drawing is currently stored on this device.");
   });
   if (!navigator.onLine) updateCloudStatus("Offline / local projects available", "warning");
 }
@@ -22531,6 +23557,77 @@ function formatCloudSaveTime(value, options = {}) {
     : date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+function readCloudSaveQueue() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CLOUD_SAVE_QUEUE_KEY));
+    return (Array.isArray(raw) ? raw : [])
+      .filter((entry) => normalizeProjectId(entry?.projectId) && entry?.record?.drawing_state)
+      .slice(0, 20);
+  } catch {
+    return [];
+  }
+}
+
+function writeCloudSaveQueue(entries) {
+  try {
+    localStorage.setItem(CLOUD_SAVE_QUEUE_KEY, JSON.stringify((Array.isArray(entries) ? entries : []).slice(0, 20)));
+  } catch (error) {
+    console.warn("Could not store the offline cloud-save queue.", error);
+  }
+}
+
+function currentCloudSaveQueueEntry() {
+  const projectId = normalizeProjectId(state.projectId);
+  if (!projectId) return null;
+  return readCloudSaveQueue().find((entry) =>
+    normalizeProjectId(entry.projectId) === projectId &&
+    (!entry.userId || entry.userId === cloudUser?.id)
+  ) ?? null;
+}
+
+function removeQueuedCloudSave(projectId = state.projectId) {
+  const id = normalizeProjectId(projectId);
+  if (!id) return;
+  writeCloudSaveQueue(readCloudSaveQueue().filter((entry) =>
+    normalizeProjectId(entry.projectId) !== id || (entry.userId && entry.userId !== cloudUser?.id)
+  ));
+}
+
+function queueCurrentCloudSave(reason = "offline", error = null, options = {}) {
+  const permission = currentDrawingProjectPermission();
+  const productionOnly = options.productionOnly === true;
+  if (
+    !cloudUser ||
+    !hasActiveCloudLicense() ||
+    (!permission.canEdit && !(productionOnly && permission.canManageProduction)) ||
+    !hasDrawingContent()
+  ) return false;
+  const record = cloudProjectRecord();
+  const projectId = normalizeProjectId(record.id);
+  if (!projectId) return false;
+  const queuedAt = new Date().toISOString();
+  const entry = {
+    projectId,
+    userId: cloudUser.id,
+    companyId: normalizeUuid(record.company_id),
+    queuedAt,
+    reason,
+    scope: productionOnly ? "production" : "drawing",
+    baseRemoteUpdatedAt: cloudLastRemoteUpdatedAt || cloudLastSavedAt || "",
+    record,
+  };
+  const remaining = readCloudSaveQueue().filter((item) =>
+    normalizeProjectId(item.projectId) !== projectId || (item.userId && item.userId !== cloudUser.id)
+  );
+  writeCloudSaveQueue([entry, ...remaining]);
+  cloudSaveDirty = true;
+  if (error) {
+    cloudSaveError = error?.message ? `Cloud save failed: ${error.message}` : "Cloud save failed.";
+  }
+  updateCloudStatus(reason === "offline" ? "Queued offline" : "Save failed / queued for retry", reason === "offline" ? "queued" : "error");
+  return true;
+}
+
 function readCloudSaveMetaStore() {
   try {
     const raw = JSON.parse(localStorage.getItem(CLOUD_SAVE_META_KEY));
@@ -22601,11 +23698,13 @@ function currentProjectHasCloudRecord() {
 
 function cloudSaveTitle(defaultTitle) {
   const lines = [defaultTitle].filter(Boolean);
+  const queued = currentCloudSaveQueueEntry();
   if (cloudUser?.email) lines.push(cloudUser.email);
   if (cloudUser) lines.push(cloudLicenseText());
   if (activeCompany && activeCompanyMembership?.status === "approved") lines.push(`Team: ${activeCompany.name}`);
   if (state.projectId) lines.push(`Project: ${projectDisplayName()}`);
   if (cloudLastSavedAt) lines.push(`Last cloud save: ${formatCloudSaveTime(cloudLastSavedAt, { full: true })}`);
+  if (queued?.queuedAt) lines.push(`Recovery copy queued: ${formatCloudSaveTime(queued.queuedAt, { full: true })}`);
   if (cloudSaveDirty) lines.push("This drawing has changes waiting to save.");
   if (cloudSaveConflict) lines.push("A newer cloud copy was detected. Press Save to choose whether to overwrite it.");
   if (cloudSaveError) lines.push(cloudSaveError);
@@ -22640,6 +23739,7 @@ function markCloudSaveClean(remoteUpdatedAt, options = {}) {
   cloudSaveError = "";
   cloudLastSavedAt = updatedAt;
   cloudLastRemoteUpdatedAt = updatedAt;
+  removeQueuedCloudSave(id);
 
   if (id && options.writeMeta !== false) {
     const store = readCloudSaveMetaStore();
@@ -22658,6 +23758,36 @@ function markCloudSaveClean(remoteUpdatedAt, options = {}) {
 function markCloudSaveFailed(error) {
   cloudSaveError = error?.message ? `Cloud save failed: ${error.message}` : "Cloud save failed.";
   updateCloudStatus("Cloud save failed", "error");
+}
+
+async function retryQueuedCloudSave(options = {}) {
+  const queued = currentCloudSaveQueueEntry();
+  if (!queued && !cloudSaveError && !cloudSaveDirty) {
+    showAppNotice(cloudLastSavedAt
+      ? `All changes were saved to cloud at ${formatCloudSaveTime(cloudLastSavedAt, { full: true })}.`
+      : "There are no failed cloud changes to recover.");
+    return false;
+  }
+  if (!navigator.onLine) {
+    queueCurrentCloudSave("offline");
+    if (!options.automatic) showAppNotice("Your recovery copy is safely queued on this device and will retry when the connection returns.");
+    return false;
+  }
+  if (!options.automatic) createProjectBackup("before cloud save recovery");
+  cloudSaveError = "";
+  updateCloudStatus("Retrying cloud save...", "saving");
+  try {
+    const saved = await saveCloudProject({
+      silent: true,
+      recovery: true,
+      productionOnly: queued?.scope === "production",
+    });
+    if (saved && !options.automatic) showAppNotice("Recovered changes saved to cloud.", { tone: "success" });
+    return saved;
+  } catch (error) {
+    if (!options.automatic) showAppNotice("The cloud save still failed. Your recovery copy remains queued on this device.", { tone: "warning" });
+    return false;
+  }
 }
 
 function remoteCloudProjectIsNewer(remoteUpdatedAt) {
@@ -22735,6 +23865,7 @@ function withCloudDirtySuppressed(callback) {
 
 function updateCloudStatus(message = null, mode = "") {
   ensureCloudSaveTrackingProject();
+  const queued = currentCloudSaveQueueEntry();
   const signedIn = Boolean(cloudUser);
   const active = signedIn && hasActiveCloudLicense();
   const readable = signedIn && hasCloudReadAccess();
@@ -22752,6 +23883,10 @@ function updateCloudStatus(message = null, mode = "") {
         ? "Cloud conflict"
         : cloudSaveError
         ? "Cloud save failed"
+        : queued
+        ? navigator.onLine
+          ? "Cloud save queued"
+          : "Queued offline"
         : cloudSaveDirty
         ? state.projectId
           ? "Unsaved changes"
@@ -22767,7 +23902,9 @@ function updateCloudStatus(message = null, mode = "") {
       ? "Licence inactive"
       : "Cloud setup needed"
     : "Local only";
-  const inferredMode = mode
+  const inferredMode = (!navigator.onLine && queued ? "queued" : "")
+    || mode
+    || (message && /queued|offline copy/i.test(message) ? "queued" : "")
     || (message && /conflict|newer/i.test(message) ? "conflict" : "")
     || (message && /failed|unavailable/i.test(message) ? "error" : "")
     || (message && /saving|loading|connecting|resending|creating|signing/i.test(message) ? "saving" : "")
@@ -22780,31 +23917,42 @@ function updateCloudStatus(message = null, mode = "") {
     || (hasCloudRecord && cloudLastSavedAt ? "saved" : "signed-in");
   const canonicalMode = inferredMode === "saving" || inferredMode === "dirty"
     ? "saving"
+    : inferredMode === "queued"
+    ? "queued"
     : inferredMode === "error" || inferredMode === "conflict"
     ? "error"
     : inferredMode === "saved" || (active && hasCloudRecord && cloudLastSavedAt && !cloudSaveDirty)
     ? "saved"
     : "local";
-  const text = canonicalMode === "saving"
+  let text = canonicalMode === "saving"
     ? "Saving…"
     : canonicalMode === "error"
     ? "Save failed"
     : canonicalMode === "saved"
     ? "Saved to cloud"
     : "Local only";
+  if (canonicalMode === "queued") {
+    text = navigator.onLine ? "Queued / Retry" : "Queued offline";
+  } else if (canonicalMode === "error") {
+    text = "Save failed / Retry";
+  } else if (canonicalMode === "saved") {
+    text = `Saved ${formatCloudSaveTime(cloudLastSavedAt) || "to cloud"}`;
+  }
 
   if (cloudSyncStatus) {
     cloudSyncStatus.textContent = text;
     cloudSyncStatus.dataset.status = canonicalMode;
     cloudSyncStatus.title = cloudSaveTitle([
       canonicalMode === "saving" ? "Saving changes to cloud" : "",
+      canonicalMode === "queued" ? "A recovery copy is stored on this device. Press to retry." : "",
       canonicalMode === "saved" ? "All changes saved to cloud" : "",
       canonicalMode === "error" ? (message || cloudSaveError || defaultMessage) : "",
       canonicalMode === "local" ? defaultMessage : "",
       signedIn && cloudUser?.email ? `${cloudUser.email}${teamSuffix}` : "Not signed in",
     ].filter(Boolean).join(" / "));
     cloudSyncStatus.setAttribute("aria-label", `${text}. ${cloudSyncStatus.title}`);
-    for (const status of ["signed-in", "saving", "saved", "dirty", "conflict", "error", "warning", "local"]) {
+    cloudSyncStatus.setAttribute("aria-disabled", String(canonicalMode !== "queued" && canonicalMode !== "error"));
+    for (const status of ["signed-in", "saving", "saved", "dirty", "queued", "conflict", "error", "warning", "local"]) {
       cloudSyncStatus.classList.toggle(status, status === canonicalMode);
     }
   }
@@ -22838,6 +23986,8 @@ function updateCloudStatus(message = null, mode = "") {
         : "Open cloud saved project in read-only mode"
       : "Open saved project from this browser";
   }
+  renderRoleAccessNotice();
+  renderWorkspaceLocationStrips();
 }
 
 function cloudProfileDate(value) {
@@ -22861,6 +24011,23 @@ function cloudLicenceState(profile = cloudProfile, nowValue = Date.now()) {
   return "expired";
 }
 
+function businessLicenceState(company = activeCompany, nowValue = Date.now()) {
+  if (!company) return "setup";
+  return cloudLicenceState({
+    license_status: company.licenseStatus,
+    trial_ends_at: company.trialEndsAt,
+    grace_ends_at: company.graceEndsAt,
+  }, nowValue);
+}
+
+function activeWorkspaceIsBusiness() {
+  return Boolean(activeCompany && activeCompanyMembership?.status === "approved");
+}
+
+function activeWorkspaceLabel() {
+  return activeWorkspaceIsBusiness() ? activeCompany.name : "Personal";
+}
+
 function licenceDaysRemaining(value, nowValue = Date.now()) {
   const endsAt = cloudProfileDate(value);
   if (!endsAt) return 0;
@@ -22874,16 +24041,24 @@ function licenceDaysText(days) {
 
 function cloudLicenseText(profile = cloudProfile) {
   if (!cloudUser) return "Local only";
-  if (!profile) return "No licence profile";
-  const state = cloudLicenceState(profile);
+  const business = activeWorkspaceIsBusiness();
+  const source = business
+    ? {
+        license_status: activeCompany.licenseStatus,
+        trial_ends_at: activeCompany.trialEndsAt,
+        grace_ends_at: activeCompany.graceEndsAt,
+      }
+    : profile;
+  if (!source) return "No licence profile";
+  const state = business ? businessLicenceState(activeCompany) : cloudLicenceState(source);
   if (state === "full") return "Full licence";
   if (state === "paid") return "Paid licence";
   if (state === "grace") {
-    const days = Math.max(1, licenceDaysRemaining(profile.grace_ends_at));
+    const days = Math.max(1, licenceDaysRemaining(source.grace_ends_at));
     return `Payment grace ${days} day${days === 1 ? "" : "s"} left`;
   }
   if (state === "trial") {
-    const days = Math.max(1, licenceDaysRemaining(profile.trial_ends_at));
+    const days = Math.max(1, licenceDaysRemaining(source.trial_ends_at));
     return `Trial ${days} day${days === 1 ? "" : "s"} left`;
   }
   return "Read-only cloud access";
@@ -22894,7 +24069,11 @@ function hasCloudReadAccess(profile = cloudProfile) {
 }
 
 function hasActiveCloudLicense(profile = cloudProfile) {
-  if (!cloudUser || !profile) return false;
+  if (!cloudUser) return false;
+  if (activeWorkspaceIsBusiness()) {
+    return ["full", "paid", "trial", "grace"].includes(businessLicenceState(activeCompany));
+  }
+  if (!profile) return false;
   return ["full", "paid", "trial", "grace"].includes(cloudLicenceState(profile));
 }
 
@@ -22906,9 +24085,13 @@ function cloudReadOnlyMessage(action = "change this cloud spool") {
 }
 
 function licenceWarningModel(profile = cloudProfile) {
-  const state = cloudLicenceState(profile);
+  const business = activeWorkspaceIsBusiness();
+  const source = business
+    ? { trial_ends_at: activeCompany?.trialEndsAt, grace_ends_at: activeCompany?.graceEndsAt }
+    : profile;
+  const state = business ? businessLicenceState(activeCompany) : cloudLicenceState(profile);
   if (state === "trial") {
-    const days = licenceDaysRemaining(profile?.trial_ends_at);
+    const days = licenceDaysRemaining(source?.trial_ends_at);
     if (days > 7) return null;
     const level = days <= 1 ? "trial-1" : days <= 3 ? "trial-3" : "trial-7";
     return {
@@ -22919,7 +24102,7 @@ function licenceWarningModel(profile = cloudProfile) {
     };
   }
   if (state === "grace") {
-    const days = Math.max(1, licenceDaysRemaining(profile?.grace_ends_at));
+    const days = Math.max(1, licenceDaysRemaining(source?.grace_ends_at));
     return {
       state,
       level: `grace-${days}`,
@@ -22949,7 +24132,11 @@ function setAccountCapabilities(items) {
 
 function updateLicencePresentation() {
   const signedIn = Boolean(cloudUser);
-  const state = cloudLicenceState();
+  const business = activeWorkspaceIsBusiness();
+  const state = business ? businessLicenceState(activeCompany) : cloudLicenceState();
+  const licenceSource = business
+    ? { trial_ends_at: activeCompany?.trialEndsAt, grace_ends_at: activeCompany?.graceEndsAt }
+    : cloudProfile;
   const warning = signedIn ? licenceWarningModel() : null;
 
   if (accountPlanPanel) {
@@ -22964,9 +24151,9 @@ function updateLicencePresentation() {
       : state === "paid"
       ? { badge: "Paid", title: "Paid licence", message: "Full cloud access is active.", countdown: "Licence active." }
       : state === "grace"
-      ? { badge: "Grace", title: "Payment grace period", message: "Cloud access remains active temporarily.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(cloudProfile?.grace_ends_at)))} remaining.` }
+      ? { badge: "Grace", title: "Payment grace period", message: "Cloud access remains active temporarily.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(licenceSource?.grace_ends_at)))} remaining.` }
       : state === "trial"
-      ? { badge: "Trial", title: `${TRIAL_LENGTH_DAYS}-day cloud trial`, message: "Full cloud saving and collaboration are active.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(cloudProfile?.trial_ends_at)))} remaining.` }
+      ? { badge: "Trial", title: `${TRIAL_LENGTH_DAYS}-day ${business ? "business " : ""}cloud trial`, message: "Full cloud saving and collaboration are active.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(licenceSource?.trial_ends_at)))} remaining.` }
       : { badge: "Expired", title: "Read-only cloud access", message: "Existing cloud spools stay available; cloud editing is paused.", countdown: "Upgrade to restore cloud saving and collaboration." };
     if (accountPlanBadge) accountPlanBadge.textContent = plan.badge;
     if (accountPlanTitle) accountPlanTitle.textContent = plan.title;
@@ -22981,7 +24168,9 @@ function updateLicencePresentation() {
         ]
       : [
           "Create, edit and synchronise cloud spools across devices",
-          "Use team projects, comments and workshop photos",
+          business
+            ? `${activeCompany.includedSeats} included people plus ${activeCompany.extraSeats} additional paid seat${activeCompany.extraSeats === 1 ? "" : "s"}`
+            : "Use your private Personal workspace across devices",
           state === "trial" ? "Use up to 10 Ask SpoolMate AI answers each day" : "Use up to 50 Ask SpoolMate AI answers each day",
           "Download project and account-data exports at any time",
         ]);
@@ -23060,6 +24249,7 @@ function projectPermission(project, options = {}) {
       canComment: false,
       canEdit: true,
       canIssue: true,
+      canManageProduction: true,
       canDelete: true,
       label: "Local editable",
     };
@@ -23068,27 +24258,158 @@ function projectPermission(project, options = {}) {
   const ownerId = normalizeUuid(project?.ownerId);
   const companyId = normalizeUuid(project?.companyId);
   const ownsProject = Boolean(cloudUser?.id && ownerId === cloudUser.id);
-  const companyMember = currentUserIsCompanyMember(companyId);
-  const companyAdmin = currentUserCanAdminCompany(companyId);
+  const membership = companyMembershipForCurrentUser(companyId);
+  const companyMember = membership?.status === "approved";
+  const role = membership?.role || "";
+  const companyAdmin = companyMember && ["owner", "admin"].includes(role);
   const canWriteCloud = hasActiveCloudLicense();
-  const canEdit = canWriteCloud && (ownsProject || companyAdmin);
+  const personal = !companyId;
+  const canEdit = canWriteCloud && (personal
+    ? ownsProject
+    : companyMember && ["owner", "admin", "designer", "checker"].includes(role));
+  const canIssue = canWriteCloud && (personal
+    ? ownsProject
+    : companyMember && ["owner", "admin", "checker"].includes(role));
+  const canManageProduction = canWriteCloud && (personal
+    ? ownsProject
+    : companyMember && ["owner", "admin", "checker", "workshop"].includes(role));
 
   return {
     canView: hasCloudReadAccess() && (ownsProject || companyMember),
-    canComment: canWriteCloud && (ownsProject || companyMember),
+    canComment: canWriteCloud && (ownsProject || (companyMember && role !== "viewer")),
     canEdit,
-    canIssue: canEdit,
-    canDelete: canWriteCloud && (ownsProject || companyAdmin),
+    canIssue,
+    canManageProduction,
+    canDelete: canWriteCloud && (personal ? ownsProject : companyAdmin),
     label: canEdit
       ? ownsProject
         ? "Owner editable"
-        : "Team admin editable"
+        : `${role || "Business"} editable`
       : !canWriteCloud
       ? "Licence expired / read only"
       : companyMember
-      ? "Member view/comment"
+      ? `${role || "Business"} access`
       : "Cloud read only",
   };
+}
+
+function workspaceCompanyOptions() {
+  return cloudCompanyMemberships
+    .filter((member) => member.status === "approved")
+    .map((member) => ({
+      company: cloudCompanies.find((company) => company.id === member.companyId),
+      membership: member,
+    }))
+    .filter((item) => item.company);
+}
+
+function renderWorkspaceChoices() {
+  const signedIn = Boolean(cloudUser);
+  const options = workspaceCompanyOptions();
+  const currentValue = activeWorkspaceIsBusiness() ? `business:${activeCompany.id}` : "personal";
+
+  if (workspaceSwitcher) {
+    workspaceSwitcher.hidden = !signedIn;
+    workspaceSwitcher.replaceChildren();
+    const personal = document.createElement("option");
+    personal.value = "personal";
+    personal.textContent = "Personal";
+    workspaceSwitcher.append(personal);
+    for (const { company } of options) {
+      const option = document.createElement("option");
+      option.value = `business:${company.id}`;
+      option.textContent = company.name;
+      workspaceSwitcher.append(option);
+    }
+    workspaceSwitcher.value = currentValue;
+  }
+
+  if (accountWorkspacePanel) accountWorkspacePanel.hidden = !signedIn;
+  if (!accountWorkspaceList) return;
+  accountWorkspaceList.replaceChildren();
+  if (!signedIn) return;
+
+  const choices = [
+    { value: "personal", title: "Personal", detail: "Private jobs and your personal licence" },
+    ...options.map(({ company, membership }) => ({
+      value: `business:${company.id}`,
+      title: company.name,
+      detail: `Business workspace / ${businessRoleLabel(membership.role)}`,
+    })),
+  ];
+  for (const choice of choices) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "account-workspace-choice";
+    button.classList.toggle("active", choice.value === currentValue);
+    button.dataset.workspaceId = choice.value;
+    const title = document.createElement("b");
+    title.textContent = choice.title;
+    const detail = document.createElement("small");
+    detail.textContent = choice.detail;
+    button.append(title, detail);
+    accountWorkspaceList.append(button);
+  }
+}
+
+async function selectWorkspace(value) {
+  const selection = String(value ?? "personal");
+  if (selection === "personal") {
+    activatePersonalWorkspace();
+  } else if (selection.startsWith("business:")) {
+    const activated = await activateCompanyFromId(selection.slice(9));
+    if (!activated) throw new Error("You do not have approved access to that business.");
+  }
+  projectLibraryOpenFolderKey = "";
+  if (projectLibraryDialog && !projectLibraryDialog.hidden && projectLibrarySource === "cloud") {
+    await openBrowserProject({ source: "cloud", keepSearch: true });
+  }
+}
+
+function businessRoleLabel(role) {
+  return ({
+    owner: "Owner",
+    admin: "Admin",
+    designer: "Designer",
+    checker: "Checker",
+    workshop: "Workshop",
+    viewer: "Viewer",
+    member: "Workshop",
+  })[role] || "Workshop";
+}
+
+function roleRequirementText(capability) {
+  if (capability === "issue") return "Approval and issue require a Checker, Admin or Owner.";
+  if (capability === "production") return "Production and weld updates require a Workshop, Checker, Admin or Owner.";
+  if (capability === "edit") return "Drawing edits require a Designer, Checker, Admin or Owner.";
+  if (capability === "comment") return "Comments require a Workshop role or higher.";
+  if (capability === "delete") return "Deleting business spools requires an Admin or Owner.";
+  return "Ask a business Admin or Owner for access.";
+}
+
+function currentRoleAccessText() {
+  if (!activeCompanyIsApproved()) return "";
+  const role = activeCompanyMembership?.role || "workshop";
+  const label = businessRoleLabel(role);
+  if (role === "owner" || role === "admin" || role === "checker") return "";
+  if (role === "designer") return `${label} access: drawing and comments are available. ${roleRequirementText("issue")} ${roleRequirementText("production")}`;
+  if (role === "viewer") return `${label} access: view and export only. ${roleRequirementText("comment")} ${roleRequirementText("edit")}`;
+  return `${label} access: production, weld and comment controls are available. ${roleRequirementText("edit")} ${roleRequirementText("issue")}`;
+}
+
+function renderRoleAccessNotice() {
+  if (!roleAccessNotice) return;
+  const text = currentRoleAccessText();
+  roleAccessNotice.hidden = !text;
+  roleAccessNotice.textContent = text;
+}
+
+function currentPermissionRestrictionText(capability) {
+  if (!hasActiveCloudLicense()) return cloudReadOnlyMessage("perform this action");
+  if (activeCompanyIsApproved()) return roleRequirementText(capability);
+  if (capability === "issue") return "Only the owner of a Personal spool can approve or issue it.";
+  if (capability === "delete") return "Only the owner of a Personal spool can delete it.";
+  return "Only the owner of this Personal spool can change it.";
 }
 
 function currentDrawingProjectPermission() {
@@ -23126,12 +24447,16 @@ function clearTeamWorkspace() {
   teamMessagesCompanyId = null;
   teamMessagesError = "";
   renderTeamWorkspace();
+  renderWorkspaceChoices();
   renderProjectLibraryComms(projectLibraryProjects);
   renderProjectComments();
 }
 
 function storedActiveCompanyId() {
   try {
+    const workspace = String(localStorage.getItem(ACTIVE_WORKSPACE_KEY) ?? "");
+    if (workspace === "personal") return null;
+    if (workspace.startsWith("business:")) return normalizeUuid(workspace.slice(9));
     return normalizeUuid(localStorage.getItem(ACTIVE_COMPANY_KEY));
   } catch {
     return null;
@@ -23143,12 +24468,34 @@ function storeActiveCompanyId(companyId) {
     const id = normalizeUuid(companyId);
     if (id) {
       localStorage.setItem(ACTIVE_COMPANY_KEY, id);
+      localStorage.setItem(ACTIVE_WORKSPACE_KEY, `business:${id}`);
     } else {
       localStorage.removeItem(ACTIVE_COMPANY_KEY);
+      localStorage.setItem(ACTIVE_WORKSPACE_KEY, "personal");
     }
   } catch {
     // Team selection still works for this session if local storage is blocked.
   }
+}
+
+function storedWorkspacePrefersPersonal() {
+  try {
+    return localStorage.getItem(ACTIVE_WORKSPACE_KEY) === "personal";
+  } catch {
+    return false;
+  }
+}
+
+function activatePersonalWorkspace() {
+  activeCompany = null;
+  activeCompanyMembership = null;
+  companyMembers = [];
+  storeActiveCompanyId(null);
+  cloudProjectCache = null;
+  renderTeamWorkspace();
+  renderWorkspaceChoices();
+  updateCloudStatus();
+  updateLicencePresentation();
 }
 
 function setActiveCompanyFromId(companyId) {
@@ -23162,7 +24509,9 @@ function setActiveCompanyFromId(companyId) {
   activeCompany = company;
   activeCompanyMembership = membership;
   storeActiveCompanyId(id);
+  cloudProjectCache = null;
   renderTeamWorkspace();
+  renderWorkspaceChoices();
   updateCloudStatus();
   return true;
 }
@@ -23198,7 +24547,7 @@ async function loadTeamWorkspace(options = {}) {
     if (companyIds.length) {
       const { data: companyRows, error: companyError } = await supabaseClient
         .from(CLOUD_COMPANIES_TABLE)
-        .select("id,name,invite_code,created_by,created_at,updated_at")
+        .select("id,name,invite_code,created_by,license_status,trial_started_at,trial_ends_at,grace_ends_at,included_seats,extra_seats,created_at,updated_at")
         .in("id", companyIds);
       if (companyError) throw companyError;
       companies = (companyRows ?? []).map(normalizeCompany).filter(Boolean);
@@ -23206,18 +24555,19 @@ async function loadTeamWorkspace(options = {}) {
 
     cloudCompanies = companies;
     const savedCompanyId = storedActiveCompanyId();
-    activeCompanyMembership =
-      memberships.find((member) => member.status === "approved" && member.companyId === savedCompanyId) ||
-      memberships.find((member) => member.status === "approved") ||
-      memberships.find((member) => member.companyId === savedCompanyId) ||
-      memberships[0] ||
-      null;
+    activeCompanyMembership = storedWorkspacePrefersPersonal()
+      ? null
+      : memberships.find((member) => member.status === "approved" && member.companyId === savedCompanyId) ||
+        memberships.find((member) => member.companyId === savedCompanyId) ||
+        memberships.find((member) => member.status === "approved") ||
+        memberships[0] ||
+        null;
     activeCompany = activeCompanyMembership
       ? companies.find((company) => company.id === activeCompanyMembership.companyId) ?? null
       : null;
     if (activeCompany) {
       storeActiveCompanyId(activeCompany.id);
-    } else {
+    } else if (!storedWorkspacePrefersPersonal()) {
       storeActiveCompanyId(null);
     }
 
@@ -23226,6 +24576,7 @@ async function loadTeamWorkspace(options = {}) {
       await loadTeamMessages({ silent: true });
     }
     renderTeamWorkspace();
+    renderWorkspaceChoices();
     updateCloudStatus();
   } catch (error) {
     console.warn("Could not load team workspace.", error);
@@ -23258,8 +24609,8 @@ function renderTeamWorkspace(errorMessage = "") {
   if (!signedIn) return;
 
   const active = hasActiveCloudLicense();
-  if (teamCreateButton) teamCreateButton.disabled = !active;
-  if (teamJoinButton) teamJoinButton.disabled = !active;
+  if (teamCreateButton) teamCreateButton.disabled = !signedIn;
+  if (teamJoinButton) teamJoinButton.disabled = !signedIn;
   if (teamRefreshButton) teamRefreshButton.disabled = !hasCloudReadAccess();
 
   if (teamWorkspaceStatus) {
@@ -23270,15 +24621,30 @@ function renderTeamWorkspace(errorMessage = "") {
         ? `${activeCompany.name} is available read only. Upgrade to change team projects, members or messages.`
         : "Team access is read only. Upgrade to create or join a team.";
     } else if (!activeCompany) {
-      teamWorkspaceStatus.textContent = "No team workspace yet. Create one or join with an invite code.";
+      teamWorkspaceStatus.textContent = cloudCompanies.length
+        ? "Personal is selected. Choose a business workspace above, create another, or join with an invite code."
+        : "No business workspace yet. Create one or join with an invite code.";
     } else if (activeCompanyMembership?.status === "pending") {
       teamWorkspaceStatus.textContent = `Join request for ${activeCompany.name} is waiting for approval.`;
     } else if (activeCompanyMembership?.status === "rejected") {
       teamWorkspaceStatus.textContent = `Join request for ${activeCompany.name} was rejected.`;
     } else {
       const invite = activeCompany.inviteCode ? ` Invite code: ${activeCompany.inviteCode}.` : "";
-      const roleText = activeCompanyMembership?.role ? ` Your role: ${activeCompanyMembership.role}.` : "";
-      teamWorkspaceStatus.textContent = `Using ${activeCompany.name} for shared cloud projects.${roleText}${invite}`;
+      const roleText = activeCompanyMembership?.role ? ` Your role: ${businessRoleLabel(activeCompanyMembership.role)}.` : "";
+      teamWorkspaceStatus.textContent = `Business jobs belong to ${activeCompany.name}.${roleText}${invite}`;
+    }
+  }
+
+  if (businessSeatSummary) {
+    businessSeatSummary.hidden = !activeCompany;
+    if (activeCompany) {
+      const seatLimit = Math.max(1, activeCompany.includedSeats + activeCompany.extraSeats);
+      const seatUsage = companyMembers.filter((member) => ["pending", "invited", "approved"].includes(member.status)).length;
+      const extraText = activeCompany.extraSeats
+        ? `${activeCompany.extraSeats} additional paid seat${activeCompany.extraSeats === 1 ? "" : "s"} active.`
+        : "Extra people can be added as paid seats when billing is connected.";
+      businessSeatSummary.textContent = `${seatUsage} of ${seatLimit} seats used. ${activeCompany.includedSeats} included. ${extraText}`;
+      businessSeatSummary.classList.toggle("full", seatUsage >= seatLimit);
     }
   }
 
@@ -23287,7 +24653,7 @@ function renderTeamWorkspace(errorMessage = "") {
   if (!activeCompany) {
     const empty = document.createElement("div");
     empty.className = "team-empty";
-    empty.textContent = "Create a team, then share its invite code with the people you want to approve.";
+    empty.textContent = "Choose a business above, or create one and share its invite code.";
     teamMembersList.append(empty);
     return;
   }
@@ -23315,7 +24681,7 @@ function renderTeamWorkspace(errorMessage = "") {
     title.textContent = member.email || (member.userId === cloudUser?.id ? "You" : "Team member");
 
     const detail = document.createElement("span");
-    detail.textContent = `${member.role} / ${member.status}`;
+    detail.textContent = `${businessRoleLabel(member.role)} / ${member.status}`;
     main.append(title, detail);
     row.append(main);
 
@@ -23325,7 +24691,13 @@ function renderTeamWorkspace(errorMessage = "") {
       const roleSelect = document.createElement("select");
       roleSelect.dataset.teamMemberRole = member.userId;
       roleSelect.title = "Change this user's team role";
-      for (const [value, label] of [["member", "Member"], ["admin", "Admin"]]) {
+      for (const [value, label] of [
+        ["admin", "Admin"],
+        ["designer", "Designer"],
+        ["checker", "Checker"],
+        ["workshop", "Workshop"],
+        ["viewer", "Viewer"],
+      ]) {
         const option = document.createElement("option");
         option.value = value;
         option.textContent = label;
@@ -23355,10 +24727,6 @@ function renderTeamWorkspace(errorMessage = "") {
 
 async function createTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
-  if (!hasActiveCloudLicense()) {
-    showAppNotice(cloudReadOnlyMessage("create a team"));
-    return;
-  }
 
   const companyName = String(teamCompanyNameInput?.value ?? "").trim() || "SpoolMate Company";
   if (teamCreateButton) teamCreateButton.disabled = true;
@@ -23374,16 +24742,12 @@ async function createTeamCompany() {
     console.warn("Could not create team.", error);
     showAppNotice(error?.message || "Could not create team.");
   } finally {
-    if (teamCreateButton) teamCreateButton.disabled = !hasActiveCloudLicense();
+    if (teamCreateButton) teamCreateButton.disabled = !cloudUser;
   }
 }
 
 async function joinTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
-  if (!hasActiveCloudLicense()) {
-    showAppNotice(cloudReadOnlyMessage("join a team"));
-    return;
-  }
 
   const joinCode = String(teamInviteCodeInput?.value ?? "").trim().toUpperCase();
   if (!joinCode) {
@@ -23404,7 +24768,7 @@ async function joinTeamCompany() {
     console.warn("Could not join team.", error);
     showAppNotice(error?.message || "Could not join team.");
   } finally {
-    if (teamJoinButton) teamJoinButton.disabled = !hasActiveCloudLicense();
+    if (teamJoinButton) teamJoinButton.disabled = !cloudUser;
   }
 }
 
@@ -23418,7 +24782,7 @@ async function reviewTeamMember(userId, approved) {
 
   const { error } = await supabaseClient
     .from(CLOUD_COMPANY_MEMBERS_TABLE)
-    .update({ status: approved ? "approved" : "rejected", role: "member" })
+    .update({ status: approved ? "approved" : "rejected", role: "workshop" })
     .eq("company_id", activeCompany.id)
     .eq("user_id", memberId);
   if (error) {
@@ -23434,7 +24798,7 @@ async function updateTeamMemberRole(userId, role) {
     return;
   }
   const memberId = normalizeUuid(userId);
-  const nextRole = role === "admin" ? "admin" : "member";
+  const nextRole = ["admin", "designer", "checker", "workshop", "viewer"].includes(role) ? role : "workshop";
   if (!memberId || !activeCompany || memberId === cloudUser?.id) return;
 
   const { error } = await supabaseClient
@@ -23999,6 +25363,7 @@ async function applyCloudSession(session) {
 
   cloudProfile = await ensureCloudProfile();
   await loadTeamWorkspace({ silent: true });
+  await completePendingBusinessSignup();
   loadCloudSaveMetaForCurrentProject();
   if (currentProjectHasCloudRecord() && !hasActiveCloudLicense()) {
     cloudPermissionReadOnly = true;
@@ -24049,6 +25414,10 @@ async function ensureCloudProfile() {
 function queueCloudAutosave() {
   if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !state.projectId || !hasDrawingContent()) return;
   if (cloudSaveConflict) return;
+  if (!navigator.onLine) {
+    queueCurrentCloudSave("offline");
+    return;
+  }
   window.clearTimeout(cloudAutosaveTimer);
   cloudAutosaveTimer = window.setTimeout(() => {
     saveCloudProject({ silent: true, autosave: true }).catch((error) => {
@@ -24060,14 +25429,21 @@ function queueCloudAutosave() {
 
 async function saveCloudProject(options = {}) {
   if (!supabaseClient || !cloudUser) return false;
+  const permission = currentDrawingProjectPermission();
+  const productionOnly = options.productionOnly === true && permission.canManageProduction;
   if (!hasActiveCloudLicense()) {
     updateCloudStatus(cloudLicenseText(), "warning");
     if (!options.silent) showAppNotice(cloudReadOnlyMessage("save cloud changes"));
     return false;
   }
-  if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
+  if (cloudPermissionReadOnly && currentProjectHasCloudRecord() && !productionOnly) {
     updateCloudStatus("View/comment only", "warning");
     if (!options.silent) showAppNotice(cloudReadOnlyMessage("save changes"));
+    return false;
+  }
+  if (!navigator.onLine) {
+    queueCurrentCloudSave("offline", null, { productionOnly });
+    if (!options.silent) showAppNotice("Cloud save queued on this device. It will retry when the connection returns.");
     return false;
   }
   if (cloudAutosaveBusy) return false;
@@ -24096,6 +25472,7 @@ async function saveCloudProject(options = {}) {
     window.setTimeout(() => updateCloudStatus(), 1600);
     return true;
   } catch (error) {
+    queueCurrentCloudSave("failed", error, { productionOnly });
     markCloudSaveFailed(error);
     throw error;
   } finally {
@@ -24114,7 +25491,10 @@ async function loadSavedCloudProjects() {
   if (error) throw error;
   cloudProjectCache = (data ?? [])
     .map(mapCloudProject)
-    .filter((project) => project.id && stateFromPayload(project.state));
+    .filter((project) => project.id && stateFromPayload(project.state))
+    .filter((project) => activeWorkspaceIsBusiness()
+      ? project.companyId === activeCompany.id
+      : !project.companyId && project.ownerId === cloudUser.id);
   return cloudProjectCache;
 }
 
@@ -24391,9 +25771,48 @@ async function openQrScanner() {
   scanner.frame = requestAnimationFrame(scanFrame);
 }
 
+function projectWindowUrl(projectId, source = projectLibrarySource) {
+  const id = normalizeProjectId(projectId);
+  if (!id) return "";
+  const url = new URL(location.href);
+  url.search = "";
+  url.hash = "";
+  if (source === "cloud") {
+    url.searchParams.set("project", id);
+  } else {
+    url.searchParams.set("localProject", id);
+  }
+  return url.toString();
+}
+
+function openProjectInNewWindow(projectId, source = projectLibrarySource) {
+  const url = projectWindowUrl(projectId, source);
+  if (!url) {
+    showAppNotice("That spool could not be opened in a new window.");
+    return false;
+  }
+  const opened = window.open(url, "_blank");
+  if (!opened) {
+    showAppNotice("The browser blocked the new spool window. Allow pop-ups for SpoolMate, or hold Ctrl/Command while pressing Open.");
+    return false;
+  }
+  try {
+    opened.opener = null;
+  } catch {
+    // The new window is still isolated by the browser when opener access is blocked.
+  }
+  showAppNotice("Spool opened in a separate window. The Jobs dashboard will stay here.");
+  return true;
+}
+
 async function maybeOpenProjectFromUrl() {
   if (location.protocol === "file:") return false;
   const params = new URLSearchParams(location.search);
+  const localProjectId = normalizeProjectId(params.get("localProject"));
+  if (localProjectId) {
+    await openSavedBrowserProject(localProjectId, { skipConfirm: true });
+    return true;
+  }
   const projectId = normalizeProjectId(params.get("project"));
   const traveller = params.get("traveller") === "1";
   if (!projectId) return false;
@@ -24617,6 +26036,7 @@ async function saveBrowserProject(options = {}) {
 }
 
 async function openBrowserProject(options = {}) {
+  captureTemporaryWorkspaceNavigation();
   closePrimaryWorkspaceDialogs("jobs");
   ensureProjectLibraryDashboardShell();
   projectLibraryGuideVisible = false;
@@ -24785,10 +26205,10 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = projectLibrarySource === "cloud"
       ? !hasActiveCloudLicense()
-        ? "Cloud projects are read only. You can open, review and export them; upgrade to save changes."
+        ? `${activeWorkspaceLabel()} cloud projects are read only. You can open, review and export them; upgrade to save changes.`
         : activeCompanyIsApproved()
-        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Start with jobs needing attention, then open one job.`
-        : "Projects are saved to your SpoolMate cloud account. Start with jobs needing attention, then open one job."
+        ? `Showing jobs owned by ${activeCompany.name}. Start with jobs needing attention, then open one job.`
+        : "Showing your private Personal jobs. Start with jobs needing attention, then open one job."
       : "Projects are saved on this device/browser. Start with jobs needing attention, then open one job.";
   }
   projectLibraryList.innerHTML = "";
@@ -25478,8 +26898,8 @@ function productionBoardFilterCounts(projects = projectLibraryProjects) {
   }, {});
 }
 
-function productionStatusQuickActions(status, canEdit, projectId) {
-  const disabledAttr = canEdit ? "" : ' disabled title="View/comment only for your team role"';
+function productionStatusQuickActions(status, canManage, projectId) {
+  const disabledAttr = canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`;
   const actions = [
     ["readycheck", "Ready"],
     ["issued", "Issued"],
@@ -25533,9 +26953,9 @@ async function persistProjectWorkflowUpdate(project, nextDrawingState, updatedAt
         : "Sign in with an active licence to update cloud production items.");
       return false;
     }
-    if (!projectPermission(project, { source: "cloud" }).canEdit) {
+    if (!projectPermission(project, { source: "cloud" }).canManageProduction) {
       showAppNotice(hasActiveCloudLicense()
-        ? "Only the project owner or a team admin can update this cloud spool."
+        ? "Your business role does not allow production updates."
         : cloudReadOnlyMessage("update cloud production items"));
       return false;
     }
@@ -25802,9 +27222,9 @@ function teamMessageHtml(message, canWrite = hasActiveCloudLicense()) {
   `;
 }
 
-function spoolMessageHtml(item) {
-  const { project, message } = item;
-  const canEdit = projectPermission(project).canEdit;
+  function spoolMessageHtml(item) {
+    const { project, message } = item;
+    const canManage = projectPermission(project).canManageProduction;
   const production = savedProjectProductionInfo(project);
   const meta = [
     savedProjectDetailLine(project),
@@ -25817,7 +27237,7 @@ function spoolMessageHtml(item) {
       <button type="button" class="team-comms-open" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">${escapeHtml(savedProjectSpoolTitle(project))}</button>
       <p>${escapeHtml(message.body)}</p>
       <small>${escapeHtml(meta)}</small>
-      <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(message.id)}"${canEdit ? "" : ' disabled title="This cloud spool is read only"'}>Done</button>
+      <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(message.id)}"${canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`}>Done</button>
     </article>
   `;
 }
@@ -26411,8 +27831,8 @@ function projectProductionCard(project) {
   const activeMessage = [...messages].reverse().find((message) => !message.completed) ?? null;
   const status = normalizeProjectStatus(savedState?.projectStatus);
   const permission = projectPermission(project);
-  const canEdit = permission.canEdit;
-  const disabledAttr = canEdit ? "" : ' disabled title="View/comment only for your team role"';
+  const canManage = permission.canManageProduction;
+  const disabledAttr = canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`;
   const dueState = productionDueState(production);
   const card = document.createElement("article");
   card.className = "production-spool-card";
@@ -26421,8 +27841,8 @@ function projectProductionCard(project) {
   card.classList.toggle("overdue", dueState.key === "overdue");
   card.classList.toggle("due-today", dueState.key === "today");
   card.classList.toggle("complete", status === "complete");
-  card.classList.toggle("read-only", !canEdit);
-  card.draggable = canEdit;
+  card.classList.toggle("read-only", !canManage);
+  card.draggable = canManage;
   card.dataset.productionProjectId = project.id;
   card.dataset.projectSource = project.source ?? projectLibrarySource;
   card.dataset.productionStatus = status;
@@ -26434,8 +27854,8 @@ function projectProductionCard(project) {
   ];
   if (production.hold) parts.unshift(production.holdReason ? `Hold: ${production.holdReason}` : "On hold");
   if (status === "complete" && production.removeAfter) parts.push(`Hides ${new Date(production.removeAfter).toLocaleDateString()}`);
-  if (!canEdit) parts.push(permission.label);
-  const quickActions = productionStatusQuickActions(status, canEdit, project.id);
+  if (!canManage) parts.push(`${permission.label} / production locked`);
+  const quickActions = productionStatusQuickActions(status, canManage, project.id);
   const latestActivity = [...savedProjectProductionActivity(project)].reverse()[0] ?? null;
 
   card.innerHTML = `
@@ -26444,7 +27864,7 @@ function projectProductionCard(project) {
         <strong>${escapeHtml(savedProjectSpoolTitle(project))}</strong>
         <span>${escapeHtml(savedProjectDetailLine(project))}</span>
       </button>
-      <span class="production-drag-handle" aria-hidden="true">${canEdit ? "Drag" : "View"}</span>
+      <span class="production-drag-handle" aria-hidden="true">${canManage ? "Drag" : "View"}</span>
     </div>
     <div class="production-card-badges">
       <span class="status">${escapeHtml(projectStatusLabel(status))}</span>
@@ -26504,7 +27924,7 @@ function projectProductionCard(project) {
         </div>
       ` : ""}
       <div class="production-message-compose">
-        <input data-production-message-input data-project-id="${escapeHtml(project.id)}" type="text" maxlength="240" placeholder="${canEdit ? "Message / yard note" : "Use spool comments or team Comms"}"${disabledAttr} />
+        <input data-production-message-input data-project-id="${escapeHtml(project.id)}" type="text" maxlength="240" placeholder="${canManage ? "Message / yard note" : "Production updates require Workshop or higher"}"${disabledAttr} />
         <button type="button" data-production-action="add-message" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add</button>
       </div>
     </div>
@@ -26512,6 +27932,7 @@ function projectProductionCard(project) {
     <div class="production-card-actions">
       ${quickActions}
       <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">Open</button>
+      <button type="button" data-open-project-window="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}" title="Keep this Jobs window open and load the spool separately">New window</button>
     </div>
   `;
   return card;
@@ -26903,7 +28324,15 @@ function projectLibraryRow(project) {
     }
 
     openButton.dataset.projectSource = project.source ?? projectLibrarySource;
-    row.append(main, openButton, deleteButton);
+    const newWindowButton = document.createElement("button");
+    newWindowButton.type = "button";
+    newWindowButton.className = "project-library-action";
+    newWindowButton.textContent = "New window";
+    newWindowButton.dataset.openProjectWindow = project.id;
+    newWindowButton.dataset.projectSource = project.source ?? projectLibrarySource;
+    newWindowButton.title = "Keep Jobs open and load this spool in a separate window";
+
+    row.append(main, openButton, newWindowButton, deleteButton);
     return row;
 }
 
@@ -27003,9 +28432,10 @@ function closeProjectLibrary() {
   ensureProjectLibraryGuideSlot();
   ensureProjectLibraryReportSlot();
   if (projectLibraryDialog) projectLibraryDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
 }
 
-async function openSavedBrowserProject(projectId) {
+async function openSavedBrowserProject(projectId, options = {}) {
   clearPendingProjectCommentPhoto();
   const record = loadSavedBrowserProjects().find((project) => project.id === projectId);
   if (!record) {
@@ -27014,7 +28444,7 @@ async function openSavedBrowserProject(projectId) {
     return;
   }
 
-  if (state.projectId !== record.id && hasDrawingContent()) {
+  if (!options.skipConfirm && state.projectId !== record.id && hasDrawingContent()) {
     const proceed = await confirmAppAction("Open this project? Your current drawing will be replaced.", {
       title: "Open saved spool",
       confirmLabel: "Open spool",
@@ -29895,10 +31325,11 @@ function openProjectDetailsDialog(options = {}) {
     projectDialogResolver = null;
   }
 
-  const defaults = normalizeProjectInfo(options.defaults ?? state.projectInfo);
+  const defaults = normalizeProjectInfo(options.defaults ?? state.projectInfo, state.pipeSpec);
   for (const [field, input] of Object.entries(projectDialogInputs)) {
     if (input) input.value = defaults[field] ?? "";
   }
+  updateProjectFittingProfileHelp();
   if (projectDialogTitle) projectDialogTitle.textContent = options.title ?? "Project details";
   projectDialogSubmitButton.textContent = options.action ?? "Save project";
   closeProjectJobPicker();
@@ -29929,7 +31360,14 @@ function projectDetailsFromDialog() {
     Object.fromEntries(
       Object.entries(projectDialogInputs).map(([field, input]) => [field, input?.value ?? ""]),
     ),
+    state.pipeSpec,
   );
+}
+
+function updateProjectFittingProfileHelp() {
+  if (!projectDialogFittingProfileHelp) return;
+  const key = normalizeFittingDataProfile(projectDialogInputs.fittingProfile?.value, state.pipeSpec);
+  projectDialogFittingProfileHelp.textContent = FITTING_DATA_PROFILES[key].help;
 }
 
 async function promptProjectDetailsFallback(defaults = state.projectInfo) {
@@ -29969,7 +31407,16 @@ async function promptProjectDetailsFallback(defaults = state.projectInfo) {
     submitLabel: "Save details",
   });
   if (drawnBy === null) return null;
-  return normalizeProjectInfo({ jobNumber, spoolNumber, client, revision, drawnBy });
+  return normalizeProjectInfo({
+    jobNumber,
+    spoolNumber,
+    client,
+    revision,
+    drawnBy,
+    fittingProfile: current.fittingProfile,
+    fittingProfileReference: current.fittingProfileReference,
+    weldGapMm: current.weldGapMm,
+  }, state.pipeSpec);
 }
 
 function exportProjectFile() {
@@ -30816,6 +32263,7 @@ function buildTakeoffReportCanvas() {
 function drawReportClientPanel(ctx, area, quantities) {
   const project = normalizeProjectInfo(state.projectInfo);
   const issueAudit = latestIssueAudit();
+  const fittingSource = fittingCalculationSourceSummary();
   ctx.save();
   roundRect(ctx, area.x, area.y, area.width, area.height, 10);
   ctx.fillStyle = "#fffdf8";
@@ -30841,7 +32289,10 @@ function drawReportClientPanel(ctx, area, quantities) {
     ["Issued", state.issuedAt ? `${new Date(state.issuedAt).toLocaleDateString()}${state.issuedBy ? ` by ${state.issuedBy}` : ""}` : "Not issued"],
     ["Ready to Issue", issueAudit ? issueAudit.result === "overridden" ? "Warnings overridden" : "Passed" : "Not recorded"],
     ["Material", pipeSpec().label],
+    ["Fitting data", fittingSource.shortProfileText],
+    ["Calculation source", fittingSource.statusLabel],
     ["Pipe centreline", `${formatLength(quantities.centrelineMm)} mm`],
+    ["Weld gap", `${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end / ${formatWeldGapMm(quantities.weldGapMm)} mm total`],
     ["Estimated weight", `${formatMass(quantities.totalWeightKg)} kg`],
     ["Fittings", `${quantities.fittings.length + quantities.elbows.length + quantities.tees.length + quantities.reducers.length} item${quantities.fittings.length + quantities.elbows.length + quantities.tees.length + quantities.reducers.length === 1 ? "" : "s"}`],
   ];
@@ -30934,6 +32385,7 @@ function drawReportHeader(ctx, width, options = {}) {
     : "Not issued";
   const status = `${projectStatusLabel()}${state.locked ? " / Locked" : ""}`;
   const issueAudit = latestIssueAudit();
+  const fittingSource = fittingCalculationSourceSummary();
   const issueAuditText = issueAudit
     ? issueAudit.result === "overridden"
       ? "Warnings overridden"
@@ -30970,7 +32422,9 @@ function drawReportHeader(ctx, width, options = {}) {
   ctx.font = "800 13px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
   ctx.fillText(truncateReportText(ctx, subtitleWithVersion, 820), 136, 73);
-  const clientLine = project.client ? `Client / area: ${project.client} / ${pipeSpec().label}` : `${pipeSpec().label} / ${checked}`;
+  const clientLine = project.client
+    ? `Client / area: ${project.client} / ${pipeSpec().label} / ${fittingSource.shortProfileText}`
+    : `${pipeSpec().label} / ${fittingSource.shortProfileText} / ${checked}`;
   drawReportPill(ctx, `${templateLabel} sheet`, 136, 84, 130);
   drawReportPill(ctx, state.issuedAt ? "Issued" : projectStatusLabel(), 274, 84, 116, {
     issued: Boolean(state.issuedAt),
@@ -31156,6 +32610,7 @@ function reportRelevantPoints() {
 
 function drawReportTakeoff(ctx, area, quantities, options = {}) {
   const compact = options.compact === true;
+  const fittingSource = fittingCalculationSourceSummary();
   ctx.save();
   roundRect(ctx, area.x, area.y, area.width, area.height, 10);
   ctx.fillStyle = "#fffdf8";
@@ -31202,8 +32657,8 @@ function drawReportTakeoff(ctx, area, quantities, options = {}) {
   drawWrappedReportText(
     ctx,
     state.showLiftingPoints
-      ? `${pipeSpec().label} pipe. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
-      : `${pipeSpec().label} pipe. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set.`,
+      ? `${pipeSpec().label}. Fitting data: ${fittingSource.profileText}. ${fittingSource.statusLabel}. Weld gap ${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end; open ends 0.0 mm. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
+      : `${pipeSpec().label}. Fitting data: ${fittingSource.profileText}. ${fittingSource.statusLabel}. Weld gap ${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end; open ends 0.0 mm. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set.`,
     x,
     area.y + area.height - 36,
     area.width - 48,
@@ -31216,7 +32671,8 @@ function drawReportTotals(ctx, x, y, width, quantities, options = {}) {
   const compact = options.compact === true;
   const totals = [
     ["Centreline", `${formatLength(quantities.centrelineMm)} mm`],
-    ["Deductions", `${formatLength(quantities.bendTakeoffMm)} mm`],
+    ["Fitting deductions", `${formatLength(quantities.bendTakeoffMm)} mm`],
+    ["Weld gap", `${formatWeldGapMm(quantities.weldGapMm)} mm`],
     ["Cut pipe", `${formatLength(quantities.cutLengthMm)} mm`],
     ...(compact ? [] : [
       ["Pipe weight", `${formatMass(quantities.pipeWeightKg)} kg`],
@@ -31387,10 +32843,11 @@ function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
 
   const columns = [
     { label: "ID", x: 0, align: "left" },
-    { label: "Size", x: Math.min(98, width * 0.18), align: "left" },
-    { label: "C/C mm", x: width * 0.42, align: "right" },
-    { label: "Deduct mm", x: width * 0.6, align: "right" },
-    { label: "Cut mm", x: width * 0.78, align: "right" },
+    { label: "Size", x: Math.min(88, width * 0.15), align: "left" },
+    { label: "C/C mm", x: width * 0.38, align: "right" },
+    { label: "Fitting mm", x: width * 0.52, align: "right" },
+    { label: "Weld gap", x: width * 0.66, align: "right" },
+    { label: "Cut mm", x: width * 0.8, align: "right" },
     { label: "Weight kg", x: width, align: "right" },
   ];
 
@@ -31433,6 +32890,7 @@ function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
       pipeSizeDisplayLabel(size),
       `${formatLength(quantity.centrelineMm)}`,
       `${formatLength(quantity.bendTakeoffMm)}`,
+      `${formatWeldGapMm(quantity.weldGapMm)}`,
       `${formatLength(quantity.cutLengthMm)}`,
       `${formatMass(quantity.pipeWeightKg)}`,
     ];
@@ -31466,6 +32924,10 @@ function drawReportCompactFabricationNotes(ctx, x, y, width, quantities) {
   for (const item of acknowledgedChecks.slice(0, 3)) {
     notes.push(`ACKNOWLEDGED CHECK: ${item.title} - ${item.acknowledgement.reason} (${item.acknowledgement.by || "Reviewer"}).`);
   }
+  notes.push(
+    `Weld gap ${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end; ` +
+    `${formatWeldGapMm(quantities.weldGapMm)} mm total across ${quantities.weldEndCount} welded end${quantities.weldEndCount === 1 ? "" : "s"}. Open pipe ends receive no weld-gap deduction.`,
+  );
   if (quantities.elbows.length) {
     notes.push(`${quantities.elbows.length} bend${quantities.elbows.length === 1 ? "" : "s"} / ${formatLength(quantities.bendTakeoffMm)} mm total deduction / ${formatMass(quantities.bendWeightKg)} kg.`);
   }
@@ -31481,7 +32943,7 @@ function drawReportCompactFabricationNotes(ctx, x, y, width, quantities) {
   if (quantities.fittings.length) {
     notes.push(`${quantities.fittings.length} end/socket/valve/weld fitting${quantities.fittings.length === 1 ? "" : "s"} / ${formatMass(quantities.fittingWeightKg)} kg.`);
   }
-  if (!notes.length) notes.push("No fittings or deductions yet. Cut lengths are centre-to-centre pipe lengths.");
+  if (notes.length === 1) notes.push("No fittings yet. Cut lengths retain their full centre-to-centre length at open pipe ends.");
 
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 18px Inter, system-ui, sans-serif";
@@ -34590,7 +36052,9 @@ document.querySelector("#anglePositiveButton").addEventListener("click", () => a
 document.querySelector("#angleNegativeButton").addEventListener("click", () => addAngledRun(-1));
 
 pipeSpecSelect.addEventListener("change", () => {
+  const previousSpec = normalizePipeSpec(state.pipeSpec);
   state.pipeSpec = normalizePipeSpec(pipeSpecSelect.value);
+  syncFittingDataProfileForSpec(previousSpec, state.pipeSpec);
   normalizeEdgePipeSizesForState();
   populatePipeSizeOptions();
   if (state.previewMode === "black" || state.previewMode === "stainless") {
@@ -34600,6 +36064,8 @@ pipeSpecSelect.addEventListener("change", () => {
   }
   updateAll();
 });
+
+projectDialogInputs.fittingProfile?.addEventListener("change", updateProjectFittingProfileHelp);
 
 pipeSizeSelect.addEventListener("change", () => {
   const pipeSizeNb = pipeSizeNbForSpec(pipeSizeSelect.value, state.pipeSpec);
@@ -34613,13 +36079,19 @@ pipeSizeSelect.addEventListener("change", () => {
 });
 
 projectStatusSelect?.addEventListener("change", async () => {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("change the drawing status"));
+  const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
+  const currentStatus = normalizeProjectStatus(state.projectStatus);
+  const permission = currentDrawingProjectPermission();
+  const capability = nextStatus === "checked" || nextStatus === "issued"
+    ? "issue"
+    : nextStatus === "draft" || nextStatus === "readycheck"
+    ? "edit"
+    : "production";
+  if (!permission[capability === "issue" ? "canIssue" : capability === "edit" ? "canEdit" : "canManageProduction"]) {
+    showAppNotice(currentPermissionRestrictionText(capability));
     updateControls();
     return;
   }
-  const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
-  const currentStatus = normalizeProjectStatus(state.projectStatus);
   if (nextStatus === "checked" && currentStatus !== "checked") {
     projectStatusSelect.value = currentStatus;
     await markDrawingChecked();
@@ -34651,8 +36123,8 @@ projectStatusSelect?.addEventListener("change", async () => {
 });
 
 projectLockToggle?.addEventListener("change", () => {
-  if (cloudPermissionReadOnly) {
-    showAppNotice(cloudReadOnlyMessage("unlock or edit the drawing"));
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     updateControls();
     return;
   }

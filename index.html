@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=315" />
+    <link rel="stylesheet" href="./styles.css?v=322" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -332,7 +332,10 @@
               <svg><use href="#icon-user"></use></svg>
               <span id="accountButtonLabel">Account</span>
             </button>
-            <span class="cloud-status-pill local" id="cloudSyncStatus" role="status" aria-live="polite">Local only</span>
+            <select class="workspace-switcher" id="workspaceSwitcher" aria-label="Active workspace" title="Choose where cloud jobs are saved" hidden>
+              <option value="personal">Personal</option>
+            </select>
+            <button class="cloud-status-pill local" id="cloudSyncStatus" type="button" role="status" aria-live="polite">Local only</button>
             <input id="projectFileInput" type="file" accept=".html,text/html,.json,application/json" hidden />
             <button class="icon-button labeled action-menu-toggle" id="actionMenuButton" type="button" aria-expanded="false" aria-controls="actionMenuPanel">
               <svg><use href="#icon-settings"></use></svg>
@@ -341,11 +344,19 @@
             <div class="action-menu-panel" id="actionMenuPanel" hidden>
               <div class="action-menu-header">
                 <div>
-                  <strong>Menu</strong>
-                  <span>Project, review and setup tools</span>
+                  <strong>Menu &amp; actions</strong>
+                  <span>Search or browse project, review and setup tools</span>
                 </div>
                 <button class="icon-button compact labeled" id="actionMenuCloseButton" type="button">Close</button>
               </div>
+              <div class="action-command-search">
+                <label for="actionCommandInput">
+                  <span>Find a tool or action</span>
+                  <input id="actionCommandInput" type="search" placeholder="Try reducer, weld register or export PDF" autocomplete="off" spellcheck="false" aria-controls="actionCommandResults" />
+                </label>
+                <kbd>Ctrl K</kbd>
+              </div>
+              <div class="action-command-results" id="actionCommandResults" role="listbox" aria-label="Matching SpoolMate actions" hidden></div>
               <div class="action-menu-groups">
                 <section class="action-menu-group">
                   <h2>Project</h2>
@@ -420,6 +431,9 @@
             </div>
         </div>
       </header>
+
+      <div class="workspace-location-strip workspace-location-main" data-workspace-location data-location-context="Drawing" aria-label="Current workspace location"></div>
+      <div class="role-access-notice" id="roleAccessNotice" role="status" hidden></div>
 
       <section class="licence-banner" id="licenceBanner" aria-live="polite" hidden>
         <div class="licence-banner-copy">
@@ -840,6 +854,27 @@
               <span>Client / area</span>
               <input id="projectDialogClient" type="text" maxlength="56" autocomplete="off" />
             </label>
+            <label class="field project-dialog-wide">
+              <span>Fitting data profile</span>
+              <select id="projectDialogFittingProfile">
+                <option value="atlasAsmeB169">Atlas / ASME B16.9 pipe — verified</option>
+                <option value="as1528Supplier">AS 1528.3 sanitary tube — supplier dimensions required</option>
+                <option value="workshopBranch">Fabricated branch — workshop allowance required</option>
+              </select>
+              <small class="project-profile-help" id="projectDialogFittingProfileHelp"></small>
+            </label>
+            <label class="field project-dialog-wide">
+              <span>Supplier / workshop reference <small>(optional)</small></span>
+              <input id="projectDialogFittingProfileReference" type="text" maxlength="80" autocomplete="off" placeholder="Supplier catalogue, procedure or approved detail" />
+            </label>
+            <label class="field project-dialog-wide">
+              <span>Weld gap per welded pipe end</span>
+              <select id="projectDialogWeldGapMm">
+                <option value="2.4">2.4 mm</option>
+                <option value="1.6">1.6 mm</option>
+              </select>
+              <small class="project-profile-help">Deducted only where a pipe cut meets a welded fitting. Open pipe ends receive no weld-gap deduction.</small>
+            </label>
           </div>
           <div class="project-dialog-actions">
             <button class="icon-button labeled" id="projectDialogCancelButton" type="button">Cancel</button>
@@ -876,6 +911,7 @@
             </div>
             <button class="icon-button labeled" id="homeDashboardCloseButton" type="button">Go to drawing</button>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Home"></div>
           <div class="home-dashboard-account" id="homeDashboardAccount">Guest mode - local projects only</div>
           <div class="home-dashboard-stats" id="homeDashboardStats">0 saved spools on this device</div>
           <div class="home-dashboard-grid">
@@ -941,6 +977,7 @@
               <small id="authDialogStatus">Sign in to save and open spool projects from the cloud.</small>
             </div>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Account"></div>
           <div class="auth-mode-tabs" role="tablist" aria-label="Account action">
             <button class="active" id="authSignInModeButton" type="button" aria-selected="true">Sign in</button>
             <button id="authCreateModeButton" type="button" aria-selected="false">Create account</button>
@@ -962,8 +999,28 @@
               <input id="authRememberDeviceInput" type="checkbox" />
               <span>Remember me on this device</span>
             </label>
+            <label class="field project-dialog-wide" id="authAccountTypeField" hidden>
+              <span>Account setup</span>
+              <select id="authAccountTypeInput">
+                <option value="personal">Just for me — Personal workspace</option>
+                <option value="business">For a business — 5 people included</option>
+              </select>
+            </label>
+            <label class="field project-dialog-wide" id="authBusinessNameField" hidden>
+              <span>Business name</span>
+              <input id="authBusinessNameInput" type="text" maxlength="80" placeholder="Workshop or company name" />
+            </label>
             <p class="auth-help project-dialog-wide" id="authModeHelp">Use the email and password you created for SpoolMate.</p>
           </div>
+          <section class="account-workspace-panel" id="accountWorkspacePanel" hidden>
+            <div class="team-panel-head">
+              <div>
+                <strong>Workspaces</strong>
+                <small>Personal jobs stay private. Business jobs belong to the business.</small>
+              </div>
+            </div>
+            <div class="account-workspace-list" id="accountWorkspaceList"></div>
+          </section>
           <section class="account-plan-panel" id="accountPlanPanel" hidden>
             <div class="account-plan-heading">
               <span class="account-plan-badge" id="accountPlanBadge">Trial</span>
@@ -982,7 +1039,7 @@
           <section class="team-workspace-panel" id="teamWorkspacePanel" hidden>
             <div class="team-panel-head">
               <div>
-                <strong>Team workspace</strong>
+                <strong>Business workspace</strong>
                 <small id="teamWorkspaceStatus">Sign in to use team projects.</small>
               </div>
               <button class="icon-button compact labeled" id="teamRefreshButton" type="button">Refresh</button>
@@ -999,6 +1056,7 @@
               </label>
               <button class="icon-button labeled team-action-button" id="teamJoinButton" type="button">Join team</button>
             </div>
+            <div class="business-seat-summary" id="businessSeatSummary" hidden></div>
             <div class="team-members-list" id="teamMembersList" aria-live="polite"></div>
           </section>
           <section class="account-launch-panel" id="accountLaunchPanel">
@@ -1035,6 +1093,7 @@
               <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Use the production board or open a job folder, then tap a spool drawing.</small>
             </div>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Jobs"></div>
           <div class="project-dashboard-toolbar" aria-label="Job dashboard tools">
             <label class="project-dashboard-search">
               <span>Search jobs, spools or clients</span>
@@ -1229,6 +1288,7 @@
               <span>Video tutorials</span>
             </button>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Tutorial"></div>
           <section class="tutorial-video-shelf" aria-label="Video tutorials">
             <div class="tutorial-video-shelf-copy">
               <span>Watch and follow along</span>
@@ -1276,6 +1336,7 @@
               <button class="icon-button labeled" id="videoTutorialCloseButton" type="button">Close</button>
             </div>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Video"></div>
           <div class="video-tutorial-layout">
             <nav class="video-tutorial-library" id="videoTutorialLibrary" aria-label="Available video tutorials"></nav>
             <div class="video-tutorial-viewer">
@@ -1740,6 +1801,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=315"></script>
+    <script defer src="./app.js?v=322"></script>
   </body>
 </html>
