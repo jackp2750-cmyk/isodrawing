@@ -339,6 +339,7 @@ with check (
   and public.has_active_company_license(company_id)
 );
 
+drop policy if exists "Admins can update company memberships" on public.company_members;
 drop policy if exists "Owners can update company memberships" on public.company_members;
 create policy "Owners can update company memberships"
 on public.company_members
@@ -559,6 +560,13 @@ using (
     )
   )
 );
+
+revoke all on function public.company_seat_limit(uuid) from public, anon, authenticated;
+revoke all on function public.company_seat_usage(uuid) from public, anon, authenticated;
+revoke all on function public.has_active_company_license(uuid) from public, anon, authenticated;
+revoke all on function public.has_active_workspace_license(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.create_company(text) from public, anon, authenticated;
+revoke all on function public.join_company_by_code(text) from public, anon, authenticated;
 
 grant execute on function public.company_seat_limit(uuid) to authenticated;
 grant execute on function public.company_seat_usage(uuid) to authenticated;

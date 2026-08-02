@@ -119,6 +119,7 @@ create index if not exists team_messages_company_created_idx
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -842,6 +843,14 @@ grant select, insert, update, delete on public.company_members to authenticated;
 grant select, insert, update, delete on public.spool_projects to authenticated;
 grant select, insert, update, delete on public.project_comments to authenticated;
 grant select, insert, update, delete on public.team_messages to authenticated;
+revoke all on function public.has_active_license(uuid) from public, anon, authenticated;
+revoke all on function public.is_company_member(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.is_company_admin(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.is_company_owner(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.create_company(text) from public, anon, authenticated;
+revoke all on function public.join_company_by_code(text) from public, anon, authenticated;
+revoke all on function public.set_project_comment_resolved(uuid, boolean) from public, anon, authenticated;
+
 grant execute on function public.has_active_license(uuid) to authenticated;
 grant execute on function public.is_company_member(uuid, uuid) to authenticated;
 grant execute on function public.is_company_admin(uuid, uuid) to authenticated;

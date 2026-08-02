@@ -1,6 +1,71 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.22`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.33`.
+
+## v3.33 - Complete video learning library
+
+- Added seven real-app, full-screen guides for Big Spool, multiple open spools, QA and fabrication export, team production, cloud recovery, import and help, and a shareable promotional overview.
+- Added chapter navigation, accurate durations and descriptive library cards for every new video.
+- Kept video delivery outside the PWA cache so large media files stream normally and do not make app updates unreliable.
+
+## v3.32 - Big Spool fabrication-only splits
+
+- Kept the master drawing and its normal 3D model continuous even when a Big Spool transport plan is enabled.
+- Limited split gaps, child-piece colours, match marks and RG/flange/weld end preparations to generated child fabrication drawings, fabrication PDFs and Big Spool reports.
+- Removed the duplicated `RG`, `RG/RG` and match-joint overlay clutter from the everyday drawing workspace.
+- Updated the PWA cache to `spoolmate-v332`.
+
+## v3.31 - Multi-spool workspace
+
+- Added persistent in-app spool tabs with independent drawing state, undo history, selection, zoom, active tool, Inspector/3D surface and cloud-save tracking.
+- Added Open tab actions in Jobs so opening another spool no longer replaces the active drawing.
+- Added a responsive Windows overview that displays every open spool together and lets the user choose which spool to edit.
+- Added safe tab switching that stores browser recovery first and flushes or queues outstanding cloud changes before another spool becomes active.
+- Added unsaved-draft protection when closing tabs, an eight-tab safety limit and session restoration after a reload.
+- Updated the PWA cache to `spoolmate-v331`.
+
+## v3.30 - Big Spool split preparations
+
+- Added a default connection choice for new automatic and manual splits: field weld, roll grooves on both sides or flanges on both sides.
+- Generated the selected end preparations as real fittings on both child-spool drawings and fabrication sheets.
+- Applied the project 1.6 mm or 2.4 mm weld gap to every generated welded child end; roll-grooved ends receive no weld-gap deduction.
+- Added split-preparation labels to the 2D drawing, 3D model, transport CSV and child fabrication package field-joint register.
+- Added an exploded master view for grooved splits so both RG pipe ends remain visible instead of being hidden at one shared cut coordinate.
+- Added one required site grooved coupling per RG/RG split to the planner summary, transport CSV and field-joint report.
+- Kept every split individually editable so one master spool can mix connection types.
+- Updated the PWA cache to `spoolmate-v330`.
+
+## v3.29 - Big Spool V2 and V3
+
+- Added custom and preset transport constraints for maximum length, width, height and weight, with automatic safe splitting that checks the finished child-spool envelope and weight.
+- Added calculated child-spool weight and centre of gravity, plus lifting-lug guidance using the existing engineering calculator.
+- Added editable field-connection type, site status and notes for every match joint.
+- Added stable child-spool fabrication identities, child-specific issued QR destinations and a combined child fabrication PDF package with a transport and field-joint register.
+- Integrated Big Spool children into the load planner so each transport piece is planned independently instead of loading the full master assembly.
+- Expanded the CSV transport list with child dimensions, weight, COG, readiness and field-joint details.
+- Added responsive desktop, tablet and phone layouts for the new constraint and joint controls.
+- Updated the PWA cache to `spoolmate-v329`.
+
+## v3.27 - Big Spool V1
+
+- Added a persistent Big Spool planner for very large master assemblies and increased the supported individual run length to 1,000,000 mm.
+- Added a user-defined maximum transport length; 4.8 m is not hard-coded.
+- Added automatic safe split suggestions, manual match-joint placement and editable joint positions kept clear of fittings and pipe ends.
+- Added stable child-spool IDs, A/B match marks, transport-envelope checks and CSV transport-list export.
+- Added matching child-piece colours to the 2D drawing, canvas preview and WebGL 3D model.
+- Updated the PWA cache to `spoolmate-v327`.
+
+## v3.24 - Workshop Gear Check and Welder Assignment
+
+- Added a dedicated Gear check stage between Issued and Cutting.
+- Assigning a spool reveals a checklist generated from its pipe and fitting take-off, with In shop, Needs ordering, Not required and note/location controls.
+- Added custom checklist items for gaskets, bolts, consumables, purge gear and other workshop requirements that cannot be inferred from the drawing.
+- Cutting cannot begin until the gear checklist is confirmed; checkers and team admins can record a traceable authorised override with a mandatory reason.
+- Added gear readiness badges, progress and retained activity history to the Jobs production card.
+- Added an All welds done by shortcut while retaining individual Welder ID rows for mixed welders.
+- Added responsive phone and tablet layouts for the new gear and welder controls.
+- Fixed Jobs dashboard view/filter controls so list-level actions respond consistently across mouse and touch layouts.
+- Updated the PWA cache to `spoolmate-v324`.
 
 ## v3.22 - Correct Prepared-End QA
 

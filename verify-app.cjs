@@ -165,6 +165,45 @@ assert(serviceWorker.includes(`./styles.css?v=${assetVersion}`), "Service worker
 assert(readme.includes(`Current app version: \`${appVersion}\``), "README current version differs from app.js");
 assert(changelog.includes(`Current app version: \`${appVersion}\``), "CHANGELOG current version differs from app.js");
 assert(
+  html.includes('id="bigSpoolDialog"')
+    && html.includes('id="bigSpoolMaxLengthInput"')
+    && html.includes('id="bigSpoolManualDistanceInput"')
+    && html.includes('id="bigSpoolDefaultJointTypeSelect"')
+    && html.includes('id="bigSpoolMaxWeightInput"')
+    && html.includes('id="bigSpoolExportPackageButton"')
+    && html.includes('id="bigSpoolLoadPlannerButton"')
+    && html.includes('id="loadPlanDialog"')
+    && html.includes('id="loadPlanJobSelect"')
+    && html.includes('id="loadPlanCanvas"')
+    && /function\s+normalizeBigSpoolPlan\s*\(/.test(app)
+    && /function\s+suggestedBigSpoolCuts\s*\(/.test(app)
+    && /function\s+bigSpoolLayout\s*\(/.test(app)
+    && /function\s+refineBigSpoolCutsForConstraints\s*\(/.test(app)
+    && /function\s+bigSpoolChildState\s*\(/.test(app)
+    && /function\s+bigSpoolJointPreparationText\s*\(/.test(app)
+    && /function\s+bigSpoolJointRejoinItemText\s*\(/.test(app)
+    && /function\s+bigSpoolFragmentScreenGeometry\s*\(/.test(app)
+    && /function\s+exportBigSpoolChildFabPackage\s*\(/.test(app)
+    && /function\s+buildBigSpoolFieldJointReportCanvas\s*\(/.test(app)
+    && /function\s+loadPlanItemsFromPayload\s*\(/.test(app)
+    && /function\s+regressionAutoCheckBigSpool\s*\(/.test(app)
+    && app.includes('id: "big-spool"')
+    && app.includes("bigSpool: normalizeBigSpoolPlan(state.bigSpool")
+    && app.includes("bigSpoolFieldJoint: true")
+    && app.includes('type: "rollGroove"')
+    && app.includes('type: "flange"')
+    && app.includes('weldGapMm: projectWeldGapMm(source)')
+    && app.includes("rejoin on site with 1 grooved coupling")
+    && app.includes("minimumHalfGapPx = 18")
+    && app.includes("const fallbackDrawSegments = fallbackSegments")
+    && !app.includes("pipeMaterialForBigSpoolPiece")
+    && !app.includes("drawBigSpoolBreaks2d(ctx, projection, bigSpoolLayoutData")
+    && css.includes(".big-spool-card")
+    && css.includes(".big-spool-constraint-grid")
+    && css.includes("@media (max-width: 620px)"),
+  "Big Spool state, planner, split calculation, drawing colours or mobile layout is incomplete",
+);
+assert(
   html.includes('id="actionCommandInput"')
     && html.includes('id="actionCommandResults"')
     && app.includes("const ACTION_COMMANDS = [")
@@ -179,10 +218,49 @@ assert(
   "Searchable command palette or keyboard/touch behavior is incomplete",
 );
 assert(
+  html.includes('id="spoolWorkspaceTabs"')
+    && html.includes('id="spoolWorkspaceOpenButton"')
+    && html.includes('id="spoolWorkspaceNewButton"')
+    && html.includes('id="spoolWorkspaceWindowButton"')
+    && html.includes('id="spoolWindowGrid"')
+    && /function\s+captureCurrentSpoolWorkspaceTab\s*\(/.test(app)
+    && /function\s+activateSpoolWorkspaceTab\s*\(/.test(app)
+    && /function\s+openProjectInWorkspaceTab\s*\(/.test(app)
+    && /function\s+flushActiveSpoolWorkspaceTab\s*\(/.test(app)
+    && /function\s+renderSpoolWindowGrid\s*\(/.test(app)
+    && app.includes("SPOOL_WORKSPACE_SESSION_KEY")
+    && css.includes(".spool-workspace-tabs")
+    && css.includes(".spool-window-grid")
+    && css.includes("body.spool-windowed-mode"),
+  "Multi-spool tabs, session isolation or windowed comparison mode is incomplete",
+);
+assert(
   /function\s+endpointHasFinish\s*\([\s\S]*?endpointSnappedFittingT\(segment, fitting\)/.test(app)
     && app.includes('key: "preparedEnds"')
     && app.includes("function regressionAutoCheckPreparedEnds"),
   "Prepared roll-grooved, flanged and threaded ends are not protected from open-end warnings",
+);
+assert(
+  app.includes('["materialcheck", "Gear check"]')
+    && /function\s+materialChecklistForState\s*\(/.test(app)
+    && /function\s+materialChecklistCanStart\s*\(/.test(app)
+    && app.includes('data-material-check-field="status"')
+    && app.includes('data-production-action="add-material-item"')
+    && app.includes('data-production-action="confirm-material-check"')
+    && app.includes('data-production-action="override-material-check"')
+    && app.includes('Complete the Gear check before starting Cutting')
+    && css.includes(".production-material-checklist")
+    && css.includes(".material-check-row"),
+  "Allocated-spool Gear check generation, readiness controls or Cutting gate is incomplete",
+);
+assert(
+  app.includes('data-weld-assignment-mode')
+    && app.includes('data-weld-all-input')
+    && app.includes('data-weld-action="apply-all-welder"')
+    && /function\s+handleWeldRegisterAction\s*\(/.test(app)
+    && app.includes("Mixed welders selected")
+    && css.includes(".weld-register-bulk"),
+  "All-welds-by and mixed-welder register controls are incomplete",
 );
 assert(
   matches(html, /\bdata-workspace-location\b/g).length >= 6 &&

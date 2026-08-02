@@ -167,6 +167,7 @@ with check (
   and public.is_company_admin(id, (select auth.uid()))
 );
 
+drop policy if exists "Admins can update company memberships" on public.company_members;
 drop policy if exists "Owners can update company memberships" on public.company_members;
 create policy "Owners can update company memberships"
 on public.company_members
@@ -314,6 +315,11 @@ using (
     )
   )
 );
+
+revoke all on function public.has_active_license(uuid) from public, anon, authenticated;
+revoke all on function public.is_company_member(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.is_company_admin(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.is_company_owner(uuid, uuid) from public, anon, authenticated;
 
 grant execute on function public.has_active_license(uuid) to authenticated;
 grant execute on function public.is_company_member(uuid, uuid) to authenticated;

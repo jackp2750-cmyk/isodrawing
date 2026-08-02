@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=322" />
+    <link rel="stylesheet" href="./styles.css?v=333" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -209,6 +209,7 @@
                 <option value="readycheck">Ready to check</option>
                 <option value="checked">Checked</option>
                 <option value="issued">Issued</option>
+                <option value="materialcheck">Gear check</option>
                 <option value="cutting">Cutting</option>
                 <option value="fitup">Fit-up</option>
                 <option value="welded">Welded</option>
@@ -328,6 +329,10 @@
               <svg><use href="#icon-sample"></use></svg>
               <span>Jobs</span>
             </button>
+            <button class="icon-button labeled big-spool-launch" id="bigSpoolButton" type="button" title="Break a large assembly into transport spools" aria-label="Open Big Spool planner">
+              <svg><use href="#icon-measure"></use></svg>
+              <span>Big Spool</span>
+            </button>
             <button class="icon-button labeled" id="accountButton" type="button" title="Sign in for cloud projects" aria-label="Account and cloud sync">
               <svg><use href="#icon-user"></use></svg>
               <span id="accountButtonLabel">Account</span>
@@ -431,6 +436,26 @@
             </div>
         </div>
       </header>
+
+      <section class="spool-workspace-shell" id="spoolWorkspaceShell" aria-label="Open spool workspace">
+        <div class="spool-workspace-tabs" id="spoolWorkspaceTabs" role="tablist" aria-label="Open spools"></div>
+        <div class="spool-workspace-actions">
+          <button type="button" id="spoolWorkspaceOpenButton" title="Open another saved spool in a tab">+ Open</button>
+          <button type="button" id="spoolWorkspaceNewButton" title="Start a new spool in another tab">+ New</button>
+          <button type="button" id="spoolWorkspaceWindowButton" aria-pressed="false" title="See all open spools together">Windows</button>
+        </div>
+      </section>
+
+      <section class="spool-window-grid-shell" id="spoolWindowGridShell" aria-label="Open spool windows" hidden>
+        <div class="spool-window-grid-header">
+          <div>
+            <strong>Open spool windows</strong>
+            <span>Compare every open spool. Choose Edit to return that spool to the full drawing workspace.</span>
+          </div>
+          <button type="button" id="spoolWindowGridCloseButton">Return to active spool</button>
+        </div>
+        <div class="spool-window-grid" id="spoolWindowGrid"></div>
+      </section>
 
       <div class="workspace-location-strip workspace-location-main" data-workspace-location data-location-context="Drawing" aria-label="Current workspace location"></div>
       <div class="role-access-notice" id="roleAccessNotice" role="status" hidden></div>
@@ -613,11 +638,11 @@
               <h2>Draw exact runs</h2>
               <label class="field">
                 <span>Next run / offset set mm</span>
-                <input id="stepLengthInput" type="number" min="50" max="12000" step="1" value="1000" />
+                <input id="stepLengthInput" type="number" min="50" max="1000000" step="1" value="1000" />
               </label>
               <label class="field">
                 <span>Selected run mm</span>
-                <input id="selectedRunLengthInput" type="number" min="50" max="12000" step="1" disabled />
+                <input id="selectedRunLengthInput" type="number" min="50" max="1000000" step="1" disabled />
               </label>
               <div class="axis-grid" aria-label="Add precise run">
                 <button data-axis="xp" type="button">+X</button>
@@ -1324,6 +1349,184 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop load-plan-backdrop" id="loadPlanDialog" hidden>
+        <section class="project-dialog-card load-plan-card" role="dialog" aria-modal="true" aria-labelledby="loadPlanTitle">
+          <div class="project-dialog-header">
+            <div>
+              <span class="big-spool-kicker">Transport planning</span>
+              <strong id="loadPlanTitle">Load planner</strong>
+              <small>Select a job, choose its spools, then build a tray and roof-rack loading plan.</small>
+            </div>
+            <label class="load-plan-tray-field">Truck tray
+              <select id="loadPlanTraySelect">
+                <option value="medium">3460 × 2040 mm tray</option>
+                <option value="long">4490 × 2040 mm tray</option>
+              </select>
+            </label>
+            <label class="load-plan-tray-field">Roof racks
+              <select id="loadPlanRackSelect">
+                <option value="off">No roof racks</option>
+                <option value="standard">6500 × 2040 mm roof racks</option>
+                <option value="long">7500 × 2040 mm roof racks</option>
+              </select>
+            </label>
+            <button class="icon-button compact labeled" id="loadPlanCloseButton" type="button">Close</button>
+          </div>
+          <div class="load-plan-layout">
+            <aside class="load-plan-picker">
+              <div>
+                <label class="field"><span>Job</span><select id="loadPlanJobSelect"></select></label>
+                <div class="load-plan-bulk-actions">
+                  <button id="loadPlanSelectAllButton" type="button">Select all</button>
+                  <button id="loadPlanDeselectAllButton" type="button">Clear</button>
+                </div>
+              </div>
+              <div class="load-plan-project-list" id="loadPlanProjectList" aria-live="polite"></div>
+            </aside>
+            <section class="load-plan-view">
+              <div class="load-plan-toolbar">
+                <div class="load-plan-view-tabs" role="group" aria-label="Load plan view">
+                  <button id="loadPlanLayoutButton" type="button" aria-pressed="true">Layout</button>
+                  <button id="loadPlanModelButton" type="button" aria-pressed="false">3D model</button>
+                </div>
+                <div class="load-plan-model-tools">
+                  <button id="loadPlanAnimateButton" type="button">Animate load</button>
+                  <button id="loadPlanSpinButton" type="button" aria-pressed="false">Auto spin</button>
+                  <button id="loadPlanResetButton" type="button">Reset view</button>
+                </div>
+                <span class="load-plan-layer-hint">Numbers show loading order</span>
+              </div>
+              <div class="load-plan-stage" id="loadPlanStage">
+                <canvas id="loadPlanCanvas" aria-label="Truck load layout"></canvas>
+                <canvas id="loadPlanThreeCanvas" aria-label="Interactive 3D truck load model" hidden></canvas>
+              </div>
+              <div class="load-plan-summary" id="loadPlanSummary" aria-live="polite">Select a job first.</div>
+            </section>
+          </div>
+          <div class="project-dialog-actions">
+            <button class="secondary-button" id="loadPlanPlayButton" type="button">Make layout</button>
+            <button class="primary-button" id="loadPlanDoneButton" type="button">Done</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop big-spool-backdrop" id="bigSpoolDialog" hidden>
+        <section class="project-dialog-card big-spool-card" role="dialog" aria-modal="true" aria-labelledby="bigSpoolTitle">
+          <div class="project-dialog-header big-spool-header">
+            <div>
+              <span class="big-spool-kicker">Transport planning</span>
+              <strong id="bigSpoolTitle">Big Spool</strong>
+              <small>Keep one master assembly, then divide it into practical fabrication and transport pieces.</small>
+            </div>
+            <button class="icon-button compact labeled" id="bigSpoolCloseButton" type="button">Close</button>
+          </div>
+
+          <div class="big-spool-controls">
+            <label class="toggle big-spool-enable">
+              <input id="bigSpoolEnabledInput" type="checkbox" />
+              <span>Use Big Spool for this drawing</span>
+            </label>
+            <label class="field">
+              <span>Maximum transport length</span>
+              <div class="big-spool-unit-input">
+                <input id="bigSpoolMaxLengthInput" type="number" min="500" max="1000000" step="100" inputmode="decimal" />
+                <b>mm</b>
+              </div>
+              <small>Choose the finished overall limit for this job. It is not fixed at 4.8 m.</small>
+            </label>
+            <label class="field">
+              <span>Keep cuts away from fittings</span>
+              <div class="big-spool-unit-input">
+                <input id="bigSpoolClearanceInput" type="number" min="50" max="2000" step="10" inputmode="decimal" />
+                <b>mm</b>
+              </div>
+            </label>
+            <button class="primary-button" id="bigSpoolSuggestButton" type="button">Suggest transport pieces</button>
+          </div>
+
+          <div class="big-spool-overview" id="bigSpoolOverview" aria-live="polite"></div>
+
+          <section class="big-spool-constraint-panel" aria-labelledby="bigSpoolConstraintTitle">
+            <div class="big-spool-section-heading">
+              <div>
+                <strong id="bigSpoolConstraintTitle">Transport constraints</strong>
+                <small>Length is required. Width, height and weight can be left at 0 when that limit does not apply.</small>
+              </div>
+              <label class="field big-spool-preset-field">
+                <span>Starting preset</span>
+                <select id="bigSpoolPresetSelect">
+                  <option value="custom">Custom limits</option>
+                  <option value="ute">Ute / small tray</option>
+                  <option value="truck">Truck transport</option>
+                  <option value="lift">Site goods lift</option>
+                </select>
+              </label>
+            </div>
+            <div class="big-spool-constraint-grid">
+              <label class="field"><span>Maximum width</span><div class="big-spool-unit-input"><input id="bigSpoolMaxWidthInput" type="number" min="0" max="1000000" step="100" inputmode="decimal" /><b>mm</b></div></label>
+              <label class="field"><span>Maximum height</span><div class="big-spool-unit-input"><input id="bigSpoolMaxHeightInput" type="number" min="0" max="1000000" step="100" inputmode="decimal" /><b>mm</b></div></label>
+              <label class="field"><span>Maximum weight</span><div class="big-spool-unit-input"><input id="bigSpoolMaxWeightInput" type="number" min="0" max="100000" step="10" inputmode="decimal" /><b>kg</b></div></label>
+              <label class="field"><span>Site / transport note</span><input id="bigSpoolTransportNoteInput" type="text" maxlength="120" placeholder="Truck, lift, doorway or crane restriction" /></label>
+            </div>
+          </section>
+
+          <div class="big-spool-workspace">
+            <section class="big-spool-section">
+              <div class="big-spool-section-heading">
+                <div>
+                  <strong>Transport pieces</strong>
+                  <small>Colours identify the generated child fabrication pieces and reports; the master drawing stays continuous.</small>
+                </div>
+              </div>
+              <div class="big-spool-piece-list" id="bigSpoolPieceList"></div>
+            </section>
+
+            <section class="big-spool-section">
+              <div class="big-spool-section-heading">
+                <div>
+                  <strong>Split connections</strong>
+                  <small>Each break prepares both child-spool ends and keeps matching A/B marks.</small>
+                </div>
+              </div>
+              <div class="big-spool-joint-default">
+                <label class="field">
+                  <span>Connection for new splits</span>
+                  <select id="bigSpoolDefaultJointTypeSelect">
+                    <option value="fieldWeld">Field weld</option>
+                    <option value="groove">Roll grooves both sides</option>
+                    <option value="flange">Flanges both sides</option>
+                  </select>
+                </label>
+                <small>Used for automatic and manual splits. Every split can still be changed below.</small>
+              </div>
+              <div class="big-spool-cut-list" id="bigSpoolCutList"></div>
+              <div class="big-spool-manual-cut">
+                <label class="field">
+                  <span>Straight run</span>
+                  <select id="bigSpoolManualSegmentSelect"></select>
+                </label>
+                <label class="field">
+                  <span>Distance from run start</span>
+                  <div class="big-spool-unit-input">
+                    <input id="bigSpoolManualDistanceInput" type="number" min="50" step="1" inputmode="decimal" />
+                    <b>mm</b>
+                  </div>
+                </label>
+                <button class="secondary-button" id="bigSpoolAddCutButton" type="button">Add manual split</button>
+              </div>
+            </section>
+          </div>
+
+          <div class="project-dialog-actions big-spool-actions">
+            <button class="secondary-button" id="bigSpoolClearCutsButton" type="button">Clear splits</button>
+            <button class="secondary-button" id="bigSpoolExportButton" type="button">Export transport list</button>
+            <button class="secondary-button" id="bigSpoolExportPackageButton" type="button">Child fab package</button>
+            <button class="secondary-button" id="bigSpoolLoadPlannerButton" type="button">Open load planner</button>
+            <button class="primary-button" id="bigSpoolDoneButton" type="button">Done</button>
+          </div>
+        </section>
+      </div>
+
       <div class="project-dialog-backdrop video-tutorial-backdrop" id="videoTutorialDialog" hidden>
         <section class="project-dialog-card video-tutorial-card" role="dialog" aria-modal="true" aria-labelledby="videoTutorialTitle" aria-describedby="videoTutorialDescription">
           <div class="project-dialog-header video-tutorial-header">
@@ -1801,6 +2004,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=322"></script>
+    <script defer src="./app.js?v=333"></script>
   </body>
 </html>

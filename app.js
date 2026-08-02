@@ -41,6 +41,7 @@ const loadPlanThreeCanvas = document.querySelector("#loadPlanThreeCanvas");
 const loadPlanSummary = document.querySelector("#loadPlanSummary");
 const loadPlanPlayButton = document.querySelector("#loadPlanPlayButton");
 const loadPlanCloseButton = document.querySelector("#loadPlanCloseButton");
+const loadPlanDoneButton = document.querySelector("#loadPlanDoneButton");
 const loadPlanTraySelect = document.querySelector("#loadPlanTraySelect");
 const loadPlanRackSelect = document.querySelector("#loadPlanRackSelect");
 const loadPlanJobSelect = document.querySelector("#loadPlanJobSelect");
@@ -81,6 +82,30 @@ const projectLockToggle = document.querySelector("#projectLockToggle");
 const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
 const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
+const bigSpoolButton = document.querySelector("#bigSpoolButton");
+const bigSpoolDialog = document.querySelector("#bigSpoolDialog");
+const bigSpoolCloseButton = document.querySelector("#bigSpoolCloseButton");
+const bigSpoolDoneButton = document.querySelector("#bigSpoolDoneButton");
+const bigSpoolEnabledInput = document.querySelector("#bigSpoolEnabledInput");
+const bigSpoolMaxLengthInput = document.querySelector("#bigSpoolMaxLengthInput");
+const bigSpoolClearanceInput = document.querySelector("#bigSpoolClearanceInput");
+const bigSpoolPresetSelect = document.querySelector("#bigSpoolPresetSelect");
+const bigSpoolMaxWidthInput = document.querySelector("#bigSpoolMaxWidthInput");
+const bigSpoolMaxHeightInput = document.querySelector("#bigSpoolMaxHeightInput");
+const bigSpoolMaxWeightInput = document.querySelector("#bigSpoolMaxWeightInput");
+const bigSpoolTransportNoteInput = document.querySelector("#bigSpoolTransportNoteInput");
+const bigSpoolDefaultJointTypeSelect = document.querySelector("#bigSpoolDefaultJointTypeSelect");
+const bigSpoolSuggestButton = document.querySelector("#bigSpoolSuggestButton");
+const bigSpoolOverview = document.querySelector("#bigSpoolOverview");
+const bigSpoolPieceList = document.querySelector("#bigSpoolPieceList");
+const bigSpoolCutList = document.querySelector("#bigSpoolCutList");
+const bigSpoolManualSegmentSelect = document.querySelector("#bigSpoolManualSegmentSelect");
+const bigSpoolManualDistanceInput = document.querySelector("#bigSpoolManualDistanceInput");
+const bigSpoolAddCutButton = document.querySelector("#bigSpoolAddCutButton");
+const bigSpoolClearCutsButton = document.querySelector("#bigSpoolClearCutsButton");
+const bigSpoolExportButton = document.querySelector("#bigSpoolExportButton");
+const bigSpoolExportPackageButton = document.querySelector("#bigSpoolExportPackageButton");
+const bigSpoolLoadPlannerButton = document.querySelector("#bigSpoolLoadPlannerButton");
 const regressionChecklistButton = document.querySelector("#regressionChecklistButton");
 const regressionDialog = document.querySelector("#regressionDialog");
 const regressionCloseButton = document.querySelector("#regressionCloseButton");
@@ -223,6 +248,14 @@ const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
 const actionCommandInput = document.querySelector("#actionCommandInput");
 const actionCommandResults = document.querySelector("#actionCommandResults");
 const resetWorkspaceLayoutButton = document.querySelector("#resetWorkspaceLayoutButton");
+const spoolWorkspaceShell = document.querySelector("#spoolWorkspaceShell");
+const spoolWorkspaceTabsElement = document.querySelector("#spoolWorkspaceTabs");
+const spoolWorkspaceOpenButton = document.querySelector("#spoolWorkspaceOpenButton");
+const spoolWorkspaceNewButton = document.querySelector("#spoolWorkspaceNewButton");
+const spoolWorkspaceWindowButton = document.querySelector("#spoolWorkspaceWindowButton");
+const spoolWindowGridShell = document.querySelector("#spoolWindowGridShell");
+const spoolWindowGrid = document.querySelector("#spoolWindowGrid");
+const spoolWindowGridCloseButton = document.querySelector("#spoolWindowGridCloseButton");
 const tutorialButton = document.querySelector("#tutorialButton");
 const videoTutorialButton = document.querySelector("#videoTutorialButton");
 const tutorialDialog = document.querySelector("#tutorialDialog");
@@ -362,95 +395,273 @@ const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v2";
 const JOB_DASHBOARD_FILTER_KEY = "spoolmate-job-dashboard-filter-v1";
 const JOB_DASHBOARD_PINS_KEY = "spoolmate-job-dashboard-pins-v1";
 const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
+const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.22";
-const APP_BUILD_DATE = "2026-08-01";
+const APP_VERSION = "v3.33";
+const APP_BUILD_DATE = "2026-08-02";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4`;
-const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-Tutorial-720p.mp4`;
-const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Masterclass-720p.mp4`;
+const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Complete-Workflow-Fullscreen-Web.mp4`;
+const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-Dashboard-Fullscreen-Web.mp4`;
+const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Masterclass-Fullscreen-Web.mp4`;
+const PIPE_ENDS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Pipe-End-Preparations-Fullscreen.mp4`;
+const SOCKETS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Sockets-In-Detail-Fullscreen.mp4`;
+const BIG_SPOOL_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Big-Spool-Fullscreen-Web.mp4`;
+const WORKSPACE_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Multi-Spool-Workspace-Fullscreen-Web.mp4`;
+const QA_EXPORT_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-QA-Export-Fullscreen-Web.mp4`;
+const PRODUCTION_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Teams-Production-Fullscreen-Web.mp4`;
+const CLOUD_RECOVERY_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Cloud-Recovery-Fullscreen-Web.mp4`;
+const IMPORT_HELP_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Import-Help-Fullscreen-Web.mp4`;
+const PROMO_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Promo-90s-Web.mp4`;
 const VIDEO_TUTORIALS = [
   {
     id: "complete",
     eyebrow: "Complete workflow",
     title: "Build a complete spool",
-    duration: 511,
+    duration: 386,
     description: "Drawing, true 45° offsets, precise edits, fittings, 3D, review, weld tracking and fabrication export.",
     shortDescription: "The best place to start",
     url: TUTORIAL_VIDEO_URL,
     chapters: [
       [0, "Overview"],
-      [21, "Start the project"],
-      [46, "Material and pipe size"],
-      [71, "Drag drawing"],
-      [124, "True 45° offset"],
-      [148, "Right-click and exact lengths"],
-      [201, "Fittings and markup"],
-      [252, "Details and live 3D"],
-      [307, "Review and ready to issue"],
-      [360, "Weld register"],
-      [386, "Save and export"],
-      [437, "Jobs and AI helper"],
+      [10, "Start the project"],
+      [25, "Draw the spool"],
+      [41, "True 45 degree offset"],
+      [58, "Finish the drawing"],
+      [83, "Add fittings"],
+      [109, "Select and edit"],
+      [132, "Exact details"],
+      [162, "Inspect the 3D model"],
+      [185, "Review the spool"],
+      [208, "Ready to issue"],
+      [234, "Weld register"],
+      [261, "Save"],
+      [283, "Export"],
+      [315, "Jobs dashboard"],
+      [341, "AI helper"],
+      [367, "Finish"],
     ],
   },
   {
     id: "jobs",
     eyebrow: "Focused guide",
     title: "Use the Jobs dashboard",
-    duration: 455.267,
+    duration: 385,
     description: "Plan daily work, use the production board, assign spools, manage holds, communicate, report progress and open issued work by QR.",
     shortDescription: "Planning, teams and workshop flow",
     url: JOBS_TUTORIAL_VIDEO_URL,
     chapters: [
       [0, "What the Jobs tab is for"],
-      [26.45, "Save the spool first"],
-      [54.94, "Know where the list comes from"],
-      [84.65, "Start with Today"],
-      [111.92, "Use the built-in guide"],
-      [139.19, "Understand the full board"],
-      [168.5, "Reduce the board with filters"],
-      [197.4, "Allocate the spool"],
-      [226.71, "Put blocked work on hold"],
-      [255.2, "Add a yard note"],
-      [283.28, "Find a job and open its folder"],
-      [311.77, "Use Comms for the wider team"],
-      [340.26, "Review daily and weekly reports"],
-      [368.34, "Open a spool by QR"],
-      [396.42, "Return to the drawing"],
-      [425.73, "Recommended daily routine"],
+      [23, "Save the spool first"],
+      [46, "Know where the list comes from"],
+      [71, "Start with Today"],
+      [95, "Use the built-in guide"],
+      [119, "Understand the full board"],
+      [144, "Reduce the board with filters"],
+      [166, "Allocate the spool"],
+      [192, "Put blocked work on hold"],
+      [216, "Add a yard note"],
+      [236, "Find a job and open its folder"],
+      [262, "Use Comms for the wider team"],
+      [288, "Review daily and weekly reports"],
+      [314, "Open a spool by QR"],
+      [338, "Return to the drawing"],
+      [361, "Recommended daily routine"],
     ],
   },
   {
     id: "drawing",
     eyebrow: "Drawing masterclass",
     title: "Master every drawing tool",
-    duration: 608.344,
+    duration: 575,
     description: "Drag drawing, exact runs, true 45 degree offsets, navigation, precise edits, every fitting, sockets, welds, dimensions, notes and the live 3D check.",
     shortDescription: "Every drawing feature in one guide",
     url: DRAWING_TUTORIAL_VIDEO_URL,
     chapters: [
       [0, "Drawing guide overview"],
-      [33.542, "Set up the spool"],
-      [63.748, "Draw pipe by dragging"],
-      [91.962, "Directions and live length"],
-      [121.472, "Exact X, Y and Z runs"],
-      [150.502, "True 45 degree offset"],
-      [183.036, "Zoom, pan and Fit"],
-      [212.546, "Select and Box Select"],
-      [242.968, "Right-click length edit"],
-      [274.686, "Pipe size and bend angle"],
-      [304.196, "Flanges"],
-      [338.842, "Roll grooves"],
-      [365.448, "Valves"],
-      [392.822, "Socket layouts"],
-      [422.86, "Move and rotate sockets"],
-      [453.21, "Tees and branches"],
-      [481.52, "Reducers"],
-      [510.574, "Weld numbering"],
-      [540.156, "Dimensions and labels"],
-      [573.002, "Measure, notes and 3D check"],
+      [33, "Set up the spool"],
+      [61, "Draw pipe by dragging"],
+      [88, "Directions and live length"],
+      [116, "Exact X, Y and Z runs"],
+      [144, "True 45 degree offset"],
+      [175, "Zoom, pan and Fit"],
+      [203, "Select and Box Select"],
+      [231, "Right-click length edit"],
+      [262, "Pipe size and bend angle"],
+      [290, "Flanges"],
+      [323, "Roll grooves"],
+      [348, "Valves"],
+      [374, "Socket layouts"],
+      [402, "Move and rotate sockets"],
+      [431, "Tees and branches"],
+      [458, "Reducers"],
+      [485, "Weld numbering"],
+      [513, "Dimensions and labels"],
+      [544, "Measure, notes and 3D check"],
+    ],
+  },
+  {
+    id: "pipe-ends",
+    eyebrow: "Focused guide",
+    title: "Add pipe end preparations",
+    duration: 161,
+    description: "Use the real right-click controls to add roll grooves, single and double flanges, flange standards and threaded ends, then verify or remove them.",
+    shortDescription: "Roll grooves, flanges and threads",
+    url: PIPE_ENDS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Pipe end overview"],
+      [21, "Open the pipe-end menu"],
+      [45, "Add a roll groove"],
+      [68, "Single and double flanges"],
+      [91, "Choose the flange standard"],
+      [116, "Add a threaded end"],
+      [139, "Check and remove ends"],
+    ],
+  },
+  {
+    id: "sockets",
+    eyebrow: "Focused guide",
+    title: "Build socket layouts",
+    duration: 198,
+    description: "Create socket layouts, choose size, count and spacing, read dimensions, move or rotate individual sockets and confirm the result in 3D.",
+    shortDescription: "Sockets in detail",
+    url: SOCKETS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Socket overview"],
+      [22, "Open Socket Layout"],
+      [42, "Choose size and count"],
+      [67, "Set the spacing"],
+      [97, "Apply and read dimensions"],
+      [122, "Move one socket"],
+      [145, "Resize, rotate and delete"],
+      [173, "3D and final check"],
+    ],
+  },
+  {
+    id: "big-spool",
+    eyebrow: "Transport planning",
+    title: "Plan and split a Big Spool",
+    duration: 116,
+    description: "Design one continuous assembly, apply real transport limits, choose matching field weld, roll-groove or flange split connections, and prepare child fabrication pieces.",
+    shortDescription: "Transport splits without breaking the master",
+    url: BIG_SPOOL_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Big Spool overview"],
+      [18, "Set transport limits"],
+      [32, "Suggest transport pieces"],
+      [46, "Choose split connections"],
+      [64, "Add a manual split"],
+      [82, "Use the load planner"],
+      [96, "Keep the master continuous"],
+    ],
+  },
+  {
+    id: "workspace",
+    eyebrow: "Workspace guide",
+    title: "Work with multiple open spools",
+    duration: 95,
+    description: "Open several spools in tabs, restore each drawing and view state, compare them in Windows mode and open saved work into a new tab from Jobs.",
+    shortDescription: "Tabs, windows and exact view restoration",
+    url: WORKSPACE_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Multiple-spool workspace"],
+      [16, "Start or open another spool"],
+      [32, "Switch without losing state"],
+      [49, "Compare in Windows mode"],
+      [64, "Open a Jobs spool in a tab"],
+      [79, "Close and restore tabs"],
+    ],
+  },
+  {
+    id: "qa-export",
+    eyebrow: "Issue and fabrication",
+    title: "QA, weld tracking and export",
+    duration: 138,
+    description: "Resolve fabrication blockers, verify cut calculations, weights and materials, complete the weld register, choose a PDF audience and issue a traceable QR fabrication package.",
+    shortDescription: "Checks, cut list, welds and PDFs",
+    url: QA_EXPORT_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Review and fabrication blockers"],
+      [16, "Show issues on the drawing"],
+      [30, "Verify the cut list"],
+      [49, "Weights and materials"],
+      [65, "Complete the weld register"],
+      [83, "Draft versus issued PDFs"],
+      [98, "Choose the PDF audience"],
+      [116, "QR, 3D and project backup"],
+    ],
+  },
+  {
+    id: "production",
+    eyebrow: "Teams and workshop",
+    title: "Run production and gear checks",
+    duration: 125,
+    description: "Use business roles, allocation, due dates, production stages, holds, gear readiness, workshop messages, mixed welders and the mobile QR traveller.",
+    shortDescription: "From allocation to workshop completion",
+    url: PRODUCTION_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Business roles and ownership"],
+      [18, "Find the work that matters"],
+      [33, "Allocate and schedule"],
+      [48, "Confirm gear is in the shop"],
+      [62, "Readiness controls and overrides"],
+      [78, "Messages, notes and photos"],
+      [91, "All welds or mixed welders"],
+      [104, "Open the mobile QR traveller"],
+    ],
+  },
+  {
+    id: "cloud-recovery",
+    eyebrow: "Accounts and safety",
+    title: "Cloud save and recovery",
+    duration: 90,
+    description: "Understand local and cloud status, personal and business workspaces, offline saving, last-session recovery, trial access and portable project backups.",
+    shortDescription: "Know exactly where every spool is saved",
+    url: CLOUD_RECOVERY_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Local and cloud save status"],
+      [16, "Personal and business workspaces"],
+      [30, "Work through a connection loss"],
+      [45, "Restore the last session"],
+      [60, "What happens after a trial"],
+      [74, "Export a portable backup"],
+    ],
+  },
+  {
+    id: "import-help",
+    eyebrow: "Tools and learning",
+    title: "Import, measure and get help",
+    duration: 93,
+    description: "Trace a supplied drawing, calibrate it correctly, add measures and notes, find any action by search, ask the in-app helper and choose the right learning path.",
+    shortDescription: "Import assistant, commands and help",
+    url: IMPORT_HELP_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Drawing import assistant"],
+      [16, "Calibrate before tracing"],
+      [29, "Measure and place notes"],
+      [44, "Search the action menu"],
+      [60, "Ask SpoolMate"],
+      [76, "Quick Start and touch controls"],
+    ],
+  },
+  {
+    id: "promo",
+    eyebrow: "See why SpoolMate",
+    title: "From first line to fabrication",
+    duration: 101,
+    description: "A concise overview for prospective customers showing connected drawing, calculations, 3D, Big Spool transport planning, production control and issued QR fabrication information.",
+    shortDescription: "Shareable SpoolMate overview",
+    url: PROMO_VIDEO_URL,
+    chapters: [
+      [0, "One connected fabrication job"],
+      [14, "Draw with workshop language"],
+      [29, "Automatic calculations"],
+      [42, "Live 3D review"],
+      [52, "Big Spool transport planning"],
+      [64, "Jobs and workshop production"],
+      [74, "Issued PDF and QR traveller"],
+      [84, "Keep every job moving"],
     ],
   },
 ];
@@ -487,7 +698,29 @@ const REPORT_CANVAS_HEIGHT = 1240;
 const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 1;
 const MIN_LENGTH_MM = 50;
-const MAX_LENGTH_MM = 12000;
+const MAX_LENGTH_MM = 1000000;
+const BIG_SPOOL_DEFAULT_MAX_LENGTH_MM = 12000;
+const BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM = 500;
+const BIG_SPOOL_DEFAULT_CLEARANCE_MM = 150;
+const BIG_SPOOL_PIECE_COLOURS = ["#087f8c", "#d97706", "#7c3aed", "#16803c", "#c0266d", "#2563eb", "#9a3412", "#4f6268"];
+const BIG_SPOOL_PRESETS = {
+  custom: { label: "Custom limits" },
+  ute: { label: "Ute / small tray", lengthMm: 4800, widthMm: 1800, heightMm: 1800, weightKg: 750 },
+  truck: { label: "Truck transport", lengthMm: 12000, widthMm: 2400, heightMm: 2700, weightKg: 5000 },
+  lift: { label: "Site goods lift", lengthMm: 3000, widthMm: 1800, heightMm: 2200, weightKg: 1200 },
+};
+const BIG_SPOOL_JOINT_TYPES = {
+  fieldWeld: "Field weld",
+  flange: "Flanges both sides",
+  groove: "Roll grooves both sides",
+  thread: "Threaded joint",
+};
+const BIG_SPOOL_PRIMARY_JOINT_TYPES = new Set(["fieldWeld", "flange", "groove"]);
+const BIG_SPOOL_JOINT_STATUSES = {
+  planned: "Planned",
+  ready: "Ready for site",
+  complete: "Completed",
+};
 const RUN_CONNECTION_TOLERANCE_MM = 8;
 const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
@@ -725,6 +958,7 @@ const PROJECT_STATUS_FLOW = [
   ["readycheck", "Ready to check"],
   ["checked", "Checked"],
   ["issued", "Issued"],
+  ["materialcheck", "Gear check"],
   ["cutting", "Cutting"],
   ["fitup", "Fit-up"],
   ["welded", "Welded"],
@@ -744,8 +978,13 @@ const PROJECT_STATUS_ALIASES = {
   painting: "finish",
   finished: "finish",
   workshop: "issued",
+  material: "materialcheck",
+  materials: "materialcheck",
+  gear: "materialcheck",
+  gearcheck: "materialcheck",
 };
 const PRODUCTION_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
+const MATERIAL_CHECK_STATUSES = new Set(["pending", "inshop", "order", "na"]);
 const PRODUCTION_BOARD_FILTERS = {
   active: "Active",
   today: "Due today",
@@ -1662,6 +1901,11 @@ let previewFloatBounds = loadPreviewFloatBoundsPreference();
 let previewFloatManual = loadPreviewFloatPreference();
 let previewPanelMinimized = false;
 let previewPanelHidden = true;
+let spoolWorkspaceTabs = [];
+let activeSpoolWorkspaceTabId = "";
+let spoolWorkspaceWindowed = false;
+let spoolWorkspaceSwitching = false;
+let spoolWorkspaceSessionPersistTimer = null;
 let actionMenuLastPointerToggleAt = -Infinity;
 let healthHighlight = null;
 let healthHighlightAnimationFrame = 0;
@@ -1726,6 +1970,7 @@ let qrReaderModulePromise = null;
 let activeQrScanner = null;
 let fabSheetTemplate = loadFabSheetTemplate();
 let loadPlanSelection = new Set();
+let loadPlanItemsCache = [];
 let loadPlanAnimationFrame = 0;
 let currentLoadPlan = null;
 let loadPlanTrayKey = "medium";
@@ -1829,6 +2074,7 @@ function sampleState() {
     locked: false,
     revisionHistory: [],
     spoolUid: createTraceabilityId("SPL"),
+    bigSpool: defaultBigSpoolPlan(),
     weldRegister: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
@@ -2065,6 +2311,7 @@ function blankState(options = {}) {
     locked: false,
     revisionHistory: [],
     spoolUid: createTraceabilityId("SPL"),
+    bigSpool: defaultBigSpoolPlan(),
     weldRegister: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
@@ -2168,6 +2415,7 @@ function statePayload(options = {}) {
     locked: state.locked === true,
     revisionHistory: options.includeRevisionHistory === false ? [] : normalizeRevisionHistory(state.revisionHistory),
     spoolUid: normalizeTraceabilityId(state.spoolUid) || createTraceabilityId("SPL"),
+    bigSpool: normalizeBigSpoolPlan(state.bigSpool, state.edges),
     weldRegister: normalizeWeldRegister(state.weldRegister, state.fittings),
     productionInfo: normalizeProductionInfo(state.productionInfo),
     productionMessages: normalizeProductionMessages(state.productionMessages),
@@ -2189,6 +2437,7 @@ function persistState() {
   }
   markCloudSaveDirty();
   queueCloudAutosave();
+  captureCurrentSpoolWorkspaceTab();
 }
 
 function stateFromPayload(payload, options = {}) {
@@ -2255,6 +2504,7 @@ function stateFromPayload(payload, options = {}) {
     locked: saved.locked === true,
     revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
     spoolUid: normalizeTraceabilityId(saved.spoolUid) || createTraceabilityId("SPL"),
+    bigSpool: normalizeBigSpoolPlan(saved.bigSpool, edges),
     weldRegister: normalizeWeldRegister(saved.weldRegister, normalizeFittings(saved.fittings, edges.length)),
     productionInfo: normalizeProductionInfo(saved.productionInfo),
     productionMessages: normalizeProductionMessages(saved.productionMessages),
@@ -2472,6 +2722,27 @@ function reindexDimensionOffsetsAfterSegmentRemoval(removedIndex) {
   state.dimensionOffsets = normalizeDimensionOffsets(next, state.edges.length);
 }
 
+function reindexBigSpoolCutsAfterSegmentSplit(splitIndex, splitDistanceMm) {
+  const plan = currentBigSpoolPlan();
+  plan.cuts = plan.cuts.map((cut) => {
+    if (cut.segmentIndex < splitIndex) return cut;
+    if (cut.segmentIndex > splitIndex) return { ...cut, segmentIndex: cut.segmentIndex + 1 };
+    if (cut.distanceFromStartMm < splitDistanceMm) return cut;
+    return {
+      ...cut,
+      segmentIndex: splitIndex + 1,
+      distanceFromStartMm: Math.max(1, Math.round(cut.distanceFromStartMm - splitDistanceMm)),
+    };
+  });
+}
+
+function reindexBigSpoolCutsAfterSegmentRemoval(removedIndex) {
+  const plan = currentBigSpoolPlan();
+  plan.cuts = plan.cuts
+    .filter((cut) => cut.segmentIndex !== removedIndex)
+    .map((cut) => cut.segmentIndex > removedIndex ? { ...cut, segmentIndex: cut.segmentIndex - 1 } : cut);
+}
+
 function normalizeEdges(edges, pointCount) {
   if (Array.isArray(edges) && edges.length) {
     return edges
@@ -2673,6 +2944,59 @@ function defaultProductionInfo() {
     removeAfter: "",
     lastUpdatedBy: "",
     lastUpdatedAt: "",
+    materialChecklist: defaultMaterialChecklist(),
+  };
+}
+
+function defaultMaterialChecklist() {
+  return {
+    items: [],
+    checkedBy: "",
+    checkedAt: "",
+    overrideBy: "",
+    overrideAt: "",
+    overrideReason: "",
+  };
+}
+
+function normalizeMaterialCheckStatus(value) {
+  const status = String(value ?? "pending").trim().toLowerCase();
+  return MATERIAL_CHECK_STATUSES.has(status) ? status : "pending";
+}
+
+function normalizeMaterialChecklist(checklist) {
+  const source = checklist && typeof checklist === "object" ? checklist : {};
+  const seen = new Set();
+  const items = (Array.isArray(source.items) ? source.items : [])
+    .map((item, index) => {
+      const label = String(item?.label ?? "").trim().slice(0, 120);
+      if (!label) return null;
+      const custom = item?.custom === true;
+      const key = String(item?.key ?? (custom ? `custom:${item?.id ?? index}` : label)).trim().slice(0, 160);
+      let id = String(item?.id ?? "").trim().slice(0, 120);
+      if (!id) id = `gear-${key.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80) || index}`;
+      if (seen.has(id)) id = `${id}-${index}`;
+      seen.add(id);
+      return {
+        id,
+        key,
+        label,
+        quantity: String(item?.quantity ?? "").trim().slice(0, 48),
+        detail: String(item?.detail ?? "").trim().slice(0, 160),
+        status: normalizeMaterialCheckStatus(item?.status),
+        note: String(item?.note ?? "").trim().slice(0, 180),
+        custom,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 80);
+  return {
+    items,
+    checkedBy: String(source.checkedBy ?? "").trim().slice(0, 120),
+    checkedAt: String(source.checkedAt ?? "").trim(),
+    overrideBy: String(source.overrideBy ?? "").trim().slice(0, 120),
+    overrideAt: String(source.overrideAt ?? "").trim(),
+    overrideReason: String(source.overrideReason ?? "").trim().slice(0, 400),
   };
 }
 
@@ -2779,6 +3103,7 @@ function normalizeProductionInfo(info) {
     removeAfter: String(source.removeAfter ?? "").trim(),
     lastUpdatedBy: String(source.lastUpdatedBy ?? "").trim().slice(0, 80),
     lastUpdatedAt: String(source.lastUpdatedAt ?? "").trim(),
+    materialChecklist: normalizeMaterialChecklist(source.materialChecklist),
   };
 }
 
@@ -3160,6 +3485,25 @@ function regressionOffsetSocketsState() {
 
 const REGRESSION_SAMPLES = [
   {
+    key: "bigSpool",
+    title: "Big Spool transport split",
+    detail: "100 metre master assembly divided using a configurable 12 metre transport limit.",
+    build: () => ({
+      ...blankState({ userDefaults: false }),
+      points: [{ x: 0, y: 0, z: 0 }, { x: 100000, y: 0, z: 0 }],
+      edges: [{ from: 0, to: 1, pipeSizeNb: 25 }],
+      activePoint: 1,
+      selectedPoint: 1,
+      projectInfo: { ...defaultProjectInfo("carbon40"), jobNumber: "BIG-TEST", spoolNumber: "SP-BIG", revision: "A" },
+      bigSpool: { ...defaultBigSpoolPlan(), enabled: true, maxTransportLengthMm: 12000, clearanceMm: 150 },
+    }),
+    checks: [
+      "Automatic match joints keep every transport piece inside the selected overall limit.",
+      "Child IDs and A/B match marks stay stable after save and reopen.",
+      "The 2D drawing and 3D model use the same child-piece colours.",
+    ],
+  },
+  {
     key: "workshop",
     title: "Workshop sample",
     detail: "General drawing, reducers, flanges, valve, weld and cut list.",
@@ -3242,6 +3586,12 @@ const REGRESSION_LAUNCH_CHECKS = [
 
 const REGRESSION_AUTO_CHECKS = [
   {
+    key: "bigSpool",
+    title: "Big Spool split check",
+    sampleKey: "bigSpool",
+    run: regressionAutoCheckBigSpool,
+  },
+  {
     key: "teeReducer",
     title: "Tee reducer check",
     sampleKey: "teeReducer",
@@ -3308,6 +3658,40 @@ const REGRESSION_AUTO_CHECKS = [
     run: regressionAutoCheckStainlessTubeMaterial,
   },
 ];
+
+function regressionAutoCheckBigSpool(segmentData, quantities, definition) {
+  const plan = currentBigSpoolPlan();
+  plan.cuts = suggestedBigSpoolCuts(plan.maxTransportLengthMm, plan.clearanceMm);
+  const layout = bigSpoolLayout(segmentData);
+  const withinLimit = layout.pieces.every((piece) => piece.maxOverallMm <= plan.maxTransportLengthMm + 1);
+  const stableIds = layout.pieces.every((piece, index) => piece.childId === `SP-BIG-${bigSpoolPieceLabel(index)}`);
+  const validJoints = layout.cuts.length === layout.pieces.length - 1
+    && layout.cuts.every((cut, index) => cut.jointId === `J${String(index + 1).padStart(2, "0")}`
+      && cut.distanceFromStartMm >= plan.clearanceMm
+      && cut.distanceFromStartMm <= cut.lengthMm - plan.clearanceMm
+      && Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut.jointType)
+      && Object.hasOwn(BIG_SPOOL_JOINT_STATUSES, cut.status));
+  const childStates = layout.pieces.map((piece) => bigSpoolChildState(piece));
+  const childStatesValid = childStates.every((child, index) =>
+    child?.projectInfo?.spoolNumber === layout.pieces[index].childId
+    && child.edges.length === layout.pieces[index].fragments.length);
+  const engineeringValid = layout.pieces.every((piece) => piece.weightKg >= 0
+    && (!piece.weightKg || piece.cogPoint)
+    && piece.transportLengthMm >= piece.transportWidthMm
+    && piece.transportWidthMm >= piece.transportHeightMm);
+  const childWeightKg = layout.pieces.reduce((sum, piece) => sum + piece.weightKg, 0);
+  const childFabWeightKg = childStates.reduce((sum, child) =>
+    sum + (child ? withTemporaryState(child, () => quantitySummary().totalWeightKg) : 0), 0);
+  const weightBalanced = Math.abs(childWeightKg - childFabWeightKg) <= Math.max(0.1, childFabWeightKg * 0.001);
+  const passed = layout.pieces.length > 1 && withinLimit && stableIds && validJoints
+    && childStatesValid && engineeringValid && weightBalanced;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${layout.pieces.length} child spools and ${layout.cuts.length} field joints; ${formatMass(childWeightKg)} kg reconciled to child fab sheets; largest ${formatLength(Math.max(...layout.pieces.map((piece) => piece.maxOverallMm)))} mm against ${formatLength(plan.maxTransportLengthMm)} mm limit.`,
+  );
+}
 
 function regressionCheckResult(title, sampleKey, passed, detail) {
   const sample = regressionSampleByKey(sampleKey);
@@ -4704,6 +5088,691 @@ function segments() {
   return list;
 }
 
+function defaultBigSpoolPlan() {
+  return {
+    enabled: false,
+    maxTransportLengthMm: BIG_SPOOL_DEFAULT_MAX_LENGTH_MM,
+    maxTransportWidthMm: 0,
+    maxTransportHeightMm: 0,
+    maxTransportWeightKg: 0,
+    clearanceMm: BIG_SPOOL_DEFAULT_CLEARANCE_MM,
+    preset: "custom",
+    transportNote: "",
+    defaultJointType: "fieldWeld",
+    cuts: [],
+    updatedAt: "",
+  };
+}
+
+function normalizeBigSpoolPlan(source, edges = []) {
+  const input = source && typeof source === "object" ? source : {};
+  const maxTransportLengthMm = clampNumber(
+    Math.round(Number(input.maxTransportLengthMm) || BIG_SPOOL_DEFAULT_MAX_LENGTH_MM),
+    BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM,
+    MAX_LENGTH_MM,
+  );
+  const clearanceMm = clampNumber(
+    Math.round(Number(input.clearanceMm) || BIG_SPOOL_DEFAULT_CLEARANCE_MM),
+    50,
+    2000,
+  );
+  const optionalLimit = (value, maximum) => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? clampNumber(Math.round(numeric), 1, maximum) : 0;
+  };
+  const maxTransportWidthMm = optionalLimit(input.maxTransportWidthMm, MAX_LENGTH_MM);
+  const maxTransportHeightMm = optionalLimit(input.maxTransportHeightMm, MAX_LENGTH_MM);
+  const maxTransportWeightKg = optionalLimit(input.maxTransportWeightKg, 100000);
+  const preset = Object.hasOwn(BIG_SPOOL_PRESETS, input.preset) ? input.preset : "custom";
+  const defaultJointType = BIG_SPOOL_PRIMARY_JOINT_TYPES.has(input.defaultJointType)
+    ? input.defaultJointType
+    : "fieldWeld";
+  const cuts = Array.isArray(input.cuts)
+    ? input.cuts
+      .map((cut, index) => ({
+        id: String(cut?.id || `CUT-${index + 1}`).replace(/[^a-z0-9_-]/gi, "").slice(0, 48) || `CUT-${index + 1}`,
+        segmentIndex: Math.round(Number(cut?.segmentIndex)),
+        distanceFromStartMm: Math.round(Number(cut?.distanceFromStartMm)),
+        source: cut?.source === "manual" ? "manual" : "auto",
+        jointType: Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut?.jointType) ? cut.jointType : "fieldWeld",
+        status: Object.hasOwn(BIG_SPOOL_JOINT_STATUSES, cut?.status) ? cut.status : "planned",
+        notes: String(cut?.notes ?? "").trim().slice(0, 120),
+      }))
+      .filter((cut) => Number.isInteger(cut.segmentIndex)
+        && cut.segmentIndex >= 0
+        && (!edges.length || cut.segmentIndex < edges.length)
+        && Number.isFinite(cut.distanceFromStartMm)
+        && cut.distanceFromStartMm > 0)
+    : [];
+  return {
+    enabled: input.enabled === true,
+    maxTransportLengthMm,
+    maxTransportWidthMm,
+    maxTransportHeightMm,
+    maxTransportWeightKg,
+    clearanceMm,
+    preset,
+    transportNote: String(input.transportNote ?? "").trim().slice(0, 120),
+    defaultJointType,
+    cuts,
+    updatedAt: String(input.updatedAt ?? "").trim(),
+  };
+}
+
+function currentBigSpoolPlan() {
+  state.bigSpool = normalizeBigSpoolPlan(state.bigSpool, state.edges);
+  return state.bigSpool;
+}
+
+function bigSpoolJointPreparationText(cut, source = state) {
+  const jointType = Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut?.jointType) ? cut.jointType : "fieldWeld";
+  const weldGapMm = projectWeldGapMm(source);
+  if (jointType === "groove") return "Roll groove on both child ends · rejoin on site with 1 grooved coupling · no weld-gap deduction";
+  if (jointType === "flange") {
+    return `Single flange on both child ends · rejoin with gasket and bolt set · Weld gap ${formatWeldGapMm(weldGapMm)} mm deducted from each pipe cut`;
+  }
+  if (jointType === "thread") return "Thread preparation on both child ends · no weld-gap deduction";
+  return `Field weld · Weld gap ${formatWeldGapMm(weldGapMm)} mm deducted from each child pipe cut (${formatWeldGapMm(weldGapMm * 2)} mm total)`;
+}
+
+function bigSpoolJointShortLabel(cut) {
+  if (cut?.jointType === "groove") return "RG/RG";
+  if (cut?.jointType === "flange") return "FLG/FLG";
+  if (cut?.jointType === "thread") return "THD/THD";
+  return "WELD";
+}
+
+function bigSpoolJointRejoinItemText(cut) {
+  if (cut?.jointType === "groove") return "1 grooved coupling (Victaulic-compatible system to project specification)";
+  if (cut?.jointType === "flange") return "1 flange gasket and matching bolt set";
+  return "";
+}
+
+function bigSpoolSplitDisplayInsetMm(cut, segment) {
+  if (cut?.jointType !== "groove" || !segment) return 0;
+  const lengthMm = pointLength(segment.vector);
+  const pipeOdMm = Number(pipeSizeForSegment(segment)?.od) || 0;
+  return clampNumber(Math.max(75, pipeOdMm * 0.8, lengthMm * 0.008), 75, Math.min(300, lengthMm * 0.2));
+}
+
+function bigSpoolFragmentDisplayGeometry(fragment) {
+  const start = clonePoint(fragment.start);
+  const end = clonePoint(fragment.end);
+  const vector = subtractPoints(fragment.segment.end, fragment.segment.start);
+  const lengthMm = pointLength(vector);
+  if (lengthMm <= 0.001) return { start, end };
+  const direction = scalePoint(vector, 1 / lengthMm);
+  const fragmentLengthMm = pointLength(subtractPoints(end, start));
+  const maximumInsetMm = Math.max(0, fragmentLengthMm * 0.22);
+  const startInsetMm = Math.min(maximumInsetMm, bigSpoolSplitDisplayInsetMm(fragment.startCut, fragment.segment));
+  const endInsetMm = Math.min(maximumInsetMm, bigSpoolSplitDisplayInsetMm(fragment.endCut, fragment.segment));
+  return {
+    start: startInsetMm ? addPoints(start, direction, startInsetMm) : start,
+    end: endInsetMm ? addPoints(end, direction, -endInsetMm) : end,
+  };
+}
+
+function bigSpoolFragmentScreenGeometry(fragment, projectPoint, minimumHalfGapPx = 18) {
+  const display = bigSpoolFragmentDisplayGeometry(fragment);
+  const start = projectPoint(display.start);
+  const end = projectPoint(display.end);
+  const segmentStart = projectPoint(fragment.segment.start);
+  const segmentEnd = projectPoint(fragment.segment.end);
+  const along = normalizeScreenVector({ x: segmentEnd.x - segmentStart.x, y: segmentEnd.y - segmentStart.y });
+  if (fragment.startCut?.jointType === "groove") {
+    const cut = projectPoint(fragment.start);
+    if (Math.hypot(start.x - cut.x, start.y - cut.y) < minimumHalfGapPx) {
+      start.x = cut.x + along.x * minimumHalfGapPx;
+      start.y = cut.y + along.y * minimumHalfGapPx;
+    }
+  }
+  if (fragment.endCut?.jointType === "groove") {
+    const cut = projectPoint(fragment.end);
+    if (Math.hypot(end.x - cut.x, end.y - cut.y) < minimumHalfGapPx) {
+      end.x = cut.x - along.x * minimumHalfGapPx;
+      end.y = cut.y - along.y * minimumHalfGapPx;
+    }
+  }
+  return { start, end, along };
+}
+
+function bigSpoolJointEndFitting(cut, segmentIndex, endpointT, source = state, id = 0) {
+  if (!cut || !Number.isInteger(Number(segmentIndex))) return null;
+  const jointType = Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut.jointType) ? cut.jointType : "fieldWeld";
+  const base = {
+    id: Number(id) || 0,
+    segmentIndex: Number(segmentIndex),
+    bigSpoolFieldJoint: true,
+    bigSpoolCutId: cut.id,
+    bigSpoolJointType: jointType,
+    fieldJointEnd: endpointT === 0 ? "start" : "end",
+  };
+  if (jointType === "groove") return { ...base, type: "rollGroove", t: endpointT };
+  if (jointType === "flange") {
+    return {
+      ...base,
+      type: "flange",
+      t: endpointT,
+      flangeMode: "single",
+      flangeStandard: normalizeFlangeStandard(source?.flangeStandard),
+    };
+  }
+  if (jointType === "thread") return { ...base, type: "threadedEnd", t: endpointT };
+  return {
+    ...base,
+    type: "weld",
+    t: endpointT === 0 ? 0.04 : 0.96,
+    weldGapMm: projectWeldGapMm(source),
+  };
+}
+
+function bigSpoolPieceLabel(index) {
+  return pointLabel(index);
+}
+
+function bigSpoolPieceColour(index) {
+  return BIG_SPOOL_PIECE_COLOURS[Math.max(0, Number(index) || 0) % BIG_SPOOL_PIECE_COLOURS.length];
+}
+
+function bigSpoolChildId(index) {
+  const base = normalizeProjectInfo(state.projectInfo).spoolNumber || "SP-MASTER";
+  return `${base}-${bigSpoolPieceLabel(index)}`;
+}
+
+function validBigSpoolCuts(segmentData = segments()) {
+  const byIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  const seen = new Set();
+  return currentBigSpoolPlan().cuts
+    .map((cut) => {
+      const segment = byIndex.get(cut.segmentIndex);
+      const lengthMm = segment ? pointLength(segment.vector) : 0;
+      if (!segment || lengthMm <= 1) return null;
+      const distanceFromStartMm = clampNumber(Number(cut.distanceFromStartMm), 1, lengthMm - 1);
+      const key = `${cut.segmentIndex}:${Math.round(distanceFromStartMm)}`;
+      if (seen.has(key)) return null;
+      seen.add(key);
+      return {
+        ...cut,
+        distanceFromStartMm,
+        t: distanceFromStartMm / lengthMm,
+        lengthMm,
+        point: lerpPoint(segment.start, segment.end, distanceFromStartMm / lengthMm),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.segmentIndex - b.segmentIndex || a.distanceFromStartMm - b.distanceFromStartMm);
+}
+
+function bigSpoolRouteDistances(segmentData = segments()) {
+  const adjacency = new Map();
+  for (const segment of segmentData) {
+    const lengthMm = pointLength(segment.vector);
+    if (!adjacency.has(segment.from)) adjacency.set(segment.from, []);
+    if (!adjacency.has(segment.to)) adjacency.set(segment.to, []);
+    adjacency.get(segment.from).push({ node: segment.to, lengthMm });
+    adjacency.get(segment.to).push({ node: segment.from, lengthMm });
+  }
+  const startNode = segmentData[0]?.from ?? 0;
+  const distances = new Map([...adjacency.keys()].map((node) => [node, Number.POSITIVE_INFINITY]));
+  distances.set(startNode, 0);
+  const open = new Set(adjacency.keys());
+  while (open.size) {
+    let current = null;
+    let best = Number.POSITIVE_INFINITY;
+    for (const node of open) {
+      const distance = distances.get(node) ?? Number.POSITIVE_INFINITY;
+      if (distance < best) {
+        current = node;
+        best = distance;
+      }
+    }
+    if (current === null || !Number.isFinite(best)) break;
+    open.delete(current);
+    for (const neighbour of adjacency.get(current) ?? []) {
+      const next = best + neighbour.lengthMm;
+      if (next < (distances.get(neighbour.node) ?? Number.POSITIVE_INFINITY)) distances.set(neighbour.node, next);
+    }
+  }
+  return distances;
+}
+
+function bigSpoolDistanceToFragment(point, fragment) {
+  const vector = subtractPoints(fragment.end, fragment.start);
+  const lengthSquared = dotPoints(vector, vector);
+  if (lengthSquared <= 0.001) return pointLength(subtractPoints(point, fragment.start));
+  const t = clampNumber(dotPoints(subtractPoints(point, fragment.start), vector) / lengthSquared, 0, 1);
+  return pointLength(subtractPoints(point, lerpPoint(fragment.start, fragment.end, t)));
+}
+
+function bigSpoolPieceForPoint(layout, point) {
+  let bestPiece = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (const piece of layout.pieces) {
+    for (const fragment of piece.fragments) {
+      const distance = bigSpoolDistanceToFragment(point, fragment);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestPiece = piece;
+      }
+    }
+  }
+  return bestPiece;
+}
+
+function addBigSpoolPieceComponent(piece, weightKg, point, type) {
+  if (!piece || !Number.isFinite(weightKg) || Math.abs(weightKg) < 0.0000001 || !point) return;
+  piece.weightComponents.push({ weightKg, point: clonePoint(point), type });
+}
+
+function applyBigSpoolPieceEngineering(layout, segmentData = segments()) {
+  const quantities = quantitySummary(segmentData);
+  const quantityBySegment = new Map(quantities.segments.map((entry) => [entry.segment.index, entry.quantity]));
+  for (const piece of layout.pieces) piece.weightComponents = [];
+
+  for (const piece of layout.pieces) {
+    for (const fragment of piece.fragments) {
+      const quantity = quantityBySegment.get(fragment.segmentIndex);
+      const segmentLength = pointLength(fragment.segment.vector);
+      const fraction = segmentLength > 0 ? fragment.lengthMm / segmentLength : 0;
+      addBigSpoolPieceComponent(
+        piece,
+        (Number(quantity?.pipeWeightKg) || 0) * fraction,
+        lerpPoint(fragment.start, fragment.end, 0.5),
+        "pipe",
+      );
+    }
+  }
+
+  const addNearest = (weightKg, point, type) => addBigSpoolPieceComponent(bigSpoolPieceForPoint(layout, point), weightKg, point, type);
+  for (const elbow of quantities.elbows) addNearest(elbow.weightKg, state.points[elbow.nodeIndex], "elbow");
+  for (const reducer of quantities.reducers) addNearest(reducer.weightKg, reducerCentrePoint(reducer), "reducer");
+  for (const tee of quantities.tees) addNearest(tee.weightKg, state.points[tee.nodeIndex], "tee");
+  for (const branch of quantities.branches) addNearest(branch.weightKg, state.points[branch.nodeIndex], "branch");
+  for (const fitting of quantities.fittings) addNearest(fitting.weightKg, fitting.point, fitting.fitting.type);
+
+  for (const piece of layout.pieces) {
+    for (const fragment of piece.fragments) {
+      for (const [cut, endpointT, point] of [
+        [fragment.startCut, 0, fragment.start],
+        [fragment.endCut, 1, fragment.end],
+      ]) {
+        const fitting = bigSpoolJointEndFitting(cut, fragment.segmentIndex, endpointT, state, -1);
+        if (!fitting) continue;
+        addBigSpoolPieceComponent(piece, fittingWeightKg(fitting, fragment.segment), point, `split-${fitting.type}`);
+        if (fitting.type === "weld" || fitting.type === "flange") {
+          const gapWeightKg = (projectWeldGapMm() / 1000) * pipeMassPerMetre(fragment.segment);
+          addBigSpoolPieceComponent(piece, -gapWeightKg, point, "split-weld-gap");
+        }
+      }
+    }
+  }
+
+  for (const piece of layout.pieces) {
+    piece.weightKg = piece.weightComponents.reduce((sum, component) => sum + component.weightKg, 0);
+    if (piece.weightKg > 0) {
+      piece.cogPoint = piece.weightComponents.reduce((sum, component) => ({
+        x: sum.x + component.point.x * component.weightKg / piece.weightKg,
+        y: sum.y + component.point.y * component.weightKg / piece.weightKg,
+        z: sum.z + component.point.z * component.weightKg / piece.weightKg,
+      }), { x: 0, y: 0, z: 0 });
+    } else {
+      piece.cogPoint = null;
+    }
+    delete piece.weightComponents;
+  }
+  return layout;
+}
+
+function bigSpoolPieceViolations(piece, plan = currentBigSpoolPlan()) {
+  const violations = [];
+  if (piece.transportLengthMm > plan.maxTransportLengthMm + 1) violations.push("length");
+  if (plan.maxTransportWidthMm > 0 && piece.transportWidthMm > plan.maxTransportWidthMm + 1) violations.push("width");
+  if (plan.maxTransportHeightMm > 0 && piece.transportHeightMm > plan.maxTransportHeightMm + 1) violations.push("height");
+  if (plan.maxTransportWeightKg > 0 && piece.weightKg > plan.maxTransportWeightKg + 0.01) violations.push("weight");
+  return violations;
+}
+
+function bigSpoolPieceReady(piece, plan = currentBigSpoolPlan()) {
+  return bigSpoolPieceViolations(piece, plan).length === 0;
+}
+
+function safeBigSpoolSplitDistance(segment, requestedDistanceMm, clearanceMm) {
+  const lengthMm = pointLength(segment.vector);
+  if (lengthMm <= clearanceMm * 2 + 10) return null;
+  const fittingDistances = state.fittings
+    .filter((fitting) => fitting.segmentIndex === segment.index)
+    .map((fitting) => normalizeFittingPosition(fitting.type, fitting.t) * lengthMm);
+  const allowed = (distance) => distance >= clearanceMm
+    && distance <= lengthMm - clearanceMm
+    && fittingDistances.every((fittingDistance) => Math.abs(distance - fittingDistance) >= clearanceMm);
+  const requested = clampNumber(requestedDistanceMm, clearanceMm, lengthMm - clearanceMm);
+  if (allowed(requested)) return Math.round(requested);
+  const step = Math.max(25, Math.min(100, clearanceMm / 3));
+  for (let offset = step; offset <= lengthMm; offset += step) {
+    const after = requested + offset;
+    const before = requested - offset;
+    if (allowed(after)) return Math.round(after);
+    if (allowed(before)) return Math.round(before);
+  }
+  return null;
+}
+
+function suggestedBigSpoolCuts(
+  maxTransportLengthMm = currentBigSpoolPlan().maxTransportLengthMm,
+  clearanceMm = currentBigSpoolPlan().clearanceMm,
+  jointType = currentBigSpoolPlan().defaultJointType,
+) {
+  const segmentData = segments();
+  const envelopeAllowanceMm = Math.max(...segmentData.map((segment) => Number(pipeSizeForSegment(segment)?.od) || 0), 0);
+  const targetRouteLengthMm = Math.max(BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM, maxTransportLengthMm - envelopeAllowanceMm);
+  const distances = bigSpoolRouteDistances(segmentData);
+  const suggestions = [];
+  const occupied = new Set();
+  for (const segment of segmentData) {
+    const lengthMm = pointLength(segment.vector);
+    const fromDistance = distances.get(segment.from);
+    const toDistance = distances.get(segment.to);
+    if (!Number.isFinite(fromDistance) || !Number.isFinite(toDistance) || lengthMm <= 1) continue;
+    const low = Math.min(fromDistance, toDistance);
+    const high = Math.max(fromDistance, toDistance);
+    if (high - low < 1) continue;
+    let threshold = (Math.floor(low / targetRouteLengthMm) + 1) * targetRouteLengthMm;
+    while (threshold < high - 1) {
+      const requested = toDistance >= fromDistance ? threshold - fromDistance : fromDistance - threshold;
+      const safeDistance = safeBigSpoolSplitDistance(segment, requested, clearanceMm);
+      const key = `${segment.index}:${safeDistance}`;
+      if (safeDistance !== null && !occupied.has(key)) {
+        occupied.add(key);
+        suggestions.push({
+          id: `AUTO-${segment.index + 1}-${Math.round(safeDistance)}`,
+          segmentIndex: segment.index,
+          distanceFromStartMm: safeDistance,
+          source: "auto",
+          jointType: BIG_SPOOL_PRIMARY_JOINT_TYPES.has(jointType) ? jointType : "fieldWeld",
+        });
+      }
+      threshold += targetRouteLengthMm;
+    }
+  }
+  return suggestions;
+}
+
+function refineBigSpoolCutsForConstraints(plan = currentBigSpoolPlan()) {
+  const maximumIterations = Math.min(80, Math.max(12, state.edges.length * 5));
+  let added = 0;
+  for (let iteration = 0; iteration < maximumIterations; iteration += 1) {
+    const layout = bigSpoolLayout();
+    const violating = layout.pieces
+      .map((piece) => ({ piece, violations: bigSpoolPieceViolations(piece, plan) }))
+      .filter((entry) => entry.violations.length)
+      .sort((first, second) => {
+        const firstRatio = Math.max(
+          first.piece.transportLengthMm / Math.max(1, plan.maxTransportLengthMm),
+          plan.maxTransportWidthMm ? first.piece.transportWidthMm / plan.maxTransportWidthMm : 0,
+          plan.maxTransportHeightMm ? first.piece.transportHeightMm / plan.maxTransportHeightMm : 0,
+          plan.maxTransportWeightKg ? first.piece.weightKg / plan.maxTransportWeightKg : 0,
+        );
+        const secondRatio = Math.max(
+          second.piece.transportLengthMm / Math.max(1, plan.maxTransportLengthMm),
+          plan.maxTransportWidthMm ? second.piece.transportWidthMm / plan.maxTransportWidthMm : 0,
+          plan.maxTransportHeightMm ? second.piece.transportHeightMm / plan.maxTransportHeightMm : 0,
+          plan.maxTransportWeightKg ? second.piece.weightKg / plan.maxTransportWeightKg : 0,
+        );
+        return secondRatio - firstRatio;
+      })[0];
+    if (!violating) break;
+
+    const candidates = violating.piece.fragments
+      .filter((fragment) => fragment.lengthMm > plan.clearanceMm * 2 + 20)
+      .map((fragment) => {
+        const segmentLength = pointLength(fragment.segment.vector);
+        const requested = segmentLength * (fragment.t0 + fragment.t1) * 0.5;
+        const distanceFromStartMm = safeBigSpoolSplitDistance(fragment.segment, requested, plan.clearanceMm);
+        if (distanceFromStartMm === null) return null;
+        if (distanceFromStartMm <= segmentLength * fragment.t0 + 2 || distanceFromStartMm >= segmentLength * fragment.t1 - 2) return null;
+        if (plan.cuts.some((cut) => cut.segmentIndex === fragment.segmentIndex && Math.abs(cut.distanceFromStartMm - distanceFromStartMm) < 2)) return null;
+        const vector = subtractPoints(fragment.end, fragment.start);
+        const axisSpread = Math.max(Math.abs(vector.x), Math.abs(vector.y), Math.abs(vector.z));
+        return { fragment, distanceFromStartMm, score: fragment.lengthMm + axisSpread * 0.6 };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+    const candidate = candidates[0];
+    if (!candidate) break;
+    plan.cuts.push({
+      id: `AUTO-C-${candidate.fragment.segmentIndex + 1}-${Math.round(candidate.distanceFromStartMm)}`,
+      segmentIndex: candidate.fragment.segmentIndex,
+      distanceFromStartMm: candidate.distanceFromStartMm,
+      source: "auto",
+      jointType: BIG_SPOOL_PRIMARY_JOINT_TYPES.has(plan.defaultJointType) ? plan.defaultJointType : "fieldWeld",
+      status: "planned",
+      notes: "",
+    });
+    added += 1;
+  }
+  return added;
+}
+
+function bigSpoolLayout(segmentData = segments()) {
+  const cuts = validBigSpoolCuts(segmentData);
+  const cutsBySegment = new Map();
+  for (const cut of cuts) {
+    if (!cutsBySegment.has(cut.segmentIndex)) cutsBySegment.set(cut.segmentIndex, []);
+    cutsBySegment.get(cut.segmentIndex).push(cut);
+  }
+  const fragments = [];
+  for (const segment of segmentData) {
+    const segmentCuts = cutsBySegment.get(segment.index) ?? [];
+    const stops = [0, ...segmentCuts.map((cut) => cut.t), 1];
+    for (let index = 0; index < stops.length - 1; index += 1) {
+      const t0 = stops[index];
+      const t1 = stops[index + 1];
+      const startCut = index > 0 ? segmentCuts[index - 1] : null;
+      const endCut = index < segmentCuts.length ? segmentCuts[index] : null;
+      fragments.push({
+        id: `${segment.index}:${index}`,
+        segmentIndex: segment.index,
+        segment,
+        t0,
+        t1,
+        start: lerpPoint(segment.start, segment.end, t0),
+        end: lerpPoint(segment.start, segment.end, t1),
+        lengthMm: pointLength(segment.vector) * (t1 - t0),
+        startKey: t0 === 0 ? `N:${segment.from}` : `C:${startCut?.id}:after`,
+        endKey: t1 === 1 ? `N:${segment.to}` : `C:${endCut?.id}:before`,
+        startCut,
+        endCut,
+      });
+    }
+  }
+
+  const parent = new Map();
+  const find = (key) => {
+    if (!parent.has(key)) parent.set(key, key);
+    let root = key;
+    while (parent.get(root) !== root) root = parent.get(root);
+    let cursor = key;
+    while (parent.get(cursor) !== cursor) {
+      const next = parent.get(cursor);
+      parent.set(cursor, root);
+      cursor = next;
+    }
+    return root;
+  };
+  const union = (a, b) => {
+    const rootA = find(a);
+    const rootB = find(b);
+    if (rootA !== rootB) parent.set(rootB, rootA);
+  };
+  for (const fragment of fragments) union(fragment.startKey, fragment.endKey);
+
+  const routeDistances = bigSpoolRouteDistances(segmentData);
+  const groups = new Map();
+  for (const fragment of fragments) {
+    const root = find(fragment.startKey);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root).push(fragment);
+  }
+  const pieces = [...groups.values()].map((pieceFragments) => {
+    const points = pieceFragments.flatMap((fragment) => [fragment.start, fragment.end]);
+    const xs = points.map((point) => point.x);
+    const ys = points.map((point) => point.y);
+    const zs = points.map((point) => point.z);
+    const extents = {
+      x: Math.max(...xs) - Math.min(...xs),
+      y: Math.max(...ys) - Math.min(...ys),
+      z: Math.max(...zs) - Math.min(...zs),
+    };
+    const largestOdMm = Math.max(...pieceFragments.map((fragment) => Number(pipeSizeForSegment(fragment.segment)?.od) || 0), 0);
+    const transportDimensions = [extents.x + largestOdMm, extents.y + largestOdMm, extents.z + largestOdMm].sort((a, b) => b - a);
+    const routeStartMm = Math.min(...pieceFragments.map((fragment) => {
+      const fromDistance = routeDistances.get(fragment.segment.from) ?? 0;
+      const toDistance = routeDistances.get(fragment.segment.to) ?? fromDistance + pointLength(fragment.segment.vector);
+      return fromDistance + (toDistance - fromDistance) * fragment.t0;
+    }));
+    return {
+      fragments: pieceFragments,
+      centrelineMm: pieceFragments.reduce((sum, fragment) => sum + fragment.lengthMm, 0),
+      extents,
+      maxOverallMm: transportDimensions[0],
+      transportLengthMm: transportDimensions[0],
+      transportWidthMm: transportDimensions[1],
+      transportHeightMm: transportDimensions[2],
+      largestOdMm,
+      routeStartMm,
+    };
+  }).sort((a, b) => a.routeStartMm - b.routeStartMm);
+
+  for (const [pieceIndex, piece] of pieces.entries()) {
+    piece.index = pieceIndex;
+    piece.label = bigSpoolPieceLabel(pieceIndex);
+    piece.childId = bigSpoolChildId(pieceIndex);
+    piece.colour = bigSpoolPieceColour(pieceIndex);
+    for (const fragment of piece.fragments) fragment.pieceIndex = pieceIndex;
+  }
+  applyBigSpoolPieceEngineering({ pieces, fragments, cuts }, segmentData);
+  const fragmentById = new Map(fragments.map((fragment) => [fragment.id, fragment]));
+  const resolvedCuts = cuts.map((cut, cutIndex) => {
+    const segmentCuts = cutsBySegment.get(cut.segmentIndex) ?? [];
+    const localIndex = segmentCuts.findIndex((item) => item.id === cut.id);
+    const before = fragmentById.get(`${cut.segmentIndex}:${localIndex}`);
+    const after = fragmentById.get(`${cut.segmentIndex}:${localIndex + 1}`);
+    return {
+      ...cut,
+      jointNumber: cutIndex + 1,
+      jointId: `J${String(cutIndex + 1).padStart(2, "0")}`,
+      beforePieceIndex: before?.pieceIndex ?? null,
+      afterPieceIndex: after?.pieceIndex ?? null,
+    };
+  });
+  return { fragments, pieces, cuts: resolvedCuts };
+}
+
+function bigSpoolFragmentsForSegment(segmentIndex, layout = bigSpoolLayout()) {
+  return layout.fragments.filter((fragment) => fragment.segmentIndex === segmentIndex);
+}
+
+function bigSpoolPlanActive() {
+  return currentBigSpoolPlan().enabled === true;
+}
+
+function bigSpoolChildState(piece, masterState = state) {
+  if (!piece) return null;
+  const child = {
+    ...masterState,
+    points: [],
+    edges: [],
+    fittings: [],
+    notes: [],
+    measurements: [],
+    nodeTypes: {},
+    reducerSideOverrides: {},
+    dimensionOffsets: {},
+    selectedSegments: [],
+    selectedSegment: null,
+    selectedFitting: null,
+    selectedNote: null,
+    selectedMeasurement: null,
+    selectedPoint: null,
+    history: [],
+    redoHistory: [],
+    bigSpool: { ...defaultBigSpoolPlan(), enabled: false },
+    projectInfo: { ...normalizeProjectInfo(masterState.projectInfo, masterState.pipeSpec), spoolNumber: piece.childId },
+    spoolUid: normalizeTraceabilityId(`${normalizeTraceabilityId(masterState.spoolUid) || "SPL"}-${piece.label}`),
+  };
+  const pointIndexByKey = new Map();
+  const addPoint = (point) => {
+    const key = `${Math.round(point.x * 1000)}:${Math.round(point.y * 1000)}:${Math.round(point.z * 1000)}`;
+    if (pointIndexByKey.has(key)) return pointIndexByKey.get(key);
+    const index = child.points.length;
+    child.points.push(clonePoint(point));
+    pointIndexByKey.set(key, index);
+    return index;
+  };
+  const edgeByFragmentId = new Map();
+  for (const fragment of piece.fragments) {
+    const from = addPoint(fragment.start);
+    const to = addPoint(fragment.end);
+    const edgeIndex = child.edges.length;
+    child.edges.push({
+      from,
+      to,
+      pipeSizeNb: normalizePipeSize(fragment.segment.pipeSizeNb),
+      ...normalizeOffsetEdgeMeta(fragment.segment),
+    });
+    edgeByFragmentId.set(fragment.id, edgeIndex);
+  }
+  for (const fitting of masterState.fittings ?? []) {
+    const fittingT = normalizeFittingPosition(fitting.type, fitting.t);
+    const candidates = piece.fragments.filter((fragment) => fragment.segmentIndex === fitting.segmentIndex
+      && fittingT >= fragment.t0 - 0.000001
+      && fittingT <= fragment.t1 + 0.000001);
+    const fragment = candidates.find((candidate) => fittingT < candidate.t1 - 0.000001) ?? candidates[candidates.length - 1];
+    if (!fragment) continue;
+    const span = Math.max(0.000001, fragment.t1 - fragment.t0);
+    const localT = clampNumber((fittingT - fragment.t0) / span, 0, 1);
+    child.fittings.push({
+      ...fitting,
+      segmentIndex: edgeByFragmentId.get(fragment.id),
+      t: normalizeFittingPosition(fitting.type, localT),
+    });
+  }
+  let generatedFittingId = child.fittings.reduce((maximum, fitting) => Math.max(maximum, Number(fitting.id) || 0), 0) + 1;
+  const addSplitEndPreparation = (fragment, cut, endpointT) => {
+    if (!cut) return;
+    const segmentIndex = edgeByFragmentId.get(fragment.id);
+    if (!Number.isInteger(segmentIndex)) return;
+    const fitting = bigSpoolJointEndFitting(cut, segmentIndex, endpointT, masterState, generatedFittingId);
+    generatedFittingId += 1;
+    if (fitting) child.fittings.push(fitting);
+  };
+  for (const fragment of piece.fragments) {
+    addSplitEndPreparation(fragment, fragment.startCut, 0);
+    addSplitEndPreparation(fragment, fragment.endCut, 1);
+  }
+  for (const [originalNode, type] of Object.entries(masterState.nodeTypes ?? {})) {
+    const point = masterState.points?.[Number(originalNode)];
+    if (!point) continue;
+    const childIndex = pointIndexByKey.get(`${Math.round(point.x * 1000)}:${Math.round(point.y * 1000)}:${Math.round(point.z * 1000)}`);
+    if (Number.isInteger(childIndex)) child.nodeTypes[childIndex] = type;
+  }
+  child.activePoint = Math.max(0, child.points.length - 1);
+  child.selectedPoint = child.activePoint;
+  child.weldRegister = normalizeWeldRegister([], child.fittings);
+  return child.points.length && child.edges.length ? child : null;
+}
+
+function bigSpoolPieceLiftData(piece) {
+  const child = bigSpoolChildState(piece);
+  if (!child) return null;
+  return withTemporaryState(child, () => {
+    const quantities = quantitySummary();
+    const cog = centreOfGravityData(quantities);
+    const lugs = suggestedLugPlan(quantities, cog);
+    return { quantities, cog, lugs };
+  });
+}
+
 function runLabelForVector(vector) {
   const normalized = normalizePoint(vector);
   let best = AXES[0];
@@ -5073,6 +6142,76 @@ function drawSpool2d(ctx, projection, options = {}) {
   drawPipePointMarkers(ctx, projection, connections);
   drawNumberedDimensionLegend(ctx, dimensionLayout);
 
+  ctx.restore();
+}
+
+function drawBigSpoolBreaks2d(ctx, projection, layout = bigSpoolLayout(), pipeWidth = 5) {
+  if (!layout.cuts.length) return;
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.font = "900 11px Inter, system-ui, sans-serif";
+  for (const cut of layout.cuts) {
+    const segment = segments().find((item) => item.index === cut.segmentIndex);
+    if (!segment) continue;
+    const point = projectIso(cut.point, projection);
+    const start = projectIso(segment.start, projection);
+    const end = projectIso(segment.end, projection);
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    const normal = { x: -dy / length, y: dx / length };
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 3;
+    drawLine(ctx, { x: point.x - normal.x * 10, y: point.y - normal.y * 10 }, { x: point.x + normal.x * 10, y: point.y + normal.y * 10 });
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#ffffff";
+    drawLine(ctx, { x: point.x - normal.x * 8, y: point.y - normal.y * 8 }, { x: point.x + normal.x * 8, y: point.y + normal.y * 8 });
+    const label = `${cut.jointId} ${bigSpoolPieceLabel(cut.beforePieceIndex ?? 0)}/${bigSpoolPieceLabel(cut.afterPieceIndex ?? 0)} ${bigSpoolJointShortLabel(cut)}`;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "rgba(255,255,255,0.95)";
+    ctx.fillStyle = "#111827";
+    const labelOffset = cut.jointType === "groove" ? 34 : 18;
+    ctx.strokeText(label, point.x + normal.x * labelOffset, point.y + normal.y * labelOffset);
+    ctx.fillText(label, point.x + normal.x * labelOffset, point.y + normal.y * labelOffset);
+    if (cut.jointType === "groove") {
+      const matchingFragments = layout.fragments.filter((fragment) => fragment.startCut?.id === cut.id || fragment.endCut?.id === cut.id);
+      for (const fragment of matchingFragments) {
+        const display = bigSpoolFragmentScreenGeometry(fragment, (worldPoint) => projectIso(worldPoint, projection));
+        const atStart = fragment.startCut?.id === cut.id;
+        const endpoint = atStart ? display.start : display.end;
+        const inward = atStart ? 1 : -1;
+        const grooveCentre = {
+          x: endpoint.x + display.along.x * inward * 5,
+          y: endpoint.y + display.along.y * inward * 5,
+        };
+        const grooveNormal = { x: -display.along.y, y: display.along.x };
+        ctx.lineCap = "butt";
+        ctx.strokeStyle = "#4d5754";
+        ctx.lineWidth = 2.8;
+        for (const offset of [-3, 3]) {
+          const centre = {
+            x: grooveCentre.x + display.along.x * offset,
+            y: grooveCentre.y + display.along.y * offset,
+          };
+          drawLine(ctx,
+            { x: centre.x - grooveNormal.x * Math.max(8, pipeWidth * 1.4), y: centre.y - grooveNormal.y * Math.max(8, pipeWidth * 1.4) },
+            { x: centre.x + grooveNormal.x * Math.max(8, pipeWidth * 1.4), y: centre.y + grooveNormal.y * Math.max(8, pipeWidth * 1.4) });
+        }
+        const labelSide = atStart ? -1 : 1;
+        const rgLabel = {
+          x: endpoint.x + grooveNormal.x * labelSide * 17,
+          y: endpoint.y + grooveNormal.y * labelSide * 17,
+        };
+        ctx.font = "900 8px Inter, system-ui, sans-serif";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
+        ctx.fillStyle = "#526067";
+        ctx.strokeText("RG", rgLabel.x, rgLabel.y);
+        ctx.fillText("RG", rgLabel.x, rgLabel.y);
+      }
+    }
+  }
   ctx.restore();
 }
 
@@ -8268,12 +9407,18 @@ function weldedSegmentEndCounts(segmentData = segments(), data = takeoffData(seg
   // there. Roll-grooved, threaded and genuinely plain/open pipe ends are not.
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
   for (const fitting of state.fittings ?? []) {
-    if (fitting?.type !== "flange") continue;
     const segment = segmentByIndex.get(Number(fitting.segmentIndex));
     if (!segment) continue;
-    const t = normalizeFittingPosition("flange", fitting.t);
-    if (t === 0) add(segment.index, segment.from);
-    if (t === 1) add(segment.index, segment.to);
+    if (fitting?.type === "flange") {
+      const t = normalizeFittingPosition("flange", fitting.t);
+      if (t === 0) add(segment.index, segment.from);
+      if (t === 1) add(segment.index, segment.to);
+      continue;
+    }
+    if (fitting?.type === "weld" && fitting.bigSpoolFieldJoint === true) {
+      if (fitting.fieldJointEnd === "start") add(segment.index, segment.from);
+      if (fitting.fieldJointEnd === "end") add(segment.index, segment.to);
+    }
   }
 
   const counts = new Map(segmentData.map((segment) => [segment.index, 0]));
@@ -9111,6 +10256,82 @@ function takeoffCountRows(quantities = quantitySummary()) {
     .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
 }
 
+function inferredMaterialChecklistItems(source = state) {
+  const target = drawingStateTarget(source) ?? source;
+  if (!target || typeof target !== "object") return [];
+  try {
+    return withTemporaryState(target, () => takeoffCountRows()
+      .filter((row) => !/^(branch|rollGroove|threadedEnd|weld):/.test(String(row.key)))
+      .map((row, index) => ({
+        id: `gear-${String(row.key).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80) || index}`,
+        key: String(row.key),
+        label: String(row.label),
+        quantity: String(row.countText || (row.quantity ? `x${row.quantity}` : "")),
+        detail: String(row.detail || ""),
+        status: "pending",
+        note: "",
+        custom: false,
+      })));
+  } catch (error) {
+    console.warn("Could not build the gear checklist from the spool take-off.", error);
+    return [];
+  }
+}
+
+function materialChecklistForState(source = state) {
+  const target = drawingStateTarget(source) ?? source;
+  const production = normalizeProductionInfo(target?.productionInfo);
+  const saved = normalizeMaterialChecklist(production.materialChecklist);
+  const byKey = new Map(saved.items.filter((item) => !item.custom).map((item) => [item.key, item]));
+  const inferred = inferredMaterialChecklistItems(target).map((item) => ({
+    ...item,
+    ...(byKey.get(item.key) ?? {}),
+    id: item.id,
+    key: item.key,
+    label: item.label,
+    quantity: item.quantity,
+    detail: item.detail,
+    custom: false,
+  }));
+  return normalizeMaterialChecklist({
+    ...saved,
+    items: [...inferred, ...saved.items.filter((item) => item.custom)],
+  });
+}
+
+function materialChecklistStats(checklist) {
+  const normalized = normalizeMaterialChecklist(checklist);
+  const resolved = normalized.items.filter((item) => item.status === "inshop" || item.status === "na").length;
+  const missing = normalized.items.filter((item) => item.status === "order").length;
+  const pending = normalized.items.filter((item) => item.status === "pending").length;
+  const ready = normalized.items.length > 0 && pending === 0 && missing === 0 && Boolean(normalized.checkedAt);
+  const overridden = Boolean(normalized.overrideAt && normalized.overrideReason);
+  return { total: normalized.items.length, resolved, missing, pending, ready, overridden };
+}
+
+function materialChecklistCanStart(checklist) {
+  const stats = materialChecklistStats(checklist);
+  return stats.ready || stats.overridden;
+}
+
+function materialChecklistSummary(checklist) {
+  const normalized = normalizeMaterialChecklist(checklist);
+  const stats = materialChecklistStats(normalized);
+  if (stats.ready) return `Ready / checked by ${normalized.checkedBy || "team"}`;
+  if (stats.overridden) return `Override / ${normalized.overrideReason}`;
+  if (stats.missing) return `${stats.missing} need ordering`;
+  if (!stats.total) return "No gear list yet";
+  return `${stats.resolved}/${stats.total} confirmed`;
+}
+
+function materialChecklistStatusLabel(value) {
+  const status = normalizeMaterialCheckStatus(value);
+  if (status === "inshop") return "In shop";
+  if (status === "order") return "Needs ordering";
+  if (status === "na") return "Not required";
+  return "Not checked";
+}
+
 function centreOfGravityData(quantities = quantitySummary()) {
   const components = [];
   const addComponent = (weightKg, point, type) => {
@@ -9557,6 +10778,7 @@ function splitSegmentAt(segmentIndex, t) {
   if (!ensureDrawingEditable("split a pipe run")) return null;
   const edge = state.edges[segmentIndex];
   if (!edge || t <= 0.02 || t >= 0.98) return null;
+  const originalLengthMm = pointLength(subtractPoints(state.points[edge.to], state.points[edge.from]));
 
   const splitPoint = lerpPoint(state.points[edge.from], state.points[edge.to], t);
   const splitIndex = state.points.length;
@@ -9568,6 +10790,7 @@ function splitSegmentAt(segmentIndex, t) {
     { from: splitIndex, to: edge.to, pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? state.pipeSizeNb) },
   );
   reindexDimensionOffsetsAfterSegmentSplit(segmentIndex);
+  reindexBigSpoolCutsAfterSegmentSplit(segmentIndex, originalLengthMm * t);
 
   const normalizedSplitFittingT = (fitting, localT) => {
     if (isEndpointFittingType(fitting.type)) {
@@ -9835,6 +11058,7 @@ function undo() {
     reindexNodeTypesAfterPointRemoval(last.pointIndex);
     reindexReducerSideOverridesAfterPointRemoval(last.pointIndex);
     reindexDimensionOffsetsAfterSegmentRemoval(last.edgeIndex);
+    reindexBigSpoolCutsAfterSegmentRemoval(last.edgeIndex);
     state.edges = state.edges.map((edge) => ({
       ...edge,
       from: edge.from > last.pointIndex ? edge.from - 1 : edge.from,
@@ -9954,6 +11178,7 @@ function deleteSegmentsByIndex(indexes) {
   for (const removedEdgeIndex of selectedSegments) {
     state.edges.splice(removedEdgeIndex, 1);
     reindexDimensionOffsetsAfterSegmentRemoval(removedEdgeIndex);
+    reindexBigSpoolCutsAfterSegmentRemoval(removedEdgeIndex);
     state.fittings = state.fittings.filter((fitting) => fitting.segmentIndex !== removedEdgeIndex);
     state.fittings = state.fittings.map((fitting) => ({
       ...fitting,
@@ -10307,8 +11532,13 @@ function endpointHasFinish(segment, pointIndex) {
   const endpointT = segment.from === pointIndex ? 0 : 1;
   return state.fittings.some((fitting) =>
     fitting.segmentIndex === segment.index &&
-    (fitting.type === "flange" || fitting.type === "rollGroove" || fitting.type === "threadedEnd") &&
-    Math.abs(endpointSnappedFittingT(segment, fitting) - endpointT) < 0.001,
+    (
+      ((fitting.type === "flange" || fitting.type === "rollGroove" || fitting.type === "threadedEnd")
+        && Math.abs(endpointSnappedFittingT(segment, fitting) - endpointT) < 0.001)
+      || (fitting.type === "weld"
+        && fitting.bigSpoolFieldJoint === true
+        && fitting.fieldJointEnd === (endpointT === 0 ? "start" : "end"))
+    ),
   );
 }
 
@@ -11263,6 +12493,7 @@ function productionAssigneeChoices() {
 
 function productionWorkflowCardHtml() {
   const production = normalizeProductionInfo(state.productionInfo);
+  const materialChecklist = materialChecklistForState(state);
   return `
     <div class="workflow-card production-workflow-card production-workflow-summary">
       <div class="production-activity-head">
@@ -11274,6 +12505,7 @@ function productionWorkflowCardHtml() {
         <li><span>Due</span><strong>${escapeHtml([production.dueDate, production.dueTime].filter(Boolean).join(" ") || "Not set")}</strong></li>
         <li><span>Priority</span><strong>${escapeHtml(productionPriorityLabel(production.priority))}</strong></li>
         <li><span>Hold</span><strong>${escapeHtml(production.hold ? production.holdReason || "On hold" : "No")}</strong></li>
+        <li><span>Gear check</span><strong>${escapeHtml(production.assignee ? materialChecklistSummary(materialChecklist) : "Assign spool first")}</strong></li>
       </ul>
       <button type="button" data-workflow-action="open-jobs">Open Jobs</button>
     </div>
@@ -11454,6 +12686,19 @@ function updateWorkflowSummary() {
   workflowSummary.querySelectorAll("[data-weld-field]").forEach((field) => {
     field.addEventListener("change", () => handleWeldRegisterFieldChange(field));
   });
+  workflowSummary.querySelectorAll("[data-weld-action]").forEach((button) => {
+    button.addEventListener("click", () => handleWeldRegisterAction(button));
+  });
+  workflowSummary.querySelectorAll("[data-weld-assignment-mode]").forEach((select) => {
+    select.addEventListener("change", () => {
+      if (select.value === "mixed") {
+        workflowSummary.querySelector("[data-weld-field='welderId']")?.focus?.();
+        showAppNotice("Mixed welders selected. Enter the welder ID against each numbered weld.");
+      } else {
+        workflowSummary.querySelector("[data-weld-all-input]")?.focus?.();
+      }
+    });
+  });
 }
 
 function weldStatusLabel(value) {
@@ -11474,12 +12719,36 @@ function weldRegisterCardHtml() {
     : ` disabled title="${escapeHtml(currentPermissionRestrictionText("production"))}"`;
   const spoolUid = ensureSpoolUid(state);
   const revisionUid = currentRevisionUid(state);
+  const namedWelders = [...new Set(welds.map((weld) => weld.welderId.trim()).filter(Boolean))];
+  const welderMode = namedWelders.length > 1 ? "mixed" : "all";
+  const welderSummary = namedWelders.length > 1
+    ? `Mixed welders / ${namedWelders.length} IDs`
+    : namedWelders.length === 1
+    ? `All welds by ${namedWelders[0]}`
+    : "Welder not assigned";
   return `
     <div class="workflow-card weld-register-card">
       <div class="weld-register-head">
-        <div><strong>Weld register</strong><span>${welds.length} numbered weld${welds.length === 1 ? "" : "s"}</span></div>
+        <div><strong>Weld register</strong><span>${welds.length} numbered weld${welds.length === 1 ? "" : "s"} / ${escapeHtml(welderSummary)}</span></div>
         <div class="traceability-ids"><code>${escapeHtml(spoolUid)}</code><code>${escapeHtml(revisionUid)}</code></div>
       </div>
+      ${welds.length ? `
+        <div class="weld-register-bulk">
+          <label>
+            <span>Welder setup</span>
+            <select data-weld-assignment-mode${disabledAttr}>
+              <option value="all"${welderMode === "all" ? " selected" : ""}>One welder for all welds</option>
+              <option value="mixed"${welderMode === "mixed" ? " selected" : ""}>Mixed welders</option>
+            </select>
+          </label>
+          <label class="weld-register-all-welder">
+            <span>All welds done by</span>
+            <input data-weld-all-input value="${escapeHtml(welderMode === "all" ? namedWelders[0] || "" : "")}" maxlength="40" placeholder="Welder name / ID"${disabledAttr} />
+          </label>
+          <button type="button" data-weld-action="apply-all-welder"${disabledAttr}>Apply to every weld</button>
+          <small>Choose Mixed welders to enter a different Welder ID on each numbered row below.</small>
+        </div>
+      ` : ""}
       ${welds.length ? `<div class="weld-register-list">${welds.map((weld) => `
         <section class="weld-register-row" data-weld-row="${weld.fittingId}">
           <div class="weld-register-number"><strong>${escapeHtml(weld.number)}</strong><span>Marker ${weld.fittingId}</span></div>
@@ -11520,6 +12789,29 @@ function handleWeldRegisterFieldChange(field) {
   state.productionActivity = addProductionActivity(state.productionActivity, "weld", `${weld.number} ${key} updated${key === "status" ? ` to ${weldStatusLabel(weld.status)}` : ""}.`, new Date().toISOString());
   persistProductionState();
   updateAll({ save: false });
+}
+
+function handleWeldRegisterAction(actionElement) {
+  if (!currentDrawingProjectPermission().canManageProduction) {
+    showAppNotice(currentPermissionRestrictionText("production"));
+    updateWorkflowSummary();
+    return;
+  }
+  const action = actionElement?.dataset?.weldAction;
+  if (action !== "apply-all-welder") return;
+  const input = actionElement.closest(".weld-register-bulk")?.querySelector("[data-weld-all-input]");
+  const welderId = String(input?.value ?? "").trim().slice(0, 40);
+  if (!welderId) {
+    showAppNotice("Enter the welder name or ID before applying it to every weld.");
+    input?.focus?.();
+    return;
+  }
+  const welds = synchronizeWeldRegister(state);
+  for (const weld of welds) weld.welderId = welderId;
+  state.productionActivity = addProductionActivity(state.productionActivity, "weld", `All ${welds.length} welds assigned to ${welderId}.`, new Date().toISOString());
+  persistProductionState();
+  updateAll({ save: false });
+  showAppNotice(`All ${welds.length} welds are assigned to ${welderId}.`);
 }
 
 async function handleWorkflowAction(action) {
@@ -11582,6 +12874,9 @@ async function handleProductionFieldChange(field) {
     lastUpdatedBy: checkerName(),
     lastUpdatedAt: now,
   });
+  if (state.productionInfo.assignee) {
+    state.productionInfo.materialChecklist = materialChecklistForState(state);
+  }
   const next = normalizeProductionInfo(state.productionInfo);
   if (key === "assignee" && previous.assignee !== next.assignee) {
     state.productionActivity = addProductionActivity(state.productionActivity, "assignee", `Assigned changed from ${previous.assignee || "Unassigned"} to ${next.assignee || "Unassigned"}.`, now);
@@ -13263,6 +14558,577 @@ function scheduleTemporaryWorkspaceRestore() {
   queueMicrotask(() => restoreTemporaryWorkspaceNavigation());
 }
 
+function createSpoolWorkspaceTabId() {
+  return `spool-tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function cloneSpoolWorkspaceValue(value) {
+  if (typeof structuredClone === "function") {
+    try {
+      return structuredClone(value);
+    } catch {
+      // JSON fallback keeps the workspace available in older WebViews.
+    }
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
+function spoolWorkspaceStateSnapshot(source = state) {
+  const snapshot = cloneSpoolWorkspaceValue(source);
+  snapshot.pointer = null;
+  snapshot.previewCandidate = null;
+  snapshot.hoveredSegment = null;
+  snapshot.history = Array.isArray(snapshot.history) ? snapshot.history.slice(-40) : [];
+  snapshot.redoHistory = Array.isArray(snapshot.redoHistory) ? snapshot.redoHistory.slice(-40) : [];
+  return snapshot;
+}
+
+function spoolWorkspaceSourceForCurrentState() {
+  if (currentProjectHasCloudRecord()) return "cloud";
+  return state.projectId ? "browser" : "draft";
+}
+
+function spoolWorkspaceLabelFromState(source = state) {
+  const info = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  const job = info.jobNumber || "No job";
+  const spool = info.spoolNumber || "Untitled";
+  return `${job} · ${spool}`;
+}
+
+function spoolWorkspaceTabDetail(tab) {
+  const source = tab?.state ?? state;
+  const info = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  const revision = info.revision || "A";
+  const status = projectStatusLabel(source?.projectStatus);
+  return `Rev ${revision} · ${status}`;
+}
+
+function captureSpoolWorkspaceUiState() {
+  return {
+    appMode,
+    activeTool: state.activeTool,
+    drawingViewOffset: { ...drawingViewOffset },
+    inspectorTab: activeInspectorTabName(),
+    surfaceState: captureWorkspaceSurfaceState(),
+    focusMode: focusModeActive,
+  };
+}
+
+function captureSpoolWorkspaceCloudState() {
+  return {
+    ownerId: normalizeUuid(currentCloudProjectOwnerId),
+    companyId: normalizeUuid(currentCloudProjectCompanyId),
+    readOnly: cloudPermissionReadOnly === true,
+    dirty: cloudSaveDirty === true,
+    conflict: cloudSaveConflict === true,
+    error: String(cloudSaveError ?? ""),
+    lastSavedAt: String(cloudLastSavedAt ?? ""),
+    remoteUpdatedAt: String(cloudLastRemoteUpdatedAt ?? ""),
+    trackedProjectId: normalizeProjectId(cloudSaveTrackedProjectId),
+  };
+}
+
+function activeSpoolWorkspaceTab() {
+  return spoolWorkspaceTabs.find((tab) => tab.id === activeSpoolWorkspaceTabId) ?? null;
+}
+
+function captureCurrentSpoolWorkspaceTab(options = {}) {
+  if (spoolWorkspaceSwitching) return null;
+  const tab = activeSpoolWorkspaceTab();
+  if (!tab) return null;
+  tab.state = spoolWorkspaceStateSnapshot();
+  tab.projectId = normalizeProjectId(state.projectId);
+  tab.spoolUid = normalizeTraceabilityId(state.spoolUid);
+  tab.source = spoolWorkspaceSourceForCurrentState();
+  tab.label = spoolWorkspaceLabelFromState();
+  tab.ui = captureSpoolWorkspaceUiState();
+  tab.cloud = captureSpoolWorkspaceCloudState();
+  tab.updatedAt = new Date().toISOString();
+  if (options.persist !== false) scheduleSpoolWorkspaceSessionPersist();
+  renderSpoolWorkspaceTabs();
+  if (spoolWorkspaceWindowed) renderSpoolWindowGrid();
+  return tab;
+}
+
+function spoolWorkspaceSessionPayload() {
+  return {
+    version: 1,
+    activeId: activeSpoolWorkspaceTabId,
+    windowed: spoolWorkspaceWindowed,
+    tabs: spoolWorkspaceTabs.slice(0, 8).map((tab) => ({
+      id: tab.id,
+      projectId: tab.projectId,
+      spoolUid: tab.spoolUid,
+      source: tab.source,
+      label: tab.label,
+      updatedAt: tab.updatedAt,
+      state: tab.state,
+      ui: tab.ui,
+      cloud: tab.cloud,
+    })),
+  };
+}
+
+function persistSpoolWorkspaceSession() {
+  window.clearTimeout(spoolWorkspaceSessionPersistTimer);
+  spoolWorkspaceSessionPersistTimer = null;
+  try {
+    sessionStorage.setItem(SPOOL_WORKSPACE_SESSION_KEY, JSON.stringify(spoolWorkspaceSessionPayload()));
+  } catch (error) {
+    console.warn("Open spool tabs could not be stored for this session.", error);
+  }
+}
+
+function scheduleSpoolWorkspaceSessionPersist() {
+  window.clearTimeout(spoolWorkspaceSessionPersistTimer);
+  spoolWorkspaceSessionPersistTimer = window.setTimeout(persistSpoolWorkspaceSession, 180);
+}
+
+function readSpoolWorkspaceSession() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(SPOOL_WORKSPACE_SESSION_KEY));
+    if (!saved || !Array.isArray(saved.tabs)) return null;
+    const candidates = saved.tabs.slice(0, 8).map((tab) => {
+      const restored = stateFromPayload(tab?.state);
+      if (!tab?.id || !restored) return null;
+      return {
+        id: String(tab.id),
+        projectId: normalizeProjectId(tab.projectId ?? restored.projectId),
+        spoolUid: normalizeTraceabilityId(tab.spoolUid ?? restored.spoolUid),
+        source: ["cloud", "browser", "draft"].includes(tab.source) ? tab.source : "browser",
+        label: String(tab.label ?? spoolWorkspaceLabelFromState(restored)),
+        updatedAt: String(tab.updatedAt ?? ""),
+        state: spoolWorkspaceStateSnapshot(tab.state),
+        ui: tab.ui && typeof tab.ui === "object" ? tab.ui : {},
+        cloud: tab.cloud && typeof tab.cloud === "object" ? tab.cloud : {},
+      };
+    }).filter(Boolean);
+    const tabs = [];
+    candidates.forEach((candidate) => {
+      const identity = candidate.projectId
+        ? `${candidate.source}:${candidate.projectId}`
+        : candidate.spoolUid
+          ? `draft:${candidate.spoolUid}`
+          : "";
+      const duplicateIndex = identity
+        ? tabs.findIndex((tab) => (tab.projectId ? `${tab.source}:${tab.projectId}` : tab.spoolUid ? `draft:${tab.spoolUid}` : "") === identity)
+        : -1;
+      if (duplicateIndex < 0) tabs.push(candidate);
+      else if (candidate.id === saved.activeId) tabs[duplicateIndex] = candidate;
+    });
+    if (!tabs.length) return null;
+    return {
+      tabs,
+      activeId: tabs.some((tab) => tab.id === saved.activeId) ? saved.activeId : tabs[0].id,
+      windowed: saved.windowed === true,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function addCurrentStateAsSpoolWorkspaceTab(options = {}) {
+  const tab = {
+    id: options.id || createSpoolWorkspaceTabId(),
+    projectId: normalizeProjectId(state.projectId),
+    spoolUid: normalizeTraceabilityId(state.spoolUid),
+    source: options.source || spoolWorkspaceSourceForCurrentState(),
+    label: spoolWorkspaceLabelFromState(),
+    updatedAt: new Date().toISOString(),
+    state: spoolWorkspaceStateSnapshot(),
+    ui: captureSpoolWorkspaceUiState(),
+    cloud: captureSpoolWorkspaceCloudState(),
+  };
+  spoolWorkspaceTabs.push(tab);
+  activeSpoolWorkspaceTabId = tab.id;
+  scheduleSpoolWorkspaceSessionPersist();
+  renderSpoolWorkspaceTabs();
+  return tab;
+}
+
+function restoreSpoolWorkspaceDrawingState(snapshot) {
+  const restored = stateFromPayload(snapshot);
+  if (!restored) return null;
+  restored.activeTool = DRAW_STOP_TOOLS.has(snapshot.activeTool) || ["select", "note", "measure", "box-select"].includes(snapshot.activeTool)
+    ? snapshot.activeTool
+    : "select";
+  restored.selectedFitting = Number.isInteger(snapshot.selectedFitting) ? snapshot.selectedFitting : null;
+  restored.selectedNote = Number.isInteger(snapshot.selectedNote) ? snapshot.selectedNote : null;
+  restored.selectedSegment = Number.isInteger(snapshot.selectedSegment) ? snapshot.selectedSegment : null;
+  restored.hoveredSegment = null;
+  restored.pointer = null;
+  restored.previewCandidate = null;
+  restored.history = Array.isArray(snapshot.history) ? cloneSpoolWorkspaceValue(snapshot.history).slice(-40) : [];
+  restored.redoHistory = Array.isArray(snapshot.redoHistory) ? cloneSpoolWorkspaceValue(snapshot.redoHistory).slice(-40) : [];
+  return restored;
+}
+
+function restoreSpoolWorkspaceCloudState(tab) {
+  const cloud = tab.cloud ?? {};
+  currentCloudProjectOwnerId = normalizeUuid(cloud.ownerId);
+  currentCloudProjectCompanyId = normalizeUuid(cloud.companyId);
+  cloudPermissionReadOnly = cloud.readOnly === true;
+  cloudSaveDirty = cloud.dirty === true;
+  cloudSaveConflict = cloud.conflict === true;
+  cloudSaveError = String(cloud.error ?? "");
+  cloudLastSavedAt = String(cloud.lastSavedAt ?? "");
+  cloudLastRemoteUpdatedAt = String(cloud.remoteUpdatedAt ?? "");
+  cloudSaveTrackedProjectId = normalizeProjectId(cloud.trackedProjectId ?? state.projectId);
+}
+
+async function flushActiveSpoolWorkspaceTab() {
+  const tab = captureCurrentSpoolWorkspaceTab({ persist: false });
+  if (!tab) return true;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(statePayload()));
+    autoSaveCurrentBrowserProject();
+  } catch (error) {
+    console.warn("The active spool could not be copied to browser recovery before switching tabs.", error);
+  }
+  window.clearTimeout(cloudAutosaveTimer);
+  if (cloudSaveDirty && currentProjectHasCloudRecord() && !cloudPermissionReadOnly) {
+    let attempts = 0;
+    while (cloudAutosaveBusy && attempts < 30) {
+      await new Promise((resolve) => window.setTimeout(resolve, 100));
+      attempts += 1;
+    }
+    if (!cloudAutosaveBusy) {
+      try {
+        await saveCloudProject({ silent: true, autosave: true });
+      } catch (error) {
+        console.warn("Cloud save was queued while changing spool tabs.", error);
+      }
+    } else {
+      queueCurrentCloudSave("tab-switch");
+    }
+  }
+  captureCurrentSpoolWorkspaceTab({ persist: false });
+  persistSpoolWorkspaceSession();
+  return true;
+}
+
+async function restoreSpoolWorkspaceTab(tab) {
+  const restored = restoreSpoolWorkspaceDrawingState(tab.state);
+  if (!restored) return false;
+  spoolWorkspaceSwitching = true;
+  try {
+    closeDrawingContextMenu();
+    setFocusMode(false);
+    state = restored;
+    restoreSpoolWorkspaceCloudState(tab);
+    if (cloudUser) {
+      if (tab.cloud?.companyId) await activateCompanyFromId(tab.cloud.companyId);
+      else if (activeWorkspaceIsBusiness()) activatePersonalWorkspace();
+    }
+    projectComments = [];
+    projectCommentsProjectId = null;
+    three.userMovedCamera = false;
+    setNextIdsFromState(state);
+    drawingViewOffset = {
+      x: Number(tab.ui?.drawingViewOffset?.x) || 0,
+      y: Number(tab.ui?.drawingViewOffset?.y) || 0,
+    };
+    applyAppMode(tab.ui?.appMode || "draw", { persist: false, activateTab: false, keepTool: true });
+    updateControls();
+    withCloudDirtySuppressed(() => updateAll({ save: false }));
+    activateInspectorTab(tab.ui?.inspectorTab || "properties");
+    restoreWorkspaceSurfaceState(tab.ui?.surfaceState);
+    if (tab.ui?.focusMode) setFocusMode(true);
+    updateCloudStatus();
+    if (currentProjectHasCloudRecord()) {
+      loadProjectComments({ silent: true }).catch((error) => console.warn("Spool comments could not be refreshed after changing tabs.", error));
+    }
+    return true;
+  } finally {
+    spoolWorkspaceSwitching = false;
+  }
+}
+
+async function activateSpoolWorkspaceTab(tabId, options = {}) {
+  const target = spoolWorkspaceTabs.find((tab) => tab.id === tabId);
+  if (!target || spoolWorkspaceSwitching) return false;
+  if (target.id === activeSpoolWorkspaceTabId) {
+    if (options.exitWindows !== false) setSpoolWorkspaceWindowed(false);
+    return true;
+  }
+  const previousId = activeSpoolWorkspaceTabId;
+  await flushActiveSpoolWorkspaceTab();
+  activeSpoolWorkspaceTabId = target.id;
+  const restored = await restoreSpoolWorkspaceTab(target);
+  if (!restored) {
+    activeSpoolWorkspaceTabId = previousId;
+    showAppNotice("That open spool tab could not be restored.", { tone: "warning" });
+    return false;
+  }
+  if (options.exitWindows !== false) setSpoolWorkspaceWindowed(false);
+  scheduleSpoolWorkspaceSessionPersist();
+  renderSpoolWorkspaceTabs();
+  return true;
+}
+
+async function openProjectInWorkspaceTab(projectId, source = projectLibrarySource) {
+  const normalizedId = normalizeProjectId(projectId);
+  if (!normalizedId) return false;
+  const existing = spoolWorkspaceTabs.find((tab) => tab.projectId === normalizedId && tab.source === source);
+  if (existing) {
+    closeProjectLibrary();
+    return activateSpoolWorkspaceTab(existing.id);
+  }
+  if (spoolWorkspaceTabs.length >= 8) {
+    showAppNotice("Close one open spool tab before opening another. The workspace supports up to 8 tabs.", { tone: "warning" });
+    return false;
+  }
+  const previousId = activeSpoolWorkspaceTabId;
+  await flushActiveSpoolWorkspaceTab();
+  spoolWorkspaceSwitching = true;
+  try {
+    if (source === "cloud") await openSavedCloudProject(normalizedId, { skipConfirm: true });
+    else await openSavedBrowserProject(normalizedId, { skipConfirm: true });
+  } finally {
+    spoolWorkspaceSwitching = false;
+  }
+  if (normalizeProjectId(state.projectId) !== normalizedId) {
+    await activateSpoolWorkspaceTab(previousId);
+    return false;
+  }
+  addCurrentStateAsSpoolWorkspaceTab({ source });
+  closeProjectLibrary();
+  setSpoolWorkspaceWindowed(false);
+  showAppNotice(`Opened ${projectDisplayName()} in a new spool tab.`, { tone: "success" });
+  return true;
+}
+
+async function createNewSpoolWorkspaceTab() {
+  if (spoolWorkspaceTabs.length >= 8) {
+    showAppNotice("Close one open spool tab before starting another.", { tone: "warning" });
+    return false;
+  }
+  const defaults = nextProjectInfoForNewSpool(state.projectInfo);
+  await flushActiveSpoolWorkspaceTab();
+  persistUserDrawingDefaults();
+  spoolWorkspaceSwitching = true;
+  try {
+    state = blankState();
+    currentCloudProjectOwnerId = null;
+    currentCloudProjectCompanyId = null;
+    cloudPermissionReadOnly = false;
+    resetCloudSaveTracking();
+    projectComments = [];
+    projectCommentsProjectId = null;
+    nextFittingId = 1;
+    nextNoteId = 1;
+    nextMeasurementId = 1;
+    drawingViewOffset = { x: 0, y: 0 };
+    three.userMovedCamera = false;
+    applyAppMode("draw", { persist: false, activateTab: false, keepTool: false });
+    updateControls();
+    updateAll({ save: false });
+  } finally {
+    spoolWorkspaceSwitching = false;
+  }
+  addCurrentStateAsSpoolWorkspaceTab({ source: "draft" });
+  setSpoolWorkspaceWindowed(false);
+  await promptForProjectDetails({ force: true, defaults });
+  captureCurrentSpoolWorkspaceTab();
+  return true;
+}
+
+async function closeSpoolWorkspaceTab(tabId) {
+  const tabIndex = spoolWorkspaceTabs.findIndex((tab) => tab.id === tabId);
+  if (tabIndex < 0 || spoolWorkspaceTabs.length <= 1) return false;
+  const tab = spoolWorkspaceTabs[tabIndex];
+  const unsavedDraft = !tab.projectId && (tab.state?.edges?.length || tab.state?.fittings?.length || tab.state?.notes?.length);
+  if (unsavedDraft) {
+    const proceed = await confirmAppAction(`Close ${tab.label || "this spool"}? It has not been saved as a project.`, {
+      title: "Close unsaved spool tab",
+      confirmLabel: "Close tab",
+      tone: "warning",
+    });
+    if (!proceed) return false;
+  }
+  if (tab.id === activeSpoolWorkspaceTabId) {
+    await flushActiveSpoolWorkspaceTab();
+    const next = spoolWorkspaceTabs[tabIndex - 1] ?? spoolWorkspaceTabs[tabIndex + 1];
+    spoolWorkspaceTabs.splice(tabIndex, 1);
+    activeSpoolWorkspaceTabId = next.id;
+    await restoreSpoolWorkspaceTab(next);
+  } else {
+    spoolWorkspaceTabs.splice(tabIndex, 1);
+  }
+  persistSpoolWorkspaceSession();
+  renderSpoolWorkspaceTabs();
+  if (spoolWorkspaceWindowed) renderSpoolWindowGrid();
+  return true;
+}
+
+function renderSpoolWorkspaceTabs() {
+  if (!spoolWorkspaceTabsElement) return;
+  spoolWorkspaceTabsElement.innerHTML = spoolWorkspaceTabs.map((tab) => {
+    const active = tab.id === activeSpoolWorkspaceTabId;
+    const dirty = tab.cloud?.dirty === true || (!tab.projectId && (tab.state?.edges?.length ?? 0) > 0);
+    return `
+      <div class="spool-workspace-tab-wrap ${active ? "active" : ""}">
+        <button type="button" class="spool-workspace-tab" role="tab" aria-selected="${active ? "true" : "false"}" data-spool-workspace-tab="${escapeHtml(tab.id)}" title="${escapeHtml(tab.label)}">
+          <span class="spool-workspace-tab-state ${dirty ? "dirty" : "saved"}" aria-hidden="true"></span>
+          <span class="spool-workspace-tab-copy">
+            <strong>${escapeHtml(tab.label || "Untitled spool")}</strong>
+            <small>${escapeHtml(spoolWorkspaceTabDetail(tab))}</small>
+          </span>
+        </button>
+        <button type="button" class="spool-workspace-tab-close" data-close-spool-workspace-tab="${escapeHtml(tab.id)}" aria-label="Close ${escapeHtml(tab.label || "spool")} tab" ${spoolWorkspaceTabs.length <= 1 ? "disabled" : ""}>×</button>
+      </div>
+    `;
+  }).join("");
+  if (spoolWorkspaceWindowButton) {
+    spoolWorkspaceWindowButton.disabled = spoolWorkspaceTabs.length < 2;
+    spoolWorkspaceWindowButton.setAttribute("aria-pressed", String(spoolWorkspaceWindowed));
+    spoolWorkspaceWindowButton.textContent = spoolWorkspaceWindowed ? "Active spool" : `Windows${spoolWorkspaceTabs.length > 1 ? ` (${spoolWorkspaceTabs.length})` : ""}`;
+  }
+}
+
+function drawSpoolWorkspacePreview(canvas, source, colourIndex = 0) {
+  if (!(canvas instanceof HTMLCanvasElement)) return;
+  const rect = canvas.getBoundingClientRect();
+  const ratio = Math.min(2, window.devicePixelRatio || 1);
+  const width = Math.max(240, Math.round(rect.width || 420));
+  const height = Math.max(150, Math.round(rect.height || 220));
+  canvas.width = Math.round(width * ratio);
+  canvas.height = Math.round(height * ratio);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  const dark = document.documentElement.dataset.theme === "dark";
+  ctx.fillStyle = dark ? "#111b20" : "#fffdf8";
+  ctx.fillRect(0, 0, width, height);
+  const points = Array.isArray(source?.points) && source.points.length ? source.points : [{ x: 0, y: 0, z: 0 }];
+  const projected = points.map((point) => ({
+    x: (Number(point.x) - Number(point.y)) * 0.866,
+    y: (Number(point.x) + Number(point.y)) * 0.5 - Number(point.z),
+  }));
+  const minX = Math.min(...projected.map((point) => point.x));
+  const maxX = Math.max(...projected.map((point) => point.x));
+  const minY = Math.min(...projected.map((point) => point.y));
+  const maxY = Math.max(...projected.map((point) => point.y));
+  const scale = Math.min((width - 54) / Math.max(1, maxX - minX), (height - 48) / Math.max(1, maxY - minY));
+  const toScreen = (index) => ({
+    x: 27 + (projected[index].x - minX) * scale,
+    y: 24 + (projected[index].y - minY) * scale,
+  });
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  const colours = ["#087f9f", "#7c3aed", "#d97706", "#0f766e", "#be123c", "#2563eb"];
+  (Array.isArray(source?.edges) ? source.edges : []).forEach((edge, index) => {
+    if (!projected[edge.from] || !projected[edge.to]) return;
+    const start = toScreen(edge.from);
+    const end = toScreen(edge.to);
+    ctx.strokeStyle = colours[(colourIndex + index) % colours.length];
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+  });
+  ctx.fillStyle = dark ? "#dce7e8" : "#1f2a2f";
+  projected.forEach((_, index) => {
+    const point = toScreen(index);
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  if (!(source?.edges?.length)) {
+    ctx.fillStyle = dark ? "#8ca1a8" : "#68777d";
+    ctx.font = "700 13px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("New spool — no runs yet", width / 2, height / 2);
+  }
+}
+
+function renderSpoolWindowGrid() {
+  if (!spoolWindowGrid) return;
+  spoolWindowGrid.innerHTML = spoolWorkspaceTabs.map((tab, index) => {
+    const active = tab.id === activeSpoolWorkspaceTabId;
+    const source = tab.state ?? state;
+    const runs = Array.isArray(source.edges) ? source.edges.length : 0;
+    return `
+      <article class="spool-window-card ${active ? "active" : ""}" data-spool-window-card="${escapeHtml(tab.id)}">
+        <div class="spool-window-card-head">
+          <div>
+            <span>${active ? "Active editor" : "Open spool"}</span>
+            <strong>${escapeHtml(tab.label || "Untitled spool")}</strong>
+            <small>${escapeHtml(spoolWorkspaceTabDetail(tab))} · ${runs} run${runs === 1 ? "" : "s"}</small>
+          </div>
+          <button type="button" data-edit-spool-window="${escapeHtml(tab.id)}">Edit</button>
+        </div>
+        <canvas aria-label="Preview of ${escapeHtml(tab.label || "open spool")}" data-spool-window-canvas="${escapeHtml(tab.id)}"></canvas>
+      </article>
+    `;
+  }).join("");
+  spoolWorkspaceTabs.forEach((tab, index) => {
+    const canvas = spoolWindowGrid.querySelector(`[data-spool-window-canvas="${CSS.escape(tab.id)}"]`);
+    drawSpoolWorkspacePreview(canvas, tab.state, index);
+  });
+}
+
+function setSpoolWorkspaceWindowed(active) {
+  spoolWorkspaceWindowed = active === true && spoolWorkspaceTabs.length > 1;
+  document.body.classList.toggle("spool-windowed-mode", spoolWorkspaceWindowed);
+  if (spoolWindowGridShell) spoolWindowGridShell.hidden = !spoolWorkspaceWindowed;
+  if (spoolWorkspaceWindowed) {
+    captureCurrentSpoolWorkspaceTab({ persist: false });
+    renderSpoolWindowGrid();
+  }
+  renderSpoolWorkspaceTabs();
+  scheduleSpoolWorkspaceSessionPersist();
+}
+
+async function initializeSpoolWorkspaceTabs() {
+  const saved = readSpoolWorkspaceSession();
+  if (saved) {
+    spoolWorkspaceTabs = saved.tabs;
+    activeSpoolWorkspaceTabId = saved.activeId;
+    const active = activeSpoolWorkspaceTab();
+    if (active) await restoreSpoolWorkspaceTab(active);
+  } else {
+    addCurrentStateAsSpoolWorkspaceTab();
+  }
+  spoolWorkspaceWindowed = saved?.windowed === true && spoolWorkspaceTabs.length > 1;
+  renderSpoolWorkspaceTabs();
+  setSpoolWorkspaceWindowed(spoolWorkspaceWindowed);
+}
+
+function setupSpoolWorkspaceTabs() {
+  initializeSpoolWorkspaceTabs().catch((error) => console.warn("The open spool workspace could not be restored.", error));
+  spoolWorkspaceTabsElement?.addEventListener("click", (event) => {
+    const closeButton = event.target instanceof Element ? event.target.closest("[data-close-spool-workspace-tab]") : null;
+    if (closeButton) {
+      closeSpoolWorkspaceTab(closeButton.dataset.closeSpoolWorkspaceTab).catch((error) => console.warn("Spool tab could not be closed.", error));
+      return;
+    }
+    const tabButton = event.target instanceof Element ? event.target.closest("[data-spool-workspace-tab]") : null;
+    if (tabButton) {
+      activateSpoolWorkspaceTab(tabButton.dataset.spoolWorkspaceTab).catch((error) => console.warn("Spool tab could not be opened.", error));
+    }
+  });
+  spoolWorkspaceOpenButton?.addEventListener("click", () => {
+    setSpoolWorkspaceWindowed(false);
+    openBrowserProject();
+  });
+  spoolWorkspaceNewButton?.addEventListener("click", () => {
+    createNewSpoolWorkspaceTab().catch((error) => console.warn("A new spool tab could not be started.", error));
+  });
+  spoolWorkspaceWindowButton?.addEventListener("click", () => setSpoolWorkspaceWindowed(!spoolWorkspaceWindowed));
+  spoolWindowGridCloseButton?.addEventListener("click", () => setSpoolWorkspaceWindowed(false));
+  spoolWindowGrid?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-edit-spool-window]") : null;
+    if (!button) return;
+    activateSpoolWorkspaceTab(button.dataset.editSpoolWindow).catch((error) => console.warn("Spool window could not be activated.", error));
+  });
+  window.addEventListener("pagehide", () => {
+    captureCurrentSpoolWorkspaceTab({ persist: false });
+    persistSpoolWorkspaceSession();
+  });
+}
+
 function workspaceLocationValues() {
   const project = normalizeProjectInfo(state.projectInfo);
   return {
@@ -13931,6 +15797,7 @@ const ACTION_COMMANDS = [
   { id: "notes", label: "Review notes and workflow", detail: "Open revision, approval and production notes", category: "Review", keywords: "comments revision approval workflow return", run: () => openCommandInspector("review", "notes") },
   { id: "cut-list", label: "Cut list", detail: "Open calculated pipe cut lengths", category: "Fabrication", keywords: "cutting list pipe lengths deductions", run: () => openCommandInspector("review", "cutlist") },
   { id: "weights", label: "Weights and lifting", detail: "Open spool mass, centre of gravity and lifting data", category: "Fabrication", keywords: "weight mass cog centre gravity lift lug", run: () => openCommandInspector("review", "weights") },
+  { id: "big-spool", label: "Big Spool transport planner", detail: "Split a large master assembly into transport pieces", category: "Fabrication", keywords: "big spool split transport truck lift match joint field weld", capability: "edit", run: () => openBigSpoolDialog() },
   { id: "bom", label: "Bill of materials", detail: "Open the fabrication material take-off", category: "Fabrication", keywords: "bom material takeoff take off order list", run: () => openCommandInspector("export", "bom") },
   { id: "preview-3d", label: "Open 3D model", detail: "Show the interactive spool preview", category: "View", keywords: "3d model rotate orbit preview", run: () => openPreviewPreservingWorkspace() },
   { id: "fit-drawing", label: "Fit drawing to screen", detail: "Zoom and centre the complete spool", category: "View", keywords: "zoom out centre center whole spool", run: () => document.querySelector("#fitDrawingButton")?.click() },
@@ -16970,7 +18837,373 @@ function closePrimaryWorkspaceDialogs(except = "") {
   if (except !== "auth" && authDialog && !authDialog.hidden && !authGateOpen) closeAuthDialog();
   if (except !== "tools" && toolSettingsDialog && !toolSettingsDialog.hidden) closeToolSettingsDialog();
   if (except !== "legal" && legalSupportDialog && !legalSupportDialog.hidden) closeLegalSupportDialog();
+  if (except !== "big-spool" && bigSpoolDialog && !bigSpoolDialog.hidden) closeBigSpoolDialog();
   closeActionMenu();
+}
+
+function renderBigSpoolPlanner() {
+  if (!bigSpoolDialog) return;
+  const plan = currentBigSpoolPlan();
+  const segmentData = segments();
+  const layout = bigSpoolLayout(segmentData);
+  const liftDataByPiece = new Map(layout.pieces.map((piece) => [piece.index, bigSpoolPieceLiftData(piece)]));
+  if (bigSpoolEnabledInput) bigSpoolEnabledInput.checked = plan.enabled;
+  if (bigSpoolMaxLengthInput) bigSpoolMaxLengthInput.value = String(plan.maxTransportLengthMm);
+  if (bigSpoolClearanceInput) bigSpoolClearanceInput.value = String(plan.clearanceMm);
+  if (bigSpoolPresetSelect) bigSpoolPresetSelect.value = plan.preset;
+  if (bigSpoolMaxWidthInput) bigSpoolMaxWidthInput.value = String(plan.maxTransportWidthMm || 0);
+  if (bigSpoolMaxHeightInput) bigSpoolMaxHeightInput.value = String(plan.maxTransportHeightMm || 0);
+  if (bigSpoolMaxWeightInput) bigSpoolMaxWeightInput.value = String(plan.maxTransportWeightKg || 0);
+  if (bigSpoolTransportNoteInput) bigSpoolTransportNoteInput.value = plan.transportNote;
+  if (bigSpoolDefaultJointTypeSelect) bigSpoolDefaultJointTypeSelect.value = plan.defaultJointType;
+  const controlsDisabled = !plan.enabled || !segmentData.length;
+  for (const control of [bigSpoolMaxLengthInput, bigSpoolClearanceInput, bigSpoolPresetSelect, bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput, bigSpoolTransportNoteInput, bigSpoolDefaultJointTypeSelect, bigSpoolSuggestButton, bigSpoolManualSegmentSelect, bigSpoolManualDistanceInput, bigSpoolAddCutButton, bigSpoolClearCutsButton, bigSpoolExportButton, bigSpoolExportPackageButton, bigSpoolLoadPlannerButton]) {
+    if (control) control.disabled = controlsDisabled;
+  }
+
+  const totalCentrelineMm = segmentData.reduce((sum, segment) => sum + pointLength(segment.vector), 0);
+  const largestPiece = layout.pieces.reduce((largest, piece) => Math.max(largest, piece.maxOverallMm), 0);
+  const overLimit = layout.pieces.filter((piece) => !bigSpoolPieceReady(piece, plan)).length;
+  const totalWeightKg = layout.pieces.reduce((sum, piece) => sum + piece.weightKg, 0);
+  const groovedCouplingCount = layout.cuts.filter((cut) => cut.jointType === "groove").length;
+  if (bigSpoolOverview) {
+    bigSpoolOverview.innerHTML = `
+      <article><small>Master assembly</small><strong>${escapeHtml(formatLength(totalCentrelineMm))} mm</strong><span>${segmentData.length} straight run${segmentData.length === 1 ? "" : "s"}</span></article>
+      <article><small>Transport pieces</small><strong>${layout.pieces.length}</strong><span>${layout.cuts.length} match joint${layout.cuts.length === 1 ? "" : "s"}${groovedCouplingCount ? ` · ${groovedCouplingCount} grooved coupling${groovedCouplingCount === 1 ? "" : "s"} required` : ""}</span></article>
+      <article class="${overLimit ? "warning" : "ready"}"><small>Largest envelope</small><strong>${escapeHtml(formatLength(largestPiece))} mm</strong><span>${overLimit ? `${overLimit} still over the selected limit` : "Within the selected limit"}</span></article>
+      <article><small>Assembly weight</small><strong>${escapeHtml(formatMass(totalWeightKg))} kg</strong><span>Calculated across all child spools</span></article>
+    `;
+  }
+
+  if (bigSpoolPieceList) {
+    bigSpoolPieceList.innerHTML = layout.pieces.length
+      ? layout.pieces.map((piece) => {
+          const violations = bigSpoolPieceViolations(piece, plan);
+          const withinLimit = violations.length === 0;
+          const cog = piece.cogPoint ? formatPointCompact(piece.cogPoint) : "Not available";
+          const lift = liftDataByPiece.get(piece.index);
+          const liftSummary = lift?.lugs
+            ? `${lift.lugs.points.length} suggested lugs / ${escapeHtml(formatLength(lift.lugs.separationMm))} mm apart @ ${lift.lugs.slingAngleDegrees}°`
+            : "Lug positions need workshop review";
+          return `
+            <article class="big-spool-piece-card ${withinLimit ? "ready" : "warning"}">
+              <span class="big-spool-piece-swatch" style="--piece-colour:${piece.colour}">${escapeHtml(piece.label)}</span>
+              <div>
+                <strong>${escapeHtml(piece.childId)}</strong>
+                <span>${escapeHtml(formatLength(piece.transportLengthMm))} × ${escapeHtml(formatLength(piece.transportWidthMm))} × ${escapeHtml(formatLength(piece.transportHeightMm))} mm transport envelope</span>
+                <small>${escapeHtml(formatMass(piece.weightKg))} kg / ${escapeHtml(formatLength(piece.centrelineMm))} mm centreline / COG ${escapeHtml(cog)}</small>
+                <small>${liftSummary}</small>
+              </div>
+              <b>${withinLimit ? "Ready" : `Over ${violations.join(" / ")}`}</b>
+            </article>`;
+        }).join("")
+      : `<div class="big-spool-empty">Draw at least one run to create transport pieces.</div>`;
+  }
+
+  if (bigSpoolCutList) {
+    bigSpoolCutList.innerHTML = layout.cuts.length
+      ? layout.cuts.map((cut) => {
+          const before = cut.beforePieceIndex === null ? "?" : bigSpoolPieceLabel(cut.beforePieceIndex);
+          const after = cut.afterPieceIndex === null ? "?" : bigSpoolPieceLabel(cut.afterPieceIndex);
+          return `
+            <article class="big-spool-cut-card" data-big-spool-cut="${escapeHtml(cut.id)}">
+              <span class="big-spool-joint-id">${escapeHtml(cut.jointId)}</span>
+              <div>
+                <strong>Run ${cut.segmentIndex + 1} / match ${escapeHtml(before)}-${escapeHtml(after)}</strong>
+                <label>From run start <input data-big-spool-cut-distance type="number" min="1" max="${Math.max(1, Math.floor(cut.lengthMm - 1))}" step="1" value="${Math.round(cut.distanceFromStartMm)}" /> mm</label>
+                <div class="big-spool-joint-fields">
+                  <label>Connection <select data-big-spool-joint-type>${Object.entries(BIG_SPOOL_JOINT_TYPES).filter(([value]) => BIG_SPOOL_PRIMARY_JOINT_TYPES.has(value)).map(([value, label]) => `<option value="${value}"${cut.jointType === value ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></label>
+                  <label>Status <select data-big-spool-joint-status>${Object.entries(BIG_SPOOL_JOINT_STATUSES).map(([value, label]) => `<option value="${value}"${cut.status === value ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></label>
+                </div>
+                <label>Site note <input data-big-spool-joint-notes type="text" maxlength="120" value="${escapeHtml(cut.notes || "")}" placeholder="Match mark, access or weld note" /></label>
+                <small class="big-spool-joint-preparation">${escapeHtml(bigSpoolJointPreparationText(cut))}</small>
+                <small>${cut.source === "manual" ? "Manual split" : "Automatic suggestion"} · ${escapeHtml(BIG_SPOOL_JOINT_TYPES[cut.jointType] || "Field weld")}</small>
+              </div>
+              <button class="icon-button compact labeled" data-big-spool-remove-cut type="button">Remove</button>
+            </article>`;
+        }).join("")
+      : `<div class="big-spool-empty">No match joints yet. Ask SpoolMate to suggest pieces or add a split to a selected run.</div>`;
+  }
+
+  if (bigSpoolManualSegmentSelect) {
+    const previous = Math.round(Number(bigSpoolManualSegmentSelect.value));
+    bigSpoolManualSegmentSelect.innerHTML = segmentData.map((segment) =>
+      `<option value="${segment.index}">Run ${segment.index + 1} · ${escapeHtml(formatLength(pointLength(segment.vector)))} mm</option>`
+    ).join("");
+    const preferred = segmentData.some((segment) => segment.index === previous)
+      ? previous
+      : selectedSegmentIndexes()[0] ?? segmentData[0]?.index;
+    if (Number.isInteger(preferred)) bigSpoolManualSegmentSelect.value = String(preferred);
+    updateBigSpoolManualDistanceLimit();
+  }
+}
+
+function updateBigSpoolManualDistanceLimit() {
+  if (!bigSpoolManualSegmentSelect || !bigSpoolManualDistanceInput) return;
+  const segment = segments().find((item) => item.index === Number(bigSpoolManualSegmentSelect.value));
+  const lengthMm = segment ? pointLength(segment.vector) : 0;
+  bigSpoolManualDistanceInput.max = String(Math.max(1, Math.floor(lengthMm - 1)));
+  const current = Number(bigSpoolManualDistanceInput.value);
+  if (!Number.isFinite(current) || current <= 0 || current >= lengthMm) {
+    bigSpoolManualDistanceInput.value = String(Math.max(1, Math.round(lengthMm / 2)));
+  }
+}
+
+function commitBigSpoolPlan(options = {}) {
+  const pendingMax = bigSpoolMaxLengthInput?.dataset.pendingValue || bigSpoolMaxLengthInput?.value;
+  const pendingClearance = bigSpoolClearanceInput?.dataset.pendingValue || bigSpoolClearanceInput?.value;
+  state.bigSpool = normalizeBigSpoolPlan({
+    ...currentBigSpoolPlan(),
+    enabled: bigSpoolEnabledInput?.checked === true,
+    maxTransportLengthMm: pendingMax,
+    clearanceMm: pendingClearance,
+    maxTransportWidthMm: bigSpoolMaxWidthInput?.dataset.pendingValue || bigSpoolMaxWidthInput?.value,
+    maxTransportHeightMm: bigSpoolMaxHeightInput?.dataset.pendingValue || bigSpoolMaxHeightInput?.value,
+    maxTransportWeightKg: bigSpoolMaxWeightInput?.dataset.pendingValue || bigSpoolMaxWeightInput?.value,
+    preset: bigSpoolPresetSelect?.value,
+    transportNote: bigSpoolTransportNoteInput?.value,
+    defaultJointType: bigSpoolDefaultJointTypeSelect?.value,
+    updatedAt: new Date().toISOString(),
+  }, state.edges);
+  renderBigSpoolPlanner();
+  updateAll({ save: options.save !== false });
+  updateControls();
+}
+
+function syncBigSpoolNumericInputs() {
+  const plan = currentBigSpoolPlan();
+  const requestedMax = Number(bigSpoolMaxLengthInput?.dataset.pendingValue || bigSpoolMaxLengthInput?.value);
+  const requestedClearance = Number(bigSpoolClearanceInput?.dataset.pendingValue || bigSpoolClearanceInput?.value);
+  if (Number.isFinite(requestedMax) && requestedMax >= BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM) {
+    plan.maxTransportLengthMm = clampNumber(Math.round(requestedMax), BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM, MAX_LENGTH_MM);
+  }
+  if (Number.isFinite(requestedClearance) && requestedClearance >= 50) {
+    plan.clearanceMm = clampNumber(Math.round(requestedClearance), 50, 2000);
+  }
+  const width = Number(bigSpoolMaxWidthInput?.dataset.pendingValue || bigSpoolMaxWidthInput?.value);
+  const height = Number(bigSpoolMaxHeightInput?.dataset.pendingValue || bigSpoolMaxHeightInput?.value);
+  const weight = Number(bigSpoolMaxWeightInput?.dataset.pendingValue || bigSpoolMaxWeightInput?.value);
+  plan.maxTransportWidthMm = Number.isFinite(width) && width > 0 ? clampNumber(Math.round(width), 1, MAX_LENGTH_MM) : 0;
+  plan.maxTransportHeightMm = Number.isFinite(height) && height > 0 ? clampNumber(Math.round(height), 1, MAX_LENGTH_MM) : 0;
+  plan.maxTransportWeightKg = Number.isFinite(weight) && weight > 0 ? clampNumber(Math.round(weight), 1, 100000) : 0;
+  plan.preset = Object.hasOwn(BIG_SPOOL_PRESETS, bigSpoolPresetSelect?.value) ? bigSpoolPresetSelect.value : "custom";
+  plan.transportNote = String(bigSpoolTransportNoteInput?.value ?? "").trim().slice(0, 120);
+  plan.defaultJointType = BIG_SPOOL_PRIMARY_JOINT_TYPES.has(bigSpoolDefaultJointTypeSelect?.value)
+    ? bigSpoolDefaultJointTypeSelect.value
+    : "fieldWeld";
+  plan.updatedAt = new Date().toISOString();
+  state.bigSpool = normalizeBigSpoolPlan(plan, state.edges);
+  return state.bigSpool;
+}
+
+function openBigSpoolDialog() {
+  if (!bigSpoolDialog) return;
+  if (bigSpoolExportPackageButton) {
+    bigSpoolExportPackageButton.onclick = () => exportBigSpoolChildFabPackage().catch((error) => {
+      console.error("Could not create the Big Spool child fabrication package.", error);
+      showAppNotice("The child fabrication package could not be created. Review the drawing and try again.");
+    });
+  }
+  if (bigSpoolLoadPlannerButton) {
+    bigSpoolLoadPlannerButton.onclick = () => {
+      closeBigSpoolDialog();
+      openLoadPlanDialog();
+    };
+  }
+  if (bigSpoolMaxLengthInput) delete bigSpoolMaxLengthInput.dataset.pendingValue;
+  if (bigSpoolClearanceInput) delete bigSpoolClearanceInput.dataset.pendingValue;
+  for (const input of [bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput]) {
+    if (input) delete input.dataset.pendingValue;
+  }
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("big-spool");
+  renderBigSpoolPlanner();
+  bigSpoolDialog.hidden = false;
+  bigSpoolEnabledInput?.focus({ preventScroll: true });
+}
+
+function closeBigSpoolDialog() {
+  const wasOpen = Boolean(bigSpoolDialog && !bigSpoolDialog.hidden);
+  if (wasOpen) {
+    syncBigSpoolNumericInputs();
+    persistState();
+  }
+  if (bigSpoolDialog) bigSpoolDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
+}
+
+function suggestBigSpoolPieces() {
+  const plan = syncBigSpoolNumericInputs();
+  if (!segments().length) {
+    showAppNotice("Draw the master assembly first, then create transport pieces.");
+    return;
+  }
+  const manualCuts = plan.cuts.filter((cut) => cut.source === "manual");
+  const suggestions = suggestedBigSpoolCuts(plan.maxTransportLengthMm, plan.clearanceMm, plan.defaultJointType)
+    .filter((suggestion) => !manualCuts.some((cut) => cut.segmentIndex === suggestion.segmentIndex
+      && Math.abs(cut.distanceFromStartMm - suggestion.distanceFromStartMm) < plan.clearanceMm));
+  plan.cuts = [...manualCuts, ...suggestions];
+  const constraintCuts = refineBigSpoolCutsForConstraints(plan);
+  plan.updatedAt = new Date().toISOString();
+  renderBigSpoolPlanner();
+  updateAll();
+  const totalSuggestions = suggestions.length + constraintCuts;
+  showAppNotice(totalSuggestions
+    ? `Suggested ${totalSuggestions} safe match joint${totalSuggestions === 1 ? "" : "s"} for the selected transport constraints. You can move or remove each one.`
+    : "The current assembly is already within the selected transport length, or no safe split is available.");
+}
+
+function addManualBigSpoolCut() {
+  const plan = currentBigSpoolPlan();
+  const segment = segments().find((item) => item.index === Number(bigSpoolManualSegmentSelect?.value));
+  if (!segment) return;
+  const requested = Number(bigSpoolManualDistanceInput?.value);
+  const safeDistance = safeBigSpoolSplitDistance(segment, requested, plan.clearanceMm);
+  if (safeDistance === null) {
+    showAppNotice("That run is too short for the selected fitting clearance. Choose another run or reduce the clearance.");
+    return;
+  }
+  if (plan.cuts.some((cut) => cut.segmentIndex === segment.index && Math.abs(cut.distanceFromStartMm - safeDistance) < 2)) {
+    showAppNotice("There is already a match joint at that position.");
+    return;
+  }
+  plan.cuts.push({
+    id: createTraceabilityId("CUT"),
+    segmentIndex: segment.index,
+    distanceFromStartMm: safeDistance,
+    source: "manual",
+    jointType: plan.defaultJointType,
+  });
+  plan.updatedAt = new Date().toISOString();
+  renderBigSpoolPlanner();
+  updateAll();
+}
+
+function exportBigSpoolTransportList() {
+  const layout = bigSpoolLayout();
+  const project = normalizeProjectInfo(state.projectInfo);
+  const plan = currentBigSpoolPlan();
+  const rows = [
+    ["Type", "ID", "Description", "Length mm", "Width mm", "Height mm", "Centreline mm", "Weight kg", "COG X mm", "COG Y mm", "COG Z mm", "Status", "Notes"],
+    ...layout.pieces.map((piece) => [
+      "Transport piece", piece.childId, `Revision ${project.revision || "-"}`,
+      Math.round(piece.transportLengthMm), Math.round(piece.transportWidthMm), Math.round(piece.transportHeightMm),
+      Math.round(piece.centrelineMm), Number(piece.weightKg.toFixed(2)),
+      piece.cogPoint ? Math.round(piece.cogPoint.x) : "",
+      piece.cogPoint ? Math.round(piece.cogPoint.y) : "",
+      piece.cogPoint ? Math.round(piece.cogPoint.z) : "",
+      bigSpoolPieceReady(piece, plan) ? "Ready" : `Over ${bigSpoolPieceViolations(piece, plan).join(" / ")}`,
+      plan.transportNote,
+    ]),
+    ...layout.cuts.map((cut) => [
+      "Match joint", cut.jointId,
+      `Run ${cut.segmentIndex + 1}; ${bigSpoolPieceLabel(cut.beforePieceIndex ?? 0)}-${bigSpoolPieceLabel(cut.afterPieceIndex ?? 0)}; ${BIG_SPOOL_JOINT_TYPES[cut.jointType] || "Field weld"}; ${bigSpoolJointPreparationText(cut)}`,
+      Math.round(cut.distanceFromStartMm), "", "", "", "", "", "", "",
+      BIG_SPOOL_JOINT_STATUSES[cut.status] || "Planned", cut.notes || "",
+    ]),
+    ...layout.cuts
+      .filter((cut) => Boolean(bigSpoolJointRejoinItemText(cut)))
+      .map((cut) => [
+        "Site rejoin item", `${cut.jointId}-REJOIN`, bigSpoolJointRejoinItemText(cut),
+        "", "", "", "", "", "", "", "", "Required", cut.notes || "",
+      ]),
+  ];
+  const csv = rows.map((row) => row.map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  downloadTextFile(csv, `${safeFilePart(project.jobNumber || "job")}-${safeFilePart(project.spoolNumber || "big-spool")}-transport.csv`, "text/csv");
+}
+
+function setupBigSpoolPlanner() {
+  bigSpoolButton?.addEventListener("click", openBigSpoolDialog);
+  bigSpoolCloseButton?.addEventListener("click", closeBigSpoolDialog);
+  bigSpoolDoneButton?.addEventListener("click", closeBigSpoolDialog);
+  bigSpoolEnabledInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolMaxLengthInput?.addEventListener("input", (event) => {
+    event.currentTarget.dataset.pendingValue = event.currentTarget.value;
+    syncBigSpoolNumericInputs();
+  });
+  bigSpoolClearanceInput?.addEventListener("input", (event) => {
+    event.currentTarget.dataset.pendingValue = event.currentTarget.value;
+    syncBigSpoolNumericInputs();
+  });
+  for (const input of [bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput]) {
+    input?.addEventListener("input", (event) => {
+      event.currentTarget.dataset.pendingValue = event.currentTarget.value;
+      syncBigSpoolNumericInputs();
+    });
+    input?.addEventListener("change", () => commitBigSpoolPlan());
+  }
+  bigSpoolTransportNoteInput?.addEventListener("input", syncBigSpoolNumericInputs);
+  bigSpoolTransportNoteInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolDefaultJointTypeSelect?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolPresetSelect?.addEventListener("change", () => {
+    const preset = BIG_SPOOL_PRESETS[bigSpoolPresetSelect.value] ?? BIG_SPOOL_PRESETS.custom;
+    if (preset.lengthMm) bigSpoolMaxLengthInput.value = String(preset.lengthMm);
+    if (preset.widthMm) bigSpoolMaxWidthInput.value = String(preset.widthMm);
+    if (preset.heightMm) bigSpoolMaxHeightInput.value = String(preset.heightMm);
+    if (preset.weightKg) bigSpoolMaxWeightInput.value = String(preset.weightKg);
+    for (const input of [bigSpoolMaxLengthInput, bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput]) {
+      if (input) input.dataset.pendingValue = input.value;
+    }
+    commitBigSpoolPlan();
+  });
+  bigSpoolMaxLengthInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolClearanceInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolSuggestButton?.addEventListener("click", suggestBigSpoolPieces);
+  bigSpoolManualSegmentSelect?.addEventListener("change", updateBigSpoolManualDistanceLimit);
+  bigSpoolAddCutButton?.addEventListener("click", addManualBigSpoolCut);
+  bigSpoolClearCutsButton?.addEventListener("click", () => {
+    currentBigSpoolPlan().cuts = [];
+    renderBigSpoolPlanner();
+    updateAll();
+  });
+  bigSpoolExportButton?.addEventListener("click", exportBigSpoolTransportList);
+  bigSpoolCutList?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-big-spool-remove-cut]") : null;
+    if (!button) return;
+    const card = button.closest("[data-big-spool-cut]");
+    const id = card?.dataset.bigSpoolCut;
+    const plan = currentBigSpoolPlan();
+    plan.cuts = plan.cuts.filter((cut) => cut.id !== id);
+    plan.updatedAt = new Date().toISOString();
+    renderBigSpoolPlanner();
+    updateAll();
+  });
+  bigSpoolCutList?.addEventListener("change", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const card = target?.closest("[data-big-spool-cut]");
+    const plan = currentBigSpoolPlan();
+    const cut = plan.cuts.find((item) => item.id === card?.dataset.bigSpoolCut);
+    if (!cut || !target) return;
+    if (target.matches("[data-big-spool-joint-type]")) cut.jointType = BIG_SPOOL_PRIMARY_JOINT_TYPES.has(target.value) ? target.value : "fieldWeld";
+    if (target.matches("[data-big-spool-joint-status]")) cut.status = Object.hasOwn(BIG_SPOOL_JOINT_STATUSES, target.value) ? target.value : "planned";
+    if (target.matches("[data-big-spool-joint-notes]")) cut.notes = String(target.value ?? "").trim().slice(0, 120);
+    if (!target.matches("[data-big-spool-cut-distance]")) {
+      plan.updatedAt = new Date().toISOString();
+      renderBigSpoolPlanner();
+      updateAll();
+      return;
+    }
+    const input = target;
+    const segment = cut ? segments().find((item) => item.index === cut.segmentIndex) : null;
+    if (!cut || !segment) return;
+    const safeDistance = safeBigSpoolSplitDistance(segment, Number(input.value), currentBigSpoolPlan().clearanceMm);
+    if (safeDistance === null) {
+      renderBigSpoolPlanner();
+      showAppNotice("That position is too close to a fitting or pipe end.");
+      return;
+    }
+    cut.distanceFromStartMm = safeDistance;
+    cut.source = "manual";
+    currentBigSpoolPlan().updatedAt = new Date().toISOString();
+    renderBigSpoolPlanner();
+    updateAll();
+  });
+  bigSpoolDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === bigSpoolDialog) closeBigSpoolDialog();
+  });
+  bigSpoolDialog?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeBigSpoolDialog();
+  });
 }
 
 function openTutorialDialog(index = null) {
@@ -17350,12 +19583,12 @@ const AI_HELPER_LOCAL_GUIDE = [
   },
   {
     patterns: [["weld", "register"], ["weld", "number"], ["wps"], ["ndt"]],
-    answer: "SpoolMate numbers drawing welds W01, W02 and onward. Open Review and the weld register to record the welder, WPS, completion date and inspection/NDT status. Review the register before issuing the fabrication PDF.",
+    answer: "SpoolMate numbers drawing welds W01, W02 and onward. In Review, use All welds done by to assign one welder across the register, or choose Mixed welders and enter a different Welder ID on each row. Record the WPS and inspection/NDT status before issue.",
     help: "review",
   },
   {
     patterns: [["production", "stage"], ["assign", "worker"], ["due", "date"], ["on", "hold"]],
-    answer: "Open Jobs > Production board. Use the spool card to set its stage, assigned worker, due date and priority. A hold requires a reason. The same current production information is shown on the mobile QR traveller for permitted users.",
+    answer: "Open Jobs > Production board. Assign the worker, then open Gear check to confirm inferred pipe and fittings are In shop, mark anything that Needs ordering, or add extra workshop gear. Cutting stays blocked until the checklist is confirmed or a checker records an authorised override. The result is also shown on the mobile QR traveller.",
     tutorial: "Production board",
     help: "account",
   },
@@ -17784,6 +20017,15 @@ function updateControls() {
   if (appVersionBadge) {
     appVersionBadge.textContent = APP_VERSION;
     appVersionBadge.title = `SpoolMate ${APP_VERSION} build ${APP_BUILD_DATE}`;
+  }
+  if (bigSpoolButton) {
+    const active = bigSpoolPlanActive();
+    bigSpoolButton.classList.toggle("active", active);
+    bigSpoolButton.setAttribute("aria-pressed", String(active));
+    const pieceCount = active ? bigSpoolLayout().pieces.length : 0;
+    bigSpoolButton.title = active
+      ? `Big Spool is active · ${pieceCount} transport piece${pieceCount === 1 ? "" : "s"}`
+      : "Break a large assembly into transport spools";
   }
   stepLengthInput.value = String(state.stepLength);
   updateSelectionControls();
@@ -19342,6 +21584,14 @@ function handleProjectLibraryActivation(event) {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
 
+  const libraryAction = target.closest("[data-project-library-action]");
+  if (libraryAction) {
+    event.preventDefault();
+    event.stopPropagation();
+    handleProjectLibraryAction(libraryAction);
+    return;
+  }
+
   const productionAction = target.closest("[data-production-action]");
   if (productionAction) {
     event.preventDefault();
@@ -19400,10 +21650,13 @@ function handleProjectLibraryActivation(event) {
     event.preventDefault();
     event.stopPropagation();
     if (shouldSkipProjectLibraryActivation(`window:${newWindowTarget.dataset.openProjectWindow ?? ""}`)) return;
-    openProjectInNewWindow(
+    openProjectInWorkspaceTab(
       newWindowTarget.dataset.openProjectWindow,
       newWindowTarget.dataset.projectSource,
-    );
+    ).catch((error) => {
+      console.warn("Could not open spool tab.", error);
+      showAppNotice("That spool could not be opened in a tab.", { tone: "warning" });
+    });
     return;
   }
 
@@ -19412,7 +21665,9 @@ function handleProjectLibraryActivation(event) {
   event.preventDefault();
   event.stopPropagation();
   if (event.ctrlKey || event.metaKey || event.shiftKey) {
-    openProjectInNewWindow(openTarget.dataset.openProjectId, openTarget.dataset.projectSource);
+    openProjectInWorkspaceTab(openTarget.dataset.openProjectId, openTarget.dataset.projectSource).catch((error) => {
+      console.warn("Could not open spool tab.", error);
+    });
     return;
   }
   if (shouldSkipProjectLibraryActivation(`open:${openTarget.dataset.openProjectId ?? ""}`)) return;
@@ -19527,7 +21782,12 @@ function handleProjectLibraryAction(actionElement) {
 
 async function handleProjectLibraryFieldChange(event) {
   const target = event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement ? event.target : null;
-  if (!target?.dataset.productionField) return;
+  if (!target) return;
+  if (target.dataset.materialCheckField) {
+    await handleMaterialChecklistFieldChange(target);
+    return;
+  }
+  if (!target.dataset.productionField) return;
   const projectId = target.dataset.projectId;
   if (!projectId) return;
 
@@ -19581,10 +21841,108 @@ async function handleProjectLibraryFieldChange(event) {
   await updateSavedProjectWorkflow(projectId, updates);
 }
 
+async function handleMaterialChecklistFieldChange(field) {
+  const projectId = field.dataset.projectId;
+  const itemId = field.dataset.materialItemId;
+  const key = field.dataset.materialCheckField;
+  const project = projectLibraryProjects.find((item) => item.id === projectId);
+  if (!project || !itemId || !["status", "note"].includes(key)) return;
+  if (!projectPermission(project).canManageProduction) {
+    showAppNotice(roleRequirementText("production"));
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+    return;
+  }
+  const checklist = materialChecklistForState(savedProjectState(project));
+  const item = checklist.items.find((entry) => entry.id === itemId);
+  if (!item) return;
+  item[key] = key === "status" ? normalizeMaterialCheckStatus(field.value) : String(field.value ?? "").trim().slice(0, 180);
+  checklist.checkedAt = "";
+  checklist.checkedBy = "";
+  checklist.overrideAt = "";
+  checklist.overrideBy = "";
+  checklist.overrideReason = "";
+  await updateSavedProjectWorkflow(projectId, { productionInfo: { materialChecklist: checklist } });
+}
+
 async function handleProjectLibraryProductionAction(actionButton) {
   const projectId = actionButton.dataset.projectId;
   if (!projectId) return;
   const action = actionButton.dataset.productionAction;
+  const project = projectLibraryProjects.find((item) => item.id === projectId);
+  const permission = projectPermission(project);
+  if (action === "add-material-item") {
+    if (!permission.canManageProduction) throw new Error(roleRequirementText("production"));
+    const response = await openFieldInputDialog({
+      title: "Add workshop gear",
+      label: "Required item",
+      value: "",
+      placeholder: "Gaskets, bolts, purge gear, consumables...",
+      help: "Use this for anything the drawing material take-off cannot infer.",
+      submitLabel: "Add to checklist",
+    });
+    const label = String(response ?? "").trim().slice(0, 120);
+    if (!label) return;
+    const checklist = materialChecklistForState(savedProjectState(project));
+    checklist.items.push({
+      id: `gear-custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      key: `custom:${Date.now().toString(36)}`,
+      label,
+      quantity: "",
+      detail: "Added workshop item",
+      status: "pending",
+      note: "",
+      custom: true,
+    });
+    checklist.checkedAt = "";
+    checklist.overrideAt = "";
+    checklist.overrideReason = "";
+    await updateSavedProjectWorkflow(projectId, { productionInfo: { materialChecklist: checklist } });
+    return;
+  }
+  if (action === "confirm-material-check") {
+    if (!permission.canManageProduction) throw new Error(roleRequirementText("production"));
+    const production = savedProjectProductionInfo(project);
+    const checklist = materialChecklistForState(savedProjectState(project));
+    const stats = materialChecklistStats(checklist);
+    if (!production.assignee) throw new Error("Assign the spool before confirming its gear checklist.");
+    if (!stats.total) throw new Error("Add at least one required item before confirming gear ready.");
+    if (stats.pending || stats.missing) {
+      throw new Error(`Resolve the gear checklist first: ${stats.pending} not checked and ${stats.missing} needing ordering.`);
+    }
+    const now = new Date().toISOString();
+    checklist.checkedAt = now;
+    checklist.checkedBy = checkerName() || production.assignee || "Team member";
+    checklist.overrideAt = "";
+    checklist.overrideBy = "";
+    checklist.overrideReason = "";
+    await updateSavedProjectWorkflow(projectId, {
+      productionInfo: { materialChecklist: checklist },
+      status: normalizeProjectStatus(savedProjectState(project)?.projectStatus) === "issued" ? "materialcheck" : undefined,
+    });
+    showAppNotice("Gear checklist confirmed. This spool is ready to start fabrication.");
+    return;
+  }
+  if (action === "override-material-check") {
+    if (!permission.canIssue) throw new Error("Only a checker or team admin can authorise starting with missing gear.");
+    const response = await openFieldInputDialog({
+      title: "Authorise gear-check override",
+      label: "Required reason",
+      value: "",
+      placeholder: "Item arriving before fit-up; cutting authorised to begin...",
+      help: "The reason, author and time are retained in the spool activity history.",
+      submitLabel: "Record override",
+      multiline: true,
+    });
+    const reason = String(response ?? "").trim().slice(0, 400);
+    if (!reason) return;
+    const checklist = materialChecklistForState(savedProjectState(project));
+    checklist.overrideAt = new Date().toISOString();
+    checklist.overrideBy = checkerName() || "Checker";
+    checklist.overrideReason = reason;
+    await updateSavedProjectWorkflow(projectId, { productionInfo: { materialChecklist: checklist } });
+    showAppNotice("Gear-check override recorded.");
+    return;
+  }
   if (action === "add-message") {
     const card = actionButton.closest(".production-spool-card");
     const input = card?.querySelector("[data-production-message-input]");
@@ -19685,6 +22043,7 @@ function shouldSkipProjectLibraryActivation(key) {
 function setupLoadPlanner() {
   loadPlanButton?.addEventListener("click", openLoadPlanDialog);
   loadPlanCloseButton?.addEventListener("click", closeLoadPlanDialog);
+  loadPlanDoneButton?.addEventListener("click", closeLoadPlanDialog);
   loadPlanPlayButton?.addEventListener("click", playTruckLoadAnimation);
   loadPlanProjectList?.addEventListener("change", handleLoadPlanChoiceChange);
   loadPlanJobSelect?.addEventListener("change", () => {
@@ -19718,6 +22077,11 @@ function setupLoadPlanner() {
     if (event.target === loadPlanDialog) {
       closeLoadPlanDialog();
     }
+  });
+  loadPlanDialog?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("button") : null;
+    if (button?.id === "loadPlanSelectAllButton") setVisibleLoadPlanSelection(true);
+    if (button?.id === "loadPlanDeselectAllButton") setVisibleLoadPlanSelection(false);
   });
 }
 
@@ -20436,22 +22800,28 @@ function rebuildThreeSpool() {
       continue;
     }
 
-    if (style.lineDrawing) {
-      group.add(outlinePipeBetween(start, end, segmentRadius, segmentPipeMaterial, {
-        startCap: (connections.get(segment.from)?.length ?? 0) <= 1,
-        endCap: (connections.get(segment.to)?.length ?? 0) <= 1,
-      }));
-    } else {
-      const pipe = cylinderBetween(
-        start,
-        end,
-        segmentRadius,
-        segmentPipeMaterial,
-        32,
-      );
-      pipe.castShadow = true;
-      pipe.receiveShadow = true;
-      group.add(pipe);
+    const renderFragments = [{ t0: 0, t1: 1, pieceIndex: null }];
+    const originalStart = modelPoints[segment.from];
+    const originalEnd = modelPoints[segment.to];
+    for (const fragment of renderFragments) {
+      const fragmentStart = fragment.t0 === 0
+        ? start.clone()
+        : originalStart.clone().lerp(originalEnd, fragment.t0);
+      const fragmentEnd = fragment.t1 === 1
+        ? end.clone()
+        : originalStart.clone().lerp(originalEnd, fragment.t1);
+      if (fragmentStart.distanceTo(fragmentEnd) < segmentRadius * 0.25) continue;
+      if (style.lineDrawing) {
+        group.add(outlinePipeBetween(fragmentStart, fragmentEnd, segmentRadius, segmentPipeMaterial, {
+          startCap: fragment.t0 > 0 || (connections.get(segment.from)?.length ?? 0) <= 1,
+          endCap: fragment.t1 < 1 || (connections.get(segment.to)?.length ?? 0) <= 1,
+        }));
+      } else {
+        const pipe = cylinderBetween(fragmentStart, fragmentEnd, segmentRadius, segmentPipeMaterial, 32);
+        pipe.castShadow = true;
+        pipe.receiveShadow = true;
+        group.add(pipe);
+      }
     }
   }
 
@@ -22570,12 +24940,13 @@ function renderFallbackPreview() {
       depth: (projectPreviewPoint(segment.start).depth + projectPreviewPoint(segment.end).depth) * 0.5,
     }))
     .sort((a, b) => a.depth - b.depth);
+  const fallbackDrawSegments = fallbackSegments;
 
   ctx.save();
   ctx.lineCap = "butt";
   ctx.lineJoin = "round";
 
-  for (const segment of fallbackSegments) {
+  for (const segment of fallbackDrawSegments) {
     const segmentPipeWidth = Math.max(12, visualPipeWidth(segment) * 1.02);
     drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style);
 
@@ -22785,7 +25156,9 @@ function fallbackPreviewStyle() {
 }
 
 function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
-  const pipeStops = style.triColor
+  const pipeStops = Number.isInteger(segment._bigSpoolPieceIndex)
+    ? bigSpoolFallbackColourStops(segment._bigSpoolPieceIndex)
+    : style.triColor
     ? triColorFallbackPipeStops(segment, style)
     : style.pipeStops;
   if (style.outline) {
@@ -22854,6 +25227,59 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
   ctx.lineWidth = Math.max(2, segmentPipeWidth * 0.18);
   ctx.strokeStyle = style.highlight;
   drawLine(ctx, segment.start2, segment.end2);
+}
+
+function bigSpoolFallbackColourStops(pieceIndex) {
+  const colour = bigSpoolPieceColour(pieceIndex);
+  return [colour, colour, colour];
+}
+
+function drawBigSpoolBreaksFallback(ctx, toScreen, layout, style) {
+  if (!layout.cuts.length) return;
+  ctx.save();
+  ctx.font = "900 12px Inter, system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  for (const cut of layout.cuts) {
+    const point = toScreen(projectPreviewPoint(cut.point));
+    ctx.fillStyle = style.background;
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = style.background;
+    ctx.fillStyle = style.outline ? style.fittingStroke : "#111827";
+    const label = `${cut.jointId} ${bigSpoolJointShortLabel(cut)}`;
+    ctx.strokeText(label, point.x, point.y - 12);
+    ctx.fillText(label, point.x, point.y - 12);
+    if (cut.jointType === "groove") {
+      const matchingFragments = layout.fragments.filter((fragment) => fragment.startCut?.id === cut.id || fragment.endCut?.id === cut.id);
+      for (const fragment of matchingFragments) {
+        const display = bigSpoolFragmentDisplayGeometry(fragment);
+        const start = toScreen(projectPreviewPoint(display.start));
+        const end = toScreen(projectPreviewPoint(display.end));
+        const endpoint = fragment.startCut?.id === cut.id ? start : end;
+        const along = normalizeScreenVector({ x: end.x - start.x, y: end.y - start.y });
+        const normal = { x: -along.y, y: along.x };
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "#4d5754";
+        for (const offset of [-3, 3]) {
+          drawLine(ctx,
+            { x: endpoint.x + along.x * offset - normal.x * 10, y: endpoint.y + along.y * offset - normal.y * 10 },
+            { x: endpoint.x + along.x * offset + normal.x * 10, y: endpoint.y + along.y * offset + normal.y * 10 });
+        }
+        ctx.font = "900 9px Inter, system-ui, sans-serif";
+        ctx.strokeStyle = style.background;
+        ctx.fillStyle = style.outline ? style.fittingStroke : "#4d5754";
+        ctx.strokeText("RG", endpoint.x + normal.x * 18, endpoint.y + normal.y * 18);
+        ctx.fillText("RG", endpoint.x + normal.x * 18, endpoint.y + normal.y * 18);
+      }
+    }
+  }
+  ctx.restore();
 }
 
 function triColorFallbackPipeStops(segment, style) {
@@ -25828,7 +28254,10 @@ async function maybeOpenProjectFromUrl() {
     readOnly: params.get("readonly") === "1",
   });
   if (traveller && state.projectId === projectId) {
-    openSpoolTraveller({ requestedRevisionUid: params.get("revision") });
+    openSpoolTraveller({
+      requestedRevisionUid: params.get("revision"),
+      requestedChildSpoolId: params.get("child"),
+    });
   }
   return true;
 }
@@ -25854,15 +28283,43 @@ function resolveSpoolTravellerRevision(requestedRevisionUid) {
 function openSpoolTraveller(options = {}) {
   document.querySelector("#spoolTravellerDialog")?.remove();
   const revision = resolveSpoolTravellerRevision(options.requestedRevisionUid);
-  const drawingState = revision.drawingState;
+  const masterDrawingState = revision.drawingState;
+  const requestedChildSpoolId = String(options.requestedChildSpoolId ?? "").trim();
+  let drawingState = masterDrawingState;
+  let childPiece = null;
+  let childLayout = null;
+  if (requestedChildSpoolId) {
+    const childResult = withTemporaryState(masterDrawingState, () => {
+      if (!bigSpoolPlanActive()) return null;
+      const layout = bigSpoolLayout();
+      const piece = layout.pieces.find((item) => item.childId === requestedChildSpoolId);
+      const child = piece ? bigSpoolChildState(piece, masterDrawingState) : null;
+      return child ? { child, piece, layout } : null;
+    });
+    if (childResult) {
+      drawingState = childResult.child;
+      childPiece = childResult.piece;
+      childLayout = childResult.layout;
+    }
+  }
   const project = normalizeProjectInfo(drawingState.projectInfo);
+  const masterProject = normalizeProjectInfo(masterDrawingState.projectInfo);
   const production = normalizeProductionInfo(state.productionInfo);
+  const materialChecklist = materialChecklistForState(state);
   const welds = synchronizeWeldRegister(drawingState);
   const issueAudit = latestIssueAudit(drawingState);
   const acceptedWelds = welds.filter((weld) => weld.status === "accepted").length;
   const activeNotes = projectComments.filter((comment) => !comment.resolved);
   const photos = projectComments.filter((comment) => comment.photoPath);
   const drawingImage = withTemporaryState(drawingState, () => buildSpoolReportCanvas("client").toDataURL("image/jpeg", 0.78));
+  const relatedJoints = childPiece && childLayout
+    ? childLayout.cuts.filter((cut) => cut.beforePieceIndex === childPiece.index || cut.afterPieceIndex === childPiece.index)
+    : [];
+  const childBanner = requestedChildSpoolId && !childPiece
+    ? `<section class="spool-traveller-revision warning"><strong>Child spool could not be found</strong><p>${escapeHtml(requestedChildSpoolId)} is not present in this saved Big Spool breakdown. The master assembly is shown.</p></section>`
+    : childPiece
+    ? `<section class="spool-traveller-revision history"><strong>Big Spool child fabrication piece</strong><p>Child ${escapeHtml(childPiece.childId)} of master ${escapeHtml(masterProject.spoolNumber || "unnamed spool")}. Transport envelope ${escapeHtml(formatLength(childPiece.transportLengthMm))} × ${escapeHtml(formatLength(childPiece.transportWidthMm))} × ${escapeHtml(formatLength(childPiece.transportHeightMm))} mm; ${escapeHtml(formatMass(childPiece.weightKg))} kg.</p></section>`
+    : "";
   const revisionBanner = revision.missing
     ? `<section class="spool-traveller-revision warning"><strong>Revision could not be verified</strong><p>This QR asks for ${escapeHtml(revision.requested)}, but that saved snapshot is unavailable. Current revision ${escapeHtml(revision.currentUid)} is shown. Check the fabrication sheet before work continues.</p></section>`
     : revision.historical
@@ -25878,12 +28335,14 @@ function openSpoolTraveller(options = {}) {
         <button type="button" data-traveller-close aria-label="Close traveller">Close</button>
       </header>
       ${revisionBanner}
+      ${childBanner}
       ${production.hold ? `<section class="spool-traveller-hold"><strong>ON HOLD — DO NOT FABRICATE</strong><p>${escapeHtml(production.holdReason || "No reason recorded")}</p></section>` : ""}
       <section class="spool-traveller-grid">
         <article><span>Revision</span><strong>${escapeHtml(project.revision || "-")}</strong></article>
         <article><span>Live stage</span><strong>${escapeHtml(projectStatusLabel(state.projectStatus))}</strong></article>
         <article><span>Assigned</span><strong>${escapeHtml(production.assignee || "Unassigned")}</strong></article>
         <article><span>Due</span><strong>${escapeHtml(formatProductionDue(production) || "Not set")}</strong></article>
+        <article><span>Gear check</span><strong>${escapeHtml(production.assignee ? materialChecklistSummary(materialChecklist) : "Not allocated")}</strong></article>
         <article><span>Welds accepted</span><strong>${acceptedWelds} / ${welds.length}</strong></article>
         <article><span>Issue audit</span><strong>${escapeHtml(issueAudit ? issueAudit.result === "overridden" ? "Warnings overridden" : "Passed" : "Not recorded")}</strong></article>
       </section>
@@ -25900,11 +28359,15 @@ function openSpoolTraveller(options = {}) {
       <details class="spool-traveller-section"${activeNotes.length ? " open" : ""}><summary><span>Current notes</span><b>${activeNotes.length}</b></summary>${activeNotes.length ? `<ul>${activeNotes.slice(-12).map((comment) => `<li><p>${escapeHtml(comment.body)}</p><span>${escapeHtml(comment.authorEmail || "Team member")} / ${escapeHtml(comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "")}</span></li>`).join("")}</ul>` : `<p>No active spool notes.</p>`}</details>
       <details class="spool-traveller-section"><summary><span>Workshop photos</span><b>${photos.length}</b></summary><div class="spool-traveller-photos">${photos.length ? photos.slice(-12).map((comment) => `<figure><img data-traveller-photo="${escapeHtml(comment.photoPath)}" alt="Workshop photo" loading="lazy" /><figcaption>${escapeHtml(comment.body)}</figcaption></figure>`).join("") : `<p>No workshop photos attached.</p>`}</div></details>
       <details class="spool-traveller-section"><summary><span>Weld register</span><b>${welds.length}</b></summary>${welds.length ? `<div class="traveller-weld-list">${welds.map((weld) => `<article><strong>${escapeHtml(weld.number)}</strong><span>${escapeHtml(weldStatusLabel(weld.status))}</span><small>${escapeHtml([weld.welderId && `Welder ${weld.welderId}`, weld.wps, weld.inspectionType].filter(Boolean).join(" / ") || "Details pending")}</small></article>`).join("")}</div>` : `<p>No weld markers registered.</p>`}</details>
+      ${childPiece ? `<details class="spool-traveller-section" open><summary><span>Field connections</span><b>${relatedJoints.length}</b></summary>${relatedJoints.length ? `<div class="traveller-weld-list">${relatedJoints.map((joint) => `<article><strong>${escapeHtml(joint.jointId)}</strong><span>${escapeHtml(BIG_SPOOL_JOINT_STATUSES[joint.status] || "Planned")}</span><small>${escapeHtml(BIG_SPOOL_JOINT_TYPES[joint.jointType] || "Field weld")}${joint.notes ? ` / ${escapeHtml(joint.notes)}` : ""}</small></article>`).join("")}</div>` : `<p>No field connections touch this child spool.</p>`}</details>` : ""}
     </main>`;
   document.body.append(dialog);
   dialog.querySelector("[data-traveller-close]")?.addEventListener("click", () => dialog.remove());
   dialog.querySelector("[data-traveller-open-full]")?.addEventListener("click", () => dialog.remove());
-  dialog.querySelector("[data-traveller-latest]")?.addEventListener("click", () => openSpoolTraveller({ requestedRevisionUid: revision.currentUid }));
+  dialog.querySelector("[data-traveller-latest]")?.addEventListener("click", () => openSpoolTraveller({
+    requestedRevisionUid: revision.currentUid,
+    requestedChildSpoolId,
+  }));
   dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.remove(); });
   dialog.querySelectorAll("[data-traveller-photo]").forEach((image) => hydrateProjectCommentPhoto(image, image.dataset.travellerPhoto));
 }
@@ -26603,7 +29066,7 @@ function projectJobMetrics(projects = []) {
     summary.total += 1;
     if (status === "readycheck") summary.readycheck += 1;
     if (status === "checked") summary.checked += 1;
-    if (status === "issued") summary.issued += 1;
+    if (status === "issued" || status === "materialcheck") summary.issued += 1;
     if (status === "complete") summary.fabricated += 1;
     if (status !== "complete" && dueState.key === "overdue") summary.overdue += 1;
     if (status !== "complete" && dueState.key === "today") summary.dueToday += 1;
@@ -26903,11 +29366,57 @@ function productionStatusQuickActions(status, canManage, projectId) {
   const actions = [
     ["readycheck", "Ready"],
     ["issued", "Issued"],
+    ["materialcheck", "Gear check"],
     ["complete", "Fabbed"],
   ].filter(([nextStatus]) => normalizeProjectStatus(status) !== nextStatus);
   return actions
     .map(([nextStatus, label]) => `<button type="button" data-production-action="set-status" data-status="${nextStatus}" data-project-id="${escapeHtml(projectId)}"${disabledAttr}>${label}</button>`)
     .join("");
+}
+
+function productionMaterialChecklistHtml(project, checklist, permission) {
+  const normalized = normalizeMaterialChecklist(checklist);
+  const stats = materialChecklistStats(normalized);
+  const canManage = permission.canManageProduction;
+  const disabledAttr = canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`;
+  const overrideDisabledAttr = permission.canIssue
+    ? ""
+    : ` disabled title="Only a checker or team admin can authorise starting with missing gear"`;
+  const statusClass = stats.ready ? "ready" : stats.overridden ? "override" : stats.missing ? "missing" : "pending";
+  return `
+    <details class="production-material-checklist ${statusClass}"${stats.ready || stats.missing ? " open" : ""}>
+      <summary>
+        <strong>Gear check</strong>
+        <span>${escapeHtml(materialChecklistSummary(normalized))}</span>
+      </summary>
+      <p>Confirm the pipe, fittings and added workshop items are physically available before cutting starts.</p>
+      ${normalized.items.length ? `<div class="material-check-list">${normalized.items.map((item) => `
+        <div class="material-check-row ${escapeHtml(item.status)}">
+          <div class="material-check-item">
+            <strong>${escapeHtml(item.label)}</strong>
+            <span>${escapeHtml([item.quantity, item.detail].filter(Boolean).join(" / ") || (item.custom ? "Added workshop item" : "Required by drawing"))}</span>
+          </div>
+          <label>
+            <span>Availability</span>
+            <select data-material-check-field="status" data-material-item-id="${escapeHtml(item.id)}" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>
+              ${["pending", "inshop", "order", "na"].map((status) => `<option value="${status}"${item.status === status ? " selected" : ""}>${escapeHtml(materialChecklistStatusLabel(status))}</option>`).join("")}
+            </select>
+          </label>
+          <label class="material-check-note">
+            <span>Note / location</span>
+            <input data-material-check-field="note" data-material-item-id="${escapeHtml(item.id)}" data-project-id="${escapeHtml(project.id)}" value="${escapeHtml(item.note)}" maxlength="180" placeholder="Rack, heat number, PO..."${disabledAttr} />
+          </label>
+        </div>
+      `).join("")}</div>` : `<p class="material-check-empty">No material could be inferred yet. Add the required workshop gear manually.</p>`}
+      ${normalized.checkedAt ? `<div class="material-check-result ready"><strong>Checklist confirmed</strong><span>${escapeHtml(normalized.checkedBy || "Team")} / ${escapeHtml(new Date(normalized.checkedAt).toLocaleString())}</span></div>` : ""}
+      ${stats.overridden ? `<div class="material-check-result override"><strong>Authorised override</strong><span>${escapeHtml(normalized.overrideReason)} / ${escapeHtml(normalized.overrideBy || "Checker")}</span></div>` : ""}
+      <div class="material-check-actions">
+        <button type="button" data-production-action="add-material-item" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add item</button>
+        <button type="button" class="primary" data-production-action="confirm-material-check" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Confirm gear ready</button>
+        <button type="button" data-production-action="override-material-check" data-project-id="${escapeHtml(project.id)}"${overrideDisabledAttr}>Authorised override</button>
+      </div>
+    </details>
+  `;
 }
 
 function cloneProjectDrawingState(project) {
@@ -27001,6 +29510,12 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
     lastUpdatedBy: checkerName(),
     lastUpdatedAt: now,
   });
+  if (nextProduction.assignee) {
+    nextProduction.materialChecklist = materialChecklistForState({
+      ...targetState,
+      productionInfo: nextProduction,
+    });
+  }
   let activity = normalizeProductionActivity(targetState.productionActivity);
 
   if (updates.status !== undefined) {
@@ -27013,6 +29528,13 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
     }
     if (projectStatusAtLeast(previousStatus, "checked") && projectStatusIndex(nextStatus) < projectStatusIndex("checked")) {
       throw new Error("Open the spool and use Return for changes so the checker comment and revision are preserved.");
+    }
+    if (
+      projectStatusIndex(previousStatus) < projectStatusIndex("cutting") &&
+      projectStatusAtLeast(nextStatus, "cutting") &&
+      !materialChecklistCanStart(nextProduction.materialChecklist)
+    ) {
+      throw new Error("Complete the Gear check before starting Cutting, or have a checker record an authorised override.");
     }
     targetState.projectStatus = nextStatus;
     if (nextStatus !== previousStatus) {
@@ -27055,6 +29577,19 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
     !(Object.prototype.hasOwnProperty.call(changedProduction, "hold") && nextProduction.hold)
   ) {
     activity = addProductionActivity(activity, "hold", `Hold reason changed from ${previousProduction.holdReason || "none"} to ${nextProduction.holdReason || "none"}.`, now);
+  }
+  if (Object.prototype.hasOwnProperty.call(changedProduction, "materialChecklist")) {
+    const previousChecklist = normalizeMaterialChecklist(previousProduction.materialChecklist);
+    const nextChecklist = normalizeMaterialChecklist(nextProduction.materialChecklist);
+    const previousStats = materialChecklistStats(previousChecklist);
+    const nextStats = materialChecklistStats(nextChecklist);
+    if (!previousChecklist.checkedAt && nextChecklist.checkedAt) {
+      activity = addProductionActivity(activity, "gear", `Gear checklist confirmed: ${nextStats.resolved}/${nextStats.total} items resolved.`, now);
+    } else if (previousChecklist.overrideAt !== nextChecklist.overrideAt && nextChecklist.overrideAt) {
+      activity = addProductionActivity(activity, "gear", `Gear-check override authorised: ${nextChecklist.overrideReason}.`, now);
+    } else if (previousStats.resolved !== nextStats.resolved || previousStats.missing !== nextStats.missing || previousStats.total !== nextStats.total) {
+      activity = addProductionActivity(activity, "gear", `Gear checklist updated: ${nextStats.resolved}/${nextStats.total} resolved; ${nextStats.missing} need ordering.`, now);
+    }
   }
 
   let messages = normalizeProductionMessages(targetState.productionMessages);
@@ -27471,7 +30006,7 @@ function projectLibraryReportData(projects = null) {
   const onHold = enriched.filter((item) => item.production.hold);
   const readyToCheck = enriched.filter((item) => item.status === "readycheck");
   const readyToIssue = enriched.filter((item) => item.status === "checked");
-  const issued = enriched.filter((item) => item.status === "issued");
+  const issued = enriched.filter((item) => item.status === "issued" || item.status === "materialcheck");
   const fabrication = enriched.filter((item) => ["cutting", "fitup", "welded", "finish"].includes(item.status));
   const actionQueue = enriched
     .filter((item) => item.status !== "complete" && !item.production.hold)
@@ -27827,6 +30362,8 @@ function productionProjectHidden(project) {
 function projectProductionCard(project) {
   const savedState = savedProjectState(project);
   const production = savedProjectProductionInfo(project);
+  const materialChecklist = materialChecklistForState(savedState);
+  const materialStats = materialChecklistStats(materialChecklist);
   const messages = savedProjectProductionMessages(project);
   const activeMessage = [...messages].reverse().find((message) => !message.completed) ?? null;
   const status = normalizeProjectStatus(savedState?.projectStatus);
@@ -27852,6 +30389,7 @@ function projectProductionCard(project) {
     production.dueDate ? `Due ${formatProductionDue(production)}` : "No due date",
     productionPriorityLabel(production.priority),
   ];
+  if (production.assignee) parts.push(`Gear ${materialChecklistSummary(materialChecklist)}`);
   if (production.hold) parts.unshift(production.holdReason ? `Hold: ${production.holdReason}` : "On hold");
   if (status === "complete" && production.removeAfter) parts.push(`Hides ${new Date(production.removeAfter).toLocaleDateString()}`);
   if (!canManage) parts.push(`${permission.label} / production locked`);
@@ -27871,6 +30409,7 @@ function projectProductionCard(project) {
       <span class="due ${escapeHtml(dueState.key)}">${escapeHtml(dueState.label)}</span>
       <span class="priority ${escapeHtml(production.priority)}">${escapeHtml(productionPriorityLabel(production.priority))}</span>
       ${production.hold ? `<span class="hold">Hold</span>` : ""}
+      ${production.assignee ? `<span class="gear ${materialStats.ready ? "ready" : materialStats.overridden ? "override" : materialStats.missing ? "missing" : "pending"}">${escapeHtml(materialStats.ready ? "Gear ready" : materialStats.overridden ? "Gear override" : materialStats.missing ? "Gear missing" : "Gear check")}</span>` : ""}
     </div>
     <small class="production-card-meta">${escapeHtml(parts.join(" / "))}</small>
     <details class="production-card-details">
@@ -27928,11 +30467,12 @@ function projectProductionCard(project) {
         <button type="button" data-production-action="add-message" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add</button>
       </div>
     </div>
+    ${production.assignee ? productionMaterialChecklistHtml(project, materialChecklist, permission) : `<p class="material-check-unassigned">Assign this spool to create its gear checklist.</p>`}
     </details>
     <div class="production-card-actions">
       ${quickActions}
       <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">Open</button>
-      <button type="button" data-open-project-window="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}" title="Keep this Jobs window open and load the spool separately">New window</button>
+      <button type="button" data-open-project-window="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}" title="Open this spool in the multi-spool workspace">Open tab</button>
     </div>
   `;
   return card;
@@ -28002,13 +30542,14 @@ function productionProjectNeedsAttention(project) {
   if (status === "complete") return false;
   const production = savedProjectProductionInfo(project);
   const dueState = productionDueState(production);
-  return production.hold || dueState.key === "overdue" || dueState.key === "today" || productionProjectWasReturned(project);
+  const gearNeedsAttention = status === "materialcheck" && !materialChecklistCanStart(materialChecklistForState(savedProjectState(project)));
+  return production.hold || gearNeedsAttention || dueState.key === "overdue" || dueState.key === "today" || productionProjectWasReturned(project);
 }
 
 function productionProjectReadyNext(project) {
   if (productionProjectHidden(project)) return false;
   const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
-  return ["readycheck", "checked", "issued", "cutting", "fitup", "welded", "finish"].includes(status);
+  return ["readycheck", "checked", "issued", "materialcheck", "cutting", "fitup", "welded", "finish"].includes(status);
 }
 
 function projectTodayGroups(projects = []) {
@@ -28327,10 +30868,10 @@ function projectLibraryRow(project) {
     const newWindowButton = document.createElement("button");
     newWindowButton.type = "button";
     newWindowButton.className = "project-library-action";
-    newWindowButton.textContent = "New window";
+    newWindowButton.textContent = "Open tab";
     newWindowButton.dataset.openProjectWindow = project.id;
     newWindowButton.dataset.projectSource = project.source ?? projectLibrarySource;
-    newWindowButton.title = "Keep Jobs open and load this spool in a separate window";
+    newWindowButton.title = "Keep the current spool open and load this one in another in-app tab";
 
     row.append(main, openButton, newWindowButton, deleteButton);
     return row;
@@ -28716,32 +31257,63 @@ function loadPlanItemFromPayload(id, name, payload, projectInfo, updatedAt = "",
   });
 }
 
+function loadPlanItemsFromPayload(id, name, payload, projectInfo, updatedAt = "", source = "saved") {
+  const restored = stateFromPayload(payload);
+  if (!restored) return [];
+  const children = withTemporaryState(restored, () => {
+    if (!bigSpoolPlanActive()) return [];
+    const layout = bigSpoolLayout();
+    if (layout.pieces.length < 2) return [];
+    return layout.pieces.map((piece) => ({
+      piece,
+      child: bigSpoolChildState(piece, restored),
+    })).filter((entry) => entry.child);
+  });
+  if (!children.length) {
+    const item = loadPlanItemFromPayload(id, name, payload, projectInfo, updatedAt, source);
+    return item ? [item] : [];
+  }
+  return children.map(({ piece, child }) => {
+    const childName = `${name || projectDisplayName(projectInfo)} / ${piece.childId}`;
+    const item = loadPlanItemFromPayload(`${id}:child:${piece.label}`, childName, child, child.projectInfo, updatedAt, `${source}-big-spool-child`);
+    if (!item) return null;
+    return {
+      ...item,
+      parentId: id,
+      parentSpoolNumber: normalizeProjectInfo(projectInfo).spoolNumber,
+      childSpoolId: piece.childId,
+      weightKg: piece.weightKg,
+      lengthMm: piece.transportLengthMm,
+      widthMm: piece.transportWidthMm,
+      heightMm: piece.transportHeightMm,
+    };
+  }).filter(Boolean);
+}
+
 function loadPlanAvailableItems() {
   const items = [];
   const currentPayload = statePayload();
-  const current = loadPlanItemFromPayload(
+  items.push(...loadPlanItemsFromPayload(
     "__current__",
     `${projectDisplayName(currentPayload.projectInfo)} (current)`,
     currentPayload,
     currentPayload.projectInfo,
     "",
     "current",
-  );
-  if (current) items.push(current);
+  ));
 
   const projects = loadSavedBrowserProjects()
     .filter((project) => project.id !== state.projectId)
     .sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt)));
 
   for (const project of projects) {
-    const item = loadPlanItemFromPayload(
+    items.push(...loadPlanItemsFromPayload(
       project.id,
       project.name || projectDisplayName(project.projectInfo),
       project.state,
       project.projectInfo,
       project.updatedAt,
-    );
-    if (item) items.push(item);
+    ));
   }
 
   return items;
@@ -28806,13 +31378,22 @@ function renderLoadPlanJobOptions(items = loadPlanAvailableItems()) {
   loadPlanJobSelect.disabled = !choices.length;
 }
 
-function loadPlanVisibleItems(items = loadPlanAvailableItems()) {
-  if (!loadPlanJobKey) return [];
-  return items.filter((item) => item.jobKey === loadPlanJobKey);
+function loadPlanVisibleItems(items = null) {
+  const availableItems = Array.isArray(items)
+    ? items
+    : loadPlanItemsCache.length ? loadPlanItemsCache : loadPlanAvailableItems();
+  const selectedJobKey = loadPlanJobSelect?.value || loadPlanJobKey;
+  if (!selectedJobKey) return [];
+  loadPlanJobKey = selectedJobKey;
+  return availableItems.filter((item) => item.jobKey === selectedJobKey);
 }
 
-function selectedLoadPlanItems(items = loadPlanVisibleItems()) {
-  return items.filter((item) => loadPlanSelection.has(item.id)).slice(0, LOAD_PLAN_MAX_SPOOLS);
+function selectedLoadPlanItems(items = null) {
+  const availableItems = Array.isArray(items) ? items : loadPlanItemsCache;
+  const checkedIds = new Set([...loadPlanProjectList?.querySelectorAll('input[type="checkbox"]:checked') ?? []]
+    .map((input) => input.value));
+  if (checkedIds.size) loadPlanSelection = checkedIds;
+  return availableItems.filter((item) => loadPlanSelection.has(item.id)).slice(0, LOAD_PLAN_MAX_SPOOLS);
 }
 
 function loadPlanItemMeta(item) {
@@ -28852,6 +31433,7 @@ function renderLoadPlanProjectChoices() {
   if (loadPlanTraySelect) loadPlanTraySelect.value = normalizeLoadPlanTrayKey(loadPlanTrayKey);
   if (loadPlanRackSelect) loadPlanRackSelect.value = normalizeLoadPlanRackKey(loadPlanRackKey);
   const allItems = loadPlanAvailableItems();
+  loadPlanItemsCache = allItems;
   renderLoadPlanJobOptions(allItems);
   const items = loadPlanVisibleItems(allItems);
   const validIds = new Set(items.map((item) => item.id));
@@ -28935,19 +31517,24 @@ function updateLoadPlanBulkButtons(items = loadPlanVisibleItems()) {
 }
 
 function setVisibleLoadPlanSelection(selectAll) {
-  const items = loadPlanVisibleItems();
-  if (!items.length) return;
+  const checkboxes = [...loadPlanProjectList?.querySelectorAll('input[type="checkbox"]') ?? []];
+  if (!checkboxes.length) return;
+  const visibleIds = new Set(checkboxes.map((checkbox) => checkbox.value));
+  const items = loadPlanItemsCache.filter((item) => visibleIds.has(item.id));
 
   if (selectAll) {
-    loadPlanSelection = new Set(items.slice(0, LOAD_PLAN_MAX_SPOOLS).map((item) => item.id));
-    if (items.length > LOAD_PLAN_MAX_SPOOLS) {
+    loadPlanSelection = new Set(checkboxes.slice(0, LOAD_PLAN_MAX_SPOOLS).map((checkbox) => checkbox.value));
+    if (checkboxes.length > LOAD_PLAN_MAX_SPOOLS) {
       showAppNotice(`Selected the first ${LOAD_PLAN_MAX_SPOOLS} spools. This load planner handles up to ${LOAD_PLAN_MAX_SPOOLS} at once.`);
     }
   } else {
     loadPlanSelection.clear();
   }
-
-  renderLoadPlanProjectChoices();
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = loadPlanSelection.has(checkbox.value);
+  });
+  updateLoadPlanBulkButtons(items);
+  updateLoadPlanPendingSelection(items);
 }
 
 function updateLoadPlanPendingSelection(items = loadPlanVisibleItems()) {
@@ -29278,7 +31865,12 @@ function createTruckLoadPlan(items) {
 
 function openLoadPlanDialog() {
   if (!loadPlanDialog) return;
+  if (loadPlanSelectAllButton) loadPlanSelectAllButton.onclick = () => setVisibleLoadPlanSelection(true);
+  if (loadPlanDeselectAllButton) loadPlanDeselectAllButton.onclick = () => setVisibleLoadPlanSelection(false);
+  if (loadPlanPlayButton) loadPlanPlayButton.onclick = playTruckLoadAnimation;
+  if (loadPlanProjectList) loadPlanProjectList.onchange = handleLoadPlanChoiceChange;
   loadPlanSelection = new Set();
+  loadPlanItemsCache = [];
   loadPlanJobKey = "";
   loadPlanViewMode = "layout";
   updateLoadPlanViewControls();
@@ -31812,6 +34404,130 @@ function exportSpoolReportImage(options = {}) {
   downloadCanvas(canvas, `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}${draftSuffix}.png`);
 }
 
+function buildBigSpoolFieldJointReportCanvas(layout = bigSpoolLayout()) {
+  if (!bigSpoolPlanActive() || !layout.pieces.length) return null;
+  const plan = currentBigSpoolPlan();
+  const canvas = document.createElement("canvas");
+  canvas.width = REPORT_CANVAS_WIDTH;
+  canvas.height = Math.max(REPORT_CANVAS_HEIGHT, 430 + layout.pieces.length * 76 + layout.cuts.length * 72);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f7f3e9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawReportHeader(ctx, canvas.width, { title: "Big Spool transport and field-joint plan", subtitle: `${currentRevisionUid(state)} / master assembly breakdown`, shortLabel: "Transport" });
+  let y = 146;
+  ctx.fillStyle = "#123a40";
+  ctx.font = "900 18px Inter, system-ui, sans-serif";
+  ctx.fillText("Selected constraints", 30, y);
+  y += 30;
+  ctx.fillStyle = "#263f44";
+  ctx.font = "800 13px Inter, system-ui, sans-serif";
+  const limitText = [
+    `Length ${formatLength(plan.maxTransportLengthMm)} mm`,
+    plan.maxTransportWidthMm ? `Width ${formatLength(plan.maxTransportWidthMm)} mm` : "Width not limited",
+    plan.maxTransportHeightMm ? `Height ${formatLength(plan.maxTransportHeightMm)} mm` : "Height not limited",
+    plan.maxTransportWeightKg ? `Weight ${formatMass(plan.maxTransportWeightKg)} kg` : "Weight not limited",
+  ].join(" / ");
+  ctx.fillText(limitText, 30, y);
+  y += 24;
+  if (plan.transportNote) {
+    ctx.fillStyle = "#5b6a6d";
+    drawWrappedReportText(ctx, `Transport note: ${plan.transportNote}`, 30, y, canvas.width - 60, 18);
+    y += 38;
+  }
+  const groovedCouplingCount = layout.cuts.filter((cut) => cut.jointType === "groove").length;
+  const flangeRejoinCount = layout.cuts.filter((cut) => cut.jointType === "flange").length;
+  if (groovedCouplingCount || flangeRejoinCount) {
+    const siteItems = [
+      groovedCouplingCount ? `${groovedCouplingCount} grooved coupling${groovedCouplingCount === 1 ? "" : "s"}` : "",
+      flangeRejoinCount ? `${flangeRejoinCount} flange gasket and bolt set${flangeRejoinCount === 1 ? "" : "s"}` : "",
+    ].filter(Boolean).join(" / ");
+    ctx.fillStyle = "#075e68";
+    ctx.font = "900 13px Inter, system-ui, sans-serif";
+    ctx.fillText(`Site rejoin materials required: ${siteItems}`, 30, y);
+    y += 28;
+  }
+
+  ctx.fillStyle = "#123a40";
+  ctx.font = "900 17px Inter, system-ui, sans-serif";
+  ctx.fillText("Child spools", 30, y);
+  y += 18;
+  for (const piece of layout.pieces) {
+    const ready = bigSpoolPieceReady(piece, plan);
+    ctx.fillStyle = ready ? "#eef8f2" : "#fff2df";
+    roundRect(ctx, 28, y, canvas.width - 56, 62, 8);
+    ctx.fill();
+    ctx.fillStyle = piece.colour;
+    roundRect(ctx, 38, y + 10, 42, 42, 7);
+    ctx.fill();
+    ctx.fillStyle = "#18363c";
+    ctx.font = "900 14px Inter, system-ui, sans-serif";
+    ctx.fillText(piece.childId, 94, y + 24);
+    ctx.font = "800 12px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#5b6a6d";
+    ctx.fillText(`${formatLength(piece.transportLengthMm)} × ${formatLength(piece.transportWidthMm)} × ${formatLength(piece.transportHeightMm)} mm / ${formatMass(piece.weightKg)} kg / ${ready ? "READY" : `OVER ${bigSpoolPieceViolations(piece, plan).join(" / ").toUpperCase()}`}`, 94, y + 46);
+    y += 70;
+  }
+
+  y += 12;
+  ctx.fillStyle = "#123a40";
+  ctx.font = "900 17px Inter, system-ui, sans-serif";
+  ctx.fillText("Field-joint register", 30, y);
+  y += 18;
+  if (!layout.cuts.length) {
+    ctx.fillStyle = "#5b6a6d";
+    ctx.font = "800 13px Inter, system-ui, sans-serif";
+    ctx.fillText("No field joints recorded.", 30, y + 24);
+  }
+  for (const cut of layout.cuts) {
+    ctx.fillStyle = "#ffffff";
+    roundRect(ctx, 28, y, canvas.width - 56, 58, 8);
+    ctx.fill();
+    ctx.strokeStyle = "#d4dddc";
+    ctx.stroke();
+    ctx.fillStyle = "#123a40";
+    ctx.font = "900 14px Inter, system-ui, sans-serif";
+    ctx.fillText(`${cut.jointId} · ${bigSpoolPieceLabel(cut.beforePieceIndex ?? 0)} / ${bigSpoolPieceLabel(cut.afterPieceIndex ?? 0)} · ${BIG_SPOOL_JOINT_TYPES[cut.jointType] || "Field weld"}`, 40, y + 23);
+    ctx.fillStyle = "#5b6a6d";
+    ctx.font = "800 12px Inter, system-ui, sans-serif";
+    const detail = `Run ${cut.segmentIndex + 1} at ${formatLength(cut.distanceFromStartMm)} mm · ${bigSpoolJointPreparationText(cut)} · ${BIG_SPOOL_JOINT_STATUSES[cut.status] || "Planned"}${cut.notes ? ` · ${cut.notes}` : ""}`;
+    ctx.fillText(fitCanvasText(ctx, detail, canvas.width - 80), 40, y + 44);
+    y += 66;
+  }
+  return canvas;
+}
+
+async function exportBigSpoolChildFabPackage() {
+  syncBigSpoolNumericInputs();
+  const layout = bigSpoolLayout();
+  if (!bigSpoolPlanActive() || layout.pieces.length < 2) {
+    showAppNotice("Create at least two Big Spool transport pieces before exporting the child fabrication package.");
+    return;
+  }
+  const masterState = state;
+  const pages = [];
+  try {
+    for (const piece of layout.pieces) {
+      const child = bigSpoolChildState(piece, masterState);
+      if (!child) continue;
+      state = child;
+      normalizeDrawingTrustState();
+      const canvas = buildSpoolReportCanvas("workshop");
+      if (masterState.issuedAt) await drawTraceabilityQr(canvas, piece.childId);
+      pages.push({ dataUrl: canvas.toDataURL("image/jpeg", 0.92), width: canvas.width, height: canvas.height });
+    }
+  } finally {
+    state = masterState;
+    updateAll({ save: false });
+    updateControls();
+  }
+  const fieldJointCanvas = buildBigSpoolFieldJointReportCanvas(layout);
+  if (fieldJointCanvas) pages.push({ dataUrl: fieldJointCanvas.toDataURL("image/jpeg", 0.92), width: fieldJointCanvas.width, height: fieldJointCanvas.height });
+  if (!pages.length) return;
+  const project = normalizeProjectInfo(masterState.projectInfo);
+  downloadBytes(buildImagePdf(pages), `${safeFilePart(project.jobNumber, "job")}-${safeFilePart(project.spoolNumber, "big-spool")}-CHILD-FAB-PACKAGE.pdf`, "application/pdf");
+  showAppNotice(`Child fabrication package created with ${layout.pieces.length} child spools and the field-joint register.`);
+}
+
 async function exportFabSheetPdf(options = {}) {
   const { name } = exportedProjectPayload();
   const template = normalizeFabSheetTemplate(fabSheetTemplate);
@@ -31829,6 +34545,12 @@ async function exportFabSheetPdf(options = {}) {
       height: reportCanvas.height,
     },
   ];
+
+  const bigSpoolCanvas = buildBigSpoolFieldJointReportCanvas();
+  if (bigSpoolCanvas) {
+    if (draft) markDraftPdfCanvas(bigSpoolCanvas);
+    pages.push({ dataUrl: bigSpoolCanvas.toDataURL("image/jpeg", 0.92), width: bigSpoolCanvas.width, height: bigSpoolCanvas.height });
+  }
 
   const weldRegisterCanvas = buildWeldRegisterReportCanvas();
   if (weldRegisterCanvas) {
@@ -31860,7 +34582,7 @@ async function exportFabSheetPdf(options = {}) {
   downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}${draftSuffix}.pdf`, "application/pdf");
 }
 
-function spoolTravellerUrl() {
+function spoolTravellerUrl(childSpoolId = "") {
   const url = new URL(location.href);
   url.hash = "";
   url.search = "";
@@ -31868,16 +34590,17 @@ function spoolTravellerUrl() {
   if (projectId) url.searchParams.set("project", projectId);
   url.searchParams.set("traveller", "1");
   url.searchParams.set("revision", currentRevisionUid(state));
+  if (childSpoolId) url.searchParams.set("child", childSpoolId);
   return url.toString();
 }
 
-async function drawTraceabilityQr(canvas) {
+async function drawTraceabilityQr(canvas, childSpoolId = "") {
   if (!canvas || !state.issuedAt) return canvas;
   try {
     const module = await import(QR_CODE_JS_URL);
     const qr = module.default ?? module;
     const qrCanvas = document.createElement("canvas");
-    await qr.toCanvas(qrCanvas, spoolTravellerUrl(), { width: 150, margin: 1, errorCorrectionLevel: "M" });
+    await qr.toCanvas(qrCanvas, spoolTravellerUrl(childSpoolId), { width: 150, margin: 1, errorCorrectionLevel: "M" });
     const ctx = canvas.getContext("2d");
     const size = 150;
     const x = canvas.width - size - 36;
@@ -31891,7 +34614,7 @@ async function drawTraceabilityQr(canvas) {
     ctx.fillStyle = "#1f3438";
     ctx.font = "900 13px Inter, system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("SCAN SPOOL TRAVELLER", x + size / 2, y - 14);
+    ctx.fillText(childSpoolId ? `SCAN ${childSpoolId}` : "SCAN SPOOL TRAVELLER", x + size / 2, y - 14);
     ctx.drawImage(qrCanvas, x, y, size, size);
     ctx.font = "800 9px ui-monospace, monospace";
     ctx.fillText(currentRevisionUid(state), x + size / 2, y + size + 8);
@@ -36109,6 +38832,17 @@ projectStatusSelect?.addEventListener("change", async () => {
     showHealthPanel();
     return;
   }
+  if (
+    projectStatusIndex(currentStatus) < projectStatusIndex("cutting") &&
+    projectStatusAtLeast(nextStatus, "cutting") &&
+    !materialChecklistCanStart(materialChecklistForState(state))
+  ) {
+    showAppNotice("Complete the Gear check in Jobs before starting Cutting, or ask a checker to record an authorised override.");
+    projectStatusSelect.value = currentStatus;
+    setTeamDashboardView("board");
+    await openBrowserProject({ keepSearch: true });
+    return;
+  }
   if (projectStatusAtLeast(nextStatus, "issued") && !state.issuedAt) {
     const issued = await issueDrawing({ targetStatus: nextStatus });
     if (!issued) {
@@ -36522,6 +39256,8 @@ setupHealthIssueClicks();
 setupTouchComfort();
 setupTouchSelectionGuards();
 setupLoadPlanner();
+setupBigSpoolPlanner();
+setupSpoolWorkspaceTabs();
 setupNetworkAwareness();
 registerServiceWorker();
 setupAppVersionChecks();

@@ -1,10 +1,14 @@
 # SpoolMate
 
-Current app version: `v3.22`
+Current app version: `v3.33`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
-The built-in video tutorial library includes the complete real-world workflow, a focused Jobs dashboard guide and a detailed drawing masterclass, with play/pause, 10-second rewind and fast-forward controls, and direct navigation to each chapter.
+Big Spool V1-V3 keeps one very large master assembly and turns it into transport-ready child spools. The planner can optimise against job-specific length, width, height and weight limits, calculates child weight and centre of gravity, suggests lift points, and records the field connection type, readiness and notes at every split. Each split can generate roll grooves on both child ends, flanges on both ends or a field weld with the selected project weld-gap deductions. Stable child identities flow into the load planner, child fabrication PDF package and child-specific QR spool traveller.
+
+The Jobs production board includes a generated Gear check after allocation. Workshop staff confirm inferred pipe and fittings, add extra gear where needed, record items needing ordering, and confirm readiness before Cutting can begin. The weld register supports assigning one welder to every weld or recording mixed welders per weld.
+
+The built-in video tutorial library now contains 12 real-app guides: the complete workflow, Jobs, drawing, pipe ends, sockets, Big Spool, multi-spool workspaces, QA/export, production, cloud recovery, import/help and a shareable promotional overview. Every guide includes play/pause, 10-second rewind and fast-forward controls, and direct chapter navigation.
 
 See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 
@@ -44,7 +48,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Export polished fabrication PDF sheets, 3D images and project files, including workshop, client/approval and material order/take-off PDF styles.
 - Use the Drawing import assistant to upload a supplied drawing/photo/PDF, calibrate a known dimension and trace centreline runs into a SpoolMate spool.
 - Learn the app with a 5-minute Quick Start, a complete Beginner tour or the full topic library; progress is saved and resumes automatically.
-- Choose from the in-app video tutorial library, including the complete voice-guided spool workflow and a focused Jobs dashboard guide, then copy the current video's public link when sharing training.
+- Choose from the 12-guide in-app video library, then copy the current video's public link when sharing training or the promotional overview with a prospective customer.
 - After any completed mini practice, use Try in drawing to open the matching real tool without changing the current drawing first.
 - Give first-time users a temporary First Spool layout that emphasises Draw, exact length, Fittings, Select and Save before revealing Review and Export.
 - Follow contextual real-workspace prompts that clear as drawing, exact runs, fittings, selection, saving, checks and export are learned.
