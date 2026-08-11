@@ -163,6 +163,20 @@ const accountExportDataButton = document.querySelector("#accountExportDataButton
 const diagnosticReportButton = document.querySelector("#diagnosticReportButton");
 const legalSupportButton = document.querySelector("#legalSupportButton");
 const accountDeleteButton = document.querySelector("#accountDeleteButton");
+const supportAdminButton = document.querySelector("#supportAdminButton");
+const supportAdminDialog = document.querySelector("#supportAdminDialog");
+const supportAdminCloseButton = document.querySelector("#supportAdminCloseButton");
+const supportAdminIdentity = document.querySelector("#supportAdminIdentity");
+const supportAdminSummary = document.querySelector("#supportAdminSummary");
+const supportAdminSearchForm = document.querySelector("#supportAdminSearchForm");
+const supportAdminSearchInput = document.querySelector("#supportAdminSearchInput");
+const supportAdminSearchButton = document.querySelector("#supportAdminSearchButton");
+const supportAdminRefreshButton = document.querySelector("#supportAdminRefreshButton");
+const supportAdminStatus = document.querySelector("#supportAdminStatus");
+const supportAdminResultCount = document.querySelector("#supportAdminResultCount");
+const supportAdminResultList = document.querySelector("#supportAdminResultList");
+const supportAdminDetail = document.querySelector("#supportAdminDetail");
+const supportAdminAuditList = document.querySelector("#supportAdminAuditList");
 const licenceBanner = document.querySelector("#licenceBanner");
 const licenceBannerTitle = document.querySelector("#licenceBannerTitle");
 const licenceBannerMessage = document.querySelector("#licenceBannerMessage");
@@ -247,6 +261,18 @@ const actionMenuPanel = document.querySelector("#actionMenuPanel");
 const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
 const actionCommandInput = document.querySelector("#actionCommandInput");
 const actionCommandResults = document.querySelector("#actionCommandResults");
+const actionMenuJobsButton = document.querySelector("#actionMenuJobsButton");
+const actionMenuBigSpoolButton = document.querySelector("#actionMenuBigSpoolButton");
+const actionMenuAccountButton = document.querySelector("#actionMenuAccountButton");
+const workspaceSettingsButton = document.querySelector("#workspaceSettingsButton");
+const workspaceSettingsPanel = document.querySelector("#workspaceSettingsPanel");
+const workspaceSettingsCloseButton = document.querySelector("#workspaceSettingsCloseButton");
+const workspaceSettingsScrim = document.querySelector("#workspaceSettingsScrim");
+const workspaceSettingsPipeSummary = document.querySelector("#workspaceSettingsPipeSummary");
+const workspaceSettingsViewSummary = document.querySelector("#workspaceSettingsViewSummary");
+const simpleControlsButton = document.querySelector("#simpleControlsButton");
+const fullControlsButton = document.querySelector("#fullControlsButton");
+const interfaceDensityButtons = [simpleControlsButton, fullControlsButton].filter(Boolean);
 const resetWorkspaceLayoutButton = document.querySelector("#resetWorkspaceLayoutButton");
 const spoolWorkspaceShell = document.querySelector("#spoolWorkspaceShell");
 const spoolWorkspaceTabsElement = document.querySelector("#spoolWorkspaceTabs");
@@ -341,6 +367,7 @@ const aiHelperCloseButton = document.querySelector("#aiHelperCloseButton");
 const aiHelperClearButton = document.querySelector("#aiHelperClearButton");
 const aiHelperMode = document.querySelector("#aiHelperMode");
 const aiHelperQuota = document.querySelector("#aiHelperQuota");
+const aiHelperContext = document.querySelector("#aiHelperContext");
 const aiHelperMessages = document.querySelector("#aiHelperMessages");
 const aiHelperSuggestions = document.querySelector("#aiHelperSuggestions");
 const aiHelperForm = document.querySelector("#aiHelperForm");
@@ -385,6 +412,7 @@ const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
 const LAST_SESSION_RECOVERY_KEY = "spoolmate-last-session-recovery-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
+const INTERFACE_DENSITY_KEY = "spoolmate-interface-density-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const PREVIEW_FLOAT_BOUNDS_KEY = "spoolmate-preview-bounds-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
@@ -395,10 +423,12 @@ const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v2";
 const JOB_DASHBOARD_FILTER_KEY = "spoolmate-job-dashboard-filter-v1";
 const JOB_DASHBOARD_PINS_KEY = "spoolmate-job-dashboard-pins-v1";
 const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
+const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.33";
-const APP_BUILD_DATE = "2026-08-02";
+const APP_VERSION = "v3.49";
+const APP_BUILD_DATE = "2026-08-11";
+const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -413,16 +443,17 @@ const QA_EXPORT_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/t
 const PRODUCTION_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Teams-Production-Fullscreen-Web.mp4`;
 const CLOUD_RECOVERY_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Cloud-Recovery-Fullscreen-Web.mp4`;
 const IMPORT_HELP_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Import-Help-Fullscreen-Web.mp4`;
-const PROMO_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Promo-90s-Web.mp4`;
 const VIDEO_TUTORIALS = [
   {
     id: "complete",
     eyebrow: "Complete workflow",
     title: "Build a complete spool",
     duration: 386,
-    description: "Drawing, true 45° offsets, precise edits, fittings, 3D, review, weld tracking and fabrication export.",
-    shortDescription: "The best place to start",
+    description: "Drawing, true 45° offsets, precise edits, fittings, 3D, review, weld tracking and fabrication export. The final Jobs chapter shows the previous dashboard while its revised footage is prepared.",
+    shortDescription: "Core workflow current · Jobs chapter update pending",
     url: TUTORIAL_VIDEO_URL,
+    previousLayout: true,
+    updateNotice: "The Complete Workflow video is current until its final Jobs chapter. Use the interactive Jobs guide for the exact v3.48 dashboard while that short section is re-rendered.",
     chapters: [
       [0, "Overview"],
       [10, "Start the project"],
@@ -448,23 +479,25 @@ const VIDEO_TUTORIALS = [
     eyebrow: "Focused guide",
     title: "Use the Jobs dashboard",
     duration: 385,
-    description: "Plan daily work, use the production board, assign spools, manage holds, communicate, report progress and open issued work by QR.",
-    shortDescription: "Planning, teams and workshop flow",
+    description: "The dashboard was streamlined in v3.48. Use the current interactive Jobs guide for exact controls while the revised Freya-narrated footage is prepared.",
+    shortDescription: "Revised v3.48 video being prepared",
     url: JOBS_TUTORIAL_VIDEO_URL,
+    previousLayout: true,
+    updateNotice: "The Jobs video shows the previous dashboard. Open More > Jobs guide for the exact v3.48 workflow while the revised Freya version is prepared.",
     chapters: [
       [0, "What the Jobs tab is for"],
       [23, "Save the spool first"],
       [46, "Know where the list comes from"],
-      [71, "Start with Today"],
-      [95, "Use the built-in guide"],
+      [71, "Use My day"],
+      [95, "Open tools from More"],
       [119, "Understand the full board"],
       [144, "Reduce the board with filters"],
       [166, "Allocate the spool"],
       [192, "Put blocked work on hold"],
       [216, "Add a yard note"],
-      [236, "Find a job and open its folder"],
-      [262, "Use Comms for the wider team"],
-      [288, "Review daily and weekly reports"],
+      [236, "Search and review job issues"],
+      [262, "Open team Comms from More"],
+      [288, "Open reports from More"],
       [314, "Open a spool by QR"],
       [338, "Return to the drawing"],
       [361, "Recommended daily routine"],
@@ -597,9 +630,11 @@ const VIDEO_TUTORIALS = [
     eyebrow: "Teams and workshop",
     title: "Run production and gear checks",
     duration: 125,
-    description: "Use business roles, allocation, due dates, production stages, holds, gear readiness, workshop messages, mixed welders and the mobile QR traveller.",
-    shortDescription: "From allocation to workshop completion",
+    description: "Use business roles, allocation, due dates, production stages, holds, gear readiness, workshop messages, mixed welders and the mobile QR traveller. Its opening Jobs section is being aligned with v3.48.",
+    shortDescription: "Production workflow current · Jobs opening update pending",
     url: PRODUCTION_TUTORIAL_VIDEO_URL,
+    previousLayout: true,
+    updateNotice: "The Production video remains correct after work is opened, but its opening Jobs view uses the previous layout. Start in My day or use the four compact Jobs filters in v3.48.",
     chapters: [
       [0, "Business roles and ownership"],
       [18, "Find the work that matters"],
@@ -645,25 +680,6 @@ const VIDEO_TUTORIALS = [
       [76, "Quick Start and touch controls"],
     ],
   },
-  {
-    id: "promo",
-    eyebrow: "See why SpoolMate",
-    title: "From first line to fabrication",
-    duration: 101,
-    description: "A concise overview for prospective customers showing connected drawing, calculations, 3D, Big Spool transport planning, production control and issued QR fabrication information.",
-    shortDescription: "Shareable SpoolMate overview",
-    url: PROMO_VIDEO_URL,
-    chapters: [
-      [0, "One connected fabrication job"],
-      [14, "Draw with workshop language"],
-      [29, "Automatic calculations"],
-      [42, "Live 3D review"],
-      [52, "Big Spool transport planning"],
-      [64, "Jobs and workshop production"],
-      [74, "Issued PDF and QR traveller"],
-      [84, "Keep every job moving"],
-    ],
-  },
 ];
 const QR_CODE_JS_URL = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
 const QR_CODE_READER_JS_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/+esm";
@@ -680,7 +696,7 @@ const AI_HELPER_FUNCTION = "ai-help";
 const AI_HELPER_TRIAL_DAILY_LIMIT = 10;
 const AI_HELPER_PAID_DAILY_LIMIT = 50;
 const AI_HELPER_MAX_HISTORY = 6;
-const AI_HELPER_WELCOME = "Hi — tell me what you are trying to do in SpoolMate. I can guide you through drawing, fittings, checks, cloud projects and fabrication PDFs.";
+const AI_HELPER_WELCOME = "Hi — ask what you are trying to do or what looks wrong. I use the screen you opened me from and give exact PC, iPad or Android steps, including what you should see when it works.";
 const LICENCE_NOTICE_KEY = "spoolmate-licence-notice-v1";
 const LICENCE_UPGRADE_URL = "";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
@@ -1092,13 +1108,13 @@ const TUTORIAL_STEPS = [
     title: "Team messages and spool conversations",
     body: "Comms is for team-wide messages. Each cloud spool also has its own conversation for @mentions, workshop photos, checker comments and resolved actions.",
     target: "#openBrowserProjectButton",
-    targetLabel: "Jobs button, then Comms",
+    targetLabel: "Jobs button, then More and Team comms",
     action: "showComms",
     actionLabel: "Open Comms",
     demo: "comms",
     items: [
-      "Open Jobs, then use Comms for messages that affect the whole team.",
-      "Open Jobs, choose Comms, then use Open spool conversation for messages attached to the current drawing.",
+      "Open Jobs, choose More, then Team comms for messages that affect the whole team.",
+      "From Team comms, use Open spool conversation for messages attached to the current drawing.",
       "Tag a teammate with @name, attach a workshop photo, then resolve the message once addressed.",
       "Owners can promote admins. Admins can approve users and manage shared team spools.",
       "Team messages are shared through Supabase for approved company members.",
@@ -1115,7 +1131,8 @@ const TUTORIAL_STEPS = [
     actionLabel: "Open Jobs",
     demo: "jobs",
     items: [
-      "Use the team dashboard for Assigned to me, Due today, Overdue, Ready to check and On hold queues.",
+      "Use My day for My attention, Assigned to me, Ready for checking and On hold queues.",
+      "Workshop users see their own work first; owners and admins see team-wide attention and holds.",
       "Recent team activity shows assignment, due-date, hold, message, pipe-size and stage changes.",
       "Drag cards between stages, or use the stage menu on touch devices.",
       "Assign a person, due date, priority and hold reason directly on the card.",
@@ -1257,14 +1274,14 @@ const TUTORIAL_STEPS = [
     kicker: "Pipe Size",
     menuLabel: "Pipe size",
     title: "Change pipe size from menus",
-    body: "Pipe size is chosen from the pipe/tube menu. Size changes on normal runs and tee connections add reducers where needed. Branches stay as welded cut-ins without reducers.",
-    target: "#pipeSizeSelect",
-    targetLabel: "Pipe / tube menu",
+    body: "Open Pipe & display to choose the next run size. Size changes on normal runs and tee connections add reducers where needed. Branches stay as welded cut-ins without reducers.",
+    target: "#workspaceSettingsButton",
+    targetLabel: "Pipe & display",
     action: "focusPipeSize",
-    actionLabel: "Open Pipe Size",
+    actionLabel: "Open Pipe & display",
     demo: "reducer",
     items: [
-      "Use the top Pipe / tube menu for the next run size.",
+      "Use Pipe & display > Size for the next run size.",
       "Right-click or long-press selected pipe to change existing sizes from the list.",
       "Reducers are added for size changes on normal pipe and tee connections. Branch welds stay cut into the main pipe with no reducer.",
       "At a welded branch, changing either straight-through main section updates the whole continuous main. The side outlet keeps its own size.",
@@ -1309,8 +1326,8 @@ const TUTORIAL_STEPS = [
     menuLabel: "Dimensions",
     title: "Choose the clearest dimension style",
     body: "Dimensions can use calm numbered callouts, traditional red centre-to-centre lines or chain dimensions. Pipe-size labels have their own visibility menu so the drawing can stay clean.",
-    target: "#dimensionStyleSelect",
-    targetLabel: "Dimension style menu",
+    target: "#workspaceSettingsButton",
+    targetLabel: "Pipe & display",
     action: "focusDimensions",
     actionLabel: "Show Styles",
     demo: "dimensions",
@@ -1853,6 +1870,7 @@ let nextNoteId = 1;
 let nextMeasurementId = 1;
 let state = loadState() ?? blankState();
 let appMode = loadAppMode();
+let interfaceDensity = "simple";
 let noteDrag = null;
 let socketDrag = null;
 let dimensionDrag = null;
@@ -1926,6 +1944,11 @@ let cloudCompanyMemberships = [];
 let activeCompany = null;
 let activeCompanyMembership = null;
 let pendingBusinessSignupBusy = false;
+let supportAdminAccess = false;
+let supportAdminAccessCheckedUserId = "";
+let supportAdminBusy = false;
+let supportAdminSelectedUserId = "";
+let supportAdminCurrentDetail = null;
 let companyMembers = [];
 let projectComments = [];
 let projectCommentsProjectId = null;
@@ -1966,6 +1989,9 @@ let projectLibraryJobFilter = readProjectLibraryJobFilter();
 let projectLibraryJobPins = readProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, 80);
 let projectLibraryRecentJobs = readProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, 12);
 let projectLibraryJobPage = 1;
+let dashboardPreferenceSaveTimer = 0;
+let dashboardPreferenceSaveBusy = false;
+const dashboardPreferenceSaveQueue = new Map();
 let qrReaderModulePromise = null;
 let activeQrScanner = null;
 let fabSheetTemplate = loadFabSheetTemplate();
@@ -3661,7 +3687,8 @@ const REGRESSION_AUTO_CHECKS = [
 
 function regressionAutoCheckBigSpool(segmentData, quantities, definition) {
   const plan = currentBigSpoolPlan();
-  plan.cuts = suggestedBigSpoolCuts(plan.maxTransportLengthMm, plan.clearanceMm);
+  plan.cuts = suggestedBigSpoolCuts(plan.maxTransportLengthMm, plan.clearanceMm, plan.defaultJointType);
+  refineBigSpoolCutsForConstraints(plan);
   const layout = bigSpoolLayout(segmentData);
   const withinLimit = layout.pieces.every((piece) => piece.maxOverallMm <= plan.maxTransportLengthMm + 1);
   const stableIds = layout.pieces.every((piece, index) => piece.childId === `SP-BIG-${bigSpoolPieceLabel(index)}`);
@@ -5160,7 +5187,15 @@ function normalizeBigSpoolPlan(source, edges = []) {
 }
 
 function currentBigSpoolPlan() {
-  state.bigSpool = normalizeBigSpoolPlan(state.bigSpool, state.edges);
+  const normalized = normalizeBigSpoolPlan(state.bigSpool, state.edges);
+  if (state.bigSpool && typeof state.bigSpool === "object" && !Array.isArray(state.bigSpool)) {
+    for (const key of Object.keys(state.bigSpool)) {
+      if (!Object.hasOwn(normalized, key)) delete state.bigSpool[key];
+    }
+    Object.assign(state.bigSpool, normalized);
+  } else {
+    state.bigSpool = normalized;
+  }
   return state.bigSpool;
 }
 
@@ -14903,6 +14938,7 @@ async function createNewSpoolWorkspaceTab() {
     showAppNotice("Close one open spool tab before starting another.", { tone: "warning" });
     return false;
   }
+  const previousId = activeSpoolWorkspaceTabId;
   const defaults = nextProjectInfoForNewSpool(state.projectInfo);
   await flushActiveSpoolWorkspaceTab();
   persistUserDrawingDefaults();
@@ -14926,9 +14962,19 @@ async function createNewSpoolWorkspaceTab() {
   } finally {
     spoolWorkspaceSwitching = false;
   }
-  addCurrentStateAsSpoolWorkspaceTab({ source: "draft" });
+  const newTab = addCurrentStateAsSpoolWorkspaceTab({ source: "draft" });
   setSpoolWorkspaceWindowed(false);
-  await promptForProjectDetails({ force: true, defaults });
+  const confirmed = await promptForProjectDetails({ force: true, defaults });
+  if (!confirmed) {
+    const newTabIndex = spoolWorkspaceTabs.findIndex((tab) => tab.id === newTab.id);
+    if (newTabIndex >= 0) spoolWorkspaceTabs.splice(newTabIndex, 1);
+    activeSpoolWorkspaceTabId = previousId;
+    const previous = spoolWorkspaceTabs.find((tab) => tab.id === previousId) ?? spoolWorkspaceTabs[0];
+    if (previous) await restoreSpoolWorkspaceTab(previous);
+    persistSpoolWorkspaceSession();
+    renderSpoolWorkspaceTabs();
+    return false;
+  }
   captureCurrentSpoolWorkspaceTab();
   return true;
 }
@@ -14963,6 +15009,9 @@ async function closeSpoolWorkspaceTab(tabId) {
 
 function renderSpoolWorkspaceTabs() {
   if (!spoolWorkspaceTabsElement) return;
+  const singleSpool = spoolWorkspaceTabs.length <= 1;
+  spoolWorkspaceShell?.classList.toggle("single-spool", singleSpool);
+  document.body.classList.toggle("single-spool-workspace", singleSpool);
   spoolWorkspaceTabsElement.innerHTML = spoolWorkspaceTabs.map((tab) => {
     const active = tab.id === activeSpoolWorkspaceTabId;
     const dirty = tab.cloud?.dirty === true || (!tab.projectId && (tab.state?.edges?.length ?? 0) > 0);
@@ -15150,6 +15199,7 @@ function renderWorkspaceLocationStrips() {
   const values = workspaceLocationValues();
   updateWorkspaceDocumentTitle();
   for (const strip of document.querySelectorAll("[data-workspace-location]")) {
+    strip.classList.toggle("compact", strip.classList.contains("workspace-location-main"));
     const configuredContext = strip.dataset.locationContext || "Drawing";
     const surface = currentWorkspaceSurface();
     const context = configuredContext === "Drawing"
@@ -15958,6 +16008,111 @@ function actionMenuOpen() {
   return Boolean(actionMenuPanel && !actionMenuPanel.hidden);
 }
 
+function readInterfaceDensity() {
+  try {
+    return localStorage.getItem(INTERFACE_DENSITY_KEY) === "full" ? "full" : "simple";
+  } catch {
+    return "simple";
+  }
+}
+
+function workspaceSettingsOpen() {
+  return document.body.classList.contains("workspace-settings-open");
+}
+
+function updateWorkspaceSettingsSummary() {
+  const material = pipeSpecSelect?.selectedOptions?.[0]?.textContent?.trim() || "Pipe";
+  const size = pipeSizeSelect?.selectedOptions?.[0]?.textContent?.trim() || "Choose size";
+  if (workspaceSettingsPipeSummary) {
+    workspaceSettingsPipeSummary.textContent = `${material} · ${size}`;
+    workspaceSettingsPipeSummary.title = workspaceSettingsPipeSummary.textContent;
+  }
+  if (workspaceSettingsViewSummary) {
+    const detail = drawingDetailSelect?.selectedOptions?.[0]?.textContent?.trim() || "Drawing";
+    const dimensions = state.showDimensions === false
+      ? "Dimensions off"
+      : dimensionStyleSelect?.selectedOptions?.[0]?.textContent?.trim() || "Dimensions";
+    workspaceSettingsViewSummary.textContent = `${detail} · ${dimensions}`;
+    workspaceSettingsViewSummary.title = workspaceSettingsViewSummary.textContent;
+  }
+}
+
+function closeWorkspaceSettings(options = {}) {
+  if (!workspaceSettingsOpen() && workspaceSettingsScrim?.hidden !== false) return;
+  document.body.classList.remove("workspace-settings-open");
+  workspaceSettingsButton?.setAttribute("aria-expanded", "false");
+  if (workspaceSettingsScrim) workspaceSettingsScrim.hidden = true;
+  if (options.restoreFocus === true) workspaceSettingsButton?.focus({ preventScroll: true });
+}
+
+function openWorkspaceSettings() {
+  if (!workspaceSettingsPanel || !workspaceSettingsButton) return;
+  closeActionMenu();
+  updateWorkspaceSettingsSummary();
+  document.body.classList.add("workspace-settings-open");
+  workspaceSettingsButton.setAttribute("aria-expanded", "true");
+  if (workspaceSettingsScrim) workspaceSettingsScrim.hidden = false;
+  window.requestAnimationFrame(() => {
+    const preferred = workspaceSettingsPanel.querySelector('[data-mode-settings]:not([hidden]) select, [data-mode-settings]:not([hidden]) input');
+    preferred?.focus?.({ preventScroll: true });
+  });
+}
+
+function setInterfaceDensity(value, options = {}) {
+  interfaceDensity = value === "full" ? "full" : "simple";
+  const simple = interfaceDensity === "simple";
+  document.body.classList.toggle("simple-controls", simple);
+  document.body.classList.toggle("full-controls", !simple);
+  document.body.dataset.interfaceDensity = interfaceDensity;
+  for (const button of interfaceDensityButtons) {
+    const active = button.dataset.interfaceDensity === interfaceDensity;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
+  if (options.persist !== false) {
+    try {
+      localStorage.setItem(INTERFACE_DENSITY_KEY, interfaceDensity);
+    } catch {
+      // The selected layout still applies when storage is unavailable.
+    }
+  }
+  closeWorkspaceSettings();
+  updateWorkspaceSettingsSummary();
+  renderSpoolWorkspaceTabs();
+  if (options.notice === true) {
+    showAppNotice(simple
+      ? "Simple controls are on. Open Pipe & display or Menu whenever you need more."
+      : "Full controls are on. Every drawing and project setting is visible.");
+  }
+  window.requestAnimationFrame(() => {
+    drawIso();
+    renderFallbackPreview();
+    resizeThree();
+  });
+}
+
+function setupInterfaceDensity() {
+  workspaceSettingsButton?.addEventListener("click", () => {
+    if (workspaceSettingsOpen()) closeWorkspaceSettings({ restoreFocus: true });
+    else openWorkspaceSettings();
+  });
+  workspaceSettingsCloseButton?.addEventListener("click", () => closeWorkspaceSettings({ restoreFocus: true }));
+  workspaceSettingsScrim?.addEventListener("click", () => closeWorkspaceSettings({ restoreFocus: true }));
+  for (const button of interfaceDensityButtons) {
+    button.addEventListener("click", () => setInterfaceDensity(button.dataset.interfaceDensity, { notice: true }));
+  }
+  actionMenuJobsButton?.addEventListener("click", () => openBrowserProjectButton?.click());
+  actionMenuBigSpoolButton?.addEventListener("click", () => bigSpoolButton?.click());
+  actionMenuAccountButton?.addEventListener("click", () => accountButton?.click());
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && workspaceSettingsOpen()) {
+      event.preventDefault();
+      closeWorkspaceSettings({ restoreFocus: true });
+    }
+  });
+  setInterfaceDensity(readInterfaceDensity(), { persist: false });
+}
+
 function openActionMenu(options = {}) {
   if (!actionMenuPanel || !actionMenuButton) return;
   actionMenuPanel.hidden = false;
@@ -16248,9 +16403,9 @@ function renderFirstUseGuide() {
   const active = firstUseGuideState.active === true;
   const step = currentFirstUseGuideStep();
   const position = firstUseGuideState.currentStep;
-  const compact = active && firstUseGuideState.compact && position <= firstUseGuideStepIndexById("save");
+  const compact = interfaceDensity === "simple";
   firstSpoolGuide.hidden = !active;
-  document.body.classList.toggle("first-spool-mode", compact);
+  document.body.classList.remove("first-spool-mode");
   document.body.classList.toggle("first-spool-guide-active", active);
   if (!active) {
     clearFirstUseGuideTarget();
@@ -16262,8 +16417,8 @@ function renderFirstUseGuide() {
   if (firstSpoolGuideActionButton) firstSpoolGuideActionButton.textContent = step.actionLabel;
   if (firstSpoolGuideNextButton) firstSpoolGuideNextButton.textContent = position === FIRST_USE_GUIDE_STEPS.length - 1 ? "Finish" : "Next";
   if (firstSpoolGuideExpandButton) {
-    firstSpoolGuideExpandButton.hidden = position > firstUseGuideStepIndexById("save");
-    firstSpoolGuideExpandButton.textContent = compact ? "Show all controls" : "Simplify controls";
+    firstSpoolGuideExpandButton.hidden = false;
+    firstSpoolGuideExpandButton.textContent = compact ? "Full controls" : "Simple controls";
   }
   if (firstSpoolGuideProgressBar) firstSpoolGuideProgressBar.style.width = `${((position + 1) / FIRST_USE_GUIDE_STEPS.length) * 100}%`;
   window.requestAnimationFrame(syncFirstUseGuideTarget);
@@ -16370,8 +16525,10 @@ function setupFirstUseGuide() {
     firstUseGuideState.compact = true;
   }
   firstSpoolGuideExpandButton?.addEventListener("click", () => {
-    firstUseGuideState.compact = !document.body.classList.contains("first-spool-mode");
+    const nextDensity = interfaceDensity === "simple" ? "full" : "simple";
+    firstUseGuideState.compact = nextDensity === "simple";
     persistFirstUseGuideState();
+    setInterfaceDensity(nextDensity, { notice: true });
     renderFirstUseGuide();
   });
   firstSpoolGuideActionButton?.addEventListener("click", runFirstUseGuideAction);
@@ -18105,9 +18262,9 @@ async function tryTutorialStepInDrawing() {
       break;
     case "focusPipeSize":
       applyAppMode("draw");
-      activateInspectorTab("properties");
-      showMobilePanel("inspector");
-      pipeSizeSelect?.focus({ preventScroll: true });
+      showMobilePanel("drawing");
+      openWorkspaceSettings();
+      window.setTimeout(() => pipeSizeSelect?.focus({ preventScroll: true }), 80);
       break;
     case "measureTool":
       applyAppMode("draw");
@@ -18117,7 +18274,8 @@ async function tryTutorialStepInDrawing() {
     case "focusDimensions":
       applyAppMode("draw");
       showMobilePanel("drawing");
-      dimensionStyleSelect?.focus({ preventScroll: true });
+      openWorkspaceSettings();
+      window.setTimeout(() => dimensionStyleSelect?.focus({ preventScroll: true }), 80);
       break;
     case "focusMode":
       applyAppMode("draw");
@@ -18835,6 +18993,7 @@ function closePrimaryWorkspaceDialogs(except = "") {
   if (except !== "help" && helpDialog && !helpDialog.hidden) closeHelpDialog();
   if (except !== "ai" && aiHelperDialog && !aiHelperDialog.hidden) closeAiHelper();
   if (except !== "auth" && authDialog && !authDialog.hidden && !authGateOpen) closeAuthDialog();
+  if (except !== "support-admin" && supportAdminDialog && !supportAdminDialog.hidden) closeSupportAdminDialog();
   if (except !== "tools" && toolSettingsDialog && !toolSettingsDialog.hidden) closeToolSettingsDialog();
   if (except !== "legal" && legalSupportDialog && !legalSupportDialog.hidden) closeLegalSupportDialog();
   if (except !== "big-spool" && bigSpoolDialog && !bigSpoolDialog.hidden) closeBigSpoolDialog();
@@ -19331,7 +19490,7 @@ function renderVideoTutorialLibrary() {
         <strong>${escapeHtml(tutorial.title)}</strong>
         <small>${escapeHtml(tutorial.shortDescription)}</small>
       </span>
-      <span class="video-tutorial-library-play" aria-hidden="true">▶</span>
+      <span class="video-tutorial-library-play" aria-hidden="true">${tutorial.previousLayout ? "UPDATE" : "▶"}</span>
     </button>
   `).join("");
 }
@@ -19370,7 +19529,9 @@ function selectVideoTutorial(videoId, { reset = true, autoplay = false } = {}) {
   } else if (reset && (changed || videoTutorialPlayer.ended)) {
     videoTutorialPlayer.currentTime = 0;
   }
-  if (autoplay) {
+  if (autoplay && tutorial.previousLayout) {
+    showAppNotice(tutorial.updateNotice || "Part of this video shows the previous Jobs layout. Use the current interactive Jobs guide for exact v3.48 controls.", { tone: "warning" });
+  } else if (autoplay) {
     videoTutorialPlayer.play().catch(() => {
       showAppNotice("The video is ready. Press play to begin.");
     });
@@ -19518,90 +19679,156 @@ const AI_HELPER_LOCAL_GUIDE = [
     help: "draw",
   },
   {
-    patterns: [["draw", "pipe"], ["first", "run"], ["start", "drawing"]],
-    answer: "Choose Draw, then press and drag from the yellow active point to the next point on the isometric paper. Continue from the new yellow point. Press Enter when the spool is finished, or switch to Select to stop drawing and edit existing runs.",
+    patterns: [["draw", "pipe"], ["first", "run"], ["start", "drawing"], ["start", "spool"], ["first", "spool"]],
+    answer: "To start a spool:\n1. From Home choose New spool and enter the job, spool and revision details.\n2. Choose Draw.\n3. Press and drag from the yellow active point to the next point on the isometric paper.\n4. Continue from each new yellow point.\n5. Press Enter on a keyboard, or choose Select on touch, when the shape is finished.\n\nYou should see each run stay connected and the yellow point move to the end you can draw from next.",
     tutorial: "Draw pipe",
     help: "draw",
   },
   {
     patterns: [["finish", "drawing"], ["stop", "drawing"], ["end", "draw"]],
-    answer: "Press Enter to finish drawing and return to Select. On a touch device, switch to Select after placing the last run. Your existing pipe stays on the drawing.",
+    answer: "To stop drawing without losing the spool:\n1. Press Enter on a keyboard.\n2. On iPad/Android, choose Select after placing the final run.\n3. Save when the badge shows the drawing has changed.\n\nYou should see the existing pipe remain in place and selection/edit controls become available.",
     tutorial: "Draw pipe",
     help: "draw",
   },
   {
     patterns: [["flange"], ["add", "fitting"], ["end", "fitting"]],
-    answer: "Open Edit, choose Fittings, then choose Flange and tap the pipe end. You can also activate Select, long-press or right-click the pipe end, and use Add fitting. To change an existing flange, long-press it with Select active and choose Flange standard.",
+    answer: "To add a flange:\n1. Open Edit and choose Fittings > Flange.\n2. Tap the pipe endpoint where the flange belongs.\n3. Or choose Select, right-click/long-press the endpoint and use Add fitting > Flange.\n4. To change its standard later, select or long-press the flange and choose Flange standard.\n\nYou should see the flange symbol at the endpoint in 2D and a bolted flange in 3D.",
     tutorial: "End fittings",
     help: "edit",
   },
   {
     patterns: [["tee"], ["branch"], ["cut", "in"]],
-    answer: "Open Fittings and choose Tee or Branch. Tap the main pipe run where the connection starts, then draw the new leg. Use Tee for a tee fitting. Use Branch when the smaller pipe is welded into the side of the larger main pipe.",
+    answer: "Choose the connection deliberately:\n1. Use Fittings > Tee for a manufactured tee fitting.\n2. Use Fittings > Branch for a smaller pipe welded into the side of a larger main.\n3. Tap the main run at the connection point, then draw the new leg.\n4. Set the outlet pipe size before finishing the leg.\n\nYou should see a tee body for Tee, but a direct welded outlet for Branch. A branch does not receive an automatic tee reducer.",
     tutorial: "Tee / branch",
     help: "draw",
   },
   {
     patterns: [["socket"], ["long", "press", "pipe"]],
-    answer: "Activate Select, then right-click on PC or long-press the pipe on iPad/Android. Choose Add sockets, select the socket size, count and spacing, then Apply. Long-press a socket later to rotate it, or drag it along the pipe in Select.",
+    answer: "To build a socket layout:\n1. Choose Select.\n2. Right-click the host pipe on PC, or long-press it on iPad/Android.\n3. Choose Add sockets and set the socket size, count and spacing.\n4. Press Apply.\n5. Select a socket later to rotate it, or drag it along the host run.\n\nYou should see every socket attached to the selected pipe and reflected in the drawing and 3D preview.",
     tutorial: "Sockets",
     help: "edit",
   },
   {
     patterns: [["pipe", "size"], ["change", "size"], ["reducer"]],
-    answer: "For the next run, choose the size from the Pipe / tube menu. To change existing pipe, activate Select, choose the run, then change its size in the inspector or context menu. Normal and tee size changes can add reducers; welded branch outlets keep their own size without an automatic reducer.",
+    answer: "To change pipe size:\n1. For a new run, open Pipe & display and choose Size before drawing.\n2. For existing pipe, choose Select and select the run.\n3. Change the size in Details or the right-click/long-press menu.\n4. Review the transition in 2D and 3D.\n\nYou should see an automatic reducer at an ordinary size transition or reducing tee where required. A welded Branch keeps its outlet size and is not treated as a tee reducer.",
     tutorial: "Pipe size",
     help: "edit",
   },
   {
     patterns: [["dimension"], ["measurement"], ["measure"]],
-    answer: "Use Measure to place a check between any two picked points without changing the pipe. For fabrication dimensions, turn Dimensions on and choose red C/C, numbered or chain style. With Select active, drag crowded red dimension labels into a clearer position.",
+    answer: "For a temporary check, choose Measure and pick two points; this does not change the pipe. For fabrication dimensions:\n1. Turn Dimensions on.\n2. Choose Red C/C lines, Numbered key or Chain dims.\n3. Use Select to drag any crowded red label into a clearer position.\n\nYou should see the chosen dimensions update without changing the spool geometry.",
     tutorial: "Dimensions",
     help: "review",
   },
   {
-    patterns: [["issue"], ["approve"], ["ready", "check"], ["drawing", "blocked"]],
-    answer: "A spool must have its required project details and revision, pass or acknowledge its drawing checks, move to Ready to check, and be approved before it can be issued. Open Review > Checks to see the exact blocker and use its action. Issuing then records the issuer and locks that revision.",
+    patterns: [["issue"], ["approve"], ["ready", "check"], ["drawing", "blocked"], ["spool", "blocked"], ["fix", "blocker"]],
+    answer: "To clear an issue blocker:\n1. Open Review > Checks.\n2. Read the first blocking item and press its Fix or Show on drawing button.\n3. Complete the required project details, revision, drawing checks and weld information.\n4. Move the spool to Ready to check, record approval, then issue it.\n\nYou should see the blocker disappear as it is fixed. Issuing records the issuer and locks that revision.",
     tutorial: "Approve / return",
     help: "review",
   },
   {
     patterns: [["cloud", "spool"], ["saved", "spool"], ["missing", "project"], ["other", "device"]],
-    answer: "First confirm Account shows you are signed in with the same email. Open Jobs and set its source to Cloud. Local projects stay only in that browser, while cloud projects follow the signed-in account across PC, iPad and Android. Trial expiry keeps existing cloud spools visible in read-only mode.",
+    answer: "To find cloud spools:\n1. Open Account and confirm the same email is signed in on this device.\n2. Open Jobs.\n3. Change the source to Cloud and search the job or spool number.\n4. Use Open tab if you want to keep the current spool open as well.\n\nYou should see cloud projects follow the account across PC, iPad and Android. Device projects remain only in the browser where they were saved.",
     help: "account",
   },
   {
     patterns: [["trial"], ["expired"], ["read", "only"], ["licence"]],
-    answer: "The 30-day trial includes cloud editing and collaboration. After expiry, existing permitted cloud spools remain available to open, view and export, but cloud saves and team changes pause. Built-in Ask SpoolMate help remains available; AI answers resume with an active trial or licence.",
+    answer: "During the trial, cloud editing and collaboration are enabled. After expiry:\n1. Existing permitted cloud spools stay available to open, view and export.\n2. Cloud saves and team changes pause.\n3. Built-in Ask SpoolMate guidance and tutorials still work.\n4. Extra AI answers resume when the trial or licence is active.\n\nYou should see the account described as read only rather than seeing its saved spools deleted.",
     help: "account",
   },
   {
     patterns: [["fab", "pdf"], ["fabrication", "pdf"], ["export", "pdf"], ["qr", "code"]],
-    answer: "Open Export, choose the PDF style, then press Fab PDF. Workshop PDFs include fabrication information and the issued spool/revision QR traveller when the drawing has the required cloud identity. Check the revision and issue status before sending the sheet to the workshop.",
+    answer: "To create workshop paperwork:\n1. Open Export and choose the PDF style.\n2. Review any blocker and use its Fix button.\n3. Confirm the job, spool, revision and issue status.\n4. Press Fab PDF.\n\nYou should see fabrication information on the PDF. An issued cloud spool with a permanent identity also includes its spool/revision QR traveller.",
     tutorial: "Export",
     help: "export",
   },
   {
     patterns: [["weld", "register"], ["weld", "number"], ["wps"], ["ndt"]],
-    answer: "SpoolMate numbers drawing welds W01, W02 and onward. In Review, use All welds done by to assign one welder across the register, or choose Mixed welders and enter a different Welder ID on each row. Record the WPS and inspection/NDT status before issue.",
+    answer: "To complete the weld register:\n1. Open Review and locate the W01, W02 and onward weld rows.\n2. Choose All welds done by when one welder completed every weld, or Mixed welders for separate IDs.\n3. Record the WPS, completion and inspection/NDT status.\n4. Resolve any missing required inspection details before issue.\n\nYou should see every drawing weld matched to one complete register row.",
     help: "review",
   },
   {
     patterns: [["production", "stage"], ["assign", "worker"], ["due", "date"], ["on", "hold"]],
-    answer: "Open Jobs > Production board. Assign the worker, then open Gear check to confirm inferred pipe and fittings are In shop, mark anything that Needs ordering, or add extra workshop gear. Cutting stays blocked until the checklist is confirmed or a checker records an authorised override. The result is also shown on the mobile QR traveller.",
+    answer: "To prepare a spool for the workshop:\n1. Open Jobs and choose My day for your role-focused work, or Full board for every production stage.\n2. Assign the worker and due date, then open Gear check.\n3. Confirm inferred pipe/fittings as In shop, mark missing items Needs ordering, and add extra gear.\n4. Record the checker and confirm readiness.\n\nYou should see Cutting become available only after the check or an authorised override. The result also appears on the mobile QR traveller.",
+    tutorial: "Production board",
+    help: "account",
+  },
+  {
+    patterns: [["jobs", "dashboard"], ["my", "day"], ["many", "jobs"], ["job", "filter"], ["needs", "attention"]],
+    answer: "Use the Jobs screen in two layers:\n1. Jobs is the compact manager list. Filter it with Active, My jobs, Completed or All, and use search for a job, client, spool or worker.\n2. My day is the action list: My/Team attention, Assigned to me, Ready for checking and On hold. Workshop users only see their own urgent work; owners and admins see team issues.\n3. Press Review on a job with issues to jump straight to its problem list.\n4. Open More for the Jobs guide, Team comms and daily or weekly reports.\n\nYou should see each spool only once in My day, under the most urgent queue that applies.",
     tutorial: "Production board",
     help: "account",
   },
   {
     patterns: [["3d"], ["preview"], ["rotate", "model"]],
-    answer: "Open 3D Preview. Use Rotate to spin the model, Move to pan, and wheel or pinch to zoom. Press Fit to centre the whole spool. On phones and tablets the preview opens as a panel so it does not cover the drawing.",
+    answer: "In 3D Preview:\n1. Choose Rotate, then drag to spin the model.\n2. Choose Move to pan along the spool.\n3. Use the mouse wheel or two-finger pinch to zoom.\n4. Press Fit whenever the model is cropped or lost.\n\nYou should see the complete spool centred without changing the 2D drawing. Phones and tablets use the 3D panel so the workspace remains usable.",
     tutorial: "3D preview",
     help: "touch",
   },
   {
-    patterns: [["ipad"], ["android"], ["tablet"], ["touch"]],
-    answer: "On iPad and Android, use Select before long-pressing a pipe or fitting. Keep your finger still until the context menu opens. Use two-finger pinch for zoom, the mobile panel buttons for details and 3D, and Hold 45° beside the drawing while dragging a 45 degree offset.",
+    patterns: [["simple", "controls"], ["full", "controls"], ["too", "many", "controls"], ["pipe", "display"]],
+    answer: "Use Simple controls for the clearest drawing workspace. Pipe size, material, dimensions and drawing display choices are grouped under Pipe & display. Save and Menu stay at the top, and drawing tools only appear in the modes where they apply.\n\nTo see every setting at once, open Menu > Workspace controls > Full. Your choice is remembered on this device.",
     help: "touch",
+  },
+  {
+    patterns: [["ipad"], ["android"], ["tablet"], ["touch"]],
+    answer: "On iPad and Android, use Select before long-pressing a pipe or fitting. Keep your finger still until the context menu opens. Use two-finger pinch for zoom, tap Details or 3D above the drawing when needed, and hold Hold 45° while dragging a 45 degree offset.",
+    help: "touch",
+  },
+  {
+    patterns: [["roll", "groove"], ["rg", "end"], ["grooved", "end"], ["victaulic"]],
+    answer: "To add a roll-grooved pipe end:\n1. Choose Select.\n2. Right-click the open pipe end on PC, or long-press it on iPad/Android.\n3. Choose Pipe end > Roll groove.\n4. Open 3D if you want to confirm the groove visually.\n\nYou should see an RG marker at that endpoint. A roll groove is a prepared end, so Review must not report it as an open pipe end.",
+    tutorial: "End fittings",
+    help: "edit",
+  },
+  {
+    patterns: [["thread", "end"], ["threaded", "pipe"], ["add", "thread"]],
+    answer: "To add a threaded end:\n1. Choose Select.\n2. Right-click the pipe endpoint, or long-press it on touch.\n3. Choose Pipe end > Threaded.\n4. Use 3D Preview and Fit to check the coarse thread is wrapped around the actual pipe end.\n\nThreads can only be applied at a pipe endpoint, not in the middle of a run.",
+    tutorial: "End fittings",
+    help: "edit",
+  },
+  {
+    patterns: [["big", "spool"], ["split", "spool"], ["transport", "pieces"], ["rg", "split"], ["field", "weld", "split"], ["flange", "split"], ["child", "fabrication"], ["match", "joint"]],
+    answer: "To split a large assembly for transport:\n1. Draw the complete master assembly, then open Big Spool.\n2. Turn on Use Big Spool for this drawing and enter the job's actual transport limits.\n3. Choose the default split connection: field weld, RG/RG or flange/flange.\n4. Press Suggest safe splits, then review and adjust each match joint.\n5. Export the child fabrication package.\n\nThe everyday master drawing and 3D model stay continuous. Split gaps, end preparations and match marks appear on the child fabrication drawings where the pieces are actually made.",
+    help: "export",
+  },
+  {
+    patterns: [["multiple", "spools"], ["spool", "tabs"], ["windowed", "mode"], ["open", "another", "spool"], ["every", "open", "spool"], ["tabs", "windows"], ["independent", "zoom"]],
+    answer: "Use the spool tabs above the workspace to keep several drawings open:\n1. Choose + Open to load another spool into a new tab.\n2. Select a tab to switch drawings; each tab keeps its own zoom, selection, tool and Details/3D state.\n3. Choose Windows to compare the open spools together.\n4. Close a tab only after its Saved status is current.\n\nOpening a spool in a tab does not replace the other open drawings.",
+    help: "account",
+  },
+  {
+    patterns: [["weld", "gap"], ["1.6"], ["2.4"]],
+    answer: "Set the fabrication weld gap in Project details to 1.6 mm or 2.4 mm. SpoolMate deducts that gap only where there is a welded pipe-to-fitting or generated field-weld connection. It does not deduct a gap from a free pipe end, roll groove or flanged split. Fab sheets label the deduction as Weld gap so the workshop can see why the cut changed.",
+    help: "review",
+  },
+  {
+    patterns: [["gear", "check"], ["gear", "shop"], ["needs", "ordering"]],
+    answer: "After a spool is allocated, open Jobs > Production and choose Gear check:\n1. Confirm the inferred pipe and fittings that are already In shop.\n2. Mark missing items as Needs ordering.\n3. Add any extra workshop gear that is not inferred from the drawing.\n4. Record the checker and confirm readiness.\n\nCutting remains blocked until the checklist is confirmed or an authorised override is recorded.",
+    tutorial: "Production board",
+    help: "account",
+  },
+  {
+    patterns: [["autosave"], ["save", "failed"], ["restore", "session"], ["offline", "save"]],
+    answer: "Watch the save badge at the top of the app: Saving, Saved with a time, Local only or Save failed. If the connection drops, cloud changes stay in the offline queue and retry after reconnecting. If a save still fails, open Menu > Restore last session to recover the most recent local safety copy before making more changes.",
+    help: "account",
+  },
+  {
+    patterns: [["change", "length"], ["edit", "length"], ["right", "click", "length"]],
+    answer: "To change an existing pipe length:\n1. Choose Select.\n2. Right-click the run on PC, or long-press it on iPad/Android.\n3. Choose Change length, enter the new centre-to-centre value, then apply it.\n4. Check the connected fittings and fabrication dimensions before saving.\n\nYou should see the selected run update while the rest of the connected spool remains attached.",
+    tutorial: "Select / edit",
+    help: "edit",
+  },
+  {
+    patterns: [["fitting", "profile"], ["project", "details"], ["required", "details"], ["revision", "field"]],
+    answer: "Project details controls the information and calculation source printed on the spool:\n1. Enter the job number, spool number and revision used by your organisation.\n2. Record Drawn by and the client/area when known.\n3. Choose the approved fitting data profile for that job; do not use a supplier profile until its dimensions are confirmed.\n4. Choose the workshop's 1.6 mm or 2.4 mm weld gap.\n\nYou should see these details in Review and on the fabrication output. Changing an issued spool should be done through Return for changes or a new revision, not by overwriting the issued revision.",
+    help: "review",
+  },
+  {
+    patterns: [["which", "tutorial"], ["choose", "tutorial"], ["new", "user", "tutorial"]],
+    answer: "For a new user, start with Video tutorials > Complete workflow. Then use the shorter Drawing, Pipe ends and Sockets videos for individual tools. If you prefer to practise inside the app, open Tutorial and begin with Draw pipe; it will guide you through a first spool one step at a time.",
+    tutorial: "Draw pipe",
+    help: "draw",
   },
 ];
 
@@ -19631,6 +19858,123 @@ function aiHelperGuideMatch(question, minimumScore = 2) {
   return bestScore >= minimumScore ? best : null;
 }
 
+function aiHelperCurrentSurface() {
+  if (homeDashboardDialog && !homeDashboardDialog.hidden) return "Home dashboard";
+  if (projectLibraryDialog && !projectLibraryDialog.hidden) return "Jobs dashboard";
+  if (projectDialog && !projectDialog.hidden) return "Project details";
+  if (bigSpoolDialog && !bigSpoolDialog.hidden) return "Big Spool planner";
+  if (loadPlanDialog && !loadPlanDialog.hidden) return "Load planner";
+  if (spoolWorkspaceWindowed && spoolWindowGridShell && !spoolWindowGridShell.hidden) return "Multi-spool windows";
+  if (!previewPanelHidden) return `3D preview / ${appMode}`;
+  return `${appMode.charAt(0).toUpperCase()}${appMode.slice(1)} workspace`;
+}
+
+function aiHelperSuggestedQuestions() {
+  const surface = aiHelperCurrentSurface();
+  if (surface === "Home dashboard") {
+    return [
+      ["Start a spool", "What is the quickest way to start my first spool?"],
+      ["Open a job", "How do I find and open a saved job or cloud spool?"],
+      ["Choose a tutorial", "Which tutorial should a new user start with?"],
+      ["Restore work", "How do I restore my last session if something went wrong?"],
+    ];
+  }
+  if (surface === "Project details") {
+    return [
+      ["Fitting profile", "Which fitting data profile should I choose?"],
+      ["Weld gap", "Should I choose a 1.6 mm or 2.4 mm weld gap?"],
+      ["Required details", "Which project details are required before issue?"],
+      ["Revision", "How should I use the spool revision field?"],
+    ];
+  }
+  if (surface === "Jobs dashboard") {
+    return [
+      ["Find cloud spools", "Where are my cloud spools and how do I find the right job?"],
+      ["Assign work", "How do I assign a worker and due date?"],
+      ["Gear check", "How does the workshop gear check work?"],
+      ["QR traveller", "How does the spool QR traveller work?"],
+    ];
+  }
+  if (surface === "Big Spool planner") {
+    return [
+      ["Create safe splits", "How do I split a Big Spool into safe transport pieces?"],
+      ["Split connections", "How do field weld, RG/RG and flange split connections work?"],
+      ["Child drawings", "Where do the Big Spool split marks and end preparations appear?"],
+      ["Export package", "How do I export the child fabrication package?"],
+    ];
+  }
+  if (surface === "Multi-spool windows") {
+    return [
+      ["Open another", "How do I open another spool without replacing this one?"],
+      ["Tabs vs windows", "How do spool tabs and windowed mode work?"],
+      ["Independent views", "Does every open spool keep its own zoom and selection?"],
+      ["Save safely", "How do I know every open spool has saved?"],
+    ];
+  }
+  if (surface.startsWith("3D preview")) {
+    return [
+      ["Move the model", "How do I rotate, pan, zoom and fit the 3D model?"],
+      ["Pipe colours", "What do the different pipe colours mean in 3D?"],
+      ["Check fittings", "How do I check tees, branches and reducers in 3D?"],
+      ["Pipe ends", "How should roll grooves and threaded ends look in 3D?"],
+    ];
+  }
+  if (appMode === "edit") {
+    return [
+      ["Change a length", "How do I right-click or long-press a pipe and change its length?"],
+      ["Add pipe ends", "How do I add roll grooves, flanges or threaded pipe ends?"],
+      ["Sockets", "How do I add, space and rotate sockets?"],
+      ["Tee or branch", "What is the difference between a tee and a branch?"],
+    ];
+  }
+  if (appMode === "review") {
+    return [
+      ["Fix a blocker", "Why is this spool blocked and how do I fix the exact issue?"],
+      ["Weld register", "How do I complete the weld register for one or mixed welders?"],
+      ["Weld gaps", "Where are 1.6 mm and 2.4 mm weld gaps deducted?"],
+      ["Ready to issue", "What must be complete before I can issue this spool?"],
+    ];
+  }
+  if (appMode === "export") {
+    return [
+      ["Fab PDF", "How do I create the fabrication PDF?"],
+      ["QR code", "When does the spool and revision QR code appear?"],
+      ["Child package", "How do I export Big Spool child fabrication drawings?"],
+      ["Export blocked", "Why is export blocked and which Fix button should I use?"],
+    ];
+  }
+  return [
+    ["Start drawing", "How do I start and finish drawing a spool?"],
+    ["45 degree offset", "How do I draw a true 45 degree offset?"],
+    ["Change pipe size", "How do I change pipe size and get an automatic reducer?"],
+    ["Add a branch", "How do I add a tee or welded branch correctly?"],
+  ];
+}
+
+function renderAiHelperSuggestions() {
+  if (!aiHelperSuggestions) return;
+  aiHelperSuggestions.replaceChildren();
+  for (const [label, question] of aiHelperSuggestedQuestions()) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.dataset.aiSuggestion = question;
+    aiHelperSuggestions.append(button);
+  }
+}
+
+function updateAiHelperScreenContext() {
+  if (!aiHelperContext) return;
+  const surface = aiHelperCurrentSurface();
+  const parts = [surface];
+  if (/workspace|3D preview|Multi-spool/.test(surface)) {
+    parts.push(`tool: ${String(state.activeTool || "select")}`);
+    parts.push(`Details: ${activeInspectorTabName()}`);
+  }
+  aiHelperContext.textContent = `Helping with: ${parts.join(" / ")}`;
+  renderAiHelperSuggestions();
+}
+
 function aiHelperMessageId() {
   return `ai-help-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -19644,6 +19988,7 @@ function resetAiHelperConversation() {
     welcome: true,
   }];
   renderAiHelperConversation();
+  updateAiHelperScreenContext();
 }
 
 function appendAiHelperMessage(role, text, options = {}) {
@@ -19675,6 +20020,7 @@ function aiHelperDailyLimit() {
 
 function updateAiHelperAvailability() {
   if (!aiHelperMode || !aiHelperQuota) return;
+  updateAiHelperScreenContext();
   const stateName = cloudLicenceState();
   if (aiHelperBusy) {
     aiHelperMode.textContent = "Finding an answer…";
@@ -19771,6 +20117,12 @@ function aiHelperSafeContext() {
     hasDrawing: hasDrawingContent(),
     projectStatus: normalizeProjectStatus(state.projectStatus),
     drawingLocked: state.locked === true || cloudPermissionReadOnly,
+    surface: aiHelperCurrentSurface(),
+    inspectorTab: activeInspectorTabName(),
+    previewOpen: !previewPanelHidden,
+    windowedWorkspace: spoolWorkspaceWindowed,
+    hasSelection: selectedSegmentIndexes().length > 0 || Boolean(state.selectedFitting),
+    hasMultipleOpenSpools: spoolWorkspaceTabs.length > 1,
   };
 }
 
@@ -19864,12 +20216,12 @@ async function sendAiHelperQuestion(value, options = {}) {
 
 function openAiHelper() {
   if (!aiHelperDialog) return;
-  closePrimaryWorkspaceDialogs("ai");
   if (!aiHelperConversation.length) resetAiHelperConversation();
   aiHelperLastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   aiHelperDialog.hidden = false;
   aiHelperButton?.setAttribute("aria-expanded", "true");
   closeActionMenu();
+  updateAiHelperScreenContext();
   updateAiHelperAvailability();
   requestAnimationFrame(() => aiHelperInput?.focus());
 }
@@ -20070,6 +20422,7 @@ function updateControls() {
   setTool(state.activeTool);
   renderRoleAccessNotice();
   renderWorkspaceLocationStrips();
+  updateWorkspaceSettingsSummary();
 }
 
 function updateAll(options = {}) {
@@ -20451,6 +20804,41 @@ function setupAuthDialog() {
       console.warn("Team member role update failed.", error);
       showAppNotice(error?.message || "Could not update team member role.");
       loadTeamWorkspace({ silent: true }).catch(() => null);
+    });
+  });
+}
+
+function setupSupportAdminDialog() {
+  supportAdminButton?.addEventListener("click", () => {
+    closeAuthDialog();
+    openSupportAdminDialog().catch((error) => {
+      console.warn("Support Admin could not open.", error);
+      showAppNotice(error?.message || "Support Admin could not open.", { tone: "error" });
+    });
+  });
+  supportAdminCloseButton?.addEventListener("click", closeSupportAdminDialog);
+  supportAdminDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === supportAdminDialog) closeSupportAdminDialog();
+  });
+  supportAdminSearchForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    searchSupportAdminUsers().catch((error) => setSupportAdminStatus(error?.message || "Account search failed.", "error"));
+  });
+  supportAdminRefreshButton?.addEventListener("click", () => {
+    loadSupportAdminOverview().catch((error) => setSupportAdminStatus(error?.message || "Overview refresh failed.", "error"));
+  });
+  supportAdminResultList?.addEventListener("click", (event) => {
+    const accountButton = event.target.closest("[data-support-user-id]");
+    if (!accountButton) return;
+    loadSupportAdminUser(accountButton.dataset.supportUserId).catch((error) => {
+      setSupportAdminStatus(error?.message || "Account details could not be loaded.", "error");
+    });
+  });
+  supportAdminDetail?.addEventListener("click", (event) => {
+    const actionButton = event.target.closest("[data-support-admin-action]");
+    if (!actionButton) return;
+    runSupportAdminAction(actionButton).catch((error) => {
+      setSupportAdminStatus(error?.message || "Support action failed.", "error");
     });
   });
 }
@@ -21160,6 +21548,7 @@ function ensureProjectLibraryDashboardShell() {
     guideButton.id = "projectLibraryGuideButton";
     guideButton.href = "#projectJobsGuide";
     guideButton.setAttribute("role", "button");
+    guideButton.hidden = true;
     guideButton.innerHTML = `
       <svg><use href="#icon-help"></use></svg>
       <span>Guide</span>
@@ -21172,6 +21561,7 @@ function ensureProjectLibraryDashboardShell() {
     reportButton.className = "icon-button labeled";
     reportButton.id = "projectLibraryReportButton";
     reportButton.type = "button";
+    reportButton.hidden = true;
     reportButton.innerHTML = `
       <svg><use href="#icon-report"></use></svg>
       <span>Report</span>
@@ -21184,6 +21574,7 @@ function ensureProjectLibraryDashboardShell() {
     commsButton.className = "icon-button labeled";
     commsButton.id = "projectLibraryCommsButton";
     commsButton.type = "button";
+    commsButton.hidden = true;
     commsButton.innerHTML = `
       <svg><use href="#icon-note"></use></svg>
       <span>Comms</span>
@@ -21205,15 +21596,15 @@ function ensureProjectLibraryDashboardShell() {
         <svg><use href="#icon-sample"></use></svg>
         <span>This device</span>
       </button>
-      <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
+      <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button" hidden>
         <svg><use href="#icon-help"></use></svg>
         <span>Guide</span>
       </a>
-      <button class="icon-button labeled" id="projectLibraryCommsButton" type="button">
+      <button class="icon-button labeled" id="projectLibraryCommsButton" type="button" hidden>
         <svg><use href="#icon-note"></use></svg>
         <span>Comms</span>
       </button>
-      <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
+      <button class="icon-button labeled" id="projectLibraryReportButton" type="button" hidden>
         <svg><use href="#icon-report"></use></svg>
         <span>Report</span>
       </button>
@@ -21221,7 +21612,7 @@ function ensureProjectLibraryDashboardShell() {
         <svg><use href="#icon-reset"></use></svg>
         <span>New spool</span>
       </button>
-      <button class="primary-button" id="projectLibrarySaveButton" type="button">
+      <button class="primary-button" id="projectLibrarySaveButton" type="button" hidden>
         <svg><use href="#icon-export"></use></svg>
         <span>Save current</span>
       </button>
@@ -21558,7 +21949,9 @@ function setupProjectDialog() {
         showAppNotice(error?.message || "Could not add team message.");
       });
   });
-  projectLibraryList?.addEventListener("click", handleProjectLibraryActivation);
+  projectLibraryList?.addEventListener("click", (event) => {
+    handleProjectLibraryActivation(event);
+  });
   projectLibraryList?.addEventListener("change", (event) => {
     handleProjectLibraryFieldChange(event).catch((error) => {
       console.warn("Production field update failed.", error);
@@ -21570,14 +21963,6 @@ function setupProjectDialog() {
   projectLibraryList?.addEventListener("dragleave", handleProjectLibraryDragLeave);
   projectLibraryList?.addEventListener("drop", handleProjectLibraryDrop);
   projectLibraryList?.addEventListener("dragend", handleProjectLibraryDragEnd);
-  projectLibraryList?.addEventListener("pointerup", (event) => {
-    if (event.pointerType === "mouse") return;
-    handleProjectLibraryActivation(event);
-  });
-  projectLibraryList?.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    handleProjectLibraryActivation(event);
-  });
 }
 
 function handleProjectLibraryActivation(event) {
@@ -21622,10 +22007,11 @@ function handleProjectLibraryActivation(event) {
   const folderOpen = target.closest("[data-project-folder-open]");
   if (folderOpen) {
     const folderKey = folderOpen.dataset.projectFolderOpen ?? "";
+    const focus = folderOpen.dataset.jobFocus ?? "";
     event.preventDefault();
     event.stopPropagation();
     if (shouldSkipProjectLibraryActivation(`folder:${folderKey}`)) return;
-    openProjectLibraryFolder(folderKey);
+    openProjectLibraryFolder(folderKey, focus);
     return;
   }
 
@@ -21683,6 +22069,17 @@ function handleProjectLibraryActivation(event) {
 
 function handleProjectLibraryAction(actionElement) {
   const action = actionElement?.dataset?.projectLibraryAction;
+  if (!action) return;
+  const actionKey = [
+    "library-action",
+    action,
+    actionElement.dataset.dashboardView,
+    actionElement.dataset.jobFilter,
+    actionElement.dataset.jobKey,
+    actionElement.dataset.jobPage,
+    actionElement.dataset.reportPeriod,
+  ].filter(Boolean).join(":");
+  if (shouldSkipProjectLibraryActivation(actionKey, 1500)) return;
   if (action === "dashboard-view") {
     setTeamDashboardView(actionElement.dataset.dashboardView);
     return;
@@ -21713,6 +22110,10 @@ function handleProjectLibraryAction(actionElement) {
       console.warn("QR scanner could not open.", error);
       showAppNotice(error?.message || "The QR scanner could not be opened.");
     });
+    return;
+  }
+  if (action === "show-guide") {
+    showProjectLibraryGuide();
     return;
   }
   if (action === "hide-guide") {
@@ -22031,9 +22432,9 @@ function handleProjectLibraryDragEnd() {
   projectLibraryDrag = null;
 }
 
-function shouldSkipProjectLibraryActivation(key) {
+function shouldSkipProjectLibraryActivation(key, debounceMs = 500) {
   const now = Date.now();
-  if (projectLibraryLastActivation.key === key && now - projectLibraryLastActivation.at < 500) {
+  if (projectLibraryLastActivation.key === key && now - projectLibraryLastActivation.at < debounceMs) {
     return true;
   }
   projectLibraryLastActivation = { key, at: now };
@@ -25965,6 +26366,413 @@ async function deleteCloudAccount() {
   }
 }
 
+function resetSupportAdminAccess() {
+  supportAdminAccess = false;
+  supportAdminAccessCheckedUserId = "";
+  supportAdminSelectedUserId = "";
+  supportAdminCurrentDetail = null;
+  if (supportAdminButton) supportAdminButton.hidden = true;
+  if (supportAdminDialog) supportAdminDialog.hidden = true;
+}
+
+async function supportAdminErrorMessage(error) {
+  try {
+    const payload = await error?.context?.json?.();
+    if (payload?.message) return String(payload.message);
+  } catch {
+    // The function client may already have consumed the response body.
+  }
+  return String(error?.message || "Support Admin request failed.");
+}
+
+async function invokeSupportAdmin(action, body = {}) {
+  if (!(await ensureSupabaseClient()) || !cloudUser) throw new Error("Sign in before opening Support Admin.");
+  const { data, error } = await supabaseClient.functions.invoke(SUPPORT_ADMIN_FUNCTION, {
+    body: { action, ...body },
+  });
+  if (error) throw new Error(await supportAdminErrorMessage(error));
+  if (!data?.ok) throw new Error(data?.message || "Support Admin request failed.");
+  return data;
+}
+
+async function refreshSupportAdminAccess(options = {}) {
+  const userId = cloudUser?.id || "";
+  if (!userId) {
+    resetSupportAdminAccess();
+    return false;
+  }
+  if (!options.force && supportAdminAccessCheckedUserId === userId) return supportAdminAccess;
+  supportAdminAccessCheckedUserId = userId;
+  supportAdminAccess = false;
+  if (supportAdminButton) supportAdminButton.hidden = true;
+  try {
+    const result = await invokeSupportAdmin("me");
+    supportAdminAccess = result.authorised === true;
+    if (supportAdminButton) supportAdminButton.hidden = !supportAdminAccess;
+    if (supportAdminIdentity && supportAdminAccess) {
+      supportAdminIdentity.textContent = `${result.operator?.displayName || "SpoolMate operator"} / ${cloudUser.email || cloudUser.id} / protected server access confirmed`;
+    }
+  } catch (error) {
+    const message = String(error?.message || "");
+    if (!/not a SpoolMate platform administrator|401|403/i.test(message)) {
+      console.warn("Support Admin access check failed.", error);
+    }
+  }
+  return supportAdminAccess;
+}
+
+function setSupportAdminStatus(message, tone = "") {
+  if (!supportAdminStatus) return;
+  supportAdminStatus.textContent = String(message || "Ready.");
+  if (tone) supportAdminStatus.dataset.tone = tone;
+  else delete supportAdminStatus.dataset.tone;
+}
+
+function setSupportAdminBusy(busy) {
+  supportAdminBusy = Boolean(busy);
+  supportAdminSearchButton?.toggleAttribute("disabled", supportAdminBusy);
+  supportAdminRefreshButton?.toggleAttribute("disabled", supportAdminBusy);
+  supportAdminDetail?.querySelectorAll("button, select, input, textarea").forEach((control) => {
+    control.disabled = supportAdminBusy || control.dataset.supportPermanentDisabled === "true";
+  });
+}
+
+function supportAdminDate(value, includeTime = true) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "Not recorded";
+  return includeTime
+    ? date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+    : date.toLocaleDateString([], { dateStyle: "medium" });
+}
+
+function supportAdminStatusLabel(status) {
+  return ({
+    trial: "Trial",
+    paid: "Paid",
+    grace: "Grace",
+    full: "Full",
+    expired: "Expired",
+    setup: "Setup needed",
+  })[String(status || "").toLowerCase()] || String(status || "Unknown");
+}
+
+function supportAdminSelectOptions(values, current) {
+  return values.map(([value, label]) =>
+    `<option value="${escapeHtml(value)}"${value === current ? " selected" : ""}>${escapeHtml(label)}</option>`
+  ).join("");
+}
+
+function renderSupportAdminOverview(payload) {
+  const stats = payload?.stats ?? {};
+  const items = [
+    [stats.users ?? 0, "Accounts"],
+    [stats.activeUsers30d ?? 0, "Active 30 days"],
+    [stats.personalTrials ?? 0, "Personal trials"],
+    [stats.personalExpired ?? 0, "Need attention"],
+    [stats.businesses ?? 0, "Businesses"],
+    [stats.cloudSpools ?? 0, "Cloud spools"],
+  ];
+  if (supportAdminSummary) {
+    supportAdminSummary.innerHTML = items.map(([value, label]) => `
+      <div class="support-admin-stat"><strong>${escapeHtml(String(value))}</strong><span>${escapeHtml(label)}</span></div>
+    `).join("");
+  }
+  if (supportAdminIdentity && payload?.operator) {
+    supportAdminIdentity.textContent = `${payload.operator.displayName || "SpoolMate operator"} / ${cloudUser?.email || cloudUser?.id || "signed in"} / protected server access confirmed`;
+  }
+  renderSupportAdminAudit(payload?.recentAudit ?? []);
+}
+
+function renderSupportAdminAudit(entries) {
+  if (!supportAdminAuditList) return;
+  if (!entries.length) {
+    supportAdminAuditList.innerHTML = '<div class="support-admin-audit-entry"><strong>No repairs recorded yet</strong><small>The first account change will appear here.</small></div>';
+    return;
+  }
+  supportAdminAuditList.innerHTML = entries.map((entry) => {
+    const failed = entry.after_state?.status === "failed";
+    return `
+      <div class="support-admin-audit-entry">
+        <strong>${escapeHtml(String(entry.action || "support action").replaceAll("_", " "))}</strong>
+        <small>${escapeHtml(entry.reason || "No reason recorded")}</small>
+        <small>${escapeHtml(supportAdminDate(entry.created_at))}${failed ? " / failed" : ""}</small>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadSupportAdminOverview() {
+  setSupportAdminBusy(true);
+  setSupportAdminStatus("Loading live account health…");
+  try {
+    const payload = await invokeSupportAdmin("overview");
+    renderSupportAdminOverview(payload);
+    setSupportAdminStatus("Live account overview refreshed.", "success");
+    return payload;
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
+async function openSupportAdminDialog() {
+  if (!supportAdminDialog) return;
+  const authorised = await refreshSupportAdminAccess({ force: true });
+  if (!authorised) throw new Error("This account is not authorised for SpoolMate Support Admin.");
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("support-admin");
+  supportAdminDialog.hidden = false;
+  setSupportAdminStatus("Loading live account health…");
+  await loadSupportAdminOverview();
+  window.setTimeout(() => supportAdminSearchInput?.focus(), 30);
+}
+
+function closeSupportAdminDialog() {
+  if (supportAdminDialog) supportAdminDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
+}
+
+function renderSupportAdminResults(users) {
+  if (!supportAdminResultList || !supportAdminResultCount) return;
+  supportAdminResultCount.textContent = `${users.length} ${users.length === 1 ? "account" : "accounts"}`;
+  if (!users.length) {
+    supportAdminResultList.innerHTML = '<div class="support-admin-empty"><strong>No account matched</strong><span>Try the complete email address or user ID.</span></div>';
+    return;
+  }
+  supportAdminResultList.innerHTML = users.map((user) => `
+    <button class="support-admin-result${user.id === supportAdminSelectedUserId ? " active" : ""}" type="button" data-support-user-id="${escapeHtml(user.id)}">
+      <strong>${escapeHtml(user.email || user.displayName || "Account without email")}</strong>
+      <small>${escapeHtml(user.displayName || user.id)}</small>
+      <span class="support-admin-result-meta">
+        <span class="support-admin-chip ${user.licenceActive ? "active" : "warning"}">${escapeHtml(supportAdminStatusLabel(user.licenceStatus))}</span>
+        <span class="support-admin-chip">${Number(user.cloudSpools) || 0} spools</span>
+        <span class="support-admin-chip">${Number(user.businesses) || 0} businesses</span>
+      </span>
+    </button>
+  `).join("");
+}
+
+async function searchSupportAdminUsers() {
+  const query = String(supportAdminSearchInput?.value || "").trim();
+  if (query.length < 2) {
+    supportAdminSearchInput?.focus();
+    throw new Error("Enter at least two characters to search.");
+  }
+  setSupportAdminBusy(true);
+  setSupportAdminStatus(`Searching for “${query}”…`);
+  try {
+    const result = await invokeSupportAdmin("search", { query });
+    renderSupportAdminResults(result.users ?? []);
+    setSupportAdminStatus(result.users?.length ? "Select an account to diagnose it." : "No customer account matched that search.");
+    return result.users ?? [];
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
+function supportAdminAccountFacts(detail) {
+  const user = detail?.user ?? {};
+  return [
+    ["Created", supportAdminDate(user.createdAt)],
+    ["Last sign-in", supportAdminDate(user.lastSignInAt)],
+    ["Email confirmed", supportAdminDate(user.confirmedAt)],
+    ["Account type", user.accountType || "Not recorded"],
+  ].map(([label, value]) => `<span class="support-admin-chip"><b>${escapeHtml(label)}:</b> ${escapeHtml(value)}</span>`).join("");
+}
+
+function renderSupportAdminMembership(membership, targetUserId) {
+  const company = membership.company;
+  if (!company) return "";
+  const ownerLocked = membership.role === "owner";
+  const licenceValues = [["trial", "Trial"], ["paid", "Paid"], ["grace", "Grace"], ["full", "Full"], ["expired", "Expired"]];
+  const roleValues = ownerLocked
+    ? [["owner", "Owner"]]
+    : [["admin", "Admin"], ["designer", "Designer"], ["checker", "Checker"], ["workshop", "Workshop"], ["viewer", "Viewer"]];
+  const statusValues = ownerLocked
+    ? [["approved", "Approved"]]
+    : [["pending", "Pending"], ["invited", "Invited"], ["approved", "Approved"], ["suspended", "Suspended"], ["rejected", "Rejected"]];
+  return `
+    <div class="support-admin-membership" data-support-company-card="${escapeHtml(company.id)}">
+      <div class="support-admin-project-row">
+        <div>
+          <strong>${escapeHtml(company.name || "Business workspace")}</strong>
+          <small>${escapeHtml(membership.role)} / ${escapeHtml(membership.status)} / created ${escapeHtml(supportAdminDate(company.created_at, false))}</small>
+        </div>
+        <span class="support-admin-chip ${["paid", "full"].includes(company.license_status) ? "active" : "warning"}">${escapeHtml(supportAdminStatusLabel(company.license_status))}</span>
+      </div>
+      <div class="support-admin-control-grid">
+        <label class="support-admin-control"><span>Business licence</span><select data-support-company-status>${supportAdminSelectOptions(licenceValues, company.license_status)}</select></label>
+        <label class="support-admin-control"><span>Included seats</span><input data-support-included-seats type="number" min="1" max="10000" value="${Number(company.included_seats) || 5}" /></label>
+        <label class="support-admin-control"><span>Extra seats</span><input data-support-extra-seats type="number" min="0" max="10000" value="${Number(company.extra_seats) || 0}" /></label>
+        <label class="support-admin-control"><span>Trial/grace days</span><input data-support-company-days type="number" min="1" max="3650" value="30" /></label>
+        <button class="primary-button" type="button" data-support-admin-action="company" data-company-id="${escapeHtml(company.id)}" data-target-user-id="${escapeHtml(targetUserId)}">Apply business access</button>
+      </div>
+      <div class="support-admin-control-grid">
+        <label class="support-admin-control"><span>Member role</span><select data-support-member-role${ownerLocked ? ' data-support-permanent-disabled="true" disabled' : ""}>${supportAdminSelectOptions(roleValues, membership.role)}</select></label>
+        <label class="support-admin-control"><span>Membership state</span><select data-support-member-status${ownerLocked ? ' data-support-permanent-disabled="true" disabled' : ""}>${supportAdminSelectOptions(statusValues, membership.status)}</select></label>
+        <button class="icon-button labeled" type="button" data-support-admin-action="membership" data-company-id="${escapeHtml(company.id)}" data-target-user-id="${escapeHtml(targetUserId)}"${ownerLocked ? ' data-support-permanent-disabled="true" disabled title="Use the ownership-transfer workflow for an Owner"' : ""}>Repair membership</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSupportAdminDetail(detail) {
+  if (!supportAdminDetail) return;
+  supportAdminCurrentDetail = detail;
+  const user = detail?.user ?? {};
+  const profile = detail?.profile ?? { license_status: "trial", trial_ends_at: null, grace_ends_at: null };
+  const licenceValues = [["trial", "Trial"], ["paid", "Paid"], ["grace", "Grace"], ["full", "Full"], ["expired", "Expired"]];
+  const memberships = detail?.memberships ?? [];
+  const projects = detail?.projects ?? [];
+  const personalDates = profile.license_status === "grace"
+    ? `Grace ends ${supportAdminDate(profile.grace_ends_at)}`
+    : profile.license_status === "trial"
+    ? `Trial ends ${supportAdminDate(profile.trial_ends_at)}`
+    : supportAdminStatusLabel(profile.license_status);
+  const projectRows = projects.slice(0, 20).map((project) => `
+    <div class="support-admin-project">
+      <div class="support-admin-project-row">
+        <strong>${escapeHtml(project.name || project.spoolNumber || project.id)}</strong>
+        <small>${escapeHtml(supportAdminDate(project.updatedAt))}</small>
+      </div>
+      <small>${escapeHtml([project.jobNumber && `Job ${project.jobNumber}`, project.spoolNumber && `Spool ${project.spoolNumber}`, project.status].filter(Boolean).join(" / ") || project.id)}</small>
+    </div>
+  `).join("");
+  const auditRows = (detail?.audit ?? []).slice(0, 12).map((entry) => `
+    <div class="support-admin-project">
+      <div class="support-admin-project-row"><strong>${escapeHtml(String(entry.action || "support action").replaceAll("_", " "))}</strong><small>${escapeHtml(supportAdminDate(entry.created_at))}</small></div>
+      <small>${escapeHtml(entry.reason || "No reason recorded")}</small>
+    </div>
+  `).join("");
+
+  supportAdminDetail.innerHTML = `
+    <div class="support-admin-account-head">
+      <div>
+        <h3>${escapeHtml(user.email || user.displayName || "Customer account")}</h3>
+        <div class="support-admin-account-id">${escapeHtml(user.id || "")}</div>
+      </div>
+      <div class="support-admin-chip-row">${supportAdminAccountFacts(detail)}</div>
+    </div>
+    <label class="support-admin-reason">
+      <span>Reason for the repair <b>(required and permanently audited)</b></span>
+      <textarea id="supportAdminReason" maxlength="500" placeholder="Example: Customer reported their paid account became read-only after changing devices."></textarea>
+    </label>
+    <div class="support-admin-panel-grid">
+      <section class="support-admin-panel">
+        <strong>Personal cloud access</strong>
+        <div class="support-admin-chip-row"><span class="support-admin-chip">${escapeHtml(personalDates)}</span><span class="support-admin-chip">${projects.length} owned cloud spools</span></div>
+        <div class="support-admin-control-grid">
+          <label class="support-admin-control"><span>Licence</span><select id="supportPersonalStatus">${supportAdminSelectOptions(licenceValues, profile.license_status || "trial")}</select></label>
+          <label class="support-admin-control"><span>Trial/grace days</span><input id="supportPersonalDays" type="number" min="1" max="3650" value="30" /></label>
+          <button class="primary-button" type="button" data-support-admin-action="personal" data-target-user-id="${escapeHtml(user.id)}">Apply personal access</button>
+        </div>
+      </section>
+      <section class="support-admin-panel">
+        <strong>Account recovery</strong>
+        <p>Send the standard secure Supabase password-reset email. SpoolMate never displays or changes the customer’s password here.</p>
+        <button class="icon-button labeled" type="button" data-support-admin-action="password-reset" data-target-user-id="${escapeHtml(user.id)}">Send password-reset email</button>
+      </section>
+      <section class="support-admin-panel wide">
+        <strong>Businesses and memberships (${memberships.length})</strong>
+        ${memberships.length ? memberships.map((membership) => renderSupportAdminMembership(membership, user.id)).join("") : "<p>This customer does not belong to a business workspace.</p>"}
+      </section>
+      <section class="support-admin-panel">
+        <strong>Recent cloud spools (${projects.length})</strong>
+        ${projectRows || "<p>No owned cloud spools were found.</p>"}
+      </section>
+      <section class="support-admin-panel">
+        <strong>Support history</strong>
+        ${auditRows || "<p>No earlier support repairs were found for this account.</p>"}
+      </section>
+    </div>
+  `;
+}
+
+async function loadSupportAdminUser(userId) {
+  const targetUserId = normalizeUuid(userId);
+  if (!targetUserId) throw new Error("That customer account ID is invalid.");
+  supportAdminSelectedUserId = targetUserId;
+  supportAdminResultList?.querySelectorAll("[data-support-user-id]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.supportUserId === targetUserId);
+  });
+  setSupportAdminBusy(true);
+  setSupportAdminStatus("Loading account, businesses and cloud spools…");
+  try {
+    const result = await invokeSupportAdmin("detail", { targetUserId });
+    renderSupportAdminDetail(result.detail);
+    setSupportAdminStatus("Account diagnosis loaded. Enter a reason before making any change.", "success");
+    return result.detail;
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
+async function runSupportAdminAction(button) {
+  if (supportAdminBusy || !supportAdminSelectedUserId) return;
+  const action = button.dataset.supportAdminAction;
+  const targetUserId = button.dataset.targetUserId || supportAdminSelectedUserId;
+  const reason = String(document.querySelector("#supportAdminReason")?.value || "").trim();
+  if (reason.length < 8) {
+    document.querySelector("#supportAdminReason")?.focus();
+    throw new Error("Enter a clear support reason of at least 8 characters first.");
+  }
+  const labels = {
+    personal: "change this customer’s personal licence",
+    company: "change this business licence and seat allowance",
+    membership: "change this customer’s business membership",
+    "password-reset": "send this customer a password-reset email",
+  };
+  const confirmed = await confirmAppAction(
+    `Confirm that you want to ${labels[action] || "apply this support repair"}. The reason and before/after values will be permanently audited.`,
+    { title: "Confirm audited support action", confirmLabel: "Apply and record", tone: "warning" },
+  );
+  if (!confirmed) return;
+
+  const companyCard = button.closest("[data-support-company-card]");
+  let functionAction = "";
+  let payload = { targetUserId, reason };
+  if (action === "personal") {
+    functionAction = "set-personal-licence";
+    payload = {
+      ...payload,
+      status: document.querySelector("#supportPersonalStatus")?.value,
+      days: document.querySelector("#supportPersonalDays")?.value,
+    };
+  } else if (action === "company") {
+    functionAction = "set-company-entitlements";
+    payload = {
+      ...payload,
+      companyId: button.dataset.companyId,
+      status: companyCard?.querySelector("[data-support-company-status]")?.value,
+      includedSeats: companyCard?.querySelector("[data-support-included-seats]")?.value,
+      extraSeats: companyCard?.querySelector("[data-support-extra-seats]")?.value,
+      days: companyCard?.querySelector("[data-support-company-days]")?.value,
+    };
+  } else if (action === "membership") {
+    functionAction = "set-membership";
+    payload = {
+      ...payload,
+      companyId: button.dataset.companyId,
+      role: companyCard?.querySelector("[data-support-member-role]")?.value,
+      status: companyCard?.querySelector("[data-support-member-status]")?.value,
+    };
+  } else if (action === "password-reset") {
+    functionAction = "send-password-reset";
+    payload = { ...payload, redirectTo: `${location.origin}${location.pathname}` };
+  } else {
+    throw new Error("Unknown Support Admin action.");
+  }
+
+  setSupportAdminBusy(true);
+  setSupportAdminStatus("Applying the audited repair…");
+  try {
+    await invokeSupportAdmin(functionAction, payload);
+    setSupportAdminStatus("Support repair applied and recorded in the audit history.", "success");
+    await Promise.all([loadSupportAdminUser(targetUserId), loadSupportAdminOverview()]);
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
 function supabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 }
@@ -26922,6 +27730,10 @@ function activatePersonalWorkspace() {
   renderWorkspaceChoices();
   updateCloudStatus();
   updateLicencePresentation();
+  hydrateCloudDashboardPreferences();
+  if (projectLibraryDialog && !projectLibraryDialog.hidden) {
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  }
 }
 
 function setActiveCompanyFromId(companyId) {
@@ -26939,6 +27751,10 @@ function setActiveCompanyFromId(companyId) {
   renderTeamWorkspace();
   renderWorkspaceChoices();
   updateCloudStatus();
+  hydrateCloudDashboardPreferences();
+  if (projectLibraryDialog && !projectLibraryDialog.hidden) {
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  }
   return true;
 }
 
@@ -27777,6 +28593,10 @@ async function applyCloudSession(session) {
   cloudUser = session?.user ?? null;
   cloudProjectCache = null;
   if (!cloudUser) {
+    window.clearTimeout(dashboardPreferenceSaveTimer);
+    dashboardPreferenceSaveQueue.clear();
+    dashboardPreferenceSaveBusy = false;
+    resetSupportAdminAccess();
     cloudProfile = null;
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
@@ -27789,6 +28609,7 @@ async function applyCloudSession(session) {
 
   cloudProfile = await ensureCloudProfile();
   await loadTeamWorkspace({ silent: true });
+  hydrateCloudDashboardPreferences();
   await completePendingBusinessSignup();
   loadCloudSaveMetaForCurrentProject();
   if (currentProjectHasCloudRecord() && !hasActiveCloudLicense()) {
@@ -27797,6 +28618,7 @@ async function applyCloudSession(session) {
     updateControls();
   }
   updateCloudStatus();
+  refreshSupportAdminAccess().catch((error) => console.warn("Support Admin availability check failed.", error));
   maybeShowLicenceWarning();
   if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
     queueCloudAutosave();
@@ -28615,6 +29437,18 @@ function renderProjectLibraryMessage(message) {
   projectLibraryList.append(notice);
 }
 
+function bindRenderedProjectLibraryActions(root = projectLibraryList) {
+  root?.querySelectorAll("[data-project-library-action]").forEach((control) => {
+    if (control.dataset.projectLibraryActionBound === "true") return;
+    control.dataset.projectLibraryActionBound = "true";
+    control.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      handleProjectLibraryAction(control);
+    });
+  });
+}
+
 function promiseWithTimeout(promise, timeoutMs, message = "Timed out") {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error(message)), timeoutMs);
@@ -28632,6 +29466,7 @@ function promiseWithTimeout(promise, timeoutMs, message = "Timed out") {
 
 function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
+  applyRoleDefaultTeamDashboardView();
   ensureProjectLibraryDashboardShell();
   ensureProjectLibraryGuideSlot();
   ensureProjectLibraryCommsSlot();
@@ -28670,9 +29505,9 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
       ? !hasActiveCloudLicense()
         ? `${activeWorkspaceLabel()} cloud projects are read only. You can open, review and export them; upgrade to save changes.`
         : activeCompanyIsApproved()
-        ? `Showing jobs owned by ${activeCompany.name}. Start with jobs needing attention, then open one job.`
-        : "Showing your private Personal jobs. Start with jobs needing attention, then open one job."
-      : "Projects are saved on this device/browser. Start with jobs needing attention, then open one job.";
+        ? `Showing jobs owned by ${activeCompany.name}. Use My day for immediate actions or Jobs for the compact list.`
+        : "Showing your private Personal jobs. Use My day for immediate actions or Jobs for the compact list."
+      : "Projects are saved on this device/browser. Search, open a job or switch to My day for immediate actions.";
   }
   projectLibraryList.innerHTML = "";
 
@@ -28702,6 +29537,7 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     empty.className = "project-library-empty";
     empty.textContent = `No saved spools match "${query}".`;
     projectLibraryList.append(empty);
+    bindRenderedProjectLibraryActions();
     return;
   }
 
@@ -28712,6 +29548,7 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   } else {
     projectLibraryList.append(projectJobsOverview(filteredProjects));
   }
+  bindRenderedProjectLibraryActions();
 }
 
 function renderProjectLibraryFolderWindow(folder) {
@@ -28758,13 +29595,23 @@ function renderProjectLibraryFolderWindow(folder) {
   }
   windowCard.append(drawings);
   projectLibraryList.append(windowCard);
+  bindRenderedProjectLibraryActions();
 }
 
-function openProjectLibraryFolder(folderKey) {
+function openProjectLibraryFolder(folderKey, focus = "") {
   if (!folderKey) return;
   projectLibraryOpenFolderKey = folderKey;
   rememberProjectLibraryRecentJob(folderKey);
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  if (focus === "attention") {
+    window.requestAnimationFrame(() => {
+      const attentionList = projectLibraryList?.querySelector(".project-job-today");
+      if (!attentionList) return;
+      attentionList.scrollIntoView({ behavior: "smooth", block: "start" });
+      attentionList.classList.add("attention");
+      window.setTimeout(() => attentionList.classList.remove("attention"), 1600);
+    });
+  }
 }
 
 function closeProjectLibraryFolder() {
@@ -28809,6 +29656,25 @@ function readTeamDashboardView() {
   }
 }
 
+function hasSavedTeamDashboardView() {
+  try {
+    return ["jobs", "today", "board"].includes(localStorage.getItem(TEAM_DASHBOARD_VIEW_KEY));
+  } catch {
+    return false;
+  }
+}
+
+function roleDefaultTeamDashboardView() {
+  if (!activeCompanyIsApproved()) return "jobs";
+  const role = String(activeCompanyMembership?.role ?? "").trim().toLowerCase();
+  return ["workshop", "member", "checker"].includes(role) ? "today" : "jobs";
+}
+
+function applyRoleDefaultTeamDashboardView() {
+  if (hasSavedTeamDashboardView()) return;
+  projectLibraryDashboardView = roleDefaultTeamDashboardView();
+}
+
 function setTeamDashboardView(view) {
   projectLibraryDashboardView = ["jobs", "today", "board"].includes(view) ? view : "jobs";
   projectLibraryJobPage = 1;
@@ -28817,6 +29683,7 @@ function setTeamDashboardView(view) {
   } catch (error) {
     console.warn("Could not remember the team dashboard view.", error);
   }
+  queueCloudDashboardPreferencesSave();
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
@@ -28842,22 +29709,23 @@ function storeProjectLibraryStringList(key, values, limit = 80) {
 function readProjectLibraryJobFilter() {
   try {
     const filter = localStorage.getItem(JOB_DASHBOARD_FILTER_KEY);
-    return ["attention", "active", "mine", "completed", "all"].includes(filter) ? filter : "attention";
+    return ["active", "mine", "completed", "all"].includes(filter) ? filter : "active";
   } catch {
-    return "attention";
+    return "active";
   }
 }
 
 function setProjectLibraryJobFilter(filter) {
-  projectLibraryJobFilter = ["attention", "active", "mine", "completed", "all"].includes(filter)
+  projectLibraryJobFilter = ["active", "mine", "completed", "all"].includes(filter)
     ? filter
-    : "attention";
+    : "active";
   projectLibraryJobPage = 1;
   try {
     localStorage.setItem(JOB_DASHBOARD_FILTER_KEY, projectLibraryJobFilter);
   } catch (error) {
     console.warn("Could not remember the Jobs filter.", error);
   }
+  queueCloudDashboardPreferencesSave();
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
@@ -28867,6 +29735,7 @@ function toggleProjectLibraryJobPin(folderKey) {
     ? projectLibraryJobPins.filter((key) => key !== folderKey)
     : [folderKey, ...projectLibraryJobPins];
   storeProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, projectLibraryJobPins, 80);
+  queueCloudDashboardPreferencesSave();
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
@@ -28874,6 +29743,129 @@ function rememberProjectLibraryRecentJob(folderKey) {
   if (!folderKey) return;
   projectLibraryRecentJobs = [folderKey, ...projectLibraryRecentJobs.filter((key) => key !== folderKey)].slice(0, 12);
   storeProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, projectLibraryRecentJobs, 12);
+  queueCloudDashboardPreferencesSave();
+}
+
+function dashboardPreferenceWorkspaceKey() {
+  return activeCompanyIsApproved() && activeCompany?.id ? `company:${activeCompany.id}` : "personal";
+}
+
+function normalizedJobsDashboardPreference(value) {
+  const input = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const view = ["jobs", "today", "board"].includes(input.view) ? input.view : null;
+  const filter = ["active", "mine", "completed", "all"].includes(input.filter) ? input.filter : null;
+  const boardFilter = normalizeProductionBoardFilter(input.boardFilter);
+  const pins = Array.isArray(input.pins) ? input.pins.map((key) => String(key ?? "")).filter(Boolean).slice(0, 80) : [];
+  const recents = Array.isArray(input.recents) ? input.recents.map((key) => String(key ?? "")).filter(Boolean).slice(0, 12) : [];
+  return { view, filter, boardFilter, pins: [...new Set(pins)], recents: [...new Set(recents)] };
+}
+
+function currentJobsDashboardPreference() {
+  return {
+    version: JOB_DASHBOARD_PREFERENCES_VERSION,
+    view: projectLibraryDashboardView,
+    filter: projectLibraryJobFilter,
+    boardFilter: normalizeProductionBoardFilter(projectLibraryBoardFilter),
+    pins: [...new Set(projectLibraryJobPins)].slice(0, 80),
+    recents: [...new Set(projectLibraryRecentJobs)].slice(0, 12),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function applyJobsDashboardPreference(value) {
+  const preference = normalizedJobsDashboardPreference(value);
+  if (!preference.view || !preference.filter) return false;
+  projectLibraryDashboardView = preference.view;
+  projectLibraryJobFilter = preference.filter;
+  projectLibraryBoardFilter = preference.boardFilter;
+  projectLibraryJobPins = preference.pins;
+  projectLibraryRecentJobs = preference.recents;
+  try {
+    localStorage.setItem(TEAM_DASHBOARD_VIEW_KEY, projectLibraryDashboardView);
+    localStorage.setItem(JOB_DASHBOARD_FILTER_KEY, projectLibraryJobFilter);
+  } catch {
+    // The active session still uses the cloud preference when local storage is unavailable.
+  }
+  storeProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, projectLibraryJobPins, 80);
+  storeProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, projectLibraryRecentJobs, 12);
+  return true;
+}
+
+function hydrateCloudDashboardPreferences() {
+  if (!cloudUser || !cloudProfile) return false;
+  const root = cloudProfile.dashboard_preferences;
+  const workspaces = root?.jobsDashboard?.workspaces;
+  const preference = workspaces?.[dashboardPreferenceWorkspaceKey()];
+  if (applyJobsDashboardPreference(preference)) return true;
+  queueCloudDashboardPreferencesSave();
+  return false;
+}
+
+function queueCloudDashboardPreferencesSave() {
+  if (!supabaseClient || !cloudUser || !cloudProfile) return;
+  dashboardPreferenceSaveQueue.set(dashboardPreferenceWorkspaceKey(), currentJobsDashboardPreference());
+  window.clearTimeout(dashboardPreferenceSaveTimer);
+  dashboardPreferenceSaveTimer = window.setTimeout(() => {
+    flushCloudDashboardPreferences().catch((error) => {
+      console.warn("Could not sync Jobs dashboard preferences.", error);
+    });
+  }, 650);
+}
+
+async function flushCloudDashboardPreferences() {
+  if (dashboardPreferenceSaveBusy || !supabaseClient || !cloudUser || !cloudProfile || !dashboardPreferenceSaveQueue.size) return;
+  dashboardPreferenceSaveBusy = true;
+  const userId = cloudUser.id;
+  const queued = new Map(dashboardPreferenceSaveQueue);
+  dashboardPreferenceSaveQueue.clear();
+  try {
+    const { data: remoteProfile, error: readError } = await supabaseClient
+      .from(CLOUD_PROFILES_TABLE)
+      .select("dashboard_preferences")
+      .eq("id", userId)
+      .maybeSingle();
+    if (readError) throw readError;
+    const remotePreferences = remoteProfile?.dashboard_preferences;
+    const existing = remotePreferences && typeof remotePreferences === "object"
+      ? remotePreferences
+      : cloudProfile.dashboard_preferences && typeof cloudProfile.dashboard_preferences === "object"
+      ? cloudProfile.dashboard_preferences
+      : {};
+    const existingJobs = existing.jobsDashboard && typeof existing.jobsDashboard === "object" ? existing.jobsDashboard : {};
+    const workspaces = existingJobs.workspaces && typeof existingJobs.workspaces === "object"
+      ? { ...existingJobs.workspaces }
+      : {};
+    for (const [workspaceKey, preference] of queued) workspaces[workspaceKey] = preference;
+    const dashboardPreferences = {
+      ...existing,
+      jobsDashboard: {
+        ...existingJobs,
+        version: JOB_DASHBOARD_PREFERENCES_VERSION,
+        workspaces,
+      },
+    };
+    const { data, error } = await supabaseClient
+      .from(CLOUD_PROFILES_TABLE)
+      .update({ dashboard_preferences: dashboardPreferences })
+      .eq("id", userId)
+      .select("dashboard_preferences")
+      .maybeSingle();
+    if (error) throw error;
+    if (cloudUser?.id === userId && data) cloudProfile = { ...cloudProfile, ...data };
+  } catch (error) {
+    for (const [workspaceKey, preference] of queued) {
+      if (!dashboardPreferenceSaveQueue.has(workspaceKey)) dashboardPreferenceSaveQueue.set(workspaceKey, preference);
+    }
+    throw error;
+  } finally {
+    dashboardPreferenceSaveBusy = false;
+    if (dashboardPreferenceSaveQueue.size) {
+      window.clearTimeout(dashboardPreferenceSaveTimer);
+      dashboardPreferenceSaveTimer = window.setTimeout(() => {
+        flushCloudDashboardPreferences().catch((error) => console.warn("Jobs preference retry failed.", error));
+      }, 1400);
+    }
+  }
 }
 
 function savedProjectProductionActivity(project) {
@@ -29125,7 +30117,7 @@ function projectJobOverviewRow(job) {
     <button type="button" class="job-overview-pin ${job.pinned ? "active" : ""}" data-project-library-action="pin-job" data-job-key="${escapeHtml(folder.key)}" aria-label="${job.pinned ? "Unpin" : "Pin"} ${escapeHtml(folder.title)}" title="${job.pinned ? "Unpin job" : "Pin job"}">
       <span aria-hidden="true">${job.pinned ? "★" : "☆"}</span>
     </button>
-    <button type="button" class="job-overview-open" data-project-folder-open="${escapeHtml(folder.key)}" aria-label="Open ${escapeHtml(folder.title)}">
+    <button type="button" class="job-overview-open" data-project-folder-open="${escapeHtml(folder.key)}"${job.attention ? ` data-job-focus="attention"` : ""} aria-label="${job.attention ? `Review ${job.attention} attention item${job.attention === 1 ? "" : "s"} in` : "Open"} ${escapeHtml(folder.title)}">
       <span class="job-overview-name"><strong>${escapeHtml(folder.title)}</strong><small>${escapeHtml(folder.meta)}</small></span>
       <span class="job-overview-progress"><i style="--job-progress:${progress}%"></i><small>${progress}% fabricated</small></span>
       <span class="job-overview-meta"><strong>${job.active} active</strong><small>${job.completed} of ${metrics.total} complete</small></span>
@@ -29136,7 +30128,7 @@ function projectJobOverviewRow(job) {
         ${metrics.onHold ? `<b class="hold">${metrics.onHold} hold</b>` : ""}
         ${!job.attention && !metrics.readycheck && !metrics.onHold ? `<b class="clear">${job.active ? "On track" : "Complete"}</b>` : ""}
       </span>
-      <span class="job-overview-arrow" aria-hidden="true">Open</span>
+      <span class="job-overview-arrow" aria-hidden="true">${job.attention ? `Review ${job.attention}` : "Open"}</span>
     </button>
   `;
   return row;
@@ -29145,7 +30137,6 @@ function projectJobOverviewRow(job) {
 function projectJobsOverview(projects) {
   const allJobs = projectFolders(projects).map(projectJobOverviewData);
   const counts = {
-    attention: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "attention")).length,
     active: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "active")).length,
     mine: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "mine")).length,
     completed: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "completed")).length,
@@ -29174,7 +30165,6 @@ function projectJobsOverview(projects) {
     </div>
     <div class="job-overview-filters" aria-label="Filter jobs">
       ${[
-        ["attention", "Needs attention"],
         ["active", "Active"],
         ["mine", "My jobs"],
         ["completed", "Completed"],
@@ -29187,7 +30177,7 @@ function projectJobsOverview(projects) {
   if (pageJobs.length) {
     pageJobs.forEach((job) => list.append(projectJobOverviewRow(job)));
   } else {
-    list.innerHTML = `<div class="project-library-empty">${projectLibraryJobFilter === "attention" ? "No jobs need attention. Choose Active or All to see the rest." : "No jobs match this filter."}</div>`;
+    list.innerHTML = `<div class="project-library-empty">No jobs match this filter.</div>`;
   }
   section.append(list);
   if (pageCount > 1) {
@@ -29286,6 +30276,7 @@ function normalizeProductionBoardFilter(value) {
 
 function setProjectLibraryBoardFilter(value) {
   projectLibraryBoardFilter = normalizeProductionBoardFilter(value);
+  queueCloudDashboardPreferencesSave();
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
@@ -29825,7 +30816,7 @@ function projectLibraryGuideCard() {
     <ol>
       <li>
         <strong>Save each spool first.</strong>
-        <span>Use Save current so the spool appears in the job list and production board.</span>
+        <span>Save from the drawing screen so the spool appears in the job list and production board.</span>
       </li>
       <li>
         <strong>Move the spool through stages.</strong>
@@ -29840,8 +30831,8 @@ function projectLibraryGuideCard() {
         <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
       </li>
       <li>
-        <strong>Open Comms for the team view.</strong>
-        <span>Use Comms to post general team messages and see all active spool notes in one place.</span>
+        <strong>Use More for team tools.</strong>
+        <span>Open More for the Jobs guide, Team comms and daily or weekly reports without crowding the main toolbar.</span>
       </li>
     </ol>
     <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
@@ -30546,20 +31537,47 @@ function productionProjectNeedsAttention(project) {
   return production.hold || gearNeedsAttention || dueState.key === "overdue" || dueState.key === "today" || productionProjectWasReturned(project);
 }
 
-function productionProjectReadyNext(project) {
+function productionProjectNeedsActionWithoutHold(project) {
   if (productionProjectHidden(project)) return false;
   const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
-  return ["readycheck", "checked", "issued", "materialcheck", "cutting", "fitup", "welded", "finish"].includes(status);
+  if (status === "complete") return false;
+  const production = savedProjectProductionInfo(project);
+  const dueState = productionDueState(production);
+  const gearNeedsAttention = status === "materialcheck" && !materialChecklistCanStart(materialChecklistForState(savedProjectState(project)));
+  return !production.hold && (gearNeedsAttention || dueState.key === "overdue" || dueState.key === "today" || productionProjectWasReturned(project));
+}
+
+function projectTodayRole() {
+  return String(activeCompanyMembership?.role ?? "").trim().toLowerCase();
 }
 
 function projectTodayGroups(projects = []) {
-  const visible = sortedProductionProjects(projects.filter((project) => !productionProjectHidden(project)));
-  const attention = visible.filter(productionProjectNeedsAttention);
+  const visible = sortedProductionProjects(projects.filter((project) => {
+    return !productionProjectHidden(project) && normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "complete";
+  }));
+  const role = projectTodayRole();
+  const teamAttention = !activeCompanyIsApproved() || ["owner", "admin"].includes(role);
+  const teamChecking = !activeCompanyIsApproved() || ["owner", "admin", "checker"].includes(role);
+  const assigned = (project) => productionAssignedToCurrentUser(savedProjectProductionInfo(project));
+  const personalScope = (project) => teamAttention || assigned(project);
+
+  const attention = visible.filter((project) => personalScope(project) && productionProjectNeedsActionWithoutHold(project));
   const attentionIds = new Set(attention.map((project) => project.id));
-  const mine = visible.filter((project) => !attentionIds.has(project.id) && productionAssignedToCurrentUser(savedProjectProductionInfo(project)) && normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "complete");
-  const mineIds = new Set(mine.map((project) => project.id));
-  const ready = visible.filter((project) => !attentionIds.has(project.id) && !mineIds.has(project.id) && productionProjectReadyNext(project));
-  return { attention, mine, ready };
+  const hold = visible.filter((project) => {
+    const production = savedProjectProductionInfo(project);
+    return !attentionIds.has(project.id) && production.hold && (teamAttention || assigned(project));
+  });
+  const holdIds = new Set(hold.map((project) => project.id));
+  const ready = visible.filter((project) => {
+    if (attentionIds.has(project.id) || holdIds.has(project.id)) return false;
+    const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+    return status === "readycheck" && (teamChecking || assigned(project));
+  });
+  const readyIds = new Set(ready.map((project) => project.id));
+  const mine = visible.filter((project) => {
+    return assigned(project) && !attentionIds.has(project.id) && !holdIds.has(project.id) && !readyIds.has(project.id);
+  });
+  return { attention, mine, ready, hold, teamAttention, teamChecking };
 }
 
 function projectTodayCard(project) {
@@ -30629,10 +31647,15 @@ function projectTodayBoard(projects) {
   const section = document.createElement("section");
   section.className = "team-today-board";
   const groups = projectTodayGroups(projects);
+  const attentionTitle = groups.teamAttention ? "Team attention" : "My attention";
+  const attentionDescription = groups.teamAttention
+    ? "Overdue, due today, returned or blocked by missing gear"
+    : "Your overdue, due today, returned or gear-blocked spools";
   section.append(
-    projectTodaySection("Needs attention", "Overdue, due today, held or returned", groups.attention, "Nothing needs urgent attention.", "attention"),
-    projectTodaySection("My work", "Active spools assigned to you", groups.mine, "No active spools are assigned to you.", "mine"),
-    projectTodaySection("Ready next", "Waiting for checking, issuing or the next workshop stage", groups.ready, "Nothing is waiting for its next stage.", "ready"),
+    projectTodaySection(attentionTitle, attentionDescription, groups.attention, "Nothing needs your attention.", "attention"),
+    projectTodaySection("Assigned to me", "Your active work without a current blocker", groups.mine, "No active work is assigned to you.", "mine"),
+    projectTodaySection("Ready for checking", groups.teamChecking ? "The checking queue" : "Your work waiting for checking", groups.ready, "Nothing is waiting for checking.", "ready"),
+    projectTodaySection("On hold", groups.teamAttention ? "Team blockers with recorded reasons" : "Your blocked work", groups.hold, "No work is on hold.", "hold"),
   );
   return section;
 }
@@ -30664,13 +31687,14 @@ function projectDashboardCard(projects, options = {}) {
     </div>
     <nav class="team-dashboard-tabs" aria-label="Team dashboard view">
       <button type="button" class="${projectLibraryDashboardView === "jobs" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="jobs">Jobs <b>${projectFolders(projects).length}</b></button>
-      <button type="button" class="${projectLibraryDashboardView === "today" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="today">Today <b>${groups.attention.length + groups.mine.length + groups.ready.length}</b></button>
+      <button type="button" class="${projectLibraryDashboardView === "today" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="today">My day <b>${groups.attention.length + groups.mine.length + groups.ready.length + groups.hold.length}</b></button>
       <button type="button" class="${projectLibraryDashboardView === "board" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="board">Full board <b>${counts.active ?? 0}</b></button>
       <button type="button" class="${projectLibraryMoreVisible ? "active" : ""}" data-project-library-action="toggle-dashboard-more" aria-expanded="${projectLibraryMoreVisible}">More</button>
     </nav>
     ${projectLibraryMoreVisible ? `
       <div class="team-dashboard-more-panel">
         <div class="team-dashboard-actions">
+          <button type="button" data-project-library-action="show-guide">Jobs guide</button>
           <button type="button" data-project-library-action="show-report" data-report-period="daily">Daily report</button>
           <button type="button" data-project-library-action="show-report" data-report-period="weekly">Weekly report</button>
           <button type="button" data-project-library-action="show-comms">Team comms</button>
@@ -33870,7 +34894,7 @@ function closeNewDrawingDialog(choice = "cancel") {
 }
 
 async function promptForProjectDetails(options = {}) {
-  if (!options.force && (state.projectInfoPrompted || hasProjectInfo() || hasDrawingContent())) return;
+  if (!options.force && (state.projectInfoPrompted || hasProjectInfo() || hasDrawingContent())) return true;
   const info = await openProjectDetailsDialog({
     title: "New drawing details",
     action: "Start drawing",
@@ -33890,6 +34914,7 @@ async function promptForProjectDetails(options = {}) {
   }
   updateControls();
   updateAll();
+  return Boolean(info);
 }
 
 async function editProjectDetailsFromHealth(field = "jobNumber") {
@@ -39096,6 +40121,10 @@ document.addEventListener("keydown", (event) => {
       closeAuthDialog();
       return;
     }
+    if (supportAdminDialog && !supportAdminDialog.hidden) {
+      closeSupportAdminDialog();
+      return;
+    }
     if (legalSupportDialog && !legalSupportDialog.hidden) {
       closeLegalSupportDialog();
       return;
@@ -39182,6 +40211,7 @@ function keyboardBlockingOverlayOpen() {
     (projectDialog && !projectDialog.hidden) ||
     (newDrawingDialog && !newDrawingDialog.hidden) ||
     (authDialog && !authDialog.hidden) ||
+    (supportAdminDialog && !supportAdminDialog.hidden) ||
     (legalSupportDialog && !legalSupportDialog.hidden) ||
     (homeDashboardDialog && !homeDashboardDialog.hidden) ||
     (projectLibraryDialog && !projectLibraryDialog.hidden) ||
@@ -39230,11 +40260,13 @@ if (drawingAssistantCanvas?.parentElement) resizeObserver.observe(drawingAssista
 setupCollapsibleControls();
 setupInspectorTabs();
 setupAppModes();
+setupInterfaceDensity();
 setupMobilePanels();
 setupFittingsToolMenu();
 setupAppTheme();
 setupActionMenu();
 setupAuthDialog();
+setupSupportAdminDialog();
 setupLegalSupportDialog();
 setupHomeDashboard();
 setupFirstUseGuide();

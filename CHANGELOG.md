@@ -1,6 +1,65 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.33`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.49`.
+
+## v3.49 - Learnable drawing workspace
+
+- Added a permanent Simple / Full controls choice, with Simple as the default for new users and the choice remembered on the device.
+- Replaced the crowded mobile settings rows with a single Pipe & display button and a touch-friendly settings sheet.
+- Reduced the Simple header to the workflow modes, Save and Menu while keeping Jobs, Big Spool and Account available inside Menu.
+- Made drawing tools and drawing-bar actions mode-aware so 45 degree controls and fitting tools only appear where they apply.
+- Collapsed the five-card location display into one compact workspace, job, spool, revision and status breadcrumb.
+- Hid the empty single-spool tab strip, clarified the Details panel name and tightened phone/tablet workspace sizing.
+- Connected the First Spool guide to the permanent Simple / Full control choice instead of ending its simplified layout halfway through the workflow.
+
+## v3.48 - Streamlined Jobs and My day
+
+- Reduced Jobs to a compact manager list with Active, My jobs, Completed and All filters; moved the guide, communications and reports into one More panel.
+- Rebuilt My day as four exclusive queues: Attention, Assigned to me, Ready for checking and On hold, so a spool appears only once under its most urgent action.
+- Scoped workshop queues to the signed-in worker while owners/admins receive team attention and checkers receive the checking queue.
+- Added direct Review actions that open a job at its issue list, retained useful job badges on smaller screens, and improved phone/tablet layouts.
+- Synchronized each user's Jobs view, filters, pins and recents through a protected per-workspace Supabase profile preference, with local fallback and merge-safe updates.
+- Updated the interactive Jobs guide, Ask SpoolMate guidance, storyboard, captions, narration script and real-app capture automation for the new workflow.
+- Removed duplicate touch/click activation paths that could make Jobs buttons switch twice on iPad/Android-style pointer input.
+- Marked the previous Jobs MP4 as awaiting revised Freya-narrated footage so it is not mistaken for exact v3.48 guidance.
+
+## v3.38 - Private Support Admin
+
+- Added a SpoolMate-wide support console that is separate from customer Business Owner and Admin roles.
+- Added protected customer search, account diagnosis, personal/business licence controls, seat controls, membership repair and password-reset assistance.
+- Added immutable-style support auditing with the operator, required reason, target and before/after values for every repair attempt.
+- Kept service-role access exclusively inside a JWT-protected Supabase Edge Function; the public app receives no administrative secret.
+- Added responsive PC, iPad and Android layouts for the support console and hid the entry point from all non-platform accounts.
+
+## v3.37 - Cross-platform launch hardening
+
+- Fixed Big Spool regression planning so child pieces and field joints use the current transport limit reliably.
+- Prevented cancelled New spool actions from leaving empty tabs behind.
+- Improved PC, Android and iPad overflow handling, compact landscape drawing space, phone Jobs controls and tutorial lesson space.
+- Stopped the PWA from caching Supabase and other private cross-origin API responses.
+- Added missing mobile sign-in sizing, iOS safe-area viewport support and clearer export accessibility labels.
+
+## v3.36 - Role-focused Jobs dashboard
+
+- Renamed the workshop action view to `My day`, keeping Needs attention, Assigned to me, Ready for checking and On hold work immediately visible.
+- Made My day the automatic first Jobs view for new Workshop accounts while owners, admins, designers and checkers continue to open on the compact Jobs list.
+- Preserved deliberate user choices: once someone selects Jobs, My day or Full board, SpoolMate remembers that preference.
+- Retained compact job rows, search, attention/active/mine/completed filters, pinned jobs, recent-job ordering and pagination for large job lists.
+- Updated the PWA cache to `spoolmate-v336` so installed devices receive the streamlined dashboard.
+
+## v3.35 - Focused in-app learning library
+
+- Removed the customer-facing promotional film from the in-app tutorial library so the learning section contains instructional material only.
+- Kept the synchronized workshop advertisement as a separate public website and share-link asset.
+- Updated the PWA cache to `spoolmate-v335` so installed devices remove the old promotional card.
+
+## v3.34 - Context-aware Ask SpoolMate
+
+- Made Ask SpoolMate recognise Home, Jobs, Project details, Big Spool, multi-spool windows, 3D and each Draw/Edit/Review/Export workspace.
+- Added screen-specific suggestion buttons and a visible current-help context showing the surface, active tool and Inspector tab.
+- Expanded the offline guide with detailed roll-groove, threaded-end, Big Spool, multi-spool, weld-gap, Gear check, autosave and recovery instructions.
+- Kept the underlying screen open while help is displayed and raised the launcher above ordinary app dialogs so instructions can be used from the relevant feature.
+- Improved signed-in AI answers with exact control names, PC/touch alternatives, numbered steps, an expected-result check and better fault-finding, without sending project names, geometry, notes or photos.
 
 ## v3.33 - Complete video learning library
 

@@ -15,8 +15,11 @@ const REQUIRED_FILES = [
   "supabase-migration-v295-trial-access.sql",
   "supabase-migration-v296-ai-helper.sql",
   "supabase-migration-v318-business-workspaces.sql",
+  "supabase-migration-v338-support-admin.sql",
+  "supabase-migration-v339-jobs-dashboard-preferences.sql",
   "supabase/functions/delete-account/index.ts",
   "supabase/functions/ai-help/index.ts",
+  "supabase/functions/support-admin/index.ts",
 ];
 
 const failures = [];
@@ -96,8 +99,15 @@ const supabaseSql = read("supabase-setup.sql");
 const trialAccessMigration = read("supabase-migration-v295-trial-access.sql");
 const aiHelperMigration = read("supabase-migration-v296-ai-helper.sql");
 const businessWorkspaceMigration = read("supabase-migration-v318-business-workspaces.sql");
+const supportAdminMigration = read("supabase-migration-v338-support-admin.sql");
+const jobsDashboardPreferencesMigration = read("supabase-migration-v339-jobs-dashboard-preferences.sql");
+const jobsStoryboard = read("video-production/storyboard-jobs.json");
+const jobsVoiceover = read("video-production/jobs-voiceover-script.txt");
+const jobsCaptions = read("video-production/spoolmate-jobs-tutorial.srt");
+const jobsCaptureScript = read("video-production/capture_real_tutorial.js");
 const deleteAccountFunction = read("supabase/functions/delete-account/index.ts");
 const aiHelpFunction = read("supabase/functions/ai-help/index.ts");
+const supportAdminFunction = read("supabase/functions/support-admin/index.ts");
 
 try {
   new Function(app);
@@ -296,6 +306,25 @@ assert(
   "Personal/Business workspace switching, five-seat entitlement or business-owned project protection is incomplete",
 );
 assert(
+  html.includes('id="supportAdminButton"') &&
+    html.includes('id="supportAdminDialog"') &&
+    html.includes('id="supportAdminSearchInput"') &&
+    html.includes('id="supportAdminDetail"') &&
+    /const\s+SUPPORT_ADMIN_FUNCTION\s*=\s*["']support-admin["']/.test(app) &&
+    /function\s+refreshSupportAdminAccess\s*\(/.test(app) &&
+    /function\s+runSupportAdminAction\s*\(/.test(app) &&
+    /create table if not exists public\.platform_support_admins/.test(supportAdminMigration) &&
+    /create table if not exists public\.support_admin_audit_log/.test(supportAdminMigration) &&
+    /alter table public\.platform_support_admins enable row level security/.test(supportAdminMigration) &&
+    /revoke all on table public\.platform_support_admins from public, anon, authenticated/.test(supportAdminMigration) &&
+    /SUPABASE_SERVICE_ROLE_KEY/.test(supportAdminFunction) &&
+    /\.from\(["']platform_support_admins["']\)/.test(supportAdminFunction) &&
+    /auth\.admin\.listUsers\s*\(/.test(supportAdminFunction) &&
+    /startAudit\s*\(/.test(supportAdminFunction) &&
+    /sendPasswordReset\s*\(/.test(supportAdminFunction),
+  "Private Support Admin access, repair controls or audit protection is incomplete",
+);
+assert(
   /function\s+regressionLargeOutletTeeState\s*\(/.test(app) &&
     /function\s+regressionAutoCheckLargeOutletTee\s*\(/.test(app) &&
     /const\s+largestEntry\s*=\s*\[\.\.\.entries\]\.sort/.test(app) &&
@@ -359,8 +388,13 @@ assert(!/\bsk-[A-Za-z0-9_-]{12,}/.test(app + html + supabaseSql), "An OpenAI API
 assert(
   /id="aiHelperButton"/.test(html) &&
     /id="aiHelperDialog"/.test(html) &&
+    /id="aiHelperContext"/.test(html) &&
     /id="aiHelperForm"/.test(html) &&
     /\.ai-helper-panel/.test(css) &&
+    /function\s+aiHelperCurrentSurface\s*\(/.test(app) &&
+    /function\s+renderAiHelperSuggestions\s*\(/.test(app) &&
+    /surface:\s*aiHelperCurrentSurface\(\)/.test(app) &&
+    /hasMultipleOpenSpools/.test(app) &&
     /function\s+setupAiHelper\s*\(/.test(app) &&
     /functions\.invoke\(AI_HELPER_FUNCTION/.test(app),
   "Ask SpoolMate interface or frontend invocation wiring is incomplete",
@@ -447,6 +481,9 @@ assert(
     /const\s+MODEL\s*=\s*["']gpt-5\.6-luna["']/.test(aiHelpFunction) &&
     /store:\s*false/.test(aiHelpFunction) &&
     /safety_identifier/.test(aiHelpFunction) &&
+    /You should see:/.test(aiHelpFunction) &&
+    /"surface",\s*"inspectorTab"/.test(aiHelpFunction) &&
+    /"previewOpen",\s*"windowedWorkspace",\s*"hasSelection",\s*"hasMultipleOpenSpools"/.test(aiHelpFunction) &&
     /auth\.getUser\s*\(/.test(aiHelpFunction),
   "Protected Ask SpoolMate Edge Function is incomplete",
 );
@@ -668,12 +705,53 @@ assert(
 );
 assert(
   /function\s+projectTodayBoard\s*\(/.test(app) &&
-    /Needs attention/.test(app) &&
-    /My work/.test(app) &&
-    /Ready next/.test(app) &&
+    /Assigned to me/.test(app) &&
+    /Ready for checking/.test(app) &&
+    /On hold/.test(app) &&
+    /function\s+projectTodayGroups\s*\(/.test(app) &&
     /data-project-library-action="scan-qr"/.test(app) &&
     /team-today-board/.test(css),
   "Simplified Today team dashboard or Scan QR entry point is incomplete",
+);
+assert(
+  /const\s+JOB_DASHBOARD_PREFERENCES_VERSION\s*=\s*1/.test(app) &&
+    /function\s+hydrateCloudDashboardPreferences\s*\(/.test(app) &&
+    /function\s+flushCloudDashboardPreferences\s*\(/.test(app) &&
+    /\.select\("dashboard_preferences"\)/.test(app) &&
+    /\.update\(\{ dashboard_preferences: dashboardPreferences \}\)/.test(app) &&
+    /add column if not exists dashboard_preferences jsonb/.test(jobsDashboardPreferencesMigration) &&
+    /Users can update their dashboard preferences/.test(jobsDashboardPreferencesMigration) &&
+    /revoke update on public\.profiles from authenticated/.test(jobsDashboardPreferencesMigration) &&
+    /grant update \(dashboard_preferences\) on public\.profiles to authenticated/.test(jobsDashboardPreferencesMigration),
+  "Per-workspace cloud Jobs dashboard preferences or protected migration is incomplete",
+);
+assert(
+  app.includes('["active", "Active"]') &&
+    app.includes('["mine", "My jobs"]') &&
+    app.includes('["completed", "Completed"]') &&
+    app.includes('["all", "All"]') &&
+    /data-project-library-action="show-guide"/.test(app) &&
+    /data-project-library-action="show-comms"/.test(app) &&
+    /data-project-library-action="show-report"/.test(app) &&
+    /id="projectLibraryGuideButton"[^>]*hidden/.test(html) &&
+    /id="projectLibraryCommsButton"[^>]*hidden/.test(html) &&
+    /id="projectLibraryReportButton"[^>]*hidden/.test(html) &&
+    /id="projectLibrarySaveButton"[^>]*hidden/.test(html) &&
+    /library-action[\s\S]{0,360}shouldSkipProjectLibraryActivation\(actionKey,\s*1500\)/.test(app) &&
+    /function\s+bindRenderedProjectLibraryActions\s*\(/.test(app) &&
+    /projectLibraryActionBound/.test(app) &&
+    !/projectLibraryList\?\.addEventListener\("pointerdown"/.test(app) &&
+    !/projectLibraryList\?\.addEventListener\("pointerup"/.test(app) &&
+    /projectLibraryList\?\.addEventListener\("click"/.test(app),
+  "Compact Jobs filters or consolidated More tools are incomplete",
+);
+assert(
+  /previousLayout:\s*true/.test(app) &&
+    /Use My day/.test(jobsStoryboard) &&
+    /More/.test(jobsVoiceover) &&
+    /Ready for checking/.test(jobsCaptions) &&
+    /const\s+openMore\s*=\s*async\s*\(/.test(jobsCaptureScript),
+  "Jobs tutorial sources or previous-layout video warning are not aligned with v3.39",
 );
 assert(
   /async function\s+openQrScanner\s*\(/.test(app) &&
@@ -867,6 +945,55 @@ assert(
     !/applyAppMode\(["']edit["']/.test(focusHealthIssueSource) &&
     !/activateInspectorTab\(["']properties["']\)/.test(focusHealthIssueSource),
   "Show on drawing no longer preserves Review and the Checks inspector",
+);
+assert(
+  [
+    "workspaceSettingsButton",
+    "workspaceSettingsPanel",
+    "workspaceSettingsCloseButton",
+    "workspaceSettingsScrim",
+    "simpleControlsButton",
+    "fullControlsButton",
+    "actionMenuJobsButton",
+    "actionMenuBigSpoolButton",
+    "actionMenuAccountButton",
+  ].every((id) => html.includes(`id="${id}"`)),
+  "Simple / Full workspace controls or Menu fallbacks are missing",
+);
+assert(
+  /const\s+INTERFACE_DENSITY_KEY\s*=\s*["']spoolmate-interface-density-v1["']/.test(app) &&
+    /function\s+setInterfaceDensity\s*\(/.test(app) &&
+    /classList\.toggle\(["']simple-controls["'],\s*simple\)/.test(app) &&
+    /localStorage\.setItem\(INTERFACE_DENSITY_KEY,\s*interfaceDensity\)/.test(app),
+  "The permanent Simple / Full preference is not wired or persisted",
+);
+assert(
+  /function\s+openWorkspaceSettings\s*\(/.test(app) &&
+    /function\s+closeWorkspaceSettings\s*\(/.test(app) &&
+    /updateWorkspaceSettingsSummary\(\)/.test(app),
+  "Pipe & display sheet behaviour or summary is missing",
+);
+assert(
+  /classList\.toggle\(["']single-spool["'],\s*singleSpool\)/.test(app) &&
+    /\.spool-workspace-shell\.single-spool\s+\.spool-workspace-tabs/.test(css),
+  "Single-spool tab-strip compaction is missing",
+);
+assert(
+  /body:not\(\[data-app-mode=["']draw["']\]\)\s+#touchShiftAngleButton/.test(css) &&
+    /body\[data-app-mode=["']review["']\]\s+\.tool-flyout-wrap/.test(css),
+  "Drawing actions are no longer restricted to their relevant workflow modes",
+);
+assert(
+  /body\.phone-layout\.field-layout\.mobile-touch-layout\s+\.topbar-settings[\s\S]*?display:\s*none\s*!important/.test(css) &&
+    /mobile-touch-layout\.workspace-settings-open\s+\.topbar-settings[\s\S]*?display:\s*grid\s*!important/.test(css) &&
+    /grid-template-areas:[\s\S]*?["']primary primary["'][\s\S]*?["']settings-trigger actions["']/.test(css),
+  "Phone and tablet two-row header or settings-sheet layout is missing",
+);
+assert(
+  html.includes("Simple and Full controls") &&
+    app.includes("Use Simple controls for the clearest drawing workspace") &&
+    app.includes("Open Pipe & display"),
+  "Help and tutorial guidance does not explain the simplified workspace",
 );
 
 const cachedAssets = matches(serviceWorker, /["'](\.\/[^"']+)["']/g).map((match) => match[1].split("?")[0]);

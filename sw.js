@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v333";
+const CACHE_NAME = "spoolmate-v349";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=333",
-  "./app.js?v=333",
+  "./styles.css?v=349",
+  "./app.js?v=349",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [
@@ -13,6 +13,9 @@ const OPTIONAL_ASSETS = [
   "./icons/spoolmate-mark.png",
   "./icons/spoolmate-logo.png"
 ];
+const STATIC_CDN_ORIGINS = new Set([
+  "https://cdn.jsdelivr.net"
+]);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -51,7 +54,15 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(request, false));
+  // Never put authenticated API, Auth or Storage responses into Cache Storage.
+  // Cache keys do not include the Authorization header, so doing so could show
+  // one signed-in user's stale response to the next user on a shared device.
+  if (STATIC_CDN_ORIGINS.has(url.origin)) {
+    event.respondWith(staleWhileRevalidate(request, false));
+    return;
+  }
+
+  event.respondWith(fetch(request));
 });
 
 self.addEventListener("message", (event) => {

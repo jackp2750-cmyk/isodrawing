@@ -341,31 +341,30 @@ with check (
 
 drop policy if exists "Admins can update company memberships" on public.company_members;
 drop policy if exists "Owners can update company memberships" on public.company_members;
-create policy "Owners can update company memberships"
-on public.company_members
-for update to authenticated
-using (
-  public.has_active_company_license(company_id)
-  and public.is_company_owner(company_id, (select auth.uid()))
-)
-with check (
-  public.has_active_company_license(company_id)
-  and public.is_company_owner(company_id, (select auth.uid()))
-);
-
 drop policy if exists "Admins can approve company members" on public.company_members;
-create policy "Admins can approve company members"
+drop policy if exists "Owners and admins can update company memberships" on public.company_members;
+create policy "Owners and admins can update company memberships"
 on public.company_members
 for update to authenticated
 using (
   public.has_active_company_license(company_id)
-  and public.is_company_admin(company_id, (select auth.uid()))
-  and role not in ('owner', 'admin')
+  and (
+    public.is_company_owner(company_id, (select auth.uid()))
+    or (
+      public.is_company_admin(company_id, (select auth.uid()))
+      and role not in ('owner', 'admin')
+    )
+  )
 )
 with check (
   public.has_active_company_license(company_id)
-  and public.is_company_admin(company_id, (select auth.uid()))
-  and role not in ('owner', 'admin')
+  and (
+    public.is_company_owner(company_id, (select auth.uid()))
+    or (
+      public.is_company_admin(company_id, (select auth.uid()))
+      and role not in ('owner', 'admin')
+    )
+  )
 );
 
 drop policy if exists "Users can leave company memberships" on public.company_members;
@@ -567,6 +566,8 @@ revoke all on function public.has_active_company_license(uuid) from public, anon
 revoke all on function public.has_active_workspace_license(uuid, uuid) from public, anon, authenticated;
 revoke all on function public.create_company(text) from public, anon, authenticated;
 revoke all on function public.join_company_by_code(text) from public, anon, authenticated;
+revoke all on function public.enforce_company_seat_capacity() from public, anon, authenticated;
+revoke all on function public.protect_company_entitlements() from public, anon, authenticated;
 
 grant execute on function public.company_seat_limit(uuid) to authenticated;
 grant execute on function public.company_seat_usage(uuid) to authenticated;

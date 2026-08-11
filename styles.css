@@ -584,6 +584,1225 @@ body.action-menu-open .topbar-actions {
   text-transform: uppercase;
 }
 
+/* Private platform support console */
+.support-admin-launch {
+  border-color: #7c3aed !important;
+  color: #5b21b6 !important;
+}
+
+.support-admin-backdrop {
+  z-index: 4600;
+  padding: clamp(8px, 2vw, 24px);
+}
+
+.support-admin-card {
+  width: min(1480px, 100%);
+  height: min(920px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
+  display: grid;
+  grid-template-rows: auto auto auto auto auto minmax(280px, 1fr) auto;
+  gap: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, #7c3aed 32%, var(--line));
+  box-shadow: 0 24px 70px rgba(32, 16, 67, 0.3);
+}
+
+.support-admin-header {
+  align-items: flex-start;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.support-admin-header > div {
+  display: grid;
+  gap: 3px;
+}
+
+.support-admin-header strong {
+  font-size: clamp(1.05rem, 2vw, 1.45rem);
+}
+
+.support-admin-live-badge {
+  width: max-content;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 0.67rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.support-admin-identity,
+.support-admin-status {
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-soft);
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.support-admin-status[data-tone="error"] {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.support-admin-status[data-tone="success"] {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.support-admin-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.support-admin-stat {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+
+.support-admin-stat strong,
+.support-admin-stat span {
+  display: block;
+}
+
+.support-admin-stat strong {
+  color: var(--ink);
+  font-size: 1.15rem;
+}
+
+.support-admin-stat span {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.support-admin-search {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) auto auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.support-admin-search label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.support-admin-search input,
+.support-admin-control select,
+.support-admin-control input,
+.support-admin-reason textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 8px 10px;
+  font: inherit;
+}
+
+.support-admin-workspace {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(240px, 0.32fr) minmax(0, 1fr);
+  gap: 12px;
+}
+
+.support-admin-results,
+.support-admin-detail,
+.support-admin-audit {
+  min-height: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-soft);
+}
+
+.support-admin-results {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+.support-admin-section-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.support-admin-section-heading small {
+  color: var(--muted);
+}
+
+.support-admin-result-list,
+.support-admin-detail {
+  overflow: auto;
+}
+
+.support-admin-result-list {
+  padding: 6px;
+}
+
+.support-admin-result {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.support-admin-result:hover,
+.support-admin-result.active {
+  border-color: color-mix(in srgb, #7c3aed 45%, var(--line));
+  background: color-mix(in srgb, #ede9fe 65%, var(--panel));
+}
+
+.support-admin-result strong,
+.support-admin-result small {
+  overflow-wrap: anywhere;
+}
+
+.support-admin-result-meta,
+.support-admin-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.support-admin-chip {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.support-admin-chip.active {
+  border-color: #10b981;
+  color: #047857;
+}
+
+.support-admin-chip.warning {
+  border-color: #f59e0b;
+  color: #92400e;
+}
+
+.support-admin-detail {
+  padding: 12px;
+  background: var(--panel);
+}
+
+.support-admin-empty {
+  height: 100%;
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.support-admin-account-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.support-admin-account-head h3 {
+  margin: 0 0 3px;
+  font-size: 1.1rem;
+  overflow-wrap: anywhere;
+}
+
+.support-admin-account-id {
+  color: var(--muted);
+  font: 0.68rem/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+
+.support-admin-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.support-admin-panel {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel-soft);
+}
+
+.support-admin-panel.wide {
+  grid-column: 1 / -1;
+}
+
+.support-admin-panel > strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+.support-admin-control-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  align-items: end;
+}
+
+.support-admin-control {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.support-admin-control-grid .primary-button,
+.support-admin-control-grid .icon-button {
+  min-height: 40px;
+}
+
+.support-admin-reason {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.support-admin-reason textarea {
+  min-height: 62px;
+  resize: vertical;
+}
+
+.support-admin-membership,
+.support-admin-project,
+.support-admin-audit-entry {
+  display: grid;
+  gap: 6px;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+}
+
+.support-admin-membership:first-of-type,
+.support-admin-project:first-of-type,
+.support-admin-audit-entry:first-child {
+  border-top: 0;
+}
+
+.support-admin-project-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.support-admin-project-row small,
+.support-admin-audit-entry small {
+  color: var(--muted);
+}
+
+.support-admin-audit {
+  max-height: 148px;
+  overflow: hidden;
+}
+
+.support-admin-audit-list {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 1fr);
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 10px 10px;
+}
+
+.support-admin-audit-entry {
+  padding: 8px;
+  border: 1px solid var(--line) !important;
+  border-radius: 9px;
+  background: var(--panel);
+}
+
+@media (max-width: 1050px) {
+  .support-admin-summary {
+    grid-template-columns: repeat(3, minmax(100px, 1fr));
+  }
+
+  .support-admin-control-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .support-admin-backdrop {
+    padding: 0;
+  }
+
+  .support-admin-card {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    grid-template-rows: auto auto auto auto auto minmax(0, 1fr);
+    padding: 10px;
+  }
+
+  .support-admin-search {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .support-admin-search label {
+    grid-column: 1 / -1;
+  }
+
+  .support-admin-workspace {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(130px, 0.36fr) minmax(260px, 1fr);
+  }
+
+  .support-admin-panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .support-admin-panel.wide {
+    grid-column: auto;
+  }
+
+  .support-admin-audit {
+    display: none;
+  }
+}
+
+@media (max-width: 470px) {
+  .support-admin-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .support-admin-search,
+  .support-admin-control-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .support-admin-search label {
+    grid-column: auto;
+  }
+
+  .support-admin-account-head {
+    display: grid;
+  }
+}
+
+@media (max-width: 300px) {
+  .support-admin-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .support-admin-header > .icon-button {
+    justify-self: start;
+  }
+}
+
+/* v3.48 final Jobs cascade: keep production context visible on every device. */
+@media (max-width: 1050px) {
+  .job-overview-open {
+    grid-template-columns: minmax(170px, 1.2fr) minmax(100px, 0.7fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr) 52px;
+  }
+
+  .job-overview-badges {
+    display: flex;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 980px) {
+  .team-today-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .project-dashboard-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-dashboard-search {
+    grid-column: 1 / -1;
+  }
+
+  .team-today-board {
+    grid-template-columns: 1fr;
+  }
+
+  .job-overview-badges {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 4;
+    justify-content: flex-start;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .job-overview-badges b {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* v3.49 learnable workspace: Simple is the default and Full remains one tap away. */
+.workspace-settings-trigger,
+.workspace-settings-sheet-head,
+.workspace-settings-scrim {
+  display: none;
+}
+
+.topbar-primary {
+  grid-area: primary;
+}
+
+.topbar-settings {
+  grid-area: settings;
+}
+
+.topbar-actions {
+  grid-area: actions;
+}
+
+.workspace-settings-trigger {
+  grid-area: settings-trigger;
+  min-width: 0;
+  min-height: 42px;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+  color: var(--ink);
+  text-align: left;
+}
+
+.workspace-settings-trigger-icon {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 27px;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  color: var(--accent);
+  font-size: 16px;
+}
+
+.workspace-settings-trigger-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.workspace-settings-trigger-copy strong {
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.workspace-settings-trigger-copy small {
+  display: block;
+  max-width: min(72vw, 720px);
+  overflow: hidden;
+  color: var(--secondary-quiet);
+  font-size: 10px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspace-settings-trigger-arrow {
+  margin-left: auto;
+  color: var(--secondary-quiet);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.interface-density-control {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  background: var(--surface-subtle);
+}
+
+.interface-density-control > span {
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.interface-density-control > small {
+  color: var(--secondary-quiet);
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.interface-density-tabs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 3px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+
+.interface-density-tabs button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--secondary-quiet);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.interface-density-tabs button.active {
+  background: var(--panel);
+  color: var(--accent);
+  box-shadow: 0 1px 5px rgba(26, 44, 50, 0.14);
+}
+
+body.simple-controls .topbar {
+  grid-template-columns: minmax(470px, 1fr) auto;
+  grid-template-areas:
+    "primary actions"
+    "settings-trigger settings-trigger";
+}
+
+body.simple-controls .topbar-primary {
+  grid-template-columns: auto auto;
+  justify-content: start;
+}
+
+body.simple-controls .project-context-strip,
+body.simple-controls .topbar-settings {
+  display: none;
+}
+
+body.simple-controls .workspace-settings-trigger {
+  display: flex;
+}
+
+body.simple-controls.workspace-settings-open .topbar-settings {
+  position: fixed;
+  z-index: 4701;
+  top: 104px;
+  right: 12px;
+  left: 12px;
+  width: auto;
+  display: flex;
+  max-height: min(70dvh, 560px);
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  box-shadow: 0 18px 50px rgba(18, 31, 36, 0.22);
+  overflow: auto;
+}
+
+body.workspace-settings-open .topbar {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body.simple-controls.workspace-settings-open .workspace-settings-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 1 0 100%;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+body.simple-controls.workspace-settings-open .workspace-settings-sheet-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+body.simple-controls.workspace-settings-open .workspace-settings-sheet-head small {
+  color: var(--secondary-quiet);
+  font-size: 10px;
+}
+
+body.simple-controls.workspace-settings-open #workspaceSettingsCloseButton {
+  display: inline-flex;
+}
+
+body.simple-controls.workspace-settings-open .workspace-settings-scrim:not([hidden]) {
+  position: fixed;
+  z-index: 4700;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: rgba(7, 16, 21, 0.3);
+}
+
+body.simple-controls .topbar-actions > #openBrowserProjectButton,
+body.simple-controls .topbar-actions > #bigSpoolButton,
+body.simple-controls .topbar-actions > #accountButton,
+body.simple-controls .topbar-actions > #workspaceSwitcher,
+body.simple-controls .topbar-actions > #cloudSyncStatus {
+  display: none !important;
+}
+
+body.simple-controls .topbar-actions {
+  justify-content: flex-end;
+}
+
+body.simple-controls .tool-rail .tool-button[data-tool="note"],
+body.simple-controls .tool-rail .tool-button[data-tool="measure"],
+body.simple-controls .tool-rail #redoButton {
+  display: none !important;
+}
+
+body.simple-controls[data-app-mode="export"] {
+  --tool-rail-width: 0px;
+}
+
+body.simple-controls[data-app-mode="export"] .tool-rail {
+  display: none !important;
+}
+
+body.simple-controls .drawing-panel .bar-actions > #zoomOutButton,
+body.simple-controls .drawing-panel .bar-actions > #zoomInButton,
+body.simple-controls .drawing-panel .bar-actions > #drawingFullscreenButton {
+  display: none !important;
+}
+
+body:not([data-app-mode="draw"]) #touchShiftAngleButton {
+  display: none !important;
+}
+
+body[data-app-mode="review"] .tool-flyout-wrap,
+body[data-app-mode="export"] .tool-flyout-wrap {
+  display: none !important;
+}
+
+.spool-workspace-shell.single-spool .spool-workspace-tabs,
+.spool-workspace-shell.single-spool #spoolWorkspaceWindowButton {
+  display: none;
+}
+
+.spool-workspace-shell.single-spool {
+  justify-content: flex-end;
+  min-height: 38px;
+  padding-block: 3px;
+}
+
+.workspace-location-main.compact {
+  min-height: 38px;
+  align-items: center;
+  gap: 0;
+  padding: 4px 8px;
+  overflow: hidden;
+}
+
+.workspace-location-main.compact .workspace-location-context,
+.workspace-location-main.compact .workspace-location-crumb {
+  min-width: 0;
+  min-height: 28px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.workspace-location-main.compact .workspace-location-context {
+  flex: 0 0 auto;
+  padding: 0 9px 0 3px;
+  color: var(--accent);
+}
+
+.workspace-location-main.compact .workspace-location-crumb {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 1 auto;
+  padding: 0 8px 0 13px;
+}
+
+.workspace-location-main.compact .workspace-location-crumb::before {
+  content: "/";
+  position: absolute;
+  left: 2px;
+  color: var(--border-subtle);
+  font-weight: 900;
+}
+
+.workspace-location-main.compact .workspace-location-crumb small {
+  font-size: 8px;
+}
+
+.workspace-location-main.compact .workspace-location-crumb b {
+  max-width: 150px;
+  font-size: 10px;
+}
+
+:root[data-theme="dark"] .workspace-settings-trigger,
+:root[data-theme="dark"] .interface-density-control {
+  border-color: var(--border-subtle);
+  background: var(--surface-subtle);
+}
+
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  body.phone-layout.field-layout.mobile-touch-layout .topbar,
+  body.tablet-layout.field-layout.mobile-touch-layout .topbar {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas:
+      "primary primary"
+      "settings-trigger actions" !important;
+    grid-template-rows: 44px 44px !important;
+  }
+
+  body.mobile-touch-layout .topbar {
+    width: 100%;
+    min-height: 98px;
+    max-height: 106px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "primary primary"
+      "settings-trigger actions";
+    grid-template-rows: 44px 44px;
+    gap: 4px 6px;
+    padding: 5px 7px;
+    overflow: visible;
+  }
+
+  body.mobile-touch-layout .topbar-primary {
+    grid-area: primary;
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  body.mobile-touch-layout .topbar-primary .project-context-strip {
+    display: none !important;
+  }
+
+  body.mobile-touch-layout .brand small,
+  body.mobile-touch-layout .brand .version-badge {
+    display: none;
+  }
+
+  body.mobile-touch-layout .brand {
+    min-width: 0;
+  }
+
+  body.mobile-touch-layout .brand-logo {
+    width: 34px;
+    height: 34px;
+  }
+
+  body.mobile-touch-layout .mode-switcher {
+    width: 100%;
+    min-width: 0;
+  }
+
+  body.mobile-touch-layout .mode-switcher button {
+    min-width: 0;
+    min-height: 38px;
+    padding-inline: 8px;
+  }
+
+  body.mobile-touch-layout .workspace-settings-trigger {
+    display: flex !important;
+    width: 100%;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  body.mobile-touch-layout .topbar-actions {
+    grid-area: actions;
+    width: auto;
+    min-width: 0;
+    height: 44px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+    padding: 0;
+    overflow: visible;
+  }
+
+  body.mobile-touch-layout .topbar-actions > #openBrowserProjectButton,
+  body.mobile-touch-layout .topbar-actions > #bigSpoolButton,
+  body.mobile-touch-layout .topbar-actions > #accountButton,
+  body.mobile-touch-layout .topbar-actions > #workspaceSwitcher,
+  body.mobile-touch-layout .topbar-actions > #cloudSyncStatus {
+    display: none !important;
+  }
+
+  body.mobile-touch-layout .topbar-actions > #saveBrowserProjectButton,
+  body.mobile-touch-layout .topbar-actions > #actionMenuButton {
+    min-width: 58px;
+    height: 44px;
+    min-height: 44px;
+    padding-inline: 8px;
+  }
+
+  body.mobile-touch-layout .topbar-settings,
+  body.mobile-touch-layout.simple-controls .topbar-settings {
+    position: fixed;
+    z-index: 4701;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-width: 100vw;
+    max-height: min(78dvh, 680px);
+    display: none;
+    align-content: start;
+    gap: 10px;
+    padding: 10px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px 16px 0 0;
+    background: var(--panel-strong);
+    box-shadow: 0 -18px 50px rgba(18, 31, 36, 0.24);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  body.phone-layout.field-layout.mobile-touch-layout .topbar-settings,
+  body.tablet-layout.field-layout.mobile-touch-layout .topbar-settings {
+    display: none !important;
+  }
+
+  body.phone-layout.field-layout.mobile-touch-layout.workspace-settings-open .topbar-settings,
+  body.tablet-layout.field-layout.mobile-touch-layout.workspace-settings-open .topbar-settings {
+    display: grid !important;
+  }
+
+  body.mobile-touch-layout .workspace-settings-sheet-head {
+    position: sticky;
+    z-index: 2;
+    top: -10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 7px 0 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--panel-strong);
+  }
+
+  .workspace-settings-sheet-head > div {
+    display: grid;
+    gap: 2px;
+  }
+
+  .workspace-settings-sheet-head strong {
+    font-size: 15px;
+  }
+
+  .workspace-settings-sheet-head small {
+    color: var(--secondary-quiet);
+    font-size: 10px;
+  }
+
+  body.mobile-touch-layout .topbar-settings-row,
+  body.mobile-touch-layout.field-layout .topbar-settings-row,
+  body.tablet-layout.field-layout .topbar-settings-row {
+    width: 100%;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 9px 0;
+    border-top: 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  body.mobile-touch-layout .topbar-settings-row .workspace-settings-label {
+    display: block;
+    grid-column: 1 / -1;
+    min-height: 0;
+    padding: 0;
+  }
+
+  body.mobile-touch-layout .topbar-settings-row > label,
+  body.mobile-touch-layout .topbar-settings-row > .top-size-readout,
+  body.mobile-touch-layout .topbar-settings-row > button {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+  }
+
+  body.mobile-touch-layout .topbar-settings-row select {
+    width: 100%;
+    max-width: none;
+  }
+
+  body.mobile-touch-layout .workspace-settings-scrim:not([hidden]) {
+    position: fixed;
+    z-index: 4700;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: rgba(7, 16, 21, 0.38);
+  }
+
+  body.mobile-touch-layout .spool-workspace-shell.single-spool {
+    min-height: 38px;
+    height: 38px;
+  }
+
+  body.mobile-touch-layout .spool-workspace-shell.single-spool .spool-workspace-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  body.mobile-touch-layout .spool-workspace-shell.single-spool .spool-workspace-actions button {
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 30px;
+    height: 30px;
+    font-size: 11px !important;
+  }
+
+  body.mobile-touch-layout .workspace-location-main {
+    display: flex !important;
+    min-height: 34px;
+    height: 34px;
+    margin: 4px 6px 0;
+    padding: 2px 5px;
+  }
+
+  body.mobile-touch-layout .workspace-location-main.compact .workspace-location-context {
+    max-width: 62px;
+    padding-right: 5px;
+    overflow: hidden;
+    font-size: 9px;
+    text-overflow: ellipsis;
+  }
+
+  body.mobile-touch-layout .workspace-location-main.compact .workspace-location-crumb {
+    gap: 0;
+    padding-inline: 8px 3px;
+    overflow: hidden;
+  }
+
+  body.mobile-touch-layout .workspace-location-main.compact .workspace-location-crumb small {
+    display: none;
+  }
+
+  body.mobile-touch-layout .workspace-location-main.compact .workspace-location-crumb b {
+    max-width: 78px;
+    font-size: 9px;
+  }
+
+  body.mobile-touch-layout .drawing-panel .panel-bar {
+    min-height: 44px;
+    height: 44px;
+    padding: 4px 6px;
+  }
+
+  body.mobile-touch-layout .drawing-panel .bar-title small,
+  body.mobile-touch-layout .drawing-panel .dimension-edit-pill {
+    display: none;
+  }
+
+  body.mobile-touch-layout.simple-controls .drawing-panel .bar-title {
+    display: none;
+  }
+
+  body.mobile-touch-layout.simple-controls .drawing-panel .panel-bar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.mobile-touch-layout.simple-controls .drawing-panel .bar-actions {
+    width: 100%;
+    max-width: none;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  body.mobile-touch-layout.simple-controls .drawing-panel .bar-actions > button:not([hidden]) {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 110px;
+  }
+
+  body.mobile-touch-layout.simple-controls .tool-rail .tool-grid {
+    width: 100%;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  body.mobile-touch-layout.simple-controls .tool-rail .tool-button,
+  body.mobile-touch-layout.simple-controls .tool-rail .tool-flyout-wrap {
+    min-width: 0;
+    flex: 1 1 0;
+    max-width: 120px;
+  }
+
+  body.mobile-touch-layout.simple-controls .mobile-panel-dock {
+    display: none !important;
+  }
+
+  body.phone-layout.field-layout.mobile-touch-layout.simple-controls:not(.focus-mode):not(.drawing-panel-fullscreen) .drawing-panel,
+  body.tablet-layout.field-layout.mobile-touch-layout.simple-controls:not(.focus-mode):not(.drawing-panel-fullscreen) .drawing-panel {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.phone-layout.field-layout.mobile-touch-layout.simple-controls .tool-rail,
+  body.tablet-layout.field-layout.mobile-touch-layout.simple-controls .tool-rail {
+    bottom: 0;
+    height: calc(74px + env(safe-area-inset-bottom, 0px));
+    min-height: calc(74px + env(safe-area-inset-bottom, 0px));
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 640px) {
+  body.mobile-touch-layout .brand > div {
+    display: none;
+  }
+
+  body.mobile-touch-layout .workspace-settings-trigger-copy small {
+    max-width: calc(100vw - 230px);
+  }
+
+  body.mobile-touch-layout .workspace-settings-trigger-icon {
+    display: none;
+  }
+
+  body.mobile-touch-layout .workspace-location-main.compact .workspace-location-crumb.workspace {
+    max-width: 58px;
+  }
+
+  body.mobile-touch-layout .workspace-location-main.compact .workspace-location-crumb.revision {
+    max-width: 32px;
+  }
+
+  body.mobile-touch-layout .workspace-location-main.compact .workspace-location-crumb.status {
+    max-width: 56px;
+  }
+}
+
+@media (max-width: 1024px) and (max-height: 520px) and (orientation: landscape) {
+  body.phone-layout.field-layout.mobile-touch-layout .topbar,
+  body.tablet-layout.field-layout.mobile-touch-layout .topbar {
+    min-height: 54px;
+    height: 54px;
+    max-height: 54px;
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(150px, 0.65fr) auto;
+    grid-template-areas: "primary settings-trigger actions" !important;
+    grid-template-columns: minmax(280px, 1fr) minmax(150px, 0.65fr) auto !important;
+    grid-template-rows: 44px !important;
+    overflow: visible;
+  }
+
+  body.mobile-touch-layout .workspace-settings-trigger {
+    display: flex !important;
+  }
+}
+
+/* v3.39: keep the Jobs dashboard calm while retaining critical workshop state. */
+.project-dashboard-toolbar {
+  grid-template-columns: minmax(260px, 1fr) repeat(2, auto);
+}
+
+.team-today-board {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.team-today-section.hold {
+  border-top: 3px solid #d99a23;
+}
+
+.project-job-today.attention {
+  border-color: rgba(194, 95, 36, 0.58);
+  box-shadow: 0 0 0 4px rgba(194, 95, 36, 0.12);
+}
+
+@media (max-width: 1050px) {
+  .job-overview-open {
+    grid-template-columns: minmax(170px, 1.2fr) minmax(100px, 0.7fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr) 52px;
+  }
+
+  .job-overview-badges {
+    display: flex;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 980px) {
+  .team-today-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .project-dashboard-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-dashboard-search {
+    grid-column: 1 / -1;
+  }
+
+  .team-today-board {
+    grid-template-columns: 1fr;
+  }
+
+  .job-overview-badges {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    justify-content: flex-start;
+  }
+}
+
 /* Multi-spool workspace */
 .spool-workspace-shell {
   display: flex;
@@ -14579,6 +15798,12 @@ body.inspector-drawer-open .inspector-show-button {
     pointer-events: auto;
   }
 
+  /* Review contains wide fabrication tables such as the weld register. Give
+     those controls enough room to remain readable instead of clipping fields. */
+  body[data-app-mode="review"].inspector-drawer-open .control-panel {
+    width: min(820px, calc(100vw - var(--tool-rail-width) - 80px));
+  }
+
   .inspector-header .sheet-close-button {
     display: inline-flex;
   }
@@ -16750,6 +17975,294 @@ body.video-tutorial-open {
   }
 }
 
+/* v3.37 cross-platform launch hardening. Keep drawers and wide tool rows from
+   enlarging the page while preserving deliberate horizontal tool scrolling. */
+@media (min-width: 1025px) and (hover: hover) and (pointer: fine) {
+  .workspace {
+    overflow-x: clip;
+  }
+}
+
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  .field input[type="email"],
+  .field input[type="password"],
+  .field input[type="search"],
+  .field input:not([type]) {
+    min-height: 46px;
+    font-size: 16px;
+  }
+
+  body.field-layout .topbar-settings,
+  body.tablet-layout.field-layout .topbar-settings {
+    width: 100%;
+    max-width: 100vw;
+    justify-content: flex-start;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+  }
+
+  body.field-layout .topbar-settings-row,
+  body.tablet-layout.field-layout .topbar-settings-row {
+    scroll-snap-align: start;
+  }
+
+  .drawing-panel .bar-actions,
+  .preview-panel .bar-actions,
+  body.preview-panel-floating .preview-panel:not(.panel-fullscreen) .bar-actions {
+    justify-content: flex-start;
+  }
+
+  .preview-panel .bar-actions {
+    scrollbar-width: thin;
+  }
+}
+
+@media (max-width: 640px) {
+  body.phone-layout.field-layout .topbar-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+  }
+
+  body.phone-layout.field-layout .topbar-actions > * {
+    flex: 0 0 auto;
+  }
+
+  body.phone-layout .drawing-panel .bar-actions,
+  body.phone-layout .preview-panel .bar-actions {
+    justify-content: flex-start;
+    scroll-padding-inline: 4px;
+  }
+
+  .project-library-card {
+    width: 100vw;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+  }
+
+  .project-library-card > .project-dialog-header {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    align-items: center;
+    padding: 10px;
+    background: var(--panel-strong);
+  }
+
+  .project-library-header-close {
+    min-width: 58px;
+    min-height: 44px;
+    flex: 0 0 auto;
+  }
+
+  .project-library-card > .workspace-location-strip {
+    padding-block: 5px;
+  }
+
+  .project-dashboard-toolbar {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+    padding-inline: 8px;
+    align-items: stretch;
+  }
+
+  .project-dashboard-search {
+    grid-column: 1 / -1;
+  }
+
+  .project-dashboard-search span {
+    display: none;
+  }
+
+  .project-dashboard-toolbar .icon-button.labeled,
+  .project-dashboard-toolbar .primary-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 5px;
+    gap: 3px;
+    font-size: 10px;
+  }
+
+  .project-dashboard-toolbar .icon-button.labeled svg,
+  .project-dashboard-toolbar .primary-button svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .project-library-list {
+    min-height: 0;
+    padding: 0 8px calc(12px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  body.field-layout .dimension-mode-field,
+  body.tablet-layout.field-layout .dimension-mode-field {
+    min-width: 170px;
+    flex: 0 0 170px;
+  }
+
+  body.field-layout .dimension-mode-field select,
+  body.tablet-layout.field-layout .dimension-mode-field select {
+    width: 104px;
+    max-width: 104px;
+  }
+}
+
+@media (max-width: 560px) {
+  /* The header already contains a Video tutorials button. Removing the large
+     duplicate shelf on phones leaves the lesson itself as the main content. */
+  .tutorial-card > .workspace-location-strip,
+  .tutorial-video-shelf {
+    display: none;
+  }
+
+  .tutorial-backdrop .tutorial-card,
+  .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  .tutorial-backdrop[data-card-y="top"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-y="top"] .tutorial-card {
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+  }
+}
+
+@media (max-width: 1024px) and (max-height: 520px) and (orientation: landscape) {
+  body.mobile-touch-layout .topbar {
+    max-height: 54px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 7px;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  body.mobile-touch-layout .topbar-primary {
+    display: flex;
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  body.mobile-touch-layout .topbar-primary .project-context-strip,
+  body.mobile-touch-layout .topbar-primary .project-readout,
+  body.mobile-touch-layout .topbar-primary .brand,
+  body.mobile-touch-layout .topbar-settings,
+  body.mobile-touch-layout .workspace-location-main,
+  body.mobile-touch-layout .role-access-notice,
+  body.mobile-touch-layout .licence-banner {
+    display: none !important;
+  }
+
+  body.mobile-touch-layout .topbar-actions {
+    display: flex;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: max-content;
+    flex-wrap: nowrap;
+    overflow: visible;
+  }
+
+  body.mobile-touch-layout .spool-workspace-shell {
+    min-height: 40px;
+    height: 40px;
+    padding: 3px 6px;
+  }
+
+  body.mobile-touch-layout .spool-workspace-tab-wrap {
+    min-width: 136px;
+    flex-basis: 154px;
+  }
+
+  body.mobile-touch-layout .spool-workspace-tab,
+  body.mobile-touch-layout .spool-workspace-actions button {
+    min-height: 32px;
+    height: 32px;
+    padding-block: 2px;
+  }
+
+  body.mobile-touch-layout .spool-workspace-actions {
+    display: flex;
+  }
+
+  body.mobile-touch-layout .drawing-panel .panel-bar {
+    min-height: 40px;
+    height: 40px;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 3px 6px;
+  }
+
+  body.mobile-touch-layout .drawing-panel .bar-title {
+    display: none;
+  }
+
+  body.mobile-touch-layout .drawing-panel .bar-actions {
+    width: 100%;
+    max-width: none;
+  }
+
+  body.mobile-touch-layout .tool-rail {
+    height: 60px;
+    min-height: 60px;
+    padding-block: 3px;
+  }
+
+  body.mobile-touch-layout .tool-button,
+  body.mobile-touch-layout .tool-flyout-wrap > .fittings-tool-button {
+    min-height: 50px;
+  }
+}
+
+/* The multi-spool bar added more in-flow children to app-shell. A column flex
+   layout guarantees those compact rows take only their content height and the
+   drawing receives every remaining pixel on desktop, Android and iPad. */
+.app-shell {
+  height: 100dvh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.topbar,
+.spool-workspace-shell,
+.workspace-location-main,
+.role-access-notice,
+.licence-banner {
+  flex: 0 0 auto;
+}
+
+.workspace,
+.spool-window-grid-shell {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+  body.field-layout .workspace-settings-label,
+  body.tablet-layout.field-layout .workspace-settings-label {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) and (max-height: 520px) and (orientation: landscape) {
+  body.tablet-layout.field-layout.mobile-touch-layout:not(.focus-mode):not(.drawing-panel-fullscreen) .drawing-panel {
+    padding-bottom: 60px;
+  }
+
+  body.tablet-layout.field-layout.mobile-touch-layout:not(.focus-mode):not(.drawing-panel-fullscreen) .tool-rail {
+    height: 60px;
+    min-height: 60px;
+    padding: 3px 8px;
+  }
+}
+
 /* Launch-readiness account, privacy and support controls. */
 .licence-banner {
   display: flex;
@@ -17291,7 +18804,7 @@ body.video-tutorial-open {
   position: fixed;
   right: 18px;
   bottom: calc(18px + env(safe-area-inset-bottom, 0px));
-  z-index: 500;
+  z-index: 545;
   min-height: 48px;
   display: inline-flex;
   align-items: center;
@@ -17352,7 +18865,7 @@ body.mobile-panel-open .ai-helper-launcher {
   height: min(690px, calc(100dvh - 36px));
   min-height: min(430px, calc(100dvh - 36px));
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
   overflow: hidden;
   border: 1px solid var(--line-strong);
   border-radius: 18px;
@@ -17447,6 +18960,19 @@ body.mobile-panel-open .ai-helper-launcher {
 
 .ai-helper-status span:first-child {
   color: var(--teal-strong);
+}
+
+.ai-helper-context {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(0, 127, 171, 0.07);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1.35;
 }
 
 .ai-helper-messages {
@@ -17605,6 +19131,7 @@ body.mobile-panel-open .ai-helper-launcher {
 }
 
 :root[data-theme="dark"] .ai-helper-status,
+:root[data-theme="dark"] .ai-helper-context,
 :root[data-theme="dark"] .ai-helper-bubble,
 :root[data-theme="dark"] .ai-helper-compose textarea {
   background: #0c1922;
@@ -18156,4 +19683,257 @@ body.mobile-touch-layout .preview-panel .preview-panel-mode {
 
 body.phone-layout.mobile-touch-layout .preview-panel {
   max-width: 100vw;
+}
+
+/* The app frame owns the available viewport now, so the drawing canvas must
+   fill its grid track rather than using the old pre-tab viewport formula. */
+main.workspace {
+  grid-template-rows: minmax(0, 1fr);
+  overflow: clip;
+}
+
+.drawing-panel {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.drawing-panel .canvas-frame {
+  height: auto;
+  min-height: 0;
+}
+
+@media (max-width: 640px) {
+  body.phone-layout .preview-panel .bar-title {
+    display: none;
+  }
+
+  body.phone-layout .preview-panel .bar-actions {
+    width: 100%;
+    flex: 1 1 100%;
+  }
+
+  body.mobile-touch-layout .preview-panel .preview-nav {
+    order: -5;
+    flex: 0 0 auto;
+  }
+}
+
+/* Final responsive overrides intentionally live last in the cascade. */
+@media (max-width: 640px) {
+  .project-library-card {
+    width: calc(100vw - 20px);
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .project-library-card > .project-dialog-header {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .project-library-card > .project-dialog-header > div {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .project-library-header-close {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 1024px) and (max-height: 520px) and (orientation: landscape) {
+  body.mobile-touch-layout .topbar {
+    min-height: 54px;
+    height: 54px;
+    max-height: 54px;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  body.mobile-touch-layout .topbar-primary {
+    display: flex;
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  body.mobile-touch-layout .topbar-primary .project-context-strip,
+  body.mobile-touch-layout .topbar-primary .brand,
+  body.mobile-touch-layout .topbar-settings,
+  body.mobile-touch-layout .workspace-location-main,
+  body.mobile-touch-layout .role-access-notice,
+  body.mobile-touch-layout .licence-banner {
+    display: none !important;
+  }
+
+  body.mobile-touch-layout .spool-workspace-shell {
+    min-height: 40px;
+    height: 40px;
+    padding: 3px 6px;
+  }
+
+  body.mobile-touch-layout .spool-workspace-actions {
+    display: flex;
+  }
+
+  body.mobile-touch-layout .spool-workspace-tab,
+  body.mobile-touch-layout .spool-workspace-actions button {
+    min-height: 32px;
+    height: 32px;
+  }
+
+  body.mobile-touch-layout .drawing-panel {
+    padding-bottom: 60px;
+  }
+
+  body.mobile-touch-layout .drawing-panel .panel-bar {
+    min-height: 40px;
+    height: 40px;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 3px 6px;
+  }
+
+  body.mobile-touch-layout .drawing-panel .bar-title {
+    display: none;
+  }
+
+  body.mobile-touch-layout .drawing-panel .bar-actions {
+    width: 100%;
+    max-width: none;
+  }
+
+  body.mobile-touch-layout .tool-rail {
+    height: 60px;
+    min-height: 60px;
+    padding: 3px 8px;
+  }
+
+  body.mobile-touch-layout .tool-button,
+  body.mobile-touch-layout .tool-flyout-wrap > .fittings-tool-button {
+    min-height: 50px;
+    height: 50px;
+  }
+}
+
+/* Keep Support Admin dimensions after the shared dialog/mobile rules. */
+.support-admin-backdrop {
+  z-index: 4600;
+  padding: clamp(8px, 2vw, 24px);
+}
+
+.support-admin-card {
+  width: min(1480px, calc(100vw - 32px));
+  height: min(920px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
+  display: grid;
+  grid-template-rows: auto auto auto auto auto minmax(280px, 1fr) auto;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.support-admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: nowrap;
+}
+
+.support-admin-header > .icon-button {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 760px) {
+  .support-admin-backdrop {
+    padding: 0;
+  }
+
+  .support-admin-card {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border-radius: 0;
+    display: block;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 10px;
+  }
+
+  .support-admin-card > * {
+    margin-bottom: 10px;
+  }
+
+  .support-admin-workspace {
+    height: 720px;
+    min-height: 720px;
+    grid-template-rows: minmax(150px, 220px) minmax(480px, 1fr);
+  }
+}
+
+@media (max-width: 300px) {
+  .support-admin-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .support-admin-header > .icon-button {
+    justify-self: start;
+  }
+}
+
+/* v3.48 Jobs overrides must remain at the absolute end of the cascade. */
+@media (max-width: 1050px) {
+  .job-overview-open {
+    grid-template-columns: minmax(170px, 1.2fr) minmax(100px, 0.7fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr) 52px;
+  }
+
+  .job-overview-badges {
+    display: flex;
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 980px) {
+  .team-today-board {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .job-overview-open {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .project-dashboard-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-dashboard-search {
+    grid-column: 1 / -1;
+  }
+
+  .team-today-board {
+    grid-template-columns: 1fr;
+  }
+
+  .job-overview-badges {
+    display: flex;
+    grid-column: 1 / -1;
+    grid-row: 4;
+    justify-content: flex-start;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .job-overview-badges b {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

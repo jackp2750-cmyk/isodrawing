@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.33`
+Current app version: `v3.49`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -9,6 +9,8 @@ Big Spool V1-V3 keeps one very large master assembly and turns it into transport
 The Jobs production board includes a generated Gear check after allocation. Workshop staff confirm inferred pipe and fittings, add extra gear where needed, record items needing ordering, and confirm readiness before Cutting can begin. The weld register supports assigning one welder to every weld or recording mixed welders per weld.
 
 The built-in video tutorial library now contains 12 real-app guides: the complete workflow, Jobs, drawing, pipe ends, sockets, Big Spool, multi-spool workspaces, QA/export, production, cloud recovery, import/help and a shareable promotional overview. Every guide includes play/pause, 10-second rewind and fast-forward controls, and direct chapter navigation.
+
+Ask SpoolMate now recognises the current workspace surface, tool and Inspector tab, changes its suggested questions for Jobs, Big Spool, 3D, Draw, Edit, Review and Export, and gives exact PC/touch steps with a visible expected result. Its signed-in AI context contains workflow state only; project names, drawing geometry, notes and photos are not sent.
 
 See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 
@@ -53,7 +55,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Give first-time users a temporary First Spool layout that emphasises Draw, exact length, Fittings, Select and Save before revealing Review and Export.
 - Follow contextual real-workspace prompts that clear as drawing, exact runs, fittings, selection, saving, checks and export are learned.
 - Finish the tutorial with a live checklist for drawing content, project details, checks, saving and the workshop PDF.
-- Open Jobs on a simplified Today dashboard with Needs attention, My work and Ready next queues; use Full board only when every production stage and field is needed.
+- Open Jobs on a compact manager list with Active, My jobs, Completed and All filters; use My day for exclusive Attention, Assigned to me, Ready for checking and On hold queues, and Full board only when every production stage is needed.
+- Keep each user's Jobs/My day view, filter, pins and recent jobs synchronized per personal or business workspace, with a device fallback when offline.
 - Keep a compact location strip on every major screen showing the current workspace, job, spool, revision and status, with one-step return to the drawing.
 - Return from Jobs, Account, Help and Tutorials to the same spool, drawing zoom, pan, selection, active tool, Details/3D surface and Focus state.
 - Open a saved spool in a separate browser window or tab while keeping Jobs open, making side-by-side work on multiple spools possible; each tab is titled with its job and spool number.
@@ -79,8 +82,8 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Keep current status and assignee visible beside the job/spool while assignments, messages, reports and activity remain in the Jobs workspace.
 - Read actions consistently across both themes: blue is reserved for active or primary actions, Save is green, destructive actions are red, exports are visually distinct, and supporting information is quieter.
 - Pick tutorial topics from the tutorial menu instead of stepping through every feature in order.
-- Open the Job dashboard to search jobs, group spools by job/client, view the production board, and quickly save or start a new spool.
-- Use the built-in Jobs `Guide` button to show the in-window guide only when needed.
+- Open the Job dashboard to search jobs, group spools by job/client, review issues and start a new spool; save the current spool from the drawing screen.
+- Open `More` in Jobs for the guide, team communications and daily or weekly reports only when needed.
 - Use the Jobs `Comms` button for shared company messages and a combined view of active spool/yard notes.
 - Generate a daily or weekly Jobs report from the dashboard, including stage counts, due/overdue work, hold items, assignees and recent progress.
 - Assign saved spools to team members, set due dates, priority and hold notes, and move each spool through Draft, Ready to check, Checked, Issued, Cutting, Fit-up, Welded, Paint / finish and Fabricated stages.

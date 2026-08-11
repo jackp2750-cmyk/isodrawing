@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f6f8f7" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=333" />
+    <link rel="stylesheet" href="./styles.css?v=349" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.07</span>
+              <span class="version-badge" id="appVersionBadge">v3.49</span>
             </div>
           </div>
 
@@ -221,7 +221,23 @@
           </div>
         </div>
 
-        <div class="topbar-settings" aria-label="Current workspace settings">
+        <button class="workspace-settings-trigger" id="workspaceSettingsButton" type="button" aria-controls="workspaceSettingsPanel" aria-expanded="false">
+          <span class="workspace-settings-trigger-icon" aria-hidden="true">&#9881;</span>
+          <span class="workspace-settings-trigger-copy">
+            <strong>Pipe &amp; display</strong>
+            <small><span id="workspaceSettingsPipeSummary">Pipe setup</span><span aria-hidden="true"> &middot; </span><span id="workspaceSettingsViewSummary">Drawing setup</span></small>
+          </span>
+          <span class="workspace-settings-trigger-arrow" aria-hidden="true">&#8250;</span>
+        </button>
+
+        <div class="topbar-settings" id="workspaceSettingsPanel" aria-label="Pipe and display settings">
+          <div class="workspace-settings-sheet-head">
+            <div>
+              <strong>Pipe &amp; display</strong>
+              <small>Current spool drawing settings</small>
+            </div>
+            <button class="sheet-close-button" id="workspaceSettingsCloseButton" type="button" aria-label="Close Pipe and display settings">Done</button>
+          </div>
           <div class="topbar-settings-row project-row" data-mode-settings="review">
             <strong class="workspace-settings-label">Review</strong>
             <label class="toggle top-toggle topbar-secondary-control">
@@ -254,19 +270,19 @@
               </select>
             </label>
             <label class="top-field">
-              <span>Pipe / tube</span>
+              <span>Size</span>
               <select id="pipeSizeSelect"></select>
             </label>
             <span class="size-readout top-size-readout" id="pipeSizeReadout">OD 33.4 mm</span>
           </div>
           <div class="topbar-settings-row view-row" data-mode-settings="draw export">
-            <strong class="workspace-settings-label">Drawing</strong>
+            <strong class="workspace-settings-label">Display</strong>
             <label class="toggle top-toggle">
               <input id="dimensionToggle" type="checkbox" checked />
               <span>Dimensions</span>
             </label>
             <label class="dimension-style-field drawing-detail-field">
-              <span>Detail</span>
+              <span>What to show</span>
               <select id="drawingDetailSelect" aria-label="Drawing detail">
                 <option value="clean">Clean</option>
                 <option value="fab">Fab dims</option>
@@ -276,7 +292,7 @@
               </select>
             </label>
             <label class="dimension-style-field dimension-mode-field">
-              <span>Dim view</span>
+              <span>Dimensions</span>
               <select id="dimensionStyleSelect" aria-label="Dimension style">
                 <option value="labels">Size labels only</option>
                 <option value="redline">Red C/C lines</option>
@@ -305,7 +321,7 @@
                 <option value="takeoff">Material order / take-off sheet</option>
               </select>
             </label>
-            <button class="workspace-action-button export-action" id="export3dButton" type="button">
+            <button class="workspace-action-button export-action" id="export3dButton" type="button" title="Export 3D model image" aria-label="Export 3D model image">
               <svg><use href="#icon-export"></use></svg>
               <span>Export 3D</span>
             </button>
@@ -365,6 +381,18 @@
               <div class="action-menu-groups">
                 <section class="action-menu-group">
                   <h2>Project</h2>
+                  <button class="icon-button labeled" id="actionMenuJobsButton" type="button" title="Open job dashboard" aria-label="Open job dashboard">
+                    <svg><use href="#icon-sample"></use></svg>
+                    <span>Jobs</span>
+                  </button>
+                  <button class="icon-button labeled" id="actionMenuBigSpoolButton" type="button" title="Open Big Spool planner" aria-label="Open Big Spool planner">
+                    <svg><use href="#icon-measure"></use></svg>
+                    <span>Big Spool</span>
+                  </button>
+                  <button class="icon-button labeled" id="actionMenuAccountButton" type="button" title="Open account and cloud sync" aria-label="Open account and cloud sync">
+                    <svg><use href="#icon-user"></use></svg>
+                    <span>Account &amp; cloud</span>
+                  </button>
                   <button class="icon-button labeled danger" id="resetButton" type="button" title="Start a new spool" aria-label="Start a new spool">
                     <svg><use href="#icon-reset"></use></svg>
                     <span>New spool</span>
@@ -404,6 +432,14 @@
                 </section>
                 <section class="action-menu-group">
                   <h2>Setup</h2>
+                  <div class="interface-density-control">
+                    <span>Workspace controls</span>
+                    <div class="interface-density-tabs" role="group" aria-label="Workspace control level">
+                      <button id="simpleControlsButton" data-interface-density="simple" type="button" aria-pressed="true">Simple</button>
+                      <button id="fullControlsButton" data-interface-density="full" type="button" aria-pressed="false">Full</button>
+                    </div>
+                    <small>Simple keeps the drawing clear. Full shows every setting.</small>
+                  </div>
                   <div class="theme-menu-control">
                     <span>Theme</span>
                     <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
@@ -436,6 +472,7 @@
             </div>
         </div>
       </header>
+      <button class="workspace-settings-scrim" id="workspaceSettingsScrim" type="button" aria-label="Close Pipe and display settings" hidden></button>
 
       <section class="spool-workspace-shell" id="spoolWorkspaceShell" aria-label="Open spool workspace">
         <div class="spool-workspace-tabs" id="spoolWorkspaceTabs" role="tablist" aria-label="Open spools"></div>
@@ -580,7 +617,7 @@
                 <svg><use href="#icon-sample"></use></svg>
                 <span>3D</span>
               </button>
-              <button class="icon-button compact labeled inspector-show-button" id="inspectorShowButton" type="button" title="Open drawing details" aria-label="Open Inspector" aria-expanded="false">
+              <button class="icon-button compact labeled inspector-show-button" id="inspectorShowButton" type="button" title="Open drawing details" aria-label="Open Details" aria-expanded="false">
                 <svg><use href="#icon-settings"></use></svg>
                 <span>Details</span>
               </button>
@@ -609,19 +646,19 @@
           </div>
         </section>
 
-        <aside class="control-panel inspector-panel" aria-label="Spool inspector">
+        <aside class="control-panel inspector-panel" aria-label="Spool details">
           <div class="inspector-header">
             <div>
-              <strong>Inspector</strong>
+              <strong>Details</strong>
               <small id="inspectorModeHint">Draw lengths, angles and selected properties</small>
             </div>
             <div class="sheet-header-actions">
               <button class="sheet-switch-button" id="inspectorOpenPreviewButton" type="button" aria-label="Switch from Details to 3D preview">3D</button>
-              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close inspector">Close</button>
+              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close Details">Close</button>
             </div>
           </div>
-          <div class="inspector-tabs" role="tablist" aria-label="Inspector views">
-            <button class="active" data-inspector-tab="properties" data-mode-tabs="draw edit" type="button">Properties</button>
+          <div class="inspector-tabs" role="tablist" aria-label="Detail views">
+            <button class="active" data-inspector-tab="properties" data-mode-tabs="draw edit" type="button">Item</button>
             <button data-inspector-tab="cutlist" data-mode-tabs="review export" type="button">Cut List</button>
             <button data-inspector-tab="weights" data-mode-tabs="review export" type="button">Weights</button>
             <button data-inspector-tab="bom" data-mode-tabs="export" type="button">BOM</button>
@@ -1095,6 +1132,7 @@
               <button class="icon-button labeled" id="accountExportDataButton" type="button" hidden>Export my data</button>
               <button class="icon-button labeled" id="diagnosticReportButton" type="button">Download diagnostics</button>
               <button class="icon-button labeled" id="legalSupportButton" type="button">Privacy, terms &amp; support</button>
+              <button class="icon-button labeled support-admin-launch" id="supportAdminButton" type="button" hidden>Support Admin</button>
               <button class="icon-button labeled danger" id="accountDeleteButton" type="button" hidden>Delete cloud account</button>
             </div>
           </section>
@@ -1110,6 +1148,52 @@
         </form>
       </div>
 
+      <div class="project-dialog-backdrop support-admin-backdrop" id="supportAdminDialog" hidden>
+        <section class="project-dialog-card support-admin-card" aria-label="SpoolMate Support Admin">
+          <div class="project-dialog-header support-admin-header">
+            <div>
+              <span class="support-admin-live-badge">Live support console</span>
+              <strong>SpoolMate Support Admin</strong>
+              <small>Diagnose accounts and make audited repairs. Customer business admins cannot access this area.</small>
+            </div>
+            <button class="icon-button compact labeled" id="supportAdminCloseButton" type="button">Close</button>
+          </div>
+          <div class="support-admin-identity" id="supportAdminIdentity">Confirming platform administrator access&hellip;</div>
+          <div class="support-admin-summary" id="supportAdminSummary" aria-live="polite"></div>
+          <form class="support-admin-search" id="supportAdminSearchForm">
+            <label>
+              <span>Find a customer</span>
+              <input id="supportAdminSearchInput" type="search" minlength="2" maxlength="120" placeholder="Email, name, phone or user ID" autocomplete="off" />
+            </label>
+            <button class="primary-button" id="supportAdminSearchButton" type="submit">Search accounts</button>
+            <button class="icon-button labeled" id="supportAdminRefreshButton" type="button">Refresh overview</button>
+          </form>
+          <div class="support-admin-status" id="supportAdminStatus" role="status" aria-live="polite">Search for an account to begin.</div>
+          <div class="support-admin-workspace">
+            <aside class="support-admin-results" aria-label="Customer search results">
+              <div class="support-admin-section-heading">
+                <strong>Accounts</strong>
+                <small id="supportAdminResultCount">No search yet</small>
+              </div>
+              <div class="support-admin-result-list" id="supportAdminResultList"></div>
+            </aside>
+            <main class="support-admin-detail" id="supportAdminDetail">
+              <div class="support-admin-empty">
+                <strong>Select a customer account</strong>
+                <span>You will see the licence, businesses, memberships, cloud spools and recent support history here.</span>
+              </div>
+            </main>
+          </div>
+          <section class="support-admin-audit">
+            <div class="support-admin-section-heading">
+              <strong>Recent admin activity</strong>
+              <small>Every repair records the operator, reason and before/after values.</small>
+            </div>
+            <div class="support-admin-audit-list" id="supportAdminAuditList"></div>
+          </section>
+        </section>
+      </div>
+
       <div class="project-dialog-backdrop" id="projectLibraryDialog" hidden>
         <section class="project-dialog-card project-library-card" aria-label="Job dashboard">
           <div class="project-dialog-header">
@@ -1117,6 +1201,7 @@
               <strong>Job dashboard</strong>
               <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Use the production board or open a job folder, then tap a spool drawing.</small>
             </div>
+            <button class="icon-button compact labeled project-library-header-close" id="projectLibraryCloseButton" type="button">Close</button>
           </div>
           <div class="workspace-location-strip" data-workspace-location data-location-context="Jobs"></div>
           <div class="project-dashboard-toolbar" aria-label="Job dashboard tools">
@@ -1128,15 +1213,15 @@
               <svg><use href="#icon-sample"></use></svg>
               <span>This device</span>
             </button>
-            <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
+            <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button" hidden>
               <svg><use href="#icon-help"></use></svg>
               <span>Guide</span>
             </a>
-            <button class="icon-button labeled" id="projectLibraryCommsButton" type="button">
+            <button class="icon-button labeled" id="projectLibraryCommsButton" type="button" hidden>
               <svg><use href="#icon-note"></use></svg>
               <span>Comms</span>
             </button>
-            <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
+            <button class="icon-button labeled" id="projectLibraryReportButton" type="button" hidden>
               <svg><use href="#icon-report"></use></svg>
               <span>Report</span>
             </button>
@@ -1144,7 +1229,7 @@
               <svg><use href="#icon-reset"></use></svg>
               <span>New spool</span>
             </button>
-            <button class="primary-button save-action" id="projectLibrarySaveButton" type="button">
+            <button class="primary-button save-action" id="projectLibrarySaveButton" type="button" hidden>
               <svg><use href="#icon-export"></use></svg>
               <span>Save current</span>
             </button>
@@ -1156,7 +1241,7 @@
                 <ol>
                   <li>
                     <strong>Save each spool first.</strong>
-                    <span>Use Save current so the spool appears in the job list and production board.</span>
+                    <span>Save from the drawing screen so the spool appears in the job list and production board.</span>
                   </li>
                   <li>
                     <strong>Move the spool through stages.</strong>
@@ -1171,8 +1256,8 @@
                     <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
                   </li>
                   <li>
-                    <strong>Open Comms for the team view.</strong>
-                    <span>Use Comms to post general team messages and see all active spool notes in one place.</span>
+                    <strong>Use More for team tools.</strong>
+                    <span>Open More for the Jobs guide, Team comms and daily or weekly reports without crowding the main toolbar.</span>
                   </li>
                 </ol>
                 <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
@@ -1217,9 +1302,6 @@
           </section>
           <div class="project-library-report-slot" id="projectLibraryReportSlot" hidden></div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
-          <div class="project-dialog-actions">
-            <button class="icon-button labeled" id="projectLibraryCloseButton" type="button">Close</button>
-          </div>
         </section>
       </div>
 
@@ -1329,7 +1411,7 @@
               <button class="tutorial-video-shelf-button" type="button" data-open-video-tutorial="jobs">
                 <span>7:35</span>
                 <strong>Jobs dashboard</strong>
-                <small>Planning, holds, comms, reports and QR</small>
+                <small>My day, compact jobs, holds, team tools and QR</small>
               </button>
               <button class="tutorial-video-shelf-button" type="button" data-open-video-tutorial="drawing">
                 <span>10:08</span>
@@ -1706,6 +1788,9 @@
             <span id="aiHelperMode">Built-in help</span>
             <span id="aiHelperQuota">Available on this device</span>
           </div>
+          <div class="ai-helper-context" id="aiHelperContext" aria-live="polite">
+            Helping with: Draw workspace
+          </div>
           <div class="ai-helper-messages" id="aiHelperMessages" role="log" aria-live="polite" aria-relevant="additions"></div>
           <div class="ai-helper-suggestions" id="aiHelperSuggestions" aria-label="Suggested questions">
             <button type="button" data-ai-suggestion="How do I draw a 45 degree offset?">45° offset</button>
@@ -1761,6 +1846,10 @@
               <h2>Using iPad or phone</h2>
               <div class="help-grid">
                 <article>
+                  <strong>Simple and Full controls</strong>
+                  <p>Simple keeps the drawing clear and puts pipe size, dimensions and display choices inside Pipe &amp; display. Open Menu &gt; Workspace controls whenever you want to switch to Full and see every setting at once.</p>
+                </article>
+                <article>
                   <strong>Change a flange</strong>
                   <p>Tap Select, zoom in if needed, then press and hold directly on the flange marker until the menu opens. Tap Flange standard, then pick Table E, PN 16, ANSI 150 or another type. The 3D model uses that table's actual flange OD, thickness, bolt PCD, hole diameter and hole count.</p>
                 </article>
@@ -1778,7 +1867,7 @@
                 </article>
                 <article>
                   <strong>3D view</strong>
-                  <p>Drag to rotate, middle mouse or Move to pan, wheel or pinch to zoom, and Fit to centre the whole spool.</p>
+                  <p>Tap 3D above the drawing. Drag to rotate, use Move to pan, pinch to zoom, and Fit to centre the whole spool.</p>
                 </article>
                 <article>
                   <strong>If the menu does not open</strong>
@@ -2004,6 +2093,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=333"></script>
+    <script defer src="./app.js?v=349"></script>
   </body>
 </html>
