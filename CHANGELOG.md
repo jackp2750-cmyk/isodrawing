@@ -1,6 +1,72 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.49`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.62`.
+
+## v3.62 - Concentric and eccentric reducers
+
+- Added an explicit default reducer type and per-reducer override, supporting mixed concentric and eccentric reducers in one spool.
+- Changed the isometric reducer symbol so concentric reducers remain centred while eccentric reducers show a flat side and their centreline offset `e`.
+- Added `CONC`/`ECC` labels to the 2D drawing and detailed reducer labels to the interactive 3D view.
+- Added reducer type, Atlas face-to-face `H`, eccentric offset `e`, size pair, weight and source to takeoff, BOM, review summary and fabrication PDF notes.
+- Kept ASME B16.9 face-to-face `H` based on the large nominal size for both reducer types, as published by Atlas, instead of inventing a second deduction table.
+- Added the Atlas Schedule 10S eccentric DN40 x DN32 weight of 0.24 kg while retaining the 0.21 kg concentric value.
+- Added separate concentric/eccentric placement actions and touch/right-click controls for changing any automatic or manual reducer.
+
+## v3.61 - Demo-day acceptance audit
+
+- Kept the full phone drawing toolbar inside the visible safe area on iPhone and Samsung-sized screens.
+- Made multi-spool tabs show the spool number first on tablets and phones so similarly named jobs remain distinguishable.
+- Remembered an explicit continue-without-account choice while keeping Account available for later cloud sign-in.
+- Reset Quick PDF, managed conversion and every new spool/tab to a clean Draw surface with Details and 3D closed.
+- Rechecked Quick PDF, managed draft PDF, saved-spool reopening, multi-spool tabs/windows, mobile 3D and offline PWA reload.
+
+## v3.55 - Workflow dead-end audit
+
+- Kept Draw, Edit, Review and Export tabs clickable while a mobile Details or 3D sheet is open.
+- Changed drawing-health success wording so it cannot be mistaken for workflow approval.
+- Made the Issue action state its next requirement, such as fixing two blockers or approving before issue.
+- Rechecked Jobs, Big Spool, Tutorial, Review and Export return paths at PC, iPad, Android tablet, iPhone and Android-phone sizes.
+
+## v3.54 - Obvious PDF download in Export
+
+- Added a large Download fabrication PDF action as the first item inside the Export/BOM panel.
+- Kept the same PDF action visible beside the drawing in Export mode for both Simple and Full controls.
+- Clarified whether the download will be a quick, draft or issued PDF and refreshed the PWA cache.
+
+## v3.53 - New spools always start in Draw
+
+- Forced every fresh managed spool to open in Draw mode instead of inheriting Review or Export from the previous spool.
+- Reset the first-spool guide to its drawing step and opened the drawing surface consistently on PC, tablet and phone.
+- Refreshed the PWA cache version so installed devices receive the corrected startup flow.
+
+## v3.52 - Quick PDF and managed workflow choices
+
+- Added a one-click Quick PDF route for individual users who do not need an account, Jobs dashboard, allocation, checking or formal issue workflow.
+- Kept the full Managed job route for saved jobs, review, formal issue, QR travellers, production and business collaboration.
+- Reduced Quick PDF navigation to Draw, Edit and PDF, with a compact cross-platform action bar for Draw, Fittings and Download PDF.
+- Added direct Quick PDF export with a small `USER CHECK REQUIRED / NOT FORMALLY ISSUED` footer instead of the managed draft watermark and issue prompts.
+- Allowed a Quick PDF drawing to be converted into a managed job without redrawing it.
+- Persisted the chosen route in local, project-file and cloud drawing state so it reopens consistently across PC, iPad/iPhone and Android devices.
+
+## v3.51 - Guided start-to-finish spool flow
+
+- Reduced New drawing to four essential fields, with fitting source, supplier reference and weld gap moved into an optional fabrication section.
+- Reworked the first-spool guide into the real sequence: drag a run, tap/right-click to set its exact length, add fittings and ends, save, review, then issue/export.
+- Made Save a one-tap action after the spool has its identifiers; project details only reopen when they are incomplete or explicitly being corrected.
+- Exposed all fitting and pipe-end tools in Draw mode and made a normal touch tap on a pipe, fitting or endpoint open its action sheet.
+- Kept Fab PDF visible in Simple Export mode and improved the iPad/Android inspector, 3D and pipe-action sheets.
+- Separated workshop assignment, due dates and gear readiness from drawing approval; they remain in Jobs and no longer require an issue override.
+- Removed internal app self-tests from spool approval decisions and fixed a disappearing drawing-highlight crash.
+- Collapsed production handoff and revision history under one secondary Review section so drawing blockers and their Fix actions stay prominent.
+
+## v3.50 - Clear interactive tutorial layout
+
+- Removed the duplicated video shelf from the interactive tutorial while keeping Video tutorials one click away in the header.
+- Rebuilt the tutorial header and footer around one obvious practice action, with Close moved out of the learning controls.
+- Increased the usable desktop workspace and switched iPad, Android tablet and touch layouts to one clear lesson column with a compact topic picker.
+- Added a dedicated short-height landscape layout so the lesson no longer collapses behind navigation and video cards.
+- Made practice trainer-first by hiding the repeated lesson copy while a mini task is active.
+- Reset topic and practice scrolling so every lesson opens at its beginning instead of retaining the previous topic's position.
 
 ## v3.49 - Learnable drawing workspace
 

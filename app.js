@@ -66,6 +66,7 @@ const noteTextInput = document.querySelector("#noteTextInput");
 const noteColorInput = document.querySelector("#noteColorInput");
 const flangeModeSelect = document.querySelector("#flangeModeSelect");
 const flangeStandardSelect = document.querySelector("#flangeStandardSelect");
+const reducerTypeSelect = document.querySelector("#reducerTypeSelect");
 const dimensionToggle = document.querySelector("#dimensionToggle");
 const drawingDetailSelect = document.querySelector("#drawingDetailSelect");
 const dimensionStyleSelect = document.querySelector("#dimensionStyleSelect");
@@ -115,6 +116,7 @@ const regressionChecklist = document.querySelector("#regressionChecklist");
 const fabSheetTemplateSelect = document.querySelector("#fabSheetTemplateSelect");
 const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
 const homeDashboardButton = document.querySelector("#homeDashboardButton");
+const quickPdfMenuButton = document.querySelector("#quickPdfMenuButton");
 const drawingAssistantButton = document.querySelector("#drawingAssistantButton");
 const accountButton = document.querySelector("#accountButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
@@ -193,6 +195,8 @@ const businessSeatSummary = document.querySelector("#businessSeatSummary");
 const projectDialog = document.querySelector("#projectDialog");
 const projectDialogForm = document.querySelector("#projectDialogForm");
 const projectDialogTitle = document.querySelector("#projectDialogTitle");
+const projectDialogSubtitle = document.querySelector("#projectDialogSubtitle");
+const projectDialogAdvanced = document.querySelector("#projectDialogAdvanced");
 const projectDialogSubmitButton = document.querySelector("#projectDialogSubmitButton");
 const projectDialogCancelButton = document.querySelector("#projectDialogCancelButton");
 const projectDialogJobPickerButton = document.querySelector("#projectDialogJobPickerButton");
@@ -207,6 +211,7 @@ let homeDashboardAccount = document.querySelector("#homeDashboardAccount");
 let homeDashboardStats = document.querySelector("#homeDashboardStats");
 let homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
 let homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+let homeDashboardQuickPdfButton = document.querySelector("#homeDashboardQuickPdfButton");
 let homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
 let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
 let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
@@ -317,6 +322,11 @@ const firstSpoolGuideExpandButton = document.querySelector("#firstSpoolGuideExpa
 const firstSpoolGuideActionButton = document.querySelector("#firstSpoolGuideActionButton");
 const firstSpoolGuideNextButton = document.querySelector("#firstSpoolGuideNextButton");
 const firstSpoolGuideCloseButton = document.querySelector("#firstSpoolGuideCloseButton");
+const quickPdfBar = document.querySelector("#quickPdfBar");
+const quickPdfDrawButton = document.querySelector("#quickPdfDrawButton");
+const quickPdfFittingsButton = document.querySelector("#quickPdfFittingsButton");
+const quickPdfDownloadButton = document.querySelector("#quickPdfDownloadButton");
+const quickPdfManagedButton = document.querySelector("#quickPdfManagedButton");
 const touchShiftAngleButton = document.querySelector("#touchShiftAngleButton");
 const noteDialog = document.querySelector("#noteDialog");
 const noteDialogTitle = document.querySelector("#noteDialogTitle");
@@ -418,7 +428,7 @@ const PREVIEW_FLOAT_BOUNDS_KEY = "spoolmate-preview-bounds-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
 const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
 const VIDEO_TUTORIAL_SELECTION_KEY = "spoolmate-video-tutorial-selection-v1";
-const FIRST_USE_GUIDE_KEY = "spoolmate-first-spool-guide-v1";
+const FIRST_USE_GUIDE_KEY = "spoolmate-guided-workflow-v2";
 const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v2";
 const JOB_DASHBOARD_FILTER_KEY = "spoolmate-job-dashboard-filter-v1";
 const JOB_DASHBOARD_PINS_KEY = "spoolmate-job-dashboard-pins-v1";
@@ -426,8 +436,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.49";
-const APP_BUILD_DATE = "2026-08-11";
+const APP_VERSION = "v3.62";
+const APP_BUILD_DATE = "2026-08-13";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -702,6 +712,7 @@ const LICENCE_UPGRADE_URL = "";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
 const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
+const AUTH_GUEST_DEVICE_KEY = "isospool-auth-guest-device-v1";
 const ACTIVE_COMPANY_KEY = "isospool-active-company-v1";
 const ACTIVE_WORKSPACE_KEY = "spoolmate-active-workspace-v1";
 const PENDING_BUSINESS_SIGNUP_KEY = "spoolmate-pending-business-signup-v1";
@@ -955,6 +966,7 @@ const FLANGE_STANDARD_KEYS = new Set(Object.keys(FLANGE_STANDARDS));
 const ROLL_GROOVE_SETBACK_MM = 18;
 const ROLL_GROOVE_VISUAL_WIDTH_MM = 9;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
+const REDUCER_TYPE_OPTIONS = new Set(["concentric", "eccentric"]);
 const DRAW_STOP_TOOLS = new Set(["draw", "tee", "branch"]);
 const PREVIEW_MODES = new Set(["illustrated", "tricolor", "carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
 const LEGACY_PREVIEW_MODE_MAP = {
@@ -1274,7 +1286,7 @@ const TUTORIAL_STEPS = [
     kicker: "Pipe Size",
     menuLabel: "Pipe size",
     title: "Change pipe size from menus",
-    body: "Open Pipe & display to choose the next run size. Size changes on normal runs and tee connections add reducers where needed. Branches stay as welded cut-ins without reducers.",
+    body: "Open Pipe & display to choose the next run size and default reducer type. Size changes on normal runs and tee connections add either a concentric or eccentric reducer. Eccentric reducers show their flat side and offset e. Branches stay as welded cut-ins without reducers.",
     target: "#workspaceSettingsButton",
     targetLabel: "Pipe & display",
     action: "focusPipeSize",
@@ -1283,7 +1295,7 @@ const TUTORIAL_STEPS = [
     items: [
       "Use Pipe & display > Size for the next run size.",
       "Right-click or long-press selected pipe to change existing sizes from the list.",
-      "Reducers are added for size changes on normal pipe and tee connections. Branch welds stay cut into the main pipe with no reducer.",
+      "Reducers are added for size changes on normal pipe and tee connections. Pick concentric or eccentric, then right-click or long-press an individual reducer to change it. Branch welds stay cut into the main pipe with no reducer.",
       "At a welded branch, changing either straight-through main section updates the whole continuous main. The side outlet keeps its own size.",
     ],
   },
@@ -1419,49 +1431,42 @@ const FIRST_USE_GUIDE_STEPS = [
   {
     id: "draw",
     title: "Draw the first pipe run",
-    message: "Choose Draw, then drag from the yellow point to place the first centreline run.",
+    message: "Choose Draw, then drag from the yellow point. The preview shows the run before you release.",
     actionLabel: "Start drawing",
     target: '[data-tool="draw"]',
   },
   {
     id: "length",
-    title: "Add an exact length",
-    message: "Enter the centre-to-centre length in millimetres, then use an X, Y or Z direction button.",
-    actionLabel: "Set length",
-    target: "#stepLengthInput",
+    title: "Set the exact pipe length",
+    message: "Tap the pipe you just drew, then choose Change length. On a PC, right-click does the same thing.",
+    actionLabel: "Select a pipe",
+    target: "#drawCanvas",
   },
   {
     id: "fittings",
-    title: "Add a fitting",
-    message: "Open Fittings to add a tee, branch, flange, groove, reducer, socket, valve or weld.",
+    title: "Finish the pipe and add fittings",
+    message: "Open Fittings for tees and branches, or tap a pipe/end for flanges, roll grooves, threads, sockets, reducers and welds.",
     actionLabel: "Open fittings",
     target: "#fittingsToolButton",
   },
   {
-    id: "select",
-    title: "Edit what you drew",
-    message: "Choose Select, then tap a run or fitting to change it without adding more pipe.",
-    actionLabel: "Choose Select",
-    target: '[data-tool="select"]',
-  },
-  {
     id: "save",
     title: "Save the spool",
-    message: "Save now so the job, spool and revision stay attached to this drawing.",
+    message: "Save keeps this job, spool and revision together. After the first setup, this is a single tap.",
     actionLabel: "Save spool",
     target: "#saveBrowserProjectButton",
   },
   {
     id: "review",
     title: "Review the checks",
-    message: "The full workspace is now visible. Open Review and clear the drawing and weld-register checks.",
+    message: "Open Review. Each real blocker has one Fix button; workshop allocation is handled separately in Jobs.",
     actionLabel: "Open checks",
     target: '[data-app-mode="review"]',
   },
   {
     id: "export",
     title: "Issue the workshop output",
-    message: "Open Export, choose the PDF style and create the fabrication sheet when the checklist is clear.",
+    message: "Approve and issue the revision, then use Fab PDF. The PDF button stays visible in Simple controls.",
     actionLabel: "Open export",
     target: '[data-app-mode="export"]',
   },
@@ -1575,6 +1580,16 @@ const PROJECT_INFO_DEFAULT = {
   fittingProfileReference: "",
   weldGapMm: String(DEFAULT_WELD_GAP_MM),
 };
+const WORKFLOW_KINDS = new Set(["managed", "quick"]);
+
+function normalizeWorkflowKind(value) {
+  const normalized = String(value ?? "managed").trim().toLowerCase();
+  return WORKFLOW_KINDS.has(normalized) ? normalized : "managed";
+}
+
+function isQuickPdfMode(source = state) {
+  return normalizeWorkflowKind(source?.workflowKind) === "quick";
+}
 const ATLAS_BUTTWELD_WEIGHTS = {
   carbon40: {
     15: { elbow90: 0.08, elbow45: 0.04, tee: 0.09 },
@@ -1678,6 +1693,12 @@ const ATLAS_STAINLESS10_REDUCER_WEIGHTS = {
   "250:200": 5.20,
   "300:200": 7.67,
   "300:250": 7.98,
+};
+// Atlas Schedule 10S welded butt-weld reducer weights are the same for both
+// types except DN40 x DN32, where the eccentric reducer is published as 0.24 kg
+// rather than the 0.21 kg concentric value.
+const ATLAS_STAINLESS10_ECCENTRIC_REDUCER_WEIGHT_OVERRIDES = {
+  "40:32": 0.24,
 };
 const TEE_TAKEOFF_MM = {
   6: 25,
@@ -2072,6 +2093,7 @@ function sampleState() {
     ],
     nodeTypes: {},
     reducerSideOverrides: {},
+    reducerTypeOverrides: {},
     dimensionOffsets: {},
     hoveredSegment: null,
     pointer: null,
@@ -2083,6 +2105,7 @@ function sampleState() {
     anglePlane: "xy",
     flangeMode: "single",
     flangeStandard: "ansi150",
+    reducerType: "concentric",
     previewMode: "tricolor",
     show3dLabels: true,
     gridScale: 42,
@@ -2126,6 +2149,7 @@ function hardCodedDrawingDefaults() {
     angleDegrees: 45,
     anglePlane: "xy",
     flangeMode: "single",
+    reducerType: "concentric",
     previewMode: "tricolor",
     show3dLabels: true,
     gridScale: 42,
@@ -2152,6 +2176,7 @@ function normalizeDrawingDefaults(defaults = {}) {
     anglePlane: normalizeAnglePlane(defaults.anglePlane ?? base.anglePlane),
     flangeMode: normalizeFlangeMode(defaults.flangeMode ?? base.flangeMode),
     flangeStandard: normalizeFlangeStandard(defaults.flangeStandard ?? base.flangeStandard),
+    reducerType: normalizeReducerType(defaults.reducerType ?? base.reducerType),
     previewMode: normalizePreviewMode(defaults.previewMode ?? base.previewMode),
     show3dLabels: defaults.show3dLabels !== false,
     gridScale: clampNumber(Number(defaults.gridScale) || base.gridScale, 24, 72),
@@ -2269,6 +2294,7 @@ function drawingDefaultsFromState(source = state) {
     anglePlane: source?.anglePlane,
     flangeMode: source?.flangeMode,
     flangeStandard: source?.flangeStandard,
+    reducerType: source?.reducerType,
     previewMode: source?.previewMode,
     show3dLabels: source?.show3dLabels !== false,
     gridScale: source?.gridScale,
@@ -2307,6 +2333,7 @@ function blankState(options = {}) {
     measurements: [],
     nodeTypes: {},
     reducerSideOverrides: {},
+    reducerTypeOverrides: {},
     dimensionOffsets: {},
     hoveredSegment: null,
     pointer: null,
@@ -2318,6 +2345,7 @@ function blankState(options = {}) {
     anglePlane: defaults.anglePlane,
     flangeMode: defaults.flangeMode,
     flangeStandard: defaults.flangeStandard,
+    reducerType: defaults.reducerType,
     previewMode: defaults.previewMode,
     show3dLabels: defaults.show3dLabels,
     gridScale: defaults.gridScale,
@@ -2328,6 +2356,7 @@ function blankState(options = {}) {
     showLiftingPoints: defaults.showLiftingPoints,
     liftingSlingAngleDegrees: defaults.liftingSlingAngleDegrees,
     projectId: null,
+    workflowKind: "managed",
     projectInfoPrompted: false,
     projectStatus: "draft",
     checkedBy: "",
@@ -2410,6 +2439,7 @@ function statePayload(options = {}) {
     measurements: normalizeMeasurements(state.measurements),
     nodeTypes: normalizeNodeTypes(state.nodeTypes, state.points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length),
+    reducerTypeOverrides: normalizeReducerTypeOverrides(state.reducerTypeOverrides, state.points.length),
     dimensionOffsets: normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length),
     activePoint: state.activePoint,
     selectedPoint: state.selectedPoint,
@@ -2422,6 +2452,7 @@ function statePayload(options = {}) {
     anglePlane: state.anglePlane,
     flangeMode: state.flangeMode,
     flangeStandard: normalizeFlangeStandard(state.flangeStandard),
+    reducerType: normalizeReducerType(state.reducerType),
     previewMode: state.previewMode,
     show3dLabels: state.show3dLabels !== false,
     gridScale: state.gridScale,
@@ -2432,6 +2463,7 @@ function statePayload(options = {}) {
     showLiftingPoints: state.showLiftingPoints,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees),
     projectId: state.projectId,
+    workflowKind: normalizeWorkflowKind(state.workflowKind),
     projectInfoPrompted: state.projectInfoPrompted === true,
     projectStatus: normalizeProjectStatus(state.projectStatus),
     checkedBy: String(state.checkedBy ?? "").trim().slice(0, 64),
@@ -2499,6 +2531,7 @@ function stateFromPayload(payload, options = {}) {
     measurements: normalizeMeasurements(saved.measurements),
     nodeTypes: normalizeNodeTypes(saved.nodeTypes, points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(saved.reducerSideOverrides, points.length),
+    reducerTypeOverrides: normalizeReducerTypeOverrides(saved.reducerTypeOverrides, points.length),
     dimensionOffsets: normalizeDimensionOffsets(saved.dimensionOffsets, edges.length),
     pipeSizeNb: defaultPipeSizeFromSaved(saved, edges, selectedSegments),
     pipeSpec: normalizePipeSpec(saved.pipeSpec),
@@ -2507,6 +2540,7 @@ function stateFromPayload(payload, options = {}) {
     anglePlane: normalizeAnglePlane(saved.anglePlane),
     flangeMode: applyNewDefaults ? "single" : normalizeFlangeMode(saved.flangeMode),
     flangeStandard: applyNewDefaults ? "ansi150" : normalizeFlangeStandard(saved.flangeStandard),
+    reducerType: normalizeReducerType(saved.reducerType),
     previewMode: normalizePreviewMode(saved.previewMode),
     show3dLabels: saved.show3dLabels !== false,
     selectedSegments,
@@ -2521,6 +2555,7 @@ function stateFromPayload(payload, options = {}) {
     showLiftingPoints: applyNewDefaults ? false : saved.showLiftingPoints === true,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(saved.liftingSlingAngleDegrees),
     projectId: normalizeProjectId(saved.projectId),
+    workflowKind: normalizeWorkflowKind(saved.workflowKind),
     projectInfoPrompted: saved.projectInfoPrompted === true || hasProjectInfo(saved.projectInfo),
     projectStatus: normalizeProjectStatus(saved.projectStatus),
     checkedBy: String(saved.checkedBy ?? "").trim().slice(0, 64),
@@ -2662,6 +2697,36 @@ function normalizeReducerSideOverrides(overrides, pointCount) {
   return normalized;
 }
 
+function normalizeReducerType(value) {
+  return REDUCER_TYPE_OPTIONS.has(value) ? value : "concentric";
+}
+
+function reducerTypeLabel(value) {
+  return normalizeReducerType(value) === "eccentric" ? "Eccentric" : "Concentric";
+}
+
+function reducerTypeCode(value) {
+  return normalizeReducerType(value) === "eccentric" ? "ECC" : "CONC";
+}
+
+function normalizeReducerTypeOverrides(overrides, pointCount) {
+  if (!overrides || typeof overrides !== "object") return {};
+
+  const normalized = {};
+  for (const [key, value] of Object.entries(overrides)) {
+    const index = Number(key);
+    if (
+      Number.isInteger(index) &&
+      index >= 0 &&
+      index < pointCount &&
+      REDUCER_TYPE_OPTIONS.has(value)
+    ) {
+      normalized[index] = value;
+    }
+  }
+  return normalized;
+}
+
 function normalizeDimensionOffsets(offsets, edgeCount) {
   if (!offsets || typeof offsets !== "object") return {};
 
@@ -2716,6 +2781,18 @@ function reindexReducerSideOverridesAfterPointRemoval(removedIndex) {
     next[index > removedIndex ? index - 1 : index] = value;
   }
   state.reducerSideOverrides = next;
+}
+
+function reindexReducerTypeOverridesAfterPointRemoval(removedIndex) {
+  if (!state.reducerTypeOverrides || typeof state.reducerTypeOverrides !== "object") return;
+
+  const next = {};
+  for (const [key, value] of Object.entries(state.reducerTypeOverrides)) {
+    const index = Number(key);
+    if (!Number.isInteger(index) || index === removedIndex || !REDUCER_TYPE_OPTIONS.has(value)) continue;
+    next[index > removedIndex ? index - 1 : index] = value;
+  }
+  state.reducerTypeOverrides = next;
 }
 
 function reindexDimensionOffsetsAfterSegmentSplit(splitIndex) {
@@ -2832,6 +2909,9 @@ function normalizeFittings(fittings, edgeCount) {
       if (type === "socket") {
         normalized.socketSizeNb = normalizePipeSize(fitting.socketSizeNb ?? SOCKET_SIZE_NB);
         normalized.socketAngle = normalizeSocketAngle(fitting.socketAngle);
+      }
+      if (type === "reducer") {
+        normalized.reducerType = normalizeReducerType(fitting.reducerType);
       }
 
       const weightKg = Number(fitting.weightKg);
@@ -3798,7 +3878,7 @@ function regressionAutoCheckTeeReducer(segmentData, quantities, definition) {
   const takeoffRows = takeoffCountRows(quantities);
   const bomSeparatesTeeAndReducer =
     takeoffRows.some((row) => row.key === "tee:150:equal" && row.quantity === 1) &&
-    takeoffRows.some((row) => row.key === "reducer:auto:150:80" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:concentric:150:80" && row.quantity === 1) &&
     !takeoffRows.some((row) => row.label.startsWith("Reducing tee"));
   const passed =
     reducers.length >= 1 &&
@@ -3836,8 +3916,8 @@ function regressionAutoCheckLargeOutletTee(segmentData, quantities, definition) 
     tee?.connections?.length === 3 &&
     tee.connections.every((connection) => Math.abs(Number(connection.takeoffMm) - expectedTakeoff) < 0.001) &&
     takeoffRows.some((row) => row.key === "tee:150:equal" && row.quantity === 1) &&
-    takeoffRows.some((row) => row.key === "reducer:auto:150:100" && row.quantity === 1) &&
-    takeoffRows.some((row) => row.key === "reducer:auto:150:80" && row.quantity === 1);
+    takeoffRows.some((row) => row.key === "reducer:auto:concentric:150:100" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:concentric:150:80" && row.quantity === 1);
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
@@ -4100,6 +4180,7 @@ function regressionAutoCheckStateRoundTrip(segmentData, quantities, definition) 
     same(restored.measurements, payload.measurements) &&
     same(restored.nodeTypes, payload.nodeTypes) &&
     same(restored.reducerSideOverrides, payload.reducerSideOverrides) &&
+    same(restored.reducerTypeOverrides, payload.reducerTypeOverrides) &&
     same(restored.dimensionOffsets, payload.dimensionOffsets) &&
     same(restored.projectInfo, payload.projectInfo) &&
     restored.pipeSpec === payload.pipeSpec &&
@@ -4428,6 +4509,12 @@ function normalizeConnectionTrustState() {
     if (!bendReducerExistsAtNode(nodeIndex, connected, segmentByIndex)) {
       delete state.reducerSideOverrides[key];
     }
+  }
+
+  const reducerNodes = new Set(autoReducerTransitions(segmentData).map((reducer) => reducer.nodeIndex));
+  state.reducerTypeOverrides = normalizeReducerTypeOverrides(state.reducerTypeOverrides, state.points.length);
+  for (const key of Object.keys(state.reducerTypeOverrides)) {
+    if (!reducerNodes.has(Number(key))) delete state.reducerTypeOverrides[key];
   }
 }
 
@@ -5722,6 +5809,7 @@ function bigSpoolChildState(piece, masterState = state) {
     measurements: [],
     nodeTypes: {},
     reducerSideOverrides: {},
+    reducerTypeOverrides: {},
     dimensionOffsets: {},
     selectedSegments: [],
     selectedSegment: null,
@@ -6473,7 +6561,6 @@ function drawAutoReducers2d(ctx, projection, segmentData) {
     const along = startsAtJoint || startsAfterBend
       ? normalizeScreenVector({ x: placementOther.x - joint.x, y: placementOther.y - joint.y })
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
-    const normal = { x: -along.y, y: along.x };
     const length = 26;
     const largeWidth = Math.max(14, visualPipeWidth(reducer.largeSegment) * 1.45);
     const smallWidth = Math.max(8, visualPipeWidth(reducer.smallSegment) * 0.95);
@@ -6493,17 +6580,73 @@ function drawAutoReducers2d(ctx, projection, segmentData) {
       end = { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
     }
 
-    ctx.beginPath();
-    ctx.moveTo(start.x + normal.x * startWidth * -0.5, start.y + normal.y * startWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * -0.5, end.y + normal.y * endWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * 0.5, end.y + normal.y * endWidth * 0.5);
-    ctx.lineTo(start.x + normal.x * startWidth * 0.5, start.y + normal.y * startWidth * 0.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(ctx, start, end, startWidth, endWidth, reducer.reducerType, {
+      label: normalizeReducerType(reducer.reducerType) === "eccentric"
+        ? `ECC e${formatLength(reducer.eccentricOffsetMm)}`
+        : "CONC",
+      labelColor: "#59358f",
+    });
   }
 
   ctx.restore();
+}
+
+function reducerProfile2d(start, end, startWidth, endWidth, reducerType = "concentric") {
+  const along = normalizeScreenVector({ x: end.x - start.x, y: end.y - start.y });
+  const normal = { x: -along.y, y: along.x };
+  const startCentre = { ...start };
+  const endCentre = { ...end };
+  if (normalizeReducerType(reducerType) === "eccentric") {
+    const shift = Math.abs(startWidth - endWidth) * 0.5;
+    if (startWidth >= endWidth) {
+      endCentre.x += normal.x * shift;
+      endCentre.y += normal.y * shift;
+    } else {
+      startCentre.x += normal.x * shift;
+      startCentre.y += normal.y * shift;
+    }
+  }
+  return {
+    normal,
+    startCentre,
+    endCentre,
+    points: [
+      { x: startCentre.x - normal.x * startWidth * 0.5, y: startCentre.y - normal.y * startWidth * 0.5 },
+      { x: endCentre.x - normal.x * endWidth * 0.5, y: endCentre.y - normal.y * endWidth * 0.5 },
+      { x: endCentre.x + normal.x * endWidth * 0.5, y: endCentre.y + normal.y * endWidth * 0.5 },
+      { x: startCentre.x + normal.x * startWidth * 0.5, y: startCentre.y + normal.y * startWidth * 0.5 },
+    ],
+  };
+}
+
+function drawReducerProfile2d(ctx, start, end, startWidth, endWidth, reducerType = "concentric", options = {}) {
+  const profile = reducerProfile2d(start, end, startWidth, endWidth, reducerType);
+  ctx.beginPath();
+  ctx.moveTo(profile.points[0].x, profile.points[0].y);
+  for (const point of profile.points.slice(1)) ctx.lineTo(point.x, point.y);
+  ctx.closePath();
+  if (options.fill !== false) ctx.fill();
+  ctx.stroke();
+
+  if (options.label) {
+    const centre = {
+      x: (profile.startCentre.x + profile.endCentre.x) * 0.5,
+      y: (profile.startCentre.y + profile.endCentre.y) * 0.5,
+    };
+    const offset = Math.max(startWidth, endWidth) * 0.78 + 9;
+    const labelX = centre.x - profile.normal.x * offset;
+    const labelY = centre.y - profile.normal.y * offset;
+    ctx.save();
+    ctx.font = "950 9px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "rgba(255, 253, 248, 0.97)";
+    ctx.strokeText(options.label, labelX, labelY);
+    ctx.fillStyle = options.labelColor ?? "#59358f";
+    ctx.fillText(options.label, labelX, labelY);
+    ctx.restore();
+  }
 }
 
 function drawFlushEndCaps2d(ctx, projection, segmentData, connections, pipeWidth) {
@@ -8281,14 +8424,15 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
     ctx.strokeText(label, labelX, labelY);
     ctx.fillText(label, labelX, labelY);
   } else if (fitting.type === "reducer") {
-    ctx.beginPath();
-    ctx.moveTo(along.x * -12 + normal.x * fittingWidth * -0.6, along.y * -12 + normal.y * fittingWidth * -0.6);
-    ctx.lineTo(along.x * 12 + normal.x * fittingWidth * -0.32, along.y * 12 + normal.y * fittingWidth * -0.32);
-    ctx.lineTo(along.x * 12 + normal.x * fittingWidth * 0.32, along.y * 12 + normal.y * fittingWidth * 0.32);
-    ctx.lineTo(along.x * -12 + normal.x * fittingWidth * 0.6, along.y * -12 + normal.y * fittingWidth * 0.6);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(
+      ctx,
+      { x: along.x * -12, y: along.y * -12 },
+      { x: along.x * 12, y: along.y * 12 },
+      fittingWidth * 1.2,
+      fittingWidth * 0.64,
+      fittingReducerType(fitting),
+      { label: reducerTypeCode(fittingReducerType(fitting)), labelColor: selected ? "#b42318" : "#59358f" },
+    );
   }
 
   ctx.restore();
@@ -8480,7 +8624,7 @@ function isCoarseInput() {
 }
 
 function isTabletLayout() {
-  return Boolean(window.matchMedia?.("(max-width: 1024px)")?.matches || isCoarseInput());
+  return Boolean(window.matchMedia?.("(max-width: 1100px)")?.matches || isCoarseInput());
 }
 
 function isPhoneLayout() {
@@ -8878,7 +9022,6 @@ function findNearestAutoReducer(pointer) {
   let nearest = null;
 
   for (const reducer of autoReducerTransitions(segments())) {
-    if (reducer.kind !== "bend") continue;
     const segment = reducerPlacementSegment(reducer);
     if (!segment) continue;
 
@@ -9733,6 +9876,8 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   const smallSize = firstIsLarge ? secondSize : firstSize;
   const largeOtherIndex = firstIsLarge ? firstConnection.other : secondConnection.other;
   const smallOtherIndex = firstIsLarge ? secondConnection.other : firstConnection.other;
+  const reducerType = reducerTypeForNode(nodeIndex);
+  const eccentricOffsetMm = reducerEccentricOffsetMm(largeSize, smallSize);
   const placementSide = isBendReducer ? reducerSideForNode(nodeIndex) : "small";
   const placementSegment = placementSide === "large" ? largeSegment : smallSegment;
   const inlineFirstTakeoffMm = Math.min(lengthMm * 0.5, pointLength(firstSegment.vector) * 0.45);
@@ -9746,7 +9891,7 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     : inlineSecondTakeoffMm;
   const firstBendTakeoffMm = isBendReducer ? bendTakeoffMm(firstSegment, options.bend) : 0;
   const secondBendTakeoffMm = isBendReducer ? bendTakeoffMm(secondSegment, options.bend) : 0;
-  const atlasWeightKg = atlasReducerWeightForSizes(largeSize, smallSize);
+  const atlasWeightKg = atlasReducerWeightForSizes(largeSize, smallSize, reducerType);
   const reducerWeightKg = atlasWeightKg ?? (lengthMm / 1000) * ((pipeMassPerMetreForSize(firstSize) + pipeMassPerMetreForSize(secondSize)) * 0.5) * 1.12;
   const reducerWeightSource = atlasWeightKg === null
     ? "estimated"
@@ -9763,6 +9908,8 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     firstTakeoffMm,
     secondTakeoffMm,
     lengthMm,
+    reducerType,
+    eccentricOffsetMm: reducerType === "eccentric" ? eccentricOffsetMm : 0,
     weightKg: reducerWeightKg,
     source: reducerWeightSource,
     kind: isBendReducer ? "bend" : "inline",
@@ -9779,19 +9926,26 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   };
 }
 
-function atlasStainless10ReducerWeightForSizes(largeSize, smallSize) {
+function atlasStainless10ReducerWeightForSizes(largeSize, smallSize, reducerType = "concentric") {
   if (!largeSize || !smallSize) return null;
   const key = `${Number(largeSize.nb)}:${Number(smallSize.nb)}`;
+  const eccentricWeight = ATLAS_STAINLESS10_ECCENTRIC_REDUCER_WEIGHT_OVERRIDES[key];
+  if (normalizeReducerType(reducerType) === "eccentric" && Number.isFinite(eccentricWeight)) return eccentricWeight;
   const weight = ATLAS_STAINLESS10_REDUCER_WEIGHTS[key];
   return Number.isFinite(weight) ? weight : null;
 }
 
-function atlasReducerWeightForSizes(largeSize, smallSize) {
+function atlasReducerWeightForSizes(largeSize, smallSize, reducerType = "concentric") {
   if (!largeSize || !smallSize) return null;
   if (normalizePipeSpec(state.pipeSpec) === "stainless10" && !isTubePipeSize(largeSize)) {
-    return atlasStainless10ReducerWeightForSizes(largeSize, smallSize);
+    return atlasStainless10ReducerWeightForSizes(largeSize, smallSize, reducerType);
   }
   return atlasButtweldWeight(largeSize, "reducer");
+}
+
+function reducerEccentricOffsetMm(firstSize, secondSize) {
+  if (!firstSize || !secondSize) return 0;
+  return Math.max(0, Math.abs(Number(firstSize.od) - Number(secondSize.od)) * 0.5);
 }
 
 function reducerLengthMm(firstSize, secondSize) {
@@ -10182,11 +10336,11 @@ function takeoffCountRows(quantities = quantitySummary()) {
 
   for (const reducer of quantities.reducers) {
     add(
-      `reducer:auto:${reducer.largeNb}:${reducer.smallNb}`,
-      `Reducer ${pipeSizeDisplayLabelByNb(reducer.largeNb)} x ${pipeSizeDisplayLabelByNb(reducer.smallNb)}`,
+      `reducer:auto:${normalizeReducerType(reducer.reducerType)}:${reducer.largeNb}:${reducer.smallNb}`,
+      `${reducerTypeLabel(reducer.reducerType)} reducer ${pipeSizeDisplayLabelByNb(reducer.largeNb)} x ${pipeSizeDisplayLabelByNb(reducer.smallNb)}`,
       1,
       reducer.weightKg,
-      reducer.source ?? "auto size change",
+      `${reducerDimensionDetail(reducer)} / ${reducer.source ?? "auto size change"}`,
       30,
     );
   }
@@ -10212,9 +10366,10 @@ function takeoffCountRows(quantities = quantitySummary()) {
     }
 
     if (type === "reducer") {
+      const reducerType = fittingReducerType(item.fitting);
       add(
-        `reducer:manual:${size.nb}`,
-        `Manual reducer on ${pipeSizeDisplayLabel(size)}`,
+        `reducer:manual:${reducerType}:${size.nb}`,
+        `Manual ${reducerTypeLabel(reducerType).toLowerCase()} reducer on ${pipeSizeDisplayLabel(size)}`,
         1,
         item.weightKg,
         "confirm outlet size",
@@ -10471,6 +10626,26 @@ function teeReducerStartOffsetMetres(reducer, style = null) {
 function reducerSideForNode(nodeIndex) {
   const value = state.reducerSideOverrides?.[nodeIndex];
   return value === "large" ? "large" : "small";
+}
+
+function reducerTypeForNode(nodeIndex) {
+  return normalizeReducerType(state.reducerTypeOverrides?.[nodeIndex] ?? state.reducerType);
+}
+
+function fittingReducerType(fitting) {
+  return normalizeReducerType(fitting?.reducerType ?? state.reducerType);
+}
+
+function reducerDimensionDetail(reducer) {
+  const length = `${formatLength(reducer?.lengthMm ?? 0)} mm H`;
+  if (normalizeReducerType(reducer?.reducerType) !== "eccentric") return length;
+  return `${length}; ${formatLength(reducer?.eccentricOffsetMm ?? 0)} mm centreline offset e`;
+}
+
+function reducerDimensionCompact(reducer) {
+  const length = `H ${formatLength(reducer?.lengthMm ?? 0)} mm`;
+  if (normalizeReducerType(reducer?.reducerType) !== "eccentric") return length;
+  return `${length} · e ${formatLength(reducer?.eccentricOffsetMm ?? 0)} mm`;
 }
 
 function reducerPlacementSide(reducer) {
@@ -10873,6 +11048,8 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   } else if (type === "socket") {
     fitting.socketSizeNb = normalizePipeSize(options.socketSizeNb ?? SOCKET_SIZE_NB);
     fitting.socketAngle = normalizeSocketAngle(options.socketAngle);
+  } else if (type === "reducer") {
+    fitting.reducerType = normalizeReducerType(options.reducerType ?? state.reducerType);
   }
 
   state.fittings.push(fitting);
@@ -11092,6 +11269,7 @@ function undo() {
     state.points.splice(last.pointIndex, 1);
     reindexNodeTypesAfterPointRemoval(last.pointIndex);
     reindexReducerSideOverridesAfterPointRemoval(last.pointIndex);
+    reindexReducerTypeOverridesAfterPointRemoval(last.pointIndex);
     reindexDimensionOffsetsAfterSegmentRemoval(last.edgeIndex);
     reindexBigSpoolCutsAfterSegmentRemoval(last.edgeIndex);
     state.edges = state.edges.map((edge) => ({
@@ -11447,7 +11625,7 @@ function updateTakeoffSummary() {
     : "<li>No bend take-off yet.</li>";
   const reducerNotes = quantities.reducers.length
     ? quantities.reducers.map((reducer, index) => {
-        return `<li>Reducer ${index + 1}: ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}</li>`;
+        return `<li>Reducer ${index + 1}: <strong>${escapeHtml(reducerTypeLabel(reducer.reducerType))}</strong> ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - ${escapeHtml(reducerDimensionDetail(reducer))}; take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${escapeHtml(reducer.source ?? "estimated")}</li>`;
       }).join("")
     : "<li>No automatic reducers yet.</li>";
   const teeNotes = quantities.tees.length
@@ -11753,7 +11931,7 @@ function drawingHealthItems() {
     items.push(healthIssue("ok", "Drawing locked", "Edits are blocked until Lock edits is turned off or a new revision is created."));
   }
   if (!items.some((item) => item.severity === "error" || item.severity === "warning")) {
-    items.unshift(healthIssue("ok", "No blocking issues found", "Health check passed for the current drawing."));
+    items.unshift(healthIssue("ok", "Drawing checks clear", "Geometry and drawing checks passed. Workflow approval is shown separately below."));
   }
 
   return items;
@@ -11774,8 +11952,8 @@ function healthSummaryText(items = drawingHealthItems()) {
   const counts = healthCounts(items);
   if (counts.error) return `${counts.error} issue${counts.error === 1 ? "" : "s"} need fixing`;
   if (counts.warning) return `${counts.warning} warning${counts.warning === 1 ? "" : "s"} to review`;
-  if (counts.acknowledged) return `No blocking issues / ${counts.acknowledged} acknowledged`;
-  return "No blocking issues";
+  if (counts.acknowledged) return `Drawing checks clear / ${counts.acknowledged} acknowledged`;
+  return "Drawing checks clear";
 }
 
 function healthIssueClickable(item) {
@@ -12050,6 +12228,11 @@ function animateHealthIssueHighlight() {
   }
   const now = performance.now();
   drawIso();
+  // The redraw can clear a highlight whose target was removed during an edit.
+  if (!healthHighlight) {
+    healthHighlightAnimationFrame = 0;
+    return;
+  }
   if (now > healthHighlight.expiresAt) {
     healthHighlight = null;
     healthHighlightAnimationFrame = 0;
@@ -12342,7 +12525,6 @@ function preIssueChecklist() {
     ...drawingWarnings,
     ...dimensionSourceWarnings,
     ...weldFindings.warnings,
-    ...productionWarnings,
   ];
   const regressionResults = runRegressionAutoChecks();
   const sizeLabels = [...new Set(segmentData.map((segment) => pipeSizeDisplayLabel(pipeSizeForSegment(segment))))];
@@ -12376,7 +12558,7 @@ function preIssueChecklist() {
 
 function preIssueChecklistStatus(checks = preIssueChecklist()) {
   if (checks.blockers.length) return "blocked";
-  if (checks.warnings.length || checks.regressionFailures.length) return "review";
+  if (checks.warnings.length) return "review";
   return "ready";
 }
 
@@ -12458,14 +12640,6 @@ function preIssueChecklistCardHtml() {
     : checks.welds.length
     ? `${checks.welds.length} weld record${checks.welds.length === 1 ? "" : "s"} ready`
     : "No weld markers";
-  const productionText = checks.productionBlockers.length
-    ? "On hold"
-    : checks.productionWarnings.length
-    ? `${checks.productionWarnings.length} allocation warning${checks.productionWarnings.length === 1 ? "" : "s"}`
-    : "Assigned, scheduled and not on hold";
-  const testText = checks.regressionFailures.length
-    ? `${checks.regressionFailures.length} app self-test${checks.regressionFailures.length === 1 ? "" : "s"} need review; not a spool blocker`
-    : "Test kit passed";
   const checkedText = state.checkedAt
     ? `Checked by ${state.checkedBy || "unknown"}`
     : "Not checked yet";
@@ -12490,9 +12664,8 @@ function preIssueChecklistCardHtml() {
         ${preIssueChecklistRowHtml("Weld gap", checks.weldGapText, "ready")}
         ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.healthWarnings.length ? "review" : "ready")}
         ${preIssueChecklistRowHtml("Weld register", weldText, checks.weldBlockers.length ? "blocked" : checks.weldWarnings.length ? "review" : "ready")}
-        ${preIssueChecklistRowHtml("Production", productionText, checks.productionBlockers.length ? "blocked" : checks.productionWarnings.length ? "review" : "ready")}
+        ${checks.productionBlockers.length ? preIssueChecklistRowHtml("Production", "On hold", "blocked") : ""}
         ${checks.acknowledged.length ? preIssueChecklistRowHtml("Acknowledged", `${checks.acknowledged.length} recorded exception${checks.acknowledged.length === 1 ? "" : "s"}`, "review") : ""}
-        ${preIssueChecklistRowHtml("Test kit", testText, checks.regressionFailures.length ? "review" : "ready")}
         ${preIssueChecklistRowHtml("Approval", checkedText, state.checkedAt ? "ready" : "blocked")}
       </ul>
       ${checks.findings.length ? `
@@ -12501,10 +12674,9 @@ function preIssueChecklistCardHtml() {
           <ul>${checks.findings.map(preIssueFindingHtml).join("")}</ul>
         </details>
       ` : `<div class="ready-issue-clear"><strong>All issue checks are clear.</strong><span>The fabrication PDF can be issued without an override.</span></div>`}
-      <p class="preissue-help">Red items block issue. Amber items require a recorded override reason. App self-tests remain visible as diagnostics and never describe the spool itself.</p>
+      <p class="preissue-help">Red items block issue. Amber items require a recorded override reason. Assignment, due date and gear checks stay in Jobs and do not hold up drawing approval.</p>
       <div class="preissue-actions">
         <button type="button" data-workflow-action="open-health">Review drawing checks</button>
-        ${checks.regressionFailures.length ? `<button type="button" data-workflow-action="open-test-kit">Open app test kit</button>` : ""}
       </div>
       ${issueAuditSummaryHtml()}
     </div>
@@ -12649,11 +12821,18 @@ function updateWorkflowSummary() {
   const issueDisabledAttr = permission.canIssue
     ? ""
     : ` disabled title="${escapeHtml(currentPermissionRestrictionText("issue"))}"`;
+  const issueChecks = preIssueChecklist();
+  const issueBlockerCount = issueChecks.blockers.length;
+  const issueActionLabel = issueBlockerCount
+    ? `Fix ${issueBlockerCount} blocker${issueBlockerCount === 1 ? "" : "s"} before issue`
+    : !state.checkedAt
+      ? "Approve before issue"
+      : "Issue drawing";
   const editDisabledAttr = permission.canEdit
     ? ""
     : ` disabled title="${escapeHtml(currentPermissionRestrictionText("edit"))}"`;
   workflowSummary.innerHTML = `
-    <div class="workflow-card">
+    <div class="workflow-card workflow-status-card">
       <strong>Drawing workflow</strong>
       <ul class="workflow-list">
         ${currentWorkflowRows().map(([label, value]) => `<li><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></li>`).join("")}
@@ -12663,12 +12842,14 @@ function updateWorkflowSummary() {
     <div class="workflow-actions">
       <button type="button" data-workflow-action="mark-checked"${reviewDisabledAttr}>Approve drawing</button>
       <button type="button" data-workflow-action="return-changes"${reviewDisabledAttr}>Return for changes</button>
-      <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${issueDisabledAttr}>Issue drawing</button>
+      <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${issueDisabledAttr}>${escapeHtml(issueActionLabel)}</button>
       <button type="button" data-workflow-action="new-revision"${editDisabledAttr}>New revision</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
     </div>
-    ${productionWorkflowCardHtml()}
     ${weldRegisterCardHtml()}
+    <details class="workflow-more-details">
+      <summary><strong>Workshop handoff & history</strong><span>Production allocation and previous revisions</span></summary>
+      ${productionWorkflowCardHtml()}
     <div class="revision-card">
       <strong>Revision history</strong>
       <div class="revision-current">
@@ -12689,6 +12870,7 @@ function updateWorkflowSummary() {
         </li>
       `).join("")}</ul>` : "<span>No saved revisions yet.</span>"}
     </div>
+    </details>
   `;
 
   workflowSummary.querySelectorAll("[data-workflow-action]").forEach((button) => {
@@ -13160,13 +13342,7 @@ async function promptForMissingIssueRevision() {
 }
 
 async function promptForIssueWarningOverride(checks) {
-  const diagnosticWarnings = checks.regressionFailures.map((result) => readyIssueFinding(
-    "warning",
-    "App self-test",
-    result.name || "SpoolMate self-test needs review",
-    result.detail || "This diagnostic describes the app, not the current spool.",
-  ));
-  const warnings = [...checks.warnings, ...diagnosticWarnings];
+  const warnings = [...checks.warnings];
   if (!warnings.length) return "";
   const warningList = warnings.slice(0, 5).map((finding) => finding.title).join("; ");
   const response = await openFieldInputDialog({
@@ -13205,12 +13381,6 @@ function recordReadyIssueAudit(checks, options = {}) {
     item.title,
     item.acknowledgement?.reason || item.detail,
   ));
-  const diagnosticFindings = checks.regressionFailures.map((result) => readyIssueFinding(
-    "warning",
-    "App self-test",
-    result.name || "SpoolMate self-test needs review",
-    result.detail || "",
-  ));
   const audit = normalizeIssueAudit({
     id: `audit-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
     revision: normalizeProjectInfo(state.projectInfo).revision || "-",
@@ -13221,7 +13391,7 @@ function recordReadyIssueAudit(checks, options = {}) {
     checkedBy: state.checkedBy,
     checkedAt: state.checkedAt,
     overrideReason,
-    findings: [...checks.warnings, ...acknowledgedFindings, ...diagnosticFindings]
+    findings: [...checks.warnings, ...acknowledgedFindings]
       .map(issueAuditFindingSnapshot)
       .filter(Boolean),
   });
@@ -13704,7 +13874,9 @@ function updateProjectReadout() {
   const title = projectDisplayName();
   const status = projectStatusLabel();
   const locked = cloudPermissionReadOnly ? " / View only" : state.locked ? " / Locked" : "";
-  projectReadout.textContent = hasProjectInfo() ? title : "No project set";
+  projectReadout.textContent = isQuickPdfMode()
+    ? `Quick PDF${state.projectId ? " · Saved copy" : " · Temporary"}`
+    : hasProjectInfo() ? title : "No project set";
   projectReadout.title = state.projectId
     ? `${title} - ${status}${locked} - saved in this browser`
     : hasProjectInfo()
@@ -13841,6 +14013,7 @@ function updatePropertiesPanel() {
           ["set-fitting-weight", "Set weight"],
           ...(fitting.fitting.type === "flange" ? [["change-flange-standard", "Flange type"]] : []),
           ...(fitting.fitting.type === "socket" ? [["change-socket-size", "Socket size"]] : []),
+          ...(fitting.fitting.type === "reducer" ? [["change-reducer-type", "Reducer type"]] : []),
           ...(fitting.weightSource === "manual" ? [["clear-fitting-weight", "Clear manual"]] : []),
           ["delete-fitting", "Delete", "danger"],
         ];
@@ -14030,6 +14203,7 @@ function handlePropertyAction(action) {
   if (action === "clear-fitting-weight") clearSelectedFittingWeight();
   if (action === "change-flange-standard") promptSelectedFlangeStandard();
   if (action === "change-socket-size") promptSelectedSocketSize();
+  if (action === "change-reducer-type") toggleSelectedReducerType();
   if (action === "delete-fitting") deleteSelectedFitting();
   if (action === "edit-note") editSelectedNote();
   if (action === "delete-note") deleteSelectedNote();
@@ -14093,6 +14267,15 @@ function promptSelectedSocketSize() {
   const data = selectedFittingData();
   if (!data || data.fitting.type !== "socket") return;
   openSelectedSocketSizeMenu(data.fitting.id);
+}
+
+function toggleSelectedReducerType() {
+  const data = selectedFittingData();
+  if (!data || data.fitting.type !== "reducer" || !ensureDrawingEditable("change reducer type")) return;
+  const snapshot = createUndoSnapshot();
+  data.fitting.reducerType = fittingReducerType(data.fitting) === "eccentric" ? "concentric" : "eccentric";
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
 }
 
 function deleteSelectedFitting() {
@@ -14258,6 +14441,27 @@ function updateAppModeVisibility(mode = appMode) {
   }
   if (workspaceTitle) {
     workspaceTitle.textContent = APP_MODE_WORKSPACE_TITLE[normalized] ?? APP_MODE_WORKSPACE_TITLE.draw;
+    if (isQuickPdfMode()) workspaceTitle.textContent = normalized === "export" ? "Quick PDF" : "Quick drawing";
+  }
+}
+
+function applyWorkflowKindUi() {
+  const quick = isQuickPdfMode();
+  document.body.dataset.workflowKind = quick ? "quick" : "managed";
+  if (quickPdfBar) quickPdfBar.hidden = !quick;
+
+  const reviewButton = appModeButtons.find((button) => button.dataset.appMode === "review");
+  const exportButton = appModeButtons.find((button) => button.dataset.appMode === "export");
+  if (reviewButton) reviewButton.hidden = quick;
+  if (exportButton) exportButton.textContent = quick ? "PDF" : "Export";
+
+  const saveLabel = saveBrowserProjectButton?.querySelector("span");
+  if (saveLabel) saveLabel.textContent = quick ? "Save copy" : "Save";
+  if (saveBrowserProjectButton) {
+    saveBrowserProjectButton.title = quick
+      ? "Optionally save this quick drawing for later"
+      : "Save project in this browser";
+    saveBrowserProjectButton.setAttribute("aria-label", saveBrowserProjectButton.title);
   }
 }
 
@@ -14347,9 +14551,11 @@ function setupToolSettingsDialog() {
 }
 
 function applyAppMode(mode, options = {}) {
-  const normalized = normalizeAppMode(mode);
+  let normalized = normalizeAppMode(mode);
+  if (isQuickPdfMode() && normalized === "review") normalized = "draw";
   appMode = normalized;
   document.body.dataset.appMode = normalized;
+  applyWorkflowKindUi();
 
   for (const button of appModeButtons) {
     const active = button.dataset.appMode === normalized;
@@ -14450,6 +14656,7 @@ function setFocusModeButtonState() {
 function currentWorkspaceSurface() {
   if (isTabletLayout()) {
     const mobilePanel = document.body.dataset.mobilePanel;
+    if (mobilePanel === "preview" && previewPanelHidden) return "drawing";
     return mobilePanel === "inspector" || mobilePanel === "preview" ? mobilePanel : "drawing";
   }
   if (!previewPanelHidden) return "preview";
@@ -14475,7 +14682,8 @@ function restoreWorkspaceSurfaceState(restore) {
   previewFloatBounds = restore.previewFloatBounds ? { ...restore.previewFloatBounds } : null;
 
   if (isTabletLayout()) {
-    showMobilePanel(restore.surface);
+    const mobileSurface = restore.surface === "preview" && restore.previewHidden ? "drawing" : restore.surface;
+    showMobilePanel(mobileSurface);
     return;
   }
 
@@ -14589,8 +14797,18 @@ function restoreTemporaryWorkspaceNavigation() {
   return true;
 }
 
+function normalizeMobileWorkspaceSurface() {
+  if (isTabletLayout() && previewPanelHidden && document.body.dataset.mobilePanel === "preview") {
+    showMobilePanel("drawing");
+  }
+}
+
 function scheduleTemporaryWorkspaceRestore() {
-  queueMicrotask(() => restoreTemporaryWorkspaceNavigation());
+  queueMicrotask(() => {
+    restoreTemporaryWorkspaceNavigation();
+    window.requestAnimationFrame(normalizeMobileWorkspaceSurface);
+    window.setTimeout(normalizeMobileWorkspaceSurface, 250);
+  });
 }
 
 function createSpoolWorkspaceTabId() {
@@ -14636,6 +14854,12 @@ function spoolWorkspaceTabDetail(tab) {
   const revision = info.revision || "A";
   const status = projectStatusLabel(source?.projectStatus);
   return `Rev ${revision} · ${status}`;
+}
+
+function spoolWorkspaceTabCompactLabel(tab) {
+  const source = tab?.state ?? state;
+  const info = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  return info.spoolNumber || "Untitled spool";
 }
 
 function captureSpoolWorkspaceUiState() {
@@ -14957,6 +15181,9 @@ async function createNewSpoolWorkspaceTab() {
     drawingViewOffset = { x: 0, y: 0 };
     three.userMovedCamera = false;
     applyAppMode("draw", { persist: false, activateTab: false, keepTool: false });
+    setTool("draw");
+    setPreviewHidden(true);
+    showMobilePanel("drawing");
     updateControls();
     updateAll({ save: false });
   } finally {
@@ -14975,6 +15202,11 @@ async function createNewSpoolWorkspaceTab() {
     renderSpoolWorkspaceTabs();
     return false;
   }
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
   captureCurrentSpoolWorkspaceTab();
   return true;
 }
@@ -15020,7 +15252,10 @@ function renderSpoolWorkspaceTabs() {
         <button type="button" class="spool-workspace-tab" role="tab" aria-selected="${active ? "true" : "false"}" data-spool-workspace-tab="${escapeHtml(tab.id)}" title="${escapeHtml(tab.label)}">
           <span class="spool-workspace-tab-state ${dirty ? "dirty" : "saved"}" aria-hidden="true"></span>
           <span class="spool-workspace-tab-copy">
-            <strong>${escapeHtml(tab.label || "Untitled spool")}</strong>
+            <strong>
+              <span class="spool-workspace-tab-label-full">${escapeHtml(tab.label || "Untitled spool")}</span>
+              <span class="spool-workspace-tab-label-compact">${escapeHtml(spoolWorkspaceTabCompactLabel(tab))}</span>
+            </strong>
             <small>${escapeHtml(spoolWorkspaceTabDetail(tab))}</small>
           </span>
         </button>
@@ -15388,6 +15623,9 @@ function updatePreviewFloatingState() {
   const active = previewFloatingActive();
   document.body.classList.toggle("preview-panel-floating", active);
   updatePreviewVisibilityControls();
+  if (previewPanelHidden && isTabletLayout() && document.body.dataset.mobilePanel === "preview") {
+    showMobilePanel("drawing");
+  }
   setPreviewFloatButtonState();
   applyPreviewFloatBounds();
   refreshPreviewAfterLayoutChange();
@@ -15426,6 +15664,12 @@ function setPreviewHidden(hidden) {
     setInspectorDrawerOpen(false);
   }
   updatePreviewFloatingState();
+  // A hidden mobile preview must also release its sheet and scrim. Keeping
+  // data-mobile-panel="preview" after hiding the panel leaves the drawing
+  // greyed out with no visible Close button on iPhone and Android.
+  if (previewPanelHidden && isTabletLayout() && document.body.dataset.mobilePanel === "preview") {
+    showMobilePanel("drawing");
+  }
 }
 
 function openPreviewPreservingWorkspace() {
@@ -15653,12 +15897,12 @@ function updateTouchComfortClass() {
         previewPanelHidden = true;
         previewPanelMinimized = false;
         localStorage.setItem(PHONE_PREVIEW_DEFAULT_KEY, "applied");
-        window.requestAnimationFrame(updatePreviewFloatingState);
+        window.requestAnimationFrame(() => setPreviewHidden(true));
       }
     } catch {
       previewPanelHidden = true;
       previewPanelMinimized = false;
-      window.requestAnimationFrame(updatePreviewFloatingState);
+      window.requestAnimationFrame(() => setPreviewHidden(true));
     }
   }
   const nextLayout = workspaceLayoutKind();
@@ -15669,7 +15913,7 @@ function updateTouchComfortClass() {
 function setupTouchComfort() {
   updateTouchComfortClass();
   const mediaQueries = [
-    window.matchMedia?.("(max-width: 1024px)"),
+    window.matchMedia?.("(max-width: 1100px)"),
     window.matchMedia?.("(pointer: coarse)"),
     window.matchMedia?.("(hover: none)"),
   ].filter(Boolean);
@@ -15830,7 +16074,7 @@ const ACTION_COMMANDS = [
   { id: "draw", label: "Draw pipe", detail: "Start drag drawing from a pipe endpoint", category: "Drawing", keywords: "run pipe line centreline drag", capability: "edit", run: () => openCommandDrawingTool("draw", "draw") },
   { id: "select", label: "Select pipe or fitting", detail: "Inspect and edit an existing drawing item", category: "Drawing", keywords: "pick edit properties right click", run: () => { applyAppMode("edit", { keepTool: true }); setTool("select"); showMobilePanel("drawing"); } },
   { id: "box-select", label: "Box select multiple runs", detail: "Drag a selection around several pipe runs", category: "Drawing", keywords: "multi multiple group selection", run: () => { applyAppMode("edit", { keepTool: true }); setTool("boxSelect"); showMobilePanel("drawing"); } },
-  { id: "reducer", label: "Reducer tool", detail: "Place a reducer at a pipe-size transition", category: "Fitting", keywords: "reduce transition concentric eccentric size change", capability: "edit", run: () => openCommandDrawingTool("reducer") },
+  { id: "reducer", label: "Reducer tool", detail: "Place a concentric or eccentric reducer", category: "Fitting", keywords: "reduce transition concentric eccentric size change", capability: "edit", run: () => openCommandDrawingTool("reducer") },
   { id: "tee", label: "Tee tool", detail: "Create or identify a manufactured tee connection", category: "Fitting", keywords: "t piece junction outlet", capability: "edit", run: () => openCommandDrawingTool("tee", "draw") },
   { id: "branch", label: "Fabricated branch tool", detail: "Create a welded outlet on a continuous main", category: "Fitting", keywords: "welded branch saddle fishmouth outlet", capability: "edit", run: () => openCommandDrawingTool("branch", "draw") },
   { id: "flange", label: "Flange tool", detail: "Place a flange and choose its standard", category: "Fitting", keywords: "ansi pn din jis table slip on weld neck", capability: "edit", run: () => openCommandDrawingTool("flange") },
@@ -16427,6 +16671,10 @@ function renderFirstUseGuide() {
 function activateFirstUseGuide(options = {}) {
   if (!firstUseGuideState) firstUseGuideState = readFirstUseGuideState() ?? defaultFirstUseGuideState();
   if (firstUseGuideState.completed && options.force !== true) return false;
+  if (options.reset === true) {
+    firstUseGuideState.learned = [];
+    firstUseGuideState.currentStep = 0;
+  }
   firstUseGuideState.active = true;
   firstUseGuideState.completed = false;
   if (typeof options.compact === "boolean") firstUseGuideState.compact = options.compact;
@@ -16486,13 +16734,9 @@ function runFirstUseGuideAction() {
     showMobilePanel("drawing");
   } else if (step.id === "length") {
     applyAppMode("draw");
-    activateInspectorTab("properties");
-    showMobilePanel("inspector");
-    window.setTimeout(() => {
-      stepLengthInput?.focus({ preventScroll: true });
-      stepLengthInput?.select();
-      syncFirstUseGuideTarget();
-    }, 80);
+    setTool("select");
+    showMobilePanel("drawing");
+    showAppNotice("Tap a pipe to open its actions, then choose Change length. Right-click on PC.");
   } else if (step.id === "fittings") {
     applyAppMode("draw");
     showMobilePanel("drawing");
@@ -16509,9 +16753,14 @@ function runFirstUseGuideAction() {
   } else if (step.id === "review") {
     showHealthPanel();
   } else if (step.id === "export") {
-    applyAppMode("export");
+    const exportModeButton = document.querySelector('[data-app-mode="export"]');
+    if (exportModeButton instanceof HTMLButtonElement) {
+      exportModeButton.click();
+    } else {
+      applyAppMode("export");
+    }
     showMobilePanel("inspector");
-    document.querySelector("#exportReportButton")?.focus({ preventScroll: true });
+    document.querySelector("#exportIsoButton, #exportReportButton")?.focus({ preventScroll: true });
   }
   window.requestAnimationFrame(syncFirstUseGuideTarget);
 }
@@ -16531,7 +16780,18 @@ function setupFirstUseGuide() {
     setInterfaceDensity(nextDensity, { notice: true });
     renderFirstUseGuide();
   });
-  firstSpoolGuideActionButton?.addEventListener("click", runFirstUseGuideAction);
+  firstSpoolGuideActionButton?.addEventListener("click", () => {
+    // The guide can be advanced manually, so use the rendered action as the
+    // final source of truth if persisted guide state is one paint behind.
+    if (firstSpoolGuideActionButton.textContent?.trim() === "Open export") {
+      applyAppMode("export");
+      showMobilePanel("inspector");
+      document.querySelector("#exportIsoButton, #exportReportButton")?.focus({ preventScroll: true });
+      window.requestAnimationFrame(syncFirstUseGuideTarget);
+      return;
+    }
+    runFirstUseGuideAction();
+  });
   firstSpoolGuideNextButton?.addEventListener("click", advanceFirstUseGuide);
   firstSpoolGuideCloseButton?.addEventListener("click", () => finishFirstUseGuide());
   window.addEventListener("resize", syncFirstUseGuideTarget);
@@ -16628,6 +16888,7 @@ function setTutorialPathMode(mode) {
   tutorialPathMode = nextMode;
   stopTutorialPractice();
   tutorialStepIndex = tutorialResumeStepIndex();
+  if (tutorialStepCard) delete tutorialStepCard.dataset.tutorialStepIndex;
   persistTutorialProgress();
   renderTutorialStep();
 }
@@ -18926,11 +19187,15 @@ function renderTutorialStep() {
     </div>
   `;
   tutorialStepCard.dataset.tutorialStepIndex = String(tutorialStepIndex);
-  if (sameStep) {
-    const copy = tutorialStepCard.querySelector(".tutorial-copy");
-    const visual = tutorialStepCard.querySelector(".tutorial-visual");
+  const copy = tutorialStepCard.querySelector(".tutorial-copy");
+  const visual = tutorialStepCard.querySelector(".tutorial-visual");
+  if (sameStep && !practiceActive) {
     if (copy) copy.scrollTop = previousCopyScroll;
     if (visual) visual.scrollTop = previousVisualScroll;
+  } else {
+    tutorialStepCard.scrollTop = 0;
+    if (copy) copy.scrollTop = 0;
+    if (visual) visual.scrollTop = 0;
   }
   if (practiceActive && !practiceComplete) {
     const currentChoice = tutorialTrainerCurrentChoice();
@@ -18954,6 +19219,11 @@ function selectTutorialStep(index) {
   const nextIndex = normalizeTutorialStepIndex(index);
   if (nextIndex === tutorialStepIndex) {
     clearTutorialTarget();
+    if (tutorialStepCard) tutorialStepCard.scrollTop = 0;
+    const copy = tutorialStepCard?.querySelector(".tutorial-copy");
+    const visual = tutorialStepCard?.querySelector(".tutorial-visual");
+    if (copy) copy.scrollTop = 0;
+    if (visual) visual.scrollTop = 0;
     return;
   }
   stopTutorialPractice();
@@ -19379,6 +19649,7 @@ function openTutorialDialog(index = null) {
   document.body.classList.add("tutorial-running");
   stopTutorialPractice();
   minimizePreviewForTutorial();
+  if (tutorialStepCard) delete tutorialStepCard.dataset.tutorialStepIndex;
   renderTutorialStep();
   tutorialNextButton?.focus();
 }
@@ -19710,7 +19981,7 @@ const AI_HELPER_LOCAL_GUIDE = [
   },
   {
     patterns: [["pipe", "size"], ["change", "size"], ["reducer"]],
-    answer: "To change pipe size:\n1. For a new run, open Pipe & display and choose Size before drawing.\n2. For existing pipe, choose Select and select the run.\n3. Change the size in Details or the right-click/long-press menu.\n4. Review the transition in 2D and 3D.\n\nYou should see an automatic reducer at an ordinary size transition or reducing tee where required. A welded Branch keeps its outlet size and is not treated as a tee reducer.",
+    answer: "To change pipe size:\n1. Open Pipe & display and choose the next Size.\n2. Choose the default reducer type: Concentric or Eccentric.\n3. Draw the smaller run, or select an existing run and change its size.\n4. Right-click or long-press the automatic reducer if this one needs the other type.\n5. Review the type in the 2D label, 3D label, takeoff and PDF.\n\nConcentric reducers use centred ends. Eccentric reducers show the flat side and centreline offset e. Both ASME B16.9 types use the Atlas face-to-face H for the selected large nominal size. A welded Branch is a direct cut-in and receives no automatic reducer.",
     tutorial: "Pipe size",
     help: "edit",
   },
@@ -20365,6 +20636,7 @@ function populateFlangeStandardOptions() {
 }
 
 function updateControls() {
+  applyWorkflowKindUi();
   populateFlangeStandardOptions();
   if (appVersionBadge) {
     appVersionBadge.textContent = APP_VERSION;
@@ -20387,15 +20659,27 @@ function updateControls() {
   pipeSpecSelect.value = normalizePipeSpec(state.pipeSpec);
   flangeModeSelect.value = normalizeFlangeMode(state.flangeMode);
   if (flangeStandardSelect) flangeStandardSelect.value = normalizeFlangeStandard(state.flangeStandard);
+  if (reducerTypeSelect) reducerTypeSelect.value = normalizeReducerType(state.reducerType);
   if (fabSheetTemplateSelect) fabSheetTemplateSelect.value = normalizeFabSheetTemplate(fabSheetTemplate);
-  const issuedPdfReady = Boolean(state.issuedAt) && projectStatusAtLeast(state.projectStatus, "issued");
-  const pdfButtonLabel = issuedPdfReady ? "Issued PDF" : "Draft PDF";
-  document.querySelectorAll("#exportReportButton span, #exportIsoButton span").forEach((label) => {
+  const quickPdf = isQuickPdfMode();
+  const issuedPdfReady = !quickPdf && Boolean(state.issuedAt) && projectStatusAtLeast(state.projectStatus, "issued");
+  const pdfButtonLabel = quickPdf ? "Download PDF" : issuedPdfReady ? "Download issued PDF" : "Download draft PDF";
+  document.querySelectorAll("#exportReportButton span, #exportIsoButton span, #exportPanelPdfButton span").forEach((label) => {
     label.textContent = pdfButtonLabel;
   });
-  for (const button of [document.querySelector("#exportReportButton"), document.querySelector("#exportIsoButton")]) {
+  const exportPanelPdfHint = document.querySelector("#exportPanelPdfHint");
+  if (exportPanelPdfHint) {
+    exportPanelPdfHint.textContent = quickPdf
+      ? "Downloads the quick working sheet immediately. Check every dimension before fabrication."
+      : issuedPdfReady
+        ? "Downloads the issued fabrication PDF with its approved revision and QR traveller."
+        : "Downloads a clearly marked draft PDF for checking before formal issue.";
+  }
+  for (const button of [document.querySelector("#exportReportButton"), document.querySelector("#exportIsoButton"), document.querySelector("#exportPanelPdfButton")]) {
     if (!button) continue;
-    button.title = issuedPdfReady
+    button.title = quickPdf
+      ? "Download a quick working PDF without the managed approval workflow"
+      : issuedPdfReady
       ? "Download the approved fabrication sheet PDF"
       : "Download a watermarked draft PDF";
     button.setAttribute("aria-label", button.title);
@@ -20674,7 +20958,10 @@ function showMobilePanel(panel = "drawing") {
     previewPanelMinimized = false;
     previewLayoutChanged = true;
   }
-  if (previewLayoutChanged) {
+  const previewDomOutOfSync = normalized === "preview" && Boolean(
+    previewPanel?.hidden || document.body.classList.contains("preview-panel-hidden")
+  );
+  if (previewLayoutChanged || previewDomOutOfSync) {
     updatePreviewFloatingState();
   }
   const sheetOpen = normalized !== "drawing";
@@ -20730,7 +21017,10 @@ function setupAuthDialog() {
     });
   });
 
-  authCloseButton?.addEventListener("click", closeAuthDialog);
+  authCloseButton?.addEventListener("click", () => {
+    if (authGateOpen) rememberGuestModeOnDevice();
+    closeAuthDialog();
+  });
   authDialog?.addEventListener("pointerdown", (event) => {
     if (event.target === authDialog && !authGateOpen) {
       closeAuthDialog();
@@ -20933,7 +21223,7 @@ function openAuthDialog(options = {}) {
   authDialog.classList.toggle("auth-gate", authGateOpen);
   document.body.classList.toggle("auth-gate-open", authGateOpen);
   if (authCloseButton) {
-    authCloseButton.textContent = authGateOpen ? "Continue as guest" : "Close";
+    authCloseButton.textContent = authGateOpen ? "Continue without account" : "Close";
     authCloseButton.title = authGateOpen ? "Use SpoolMate without cloud sync on this device" : "Close account panel";
   }
   if (options.startup) {
@@ -20999,6 +21289,22 @@ function authPromptRememberedOnDevice() {
   }
 }
 
+function rememberGuestModeOnDevice() {
+  try {
+    localStorage.setItem(AUTH_GUEST_DEVICE_KEY, "yes");
+  } catch {
+    // Guest mode still works for this session if browser storage is unavailable.
+  }
+}
+
+function guestModeRememberedOnDevice() {
+  try {
+    return localStorage.getItem(AUTH_GUEST_DEVICE_KEY) === "yes";
+  } catch {
+    return false;
+  }
+}
+
 async function runStartupPrompts() {
   await initSupabase();
   if (await maybeOpenProjectFromUrl()) return;
@@ -21009,7 +21315,7 @@ async function runStartupPrompts() {
 function maybeOpenStartupAuthPrompt() {
   if (!authDialog || cloudUser) return false;
   if (authDialog.hidden === false) return true;
-  if (authPromptRememberedOnDevice()) return false;
+  if (authPromptRememberedOnDevice() || guestModeRememberedOnDevice()) return false;
 
   openAuthDialog({ startup: true });
   return true;
@@ -21284,6 +21590,11 @@ function ensureHomeDashboardShell() {
         <div class="home-dashboard-account" id="homeDashboardAccount">Guest mode - local projects only</div>
         <div class="home-dashboard-stats" id="homeDashboardStats">0 saved spools on this device</div>
         <div class="home-dashboard-grid">
+          <button class="home-dashboard-action quick-pdf" id="homeDashboardQuickPdfButton" type="button">
+            <svg><use href="#icon-report"></use></svg>
+            <strong>Quick PDF</strong>
+            <span>No account or job workflow. Draw the spool, check it and download the PDF.</span>
+          </button>
           <button class="home-dashboard-action primary" id="homeDashboardContinueButton" type="button">
             <svg><use href="#icon-draw"></use></svg>
             <strong>Continue drawing</strong>
@@ -21296,8 +21607,8 @@ function ensureHomeDashboardShell() {
           </button>
           <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
             <svg><use href="#icon-reset"></use></svg>
-            <strong>New spool</strong>
-            <span>Start a fresh drawing with job details.</span>
+            <strong>Managed job</strong>
+            <span>Use saving, review, issue, QR and production workflow.</span>
           </button>
           <button class="home-dashboard-action" id="homeDashboardJobsButton" type="button">
             <svg><use href="#icon-sample"></use></svg>
@@ -21361,6 +21672,7 @@ function ensureHomeDashboardShell() {
   homeDashboardStats = document.querySelector("#homeDashboardStats");
   homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
   homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+  homeDashboardQuickPdfButton = document.querySelector("#homeDashboardQuickPdfButton");
   homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
   homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
   homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
@@ -21380,6 +21692,13 @@ function setupHomeDashboard() {
   });
   homeDashboardCloseButton?.addEventListener("click", closeHomeDashboard);
   homeDashboardContinueButton?.addEventListener("click", closeHomeDashboard);
+  homeDashboardQuickPdfButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    startQuickPdfDrawing().catch((error) => {
+      console.warn("Quick PDF start failed.", error);
+      showAppNotice(error?.message || "Quick PDF could not be started.");
+    });
+  });
   homeDashboardRestoreButton?.addEventListener("click", () => {
     restoreLastSession().catch((error) => {
       console.warn("Last session restore failed.", error);
@@ -21456,6 +21775,7 @@ function updateHomeDashboard() {
   const useCloudCount = Boolean(cloudUser && hasCloudReadAccess() && cloudCount !== null);
   const savedCount = useCloudCount ? cloudCount : localProjects.length;
   const savedLabel = `${savedCount} saved spool${savedCount === 1 ? "" : "s"}`;
+  if (homeDashboardContinueButton) homeDashboardContinueButton.hidden = !hasDrawingContent();
 
   if (homeDashboardSubtitle) {
     homeDashboardSubtitle.textContent = hasDrawingContent()
@@ -25080,6 +25400,39 @@ function build3dPipeLabels(segmentData, modelPoints) {
   }
 
   const quantities = quantitySummary(segmentData);
+  for (const reducer of quantities.reducers) {
+    const modelPoint = toModelUnits(reducerCentrePoint(reducer));
+    const label = document.createElement("div");
+    label.className = "pipe-size-label reducer-type-label";
+    const lines = [
+      `${reducerTypeCode(reducer.reducerType)} REDUCER`,
+      `${pipeSizeDisplayLabelByNb(reducer.largeNb)} x ${pipeSizeDisplayLabelByNb(reducer.smallNb)} · ${reducerDimensionCompact(reducer)}`,
+    ];
+    for (const [index, line] of lines.entries()) {
+      const element = document.createElement(index === 0 ? "span" : "small");
+      element.textContent = line;
+      label.append(element);
+    }
+    previewLabelLayer.append(label);
+    three.labels.push({ element: label, point: new three.module.Vector3(modelPoint.x, modelPoint.y, modelPoint.z) });
+  }
+
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  for (const fitting of state.fittings.filter((item) => item.type === "reducer")) {
+    const segment = segmentByIndex.get(fitting.segmentIndex);
+    if (!segment) continue;
+    const modelPoint = toModelUnits(fittingDisplayPoint(segment, fitting));
+    const label = document.createElement("div");
+    label.className = "pipe-size-label reducer-type-label";
+    const title = document.createElement("span");
+    title.textContent = `${reducerTypeCode(fittingReducerType(fitting))} REDUCER`;
+    const detail = document.createElement("small");
+    detail.textContent = "Confirm outlet size";
+    label.append(title, detail);
+    previewLabelLayer.append(label);
+    three.labels.push({ element: label, point: new three.module.Vector3(modelPoint.x, modelPoint.y, modelPoint.z) });
+  }
+
   const liftPoint = centreOfGravityData(quantities);
   if (state.showLiftingPoints && liftPoint) {
     const modelPoint = toModelUnits(liftPoint.point);
@@ -25770,7 +26123,6 @@ function drawAutoReducersFallback(ctx, fallbackSegments, connections, style) {
     const along = startsAtJoint || startsAfterBend
       ? normalizeScreenVector({ x: placementOther.x - joint.x, y: placementOther.y - joint.y })
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
-    const normal = { x: -along.y, y: along.x };
     const length = 30;
     const largeWidth = Math.max(10, visualPipeWidth(reducer.largeSegment));
     const smallWidth = Math.max(7, visualPipeWidth(reducer.smallSegment));
@@ -25790,14 +26142,13 @@ function drawAutoReducersFallback(ctx, fallbackSegments, connections, style) {
       end = { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
     }
 
-    ctx.beginPath();
-    ctx.moveTo(start.x + normal.x * startWidth * -0.5, start.y + normal.y * startWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * -0.5, end.y + normal.y * endWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * 0.5, end.y + normal.y * endWidth * 0.5);
-    ctx.lineTo(start.x + normal.x * startWidth * 0.5, start.y + normal.y * startWidth * 0.5);
-    ctx.closePath();
-    if (!style.outline) ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(ctx, start, end, startWidth, endWidth, reducer.reducerType, {
+      fill: !style.outline,
+      label: normalizeReducerType(reducer.reducerType) === "eccentric"
+        ? `ECC e${formatLength(reducer.eccentricOffsetMm)}`
+        : "CONC",
+      labelColor: style.fittingStroke,
+    });
   }
 
   ctx.restore();
@@ -26007,14 +26358,15 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
     ctx.lineTo(normal.x * body * 1.32 + along.x * body * 0.38, normal.y * body * 1.32 + along.y * body * 0.38);
     ctx.stroke();
   } else if (fitting.type === "reducer") {
-    ctx.beginPath();
-    ctx.moveTo(along.x * -15 + normal.x * pipeWidth * -0.7, along.y * -15 + normal.y * pipeWidth * -0.7);
-    ctx.lineTo(along.x * 15 + normal.x * pipeWidth * -0.38, along.y * 15 + normal.y * pipeWidth * -0.38);
-    ctx.lineTo(along.x * 15 + normal.x * pipeWidth * 0.38, along.y * 15 + normal.y * pipeWidth * 0.38);
-    ctx.lineTo(along.x * -15 + normal.x * pipeWidth * 0.7, along.y * -15 + normal.y * pipeWidth * 0.7);
-    ctx.closePath();
-    if (!style.outline) ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(
+      ctx,
+      { x: along.x * -15, y: along.y * -15 },
+      { x: along.x * 15, y: along.y * 15 },
+      pipeWidth * 1.4,
+      pipeWidth * 0.76,
+      fittingReducerType(fitting),
+      { fill: !style.outline, label: reducerTypeCode(fittingReducerType(fitting)), labelColor: style.fittingStroke },
+    );
   } else if (fitting.type === "flange") {
     const offsets = fittingFlangeMode(fitting) === "single" ? [0] : [-8, 8];
     for (const offset of offsets) {
@@ -29292,11 +29644,14 @@ async function saveBrowserProject(options = {}) {
     showAppNotice(cloudReadOnlyMessage("save changes"));
     return false;
   }
-  const info = await openProjectDetailsDialog({
-    title: state.projectId ? "Save project" : cloudUser && hasActiveCloudLicense() ? "Save cloud project" : "Save as project",
-    action: "Save project",
-    defaults: state.projectInfo,
-  });
+  const canQuickSave = Boolean(state.projectId && hasProjectInfo() && options.forceDetails !== true);
+  const info = canQuickSave
+    ? normalizeProjectInfo(state.projectInfo, state.pipeSpec)
+    : await openProjectDetailsDialog({
+        title: state.projectId ? "Save project details" : cloudUser && hasActiveCloudLicense() ? "Save cloud project" : "Save as project",
+        action: "Save project",
+        defaults: state.projectInfo,
+      });
   if (!info) return false;
 
   state.projectInfo = info;
@@ -34167,6 +34522,133 @@ function redrawLoadPlanIfOpen() {
   }
 }
 
+function quickPdfProjectInfo(previousInfo = state.projectInfo) {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+  const time = `${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const previous = normalizeProjectInfo(previousInfo);
+  return normalizeProjectInfo({
+    ...defaultProjectInfo(state.pipeSpec),
+    jobNumber: `QUICK-${date}`,
+    spoolNumber: `SP-${time}`,
+    revision: "A",
+    drawnBy: previous.drawnBy,
+    client: "Quick PDF",
+  }, state.pipeSpec);
+}
+
+async function startQuickPdfDrawing() {
+  clearPendingProjectCommentPhoto();
+  const previousInfo = normalizeProjectInfo(state.projectInfo);
+  if (hasDrawingContent()) {
+    const choice = await openNewDrawingDialog();
+    if (choice === "cancel") return false;
+    if (choice === "save") {
+      const saved = await saveBrowserProject({ silent: true });
+      if (!saved) return false;
+    }
+  }
+
+  persistUserDrawingDefaults();
+  state = blankState();
+  state.workflowKind = "quick";
+  state.projectInfo = quickPdfProjectInfo(previousInfo);
+  state.projectInfoPrompted = true;
+  state.projectId = null;
+  currentCloudProjectOwnerId = null;
+  currentCloudProjectCompanyId = null;
+  cloudPermissionReadOnly = false;
+  resetCloudSaveTracking();
+  projectComments = [];
+  projectCommentsProjectId = null;
+  nextFittingId = 1;
+  nextNoteId = 1;
+  three.userMovedCamera = false;
+  if (firstUseGuideState) {
+    firstUseGuideState.active = false;
+    persistFirstUseGuideState();
+    renderFirstUseGuide();
+  }
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  updateControls();
+  updateAll({ save: false });
+  showAppNotice("Quick PDF is ready. Draw the spool, add fittings, then press Download PDF.");
+  return true;
+}
+
+async function convertQuickPdfToManagedWorkflow() {
+  if (!isQuickPdfMode()) return;
+  const quickInfo = normalizeProjectInfo(state.projectInfo);
+  const info = await openProjectDetailsDialog({
+    title: "Use managed workflow",
+    action: "Continue as managed job",
+    defaults: {
+      ...quickInfo,
+      jobNumber: "",
+      spoolNumber: quickInfo.spoolNumber || "SP-01",
+      client: quickInfo.client === "Quick PDF" ? "" : quickInfo.client,
+    },
+  });
+  if (!info) return;
+
+  state.workflowKind = "managed";
+  state.projectInfo = info;
+  state.projectInfoPrompted = true;
+  if (!state.projectId) state.projectId = createProjectId();
+  applyWorkflowKindUi();
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  updateControls();
+  updateAll();
+  activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: hasDrawingContent() ? "review" : "draw" });
+  showAppNotice("Managed workflow is active. This spool now has saving, review, issue, QR and production controls.");
+}
+
+function setupQuickPdfMode() {
+  quickPdfMenuButton?.addEventListener("click", () => {
+    closeActionMenu();
+    startQuickPdfDrawing().catch((error) => {
+      console.warn("Quick PDF start failed.", error);
+      showAppNotice(error?.message || "Quick PDF could not be started.");
+    });
+  });
+  quickPdfDrawButton?.addEventListener("click", () => {
+    applyAppMode("draw");
+    setTool("draw");
+    showMobilePanel("drawing");
+  });
+  quickPdfFittingsButton?.addEventListener("click", () => {
+    applyAppMode("draw");
+    showMobilePanel("drawing");
+    setFittingsToolMenuOpen(true);
+  });
+  quickPdfDownloadButton?.addEventListener("click", async () => {
+    if (quickPdfDownloadButton.disabled) return;
+    const originalLabel = quickPdfDownloadButton.textContent;
+    quickPdfDownloadButton.disabled = true;
+    quickPdfDownloadButton.textContent = "Creating PDF…";
+    try {
+      await exportIsoImage();
+    } finally {
+      quickPdfDownloadButton.disabled = false;
+      quickPdfDownloadButton.textContent = originalLabel;
+    }
+  });
+  quickPdfManagedButton?.addEventListener("click", () => {
+    convertQuickPdfToManagedWorkflow().catch((error) => {
+      console.warn("Managed workflow conversion failed.", error);
+      showAppNotice(error?.message || "Could not change to managed workflow.");
+    });
+  });
+  applyWorkflowKindUi();
+}
+
 async function startNewDrawing() {
   clearPendingProjectCommentPhoto();
   let nextProjectDefaults = null;
@@ -34182,6 +34664,7 @@ async function startNewDrawing() {
 
   persistUserDrawingDefaults();
   state = blankState();
+  state.workflowKind = "managed";
   currentCloudProjectOwnerId = null;
   currentCloudProjectCompanyId = null;
   cloudPermissionReadOnly = false;
@@ -34191,10 +34674,22 @@ async function startNewDrawing() {
   nextFittingId = 1;
   nextNoteId = 1;
   three.userMovedCamera = false;
+  // A new spool is always a drawing task. Do not inherit Review/Export from
+  // the previous spool or from the user's last persisted workspace mode.
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
   updateControls();
   updateAll({ save: false });
-  await promptForProjectDetails({ force: true, defaults: nextProjectDefaults });
-  activateFirstUseGuide({ compact: true });
+  const created = await promptForProjectDetails({ force: true, defaults: nextProjectDefaults });
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  if (created) {
+    activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
+  }
 }
 
 function loadSampleDrawing() {
@@ -34845,6 +35340,7 @@ async function buildSpoolFromDrawingAssistant() {
   state.measurements = [];
   state.nodeTypes = {};
   state.reducerSideOverrides = {};
+  state.reducerTypeOverrides = {};
   state.dimensionOffsets = {};
   state.activePoint = points.length - 1;
   state.selectedPoint = points.length - 1;
@@ -34911,6 +35407,10 @@ async function promptForProjectDetails(options = {}) {
     resetCloudSaveTracking();
     projectComments = [];
     projectCommentsProjectId = null;
+    activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
+    applyAppMode("draw");
+    setTool("draw");
+    showMobilePanel("drawing");
   }
   updateControls();
   updateAll();
@@ -34948,13 +35448,21 @@ function openProjectDetailsDialog(options = {}) {
   }
   updateProjectFittingProfileHelp();
   if (projectDialogTitle) projectDialogTitle.textContent = options.title ?? "Project details";
+  const advancedFields = new Set(["client", "fittingProfile", "fittingProfileReference", "weldGapMm"]);
+  const focusField = Object.prototype.hasOwnProperty.call(projectDialogInputs, options.focusField)
+    ? options.focusField
+    : "jobNumber";
+  const isNewDrawing = String(options.action ?? "").toLowerCase().includes("start");
+  if (projectDialogSubtitle) {
+    projectDialogSubtitle.textContent = isNewDrawing
+      ? "Enter the four essentials. Fabrication defaults can stay unchanged."
+      : "Confirm the identifiers, or open Advanced fabrication setup only when needed.";
+  }
+  if (projectDialogAdvanced) projectDialogAdvanced.open = options.openAdvanced === true || advancedFields.has(focusField);
   projectDialogSubmitButton.textContent = options.action ?? "Save project";
   closeProjectJobPicker();
   updateProjectJobPickerButton();
   projectDialog.hidden = false;
-  const focusField = Object.prototype.hasOwnProperty.call(projectDialogInputs, options.focusField)
-    ? options.focusField
-    : "jobNumber";
   const focusInput = projectDialogInputs[focusField] ?? projectDialogInputs.jobNumber;
   focusInput?.focus();
   focusInput?.select?.();
@@ -35361,6 +35869,22 @@ function export3dImage() {
 
 async function exportIsoImage() {
   markFirstUseGuideLearned("export");
+  if (isQuickPdfMode()) {
+    if (!hasDrawingContent()) {
+      applyAppMode("draw");
+      showAppNotice("Draw at least one pipe run before downloading the Quick PDF.");
+      return;
+    }
+    try {
+      await exportFabSheetPdf({ quick: true });
+      showAppNotice("Quick PDF downloaded. Check every dimension before fabrication; it is not an issued drawing.");
+    } catch (error) {
+      console.warn("Could not export quick PDF.", error);
+      showAppNotice("Could not create the Quick PDF. A PNG working sheet will be used instead.");
+      exportSpoolReportImage({ quick: true });
+    }
+    return;
+  }
   const draft = !state.issuedAt || !projectStatusAtLeast(state.projectStatus, "issued");
   if (draft) {
     const checks = preIssueChecklist();
@@ -35421,12 +35945,30 @@ function markDraftPdfCanvas(canvas) {
   return canvas;
 }
 
+function markQuickPdfCanvas(canvas) {
+  if (!canvas) return canvas;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  const bandHeight = Math.max(34, Math.round(canvas.height * 0.038));
+  ctx.save();
+  ctx.fillStyle = "rgba(0, 101, 122, 0.96)";
+  ctx.fillRect(0, canvas.height - bandHeight, canvas.width, bandHeight);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `900 ${Math.max(14, Math.round(bandHeight * 0.39))}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("QUICK PDF · USER CHECK REQUIRED · NOT FORMALLY ISSUED", canvas.width / 2, canvas.height - bandHeight / 2);
+  ctx.restore();
+  return canvas;
+}
+
 function exportSpoolReportImage(options = {}) {
   const template = normalizeFabSheetTemplate(fabSheetTemplate);
   const canvas = buildSpoolReportCanvas(template);
-  if (options.draft) markDraftPdfCanvas(canvas);
-  const draftSuffix = options.draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
-  downloadCanvas(canvas, `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}${draftSuffix}.png`);
+  if (options.quick) markQuickPdfCanvas(canvas);
+  else if (options.draft) markDraftPdfCanvas(canvas);
+  const suffix = options.quick ? "-QUICK-PDF" : options.draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
+  downloadCanvas(canvas, `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}${suffix}.png`);
 }
 
 function buildBigSpoolFieldJointReportCanvas(layout = bigSpoolLayout()) {
@@ -35557,8 +36099,11 @@ async function exportFabSheetPdf(options = {}) {
   const { name } = exportedProjectPayload();
   const template = normalizeFabSheetTemplate(fabSheetTemplate);
   const draft = options.draft === true;
+  const quick = options.quick === true;
   const reportCanvas = buildSpoolReportCanvas(template);
-  if (draft) {
+  if (quick) {
+    markQuickPdfCanvas(reportCanvas);
+  } else if (draft) {
     markDraftPdfCanvas(reportCanvas);
   } else {
     await drawTraceabilityQr(reportCanvas);
@@ -35571,40 +36116,44 @@ async function exportFabSheetPdf(options = {}) {
     },
   ];
 
-  const bigSpoolCanvas = buildBigSpoolFieldJointReportCanvas();
-  if (bigSpoolCanvas) {
-    if (draft) markDraftPdfCanvas(bigSpoolCanvas);
-    pages.push({ dataUrl: bigSpoolCanvas.toDataURL("image/jpeg", 0.92), width: bigSpoolCanvas.width, height: bigSpoolCanvas.height });
-  }
+  // Fast Mode intentionally creates one working sheet. Managed exports retain
+  // the field-joint, weld-register and 3D report pages.
+  if (!quick) {
+    const bigSpoolCanvas = buildBigSpoolFieldJointReportCanvas();
+    if (bigSpoolCanvas) {
+      if (draft) markDraftPdfCanvas(bigSpoolCanvas);
+      pages.push({ dataUrl: bigSpoolCanvas.toDataURL("image/jpeg", 0.92), width: bigSpoolCanvas.width, height: bigSpoolCanvas.height });
+    }
 
-  const weldRegisterCanvas = buildWeldRegisterReportCanvas();
-  if (weldRegisterCanvas) {
-    if (draft) markDraftPdfCanvas(weldRegisterCanvas);
-    pages.push({
-      dataUrl: weldRegisterCanvas.toDataURL("image/jpeg", 0.92),
-      width: weldRegisterCanvas.width,
-      height: weldRegisterCanvas.height,
-    });
-  }
-
-  const modelViews = capture3dReportViews();
-  if (modelViews.length) {
-    try {
-      const modelCanvas = await buildModelReportCanvas(modelViews);
-      if (draft) markDraftPdfCanvas(modelCanvas);
+    const weldRegisterCanvas = buildWeldRegisterReportCanvas();
+    if (weldRegisterCanvas) {
+      if (draft) markDraftPdfCanvas(weldRegisterCanvas);
       pages.push({
-        dataUrl: modelCanvas.toDataURL("image/jpeg", 0.92),
-        width: modelCanvas.width,
-        height: modelCanvas.height,
+        dataUrl: weldRegisterCanvas.toDataURL("image/jpeg", 0.92),
+        width: weldRegisterCanvas.width,
+        height: weldRegisterCanvas.height,
       });
-    } catch (error) {
-      console.warn("Could not add 3D preview page to fab sheet PDF.", error);
+    }
+
+    const modelViews = capture3dReportViews();
+    if (modelViews.length) {
+      try {
+        const modelCanvas = await buildModelReportCanvas(modelViews);
+        if (draft) markDraftPdfCanvas(modelCanvas);
+        pages.push({
+          dataUrl: modelCanvas.toDataURL("image/jpeg", 0.92),
+          width: modelCanvas.width,
+          height: modelCanvas.height,
+        });
+      } catch (error) {
+        console.warn("Could not add 3D preview page to fab sheet PDF.", error);
+      }
     }
   }
 
   const pdfBytes = buildImagePdf(pages);
-  const draftSuffix = draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
-  downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}${draftSuffix}.pdf`, "application/pdf");
+  const suffix = quick ? "-QUICK-PDF" : draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
+  downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}${suffix}.pdf`, "application/pdf");
 }
 
 function spoolTravellerUrl(childSpoolId = "") {
@@ -36686,7 +37235,13 @@ function drawReportCompactFabricationNotes(ctx, x, y, width, quantities) {
     notes.push(`${quantities.branches.length} branch weld${quantities.branches.length === 1 ? "" : "s"} / ${formatMass(quantities.branchWeightKg)} kg. Branches stay cut into the main pipe.`);
   }
   if (quantities.reducers.length) {
-    notes.push(`${quantities.reducers.length} reducer${quantities.reducers.length === 1 ? "" : "s"} / ${formatMass(quantities.reducerWeightKg)} kg. Size changes are included in take-off.`);
+    const concentricCount = quantities.reducers.filter((reducer) => normalizeReducerType(reducer.reducerType) === "concentric").length;
+    const eccentricCount = quantities.reducers.length - concentricCount;
+    const typeSummary = [
+      concentricCount ? `${concentricCount} concentric` : "",
+      eccentricCount ? `${eccentricCount} eccentric` : "",
+    ].filter(Boolean).join(" / ");
+    notes.push(`${typeSummary} reducer${quantities.reducers.length === 1 ? "" : "s"} / ${formatMass(quantities.reducerWeightKg)} kg. H and eccentric offset e are listed in the reducer deductions.`);
   }
   if (quantities.fittings.length) {
     notes.push(`${quantities.fittings.length} end/socket/valve/weld fitting${quantities.fittings.length === 1 ? "" : "s"} / ${formatMass(quantities.fittingWeightKg)} kg.`);
@@ -36807,7 +37362,7 @@ function drawReportReducerNotes(ctx, x, y, width, quantities) {
   }
 
   for (const [index, reducer] of quantities.reducers.entries()) {
-    const line = `R${index + 1} ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}`;
+    const line = `R${index + 1} ${reducerTypeLabel(reducer.reducerType)} ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - ${reducerDimensionDetail(reducer)}; take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
 
@@ -36830,7 +37385,10 @@ function drawReportFittingNotes(ctx, x, y, width, quantities) {
 
   for (const item of quantities.fittings) {
     const distance = pointLength(subtractPoints(item.point, item.segment.start));
-    const line = `${fittingActionLabel(item.fitting.type)} run ${item.segment.index + 1} @ ${formatLength(distance)} mm - ${formatMass(item.weightKg)} kg ${item.weightSource}`;
+    const fittingLabel = item.fitting.type === "reducer"
+      ? `${reducerTypeLabel(fittingReducerType(item.fitting)).toLowerCase()} reducer`
+      : fittingActionLabel(item.fitting.type);
+    const line = `${fittingLabel} run ${item.segment.index + 1} @ ${formatLength(distance)} mm - ${formatMass(item.weightKg)} kg ${item.weightSource}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
 
@@ -37016,9 +37574,14 @@ function renderDrawingContextMenu() {
         action: () => placeContextFitting("threadedEnd"),
       },
       {
-        label: "Add reducer",
-        detail: "On this run",
-        action: () => placeContextFitting("reducer"),
+        label: "Add concentric reducer",
+        detail: "Centred transition / outlet size to be confirmed",
+        action: () => placeContextFitting("reducer", { reducerType: "concentric" }),
+      },
+      {
+        label: "Add eccentric reducer",
+        detail: "Flat-side transition / outlet size to be confirmed",
+        action: () => placeContextFitting("reducer", { reducerType: "eccentric" }),
       },
       {
         label: "Add sockets",
@@ -37036,12 +37599,19 @@ function renderDrawingContextMenu() {
     });
   }
 
-  if (target?.reducerHit?.reducer?.kind === "bend") {
+  if (target?.reducerHit?.reducer) {
     actions.push({
-      label: "Move reducer to other side",
-      detail: reducerSideDetail(target.reducerHit.reducer),
-      action: () => toggleContextBendReducerSide(),
+      label: `Set as ${target.reducerHit.reducer.reducerType === "eccentric" ? "concentric" : "eccentric"}`,
+      detail: `${reducerTypeLabel(target.reducerHit.reducer.reducerType)} now; ${reducerDimensionDetail(target.reducerHit.reducer)}`,
+      action: () => toggleContextAutoReducerType(),
     });
+    if (target.reducerHit.reducer.kind === "bend") {
+      actions.push({
+        label: "Move reducer to other side",
+        detail: reducerSideDetail(target.reducerHit.reducer),
+        action: () => toggleContextBendReducerSide(),
+      });
+    }
   }
 
   const pointConnections = target?.pointHit
@@ -37098,6 +37668,14 @@ function renderDrawingContextMenu() {
         label: "Spin socket 90 deg",
         detail: `Current ${formatAngle(fittingSocketAngle(target.fittingHit.fitting))} deg around pipe`,
         action: () => rotateContextSocket(),
+      });
+    }
+
+    if (target.fittingHit.fitting.type === "reducer") {
+      actions.push({
+        label: `Set as ${fittingReducerType(target.fittingHit.fitting) === "eccentric" ? "concentric" : "eccentric"}`,
+        detail: `${reducerTypeLabel(fittingReducerType(target.fittingHit.fitting))} now`,
+        action: () => toggleContextManualReducerType(),
       });
     }
 
@@ -37317,6 +37895,13 @@ function renderMobileDrawingContextMenu(target) {
         action: () => rotateContextSocket(),
       });
     }
+    if (fitting.type === "reducer") {
+      actions.push({
+        label: `Set as ${fittingReducerType(fitting) === "eccentric" ? "concentric" : "eccentric"}`,
+        detail: `${reducerTypeLabel(fittingReducerType(fitting))} now`,
+        action: () => toggleContextManualReducerType(),
+      });
+    }
     actions.push({
       label: `Delete ${fittingActionLabel(fitting.type)}`,
       detail: "Remove this fitting only",
@@ -37327,13 +37912,21 @@ function renderMobileDrawingContextMenu(target) {
     return;
   }
 
-  if (target?.reducerHit?.reducer?.kind === "bend") {
-    addDrawingContextHeader("Reducer", "Bend reducer actions");
+  if (target?.reducerHit?.reducer) {
+    const reducer = target.reducerHit.reducer;
+    addDrawingContextHeader(`${reducerTypeLabel(reducer.reducerType)} reducer`, reducerDimensionDetail(reducer));
     actions.push({
-      label: "Move reducer to other side",
-      detail: reducerSideDetail(target.reducerHit.reducer),
-      action: () => toggleContextBendReducerSide(),
+      label: `Set as ${reducer.reducerType === "eccentric" ? "concentric" : "eccentric"}`,
+      detail: reducer.reducerType === "eccentric" ? "Use centred ends" : "Use flat side and show offset e",
+      action: () => toggleContextAutoReducerType(),
     });
+    if (reducer.kind === "bend") {
+      actions.push({
+        label: "Move reducer to other side",
+        detail: reducerSideDetail(reducer),
+        action: () => toggleContextBendReducerSide(),
+      });
+    }
     appendDrawingContextActions(actions);
     return;
   }
@@ -37445,9 +38038,14 @@ function renderMobileFittingMenu() {
       action: () => placeContextFitting("threadedEnd"),
     },
     {
-      label: "Reducer",
-      detail: "On this run",
-      action: () => placeContextFitting("reducer"),
+      label: "Concentric reducer",
+      detail: "Centred transition / confirm outlet size",
+      action: () => placeContextFitting("reducer", { reducerType: "concentric" }),
+    },
+    {
+      label: "Eccentric reducer",
+      detail: "Flat-side transition / confirm outlet size",
+      action: () => placeContextFitting("reducer", { reducerType: "eccentric" }),
     },
     {
       label: "Sockets",
@@ -37807,7 +38405,13 @@ function finishTouchContextPress(event) {
     return true;
   }
 
+  const target = contextTargetFromPointer(press.pointer);
   selectContextHitOnTouch(press.pointer, event);
+  if (!drawingEditLocked() && (target.segmentHit || target.fittingHit || target.pointHit)) {
+    showMobilePanel("drawing");
+    openDrawingContextMenuFromPointer(press.pointer, press.clientX, press.clientY);
+    cursorReadout.textContent = "Choose a pipe action";
+  }
   event.preventDefault();
   return true;
 }
@@ -38318,6 +38922,7 @@ function fittingModeText(fittingData) {
   if (fitting?.type === "rollGroove") return "0 kg roll groove";
   if (fitting?.type === "threadedEnd") return "0 kg threaded end preparation";
   if (fitting?.type === "socket") return `NB ${fittingSocketSizeNb(fitting)} socket / ${formatAngle(fittingSocketAngle(fitting))} deg`;
+  if (fitting?.type === "reducer") return `${reducerTypeLabel(fittingReducerType(fitting))} reducer / outlet size required`;
   return fittingData?.weightSource ?? "estimated";
 }
 
@@ -38361,6 +38966,35 @@ function toggleContextBendReducerSide() {
   } else {
     state.reducerSideOverrides[reducer.nodeIndex] = "large";
   }
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function toggleContextAutoReducerType() {
+  if (!ensureDrawingEditable("change reducer type")) return;
+  const reducer = drawingContextTarget?.reducerHit?.reducer;
+  if (!reducer) return;
+
+  const snapshot = createUndoSnapshot();
+  state.reducerTypeOverrides = normalizeReducerTypeOverrides(state.reducerTypeOverrides, state.points.length);
+  const nextType = normalizeReducerType(reducer.reducerType) === "eccentric" ? "concentric" : "eccentric";
+  if (nextType === normalizeReducerType(state.reducerType)) {
+    delete state.reducerTypeOverrides[reducer.nodeIndex];
+  } else {
+    state.reducerTypeOverrides[reducer.nodeIndex] = nextType;
+  }
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function toggleContextManualReducerType() {
+  if (!ensureDrawingEditable("change reducer type")) return;
+  const fitting = drawingContextTarget?.fittingHit?.fitting;
+  if (!fitting || fitting.type !== "reducer") return;
+
+  const snapshot = createUndoSnapshot();
+  fitting.reducerType = fittingReducerType(fitting) === "eccentric" ? "concentric" : "eccentric";
+  state.selectedFitting = fitting.id;
   recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
@@ -38497,6 +39131,7 @@ function deleteContextPoint() {
   state.points.splice(pointHit.index, 1);
   reindexNodeTypesAfterPointRemoval(pointHit.index);
   reindexReducerSideOverridesAfterPointRemoval(pointHit.index);
+  reindexReducerTypeOverridesAfterPointRemoval(pointHit.index);
   state.selectedPoint = null;
   state.activePoint = Math.max(0, Math.min(state.activePoint, state.points.length - 1));
   recordHistory({ type: "snapshot", snapshot });
@@ -38582,7 +39217,13 @@ async function editSegmentLengthFromDimensionSource(segment, options = {}) {
   } else {
     setSelectedSegmentLength(text);
   }
-  revealInspectorForSelection();
+  markFirstUseGuideLearned("length");
+  if (options.sourceType === "context") {
+    showMobilePanel("drawing");
+    showAppNotice(`Pipe length set to ${formatLength(pointLength(segments()[segment.index]?.vector ?? segment.vector))} mm.`);
+  } else {
+    revealInspectorForSelection();
+  }
   return true;
 }
 
@@ -39949,6 +40590,11 @@ flangeStandardSelect?.addEventListener("change", () => {
   persistState();
 });
 
+reducerTypeSelect?.addEventListener("change", () => {
+  state.reducerType = normalizeReducerType(reducerTypeSelect.value);
+  updateAll();
+});
+
 previewModeSelect?.addEventListener("change", () => setPreviewMode(previewModeSelect.value));
 previewModePanelSelect?.addEventListener("change", () => setPreviewMode(previewModePanelSelect.value));
 previewLabelToggle?.addEventListener("change", () => {
@@ -40063,6 +40709,7 @@ drawingAssistantBuildButton?.addEventListener("click", buildSpoolFromDrawingAssi
 document.querySelector("#export3dButton").addEventListener("click", export3dImage);
 document.querySelector("#exportReportButton").addEventListener("click", exportIsoImage);
 document.querySelector("#exportIsoButton").addEventListener("click", exportIsoImage);
+document.querySelector("#exportPanelPdfButton").addEventListener("click", exportIsoImage);
 fabSheetTemplateSelect?.addEventListener("change", () => {
   storeFabSheetTemplate(fabSheetTemplateSelect.value);
   updateControls();
@@ -40269,6 +40916,7 @@ setupAuthDialog();
 setupSupportAdminDialog();
 setupLegalSupportDialog();
 setupHomeDashboard();
+setupQuickPdfMode();
 setupFirstUseGuide();
 setupProjectDialog();
 setupToolSettingsDialog();

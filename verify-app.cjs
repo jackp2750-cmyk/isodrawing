@@ -416,8 +416,8 @@ assert(
     /const\s+JOBS_TUTORIAL_VIDEO_URL\s*=/.test(app) &&
     /const\s+DRAWING_TUTORIAL_VIDEO_URL\s*=/.test(app) &&
     /const\s+VIDEO_TUTORIALS\s*=/.test(app) &&
-    /data-open-video-tutorial="jobs"/.test(html) &&
-    /data-open-video-tutorial="drawing"/.test(html) &&
+    /class="tutorial-header-actions"/.test(html) &&
+    /id="tutorialCloseButton"/.test(html) &&
     /function\s+renderVideoTutorialLibrary\s*\(/.test(app) &&
     /function\s+selectVideoTutorial\s*\(/.test(app) &&
     /function\s+setupVideoTutorialDialog\s*\(/.test(app) &&
@@ -426,7 +426,7 @@ assert(
     /function\s+jumpToVideoTutorialChapter\s*\(/.test(app) &&
     /\.video-tutorial-card/.test(css) &&
     /\.video-tutorial-library-item/.test(css) &&
-    /\.tutorial-video-shelf/.test(css) &&
+    /\.tutorial-header-actions/.test(css) &&
     /\.video-tutorial-controls/.test(css) &&
     !/720p web edition/.test(html) &&
     !/Start from beginning/.test(html) &&
@@ -438,7 +438,7 @@ assert(
     /DRAFT — NOT FOR FABRICATION/.test(app) &&
     /DRAFT-NOT-FOR-FABRICATION/.test(app) &&
     /exportFabSheetPdf\(\{\s*draft\s*\}\)/.test(app) &&
-    /issuedPdfReady\s*\?\s*["']Issued PDF["']\s*:\s*["']Draft PDF["']/.test(app) &&
+    /issuedPdfReady\s*\?\s*["']Download issued PDF["']\s*:\s*["']Download draft PDF["']/.test(app) &&
     serviceWorker.includes(`spoolmate-v${assetVersion}`),
   "Simplified draft/issued PDF flow or draft safety marking is incomplete",
 );
@@ -825,9 +825,9 @@ assert(
 assert(
   /function\s+weldReadyIssueFindings\s*\(/.test(app) &&
     /if\s*\(checks\.blockers\.length\)\s*return\s+["']blocked["']/.test(app) &&
-    /checks\.warnings\.length\s*\|\|\s*checks\.regressionFailures\.length/.test(app) &&
-    /data-workflow-action="open-test-kit"/.test(app),
-  "Ready to Issue severity or app-diagnostic handling is incomplete",
+    /if\s*\(checks\.warnings\.length\)\s*return\s+["']review["']/.test(app) &&
+    /const\s+warnings\s*=\s*\[\.\.\.checks\.warnings\]/.test(app),
+  "Ready to Issue severity or warning handling is incomplete",
 );
 assert(
   /<strong>Ready to Issue<\/strong>/.test(app) &&
@@ -1025,6 +1025,7 @@ try {
   const reducerLengths = constValue(app, "REDUCER_LENGTH_MM");
   const buttweldWeights = constValue(app, "ATLAS_BUTTWELD_WEIGHTS");
   const stainlessReducers = constValue(app, "ATLAS_STAINLESS10_REDUCER_WEIGHTS");
+  const eccentricReducerWeightOverrides = constValue(app, "ATLAS_STAINLESS10_ECCENTRIC_REDUCER_WEIGHT_OVERRIDES");
   const flangeTables = constValue(app, "FLANGE_DRILLING_TABLES");
   const pipeSizes = sizes.filter((size) => size.kind !== "tube");
   const tubeSizes = sizes.filter((size) => size.kind === "tube");
@@ -1115,6 +1116,8 @@ try {
 
   assert(!Object.hasOwn(buttweldWeights.carbon40[15], "reducer"), "DN15 carbon reducer must not use the Atlas stub-end weight");
   assert(buttweldWeights.carbon40[20].reducer === 0.06, "DN20 carbon reducer weight must match the Atlas reducer column");
+  assert(stainlessReducers["40:32"] === 0.21, "DN40 x DN32 concentric Schedule 10S reducer must be 0.21 kg");
+  assert(eccentricReducerWeightOverrides["40:32"] === 0.24, "DN40 x DN32 eccentric Schedule 10S reducer must be 0.24 kg");
   assert(
     app.includes("ELBOW_45_TAKEOFF_MM[size.nb]"),
     "45 degree pipe elbows are not using the explicit Atlas centre-to-end table",
@@ -1158,6 +1161,20 @@ try {
 } catch (error) {
   fail(`Engineering table validation failed: ${error.message}`);
 }
+
+assert(
+  html.includes('id="reducerTypeSelect"') &&
+    app.includes('const REDUCER_TYPE_OPTIONS = new Set(["concentric", "eccentric"])') &&
+    app.includes("reducerTypeOverrides: normalizeReducerTypeOverrides(state.reducerTypeOverrides") &&
+    app.includes("function toggleContextAutoReducerType") &&
+    app.includes("function toggleContextManualReducerType") &&
+    app.includes("function reducerEccentricOffsetMm") &&
+    app.includes("function reducerProfile2d") &&
+    app.includes('className = "pipe-size-label reducer-type-label"') &&
+    app.includes("reducerDimensionDetail(reducer)") &&
+    css.includes(".reducer-type-label"),
+  "Concentric/eccentric reducer selection, saved state, iso shape, dimensions or 3D labels are incomplete",
+);
 
 const rpcCalls = matches(app, /\.rpc\(\s*["']([^"']+)["']/g).map((match) => match[1]);
 for (const rpc of new Set(rpcCalls)) {

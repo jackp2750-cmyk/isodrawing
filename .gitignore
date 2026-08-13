@@ -1,3 +1,24 @@
+# Local production and scratch material. Keep these out of the public repo.
 tmp/
 video-production/
+local-only/
+private/
 
+# Secrets and machine-specific configuration.
+.env
+.env.*
+!.env.example
+
+# Rendered/raw media belongs in Supabase Storage, not the source repository.
+*.mp4
+*.mov
+*.mkv
+*.webm
+*.wav
+*.mp3
+*.aac
+*.m4a
+
+# Large local packages/exports.
+*.zip
+*.7z

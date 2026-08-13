@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=349" />
+    <link rel="stylesheet" href="./styles.css?v=362" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.49</span>
+              <span class="version-badge" id="appVersionBadge">v3.62</span>
             </div>
           </div>
 
@@ -395,7 +395,11 @@
                   </button>
                   <button class="icon-button labeled danger" id="resetButton" type="button" title="Start a new spool" aria-label="Start a new spool">
                     <svg><use href="#icon-reset"></use></svg>
-                    <span>New spool</span>
+                    <span>Managed job</span>
+                  </button>
+                  <button class="icon-button labeled" id="quickPdfMenuButton" type="button" title="Start a drawing without the managed workflow" aria-label="Start Quick PDF">
+                    <svg><use href="#icon-report"></use></svg>
+                    <span>Quick PDF</span>
                   </button>
                   <button class="icon-button labeled" id="homeDashboardButton" type="button" title="Open SpoolMate dashboard" aria-label="Open SpoolMate dashboard">
                     <svg><use href="#icon-settings"></use></svg>
@@ -552,22 +556,25 @@
                   <button class="tool-button" data-tool="branch" data-mode-tools="draw edit" type="button" title="Draw branch weld point" aria-label="Draw branch weld point">
                     <svg><use href="#icon-tee"></use></svg><span>Branch</span>
                   </button>
-                  <button class="tool-button" data-tool="flange" data-mode-tools="edit" type="button" title="Place flange" aria-label="Place flange">
+                  <button class="tool-button" data-tool="flange" data-mode-tools="draw edit" type="button" title="Place flange" aria-label="Place flange">
                     <svg><use href="#icon-flange"></use></svg><span>Flange</span>
                   </button>
-                  <button class="tool-button" data-tool="reducer" data-mode-tools="edit" type="button" title="Place reducer" aria-label="Place reducer">
+                  <button class="tool-button" data-tool="reducer" data-mode-tools="draw edit" type="button" title="Place reducer" aria-label="Place reducer">
                     <svg><use href="#icon-reducer"></use></svg><span>Reducer</span>
                   </button>
-                  <button class="tool-button" data-tool="rollGroove" data-mode-tools="edit" type="button" title="Place roll groove" aria-label="Place roll groove">
+                  <button class="tool-button" data-tool="rollGroove" data-mode-tools="draw edit" type="button" title="Place roll groove" aria-label="Place roll groove">
                     <svg><use href="#icon-groove"></use></svg><span>Groove</span>
                   </button>
-                  <button class="tool-button" data-tool="valve" data-mode-tools="edit" type="button" title="Place valve" aria-label="Place valve">
+                  <button class="tool-button" data-tool="threadedEnd" data-mode-tools="draw edit" type="button" title="Place threaded pipe end" aria-label="Place threaded pipe end">
+                    <svg><use href="#icon-groove"></use></svg><span>Thread</span>
+                  </button>
+                  <button class="tool-button" data-tool="valve" data-mode-tools="draw edit" type="button" title="Place valve" aria-label="Place valve">
                     <svg><use href="#icon-valve"></use></svg><span>Valve</span>
                   </button>
-                  <button class="tool-button" data-tool="socket" data-mode-tools="edit" type="button" title="Place one socket; use right-click for a socket layout" aria-label="Place one socket">
+                  <button class="tool-button" data-tool="socket" data-mode-tools="draw edit" type="button" title="Place one socket; tap a pipe for socket layout actions" aria-label="Place one socket">
                     <svg><use href="#icon-tee"></use></svg><span>Socket</span>
                   </button>
-                  <button class="tool-button" data-tool="weld" data-mode-tools="edit" type="button" title="Place weld" aria-label="Place weld">
+                  <button class="tool-button" data-tool="weld" data-mode-tools="draw edit" type="button" title="Place weld" aria-label="Place weld">
                     <svg><use href="#icon-weld"></use></svg><span>Weld</span>
                   </button>
                 </div>
@@ -639,6 +646,19 @@
               <button class="icon-button compact labeled" id="firstSpoolGuideActionButton" type="button">Start drawing</button>
               <button class="primary-button" id="firstSpoolGuideNextButton" type="button">Next</button>
               <button class="first-spool-guide-close" id="firstSpoolGuideCloseButton" type="button" aria-label="End first spool tips">End tips</button>
+            </div>
+          </section>
+          <section class="quick-pdf-bar" id="quickPdfBar" aria-label="Quick PDF actions" hidden>
+            <div class="quick-pdf-copy">
+              <small>FAST MODE</small>
+              <strong>Draw it. Check it. Make the PDF.</strong>
+              <span>No account, Jobs board or approval workflow is required.</span>
+            </div>
+            <div class="quick-pdf-actions">
+              <button class="icon-button compact labeled" id="quickPdfDrawButton" type="button">Draw</button>
+              <button class="icon-button compact labeled" id="quickPdfFittingsButton" type="button">Fittings</button>
+              <button class="primary-button" id="quickPdfDownloadButton" type="button">Download PDF</button>
+              <button class="quick-pdf-managed-link" id="quickPdfManagedButton" type="button">Use managed workflow</button>
             </div>
           </section>
           <div class="canvas-frame">
@@ -734,6 +754,14 @@
                   <option value="jis10k">JIS 10K</option>
                 </select>
               </label>
+              <label class="field">
+                <span>Default reducer type</span>
+                <select id="reducerTypeSelect">
+                  <option value="concentric">Concentric reducer</option>
+                  <option value="eccentric">Eccentric reducer</option>
+                </select>
+                <small>Automatic size changes use this type unless changed on the reducer.</small>
+              </label>
             </section>
           </div>
 
@@ -756,6 +784,15 @@
           </div>
 
           <div class="inspector-tab-panel" data-inspector-panel="bom">
+            <section class="control-section export-primary-card">
+              <small>READY TO DOWNLOAD</small>
+              <h2>Fabrication PDF</h2>
+              <p id="exportPanelPdfHint">Creates a clearly marked draft PDF. Issued drawings include their approved revision and QR traveller.</p>
+              <button class="primary-button export-action" id="exportPanelPdfButton" type="button" title="Download fabrication sheet PDF" aria-label="Download fabrication sheet PDF">
+                <svg><use href="#icon-export"></use></svg>
+                <span>Download draft PDF</span>
+              </button>
+            </section>
             <section class="control-section">
               <h2>Order list</h2>
               <div class="takeoff-summary" id="bomSummary" aria-live="polite"></div>
@@ -888,10 +925,10 @@
           <div class="project-dialog-header">
             <div>
               <strong id="projectDialogTitle">Project details</strong>
-              <small>These details go on the fabrication sheet and saved project list.</small>
+              <small id="projectDialogSubtitle">Enter the essentials now. Fabrication defaults can stay unchanged.</small>
             </div>
           </div>
-          <div class="project-dialog-grid">
+          <div class="project-dialog-grid project-dialog-essentials">
             <label class="field">
               <span>Job no.</span>
               <div class="project-job-entry">
@@ -912,6 +949,13 @@
               <span>Drawn by</span>
               <input id="projectDialogDrawnBy" type="text" maxlength="32" autocomplete="off" />
             </label>
+          </div>
+          <details class="project-dialog-advanced" id="projectDialogAdvanced">
+            <summary>
+              <span><strong>Advanced fabrication setup</strong><small>Fitting source and weld gap</small></span>
+              <b>Optional</b>
+            </summary>
+            <div class="project-dialog-grid">
             <label class="field project-dialog-wide">
               <span>Client / area</span>
               <input id="projectDialogClient" type="text" maxlength="56" autocomplete="off" />
@@ -937,7 +981,8 @@
               </select>
               <small class="project-profile-help">Deducted only where a pipe cut meets a welded fitting. Open pipe ends receive no weld-gap deduction.</small>
             </label>
-          </div>
+            </div>
+          </details>
           <div class="project-dialog-actions">
             <button class="icon-button labeled" id="projectDialogCancelButton" type="button">Cancel</button>
             <button class="primary-button save-action" id="projectDialogSubmitButton" type="submit">Save project</button>
@@ -977,6 +1022,11 @@
           <div class="home-dashboard-account" id="homeDashboardAccount">Guest mode - local projects only</div>
           <div class="home-dashboard-stats" id="homeDashboardStats">0 saved spools on this device</div>
           <div class="home-dashboard-grid">
+            <button class="home-dashboard-action quick-pdf" id="homeDashboardQuickPdfButton" type="button">
+              <svg><use href="#icon-report"></use></svg>
+              <strong>Quick PDF</strong>
+              <span>No account or job workflow. Draw the spool, check it and download the PDF.</span>
+            </button>
             <button class="home-dashboard-action primary" id="homeDashboardContinueButton" type="button">
               <svg><use href="#icon-draw"></use></svg>
               <strong>Continue drawing</strong>
@@ -989,8 +1039,8 @@
             </button>
             <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
               <svg><use href="#icon-reset"></use></svg>
-              <strong>New spool</strong>
-              <span>Start a fresh drawing with job details.</span>
+              <strong>Managed job</strong>
+              <span>Use saving, review, issue, QR and production workflow.</span>
             </button>
             <button class="home-dashboard-action" id="homeDashboardJobsButton" type="button">
               <svg><use href="#icon-sample"></use></svg>
@@ -1137,7 +1187,7 @@
             </div>
           </section>
           <div class="project-dialog-actions auth-actions">
-            <button class="icon-button labeled" id="authCloseButton" type="button">Continue as guest</button>
+            <button class="icon-button labeled" id="authCloseButton" type="button">Continue without account</button>
             <button class="icon-button labeled" id="authSignOutButton" type="button" hidden>Sign out</button>
             <button class="icon-button labeled" id="authResendButton" type="button" hidden>Resend email</button>
             <button class="primary-button" id="authSendResetButton" type="button" hidden>Send reset email</button>
@@ -1390,43 +1440,21 @@
               <strong>Interactive tutorial</strong>
               <small>Pick a topic, watch the mini demo, then use the safe practice without changing your drawing.</small>
             </div>
-            <button class="icon-button labeled tutorial-video-button" id="tutorialVideoButton" type="button">
-              <svg><use href="#icon-image"></use></svg>
-              <span>Video tutorials</span>
-            </button>
+            <div class="tutorial-header-actions">
+              <button class="icon-button labeled tutorial-video-button" id="tutorialVideoButton" type="button" aria-label="Open video tutorials">
+                <svg><use href="#icon-image"></use></svg>
+                <span>Video tutorials</span>
+              </button>
+              <button class="icon-button labeled tutorial-close-button" id="tutorialCloseButton" type="button" aria-label="Close interactive tutorial">Close</button>
+            </div>
           </div>
           <div class="workspace-location-strip" data-workspace-location data-location-context="Tutorial"></div>
-          <section class="tutorial-video-shelf" aria-label="Video tutorials">
-            <div class="tutorial-video-shelf-copy">
-              <span>Watch and follow along</span>
-              <strong>Video tutorials</strong>
-              <small>Start with the complete workflow, or learn one part of SpoolMate at a time.</small>
-            </div>
-            <div class="tutorial-video-shelf-actions">
-              <button class="tutorial-video-shelf-button" type="button" data-open-video-tutorial="complete">
-                <span>8:31</span>
-                <strong>Complete spool</strong>
-                <small>Drawing, 3D, checks, welds and export</small>
-              </button>
-              <button class="tutorial-video-shelf-button" type="button" data-open-video-tutorial="jobs">
-                <span>7:35</span>
-                <strong>Jobs dashboard</strong>
-                <small>My day, compact jobs, holds, team tools and QR</small>
-              </button>
-              <button class="tutorial-video-shelf-button" type="button" data-open-video-tutorial="drawing">
-                <span>10:08</span>
-                <strong>Drawing masterclass</strong>
-                <small>Drag, precise edits, fittings, sockets and 3D</small>
-              </button>
-            </div>
-          </section>
           <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
           <article class="tutorial-step-card" id="tutorialStepCard"></article>
           <div class="project-dialog-actions tutorial-actions">
-            <button class="icon-button labeled" id="tutorialCloseButton" type="button">Close</button>
             <button class="icon-button labeled" id="tutorialPrevButton" type="button">Back</button>
-            <button class="icon-button labeled" id="tutorialActionButton" type="button">Try it</button>
-            <button class="primary-button" id="tutorialNextButton" type="button">Next</button>
+            <button class="primary-button" id="tutorialActionButton" type="button">Start practice</button>
+            <button class="icon-button labeled" id="tutorialNextButton" type="button">Next</button>
           </div>
         </section>
       </div>
@@ -1949,7 +1977,7 @@
                 </article>
                 <article>
                   <strong>Reducers</strong>
-                  <p>Reducers are added when pipe sizes change. If a bend reducer lands on the wrong side, right-click or long-press it and move it to the other side.</p>
+                  <p>Reducers are added when pipe sizes change. Choose concentric or eccentric in Pipe &amp; display, or right-click/long-press the reducer to change its type. Eccentric reducers show their flat side and offset <strong>e</strong>; bend reducers can also be moved to the other leg.</p>
                 </article>
                 <article>
                   <strong>Notes</strong>
@@ -2093,6 +2121,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=349"></script>
+    <script defer src="./app.js?v=362"></script>
   </body>
 </html>

@@ -1,8 +1,10 @@
 # SpoolMate
 
-Current app version: `v3.49`
+Current app version: `v3.62`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
+
+The start dashboard offers two deliberately separate routes. Quick PDF needs no account, Jobs board, allocation or approval workflow: it opens a temporary drawing immediately and creates a clearly identified user-check working PDF. Managed job retains saving, review, formal issue, QR, production and business-team controls. A Quick PDF can be converted to a managed job without redrawing it.
 
 Big Spool V1-V3 keeps one very large master assembly and turns it into transport-ready child spools. The planner can optimise against job-specific length, width, height and weight limits, calculates child weight and centre of gravity, suggests lift points, and records the field connection type, readiness and notes at every split. Each split can generate roll grooves on both child ends, flanges on both ends or a field weld with the selected project weld-gap deductions. Stable child identities flow into the load planner, child fabrication PDF package and child-specific QR spool traveller.
 

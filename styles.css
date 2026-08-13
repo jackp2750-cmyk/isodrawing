@@ -1084,6 +1084,800 @@ body.action-menu-open .topbar-actions {
   }
 }
 
+/* v3.61 demo-day device audit: make open tabs identifiable before the label
+   truncates, and keep the phone drawing rail fully inside the safe viewport. */
+@media (max-width: 1024px) {
+  body.mobile-touch-layout .spool-workspace-tab-label-full {
+    display: none;
+  }
+
+  body.mobile-touch-layout .spool-workspace-tab-label-compact {
+    display: inline;
+  }
+}
+
+@media (max-width: 640px) and (orientation: portrait) {
+  body.phone-layout.field-layout.mobile-touch-layout:not(.focus-mode):not(.drawing-panel-fullscreen) .drawing-panel {
+    padding-bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.phone-layout.field-layout.mobile-touch-layout:not(.focus-mode):not(.drawing-panel-fullscreen) .tool-rail {
+    bottom: 0;
+    height: calc(74px + env(safe-area-inset-bottom, 0px));
+    min-height: calc(74px + env(safe-area-inset-bottom, 0px));
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom, 0px));
+  }
+
+  body.phone-layout.field-layout.mobile-touch-layout .tool-rail .tool-grid {
+    height: 60px;
+    min-height: 60px;
+    overflow: visible;
+  }
+
+  body.phone-layout.field-layout.mobile-touch-layout .tool-rail .tool-button,
+  body.phone-layout.field-layout.mobile-touch-layout .tool-rail .tool-flyout-wrap,
+  body.phone-layout.field-layout.mobile-touch-layout .tool-rail .tool-flyout-wrap > .fittings-tool-button {
+    height: 58px;
+    min-height: 58px;
+  }
+}
+
+/* Keep this final so the legacy v3.01 hide rule cannot remove Export's CTA. */
+body[data-app-mode="export"] #exportIsoButton {
+  display: inline-flex !important;
+  border-color: #007fab;
+  background: #007fab;
+  color: #fff;
+}
+
+/* v3.54: the Export workspace must always expose one obvious PDF action. */
+body[data-app-mode="export"] #exportIsoButton {
+  display: inline-flex !important;
+  border-color: #007fab;
+  background: #007fab;
+  color: #fff;
+  box-shadow: 0 7px 18px rgba(0, 127, 171, 0.22);
+}
+
+.export-primary-card {
+  display: grid;
+  gap: 7px;
+  border: 1px solid rgba(0, 127, 171, 0.34) !important;
+  background: linear-gradient(145deg, #eafaff, #f7fdfb) !important;
+  box-shadow: 0 8px 22px rgba(0, 127, 171, 0.1);
+}
+
+.export-primary-card > small {
+  color: #00708f;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+}
+
+.export-primary-card > h2,
+.export-primary-card > p {
+  margin: 0;
+}
+
+.export-primary-card > p {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+#exportPanelPdfButton {
+  width: 100%;
+  min-height: 50px;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+#exportPanelPdfButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+:root[data-theme="dark"] .export-primary-card {
+  border-color: rgba(19, 216, 255, 0.34) !important;
+  background: linear-gradient(145deg, rgba(5, 40, 54, 0.98), rgba(6, 31, 40, 0.98)) !important;
+}
+
+/* v3.52 fast individual workflow */
+.home-dashboard-action.quick-pdf {
+  border-color: rgba(0, 127, 171, 0.55);
+  background: linear-gradient(180deg, #e9fbff 0%, #d7f5f7 100%);
+  color: #075e68;
+  box-shadow: 0 8px 22px rgba(0, 127, 171, 0.12);
+}
+
+.home-dashboard-action.quick-pdf:hover {
+  border-color: #007fab;
+  background: linear-gradient(180deg, #def8fd 0%, #caeff2 100%);
+}
+
+.home-dashboard-action.quick-pdf span {
+  color: #27636b;
+}
+
+.quick-pdf-bar {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(270px, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(0, 127, 171, 0.28);
+  background: linear-gradient(90deg, #e9fbff 0%, #f5fcfb 100%);
+  box-shadow: 0 8px 18px rgba(24, 75, 83, 0.08);
+}
+
+.quick-pdf-bar[hidden] {
+  display: none !important;
+}
+
+.quick-pdf-copy {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 2px 9px;
+  align-items: baseline;
+}
+
+.quick-pdf-copy small {
+  grid-row: 1 / span 2;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #007fab;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+}
+
+.quick-pdf-copy strong {
+  color: #123a40;
+  font-size: 14px;
+  font-weight: 950;
+}
+
+.quick-pdf-copy span {
+  color: #557176;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.quick-pdf-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.quick-pdf-actions button {
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.quick-pdf-managed-link {
+  border: 0;
+  background: transparent;
+  color: #46656b;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+body[data-workflow-kind="quick"] .drawing-panel {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+
+body[data-workflow-kind="quick"] #firstSpoolGuide,
+body[data-workflow-kind="quick"] [data-app-mode="review"],
+body[data-workflow-kind="quick"] .project-status-field,
+body[data-workflow-kind="quick"] #projectAssigneeReadout,
+body[data-workflow-kind="quick"] #openBrowserProjectButton,
+body[data-workflow-kind="quick"] #bigSpoolButton,
+body[data-workflow-kind="quick"] #accountButton,
+body[data-workflow-kind="quick"] #workspaceSwitcher,
+body[data-workflow-kind="quick"] #cloudSyncStatus,
+body[data-workflow-kind="quick"] .role-access-notice,
+body[data-workflow-kind="quick"] .licence-banner {
+  display: none !important;
+}
+
+body[data-workflow-kind="quick"] .project-context-strip {
+  padding: 4px 8px;
+  border: 1px solid rgba(0, 127, 171, 0.2);
+  border-radius: 8px;
+  background: #eefbfc;
+}
+
+body[data-workflow-kind="quick"] .project-context-strip .project-readout {
+  color: #075e68;
+  font-weight: 950;
+}
+
+:root[data-theme="dark"] .home-dashboard-action.quick-pdf,
+:root[data-theme="dark"] .quick-pdf-bar {
+  border-color: rgba(19, 216, 255, 0.34);
+  background: linear-gradient(135deg, rgba(7, 44, 47, 0.98), rgba(5, 31, 48, 0.98));
+}
+
+:root[data-theme="dark"] .quick-pdf-copy strong,
+:root[data-theme="dark"] .home-dashboard-action.quick-pdf {
+  color: #a7f3ff;
+}
+
+:root[data-theme="dark"] .quick-pdf-copy span,
+:root[data-theme="dark"] .home-dashboard-action.quick-pdf span,
+:root[data-theme="dark"] .quick-pdf-managed-link {
+  color: #9bc0c5;
+}
+
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
+  .quick-pdf-bar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 7px;
+    padding: 8px 10px;
+  }
+
+  .quick-pdf-copy {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .quick-pdf-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+
+  .quick-pdf-actions button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .home-dashboard-action {
+    min-height: 92px;
+  }
+
+  .quick-pdf-copy span,
+  .quick-pdf-copy small {
+    display: none;
+  }
+
+  .quick-pdf-copy {
+    display: block;
+    text-align: center;
+  }
+
+  .quick-pdf-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .quick-pdf-managed-link {
+    grid-column: 1 / -1;
+    min-height: 44px !important;
+  }
+
+  body[data-workflow-kind="quick"] .drawing-panel {
+    grid-template-rows: auto auto minmax(260px, 1fr);
+  }
+}
+
+/* v3.51 flow overrides must remain at the absolute end of the cascade. */
+body.simple-controls .workflow-status-card {
+  display: none;
+}
+
+.workflow-more-details {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f7faf9;
+}
+
+.workflow-more-details > summary {
+  min-height: 54px;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.workflow-more-details > summary span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.workflow-more-details[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.workflow-more-details > :not(summary) {
+  margin: 10px;
+}
+
+body.simple-controls[data-app-mode="export"] #exportIsoButton {
+  display: inline-flex !important;
+}
+
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
+  .project-dialog-card {
+    max-height: calc(100dvh - 20px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .control-panel,
+  .preview-panel {
+    left: 8px;
+    right: 8px;
+    height: min(78dvh, 680px);
+  }
+
+  .inspector-tab-panel {
+    max-height: calc(78dvh - 108px);
+  }
+
+  .drawing-context-menu {
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: auto !important;
+    max-height: min(70dvh, 560px);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 18px 18px 0 0;
+    z-index: 390;
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.28);
+  }
+
+  .drawing-context-menu::before {
+    content: "";
+    display: block;
+    width: 46px;
+    height: 4px;
+    margin: 0 auto 8px;
+    border-radius: 999px;
+    background: #aebcc0;
+  }
+
+  .preview-panel.mobile-sheet-open .preview-stage {
+    min-height: 280px;
+  }
+
+  .first-spool-guide {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .first-spool-guide-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+
+  .first-spool-guide-actions .icon-button,
+  .first-spool-guide-actions .primary-button {
+    min-width: 0;
+    width: 100%;
+    white-space: normal;
+  }
+}
+
+/* v3.51 guided spool flow and touch-workspace refinements. */
+body.simple-controls .workflow-status-card {
+  display: none;
+}
+
+.workflow-more-details {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f7faf9;
+}
+
+.workflow-more-details > summary {
+  min-height: 54px;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.workflow-more-details > summary span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.workflow-more-details[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.workflow-more-details > :not(summary) {
+  margin: 10px;
+}
+
+body.simple-controls[data-app-mode="export"] #exportIsoButton {
+  display: inline-flex !important;
+}
+
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
+  .project-dialog-card {
+    max-height: calc(100dvh - 20px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .control-panel,
+  .preview-panel {
+    left: 8px;
+    right: 8px;
+    height: min(78dvh, 680px);
+  }
+
+  .inspector-tab-panel {
+    max-height: calc(78dvh - 108px);
+  }
+
+  .drawing-context-menu {
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: auto !important;
+    max-height: min(70dvh, 560px);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 18px 18px 0 0;
+    z-index: 390;
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.28);
+  }
+
+  .drawing-context-menu::before {
+    content: "";
+    display: block;
+    width: 46px;
+    height: 4px;
+    margin: 0 auto 8px;
+    border-radius: 999px;
+    background: #aebcc0;
+  }
+
+  .preview-panel.mobile-sheet-open .preview-stage {
+    min-height: 280px;
+  }
+
+  .first-spool-guide {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .first-spool-guide-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+
+  .first-spool-guide-actions .icon-button,
+  .first-spool-guide-actions .primary-button {
+    min-width: 0;
+    width: 100%;
+    white-space: normal;
+  }
+}
+
+/* v3.50: calm, predictable interactive tutorial layout. */
+.tutorial-card,
+.tutorial-backdrop .tutorial-card {
+  width: min(1180px, calc(100vw - 32px));
+  max-width: 1180px;
+  grid-template-columns: minmax(248px, 280px) minmax(0, 1fr);
+}
+
+.tutorial-card > .workspace-location-strip,
+.tutorial-card > .tutorial-video-shelf {
+  display: none !important;
+}
+
+.tutorial-card > .project-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tutorial-card > .project-dialog-header > div:first-child {
+  min-width: 0;
+}
+
+.tutorial-header-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tutorial-close-button {
+  min-height: 42px;
+}
+
+.tutorial-step-card {
+  grid-template-columns: minmax(320px, 0.84fr) minmax(420px, 1.16fr);
+}
+
+.tutorial-actions {
+  grid-template-columns: auto minmax(180px, 260px) auto;
+  justify-content: end;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.tutorial-actions button {
+  min-height: 44px;
+}
+
+body.tutorial-practice-active .tutorial-backdrop .tutorial-card,
+body.tutorial-practice-active .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+body.tutorial-practice-active .tutorial-backdrop[data-card-y="top"] .tutorial-card {
+  width: min(980px, calc(100vw - 32px));
+  max-width: 980px;
+  grid-template-columns: minmax(220px, 250px) minmax(0, 1fr);
+}
+
+body.tutorial-practice-active .tutorial-step-card {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.tutorial-practice-active .tutorial-copy {
+  display: none;
+}
+
+body.tutorial-practice-active .tutorial-visual {
+  width: min(760px, 100%);
+  justify-self: center;
+  overflow: auto;
+}
+
+@media (max-width: 1180px), (hover: none) and (pointer: coarse) {
+  .tutorial-backdrop .tutorial-card,
+  .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  .tutorial-backdrop[data-card-y="top"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-y="top"] .tutorial-card {
+    inset: 10px;
+    width: auto;
+    max-width: none;
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+    transform: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "head"
+      "menu"
+      "step"
+      "actions";
+    overflow: hidden;
+  }
+
+  .tutorial-progress,
+  body.tutorial-practice-active .tutorial-progress {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.78fr);
+    grid-template-areas:
+      "mode select"
+      "head select";
+    align-items: end;
+    gap: 6px 10px;
+    min-height: 0;
+    overflow: visible;
+    padding: 8px 10px;
+  }
+
+  .tutorial-mode-switch {
+    grid-area: mode;
+  }
+
+  .tutorial-path-help,
+  .tutorial-topic-menu {
+    display: none;
+  }
+
+  .tutorial-progress-head {
+    grid-area: head;
+  }
+
+  .tutorial-progress-head small {
+    display: none;
+  }
+
+  .tutorial-topic-select-wrap {
+    grid-area: select;
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .tutorial-step-card,
+  body.tutorial-practice-active .tutorial-step-card {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tutorial-copy,
+  .tutorial-visual,
+  body.tutorial-practice-active .tutorial-visual {
+    width: 100%;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .tutorial-actions {
+    position: relative;
+    z-index: 2;
+    grid-template-columns: auto minmax(180px, 260px) auto;
+    justify-content: end;
+    gap: 7px;
+    margin: 0;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line);
+    background: var(--panel-strong);
+  }
+}
+
+@media (max-width: 650px) {
+  .tutorial-card > .project-dialog-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+
+  .tutorial-card > .project-dialog-header small {
+    display: none;
+  }
+
+  .tutorial-header-actions {
+    gap: 6px;
+  }
+
+  .tutorial-card .tutorial-video-button,
+  .tutorial-card .tutorial-close-button {
+    width: auto;
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .tutorial-card .tutorial-video-button span {
+    display: inline;
+    font-size: 0;
+  }
+
+  .tutorial-card .tutorial-video-button span::after {
+    content: "Videos";
+    font-size: 12px;
+  }
+
+  .tutorial-card .tutorial-close-button {
+    font-size: 12px;
+  }
+
+  .tutorial-card .tutorial-close-button::before {
+    content: none;
+  }
+
+  .tutorial-progress,
+  body.tutorial-practice-active .tutorial-progress {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "mode"
+      "head"
+      "select";
+    align-items: stretch;
+  }
+
+  .tutorial-progress,
+  body.tutorial-practice-active .tutorial-progress {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "mode"
+      "head"
+      "select";
+    align-items: stretch;
+  }
+
+  .tutorial-step-card,
+  body.tutorial-practice-active .tutorial-step-card {
+    padding: 13px;
+  }
+
+  .tutorial-actions,
+  body.tutorial-practice-active .tutorial-actions {
+    grid-template-columns: minmax(64px, 0.72fr) minmax(132px, 1.45fr) minmax(64px, 0.83fr);
+    justify-content: stretch;
+  }
+
+  .tutorial-actions button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 1180px) and (max-height: 600px) and (orientation: landscape) {
+  .tutorial-backdrop .tutorial-card,
+  .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  .tutorial-backdrop[data-card-y="top"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-y="top"] .tutorial-card {
+    inset: 6px;
+    height: calc(100dvh - 12px);
+    max-height: calc(100dvh - 12px);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .tutorial-card > .project-dialog-header small,
+  .tutorial-progress-head {
+    display: none;
+  }
+
+  .tutorial-card > .project-dialog-header {
+    min-height: 44px;
+  }
+
+  .tutorial-progress,
+  body.tutorial-practice-active .tutorial-progress {
+    grid-template-columns: minmax(300px, 0.95fr) minmax(250px, 1.05fr);
+    grid-template-areas: "mode select";
+    align-items: center;
+    gap: 8px;
+    padding: 5px 7px;
+  }
+
+  .tutorial-topic-select-wrap {
+    gap: 0;
+  }
+
+  .tutorial-topic-select-wrap > span {
+    display: none;
+  }
+
+  .tutorial-topic-select-wrap select,
+  .tutorial-mode-switch button {
+    min-height: 38px;
+  }
+
+  .tutorial-step-card,
+  body.tutorial-practice-active .tutorial-step-card {
+    padding: 11px;
+  }
+
+  .tutorial-actions,
+  body.tutorial-practice-active .tutorial-actions {
+    min-height: 50px;
+    padding: 4px 7px calc(4px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .tutorial-actions button {
+    min-height: 40px;
+  }
+}
+
 /* v3.49 learnable workspace: Simple is the default and Full remains one tap away. */
 .workspace-settings-trigger,
 .workspace-settings-sheet-head,
@@ -1389,7 +2183,7 @@ body[data-app-mode="export"] .tool-flyout-wrap {
   background: var(--surface-subtle);
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.phone-layout.field-layout.mobile-touch-layout .topbar,
   body.tablet-layout.field-layout.mobile-touch-layout .topbar {
     grid-template-columns: minmax(0, 1fr) auto !important;
@@ -1895,6 +2689,10 @@ body[data-app-mode="export"] .tool-flyout-wrap {
 .spool-workspace-tab-copy strong {
   font-size: 12px;
   font-weight: 900;
+}
+
+.spool-workspace-tab-label-compact {
+  display: none;
 }
 
 .spool-workspace-tab-copy small {
@@ -4611,6 +5409,16 @@ body.numbered-dimensions-active .dimension-edit-pill {
   line-height: 1;
 }
 
+.reducer-type-label {
+  border-color: rgba(122, 77, 194, 0.42);
+  background: rgba(250, 247, 255, 0.96);
+  color: #59358f;
+}
+
+.reducer-type-label small {
+  color: #6a568d;
+}
+
 .lift-point-label {
   border-color: rgba(193, 18, 31, 0.38);
   background: rgba(255, 250, 250, 0.96);
@@ -4839,11 +5647,12 @@ body.auth-gate-open .app-shell {
 }
 
 .tutorial-card {
-  width: min(1040px, calc(100vw - 32px));
+  width: min(1180px, calc(100vw - 32px));
+  max-width: 1180px;
   height: min(88dvh, 820px);
   max-height: min(88dvh, 820px);
   overflow: hidden;
-  grid-template-columns: minmax(292px, 330px) minmax(0, 1fr);
+  grid-template-columns: minmax(248px, 280px) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   grid-template-areas:
     "head head"
@@ -4872,7 +5681,8 @@ body.auth-gate-open .app-shell {
   top: 50%;
   right: auto;
   bottom: auto;
-  width: min(1040px, calc(100vw - 32px));
+  width: min(1180px, calc(100vw - 32px));
+  max-width: 1180px;
   height: min(88dvh, 820px);
   max-height: min(88dvh, 820px);
   transform: translate(-50%, -50%);
@@ -5098,7 +5908,7 @@ body.auth-gate-open .app-shell {
 .tutorial-step-card {
   grid-area: step;
   display: grid;
-  grid-template-columns: minmax(0, 0.86fr) minmax(280px, 1.14fr);
+  grid-template-columns: minmax(320px, 0.84fr) minmax(420px, 1.16fr);
   gap: 14px;
   min-height: 0;
   overflow: hidden;
@@ -7217,11 +8027,12 @@ body.tutorial-practice-active .tutorial-backdrop[data-card-y="top"] .tutorial-ca
   right: auto;
   top: 50%;
   bottom: auto;
-  width: min(1120px, calc(100vw - 32px));
+  width: min(980px, calc(100vw - 32px));
+  max-width: 980px;
   height: min(88dvh, 820px);
   max-height: min(88dvh, 820px);
   transform: translate(-50%, -50%);
-  grid-template-columns: minmax(230px, 0.36fr) minmax(0, 1fr);
+  grid-template-columns: minmax(220px, 250px) minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   grid-template-areas:
     "head head"
@@ -7235,8 +8046,17 @@ body.tutorial-practice-active .tutorial-progress {
 }
 
 body.tutorial-practice-active .tutorial-step-card {
-  grid-template-columns: minmax(0, 0.8fr) minmax(300px, 1.2fr);
+  grid-template-columns: minmax(0, 1fr);
   overflow: hidden;
+}
+
+body.tutorial-practice-active .tutorial-copy {
+  display: none;
+}
+
+body.tutorial-practice-active .tutorial-visual {
+  width: min(760px, 100%);
+  justify-self: center;
 }
 
 body.tutorial-practice-active .tutorial-step-card ul,
@@ -7257,7 +8077,7 @@ body.tutorial-practice-active .tutorial-demo {
 
 .tutorial-actions {
   grid-area: actions;
-  grid-template-columns: auto auto auto auto;
+  grid-template-columns: auto minmax(180px, 260px) auto;
   justify-content: end;
 }
 
@@ -8312,6 +9132,55 @@ body.tutorial-practice-active .tutorial-demo {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.project-dialog-advanced {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f6f9f8;
+}
+
+.project-dialog-advanced > summary {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.project-dialog-advanced > summary::-webkit-details-marker {
+  display: none;
+}
+
+.project-dialog-advanced > summary span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.project-dialog-advanced > summary small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.project-dialog-advanced > summary b {
+  flex: 0 0 auto;
+  color: var(--teal-strong);
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.project-dialog-advanced[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.project-dialog-advanced > .project-dialog-grid {
+  padding: 12px;
 }
 
 .project-job-entry {
@@ -11339,7 +12208,7 @@ body.tutorial-practice-active .tutorial-demo {
   }
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   html,
   body {
     height: 100%;
@@ -12135,11 +13004,11 @@ body.tutorial-practice-active .tutorial-demo {
   }
 
   .tutorial-actions {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(64px, 0.72fr) minmax(132px, 1.45fr) minmax(64px, 0.83fr);
   }
 
   .tutorial-actions .primary-button {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
 
   body.tutorial-practice-active .tutorial-backdrop .tutorial-card,
@@ -12513,7 +13382,7 @@ body .preview-panel:fullscreen {
   background: var(--panel);
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.drawing-panel-fullscreen .tool-rail {
     top: auto;
     right: 0;
@@ -12893,7 +13762,7 @@ body .preview-panel:fullscreen {
   }
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.field-layout .topbar {
     grid-template-columns: minmax(0, 1fr) minmax(248px, auto);
     grid-template-areas:
@@ -15454,7 +16323,7 @@ body:not([data-app-mode="export"]) #exportIsoButton {
   }
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.field-layout .topbar,
   body.tablet-layout.field-layout .topbar {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -15819,7 +16688,7 @@ body.inspector-drawer-open .inspector-show-button {
   }
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   .tool-flyout-wrap {
     flex: 0 0 92px;
     min-width: 92px;
@@ -16178,7 +17047,7 @@ body.focus-mode.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
     #07131e;
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   .project-context-strip {
     min-width: 0;
     overflow: hidden;
@@ -16582,7 +17451,7 @@ body.focus-mode.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
   box-shadow: none;
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   .tool-button:not(.active):not(.danger) {
     border-color: var(--border-quiet);
     background: var(--button);
@@ -17228,7 +18097,7 @@ body.focus-mode.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
   display: none;
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   .tutorial-backdrop .tutorial-card,
   .tutorial-backdrop[data-card-x="left"] .tutorial-card,
   .tutorial-backdrop[data-card-y="top"] .tutorial-card,
@@ -17326,7 +18195,7 @@ body.focus-mode.preview-panel-floating .preview-panel:not(.panel-fullscreen) {
   .tutorial-actions {
     position: relative;
     z-index: 2;
-    grid-template-columns: auto auto minmax(0, 1fr) minmax(0, 1.15fr);
+    grid-template-columns: auto minmax(180px, 260px) auto;
     align-items: stretch;
     gap: 6px;
     margin: 0;
@@ -17760,11 +18629,11 @@ body.video-tutorial-open {
   }
 
   .tutorial-card > .project-dialog-header {
-    align-items: stretch;
+    align-items: center;
   }
 
   .tutorial-video-button {
-    width: 100%;
+    width: auto;
     justify-content: center;
   }
 }
@@ -17924,14 +18793,14 @@ body.video-tutorial-open {
 @media (min-width: 900px) and (orientation: landscape) and (hover: none) and (pointer: coarse) {
   .tutorial-step-card,
   body.tutorial-practice-active .tutorial-step-card {
-    grid-template-columns: minmax(0, 0.86fr) minmax(300px, 1.14fr);
-    overflow: hidden;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
   }
 
   .tutorial-copy,
   .tutorial-visual {
-    min-height: 0;
-    overflow: auto;
+    min-height: auto;
+    overflow: visible;
     -webkit-overflow-scrolling: touch;
   }
 }
@@ -17983,7 +18852,7 @@ body.video-tutorial-open {
   }
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   .field input[type="email"],
   .field input[type="password"],
   .field input[type="search"],
@@ -18101,7 +18970,7 @@ body.video-tutorial-open {
   }
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.field-layout .dimension-mode-field,
   body.tablet-layout.field-layout .dimension-mode-field {
     min-width: 170px;
@@ -18244,7 +19113,7 @@ body.video-tutorial-open {
   min-height: 0;
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.field-layout .workspace-settings-label,
   body.tablet-layout.field-layout .workspace-settings-label {
     display: none;
@@ -19241,7 +20110,7 @@ body.mobile-panel-open .ai-helper-launcher {
   -webkit-user-select: none;
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   .touch-shift-angle-button {
     display: inline-flex;
   }
@@ -19413,7 +20282,7 @@ body.first-spool-mode .control-panel {
   color: #6ee7b7;
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.first-spool-guide-active .drawing-panel {
     position: relative;
     grid-template-rows: auto minmax(0, 1fr);
@@ -19523,7 +20392,7 @@ body.first-spool-mode .control-panel {
   }
 }
 
-@media (max-width: 1024px), (hover: none) and (pointer: coarse) {
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
   body.tablet-layout.field-layout .mobile-panel-dock {
     display: none;
   }
@@ -19885,7 +20754,344 @@ main.workspace {
   }
 }
 
+/* v3.50 tutorial overrides must remain after the older responsive rules. */
+@media (max-width: 1180px), (hover: none) and (pointer: coarse) {
+  .tutorial-backdrop .tutorial-card,
+  .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  .tutorial-backdrop[data-card-y="top"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-y="top"] .tutorial-card {
+    inset: 10px;
+    width: auto;
+    max-width: none;
+    height: calc(100dvh - 20px);
+    max-height: calc(100dvh - 20px);
+    transform: none;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "head"
+      "menu"
+      "step"
+      "actions";
+    overflow: hidden;
+  }
+
+  .tutorial-progress,
+  body.tutorial-practice-active .tutorial-progress {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 0.78fr);
+    grid-template-areas:
+      "mode select"
+      "head select";
+    align-items: end;
+    gap: 6px 10px;
+    min-height: 0;
+    overflow: visible;
+    padding: 8px 10px;
+  }
+
+  .tutorial-mode-switch {
+    grid-area: mode;
+  }
+
+  .tutorial-path-help,
+  .tutorial-topic-menu {
+    display: none;
+  }
+
+  .tutorial-progress-head {
+    grid-area: head;
+  }
+
+  .tutorial-progress-head small {
+    display: none;
+  }
+
+  .tutorial-topic-select-wrap {
+    grid-area: select;
+    min-width: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .tutorial-step-card,
+  body.tutorial-practice-active .tutorial-step-card {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tutorial-copy,
+  .tutorial-visual,
+  body.tutorial-practice-active .tutorial-visual {
+    width: 100%;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .tutorial-actions,
+  body.tutorial-practice-active .tutorial-actions {
+    position: relative;
+    z-index: 2;
+    grid-template-columns: auto minmax(180px, 260px) auto;
+    justify-content: end;
+    gap: 7px;
+    margin: 0;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--line);
+    background: var(--panel-strong);
+  }
+
+  .tutorial-actions .primary-button {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 650px) {
+  .tutorial-card > .project-dialog-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tutorial-card .tutorial-video-button,
+  .tutorial-card .tutorial-close-button {
+    width: auto;
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .tutorial-card .tutorial-video-button span {
+    display: inline;
+    font-size: 0;
+  }
+
+  .tutorial-card .tutorial-video-button span::after {
+    content: "Videos";
+    font-size: 12px;
+  }
+
+  .tutorial-card .tutorial-close-button {
+    font-size: 12px;
+  }
+
+  .tutorial-card .tutorial-close-button::before {
+    content: none;
+  }
+
+  .tutorial-progress,
+  body.tutorial-practice-active .tutorial-progress {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "mode"
+      "head"
+      "select";
+    align-items: stretch;
+  }
+
+  .tutorial-actions,
+  body.tutorial-practice-active .tutorial-actions {
+    grid-template-columns: minmax(64px, 0.72fr) minmax(132px, 1.45fr) minmax(64px, 0.83fr);
+  }
+
+  .tutorial-actions .primary-button {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 1180px) and (max-height: 600px) and (orientation: landscape) {
+  .tutorial-backdrop .tutorial-card,
+  .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  .tutorial-backdrop[data-card-y="top"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-x="left"] .tutorial-card,
+  body.tutorial-practice-active .tutorial-backdrop[data-card-y="top"] .tutorial-card {
+    inset: 6px;
+    width: auto;
+    max-width: none;
+    height: calc(100dvh - 12px);
+    max-height: calc(100dvh - 12px);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 8px;
+    transform: none;
+  }
+
+  .tutorial-card > .project-dialog-header small,
+  .tutorial-progress-head {
+    display: none;
+  }
+
+  .tutorial-progress,
+  body.tutorial-practice-active .tutorial-progress {
+    grid-template-columns: minmax(300px, 0.95fr) minmax(250px, 1.05fr);
+    grid-template-areas: "mode select";
+    align-items: center;
+    gap: 8px;
+    padding: 5px 7px;
+  }
+
+  .tutorial-topic-select-wrap {
+    gap: 0;
+  }
+
+  .tutorial-topic-select-wrap > span {
+    display: none;
+  }
+
+  .tutorial-topic-select-wrap select,
+  .tutorial-mode-switch button {
+    min-height: 38px;
+  }
+
+  .tutorial-step-card,
+  body.tutorial-practice-active .tutorial-step-card {
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
+    padding: 11px;
+  }
+
+  .tutorial-copy,
+  .tutorial-visual,
+  body.tutorial-practice-active .tutorial-visual {
+    width: 100%;
+    min-height: auto;
+    overflow: visible;
+  }
+
+  .tutorial-actions,
+  body.tutorial-practice-active .tutorial-actions {
+    min-height: 50px;
+    grid-template-columns: auto minmax(180px, 260px) auto;
+    padding: 4px 7px calc(4px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .tutorial-actions button {
+    min-height: 40px;
+  }
+}
+
 /* v3.48 Jobs overrides must remain at the absolute end of the cascade. */
+/* v3.51 flow refinements sit beside the final responsive overrides. */
+/* v3.54 keeps the Export CTA after the legacy v3.01 hide rule. */
+body[data-app-mode="export"] #exportIsoButton {
+  display: inline-flex !important;
+  border-color: #007fab;
+  background: #007fab;
+  color: #fff;
+}
+
+/* v3.55: mode tabs stay usable while the mobile Details/3D sheet is open. */
+body.mobile-panel-open .topbar {
+  z-index: 345;
+}
+
+body.simple-controls .workflow-status-card {
+  display: none;
+}
+
+.workflow-more-details {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #f7faf9;
+}
+
+.workflow-more-details > summary {
+  min-height: 54px;
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.workflow-more-details > summary span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.workflow-more-details[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.workflow-more-details > :not(summary) {
+  margin: 10px;
+}
+
+body.simple-controls[data-app-mode="export"] #exportIsoButton {
+  display: inline-flex !important;
+}
+
+@media (max-width: 1100px), (hover: none) and (pointer: coarse) {
+  .project-dialog-card {
+    max-height: calc(100dvh - 20px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .control-panel,
+  .preview-panel {
+    left: 8px;
+    right: 8px;
+    height: min(78dvh, 680px);
+  }
+
+  .inspector-tab-panel {
+    max-height: calc(78dvh - 108px);
+  }
+
+  .drawing-context-menu {
+    left: 8px !important;
+    right: 8px !important;
+    top: auto !important;
+    bottom: 0 !important;
+    width: auto !important;
+    max-height: min(70dvh, 560px);
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    border-radius: 18px 18px 0 0;
+    z-index: 390;
+    box-shadow: 0 -18px 48px rgba(0, 0, 0, 0.28);
+  }
+
+  .drawing-context-menu::before {
+    content: "";
+    display: block;
+    width: 46px;
+    height: 4px;
+    margin: 0 auto 8px;
+    border-radius: 999px;
+    background: #aebcc0;
+  }
+
+  .preview-panel.mobile-sheet-open .preview-stage {
+    min-height: 280px;
+  }
+
+  .first-spool-guide {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .first-spool-guide-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+
+  .first-spool-guide-actions .icon-button,
+  .first-spool-guide-actions .primary-button {
+    min-width: 0;
+    width: 100%;
+    white-space: normal;
+  }
+}
+
 @media (max-width: 1050px) {
   .job-overview-open {
     grid-template-columns: minmax(170px, 1.2fr) minmax(100px, 0.7fr) minmax(90px, 0.55fr) minmax(120px, 0.8fr) 52px;
