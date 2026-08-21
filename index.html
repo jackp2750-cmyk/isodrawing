@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#f6f8f7" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -11,6 +11,7 @@
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+    <link rel="preconnect" href="https://wsrfxqnsquzzwqijfmec.supabase.co" crossorigin />
     <script>
       try {
         document.documentElement.dataset.theme = localStorage.getItem("spoolmate-theme-v1") === "dark" ? "dark" : "light";
@@ -18,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=293" />
+    <link rel="stylesheet" href="./styles.css?v=364" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -189,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v2.93</span>
+              <span class="version-badge" id="appVersionBadge">v3.64</span>
             </div>
           </div>
 
@@ -208,6 +209,7 @@
                 <option value="readycheck">Ready to check</option>
                 <option value="checked">Checked</option>
                 <option value="issued">Issued</option>
+                <option value="materialcheck">Gear check</option>
                 <option value="cutting">Cutting</option>
                 <option value="fitup">Fit-up</option>
                 <option value="welded">Welded</option>
@@ -219,7 +221,23 @@
           </div>
         </div>
 
-        <div class="topbar-settings" aria-label="Current workspace settings">
+        <button class="workspace-settings-trigger" id="workspaceSettingsButton" type="button" aria-controls="workspaceSettingsPanel" aria-expanded="false">
+          <span class="workspace-settings-trigger-icon" aria-hidden="true">&#9881;</span>
+          <span class="workspace-settings-trigger-copy">
+            <strong>Pipe &amp; display</strong>
+            <small><span id="workspaceSettingsPipeSummary">Pipe setup</span><span aria-hidden="true"> &middot; </span><span id="workspaceSettingsViewSummary">Drawing setup</span></small>
+          </span>
+          <span class="workspace-settings-trigger-arrow" aria-hidden="true">&#8250;</span>
+        </button>
+
+        <div class="topbar-settings" id="workspaceSettingsPanel" aria-label="Pipe and display settings">
+          <div class="workspace-settings-sheet-head">
+            <div>
+              <strong>Pipe &amp; display</strong>
+              <small>Current spool drawing settings</small>
+            </div>
+            <button class="sheet-close-button" id="workspaceSettingsCloseButton" type="button" aria-label="Close Pipe and display settings">Done</button>
+          </div>
           <div class="topbar-settings-row project-row" data-mode-settings="review">
             <strong class="workspace-settings-label">Review</strong>
             <label class="toggle top-toggle topbar-secondary-control">
@@ -252,19 +270,19 @@
               </select>
             </label>
             <label class="top-field">
-              <span>Pipe / tube</span>
+              <span>Size</span>
               <select id="pipeSizeSelect"></select>
             </label>
             <span class="size-readout top-size-readout" id="pipeSizeReadout">OD 33.4 mm</span>
           </div>
           <div class="topbar-settings-row view-row" data-mode-settings="draw export">
-            <strong class="workspace-settings-label">Drawing</strong>
+            <strong class="workspace-settings-label">Display</strong>
             <label class="toggle top-toggle">
               <input id="dimensionToggle" type="checkbox" checked />
               <span>Dimensions</span>
             </label>
             <label class="dimension-style-field drawing-detail-field">
-              <span>Detail</span>
+              <span>What to show</span>
               <select id="drawingDetailSelect" aria-label="Drawing detail">
                 <option value="clean">Clean</option>
                 <option value="fab">Fab dims</option>
@@ -274,7 +292,7 @@
               </select>
             </label>
             <label class="dimension-style-field dimension-mode-field">
-              <span>Dim view</span>
+              <span>Dimensions</span>
               <select id="dimensionStyleSelect" aria-label="Dimension style">
                 <option value="labels">Size labels only</option>
                 <option value="redline">Red C/C lines</option>
@@ -303,13 +321,13 @@
                 <option value="takeoff">Material order / take-off sheet</option>
               </select>
             </label>
-            <button class="workspace-action-button export-action" id="export3dButton" type="button">
+            <button class="workspace-action-button export-action" id="export3dButton" type="button" title="Export 3D model image" aria-label="Export 3D model image">
               <svg><use href="#icon-export"></use></svg>
               <span>Export 3D</span>
             </button>
             <button class="workspace-action-button primary export-action" id="exportReportButton" type="button" title="Export fabrication sheet PDF" aria-label="Export fabrication sheet PDF">
               <svg><use href="#icon-export"></use></svg>
-              <span>Fab PDF</span>
+              <span>Draft PDF</span>
             </button>
             <button class="workspace-action-button export-action" id="exportProjectButton" type="button" title="Export openable project sheet" aria-label="Export openable project sheet">
               <svg><use href="#icon-export"></use></svg>
@@ -327,11 +345,18 @@
               <svg><use href="#icon-sample"></use></svg>
               <span>Jobs</span>
             </button>
+            <button class="icon-button labeled big-spool-launch" id="bigSpoolButton" type="button" title="Break a large assembly into transport spools" aria-label="Open Big Spool planner">
+              <svg><use href="#icon-measure"></use></svg>
+              <span>Big Spool</span>
+            </button>
             <button class="icon-button labeled" id="accountButton" type="button" title="Sign in for cloud projects" aria-label="Account and cloud sync">
               <svg><use href="#icon-user"></use></svg>
               <span id="accountButtonLabel">Account</span>
             </button>
-            <span class="cloud-status-pill" id="cloudSyncStatus">Local only</span>
+            <select class="workspace-switcher" id="workspaceSwitcher" aria-label="Active workspace" title="Choose where cloud jobs are saved" hidden>
+              <option value="personal">Personal</option>
+            </select>
+            <button class="cloud-status-pill local" id="cloudSyncStatus" type="button" role="status" aria-live="polite">Local only</button>
             <input id="projectFileInput" type="file" accept=".html,text/html,.json,application/json" hidden />
             <button class="icon-button labeled action-menu-toggle" id="actionMenuButton" type="button" aria-expanded="false" aria-controls="actionMenuPanel">
               <svg><use href="#icon-settings"></use></svg>
@@ -340,29 +365,53 @@
             <div class="action-menu-panel" id="actionMenuPanel" hidden>
               <div class="action-menu-header">
                 <div>
-                  <strong>Menu</strong>
-                  <span>Project, review and setup tools</span>
+                  <strong>Menu &amp; actions</strong>
+                  <span>Search or browse project, review and setup tools</span>
                 </div>
                 <button class="icon-button compact labeled" id="actionMenuCloseButton" type="button">Close</button>
               </div>
+              <div class="action-command-search">
+                <label for="actionCommandInput">
+                  <span>Find a tool or action</span>
+                  <input id="actionCommandInput" type="search" placeholder="Try reducer, weld register or export PDF" autocomplete="off" spellcheck="false" aria-controls="actionCommandResults" />
+                </label>
+                <kbd>Ctrl K</kbd>
+              </div>
+              <div class="action-command-results" id="actionCommandResults" role="listbox" aria-label="Matching SpoolMate actions" hidden></div>
               <div class="action-menu-groups">
                 <section class="action-menu-group">
                   <h2>Project</h2>
+                  <button class="icon-button labeled" id="actionMenuJobsButton" type="button" title="Open job dashboard" aria-label="Open job dashboard">
+                    <svg><use href="#icon-sample"></use></svg>
+                    <span>Jobs</span>
+                  </button>
+                  <button class="icon-button labeled" id="actionMenuBigSpoolButton" type="button" title="Open Big Spool planner" aria-label="Open Big Spool planner">
+                    <svg><use href="#icon-measure"></use></svg>
+                    <span>Big Spool</span>
+                  </button>
+                  <button class="icon-button labeled" id="actionMenuAccountButton" type="button" title="Open account and cloud sync" aria-label="Open account and cloud sync">
+                    <svg><use href="#icon-user"></use></svg>
+                    <span>Account &amp; cloud</span>
+                  </button>
                   <button class="icon-button labeled danger" id="resetButton" type="button" title="Start a new spool" aria-label="Start a new spool">
                     <svg><use href="#icon-reset"></use></svg>
-                    <span>New spool</span>
+                    <span>Managed job</span>
+                  </button>
+                  <button class="icon-button labeled" id="quickPdfMenuButton" type="button" title="Start a drawing without the managed workflow" aria-label="Start Quick PDF">
+                    <svg><use href="#icon-report"></use></svg>
+                    <span>Quick PDF</span>
                   </button>
                   <button class="icon-button labeled" id="homeDashboardButton" type="button" title="Open SpoolMate dashboard" aria-label="Open SpoolMate dashboard">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Dashboard</span>
                   </button>
-                  <button class="icon-button labeled" id="accountMenuButton" type="button" title="Account and cloud sync" aria-label="Account and cloud sync">
-                    <svg><use href="#icon-user"></use></svg>
-                    <span>Account</span>
-                  </button>
                   <button class="icon-button labeled" id="tutorialButton" type="button" title="Open SpoolMate tutorial" aria-label="Open SpoolMate tutorial">
                     <svg><use href="#icon-help"></use></svg>
                     <span>Tutorial</span>
+                  </button>
+                  <button class="icon-button labeled" id="videoTutorialButton" type="button" title="Watch the complete SpoolMate video guide" aria-label="Watch the complete SpoolMate video guide">
+                    <svg><use href="#icon-image"></use></svg>
+                    <span>Video tutorials</span>
                   </button>
                   <button class="icon-button labeled" id="sampleButton" type="button" title="Load sample spool" aria-label="Load sample spool">
                     <svg><use href="#icon-sample"></use></svg>
@@ -378,26 +427,23 @@
                   </button>
                 </section>
                 <section class="action-menu-group">
-                  <h2>Review</h2>
-                  <button class="icon-button labeled" id="healthCheckButton" type="button" title="Run drawing health check" aria-label="Run drawing health check">
-                    <svg><use href="#icon-select"></use></svg>
-                    <span>Check</span>
-                  </button>
+                  <h2>Diagnostics</h2>
                   <button class="icon-button labeled" id="regressionChecklistButton" type="button" title="Open regression test samples" aria-label="Open regression test samples">
                     <svg><use href="#icon-report"></use></svg>
                     <span>Test kit</span>
                   </button>
-                  <button class="icon-button labeled" id="newRevisionButton" type="button" title="Create next revision" aria-label="Create next revision">
-                    <svg><use href="#icon-reset"></use></svg>
-                    <span>Revision</span>
-                  </button>
-                  <button class="icon-button labeled export-action" id="shareReadOnlyButton" type="button" title="Create read-only share export" aria-label="Create read-only share export">
-                    <svg><use href="#icon-export"></use></svg>
-                    <span>Share</span>
-                  </button>
+                  <p class="action-menu-group-help">Drawing checks, approval, revisions and sharing now live together in Review.</p>
                 </section>
                 <section class="action-menu-group">
                   <h2>Setup</h2>
+                  <div class="interface-density-control">
+                    <span>Workspace controls</span>
+                    <div class="interface-density-tabs" role="group" aria-label="Workspace control level">
+                      <button id="simpleControlsButton" data-interface-density="simple" type="button" aria-pressed="true">Simple</button>
+                      <button id="fullControlsButton" data-interface-density="full" type="button" aria-pressed="false">Full</button>
+                    </div>
+                    <small>Simple keeps the drawing clear. Full shows every setting.</small>
+                  </div>
                   <div class="theme-menu-control">
                     <span>Theme</span>
                     <div class="theme-tabs" id="themeTabs" role="tablist" aria-label="Theme">
@@ -409,9 +455,17 @@
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Side tools</span>
                   </button>
+                  <button class="icon-button labeled" id="resetWorkspaceLayoutButton" type="button" title="Close temporary panels and restore the drawing workspace" aria-label="Reset workspace layout">
+                    <svg><use href="#icon-reset"></use></svg>
+                    <span>Reset layout</span>
+                  </button>
                   <button class="icon-button labeled save-action" id="saveDefaultsButton" type="button" title="Save current settings as my defaults" aria-label="Save current settings as my defaults">
                     <svg><use href="#icon-settings"></use></svg>
                     <span>Defaults</span>
+                  </button>
+                  <button class="icon-button labeled" id="legalSupportMenuButton" type="button" title="Privacy, terms and support" aria-label="Open privacy, terms and support">
+                    <svg><use href="#icon-user"></use></svg>
+                    <span>Privacy &amp; support</span>
                   </button>
                   <button class="icon-button labeled" id="helpButton" type="button" title="Open help" aria-label="Open SpoolMate help">
                     <svg><use href="#icon-help"></use></svg>
@@ -422,6 +476,38 @@
             </div>
         </div>
       </header>
+      <button class="workspace-settings-scrim" id="workspaceSettingsScrim" type="button" aria-label="Close Pipe and display settings" hidden></button>
+
+      <section class="spool-workspace-shell" id="spoolWorkspaceShell" aria-label="Open spool workspace">
+        <div class="spool-workspace-tabs" id="spoolWorkspaceTabs" role="tablist" aria-label="Open spools"></div>
+        <div class="spool-workspace-actions">
+          <button type="button" id="spoolWorkspaceOpenButton" title="Open another saved spool in a tab">+ Open</button>
+          <button type="button" id="spoolWorkspaceNewButton" title="Start a new spool in another tab">+ New</button>
+          <button type="button" id="spoolWorkspaceWindowButton" aria-pressed="false" title="See all open spools together">Windows</button>
+        </div>
+      </section>
+
+      <section class="spool-window-grid-shell" id="spoolWindowGridShell" aria-label="Open spool windows" hidden>
+        <div class="spool-window-grid-header">
+          <div>
+            <strong>Open spool windows</strong>
+            <span>Compare every open spool. Choose Edit to return that spool to the full drawing workspace.</span>
+          </div>
+          <button type="button" id="spoolWindowGridCloseButton">Return to active spool</button>
+        </div>
+        <div class="spool-window-grid" id="spoolWindowGrid"></div>
+      </section>
+
+      <div class="workspace-location-strip workspace-location-main" data-workspace-location data-location-context="Drawing" aria-label="Current workspace location"></div>
+      <div class="role-access-notice" id="roleAccessNotice" role="status" hidden></div>
+
+      <section class="licence-banner" id="licenceBanner" aria-live="polite" hidden>
+        <div class="licence-banner-copy">
+          <strong id="licenceBannerTitle">Trial ending soon</strong>
+          <span id="licenceBannerMessage">Your cloud projects remain available after the trial in read-only mode.</span>
+        </div>
+        <button class="primary-button" id="licenceBannerUpgradeButton" type="button">Upgrade licence</button>
+      </section>
 
       <main class="workspace">
         <aside class="tool-rail" aria-label="Drawing tools">
@@ -470,22 +556,25 @@
                   <button class="tool-button" data-tool="branch" data-mode-tools="draw edit" type="button" title="Draw branch weld point" aria-label="Draw branch weld point">
                     <svg><use href="#icon-tee"></use></svg><span>Branch</span>
                   </button>
-                  <button class="tool-button" data-tool="flange" data-mode-tools="edit" type="button" title="Place flange" aria-label="Place flange">
+                  <button class="tool-button" data-tool="flange" data-mode-tools="draw edit" type="button" title="Place flange" aria-label="Place flange">
                     <svg><use href="#icon-flange"></use></svg><span>Flange</span>
                   </button>
-                  <button class="tool-button" data-tool="reducer" data-mode-tools="edit" type="button" title="Place reducer" aria-label="Place reducer">
+                  <button class="tool-button" data-tool="reducer" data-mode-tools="draw edit" type="button" title="Place reducer" aria-label="Place reducer">
                     <svg><use href="#icon-reducer"></use></svg><span>Reducer</span>
                   </button>
-                  <button class="tool-button" data-tool="rollGroove" data-mode-tools="edit" type="button" title="Place roll groove" aria-label="Place roll groove">
+                  <button class="tool-button" data-tool="rollGroove" data-mode-tools="draw edit" type="button" title="Place roll groove" aria-label="Place roll groove">
                     <svg><use href="#icon-groove"></use></svg><span>Groove</span>
                   </button>
-                  <button class="tool-button" data-tool="valve" data-mode-tools="edit" type="button" title="Place valve" aria-label="Place valve">
+                  <button class="tool-button" data-tool="threadedEnd" data-mode-tools="draw edit" type="button" title="Place threaded pipe end" aria-label="Place threaded pipe end">
+                    <svg><use href="#icon-groove"></use></svg><span>Thread</span>
+                  </button>
+                  <button class="tool-button" data-tool="valve" data-mode-tools="draw edit" type="button" title="Place valve" aria-label="Place valve">
                     <svg><use href="#icon-valve"></use></svg><span>Valve</span>
                   </button>
-                  <button class="tool-button" data-tool="socket" data-mode-tools="edit" type="button" title="Place one socket; use right-click for a socket layout" aria-label="Place one socket">
+                  <button class="tool-button" data-tool="socket" data-mode-tools="draw edit" type="button" title="Place one socket; tap a pipe for socket layout actions" aria-label="Place one socket">
                     <svg><use href="#icon-tee"></use></svg><span>Socket</span>
                   </button>
-                  <button class="tool-button" data-tool="weld" data-mode-tools="edit" type="button" title="Place weld" aria-label="Place weld">
+                  <button class="tool-button" data-tool="weld" data-mode-tools="draw edit" type="button" title="Place weld" aria-label="Place weld">
                     <svg><use href="#icon-weld"></use></svg><span>Weld</span>
                   </button>
                 </div>
@@ -506,7 +595,7 @@
         <section class="drawing-panel" aria-label="Isometric drawing area">
           <div class="panel-bar">
             <div class="bar-title">
-              <span>2D Iso Drawing - Draw Here</span>
+              <span id="workspaceTitle">Draw spool</span>
               <small id="cursorReadout">0, 0, 0</small>
               <span class="dimension-edit-pill" id="dimensionEditHint">Numbered key: Select D/O rows to edit C/C</span>
             </div>
@@ -519,6 +608,14 @@
                 <span class="button-sign" aria-hidden="true">+</span>
                 <span>Zoom</span>
               </button>
+              <button class="icon-button compact labeled" id="fitDrawingButton" type="button" title="Fit the whole spool on screen" aria-label="Fit whole spool on screen">
+                <span class="button-sign" aria-hidden="true">↔</span>
+                <span>Fit</span>
+              </button>
+              <button class="icon-button compact labeled touch-shift-angle-button" id="touchShiftAngleButton" type="button" title="Hold while drawing a 45 degree offset" aria-label="Hold for 45 degree drawing" aria-pressed="false">
+                <span class="button-sign" aria-hidden="true">45°</span>
+                <span>Hold 45°</span>
+              </button>
               <button class="icon-button compact labeled focus-mode-button" id="drawingFullscreenButton" type="button" title="Enter Focus mode" aria-label="Enter Focus mode" aria-pressed="false">
                 <svg><use href="#icon-fullscreen"></use></svg>
                 <span>Focus</span>
@@ -527,31 +624,61 @@
                 <svg><use href="#icon-sample"></use></svg>
                 <span>3D</span>
               </button>
-              <button class="icon-button compact labeled inspector-show-button" id="inspectorShowButton" type="button" title="Open drawing details" aria-label="Open Inspector" aria-expanded="false">
+              <button class="icon-button compact labeled inspector-show-button" id="inspectorShowButton" type="button" title="Open drawing details" aria-label="Open Details" aria-expanded="false">
                 <svg><use href="#icon-settings"></use></svg>
                 <span>Details</span>
               </button>
               <button class="icon-button compact labeled export-action" id="exportIsoButton" type="button" title="Save fabrication sheet PDF" aria-label="Save fabrication sheet PDF">
                 <svg><use href="#icon-image"></use></svg>
-                <span>PDF</span>
+                <span>Draft PDF</span>
               </button>
             </div>
           </div>
+          <section class="first-spool-guide" id="firstSpoolGuide" aria-live="polite" hidden>
+            <div class="first-spool-guide-progress" aria-hidden="true"><i id="firstSpoolGuideProgressBar"></i></div>
+            <div class="first-spool-guide-copy">
+              <small id="firstSpoolGuideKicker">First spool</small>
+              <strong id="firstSpoolGuideTitle">Start by drawing a pipe run</strong>
+              <span id="firstSpoolGuideMessage">Choose Draw, then drag from the yellow point.</span>
+            </div>
+            <div class="first-spool-guide-actions">
+              <button class="icon-button compact labeled" id="firstSpoolGuideExpandButton" type="button">Show all controls</button>
+              <button class="icon-button compact labeled" id="firstSpoolGuideActionButton" type="button">Start drawing</button>
+              <button class="primary-button" id="firstSpoolGuideNextButton" type="button">Next</button>
+              <button class="first-spool-guide-close" id="firstSpoolGuideCloseButton" type="button" aria-label="End first spool tips">End tips</button>
+            </div>
+          </section>
+          <section class="quick-pdf-bar" id="quickPdfBar" aria-label="Quick PDF actions" hidden>
+            <div class="quick-pdf-copy">
+              <small>FAST MODE</small>
+              <strong>Draw it. Check it. Make the PDF.</strong>
+              <span>No account, Jobs board or approval workflow is required.</span>
+            </div>
+            <div class="quick-pdf-actions">
+              <button class="icon-button compact labeled" id="quickPdfDrawButton" type="button">Draw</button>
+              <button class="icon-button compact labeled" id="quickPdfFittingsButton" type="button">Fittings</button>
+              <button class="primary-button" id="quickPdfDownloadButton" type="button">Download PDF</button>
+              <button class="quick-pdf-managed-link" id="quickPdfManagedButton" type="button">Use managed workflow</button>
+            </div>
+          </section>
           <div class="canvas-frame">
             <canvas id="drawCanvas"></canvas>
           </div>
         </section>
 
-        <aside class="control-panel inspector-panel" aria-label="Spool inspector">
+        <aside class="control-panel inspector-panel" aria-label="Spool details">
           <div class="inspector-header">
             <div>
-              <strong>Inspector</strong>
+              <strong>Details</strong>
               <small id="inspectorModeHint">Draw lengths, angles and selected properties</small>
             </div>
-            <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close inspector">Close</button>
+            <div class="sheet-header-actions">
+              <button class="sheet-switch-button" id="inspectorOpenPreviewButton" type="button" aria-label="Switch from Details to 3D preview">3D</button>
+              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close Details">Close</button>
+            </div>
           </div>
-          <div class="inspector-tabs" role="tablist" aria-label="Inspector views">
-            <button class="active" data-inspector-tab="properties" data-mode-tabs="draw edit" type="button">Properties</button>
+          <div class="inspector-tabs" role="tablist" aria-label="Detail views">
+            <button class="active" data-inspector-tab="properties" data-mode-tabs="draw edit" type="button">Item</button>
             <button data-inspector-tab="cutlist" data-mode-tabs="review export" type="button">Cut List</button>
             <button data-inspector-tab="weights" data-mode-tabs="review export" type="button">Weights</button>
             <button data-inspector-tab="bom" data-mode-tabs="export" type="button">BOM</button>
@@ -568,11 +695,11 @@
               <h2>Draw exact runs</h2>
               <label class="field">
                 <span>Next run / offset set mm</span>
-                <input id="stepLengthInput" type="number" min="50" max="12000" step="1" value="1000" />
+                <input id="stepLengthInput" type="number" min="50" max="1000000" step="1" value="1000" />
               </label>
               <label class="field">
                 <span>Selected run mm</span>
-                <input id="selectedRunLengthInput" type="number" min="50" max="12000" step="1" disabled />
+                <input id="selectedRunLengthInput" type="number" min="50" max="1000000" step="1" disabled />
               </label>
               <div class="axis-grid" aria-label="Add precise run">
                 <button data-axis="xp" type="button">+X</button>
@@ -627,6 +754,14 @@
                   <option value="jis10k">JIS 10K</option>
                 </select>
               </label>
+              <label class="field">
+                <span>Default reducer type</span>
+                <select id="reducerTypeSelect">
+                  <option value="concentric">Concentric reducer</option>
+                  <option value="eccentric">Eccentric reducer</option>
+                </select>
+                <small>Automatic size changes use this type unless changed on the reducer.</small>
+              </label>
             </section>
           </div>
 
@@ -649,6 +784,15 @@
           </div>
 
           <div class="inspector-tab-panel" data-inspector-panel="bom">
+            <section class="control-section export-primary-card">
+              <small>READY TO DOWNLOAD</small>
+              <h2>Fabrication PDF</h2>
+              <p id="exportPanelPdfHint">Creates a clearly marked draft PDF. Issued drawings include their approved revision and QR traveller.</p>
+              <button class="primary-button export-action" id="exportPanelPdfButton" type="button" title="Download fabrication sheet PDF" aria-label="Download fabrication sheet PDF">
+                <svg><use href="#icon-export"></use></svg>
+                <span>Download draft PDF</span>
+              </button>
+            </section>
             <section class="control-section">
               <h2>Order list</h2>
               <div class="takeoff-summary" id="bomSummary" aria-live="polite"></div>
@@ -726,14 +870,11 @@
               <label class="preview-panel-mode">
                 <span>3D view</span>
                 <select id="previewModePanelSelect" aria-label="3D preview style">
+                  <option value="tricolor">Tri-colour by pipe size</option>
+                  <option value="illustrated">Illustrated workshop</option>
                   <option value="carbon">Realistic 3D</option>
-                  <option value="workshop">Workshop model</option>
-                  <option value="black">Carbon dark</option>
-                  <option value="stainless">Stainless silver</option>
-                  <option value="red">Painted red</option>
                   <option value="ghost">Transparent</option>
                   <option value="outline">Fabrication outline</option>
-                  <option value="cad">CAD green line</option>
                 </select>
               </label>
               <div class="preview-nav" aria-label="3D navigation">
@@ -758,6 +899,7 @@
                 <span>3D labels</span>
               </label>
               <span class="pill" id="spoolStats">0 runs</span>
+              <button class="sheet-switch-button" id="previewOpenInspectorButton" type="button" aria-label="Switch from 3D preview to Details">Details</button>
               <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close 3D preview">Close</button>
             </div>
           </div>
@@ -765,6 +907,7 @@
             <canvas id="threeCanvas" hidden></canvas>
             <canvas id="fallbackCanvas"></canvas>
             <div class="preview-label-layer" id="previewLabelLayer" aria-hidden="true"></div>
+            <div class="preview-size-colour-legend" id="previewSizeColourLegend" aria-label="Pipe size colour key" hidden></div>
           </div>
           <div class="preview-float-resize" id="previewFloatResize" aria-hidden="true"></div>
         </section>
@@ -782,10 +925,10 @@
           <div class="project-dialog-header">
             <div>
               <strong id="projectDialogTitle">Project details</strong>
-              <small>These details go on the fabrication sheet and saved project list.</small>
+              <small id="projectDialogSubtitle">Enter the essentials now. Fabrication defaults can stay unchanged.</small>
             </div>
           </div>
-          <div class="project-dialog-grid">
+          <div class="project-dialog-grid project-dialog-essentials">
             <label class="field">
               <span>Job no.</span>
               <div class="project-job-entry">
@@ -806,11 +949,40 @@
               <span>Drawn by</span>
               <input id="projectDialogDrawnBy" type="text" maxlength="32" autocomplete="off" />
             </label>
+          </div>
+          <details class="project-dialog-advanced" id="projectDialogAdvanced">
+            <summary>
+              <span><strong>Advanced fabrication setup</strong><small>Fitting source and weld gap</small></span>
+              <b>Optional</b>
+            </summary>
+            <div class="project-dialog-grid">
             <label class="field project-dialog-wide">
               <span>Client / area</span>
               <input id="projectDialogClient" type="text" maxlength="56" autocomplete="off" />
             </label>
-          </div>
+            <label class="field project-dialog-wide">
+              <span>Fitting data profile</span>
+              <select id="projectDialogFittingProfile">
+                <option value="atlasAsmeB169">Atlas / ASME B16.9 pipe — verified</option>
+                <option value="as1528Supplier">AS 1528.3 sanitary tube — supplier dimensions required</option>
+                <option value="workshopBranch">Fabricated branch — workshop allowance required</option>
+              </select>
+              <small class="project-profile-help" id="projectDialogFittingProfileHelp"></small>
+            </label>
+            <label class="field project-dialog-wide">
+              <span>Supplier / workshop reference <small>(optional)</small></span>
+              <input id="projectDialogFittingProfileReference" type="text" maxlength="80" autocomplete="off" placeholder="Supplier catalogue, procedure or approved detail" />
+            </label>
+            <label class="field project-dialog-wide">
+              <span>Weld gap per welded pipe end</span>
+              <select id="projectDialogWeldGapMm">
+                <option value="2.4">2.4 mm</option>
+                <option value="1.6">1.6 mm</option>
+              </select>
+              <small class="project-profile-help">Deducted only where a pipe cut meets a welded fitting. Open pipe ends receive no weld-gap deduction.</small>
+            </label>
+            </div>
+          </details>
           <div class="project-dialog-actions">
             <button class="icon-button labeled" id="projectDialogCancelButton" type="button">Cancel</button>
             <button class="primary-button save-action" id="projectDialogSubmitButton" type="submit">Save project</button>
@@ -846,18 +1018,29 @@
             </div>
             <button class="icon-button labeled" id="homeDashboardCloseButton" type="button">Go to drawing</button>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Home"></div>
           <div class="home-dashboard-account" id="homeDashboardAccount">Guest mode - local projects only</div>
           <div class="home-dashboard-stats" id="homeDashboardStats">0 saved spools on this device</div>
           <div class="home-dashboard-grid">
+            <button class="home-dashboard-action quick-pdf" id="homeDashboardQuickPdfButton" type="button">
+              <svg><use href="#icon-report"></use></svg>
+              <strong>Quick PDF</strong>
+              <span>No account or job workflow. Draw the spool, check it and download the PDF.</span>
+            </button>
             <button class="home-dashboard-action primary" id="homeDashboardContinueButton" type="button">
               <svg><use href="#icon-draw"></use></svg>
               <strong>Continue drawing</strong>
               <span>Return to the spool on screen.</span>
             </button>
+            <button class="home-dashboard-action recovery" id="homeDashboardRestoreButton" type="button" hidden>
+              <svg><use href="#icon-undo"></use></svg>
+              <strong>Restore last session</strong>
+              <span>Recover the drawing saved when this app session started.</span>
+            </button>
             <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
               <svg><use href="#icon-reset"></use></svg>
-              <strong>New spool</strong>
-              <span>Start a fresh drawing with job details.</span>
+              <strong>Managed job</strong>
+              <span>Use saving, review, issue, QR and production workflow.</span>
             </button>
             <button class="home-dashboard-action" id="homeDashboardJobsButton" type="button">
               <svg><use href="#icon-sample"></use></svg>
@@ -867,7 +1050,12 @@
             <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
               <svg><use href="#icon-help"></use></svg>
               <strong>Tutorial</strong>
-              <span>Walk through the main workflow.</span>
+              <span>Learn the workflow or continue where you left off.</span>
+            </button>
+            <button class="home-dashboard-action video-guide" id="homeDashboardVideoButton" type="button">
+              <svg><use href="#icon-image"></use></svg>
+              <strong>Video tutorials</strong>
+              <span>Complete workflow and focused feature guides.</span>
             </button>
             <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
               <svg><use href="#icon-sample"></use></svg>
@@ -901,29 +1089,69 @@
               <small id="authDialogStatus">Sign in to save and open spool projects from the cloud.</small>
             </div>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Account"></div>
           <div class="auth-mode-tabs" role="tablist" aria-label="Account action">
             <button class="active" id="authSignInModeButton" type="button" aria-selected="true">Sign in</button>
             <button id="authCreateModeButton" type="button" aria-selected="false">Create account</button>
           </div>
           <div class="project-dialog-grid">
-            <label class="field project-dialog-wide">
+            <label class="field project-dialog-wide" id="authEmailField">
               <span>Email</span>
               <input id="authEmailInput" type="email" autocomplete="email" />
             </label>
-            <label class="field project-dialog-wide">
+            <label class="field project-dialog-wide" id="authPasswordField">
               <span>Password</span>
               <input id="authPasswordInput" type="password" autocomplete="current-password" minlength="6" />
             </label>
-            <label class="toggle auth-remember project-dialog-wide">
+            <label class="field project-dialog-wide" id="authPasswordConfirmField" hidden>
+              <span>Confirm new password</span>
+              <input id="authPasswordConfirmInput" type="password" autocomplete="new-password" minlength="8" />
+            </label>
+            <label class="toggle auth-remember project-dialog-wide" id="authRememberField">
               <input id="authRememberDeviceInput" type="checkbox" />
               <span>Remember me on this device</span>
             </label>
+            <label class="field project-dialog-wide" id="authAccountTypeField" hidden>
+              <span>Account setup</span>
+              <select id="authAccountTypeInput">
+                <option value="personal">Just for me — Personal workspace</option>
+                <option value="business">For a business — 5 people included</option>
+              </select>
+            </label>
+            <label class="field project-dialog-wide" id="authBusinessNameField" hidden>
+              <span>Business name</span>
+              <input id="authBusinessNameInput" type="text" maxlength="80" placeholder="Workshop or company name" />
+            </label>
             <p class="auth-help project-dialog-wide" id="authModeHelp">Use the email and password you created for SpoolMate.</p>
           </div>
+          <section class="account-workspace-panel" id="accountWorkspacePanel" hidden>
+            <div class="team-panel-head">
+              <div>
+                <strong>Workspaces</strong>
+                <small>Personal jobs stay private. Business jobs belong to the business.</small>
+              </div>
+            </div>
+            <div class="account-workspace-list" id="accountWorkspaceList"></div>
+          </section>
+          <section class="account-plan-panel" id="accountPlanPanel" hidden>
+            <div class="account-plan-heading">
+              <span class="account-plan-badge" id="accountPlanBadge">Trial</span>
+              <div>
+                <strong id="accountPlanTitle">Cloud trial</strong>
+                <small id="accountPlanMessage">Full cloud access is active.</small>
+              </div>
+            </div>
+            <div class="account-plan-countdown" id="accountPlanCountdown"></div>
+            <ul class="account-plan-capabilities" id="accountPlanCapabilities">
+              <li>Open and export your existing cloud spools</li>
+              <li>Cloud editing, saving and collaboration while active</li>
+            </ul>
+            <button class="primary-button" id="accountPlanUpgradeButton" type="button">Upgrade licence</button>
+          </section>
           <section class="team-workspace-panel" id="teamWorkspacePanel" hidden>
             <div class="team-panel-head">
               <div>
-                <strong>Team workspace</strong>
+                <strong>Business workspace</strong>
                 <small id="teamWorkspaceStatus">Sign in to use team projects.</small>
               </div>
               <button class="icon-button compact labeled" id="teamRefreshButton" type="button">Refresh</button>
@@ -940,16 +1168,80 @@
               </label>
               <button class="icon-button labeled team-action-button" id="teamJoinButton" type="button">Join team</button>
             </div>
+            <div class="business-seat-summary" id="businessSeatSummary" hidden></div>
             <div class="team-members-list" id="teamMembersList" aria-live="polite"></div>
           </section>
+          <section class="account-launch-panel" id="accountLaunchPanel">
+            <div>
+              <strong>Account, privacy and support</strong>
+              <small>Recover access, export your cloud data, get diagnostics or manage your account.</small>
+            </div>
+            <div class="account-launch-actions">
+              <button class="icon-button labeled" id="authForgotPasswordButton" type="button">Forgot password</button>
+              <button class="icon-button labeled" id="authBackToSignInButton" type="button" hidden>Back to sign in</button>
+              <button class="icon-button labeled" id="accountExportDataButton" type="button" hidden>Export my data</button>
+              <button class="icon-button labeled" id="diagnosticReportButton" type="button">Download diagnostics</button>
+              <button class="icon-button labeled" id="legalSupportButton" type="button">Privacy, terms &amp; support</button>
+              <button class="icon-button labeled support-admin-launch" id="supportAdminButton" type="button" hidden>Support Admin</button>
+              <button class="icon-button labeled danger" id="accountDeleteButton" type="button" hidden>Delete cloud account</button>
+            </div>
+          </section>
           <div class="project-dialog-actions auth-actions">
-            <button class="icon-button labeled" id="authCloseButton" type="button">Continue as guest</button>
+            <button class="icon-button labeled" id="authCloseButton" type="button">Continue without account</button>
             <button class="icon-button labeled" id="authSignOutButton" type="button" hidden>Sign out</button>
             <button class="icon-button labeled" id="authResendButton" type="button" hidden>Resend email</button>
+            <button class="primary-button" id="authSendResetButton" type="button" hidden>Send reset email</button>
+            <button class="primary-button" id="authUpdatePasswordButton" type="button" hidden>Update password</button>
             <button class="icon-button labeled" id="authSignUpButton" type="button" hidden>Sign up</button>
             <button class="primary-button" id="authSignInButton" type="submit">Sign in</button>
           </div>
         </form>
+      </div>
+
+      <div class="project-dialog-backdrop support-admin-backdrop" id="supportAdminDialog" hidden>
+        <section class="project-dialog-card support-admin-card" aria-label="SpoolMate Support Admin">
+          <div class="project-dialog-header support-admin-header">
+            <div>
+              <span class="support-admin-live-badge">Live support console</span>
+              <strong>SpoolMate Support Admin</strong>
+              <small>Diagnose accounts and make audited repairs. Customer business admins cannot access this area.</small>
+            </div>
+            <button class="icon-button compact labeled" id="supportAdminCloseButton" type="button">Close</button>
+          </div>
+          <div class="support-admin-identity" id="supportAdminIdentity">Confirming platform administrator access&hellip;</div>
+          <div class="support-admin-summary" id="supportAdminSummary" aria-live="polite"></div>
+          <form class="support-admin-search" id="supportAdminSearchForm">
+            <label>
+              <span>Find a customer</span>
+              <input id="supportAdminSearchInput" type="search" minlength="2" maxlength="120" placeholder="Email, name, phone or user ID" autocomplete="off" />
+            </label>
+            <button class="primary-button" id="supportAdminSearchButton" type="submit">Search accounts</button>
+            <button class="icon-button labeled" id="supportAdminRefreshButton" type="button">Refresh overview</button>
+          </form>
+          <div class="support-admin-status" id="supportAdminStatus" role="status" aria-live="polite">Search for an account to begin.</div>
+          <div class="support-admin-workspace">
+            <aside class="support-admin-results" aria-label="Customer search results">
+              <div class="support-admin-section-heading">
+                <strong>Accounts</strong>
+                <small id="supportAdminResultCount">No search yet</small>
+              </div>
+              <div class="support-admin-result-list" id="supportAdminResultList"></div>
+            </aside>
+            <main class="support-admin-detail" id="supportAdminDetail">
+              <div class="support-admin-empty">
+                <strong>Select a customer account</strong>
+                <span>You will see the licence, businesses, memberships, cloud spools and recent support history here.</span>
+              </div>
+            </main>
+          </div>
+          <section class="support-admin-audit">
+            <div class="support-admin-section-heading">
+              <strong>Recent admin activity</strong>
+              <small>Every repair records the operator, reason and before/after values.</small>
+            </div>
+            <div class="support-admin-audit-list" id="supportAdminAuditList"></div>
+          </section>
+        </section>
       </div>
 
       <div class="project-dialog-backdrop" id="projectLibraryDialog" hidden>
@@ -959,21 +1251,27 @@
               <strong>Job dashboard</strong>
               <small id="projectLibrarySubtitle">Projects are saved on this device/browser. Use the production board or open a job folder, then tap a spool drawing.</small>
             </div>
+            <button class="icon-button compact labeled project-library-header-close" id="projectLibraryCloseButton" type="button">Close</button>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Jobs"></div>
           <div class="project-dashboard-toolbar" aria-label="Job dashboard tools">
             <label class="project-dashboard-search">
               <span>Search jobs, spools or clients</span>
               <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client, assignee or status" autocomplete="off" />
             </label>
-            <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
+            <button class="icon-button labeled" id="projectLibrarySourceButton" type="button" hidden>
+              <svg><use href="#icon-sample"></use></svg>
+              <span>This device</span>
+            </button>
+            <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button" hidden>
               <svg><use href="#icon-help"></use></svg>
               <span>Guide</span>
             </a>
-            <button class="icon-button labeled" id="projectLibraryCommsButton" type="button">
+            <button class="icon-button labeled" id="projectLibraryCommsButton" type="button" hidden>
               <svg><use href="#icon-note"></use></svg>
               <span>Comms</span>
             </button>
-            <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
+            <button class="icon-button labeled" id="projectLibraryReportButton" type="button" hidden>
               <svg><use href="#icon-report"></use></svg>
               <span>Report</span>
             </button>
@@ -981,7 +1279,7 @@
               <svg><use href="#icon-reset"></use></svg>
               <span>New spool</span>
             </button>
-            <button class="primary-button save-action" id="projectLibrarySaveButton" type="button">
+            <button class="primary-button save-action" id="projectLibrarySaveButton" type="button" hidden>
               <svg><use href="#icon-export"></use></svg>
               <span>Save current</span>
             </button>
@@ -993,7 +1291,7 @@
                 <ol>
                   <li>
                     <strong>Save each spool first.</strong>
-                    <span>Use Save current so the spool appears in the job list and production board.</span>
+                    <span>Save from the drawing screen so the spool appears in the job list and production board.</span>
                   </li>
                   <li>
                     <strong>Move the spool through stages.</strong>
@@ -1008,8 +1306,8 @@
                     <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
                   </li>
                   <li>
-                    <strong>Open Comms for the team view.</strong>
-                    <span>Use Comms to post general team messages and see all active spool notes in one place.</span>
+                    <strong>Use More for team tools.</strong>
+                    <span>Open More for the Jobs guide, Team comms and daily or weekly reports without crowding the main toolbar.</span>
                   </li>
                 </ol>
                 <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
@@ -1054,9 +1352,6 @@
           </section>
           <div class="project-library-report-slot" id="projectLibraryReportSlot" hidden></div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
-          <div class="project-dialog-actions">
-            <button class="icon-button labeled" id="projectLibraryCloseButton" type="button">Close</button>
-          </div>
         </section>
       </div>
 
@@ -1143,16 +1438,246 @@
           <div class="project-dialog-header">
             <div>
               <strong>Interactive tutorial</strong>
-              <small>Pick a topic, watch the mini demo, then try the highlighted tool when you are ready.</small>
+              <small>Pick a topic, watch the mini demo, then use the safe practice without changing your drawing.</small>
+            </div>
+            <div class="tutorial-header-actions">
+              <button class="icon-button labeled tutorial-video-button" id="tutorialVideoButton" type="button" aria-label="Open video tutorials">
+                <svg><use href="#icon-image"></use></svg>
+                <span>Video tutorials</span>
+              </button>
+              <button class="icon-button labeled tutorial-close-button" id="tutorialCloseButton" type="button" aria-label="Close interactive tutorial">Close</button>
             </div>
           </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Tutorial"></div>
           <div class="tutorial-progress" id="tutorialProgress" aria-live="polite"></div>
           <article class="tutorial-step-card" id="tutorialStepCard"></article>
           <div class="project-dialog-actions tutorial-actions">
-            <button class="icon-button labeled" id="tutorialCloseButton" type="button">Close</button>
             <button class="icon-button labeled" id="tutorialPrevButton" type="button">Back</button>
-            <button class="icon-button labeled" id="tutorialActionButton" type="button">Try it</button>
-            <button class="primary-button" id="tutorialNextButton" type="button">Next</button>
+            <button class="primary-button" id="tutorialActionButton" type="button">Start practice</button>
+            <button class="icon-button labeled" id="tutorialNextButton" type="button">Next</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop load-plan-backdrop" id="loadPlanDialog" hidden>
+        <section class="project-dialog-card load-plan-card" role="dialog" aria-modal="true" aria-labelledby="loadPlanTitle">
+          <div class="project-dialog-header">
+            <div>
+              <span class="big-spool-kicker">Transport planning</span>
+              <strong id="loadPlanTitle">Load planner</strong>
+              <small>Select a job, choose its spools, then build a tray and roof-rack loading plan.</small>
+            </div>
+            <label class="load-plan-tray-field">Truck tray
+              <select id="loadPlanTraySelect">
+                <option value="medium">3460 × 2040 mm tray</option>
+                <option value="long">4490 × 2040 mm tray</option>
+              </select>
+            </label>
+            <label class="load-plan-tray-field">Roof racks
+              <select id="loadPlanRackSelect">
+                <option value="off">No roof racks</option>
+                <option value="standard">6500 × 2040 mm roof racks</option>
+                <option value="long">7500 × 2040 mm roof racks</option>
+              </select>
+            </label>
+            <button class="icon-button compact labeled" id="loadPlanCloseButton" type="button">Close</button>
+          </div>
+          <div class="load-plan-layout">
+            <aside class="load-plan-picker">
+              <div>
+                <label class="field"><span>Job</span><select id="loadPlanJobSelect"></select></label>
+                <div class="load-plan-bulk-actions">
+                  <button id="loadPlanSelectAllButton" type="button">Select all</button>
+                  <button id="loadPlanDeselectAllButton" type="button">Clear</button>
+                </div>
+              </div>
+              <div class="load-plan-project-list" id="loadPlanProjectList" aria-live="polite"></div>
+            </aside>
+            <section class="load-plan-view">
+              <div class="load-plan-toolbar">
+                <div class="load-plan-view-tabs" role="group" aria-label="Load plan view">
+                  <button id="loadPlanLayoutButton" type="button" aria-pressed="true">Layout</button>
+                  <button id="loadPlanModelButton" type="button" aria-pressed="false">3D model</button>
+                </div>
+                <div class="load-plan-model-tools">
+                  <button id="loadPlanAnimateButton" type="button">Animate load</button>
+                  <button id="loadPlanSpinButton" type="button" aria-pressed="false">Auto spin</button>
+                  <button id="loadPlanResetButton" type="button">Reset view</button>
+                </div>
+                <span class="load-plan-layer-hint">Numbers show loading order</span>
+              </div>
+              <div class="load-plan-stage" id="loadPlanStage">
+                <canvas id="loadPlanCanvas" aria-label="Truck load layout"></canvas>
+                <canvas id="loadPlanThreeCanvas" aria-label="Interactive 3D truck load model" hidden></canvas>
+              </div>
+              <div class="load-plan-summary" id="loadPlanSummary" aria-live="polite">Select a job first.</div>
+            </section>
+          </div>
+          <div class="project-dialog-actions">
+            <button class="secondary-button" id="loadPlanPlayButton" type="button">Make layout</button>
+            <button class="primary-button" id="loadPlanDoneButton" type="button">Done</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop big-spool-backdrop" id="bigSpoolDialog" hidden>
+        <section class="project-dialog-card big-spool-card" role="dialog" aria-modal="true" aria-labelledby="bigSpoolTitle">
+          <div class="project-dialog-header big-spool-header">
+            <div>
+              <span class="big-spool-kicker">Transport planning</span>
+              <strong id="bigSpoolTitle">Big Spool</strong>
+              <small>Keep one master assembly, then divide it into practical fabrication and transport pieces.</small>
+            </div>
+            <button class="icon-button compact labeled" id="bigSpoolCloseButton" type="button">Close</button>
+          </div>
+
+          <div class="big-spool-controls">
+            <label class="toggle big-spool-enable">
+              <input id="bigSpoolEnabledInput" type="checkbox" />
+              <span>Use Big Spool for this drawing</span>
+            </label>
+            <label class="field">
+              <span>Maximum transport length</span>
+              <div class="big-spool-unit-input">
+                <input id="bigSpoolMaxLengthInput" type="number" min="500" max="1000000" step="100" inputmode="decimal" />
+                <b>mm</b>
+              </div>
+              <small>Choose the finished overall limit for this job. It is not fixed at 4.8 m.</small>
+            </label>
+            <label class="field">
+              <span>Keep cuts away from fittings</span>
+              <div class="big-spool-unit-input">
+                <input id="bigSpoolClearanceInput" type="number" min="50" max="2000" step="10" inputmode="decimal" />
+                <b>mm</b>
+              </div>
+            </label>
+            <button class="primary-button" id="bigSpoolSuggestButton" type="button">Suggest transport pieces</button>
+          </div>
+
+          <div class="big-spool-overview" id="bigSpoolOverview" aria-live="polite"></div>
+
+          <section class="big-spool-constraint-panel" aria-labelledby="bigSpoolConstraintTitle">
+            <div class="big-spool-section-heading">
+              <div>
+                <strong id="bigSpoolConstraintTitle">Transport constraints</strong>
+                <small>Length is required. Width, height and weight can be left at 0 when that limit does not apply.</small>
+              </div>
+              <label class="field big-spool-preset-field">
+                <span>Starting preset</span>
+                <select id="bigSpoolPresetSelect">
+                  <option value="custom">Custom limits</option>
+                  <option value="ute">Ute / small tray</option>
+                  <option value="truck">Truck transport</option>
+                  <option value="lift">Site goods lift</option>
+                </select>
+              </label>
+            </div>
+            <div class="big-spool-constraint-grid">
+              <label class="field"><span>Maximum width</span><div class="big-spool-unit-input"><input id="bigSpoolMaxWidthInput" type="number" min="0" max="1000000" step="100" inputmode="decimal" /><b>mm</b></div></label>
+              <label class="field"><span>Maximum height</span><div class="big-spool-unit-input"><input id="bigSpoolMaxHeightInput" type="number" min="0" max="1000000" step="100" inputmode="decimal" /><b>mm</b></div></label>
+              <label class="field"><span>Maximum weight</span><div class="big-spool-unit-input"><input id="bigSpoolMaxWeightInput" type="number" min="0" max="100000" step="10" inputmode="decimal" /><b>kg</b></div></label>
+              <label class="field"><span>Site / transport note</span><input id="bigSpoolTransportNoteInput" type="text" maxlength="120" placeholder="Truck, lift, doorway or crane restriction" /></label>
+            </div>
+          </section>
+
+          <div class="big-spool-workspace">
+            <section class="big-spool-section">
+              <div class="big-spool-section-heading">
+                <div>
+                  <strong>Transport pieces</strong>
+                  <small>Colours identify the generated child fabrication pieces and reports; the master drawing stays continuous.</small>
+                </div>
+              </div>
+              <div class="big-spool-piece-list" id="bigSpoolPieceList"></div>
+            </section>
+
+            <section class="big-spool-section">
+              <div class="big-spool-section-heading">
+                <div>
+                  <strong>Split connections</strong>
+                  <small>Each break prepares both child-spool ends and keeps matching A/B marks.</small>
+                </div>
+              </div>
+              <div class="big-spool-joint-default">
+                <label class="field">
+                  <span>Connection for new splits</span>
+                  <select id="bigSpoolDefaultJointTypeSelect">
+                    <option value="fieldWeld">Field weld</option>
+                    <option value="groove">Roll grooves both sides</option>
+                    <option value="flange">Flanges both sides</option>
+                  </select>
+                </label>
+                <small>Used for automatic and manual splits. Every split can still be changed below.</small>
+              </div>
+              <div class="big-spool-cut-list" id="bigSpoolCutList"></div>
+              <div class="big-spool-manual-cut">
+                <label class="field">
+                  <span>Straight run</span>
+                  <select id="bigSpoolManualSegmentSelect"></select>
+                </label>
+                <label class="field">
+                  <span>Distance from run start</span>
+                  <div class="big-spool-unit-input">
+                    <input id="bigSpoolManualDistanceInput" type="number" min="50" step="1" inputmode="decimal" />
+                    <b>mm</b>
+                  </div>
+                </label>
+                <button class="secondary-button" id="bigSpoolAddCutButton" type="button">Add manual split</button>
+              </div>
+            </section>
+          </div>
+
+          <div class="project-dialog-actions big-spool-actions">
+            <button class="secondary-button" id="bigSpoolClearCutsButton" type="button">Clear splits</button>
+            <button class="secondary-button" id="bigSpoolExportButton" type="button">Export transport list</button>
+            <button class="secondary-button" id="bigSpoolExportPackageButton" type="button">Child fab package</button>
+            <button class="secondary-button" id="bigSpoolLoadPlannerButton" type="button">Open load planner</button>
+            <button class="primary-button" id="bigSpoolDoneButton" type="button">Done</button>
+          </div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop video-tutorial-backdrop" id="videoTutorialDialog" hidden>
+        <section class="project-dialog-card video-tutorial-card" role="dialog" aria-modal="true" aria-labelledby="videoTutorialTitle" aria-describedby="videoTutorialDescription">
+          <div class="project-dialog-header video-tutorial-header">
+            <div>
+              <span class="video-tutorial-kicker">SpoolMate learning centre</span>
+              <strong id="videoTutorialTitle">Video tutorials</strong>
+              <small id="videoTutorialDescription">Choose a guide, watch at your own pace and jump directly to the section you need.</small>
+            </div>
+            <div class="video-tutorial-header-actions">
+              <button class="icon-button labeled" id="videoTutorialCloseButton" type="button">Close</button>
+            </div>
+          </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Video"></div>
+          <div class="video-tutorial-layout">
+            <nav class="video-tutorial-library" id="videoTutorialLibrary" aria-label="Available video tutorials"></nav>
+            <div class="video-tutorial-viewer">
+              <div class="video-tutorial-now-playing">
+                <div>
+                  <span id="videoTutorialNowPlayingKicker">Complete workflow · 8:31</span>
+                  <strong id="videoTutorialNowPlayingTitle">Build a complete spool</strong>
+                  <small id="videoTutorialNowPlayingDescription">Drawing, true offsets, precise edits, fittings, 3D, review, welds and export.</small>
+                </div>
+                <button class="icon-button labeled" id="videoTutorialCopyLinkButton" type="button">Copy video link</button>
+              </div>
+              <div class="video-tutorial-frame">
+                <video id="videoTutorialPlayer" controls preload="metadata" playsinline>
+                  <source src="https://wsrfxqnsquzzwqijfmec.supabase.co/storage/v1/object/public/tutorials/SpoolMate-Tutorial-Web-720p.mp4" type="video/mp4" />
+                  Your browser cannot play this video.
+                </video>
+              </div>
+              <div class="video-tutorial-controls" aria-label="Video playback controls">
+                <button class="icon-button labeled" id="videoTutorialBackButton" type="button" aria-label="Rewind video 10 seconds">← 10 sec</button>
+                <button class="primary-button" id="videoTutorialPlayButton" type="button" aria-label="Play video">Play</button>
+                <button class="icon-button labeled" id="videoTutorialForwardButton" type="button" aria-label="Fast forward video 10 seconds">10 sec →</button>
+                <label class="video-tutorial-chapter">
+                  <span>Jump to section</span>
+                  <select id="videoTutorialChapterSelect"></select>
+                </label>
+                <output class="video-tutorial-time" id="videoTutorialTime" aria-live="off">0:00 / 8:31</output>
+              </div>
+            </div>
           </div>
         </section>
       </div>
@@ -1164,11 +1689,56 @@
               <strong>Regression test kit</strong>
               <small>Load known spools after an update and check the expected behaviours.</small>
             </div>
-            <button class="icon-button labeled" id="regressionCloseButton" type="button">Close</button>
+            <div class="regression-head-actions">
+              <button class="icon-button labeled" id="regressionDiagnosticsButton" type="button">Diagnostics</button>
+              <button class="icon-button labeled" id="regressionCloseButton" type="button">Close</button>
+            </div>
           </div>
           <div class="regression-summary" id="regressionSummary"></div>
           <div class="regression-sample-list" id="regressionSampleList"></div>
           <div class="regression-checklist" id="regressionChecklist"></div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop legal-support-backdrop" id="legalSupportDialog" hidden>
+        <section class="project-dialog-card legal-support-card" aria-label="Privacy, terms and support">
+          <div class="project-dialog-header">
+            <div>
+              <strong>Privacy, terms and support</strong>
+              <small>How SpoolMate handles account data and where to get help.</small>
+            </div>
+            <button class="icon-button labeled" id="legalSupportCloseButton" type="button">Close</button>
+          </div>
+          <div class="legal-support-sections">
+            <section>
+              <h2>Privacy summary</h2>
+              <p>Guest drawings are stored in this browser. When you sign in, SpoolMate stores your email, trial/licence status, cloud drawings, team membership, comments and any workshop photos you choose to upload in Supabase.</p>
+              <p>Cloud data is used to authenticate you, synchronise projects and support team collaboration. Workshop photos are stored in a private bucket and access is controlled by project and company permissions.</p>
+              <p>Ask SpoolMate uses built-in help first. If a signed-in user asks for extra AI help, the question, a short recent help conversation and limited app context such as the current mode and tool are sent through a protected Supabase function to OpenAI. Drawing geometry, project names, notes, photos and authentication tokens are not sent automatically. Do not type customer-confidential information into the helper.</p>
+              <p>You can download an account-data export from Account. Deleting your cloud account permanently removes the account and its owned cloud data; local browser projects remain on this device.</p>
+            </section>
+            <section>
+              <h2>Trial and licence access</h2>
+              <p>New accounts receive a 30-day cloud trial. The app warns as the trial approaches its end.</p>
+              <p>Trial expiry does not delete cloud drawings. Permitted projects, comments and workshop photos remain available to open, view and export in read-only mode. Cloud saving, editing, new comments/photos and team changes resume when the licence is activated.</p>
+              <p>No automatic inactive-account deletion is currently enabled. Users can export their data or permanently delete their own cloud account from Account.</p>
+            </section>
+            <section>
+              <h2>Important fabrication terms</h2>
+              <p>SpoolMate is a drawing and fabrication-assistance tool, not engineering certification. Check dimensions, specifications, material selections, weld/NDT requirements, lifting calculations and issued PDFs before fabrication, ordering or lifting.</p>
+              <p>Your organisation remains responsible for approvals, applicable standards and workshop use of exported information.</p>
+            </section>
+            <section>
+              <h2>Support and problem reports</h2>
+              <p>Download a diagnostic report before requesting help. It contains app/device status and drawing counts, but excludes drawing geometry, notes, photos, passwords and authentication tokens.</p>
+              <div class="legal-support-actions">
+                <button class="icon-button labeled" id="legalDiagnosticsButton" type="button">Download diagnostics</button>
+                <a class="icon-button labeled" id="legalIssueLink" href="https://github.com/jackp2750-cmyk/isodrawing/issues" target="_blank" rel="noopener noreferrer">Open support page</a>
+              </div>
+              <small>GitHub issues are public. Do not include customer drawings, photos, passwords, tokens or commercially sensitive project information.</small>
+            </section>
+            <p class="legal-draft-notice"><strong>Pre-launch action:</strong> have the final privacy policy and terms reviewed and add the operator's business name and support email before a public paid launch.</p>
+          </div>
         </section>
       </div>
 
@@ -1224,6 +1794,49 @@
         </form>
       </div>
 
+      <button class="ai-helper-launcher" id="aiHelperButton" type="button" aria-expanded="false" aria-controls="aiHelperDialog">
+        <svg aria-hidden="true"><use href="#icon-help"></use></svg>
+        <span>Ask SpoolMate</span>
+      </button>
+
+      <div class="ai-helper-backdrop" id="aiHelperDialog" hidden>
+        <section class="ai-helper-panel" role="dialog" aria-modal="true" aria-labelledby="aiHelperTitle">
+          <header class="ai-helper-header">
+            <div>
+              <span class="ai-helper-kicker">In-app help</span>
+              <strong id="aiHelperTitle">Ask SpoolMate</strong>
+              <small>Help with drawing, fittings, checks, cloud saves and PDFs.</small>
+            </div>
+            <div class="ai-helper-header-actions">
+              <button class="icon-button compact labeled" id="aiHelperClearButton" type="button">Clear</button>
+              <button class="icon-button compact labeled" id="aiHelperCloseButton" type="button">Close</button>
+            </div>
+          </header>
+          <div class="ai-helper-status" aria-live="polite">
+            <span id="aiHelperMode">Built-in help</span>
+            <span id="aiHelperQuota">Available on this device</span>
+          </div>
+          <div class="ai-helper-context" id="aiHelperContext" aria-live="polite">
+            Helping with: Draw workspace
+          </div>
+          <div class="ai-helper-messages" id="aiHelperMessages" role="log" aria-live="polite" aria-relevant="additions"></div>
+          <div class="ai-helper-suggestions" id="aiHelperSuggestions" aria-label="Suggested questions">
+            <button type="button" data-ai-suggestion="How do I draw a 45 degree offset?">45° offset</button>
+            <button type="button" data-ai-suggestion="How do I add a flange?">Add a flange</button>
+            <button type="button" data-ai-suggestion="Why can't I issue this spool?">Issue blocked</button>
+            <button type="button" data-ai-suggestion="Where are my cloud spools?">Cloud spools</button>
+          </div>
+          <form class="ai-helper-form" id="aiHelperForm">
+            <label for="aiHelperInput">What are you stuck on?</label>
+            <div class="ai-helper-compose">
+              <textarea id="aiHelperInput" rows="2" maxlength="500" placeholder="Example: How do I change an existing pipe size?"></textarea>
+              <button class="primary-button" id="aiHelperSendButton" type="submit">Send</button>
+            </div>
+            <small>Do not include client names, drawing details, passwords, tokens or confidential project information.</small>
+          </form>
+        </section>
+      </div>
+
       <div class="app-toast-stack" id="appToastStack" aria-live="polite" aria-atomic="false"></div>
 
       <div class="project-dialog-backdrop app-confirm-backdrop" id="appConfirmDialog" hidden>
@@ -1261,20 +1874,28 @@
               <h2>Using iPad or phone</h2>
               <div class="help-grid">
                 <article>
+                  <strong>Simple and Full controls</strong>
+                  <p>Simple keeps the drawing clear and puts pipe size, dimensions and display choices inside Pipe &amp; display. Open Menu &gt; Workspace controls whenever you want to switch to Full and see every setting at once.</p>
+                </article>
+                <article>
                   <strong>Change a flange</strong>
                   <p>Tap Select, zoom in if needed, then press and hold directly on the flange marker until the menu opens. Tap Flange standard, then pick Table E, PN 16, ANSI 150 or another type. The 3D model uses that table's actual flange OD, thickness, bolt PCD, hole diameter and hole count.</p>
                 </article>
                 <article>
                   <strong>Add fittings</strong>
-                  <p>Press and hold on a pipe run or pipe end. Use Add fitting for flanges, roll grooves, reducers and sockets.</p>
+                  <p>Press and hold on a pipe run or pipe end. Use Add fitting for flanges, roll grooves, threaded pipe ends, reducers and sockets.</p>
                 </article>
                 <article>
                   <strong>Move sockets and dimensions</strong>
-                  <p>With Select active, drag a socket along the pipe. Drag red dimension labels away from clashes when red line dimensions are on.</p>
+                  <p>With Select active, drag a socket along the pipe. Drag fabrication dimension labels away from clashes when line dimensions are on.</p>
+                </article>
+                <article>
+                  <strong>Move and fit the 2D drawing</strong>
+                  <p>With Select active, drag empty paper to move the spool. Use two fingers together to pan and pinch to zoom. Tap Fit above the drawing whenever you want the whole spool and its callouts back on screen.</p>
                 </article>
                 <article>
                   <strong>3D view</strong>
-                  <p>Drag to rotate, middle mouse or Move to pan, wheel or pinch to zoom, and Fit to centre the whole spool.</p>
+                  <p>Tap 3D above the drawing. Drag to rotate, use Move to pan, pinch to zoom, and Fit to centre the whole spool.</p>
                 </article>
                 <article>
                   <strong>If the menu does not open</strong>
@@ -1283,6 +1904,10 @@
                 <article>
                   <strong>Open Help quickly</strong>
                   <p>Tap Menu, then Help. On iPad or phone, Help opens to this touch section first.</p>
+                </article>
+                <article>
+                  <strong>Draw a 45 degree offset</strong>
+                  <p>Enter the offset set, then press and hold Hold 45° beside the drawing controls with one finger while dragging the angled travel with another. Release it before drawing the straight return.</p>
                 </article>
               </div>
             </section>
@@ -1299,7 +1924,7 @@
                 </article>
                 <article>
                   <strong>45 degree offsets</strong>
-                  <p>Enter the offset set in Next run / offset set mm. For 45 degrees, SpoolMate calculates travel as set x 1.414 and stores both values.</p>
+                  <p>Enter the offset set in Next run / offset set mm. Hold Shift on a keyboard, or hold the Hold 45° drawing control on touch, while dragging the angled travel. Release it for the straight return. SpoolMate calculates travel as set x 1.414 and stores both values.</p>
                 </article>
                 <article>
                   <strong>Project details</strong>
@@ -1307,7 +1932,7 @@
                 </article>
                 <article>
                   <strong>Offset measurements</strong>
-                  <p>Turn Dimensions on. The angled run shows the travel C/C, and red-line dimensions also show the offset set C/C between centres.</p>
+                  <p>Turn Dimensions on. The angled run shows the travel C/C, and fabrication line dimensions also show the offset set C/C between centres.</p>
                 </article>
                 <article>
                   <strong>Measure tool</strong>
@@ -1340,7 +1965,7 @@
                 </article>
                 <article>
                   <strong>Flanges and grooves</strong>
-                  <p>Right-click or long-press a pipe end to add a single flange, double flange or roll groove. Existing flanges can be changed from the flange pick menu.</p>
+                  <p>Right-click or long-press a pipe end to add a single flange, double flange, roll groove or threaded pipe end. Existing flanges can be changed from the flange pick menu.</p>
                 </article>
                 <article>
                   <strong>Sockets</strong>
@@ -1352,7 +1977,7 @@
                 </article>
                 <article>
                   <strong>Reducers</strong>
-                  <p>Reducers are added when pipe sizes change. If a bend reducer lands on the wrong side, right-click or long-press it and move it to the other side.</p>
+                  <p>Reducers are added when pipe sizes change. Choose concentric or eccentric in Pipe &amp; display, or right-click/long-press the reducer to change its type. Eccentric reducers show their flat side and offset <strong>e</strong>; bend reducers can also be moved to the other leg.</p>
                 </article>
                 <article>
                   <strong>Notes</strong>
@@ -1393,7 +2018,7 @@
                 </article>
                 <article>
                   <strong>Takeoff list</strong>
-                  <p>The takeoff list groups pipes and fittings by size and type, including flange standards, tees, bends, reducers, sockets and roll grooves.</p>
+                  <p>The takeoff list groups pipes and fittings by size and type, including flange standards, tees, bends, reducers, sockets, roll grooves and threaded pipe ends.</p>
                 </article>
                 <article>
                   <strong>Weight notes</strong>
@@ -1426,7 +2051,7 @@
                 </article>
                 <article>
                   <strong>Clean export drawings</strong>
-                  <p>Before exporting, turn off 3D pipe labels if the model is too busy and drag red dimensions away from overlaps.</p>
+                  <p>Before exporting, turn off 3D pipe labels if the model is too busy and drag fabrication dimensions away from overlaps.</p>
                 </article>
                 <article>
                   <strong>Fab sheet contents</strong>
@@ -1444,6 +2069,10 @@
                 <article>
                   <strong>Sign in</strong>
                   <p>Signing in lets projects save to your cloud account and makes them available on other devices.</p>
+                </article>
+                <article>
+                  <strong>Password recovery</strong>
+                  <p>Open Account and choose Forgot password. Use the emailed recovery link to return to SpoolMate and set a new password.</p>
                 </article>
                 <article>
                   <strong>Team workspace</strong>
@@ -1465,10 +2094,18 @@
                   <strong>Review and approval</strong>
                   <p>Checkers can approve a drawing or return it with a required comment. Issued drawings stay locked; returning one preserves it and starts the next revision.</p>
                 </article>
+                <article>
+                  <strong>Privacy and account data</strong>
+                  <p>Account includes data export, diagnostics and cloud-account deletion. Privacy &amp; support explains what stays local and what is stored in Supabase.</p>
+                </article>
               </div>
             </section>
           </div>
           <div class="project-dialog-actions">
+            <button class="icon-button labeled" id="helpVideoButton" type="button">
+              <svg><use href="#icon-image"></use></svg>
+              <span>Video tutorials</span>
+            </button>
             <button class="primary-button" id="helpCloseButton" type="button">Done</button>
           </div>
         </section>
@@ -1484,6 +2121,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=293"></script>
+    <script defer src="./app.js?v=364"></script>
   </body>
 </html>

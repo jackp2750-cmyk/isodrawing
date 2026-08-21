@@ -1,6 +1,486 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v2.93`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.64`.
+
+## v3.64 - Expanded real-app video library
+
+- Replaced the outdated Jobs video with a current compact Jobs and My day walkthrough.
+- Added detailed real-app guides for Quick PDF, iPad/iPhone/Android controls, concentric and eccentric reducers, editing common mistakes, business-team setup and advanced Big Spool planning.
+- Added direct chapter navigation for each new workflow and refreshed the PWA cache so installed devices load the expanded library.
+
+## v3.63 - Detailed fabrication video guides
+
+- Added five real-app guides for tees/branches/reducers, 45-degree offset calculations, 3D model inspection, approval/revisions/PDF/QR control and the complete weld register.
+- Added accurate chapter navigation for every new guide so users can jump directly to one fabrication task without replaying the entire video.
+- Published the matching MP4 files to the public Supabase tutorial library and updated PWA asset versions so PC, iPad and Android receive the expanded library.
+
+## v3.62 - Concentric and eccentric reducers
+
+- Added an explicit default reducer type and per-reducer override, supporting mixed concentric and eccentric reducers in one spool.
+- Changed the isometric reducer symbol so concentric reducers remain centred while eccentric reducers show a flat side and their centreline offset `e`.
+- Added `CONC`/`ECC` labels to the 2D drawing and detailed reducer labels to the interactive 3D view.
+- Added reducer type, Atlas face-to-face `H`, eccentric offset `e`, size pair, weight and source to takeoff, BOM, review summary and fabrication PDF notes.
+- Kept ASME B16.9 face-to-face `H` based on the large nominal size for both reducer types, as published by Atlas, instead of inventing a second deduction table.
+- Added the Atlas Schedule 10S eccentric DN40 x DN32 weight of 0.24 kg while retaining the 0.21 kg concentric value.
+- Added separate concentric/eccentric placement actions and touch/right-click controls for changing any automatic or manual reducer.
+
+## v3.61 - Demo-day acceptance audit
+
+- Kept the full phone drawing toolbar inside the visible safe area on iPhone and Samsung-sized screens.
+- Made multi-spool tabs show the spool number first on tablets and phones so similarly named jobs remain distinguishable.
+- Remembered an explicit continue-without-account choice while keeping Account available for later cloud sign-in.
+- Reset Quick PDF, managed conversion and every new spool/tab to a clean Draw surface with Details and 3D closed.
+- Rechecked Quick PDF, managed draft PDF, saved-spool reopening, multi-spool tabs/windows, mobile 3D and offline PWA reload.
+
+## v3.55 - Workflow dead-end audit
+
+- Kept Draw, Edit, Review and Export tabs clickable while a mobile Details or 3D sheet is open.
+- Changed drawing-health success wording so it cannot be mistaken for workflow approval.
+- Made the Issue action state its next requirement, such as fixing two blockers or approving before issue.
+- Rechecked Jobs, Big Spool, Tutorial, Review and Export return paths at PC, iPad, Android tablet, iPhone and Android-phone sizes.
+
+## v3.54 - Obvious PDF download in Export
+
+- Added a large Download fabrication PDF action as the first item inside the Export/BOM panel.
+- Kept the same PDF action visible beside the drawing in Export mode for both Simple and Full controls.
+- Clarified whether the download will be a quick, draft or issued PDF and refreshed the PWA cache.
+
+## v3.53 - New spools always start in Draw
+
+- Forced every fresh managed spool to open in Draw mode instead of inheriting Review or Export from the previous spool.
+- Reset the first-spool guide to its drawing step and opened the drawing surface consistently on PC, tablet and phone.
+- Refreshed the PWA cache version so installed devices receive the corrected startup flow.
+
+## v3.52 - Quick PDF and managed workflow choices
+
+- Added a one-click Quick PDF route for individual users who do not need an account, Jobs dashboard, allocation, checking or formal issue workflow.
+- Kept the full Managed job route for saved jobs, review, formal issue, QR travellers, production and business collaboration.
+- Reduced Quick PDF navigation to Draw, Edit and PDF, with a compact cross-platform action bar for Draw, Fittings and Download PDF.
+- Added direct Quick PDF export with a small `USER CHECK REQUIRED / NOT FORMALLY ISSUED` footer instead of the managed draft watermark and issue prompts.
+- Allowed a Quick PDF drawing to be converted into a managed job without redrawing it.
+- Persisted the chosen route in local, project-file and cloud drawing state so it reopens consistently across PC, iPad/iPhone and Android devices.
+
+## v3.51 - Guided start-to-finish spool flow
+
+- Reduced New drawing to four essential fields, with fitting source, supplier reference and weld gap moved into an optional fabrication section.
+- Reworked the first-spool guide into the real sequence: drag a run, tap/right-click to set its exact length, add fittings and ends, save, review, then issue/export.
+- Made Save a one-tap action after the spool has its identifiers; project details only reopen when they are incomplete or explicitly being corrected.
+- Exposed all fitting and pipe-end tools in Draw mode and made a normal touch tap on a pipe, fitting or endpoint open its action sheet.
+- Kept Fab PDF visible in Simple Export mode and improved the iPad/Android inspector, 3D and pipe-action sheets.
+- Separated workshop assignment, due dates and gear readiness from drawing approval; they remain in Jobs and no longer require an issue override.
+- Removed internal app self-tests from spool approval decisions and fixed a disappearing drawing-highlight crash.
+- Collapsed production handoff and revision history under one secondary Review section so drawing blockers and their Fix actions stay prominent.
+
+## v3.50 - Clear interactive tutorial layout
+
+- Removed the duplicated video shelf from the interactive tutorial while keeping Video tutorials one click away in the header.
+- Rebuilt the tutorial header and footer around one obvious practice action, with Close moved out of the learning controls.
+- Increased the usable desktop workspace and switched iPad, Android tablet and touch layouts to one clear lesson column with a compact topic picker.
+- Added a dedicated short-height landscape layout so the lesson no longer collapses behind navigation and video cards.
+- Made practice trainer-first by hiding the repeated lesson copy while a mini task is active.
+- Reset topic and practice scrolling so every lesson opens at its beginning instead of retaining the previous topic's position.
+
+## v3.49 - Learnable drawing workspace
+
+- Added a permanent Simple / Full controls choice, with Simple as the default for new users and the choice remembered on the device.
+- Replaced the crowded mobile settings rows with a single Pipe & display button and a touch-friendly settings sheet.
+- Reduced the Simple header to the workflow modes, Save and Menu while keeping Jobs, Big Spool and Account available inside Menu.
+- Made drawing tools and drawing-bar actions mode-aware so 45 degree controls and fitting tools only appear where they apply.
+- Collapsed the five-card location display into one compact workspace, job, spool, revision and status breadcrumb.
+- Hid the empty single-spool tab strip, clarified the Details panel name and tightened phone/tablet workspace sizing.
+- Connected the First Spool guide to the permanent Simple / Full control choice instead of ending its simplified layout halfway through the workflow.
+
+## v3.48 - Streamlined Jobs and My day
+
+- Reduced Jobs to a compact manager list with Active, My jobs, Completed and All filters; moved the guide, communications and reports into one More panel.
+- Rebuilt My day as four exclusive queues: Attention, Assigned to me, Ready for checking and On hold, so a spool appears only once under its most urgent action.
+- Scoped workshop queues to the signed-in worker while owners/admins receive team attention and checkers receive the checking queue.
+- Added direct Review actions that open a job at its issue list, retained useful job badges on smaller screens, and improved phone/tablet layouts.
+- Synchronized each user's Jobs view, filters, pins and recents through a protected per-workspace Supabase profile preference, with local fallback and merge-safe updates.
+- Updated the interactive Jobs guide, Ask SpoolMate guidance, storyboard, captions, narration script and real-app capture automation for the new workflow.
+- Removed duplicate touch/click activation paths that could make Jobs buttons switch twice on iPad/Android-style pointer input.
+- Marked the previous Jobs MP4 as awaiting revised Freya-narrated footage so it is not mistaken for exact v3.48 guidance.
+
+## v3.38 - Private Support Admin
+
+- Added a SpoolMate-wide support console that is separate from customer Business Owner and Admin roles.
+- Added protected customer search, account diagnosis, personal/business licence controls, seat controls, membership repair and password-reset assistance.
+- Added immutable-style support auditing with the operator, required reason, target and before/after values for every repair attempt.
+- Kept service-role access exclusively inside a JWT-protected Supabase Edge Function; the public app receives no administrative secret.
+- Added responsive PC, iPad and Android layouts for the support console and hid the entry point from all non-platform accounts.
+
+## v3.37 - Cross-platform launch hardening
+
+- Fixed Big Spool regression planning so child pieces and field joints use the current transport limit reliably.
+- Prevented cancelled New spool actions from leaving empty tabs behind.
+- Improved PC, Android and iPad overflow handling, compact landscape drawing space, phone Jobs controls and tutorial lesson space.
+- Stopped the PWA from caching Supabase and other private cross-origin API responses.
+- Added missing mobile sign-in sizing, iOS safe-area viewport support and clearer export accessibility labels.
+
+## v3.36 - Role-focused Jobs dashboard
+
+- Renamed the workshop action view to `My day`, keeping Needs attention, Assigned to me, Ready for checking and On hold work immediately visible.
+- Made My day the automatic first Jobs view for new Workshop accounts while owners, admins, designers and checkers continue to open on the compact Jobs list.
+- Preserved deliberate user choices: once someone selects Jobs, My day or Full board, SpoolMate remembers that preference.
+- Retained compact job rows, search, attention/active/mine/completed filters, pinned jobs, recent-job ordering and pagination for large job lists.
+- Updated the PWA cache to `spoolmate-v336` so installed devices receive the streamlined dashboard.
+
+## v3.35 - Focused in-app learning library
+
+- Removed the customer-facing promotional film from the in-app tutorial library so the learning section contains instructional material only.
+- Kept the synchronized workshop advertisement as a separate public website and share-link asset.
+- Updated the PWA cache to `spoolmate-v335` so installed devices remove the old promotional card.
+
+## v3.34 - Context-aware Ask SpoolMate
+
+- Made Ask SpoolMate recognise Home, Jobs, Project details, Big Spool, multi-spool windows, 3D and each Draw/Edit/Review/Export workspace.
+- Added screen-specific suggestion buttons and a visible current-help context showing the surface, active tool and Inspector tab.
+- Expanded the offline guide with detailed roll-groove, threaded-end, Big Spool, multi-spool, weld-gap, Gear check, autosave and recovery instructions.
+- Kept the underlying screen open while help is displayed and raised the launcher above ordinary app dialogs so instructions can be used from the relevant feature.
+- Improved signed-in AI answers with exact control names, PC/touch alternatives, numbered steps, an expected-result check and better fault-finding, without sending project names, geometry, notes or photos.
+
+## v3.33 - Complete video learning library
+
+- Added seven real-app, full-screen guides for Big Spool, multiple open spools, QA and fabrication export, team production, cloud recovery, import and help, and a shareable promotional overview.
+- Added chapter navigation, accurate durations and descriptive library cards for every new video.
+- Kept video delivery outside the PWA cache so large media files stream normally and do not make app updates unreliable.
+
+## v3.32 - Big Spool fabrication-only splits
+
+- Kept the master drawing and its normal 3D model continuous even when a Big Spool transport plan is enabled.
+- Limited split gaps, child-piece colours, match marks and RG/flange/weld end preparations to generated child fabrication drawings, fabrication PDFs and Big Spool reports.
+- Removed the duplicated `RG`, `RG/RG` and match-joint overlay clutter from the everyday drawing workspace.
+- Updated the PWA cache to `spoolmate-v332`.
+
+## v3.31 - Multi-spool workspace
+
+- Added persistent in-app spool tabs with independent drawing state, undo history, selection, zoom, active tool, Inspector/3D surface and cloud-save tracking.
+- Added Open tab actions in Jobs so opening another spool no longer replaces the active drawing.
+- Added a responsive Windows overview that displays every open spool together and lets the user choose which spool to edit.
+- Added safe tab switching that stores browser recovery first and flushes or queues outstanding cloud changes before another spool becomes active.
+- Added unsaved-draft protection when closing tabs, an eight-tab safety limit and session restoration after a reload.
+- Updated the PWA cache to `spoolmate-v331`.
+
+## v3.30 - Big Spool split preparations
+
+- Added a default connection choice for new automatic and manual splits: field weld, roll grooves on both sides or flanges on both sides.
+- Generated the selected end preparations as real fittings on both child-spool drawings and fabrication sheets.
+- Applied the project 1.6 mm or 2.4 mm weld gap to every generated welded child end; roll-grooved ends receive no weld-gap deduction.
+- Added split-preparation labels to the 2D drawing, 3D model, transport CSV and child fabrication package field-joint register.
+- Added an exploded master view for grooved splits so both RG pipe ends remain visible instead of being hidden at one shared cut coordinate.
+- Added one required site grooved coupling per RG/RG split to the planner summary, transport CSV and field-joint report.
+- Kept every split individually editable so one master spool can mix connection types.
+- Updated the PWA cache to `spoolmate-v330`.
+
+## v3.29 - Big Spool V2 and V3
+
+- Added custom and preset transport constraints for maximum length, width, height and weight, with automatic safe splitting that checks the finished child-spool envelope and weight.
+- Added calculated child-spool weight and centre of gravity, plus lifting-lug guidance using the existing engineering calculator.
+- Added editable field-connection type, site status and notes for every match joint.
+- Added stable child-spool fabrication identities, child-specific issued QR destinations and a combined child fabrication PDF package with a transport and field-joint register.
+- Integrated Big Spool children into the load planner so each transport piece is planned independently instead of loading the full master assembly.
+- Expanded the CSV transport list with child dimensions, weight, COG, readiness and field-joint details.
+- Added responsive desktop, tablet and phone layouts for the new constraint and joint controls.
+- Updated the PWA cache to `spoolmate-v329`.
+
+## v3.27 - Big Spool V1
+
+- Added a persistent Big Spool planner for very large master assemblies and increased the supported individual run length to 1,000,000 mm.
+- Added a user-defined maximum transport length; 4.8 m is not hard-coded.
+- Added automatic safe split suggestions, manual match-joint placement and editable joint positions kept clear of fittings and pipe ends.
+- Added stable child-spool IDs, A/B match marks, transport-envelope checks and CSV transport-list export.
+- Added matching child-piece colours to the 2D drawing, canvas preview and WebGL 3D model.
+- Updated the PWA cache to `spoolmate-v327`.
+
+## v3.24 - Workshop Gear Check and Welder Assignment
+
+- Added a dedicated Gear check stage between Issued and Cutting.
+- Assigning a spool reveals a checklist generated from its pipe and fitting take-off, with In shop, Needs ordering, Not required and note/location controls.
+- Added custom checklist items for gaskets, bolts, consumables, purge gear and other workshop requirements that cannot be inferred from the drawing.
+- Cutting cannot begin until the gear checklist is confirmed; checkers and team admins can record a traceable authorised override with a mandatory reason.
+- Added gear readiness badges, progress and retained activity history to the Jobs production card.
+- Added an All welds done by shortcut while retaining individual Welder ID rows for mixed welders.
+- Added responsive phone and tablet layouts for the new gear and welder controls.
+- Fixed Jobs dashboard view/filter controls so list-level actions respond consistently across mouse and touch layouts.
+- Updated the PWA cache to `spoolmate-v324`.
+
+## v3.22 - Correct Prepared-End QA
+
+- Fixed roll-grooved pipe ends being incorrectly reported as open because their visual groove is drawn slightly inset from the actual endpoint.
+- Health checks now use the fitting's true snapped endpoint while preserving the inset roll-groove appearance.
+- Added a built-in regression check covering roll-grooved, flanged and threaded pipe ends.
+- Updated the PWA cache to `spoolmate-v322`.
+
+## v3.21 - Searchable Command and Tool Menu
+
+- Added one searchable command palette inside Menu for drawing tools, fittings, screens, fabrication data, exports, help and diagnostics.
+- Added workshop-language aliases including reducer, Victaulic, thread, NDT, WPS, fab PDF and 45 offset so users do not need to know the exact interface wording.
+- Added `Ctrl+K` / `Command+K`, arrow-key and Enter operation, with large touch results and a compact phone/tablet layout.
+- Restricted actions remain visible with a clear role explanation instead of failing silently.
+- Search results open the relevant tool, screen or inspector section while preserving the current spool workspace.
+- Updated the PWA cache to `spoolmate-v321`.
+
+## v3.20 - Save Recovery, Role Clarity and Direct QA Fixes
+
+- Cloud status now displays the exact last-saved time instead of a generic saved label.
+- Added a persistent device-side offline queue for cloud drawing changes, including automatic retry when connectivity returns.
+- Failed or queued cloud status is now a one-click recovery control; a local backup is made before a manual retry and failed copies remain queued.
+- Added a clear access notice for restricted business roles without adding visual noise for unrestricted drawing/checking roles.
+- Corrected role enforcement so Designers cannot approve or issue, while Workshop users can update production and weld records without gaining drawing-edit access.
+- Disabled workflow, status, weld and production controls now explain which role can perform the action.
+- Every Ready-to-Issue blocker now has one prominent `Fix:` button that opens the exact problem, including focusing the current production card in Jobs.
+- Updated the PWA cache to `spoolmate-v320`.
+
+## v3.19 - Predictable Navigation and Multi-Spool Windows
+
+- Added a universal location strip to Drawing, Home, Jobs, Account and Tutorial screens showing the active workspace, job, spool, revision and production status.
+- Added a direct Back to drawing action on secondary screens.
+- Returning from Jobs, Account, Help, Tutorials or 3D now restores the same spool, drawing zoom and pan, selection, active tool, inspector tab, open surface and Focus mode.
+- Added New window actions for saved spools so Jobs can remain open while different spools are worked on side by side, with job/spool browser-tab titles to keep them identifiable.
+- Added direct cloud and local spool URLs for those separate windows, with a clear fallback when browser pop-up protection blocks them.
+- Updated responsive layout so the location strip remains compact and horizontally accessible on phones and tablets.
+- Updated the PWA cache to `spoolmate-v319`.
+
+## v3.18 - Personal and Business Workspaces
+
+- Added a permanent Personal/Business workspace switcher so private and business jobs no longer appear mixed together.
+- Added Business account setup during signup and automatic creation after email confirmation.
+- Business subscriptions now belong to the business and apply to approved members independently of their Personal trial.
+- Added five included people per Business workspace, with pending invitations reserving seats and configurable paid extra-seat entitlement.
+- Added Owner, Admin, Designer, Checker, Workshop and Viewer role choices.
+- Business spool records now survive an employee account deletion by retaining business ownership.
+- Updated collaboration, project, photo and message policies to use the active workspace licence.
+- Updated the PWA cache to `spoolmate-v318`.
+
+## v3.17 - Selectable Weld-Gap Cut Allowance
+
+- Added a project-level 1.6 mm or 2.4 mm weld-gap option, defaulting to 2.4 mm.
+- Deducts the selected gap once at each pipe end that meets an elbow, tee, fabricated branch outlet, reducer or end flange; open/plain, roll-grooved and threaded pipe ends receive no weld-gap deduction.
+- De-duplicates combined fitting arrangements at one pipe end and keeps fabricated-branch main pipe continuous, so a single pipe end is never charged twice.
+- Shows `Weld gap` explicitly in run details, selection properties, take-off totals, Ready to Issue and every fabrication PDF cut table/summary.
+- Expanded the branch and 45-degree offset self-tests to verify welded-end counts, gap totals and final cut lengths.
+- Updated the PWA cache to `spoolmate-v317`.
+
+## v3.16 - Fitting Data Profiles
+
+- Added a saved Fitting Data Profile to project details for Atlas/ASME B16.9 pipe, AS 1528.3 sanitary tube and fabricated workshop branches.
+- Automatically follows the selected material when a project still uses the previous material's default profile, while preserving deliberate project choices.
+- Added an optional supplier, workshop procedure or approved-detail reference.
+- Shows the profile, reference and Verified dimensions or Estimate review status in Ready to Issue and fabrication PDFs.
+- Warns when the selected profile does not match the drawing, when supplier tube dimensions are required, when fabricated branch allowances need workshop confirmation, or when an elbow deduction falls outside the verified 45/90-degree tables.
+- Added an independent DN25, DN50, DN100, DN150 and DN300 45-degree offset size-matrix regression test.
+- Updated the PWA cache to `spoolmate-v316`.
+
+## v3.15 - Atlas Fitting Calculation Audit
+
+- Corrected 45-degree long-radius pipe elbow deductions to use Atlas/ASME B16.9 centre-to-end dimension B instead of deriving them from the 90-degree radius.
+- Added an independent regression check for a 1000 mm set: set × √2 travel, two published 45-degree elbow deductions, and the resulting angled cut length.
+- Corrected the carbon fitting-weight table so DN15 no longer treats a stub-end value as a reducer weight and DN20 uses the published 0.06 kg reducer value.
+- Rechecked pipe tee centre-to-end and reducer face-to-face dimensions through DN300 against the supplied Atlas manual.
+- Kept welded branch take-offs and sanitary tube fitting dimensions explicitly separate from the ASME B16.9 pipe tables, with issue-review warnings requiring their workshop or supplier dimensions to be confirmed.
+- Updated the PWA cache to `spoolmate-v315`.
+
+## v3.14 - Focused Jobs Dashboard
+
+- Replaced the crowded all-at-once Jobs screen with a compact job-first overview.
+- Added Needs attention, Active, My jobs, Completed and All filters with job counts.
+- Added pinning, recently opened ordering, fabrication progress, due dates, assignees and attention badges.
+- Limited the overview to 12 jobs per page so large job lists remain manageable.
+- Moved the detailed production board and spool drawings inside the selected job.
+- Added compact responsive rows for phones, Android tablets and iPads.
+
+## v3.13 - Reliable Mixed-Size Tees
+- Reworked automatic tee sizing so the largest connected pipe defines the equal tee body even when that pipe is the outlet rather than a straight-through leg.
+- Added a separate reducer to every smaller tee leg, covering smaller outlets, larger outlets and three different connected pipe sizes consistently in take-offs, BOM and weight totals.
+- Split fabricated-branch calculations from tee calculations explicitly: branches retain one continuous main-pipe cut, deduct only the welded outlet take-off, and never create a tee fitting or reducer.
+- Trimmed connected pipe cylinders back to the actual tee and reducer ends so the 3D model no longer layers pipe through the fitting or creates striped/z-fighting surfaces.
+- Rendered the whole equal tee body at its correct largest size before transitioning to the smaller coloured pipe legs.
+- Added a built-in large-outlet regression sample that verifies an NB 150 tee with NB 100 and NB 80 reducers.
+- Strengthened the 45-degree offset self-test to verify true travel, both 45-degree elbow take-offs and the final angled pipe cut length.
+- Updated the PWA cache to `spoolmate-v313`.
+
+## v3.12 - Predictable Workspace and Clearer Threaded Ends
+- Unified Drawing, Details and 3D behaviour across desktop, iPad, Android tablets and phones so only one auxiliary surface takes control at a time.
+- Stopped touch selections from replacing the drawing with the Details sheet, and stopped ordinary redraws from closing a Details drawer the user deliberately opened.
+- Preserved the desktop 3D Float/Dock preference when switching through touch layouts; touch 3D now always opens expanded and never inherits minimized/floating state.
+- Made Focus mode restore the exact Drawing, Details or 3D surface that was active before Focus began.
+- Coordinated Dashboard, Jobs, Tutorial, video, Help, Account and AI helper dialogs so opening one closes competing top-level screens.
+- Added Menu > Reset layout to safely return to Drawing, close temporary surfaces, expand collapsed Details sections and clear stale preview bounds without changing spool data.
+- Rebuilt threaded pipe ends as a reduced machined section with a tapered core, visible shoulder and extra-coarse exposed helix that remains inside the original pipe diameter and stays readable while the model rotates.
+- Updated the PWA cache to `spoolmate-v312`.
+
+## v3.11 - Clearer 3D Connections and Pipe Sizes
+- Made Tri-colour by pipe size the default 3D view, assigning teal, amber and violet consistently to different NB/OD sizes.
+- Added a compact colour key inside the 3D preview so each colour remains tied to its actual pipe-size label.
+- Simplified the visible 3D choices to Tri-colour, Illustrated, Realistic, Transparent and Fabrication outline while safely mapping older saved style names to their closest retained view.
+- Rebuilt roll-groove ends as a narrow, set-back cold-formed groove with a clear gasket-seat land and rounded groove edges instead of a raised black collar.
+- Removed the internal branch-cylinder construction line from equal tees while retaining the real fitting-to-pipe seam lines.
+- Kept the welded-branch root detail, but suppressed its hidden internal collar edge so it cannot appear through the main pipe.
+- Added reliable dark weld-seam rings at both ends of illustrated elbows and removed the oversized curved silhouette shells that could appear as black crescents at intersecting fittings.
+- Updated the PWA cache to `spoolmate-v311`.
+
+## v3.10 - Illustrated Workshop 3D
+- Added a new default Illustrated workshop 3D style inspired by clean fabrication illustrations, with light-grey components, crisp black silhouettes and edges, a white background and subtle contact shadows.
+- Kept Realistic 3D, Workshop model, Carbon dark, Stainless silver, Painted red, Transparent, Fabrication outline and CAD green line as selectable alternatives.
+- Migrated the previous default Realistic/Workshop choice once while preserving explicitly selected specialist styles.
+- Fixed reducing tees so their automatic reducers are included consistently in cut deductions, BOM, weight totals, drawing health checks and the built-in test kit.
+- Reframed long 3D spools against their visible projection so tee and branch models fill phone and tablet previews, and kept the Ask SpoolMate button from covering small-screen models.
+- Updated the PWA cache to `spoolmate-v310`.
+
+## v3.09 - Complete Drawing Masterclass
+- Added a 10-minute drawing tutorial with 20 directly selectable chapters and Natasha narration.
+- Demonstrates drag drawing, live snap length, exact X/Y/Z runs and the true Shift or touch 45 degree offset workflow.
+- Covers zoom, pan, Fit, single and box selection, right-click or long-press length edits, size changes and bend angles.
+- Demonstrates flanges, roll grooves, valves, socket layouts and rotation, tees, welded branches, reducers and automatic weld numbering.
+- Finishes with dimensions, pipe labels, measurements, notes, Undo/Redo and a moving capture of SpoolMate's live 3D model.
+- Added the drawing guide to both the tutorial shelf and the reusable video library with play/pause, skip and chapter controls.
+- Updated the PWA cache to `spoolmate-v309`.
+
+## v3.08 - Video Tutorial Library
+- Replaced the single video popup with a reusable tutorial library that can grow as new focused training videos are produced.
+- Added the narrated Jobs dashboard guide with chapters for Today, the production board, filters, allocation, holds, notes, Comms, reports and QR access.
+- Added a compact video shelf inside the interactive tutorial with direct Complete spool and Jobs dashboard choices.
+- Kept play/pause, ten-second skip controls, chapter jumping, elapsed time and copy-link actions for every guide.
+- Made the library responsive across desktop, iPad, Android tablets, portrait phones and short landscape phone screens.
+- Kept tutorial videos out of the offline PWA cache so large media does not consume drawing storage.
+- Updated the PWA cache to `spoolmate-v308`.
+
+## v3.07 - Apple and Android Compatibility Pass
+- Calmed the default numbered drawing view with slate fabrication dimensions, a stronger deep-teal pipe, and a lighter paper grid; traditional red-line dimensions remain available as an optional view.
+- Changed active manual measurements and socket-position edits to blue so red is reserved for warnings, blockers and the optional red-line view.
+- Tested 32 recent Apple and Android viewport/orientation combinations covering iPhones, iPads, Galaxy phones and tablets, Pixels, foldables and large tablets.
+- Added a compact landscape layout that preserves useful drawing height on short phone screens.
+- Improved large-touch-device detection using touch points as well as pointer and hover capabilities.
+- Prevented the 3D canvas from retaining an oversized desktop width inside phone and tablet preview sheets.
+- Reworked the phone Export strip so PDF style, Export 3D, Fab PDF and project-file actions remain on screen.
+- Rechecked Draw, Edit, Review, Export, tutorial, AI helper, jobs, inspector, Fit and 3D sheet workflows.
+- Updated the PWA cache to `spoolmate-v307`.
+
+## v3.06 - Samsung Phone Drawing Navigation
+- Added two-finger pan and pinch zoom to the 2D spool drawing.
+- Added one-finger pan on empty drawing space while Select is active.
+- Reduced the minimum drawing scale so long spools can zoom out properly on phones.
+- Added a one-tap Fit control that centres the whole spool with phone-safe padding.
+- Limited the on-canvas numbered dimension key to the available height so quotation and callout boxes are not cut off.
+- Added the new phone gestures to in-app Help and updated the PWA cache to `spoolmate-v306`.
+
+## v3.05 - Clear Saving and Session Recovery
+- Reduced the header save indicator to four unmistakable states: Saving…, Saved to cloud, Local only and Save failed.
+- Added colour and status dots plus accessible live announcements for save-state changes.
+- Captures the drawing present when a new app session starts as a recovery snapshot.
+- Added Restore last session to the dashboard when a valid recovery snapshot exists.
+- Backs up the current drawing before recovery and opens the recovered spool as a local copy to prevent accidental cloud overwrites.
+- Updated the PWA cache to `spoolmate-v305`.
+
+## v3.04 - Simpler PDF and Issue Flow
+- Allowed users to download a PDF before completing the full Ready to Issue process.
+- Clearly marks every page of an unissued export as `DRAFT — NOT FOR FABRICATION`.
+- Adds `DRAFT-NOT-FOR-FABRICATION` to draft filenames and excludes the issued QR traveller.
+- Keeps the full QA, approval, issue audit and QR controls for official workshop PDFs.
+- Changes the export label between Draft PDF and Issued PDF so the current state is obvious.
+- Updated the PWA cache to `spoolmate-v304`.
+
+## v3.03 - Video Playback and Chapters
+- Simplified the video guide by removing the quality, voice and device badges plus the duplicate footer actions.
+- Added clear play/pause, 10-second rewind and 10-second fast-forward controls.
+- Added a Jump to section menu covering drawing, offsets, editing, 3D, checks, welds, exports, jobs and the AI helper.
+- Added an always-visible elapsed and total time display.
+- Refined the control layout for desktop, iPad and Android tablets.
+- Updated the PWA cache to `spoolmate-v303`.
+
+## v3.02 - Full Video Guide
+- Added an in-app 8-minute real-world video guide with the approved Natasha narration.
+- Added Video guide entry points to the startup dashboard, Menu, interactive tutorial and Help.
+- Added a responsive 16:9 player with inline playback for desktop, iPad and Android tablets.
+- Added restart, copy-link and open/share controls for training and customer onboarding.
+- Kept the 1080p master outside the app and prepared a 720p streaming edition for the Supabase Free file limit.
+- Excluded video and byte-range requests from the PWA cache so large media does not crowd out drawing files.
+- Bumped the PWA cache to `spoolmate-v302`.
+
+## v3.01 - Calm Workspace Layout
+- Narrowed the desktop tool rail to one clear column, returning more width to the isometric drawing.
+- Enforced one contextual surface at a time on desktop: opening Details closes 3D and opening 3D closes Details.
+- Removed the duplicated drawing-header PDF action while keeping the primary fabrication PDF action in Export.
+- Removed repeated Account, Check, Revision and Share entries from Menu; account stays in the permanent header and drawing workflow actions stay together in Review.
+- Removed the duplicate Save defaults action from Review while retaining it under Menu > Setup.
+- Replaced the tablet's stacked tool and panel docks with one bottom drawing-tool dock.
+- Made tablet Details and 3D open as larger slide-up sheets from the drawing header, with the canvas reclaiming the second dock's height.
+- Made Draw, Edit, Review and Export update the drawing workspace title and return Draw/Edit to the canvas after leaving a sheet-oriented mode.
+- Preserved phone panel navigation, fullscreen/focus behaviour, safe-area spacing and large touch targets.
+- Bumped the PWA cache to `spoolmate-v301`.
+
+## v3.00 - Ready to Issue Gate
+- Replaced the basic pre-issue summary with one red/amber/green Ready to Issue gate covering project identity, material and pipe sizes, drawing health, weld/WPS and inspection records, production holds and allocation, drawing approval and app diagnostics.
+- Added a focused fix action beside every blocker and warning so users can jump directly to the missing project field, drawing finding, weld row, Jobs production card or approval step.
+- Blocked issue and fabrication-PDF creation while red findings remain.
+- Required a written override reason before an amber revision can be issued.
+- Saved the issuer, checker, timestamp, override reason and warning snapshot as a permanent issue audit attached to the revision.
+- Showed the audit result in revision history, fabrication PDF headers, client approval sheets and QR spool travellers.
+- Added checks for zero/invalid and unusually short pipe runs to the drawing-health pass.
+- Bumped the PWA cache to `spoolmate-v300`.
+
+## v2.99.1 - Simple Team Dashboard and QR Workshop Flow
+- Replaced the dense default team dashboard with Today, Full board and More views.
+- Added three focused Today queues: Needs attention, My work and Ready next, with compact spool cards and one clear open action.
+- Moved reports, team communications and recent activity behind More, while preserving the complete stage board for supervisors.
+- Collapsed full-board assignment, due-date, priority, hold and message fields under Details and updates.
+- Added an in-app rear-camera QR scanner with Android/iPad-friendly touch controls, saved-photo scanning and a paste-link fallback.
+- Kept QR navigation on the current SpoolMate origin and continued to rely on signed-in project permissions for cloud access.
+- Made the mobile spool traveller workshop-first with hold warnings, live stage/assignment/due details, drawing access, notes, photos and weld acceptance progress.
+- Honoured the revision identifier carried by QR links by showing saved issued snapshots when available and warning clearly when a requested revision cannot be verified.
+- Made project forms scroll safely on short landscape tablet screens so their Save actions stay reachable.
+- Bumped the PWA cache to `spoolmate-v2991`.
+
+## v2.98 - First Spool Launch Experience
+- Added a recommended 5-minute Quick Start path covering drawing, exact and 45-degree runs, fittings, dimensions, checks and export.
+- Added Try in drawing after every completed mini practice so the tutorial hands users directly to the correct live mode, panel or tool.
+- Added a temporary First Spool workspace that reduces early visual density to Draw, exact length, Fittings, Select and Save, with an immediate Show all controls option.
+- Added contextual real-app prompts that advance as users draw, add exact runs, open fittings, select, save, review checks and export.
+- Added a live final checklist for drawing content, project details, checks, saved state and workshop PDF export.
+- Kept the new guide responsive for desktop, iPad and Android tablet layouts, with persisted progress and a clear End tips action.
+- Bumped the PWA cache to `spoolmate-v298`.
+
+## v2.97 - New User Tutorial Polish
+- Saved tutorial path, last topic and completed practice tasks locally so new users continue where they left off after closing or reloading the app.
+- Added clearer progress wording and a Finish tour action with a useful completion/resume message.
+- Added a real Hold 45° drawing control for iPad, Android and compact layouts so the touch tutorial now matches the live drawing workflow.
+- Expanded Review guidance for automatic W01 weld numbering, welder/WPS and inspection/NDT tracking.
+- Expanded Export guidance for issued spool/revision QR travellers and their mobile production information.
+- Clarified the tutorial header and dashboard entry so users know practice is safe and resumable.
+- Bumped the PWA cache to `spoolmate-v297`.
+
+## v2.96 - Ask SpoolMate In-App Helper
+- Added a responsive Ask SpoolMate panel for desktop, iPad and Android with large touch targets, suggested questions and safe-area-aware bottom-sheet behaviour.
+- Added instant built-in answers for drawing, 45 degree offsets, fittings, checks, cloud spools, fabrication PDFs, weld registers and production workflows.
+- Added direct Open tutorial, Open help, Solved and Still stuck actions so answers lead back into the existing learning tools.
+- Added a protected authenticated Supabase `ai-help` Edge Function using the OpenAI Responses API and the cost-sensitive `gpt-5.6-luna` model.
+- Kept the OpenAI API key server-side, whitelisted the small app context, omitted drawing/client content by default, disabled response storage and sent a hashed safety identifier.
+- Added atomic daily allowances of 10 AI answers for trials and 50 for paid/full/grace accounts. Expired and guest users retain built-in help without API cost.
+- Added `supabase-migration-v296-ai-helper.sql`, setup documentation, privacy wording and release checks for the helper.
+- Bumped the PWA cache to `spoolmate-v296-helper`.
+
+## v2.95 - Fair Trial Expiry and Read-Only Cloud Access
+- Kept permitted cloud spools visible after trial expiry instead of making the account appear empty.
+- Opened expired cloud spools in enforced read-only mode while preserving drawing, PDF, project and account-data exports.
+- Kept existing cloud comments, workshop photos and team-message history readable after expiry while blocking new cloud activity.
+- Added a 30-day trial plan panel, persistent seven/three/one-day warning stages and a clear expired-account banner.
+- Added an Upgrade licence action with an honest manual-contact fallback until online checkout is connected.
+- Added a seven-day payment-grace licence state for future billing recovery.
+- Added a Cloud / This device switch to Jobs so signed-in users can always reach local browser projects.
+- Hardened Supabase write policies for company administration, memberships, comments and workshop photos.
+- Added `supabase-migration-v295-trial-access.sql` for existing databases and updated the complete setup SQL.
+- Documented that expiry does not delete customer cloud data and that no automatic inactive-data deletion is enabled.
+- Bumped app cache to `spoolmate-v295`.
+
+## v2.94 - Launch Readiness Accounts and Support
+- Added Supabase password-reset email requests and a recovery callback flow for choosing a new password.
+- Added account-data export covering owned cloud drawings, memberships, authored messages and local browser projects.
+- Added privacy, fabrication terms and support guidance inside the app, with a clear pre-launch legal/contact-details reminder.
+- Added privacy-safe diagnostic downloads with app, device, PWA, cloud, drawing-health and regression status while excluding drawing content, credentials and raw error messages.
+- Added clear offline/online status so workshop users know local projects remain available while cloud sync, team data and QR travellers are unavailable.
+- Added a ten-step production launch smoke test to the existing regression Test Kit.
+- Added a protected Supabase Edge Function for permanent account deletion, private-photo cleanup and team-owner safeguards.
+- Bumped app cache to `spoolmate-v243`.
 
 ## v2.93 - True Shift 45 Tutorial
 - Changed the 45-degree offset tutorial to match the real drawing workflow: enter the offset set, hold Shift for the angled travel, release Shift, draw the return and finish.

@@ -7,12 +7,33 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   email text,
   license_status text not null default 'trial'
-    check (license_status in ('trial', 'paid', 'full', 'expired')),
+    check (license_status in ('trial', 'paid', 'grace', 'full', 'expired')),
   trial_started_at timestamptz not null default now(),
   trial_ends_at timestamptz not null default (now() + interval '30 days'),
+  grace_ends_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.profiles
+  add column if not exists grace_ends_at timestamptz;
+
+alter table public.profiles
+  add column if not exists dashboard_preferences jsonb not null default '{}'::jsonb;
+
+alter table public.profiles
+  drop constraint if exists profiles_dashboard_preferences_object_check;
+
+alter table public.profiles
+  add constraint profiles_dashboard_preferences_object_check
+  check (jsonb_typeof(dashboard_preferences) = 'object');
+
+alter table public.profiles
+  drop constraint if exists profiles_license_status_check;
+
+alter table public.profiles
+  add constraint profiles_license_status_check
+  check (license_status in ('trial', 'paid', 'grace', 'full', 'expired'));
 
 create table if not exists public.companies (
   id uuid primary key default gen_random_uuid(),
@@ -108,6 +129,7 @@ create index if not exists team_messages_company_created_idx
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
+set search_path = public
 as $$
 begin
   new.updated_at = now();
@@ -168,6 +190,7 @@ as $$
       and (
         license_status in ('paid', 'full')
         or (license_status = 'trial' and trial_ends_at > now())
+        or (license_status = 'grace' and grace_ends_at > now())
       )
   );
 $$;
@@ -420,8 +443,22 @@ create policy "Company admins can update companies"
 on public.companies
 for update
 to authenticated
-using (public.is_company_admin(id, (select auth.uid())))
-with check (public.is_company_admin(id, (select auth.uid())));
+using (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_admin(id, (select auth.uid()))
+)
+with check (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_admin(id, (select auth.uid()))
+);
+
+drop policy if exists "Users can update their dashboard preferences" on public.profiles;
+create policy "Users can update their dashboard preferences"
+on public.profiles
+for update
+to authenticated
+using ((select auth.uid()) = id)
+with check ((select auth.uid()) = id);
 
 drop policy if exists "Company members can read memberships" on public.company_members;
 create policy "Company members can read memberships"
@@ -454,19 +491,27 @@ create policy "Owners can update company memberships"
 on public.company_members
 for update
 to authenticated
-using (public.is_company_owner(company_id, (select auth.uid())))
-with check (public.is_company_owner(company_id, (select auth.uid())));
+using (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_owner(company_id, (select auth.uid()))
+)
+with check (
+  public.has_active_license((select auth.uid()))
+  and public.is_company_owner(company_id, (select auth.uid()))
+);
 
 create policy "Admins can approve company members"
 on public.company_members
 for update
 to authenticated
 using (
-  public.is_company_admin(company_id, (select auth.uid()))
+  public.has_active_license((select auth.uid()))
+  and public.is_company_admin(company_id, (select auth.uid()))
   and role = 'member'
 )
 with check (
-  public.is_company_admin(company_id, (select auth.uid()))
+  public.has_active_license((select auth.uid()))
+  and public.is_company_admin(company_id, (select auth.uid()))
   and role = 'member'
 );
 
@@ -477,10 +522,15 @@ for delete
 to authenticated
 using (
   user_id = (select auth.uid())
-  or public.is_company_owner(company_id, (select auth.uid()))
   or (
-    public.is_company_admin(company_id, (select auth.uid()))
-    and role = 'member'
+    public.has_active_license((select auth.uid()))
+    and (
+      public.is_company_owner(company_id, (select auth.uid()))
+      or (
+        public.is_company_admin(company_id, (select auth.uid()))
+        and role = 'member'
+      )
+    )
   )
 );
 
@@ -490,13 +540,10 @@ on public.spool_projects
 for select
 to authenticated
 using (
-  public.has_active_license((select auth.uid()))
-  and (
-    owner_id = (select auth.uid())
-    or (
-      company_id is not null
-      and public.is_company_member(company_id, (select auth.uid()))
-    )
+  owner_id = (select auth.uid())
+  or (
+    company_id is not null
+    and public.is_company_member(company_id, (select auth.uid()))
   )
 );
 
@@ -562,19 +609,16 @@ on public.project_comments
 for select
 to authenticated
 using (
-  public.has_active_license((select auth.uid()))
-  and (
-    author_id = (select auth.uid())
-    or (
-      company_id is not null
-      and public.is_company_member(company_id, (select auth.uid()))
-    )
-    or exists (
-      select 1
-      from public.spool_projects
-      where spool_projects.id = project_comments.project_id
-        and spool_projects.owner_id = (select auth.uid())
-    )
+  author_id = (select auth.uid())
+  or (
+    company_id is not null
+    and public.is_company_member(company_id, (select auth.uid()))
+  )
+  or exists (
+    select 1
+    from public.spool_projects
+    where spool_projects.id = project_comments.project_id
+      and spool_projects.owner_id = (select auth.uid())
   )
 );
 
@@ -606,17 +650,23 @@ on public.project_comments
 for update
 to authenticated
 using (
-  author_id = (select auth.uid())
-  or (
-    company_id is not null
-    and public.is_company_admin(company_id, (select auth.uid()))
+  public.has_active_license((select auth.uid()))
+  and (
+    author_id = (select auth.uid())
+    or (
+      company_id is not null
+      and public.is_company_admin(company_id, (select auth.uid()))
+    )
   )
 )
 with check (
-  author_id = (select auth.uid())
-  or (
-    company_id is not null
-    and public.is_company_admin(company_id, (select auth.uid()))
+  public.has_active_license((select auth.uid()))
+  and (
+    author_id = (select auth.uid())
+    or (
+      company_id is not null
+      and public.is_company_admin(company_id, (select auth.uid()))
+    )
   )
 );
 
@@ -626,10 +676,13 @@ on public.project_comments
 for delete
 to authenticated
 using (
-  author_id = (select auth.uid())
-  or (
-    company_id is not null
-    and public.is_company_admin(company_id, (select auth.uid()))
+  public.has_active_license((select auth.uid()))
+  and (
+    author_id = (select auth.uid())
+    or (
+      company_id is not null
+      and public.is_company_admin(company_id, (select auth.uid()))
+    )
   )
 );
 
@@ -653,7 +706,6 @@ for select
 to authenticated
 using (
   bucket_id = 'spool-photos'
-  and public.has_active_license((select auth.uid()))
   and (
     (storage.foldername(name))[1] = (select auth.uid())::text
     or exists (
@@ -693,6 +745,7 @@ for update
 to authenticated
 using (
   bucket_id = 'spool-photos'
+  and public.has_active_license((select auth.uid()))
   and (
     owner_id = (select auth.uid()::text)
     or exists (
@@ -707,6 +760,7 @@ using (
 )
 with check (
   bucket_id = 'spool-photos'
+  and public.has_active_license((select auth.uid()))
   and (
     owner_id = (select auth.uid()::text)
     or exists (
@@ -727,6 +781,7 @@ for delete
 to authenticated
 using (
   bucket_id = 'spool-photos'
+  and public.has_active_license((select auth.uid()))
   and (
     owner_id = (select auth.uid()::text)
     or exists (
@@ -746,8 +801,7 @@ on public.team_messages
 for select
 to authenticated
 using (
-  public.has_active_license((select auth.uid()))
-  and public.is_company_member(team_messages.company_id, (select auth.uid()))
+  public.is_company_member(team_messages.company_id, (select auth.uid()))
   and (
     remove_after is null
     or remove_after > now()
@@ -802,11 +856,21 @@ using (
 );
 
 grant select, insert on public.profiles to authenticated;
+revoke update on public.profiles from authenticated;
+grant update (dashboard_preferences) on public.profiles to authenticated;
 grant select, insert, update on public.companies to authenticated;
 grant select, insert, update, delete on public.company_members to authenticated;
 grant select, insert, update, delete on public.spool_projects to authenticated;
 grant select, insert, update, delete on public.project_comments to authenticated;
 grant select, insert, update, delete on public.team_messages to authenticated;
+revoke all on function public.has_active_license(uuid) from public, anon, authenticated;
+revoke all on function public.is_company_member(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.is_company_admin(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.is_company_owner(uuid, uuid) from public, anon, authenticated;
+revoke all on function public.create_company(text) from public, anon, authenticated;
+revoke all on function public.join_company_by_code(text) from public, anon, authenticated;
+revoke all on function public.set_project_comment_resolved(uuid, boolean) from public, anon, authenticated;
+
 grant execute on function public.has_active_license(uuid) to authenticated;
 grant execute on function public.is_company_member(uuid, uuid) to authenticated;
 grant execute on function public.is_company_admin(uuid, uuid) to authenticated;
@@ -817,3 +881,167 @@ grant execute on function public.set_project_comment_resolved(uuid, boolean) to 
 
 -- To give someone a full licence, run this manually as the project owner:
 -- update public.profiles set license_status = 'full' where email = 'person@example.com';
+
+-- Ask SpoolMate daily AI allowance. This table is private to the protected Edge Function.
+create table if not exists public.ai_help_usage (
+  id bigint generated always as identity primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  used_on date not null default (timezone('utc', now())::date),
+  request_count integer not null default 0 check (request_count >= 0),
+  updated_at timestamptz not null default now(),
+  unique (user_id, used_on)
+);
+
+alter table public.ai_help_usage enable row level security;
+revoke all on table public.ai_help_usage from anon, authenticated;
+
+create or replace function public.consume_ai_help_allowance(
+  p_user_id uuid,
+  p_daily_limit integer
+)
+returns table (
+  allowed boolean,
+  used_count integer,
+  remaining_count integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_limit integer := greatest(coalesce(p_daily_limit, 0), 0);
+  v_used integer;
+begin
+  if p_user_id is null or v_limit = 0 then
+    return query select false, 0, 0;
+    return;
+  end if;
+
+  insert into public.ai_help_usage (user_id, used_on, request_count, updated_at)
+  values (p_user_id, timezone('utc', now())::date, 1, now())
+  on conflict (user_id, used_on) do update
+    set request_count = ai_help_usage.request_count + 1,
+        updated_at = now()
+    where ai_help_usage.request_count < v_limit
+  returning request_count into v_used;
+
+  if v_used is null then
+    select request_count
+      into v_used
+      from public.ai_help_usage
+      where user_id = p_user_id
+        and used_on = timezone('utc', now())::date;
+    return query select false, coalesce(v_used, v_limit), 0;
+    return;
+  end if;
+
+  return query select true, v_used, greatest(v_limit - v_used, 0);
+end;
+$$;
+
+create or replace function public.release_ai_help_allowance(p_user_id uuid)
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  update public.ai_help_usage
+  set request_count = greatest(request_count - 1, 0),
+      updated_at = now()
+  where user_id = p_user_id
+    and used_on = timezone('utc', now())::date;
+$$;
+
+revoke all on function public.consume_ai_help_allowance(uuid, integer) from public, anon, authenticated;
+revoke all on function public.release_ai_help_allowance(uuid) from public, anon, authenticated;
+grant execute on function public.consume_ai_help_allowance(uuid, integer) to service_role;
+grant execute on function public.release_ai_help_allowance(uuid) to service_role;
+
+-- Private SpoolMate-wide support access. Customer Business Owner/Admin roles
+-- are intentionally unrelated to this table. Add the verified operator UUID
+-- only after setup; never put a service key in the browser app.
+create table if not exists public.platform_support_admins (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  display_name text not null default 'SpoolMate operator'
+    check (char_length(display_name) between 1 and 80),
+  active boolean not null default true,
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.support_admin_audit_log (
+  id bigint generated always as identity primary key,
+  request_id uuid not null default gen_random_uuid(),
+  admin_user_id uuid not null references auth.users(id) on delete restrict,
+  target_user_id uuid references auth.users(id) on delete set null,
+  target_company_id uuid references public.companies(id) on delete set null,
+  action text not null check (char_length(action) between 2 and 80),
+  reason text not null check (char_length(reason) between 8 and 500),
+  before_state jsonb not null default '{}'::jsonb,
+  after_state jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists support_admin_audit_admin_created_idx
+  on public.support_admin_audit_log (admin_user_id, created_at desc);
+create index if not exists platform_support_admins_created_by_idx
+  on public.platform_support_admins (created_by)
+  where created_by is not null;
+create index if not exists support_admin_audit_target_user_created_idx
+  on public.support_admin_audit_log (target_user_id, created_at desc)
+  where target_user_id is not null;
+create index if not exists support_admin_audit_target_company_created_idx
+  on public.support_admin_audit_log (target_company_id, created_at desc)
+  where target_company_id is not null;
+
+alter table public.platform_support_admins enable row level security;
+alter table public.support_admin_audit_log enable row level security;
+drop policy if exists "No client access to platform support admins" on public.platform_support_admins;
+create policy "No client access to platform support admins"
+on public.platform_support_admins
+for all to anon, authenticated
+using (false)
+with check (false);
+drop policy if exists "No client access to support audit log" on public.support_admin_audit_log;
+create policy "No client access to support audit log"
+on public.support_admin_audit_log
+for all to anon, authenticated
+using (false)
+with check (false);
+create or replace function public.protect_support_admin_audit_log()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  if tg_op = 'DELETE' then
+    raise exception 'Support audit records cannot be deleted.';
+  end if;
+  if coalesce(old.after_state ->> 'status', '') <> 'started' then
+    raise exception 'Completed support audit records cannot be changed.';
+  end if;
+  if new.id is distinct from old.id
+     or new.request_id is distinct from old.request_id
+     or new.admin_user_id is distinct from old.admin_user_id
+     or new.target_user_id is distinct from old.target_user_id
+     or new.target_company_id is distinct from old.target_company_id
+     or new.action is distinct from old.action
+     or new.reason is distinct from old.reason
+     or new.before_state is distinct from old.before_state
+     or new.created_at is distinct from old.created_at then
+    raise exception 'Only the result of a started support audit can be completed.';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists support_admin_audit_immutable on public.support_admin_audit_log;
+create trigger support_admin_audit_immutable
+before update or delete on public.support_admin_audit_log
+for each row execute function public.protect_support_admin_audit_log();
+revoke all on table public.platform_support_admins from public, anon, authenticated;
+revoke all on table public.support_admin_audit_log from public, anon, authenticated;
+revoke all on sequence public.support_admin_audit_log_id_seq from public, anon, authenticated;
+revoke all on function public.protect_support_admin_audit_log() from public, anon, authenticated;
+grant execute on function public.protect_support_admin_audit_log() to service_role;

@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v242";
+const CACHE_NAME = "spoolmate-v364-expanded-video-guides";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=293",
-  "./app.js?v=293",
+  "./styles.css?v=364",
+  "./app.js?v=364",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [
@@ -13,6 +13,9 @@ const OPTIONAL_ASSETS = [
   "./icons/spoolmate-mark.png",
   "./icons/spoolmate-logo.png"
 ];
+const STATIC_CDN_ORIGINS = new Set([
+  "https://cdn.jsdelivr.net"
+]);
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -37,6 +40,10 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
 
   const url = new URL(request.url);
+  if (request.destination === "video" || request.headers.has("range")) {
+    event.respondWith(fetch(request));
+    return;
+  }
   if (request.mode === "navigate") {
     event.respondWith(networkFirst(request, "./index.html"));
     return;
@@ -47,7 +54,15 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(request, false));
+  // Never put authenticated API, Auth or Storage responses into Cache Storage.
+  // Cache keys do not include the Authorization header, so doing so could show
+  // one signed-in user's stale response to the next user on a shared device.
+  if (STATIC_CDN_ORIGINS.has(url.origin)) {
+    event.respondWith(staleWhileRevalidate(request, false));
+    return;
+  }
+
+  event.respondWith(fetch(request));
 });
 
 self.addEventListener("message", (event) => {

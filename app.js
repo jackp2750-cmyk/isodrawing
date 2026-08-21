@@ -5,12 +5,14 @@ const previewStage = document.querySelector("#previewStage");
 const drawingPanel = document.querySelector(".drawing-panel");
 const controlPanel = document.querySelector(".control-panel");
 const previewPanel = document.querySelector(".preview-panel");
+const workspaceTitle = document.querySelector("#workspaceTitle");
 const cursorReadout = document.querySelector("#cursorReadout");
 const renderStatus = document.querySelector("#renderStatus");
 const spoolStats = document.querySelector("#spoolStats");
 const previewModeSelect = document.querySelector("#previewModeSelect");
 const previewModePanelSelect = document.querySelector("#previewModePanelSelect");
 const previewLabelToggle = document.querySelector("#previewLabelToggle");
+const previewSizeColourLegend = document.querySelector("#previewSizeColourLegend");
 const previewRotateButton = document.querySelector("#previewRotateButton");
 const previewMoveButton = document.querySelector("#previewMoveButton");
 const previewResetButton = document.querySelector("#previewResetButton");
@@ -20,6 +22,8 @@ const previewFloatButton = document.querySelector("#previewFloatButton");
 const previewMinimizeButton = document.querySelector("#previewMinimizeButton");
 const previewHideButton = document.querySelector("#previewHideButton");
 const previewShowButton = document.querySelector("#previewShowButton");
+const inspectorOpenPreviewButton = document.querySelector("#inspectorOpenPreviewButton");
+const previewOpenInspectorButton = document.querySelector("#previewOpenInspectorButton");
 const undoButton = document.querySelector("#undoButton");
 const redoButton = document.querySelector("#redoButton");
 const fittingsToolButton = document.querySelector("#fittingsToolButton");
@@ -37,6 +41,7 @@ const loadPlanThreeCanvas = document.querySelector("#loadPlanThreeCanvas");
 const loadPlanSummary = document.querySelector("#loadPlanSummary");
 const loadPlanPlayButton = document.querySelector("#loadPlanPlayButton");
 const loadPlanCloseButton = document.querySelector("#loadPlanCloseButton");
+const loadPlanDoneButton = document.querySelector("#loadPlanDoneButton");
 const loadPlanTraySelect = document.querySelector("#loadPlanTraySelect");
 const loadPlanRackSelect = document.querySelector("#loadPlanRackSelect");
 const loadPlanJobSelect = document.querySelector("#loadPlanJobSelect");
@@ -61,6 +66,7 @@ const noteTextInput = document.querySelector("#noteTextInput");
 const noteColorInput = document.querySelector("#noteColorInput");
 const flangeModeSelect = document.querySelector("#flangeModeSelect");
 const flangeStandardSelect = document.querySelector("#flangeStandardSelect");
+const reducerTypeSelect = document.querySelector("#reducerTypeSelect");
 const dimensionToggle = document.querySelector("#dimensionToggle");
 const drawingDetailSelect = document.querySelector("#drawingDetailSelect");
 const dimensionStyleSelect = document.querySelector("#dimensionStyleSelect");
@@ -77,38 +83,106 @@ const projectLockToggle = document.querySelector("#projectLockToggle");
 const appVersionBadge = document.querySelector("#appVersionBadge");
 const saveBrowserProjectButton = document.querySelector("#saveBrowserProjectButton");
 const openBrowserProjectButton = document.querySelector("#openBrowserProjectButton");
-const healthCheckButton = document.querySelector("#healthCheckButton");
+const bigSpoolButton = document.querySelector("#bigSpoolButton");
+const bigSpoolDialog = document.querySelector("#bigSpoolDialog");
+const bigSpoolCloseButton = document.querySelector("#bigSpoolCloseButton");
+const bigSpoolDoneButton = document.querySelector("#bigSpoolDoneButton");
+const bigSpoolEnabledInput = document.querySelector("#bigSpoolEnabledInput");
+const bigSpoolMaxLengthInput = document.querySelector("#bigSpoolMaxLengthInput");
+const bigSpoolClearanceInput = document.querySelector("#bigSpoolClearanceInput");
+const bigSpoolPresetSelect = document.querySelector("#bigSpoolPresetSelect");
+const bigSpoolMaxWidthInput = document.querySelector("#bigSpoolMaxWidthInput");
+const bigSpoolMaxHeightInput = document.querySelector("#bigSpoolMaxHeightInput");
+const bigSpoolMaxWeightInput = document.querySelector("#bigSpoolMaxWeightInput");
+const bigSpoolTransportNoteInput = document.querySelector("#bigSpoolTransportNoteInput");
+const bigSpoolDefaultJointTypeSelect = document.querySelector("#bigSpoolDefaultJointTypeSelect");
+const bigSpoolSuggestButton = document.querySelector("#bigSpoolSuggestButton");
+const bigSpoolOverview = document.querySelector("#bigSpoolOverview");
+const bigSpoolPieceList = document.querySelector("#bigSpoolPieceList");
+const bigSpoolCutList = document.querySelector("#bigSpoolCutList");
+const bigSpoolManualSegmentSelect = document.querySelector("#bigSpoolManualSegmentSelect");
+const bigSpoolManualDistanceInput = document.querySelector("#bigSpoolManualDistanceInput");
+const bigSpoolAddCutButton = document.querySelector("#bigSpoolAddCutButton");
+const bigSpoolClearCutsButton = document.querySelector("#bigSpoolClearCutsButton");
+const bigSpoolExportButton = document.querySelector("#bigSpoolExportButton");
+const bigSpoolExportPackageButton = document.querySelector("#bigSpoolExportPackageButton");
+const bigSpoolLoadPlannerButton = document.querySelector("#bigSpoolLoadPlannerButton");
 const regressionChecklistButton = document.querySelector("#regressionChecklistButton");
 const regressionDialog = document.querySelector("#regressionDialog");
 const regressionCloseButton = document.querySelector("#regressionCloseButton");
 const regressionSummary = document.querySelector("#regressionSummary");
 const regressionSampleList = document.querySelector("#regressionSampleList");
 const regressionChecklist = document.querySelector("#regressionChecklist");
-const newRevisionButton = document.querySelector("#newRevisionButton");
-const shareReadOnlyButton = document.querySelector("#shareReadOnlyButton");
 const fabSheetTemplateSelect = document.querySelector("#fabSheetTemplateSelect");
 const saveDefaultsButton = document.querySelector("#saveDefaultsButton");
 const homeDashboardButton = document.querySelector("#homeDashboardButton");
+const quickPdfMenuButton = document.querySelector("#quickPdfMenuButton");
 const drawingAssistantButton = document.querySelector("#drawingAssistantButton");
 const accountButton = document.querySelector("#accountButton");
-const accountMenuButton = document.querySelector("#accountMenuButton");
 const accountButtonLabel = document.querySelector("#accountButtonLabel");
+const workspaceSwitcher = document.querySelector("#workspaceSwitcher");
 const cloudSyncStatus = document.querySelector("#cloudSyncStatus");
+const roleAccessNotice = document.querySelector("#roleAccessNotice");
 const authDialog = document.querySelector("#authDialog");
 const authDialogForm = document.querySelector("#authDialogForm");
 const authDialogTitle = document.querySelector("#authDialogTitle");
 const authDialogStatus = document.querySelector("#authDialogStatus");
 const authSignInModeButton = document.querySelector("#authSignInModeButton");
 const authCreateModeButton = document.querySelector("#authCreateModeButton");
+const authEmailField = document.querySelector("#authEmailField");
+const authPasswordField = document.querySelector("#authPasswordField");
+const authPasswordConfirmField = document.querySelector("#authPasswordConfirmField");
+const authRememberField = document.querySelector("#authRememberField");
 const authEmailInput = document.querySelector("#authEmailInput");
 const authPasswordInput = document.querySelector("#authPasswordInput");
+const authPasswordConfirmInput = document.querySelector("#authPasswordConfirmInput");
 const authRememberDeviceInput = document.querySelector("#authRememberDeviceInput");
+const authAccountTypeField = document.querySelector("#authAccountTypeField");
+const authAccountTypeInput = document.querySelector("#authAccountTypeInput");
+const authBusinessNameField = document.querySelector("#authBusinessNameField");
+const authBusinessNameInput = document.querySelector("#authBusinessNameInput");
 const authModeHelp = document.querySelector("#authModeHelp");
 const authCloseButton = document.querySelector("#authCloseButton");
 const authSignInButton = document.querySelector("#authSignInButton");
 const authSignUpButton = document.querySelector("#authSignUpButton");
 const authResendButton = document.querySelector("#authResendButton");
+const authForgotPasswordButton = document.querySelector("#authForgotPasswordButton");
+const authBackToSignInButton = document.querySelector("#authBackToSignInButton");
+const authSendResetButton = document.querySelector("#authSendResetButton");
+const authUpdatePasswordButton = document.querySelector("#authUpdatePasswordButton");
 const authSignOutButton = document.querySelector("#authSignOutButton");
+const accountPlanPanel = document.querySelector("#accountPlanPanel");
+const accountPlanBadge = document.querySelector("#accountPlanBadge");
+const accountPlanTitle = document.querySelector("#accountPlanTitle");
+const accountPlanMessage = document.querySelector("#accountPlanMessage");
+const accountPlanCountdown = document.querySelector("#accountPlanCountdown");
+const accountPlanCapabilities = document.querySelector("#accountPlanCapabilities");
+const accountPlanUpgradeButton = document.querySelector("#accountPlanUpgradeButton");
+const accountWorkspacePanel = document.querySelector("#accountWorkspacePanel");
+const accountWorkspaceList = document.querySelector("#accountWorkspaceList");
+const accountLaunchPanel = document.querySelector("#accountLaunchPanel");
+const accountExportDataButton = document.querySelector("#accountExportDataButton");
+const diagnosticReportButton = document.querySelector("#diagnosticReportButton");
+const legalSupportButton = document.querySelector("#legalSupportButton");
+const accountDeleteButton = document.querySelector("#accountDeleteButton");
+const supportAdminButton = document.querySelector("#supportAdminButton");
+const supportAdminDialog = document.querySelector("#supportAdminDialog");
+const supportAdminCloseButton = document.querySelector("#supportAdminCloseButton");
+const supportAdminIdentity = document.querySelector("#supportAdminIdentity");
+const supportAdminSummary = document.querySelector("#supportAdminSummary");
+const supportAdminSearchForm = document.querySelector("#supportAdminSearchForm");
+const supportAdminSearchInput = document.querySelector("#supportAdminSearchInput");
+const supportAdminSearchButton = document.querySelector("#supportAdminSearchButton");
+const supportAdminRefreshButton = document.querySelector("#supportAdminRefreshButton");
+const supportAdminStatus = document.querySelector("#supportAdminStatus");
+const supportAdminResultCount = document.querySelector("#supportAdminResultCount");
+const supportAdminResultList = document.querySelector("#supportAdminResultList");
+const supportAdminDetail = document.querySelector("#supportAdminDetail");
+const supportAdminAuditList = document.querySelector("#supportAdminAuditList");
+const licenceBanner = document.querySelector("#licenceBanner");
+const licenceBannerTitle = document.querySelector("#licenceBannerTitle");
+const licenceBannerMessage = document.querySelector("#licenceBannerMessage");
+const licenceBannerUpgradeButton = document.querySelector("#licenceBannerUpgradeButton");
 const teamWorkspacePanel = document.querySelector("#teamWorkspacePanel");
 const teamWorkspaceStatus = document.querySelector("#teamWorkspaceStatus");
 const teamCompanyNameInput = document.querySelector("#teamCompanyNameInput");
@@ -117,9 +191,12 @@ const teamCreateButton = document.querySelector("#teamCreateButton");
 const teamJoinButton = document.querySelector("#teamJoinButton");
 const teamRefreshButton = document.querySelector("#teamRefreshButton");
 const teamMembersList = document.querySelector("#teamMembersList");
+const businessSeatSummary = document.querySelector("#businessSeatSummary");
 const projectDialog = document.querySelector("#projectDialog");
 const projectDialogForm = document.querySelector("#projectDialogForm");
 const projectDialogTitle = document.querySelector("#projectDialogTitle");
+const projectDialogSubtitle = document.querySelector("#projectDialogSubtitle");
+const projectDialogAdvanced = document.querySelector("#projectDialogAdvanced");
 const projectDialogSubmitButton = document.querySelector("#projectDialogSubmitButton");
 const projectDialogCancelButton = document.querySelector("#projectDialogCancelButton");
 const projectDialogJobPickerButton = document.querySelector("#projectDialogJobPickerButton");
@@ -134,9 +211,12 @@ let homeDashboardAccount = document.querySelector("#homeDashboardAccount");
 let homeDashboardStats = document.querySelector("#homeDashboardStats");
 let homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
 let homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+let homeDashboardQuickPdfButton = document.querySelector("#homeDashboardQuickPdfButton");
+let homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
 let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
 let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
 let homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
+let homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
 let homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
 let homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
 let homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
@@ -146,6 +226,7 @@ const projectLibraryList = document.querySelector("#projectLibraryList");
 const projectLibraryCloseButton = document.querySelector("#projectLibraryCloseButton");
 let projectLibrarySubtitle = document.querySelector("#projectLibrarySubtitle");
 let projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+let projectLibrarySourceButton = document.querySelector("#projectLibrarySourceButton");
 let projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButton");
 let projectLibraryGuideSlot = document.querySelector("#projectLibraryGuideSlot");
 let projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
@@ -183,7 +264,31 @@ const themeColorMeta = document.querySelector("meta[name='theme-color']");
 const actionMenuButton = document.querySelector("#actionMenuButton");
 const actionMenuPanel = document.querySelector("#actionMenuPanel");
 const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
+const actionCommandInput = document.querySelector("#actionCommandInput");
+const actionCommandResults = document.querySelector("#actionCommandResults");
+const actionMenuJobsButton = document.querySelector("#actionMenuJobsButton");
+const actionMenuBigSpoolButton = document.querySelector("#actionMenuBigSpoolButton");
+const actionMenuAccountButton = document.querySelector("#actionMenuAccountButton");
+const workspaceSettingsButton = document.querySelector("#workspaceSettingsButton");
+const workspaceSettingsPanel = document.querySelector("#workspaceSettingsPanel");
+const workspaceSettingsCloseButton = document.querySelector("#workspaceSettingsCloseButton");
+const workspaceSettingsScrim = document.querySelector("#workspaceSettingsScrim");
+const workspaceSettingsPipeSummary = document.querySelector("#workspaceSettingsPipeSummary");
+const workspaceSettingsViewSummary = document.querySelector("#workspaceSettingsViewSummary");
+const simpleControlsButton = document.querySelector("#simpleControlsButton");
+const fullControlsButton = document.querySelector("#fullControlsButton");
+const interfaceDensityButtons = [simpleControlsButton, fullControlsButton].filter(Boolean);
+const resetWorkspaceLayoutButton = document.querySelector("#resetWorkspaceLayoutButton");
+const spoolWorkspaceShell = document.querySelector("#spoolWorkspaceShell");
+const spoolWorkspaceTabsElement = document.querySelector("#spoolWorkspaceTabs");
+const spoolWorkspaceOpenButton = document.querySelector("#spoolWorkspaceOpenButton");
+const spoolWorkspaceNewButton = document.querySelector("#spoolWorkspaceNewButton");
+const spoolWorkspaceWindowButton = document.querySelector("#spoolWorkspaceWindowButton");
+const spoolWindowGridShell = document.querySelector("#spoolWindowGridShell");
+const spoolWindowGrid = document.querySelector("#spoolWindowGrid");
+const spoolWindowGridCloseButton = document.querySelector("#spoolWindowGridCloseButton");
 const tutorialButton = document.querySelector("#tutorialButton");
+const videoTutorialButton = document.querySelector("#videoTutorialButton");
 const tutorialDialog = document.querySelector("#tutorialDialog");
 const tutorialProgress = document.querySelector("#tutorialProgress");
 const tutorialStepCard = document.querySelector("#tutorialStepCard");
@@ -191,8 +296,38 @@ const tutorialCloseButton = document.querySelector("#tutorialCloseButton");
 const tutorialPrevButton = document.querySelector("#tutorialPrevButton");
 const tutorialActionButton = document.querySelector("#tutorialActionButton");
 const tutorialNextButton = document.querySelector("#tutorialNextButton");
+const tutorialVideoButton = document.querySelector("#tutorialVideoButton");
+const tutorialVideoLaunchButtons = [...document.querySelectorAll("[data-open-video-tutorial]")];
 const tutorialSpotlight = document.querySelector("#tutorialSpotlight");
 const tutorialCoach = document.querySelector("#tutorialCoach");
+const videoTutorialDialog = document.querySelector("#videoTutorialDialog");
+const videoTutorialLibrary = document.querySelector("#videoTutorialLibrary");
+const videoTutorialPlayer = document.querySelector("#videoTutorialPlayer");
+const videoTutorialCloseButton = document.querySelector("#videoTutorialCloseButton");
+const videoTutorialCopyLinkButton = document.querySelector("#videoTutorialCopyLinkButton");
+const videoTutorialBackButton = document.querySelector("#videoTutorialBackButton");
+const videoTutorialPlayButton = document.querySelector("#videoTutorialPlayButton");
+const videoTutorialForwardButton = document.querySelector("#videoTutorialForwardButton");
+const videoTutorialChapterSelect = document.querySelector("#videoTutorialChapterSelect");
+const videoTutorialTime = document.querySelector("#videoTutorialTime");
+const videoTutorialNowPlayingKicker = document.querySelector("#videoTutorialNowPlayingKicker");
+const videoTutorialNowPlayingTitle = document.querySelector("#videoTutorialNowPlayingTitle");
+const videoTutorialNowPlayingDescription = document.querySelector("#videoTutorialNowPlayingDescription");
+const firstSpoolGuide = document.querySelector("#firstSpoolGuide");
+const firstSpoolGuideProgressBar = document.querySelector("#firstSpoolGuideProgressBar");
+const firstSpoolGuideKicker = document.querySelector("#firstSpoolGuideKicker");
+const firstSpoolGuideTitle = document.querySelector("#firstSpoolGuideTitle");
+const firstSpoolGuideMessage = document.querySelector("#firstSpoolGuideMessage");
+const firstSpoolGuideExpandButton = document.querySelector("#firstSpoolGuideExpandButton");
+const firstSpoolGuideActionButton = document.querySelector("#firstSpoolGuideActionButton");
+const firstSpoolGuideNextButton = document.querySelector("#firstSpoolGuideNextButton");
+const firstSpoolGuideCloseButton = document.querySelector("#firstSpoolGuideCloseButton");
+const quickPdfBar = document.querySelector("#quickPdfBar");
+const quickPdfDrawButton = document.querySelector("#quickPdfDrawButton");
+const quickPdfFittingsButton = document.querySelector("#quickPdfFittingsButton");
+const quickPdfDownloadButton = document.querySelector("#quickPdfDownloadButton");
+const quickPdfManagedButton = document.querySelector("#quickPdfManagedButton");
+const touchShiftAngleButton = document.querySelector("#touchShiftAngleButton");
 const noteDialog = document.querySelector("#noteDialog");
 const noteDialogTitle = document.querySelector("#noteDialogTitle");
 const noteDialogText = document.querySelector("#noteDialogText");
@@ -235,6 +370,24 @@ const drawingAssistantBuildButton = document.querySelector("#drawingAssistantBui
 const helpButton = document.querySelector("#helpButton");
 const helpDialog = document.querySelector("#helpDialog");
 const helpCloseButton = document.querySelector("#helpCloseButton");
+const helpVideoButton = document.querySelector("#helpVideoButton");
+const aiHelperButton = document.querySelector("#aiHelperButton");
+const aiHelperDialog = document.querySelector("#aiHelperDialog");
+const aiHelperCloseButton = document.querySelector("#aiHelperCloseButton");
+const aiHelperClearButton = document.querySelector("#aiHelperClearButton");
+const aiHelperMode = document.querySelector("#aiHelperMode");
+const aiHelperQuota = document.querySelector("#aiHelperQuota");
+const aiHelperContext = document.querySelector("#aiHelperContext");
+const aiHelperMessages = document.querySelector("#aiHelperMessages");
+const aiHelperSuggestions = document.querySelector("#aiHelperSuggestions");
+const aiHelperForm = document.querySelector("#aiHelperForm");
+const aiHelperInput = document.querySelector("#aiHelperInput");
+const aiHelperSendButton = document.querySelector("#aiHelperSendButton");
+const legalSupportMenuButton = document.querySelector("#legalSupportMenuButton");
+const legalSupportDialog = document.querySelector("#legalSupportDialog");
+const legalSupportCloseButton = document.querySelector("#legalSupportCloseButton");
+const legalDiagnosticsButton = document.querySelector("#legalDiagnosticsButton");
+const regressionDiagnosticsButton = document.querySelector("#regressionDiagnosticsButton");
 const helpTabButtons = [...document.querySelectorAll("[data-help-tab]")];
 const helpPanels = [...document.querySelectorAll("[data-help-panel]")];
 const projectDialogInputs = {
@@ -243,7 +396,11 @@ const projectDialogInputs = {
   revision: document.querySelector("#projectDialogRevision"),
   drawnBy: document.querySelector("#projectDialogDrawnBy"),
   client: document.querySelector("#projectDialogClient"),
+  fittingProfile: document.querySelector("#projectDialogFittingProfile"),
+  fittingProfileReference: document.querySelector("#projectDialogFittingProfileReference"),
+  weldGapMm: document.querySelector("#projectDialogWeldGapMm"),
 };
+const projectDialogFittingProfileHelp = document.querySelector("#projectDialogFittingProfileHelp");
 const mobilePanelScrim = document.querySelector("#mobilePanelScrim");
 const mobilePanelButtons = [...document.querySelectorAll("[data-mobile-panel]")];
 const mobilePanelCloseButtons = [...document.querySelectorAll("[data-mobile-close-panel]")];
@@ -254,24 +411,496 @@ const STORAGE_KEY = "isospool-studio-state-v8";
 const CONTROL_COLLAPSE_KEY = "isospool-control-collapse-v1";
 const SAVED_PROJECTS_KEY = "isospool-saved-projects-v1";
 const CLOUD_SAVE_META_KEY = "spoolmate-cloud-save-meta-v1";
+const CLOUD_SAVE_QUEUE_KEY = "spoolmate-cloud-save-queue-v1";
 const FAB_SHEET_TEMPLATE_KEY = "spoolmate-fab-sheet-template-v1";
 const PROJECT_LIBRARY_FOLDER_STATE_KEY = "isospool-project-library-folder-state-v1";
 const SIDE_TOOL_VISIBILITY_KEY = "isospool-side-tool-visibility-v1";
 const USER_DRAWING_DEFAULTS_KEY = "isospool-user-drawing-defaults-v1";
 const NUMBERED_DIMENSION_DEFAULT_KEY = "spoolmate-numbered-dimension-default-v1";
+const TRICOLOR_3D_DEFAULT_KEY = "spoolmate-tricolor-3d-default-v1";
 const PROJECT_BACKUPS_KEY = "isospool-project-backups-v1";
+const LAST_SESSION_RECOVERY_KEY = "spoolmate-last-session-recovery-v1";
 const APP_THEME_KEY = "spoolmate-theme-v1";
 const APP_MODE_KEY = "spoolmate-app-mode-v1";
+const INTERFACE_DENSITY_KEY = "spoolmate-interface-density-v1";
 const PREVIEW_FLOAT_KEY = "spoolmate-preview-float-v1";
 const PREVIEW_FLOAT_BOUNDS_KEY = "spoolmate-preview-bounds-v1";
 const PHONE_PREVIEW_DEFAULT_KEY = "spoolmate-phone-preview-hidden-v1";
+const TUTORIAL_PROGRESS_KEY = "spoolmate-tutorial-progress-v1";
+const VIDEO_TUTORIAL_SELECTION_KEY = "spoolmate-video-tutorial-selection-v1";
+const FIRST_USE_GUIDE_KEY = "spoolmate-guided-workflow-v2";
+const TEAM_DASHBOARD_VIEW_KEY = "spoolmate-team-dashboard-view-v2";
+const JOB_DASHBOARD_FILTER_KEY = "spoolmate-job-dashboard-filter-v1";
+const JOB_DASHBOARD_PINS_KEY = "spoolmate-job-dashboard-pins-v1";
+const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
+const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
+const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v2.93";
-const APP_BUILD_DATE = "2026-07-21";
+const APP_VERSION = "v3.64";
+const APP_BUILD_DATE = "2026-08-19";
+const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Complete-Workflow-Fullscreen-Web.mp4`;
+const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-My-Day-Current-Fullscreen-Web.mp4`;
+const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Masterclass-Fullscreen-Web.mp4`;
+const PIPE_ENDS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Pipe-End-Preparations-Fullscreen.mp4`;
+const SOCKETS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Sockets-In-Detail-Fullscreen.mp4`;
+const BIG_SPOOL_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Big-Spool-Fullscreen-Web.mp4`;
+const WORKSPACE_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Multi-Spool-Workspace-Fullscreen-Web.mp4`;
+const QA_EXPORT_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-QA-Export-Fullscreen-Web.mp4`;
+const PRODUCTION_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Teams-Production-Fullscreen-Web.mp4`;
+const CLOUD_RECOVERY_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Cloud-Recovery-Fullscreen-Web.mp4`;
+const IMPORT_HELP_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Import-Help-Fullscreen-Web.mp4`;
+const TEES_REDUCERS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Tees-Branches-Reducers-Fullscreen-Web.mp4`;
+const OFFSETS_45_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-45-Degree-Offsets-Cut-Lengths-Fullscreen-Web.mp4`;
+const APPROVAL_REVISIONS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Approval-Revisions-PDF-QR-Fullscreen-Web.mp4`;
+const WELD_REGISTER_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Weld-Register-NDT-Repairs-Fullscreen-Web.mp4`;
+const THREE_D_INSPECTION_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-3D-Inspection-Controls-Fullscreen-Web.mp4`;
+const QUICK_PDF_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Quick-PDF-First-Spool-Fullscreen-Web.mp4`;
+const TOUCH_CONTROLS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-iPad-Android-Touch-Controls-Web.mp4`;
+const REDUCERS_DETAIL_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Concentric-Eccentric-Reducers-Fullscreen-Web.mp4`;
+const EDITING_FIXES_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Editing-Fixing-Mistakes-Fullscreen-Web.mp4`;
+const BUSINESS_SETUP_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Business-Account-Team-Setup-Fullscreen-Web.mp4`;
+const BIG_SPOOL_ADVANCED_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Big-Spool-Advanced-Fullscreen-Web.mp4`;
+const VIDEO_TUTORIALS = [
+  {
+    id: "complete",
+    eyebrow: "Complete workflow",
+    title: "Build a complete spool",
+    duration: 386,
+    description: "Drawing, true 45° offsets, precise edits, fittings, 3D, review, weld tracking and fabrication export. The final Jobs chapter shows the previous dashboard while its revised footage is prepared.",
+    shortDescription: "Core workflow current · Jobs chapter update pending",
+    url: TUTORIAL_VIDEO_URL,
+    previousLayout: true,
+    updateNotice: "The Complete Workflow video is current until its final Jobs chapter. Use the interactive Jobs guide for the exact v3.48 dashboard while that short section is re-rendered.",
+    chapters: [
+      [0, "Overview"],
+      [10, "Start the project"],
+      [25, "Draw the spool"],
+      [41, "True 45 degree offset"],
+      [58, "Finish the drawing"],
+      [83, "Add fittings"],
+      [109, "Select and edit"],
+      [132, "Exact details"],
+      [162, "Inspect the 3D model"],
+      [185, "Review the spool"],
+      [208, "Ready to issue"],
+      [234, "Weld register"],
+      [261, "Save"],
+      [283, "Export"],
+      [315, "Jobs dashboard"],
+      [341, "AI helper"],
+      [367, "Finish"],
+    ],
+  },
+  {
+    id: "jobs",
+    eyebrow: "Current Jobs guide",
+    title: "Use Jobs and My day",
+    duration: 142,
+    description: "Use the current compact Jobs list, search and filters, open a job folder, work through My day, review the full production board and find reports without being overwhelmed by a large job list.",
+    shortDescription: "Current compact dashboard and daily workflow",
+    url: JOBS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Jobs and My day overview"],
+      [17, "Search, filter and pin jobs"],
+      [36, "Open a compact job folder"],
+      [56, "Work through My day"],
+      [74, "Review urgent work"],
+      [90, "Use the full production board"],
+      [107, "More tools and reports"],
+      [121, "Recommended daily routine"],
+    ],
+  },
+  {
+    id: "quick-pdf",
+    eyebrow: "Fast individual workflow",
+    title: "First spool to Quick PDF",
+    duration: 127,
+    description: "Draw a straightforward spool without a business account, set exact and 45 degree runs, add pipe ends, make precise edits, inspect it in 3D and download a clearly marked working PDF.",
+    shortDescription: "Draw, check and download without the full workflow",
+    url: QUICK_PDF_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "When to use Quick PDF"],
+      [16, "Start a Quick PDF spool"],
+      [29, "Draw exact and 45 degree runs"],
+      [47, "Add fittings and prepared ends"],
+      [64, "Edit lengths and pipe sizes"],
+      [81, "Fit and inspect in 3D"],
+      [93, "Download the working PDF"],
+      [111, "Convert to managed workflow"],
+    ],
+  },
+  {
+    id: "drawing",
+    eyebrow: "Drawing masterclass",
+    title: "Master every drawing tool",
+    duration: 575,
+    description: "Drag drawing, exact runs, true 45 degree offsets, navigation, precise edits, every fitting, sockets, welds, dimensions, notes and the live 3D check.",
+    shortDescription: "Every drawing feature in one guide",
+    url: DRAWING_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Drawing guide overview"],
+      [33, "Set up the spool"],
+      [61, "Draw pipe by dragging"],
+      [88, "Directions and live length"],
+      [116, "Exact X, Y and Z runs"],
+      [144, "True 45 degree offset"],
+      [175, "Zoom, pan and Fit"],
+      [203, "Select and Box Select"],
+      [231, "Right-click length edit"],
+      [262, "Pipe size and bend angle"],
+      [290, "Flanges"],
+      [323, "Roll grooves"],
+      [348, "Valves"],
+      [374, "Socket layouts"],
+      [402, "Move and rotate sockets"],
+      [431, "Tees and branches"],
+      [458, "Reducers"],
+      [485, "Weld numbering"],
+      [513, "Dimensions and labels"],
+      [544, "Measure, notes and 3D check"],
+    ],
+  },
+  {
+    id: "tees-reducers",
+    eyebrow: "Connections in detail",
+    title: "Tees, branches and automatic reducers",
+    duration: 133,
+    description: "Build one clear spool while learning the exact difference between a manufactured tee, a fabricated branch and an automatic reducer, including pipe-size changes, fitting deductions and the final 3D and cut-list checks.",
+    shortDescription: "Tee bodies, fabricated branches and size transitions",
+    url: TEES_REDUCERS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Know the three connection types"],
+      [19, "Add a manufactured tee"],
+      [35, "Tee centre-to-end deductions"],
+      [50, "Add a fabricated branch"],
+      [67, "Create an automatic reducer"],
+      [87, "Change a branch outlet size"],
+      [106, "Check 3D and the cut list"],
+    ],
+  },
+  {
+    id: "reducers-detail",
+    eyebrow: "Reducer guide",
+    title: "Concentric and eccentric reducers",
+    duration: 127,
+    description: "See when SpoolMate inserts a reducer automatically, choose concentric or eccentric construction, compare both in the isometric and 3D model, and verify face-to-face and cut-list information.",
+    shortDescription: "Automatic transitions, types and dimensions",
+    url: REDUCERS_DETAIL_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "How automatic reducers work"],
+      [16, "Choose the default reducer type"],
+      [32, "Read the concentric symbol"],
+      [46, "Inspect concentric in 3D"],
+      [63, "Change one reducer to eccentric"],
+      [79, "Inspect eccentric in 3D"],
+      [93, "Verify the cut list"],
+      [110, "Branches are not reducers"],
+    ],
+  },
+  {
+    id: "offsets-45",
+    eyebrow: "Calculation guide",
+    title: "45 degree offsets and cut lengths",
+    duration: 126,
+    description: "Create a true one-plane 45 degree offset on PC or touch, follow set multiplied by the square root of two through to travel, then verify elbow take-offs, weld gaps and the resulting angled pipe cut.",
+    shortDescription: "Set, travel, deductions and the finished cut",
+    url: OFFSETS_45_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "The one-plane offset method"],
+      [18, "Enter the required set"],
+      [32, "Draw with Shift or Hold 45"],
+      [50, "Calculate set multiplied by square root of two"],
+      [71, "Finish and dimension the offset"],
+      [86, "Calculate the angled pipe cut"],
+      [103, "Weld gaps and the 3D check"],
+    ],
+  },
+  {
+    id: "pipe-ends",
+    eyebrow: "Focused guide",
+    title: "Add pipe end preparations",
+    duration: 161,
+    description: "Use the real right-click controls to add roll grooves, single and double flanges, flange standards and threaded ends, then verify or remove them.",
+    shortDescription: "Roll grooves, flanges and threads",
+    url: PIPE_ENDS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Pipe end overview"],
+      [21, "Open the pipe-end menu"],
+      [45, "Add a roll groove"],
+      [68, "Single and double flanges"],
+      [91, "Choose the flange standard"],
+      [116, "Add a threaded end"],
+      [139, "Check and remove ends"],
+    ],
+  },
+  {
+    id: "sockets",
+    eyebrow: "Focused guide",
+    title: "Build socket layouts",
+    duration: 198,
+    description: "Create socket layouts, choose size, count and spacing, read dimensions, move or rotate individual sockets and confirm the result in 3D.",
+    shortDescription: "Sockets in detail",
+    url: SOCKETS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Socket overview"],
+      [22, "Open Socket Layout"],
+      [42, "Choose size and count"],
+      [67, "Set the spacing"],
+      [97, "Apply and read dimensions"],
+      [122, "Move one socket"],
+      [145, "Resize, rotate and delete"],
+      [173, "3D and final check"],
+    ],
+  },
+  {
+    id: "touch-controls",
+    eyebrow: "iPad, iPhone and Android",
+    title: "Use SpoolMate on touch screens",
+    duration: 130,
+    description: "Learn the tablet and phone layout, exact runs, Hold 45, zoom, pan, Fit, long-press editing, mobile Details, 3D controls and the compact action menu.",
+    shortDescription: "Touch drawing, navigation and editing",
+    url: TOUCH_CONTROLS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "The touch workspace"],
+      [16, "Draw an exact run"],
+      [30, "Use Hold 45"],
+      [46, "Zoom, pan and Fit"],
+      [60, "Long-press to edit"],
+      [76, "Use the mobile Details sheet"],
+      [92, "Inspect the 3D model"],
+      [107, "Find actions on a small screen"],
+    ],
+  },
+  {
+    id: "editing-fixes",
+    eyebrow: "Editing guide",
+    title: "Edit and fix common mistakes",
+    duration: 133,
+    description: "Correct lengths and sizes, use Undo and Redo, place or remove fittings, box-select runs, recover the view with Fit or layout reset, and jump directly from a QA warning to the problem.",
+    shortDescription: "Fast corrections without redrawing the spool",
+    url: EDITING_FIXES_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Select before editing"],
+      [16, "Correct an exact length"],
+      [33, "Undo and Redo safely"],
+      [50, "Change a pipe size"],
+      [65, "Add or remove a fitting"],
+      [81, "Use box selection"],
+      [96, "Recover zoom and layout"],
+      [112, "Fix issues from Review"],
+    ],
+  },
+  {
+    id: "three-d-inspection",
+    eyebrow: "3D inspection",
+    title: "Control and inspect the 3D model",
+    duration: 147,
+    description: "Use Full, Rotate, Move, zoom and Fit on PC, iPad and Android, compare every model style, inspect tee, reducer, branch, offset and prepared-end geometry, then export a clean 3D image.",
+    shortDescription: "Orbit, pan, zoom, styles and fabrication checks",
+    url: THREE_D_INSPECTION_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Open the live 3D model"],
+      [18, "Orbit smoothly in Rotate mode"],
+      [34, "Move, zoom and Fit"],
+      [49, "Choose the right model style"],
+      [68, "Read the size-colour key and labels"],
+      [85, "Inspect a fabricated branch"],
+      [103, "Inspect offsets and prepared ends"],
+      [121, "Export a clean 3D image"],
+    ],
+  },
+  {
+    id: "big-spool",
+    eyebrow: "Transport planning",
+    title: "Plan and split a Big Spool",
+    duration: 116,
+    description: "Design one continuous assembly, apply real transport limits, choose matching field weld, roll-groove or flange split connections, and prepare child fabrication pieces.",
+    shortDescription: "Transport splits without breaking the master",
+    url: BIG_SPOOL_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Big Spool overview"],
+      [18, "Set transport limits"],
+      [32, "Suggest transport pieces"],
+      [46, "Choose split connections"],
+      [64, "Add a manual split"],
+      [82, "Use the load planner"],
+      [96, "Keep the master continuous"],
+    ],
+  },
+  {
+    id: "big-spool-advanced",
+    eyebrow: "Advanced transport planning",
+    title: "Master Big Spool planning",
+    duration: 166,
+    description: "Apply custom truck, lift or access limits, review suggested and manual split positions, choose flanges, roll grooves or field welds, build a populated load plan and create linked child fabrication spools.",
+    shortDescription: "Limits, split joints, load plans and child spools",
+    url: BIG_SPOOL_ADVANCED_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "When to use Big Spool"],
+      [19, "Set real transport limits"],
+      [35, "Review suggested pieces"],
+      [52, "Choose flanges or roll grooves"],
+      [73, "Apply field-weld gaps"],
+      [91, "Add a manual split"],
+      [107, "Build the load plan"],
+      [121, "Create child fabrication spools"],
+      [141, "Inspect and issue every child"],
+    ],
+  },
+  {
+    id: "workspace",
+    eyebrow: "Workspace guide",
+    title: "Work with multiple open spools",
+    duration: 95,
+    description: "Open several spools in tabs, restore each drawing and view state, compare them in Windows mode and open saved work into a new tab from Jobs.",
+    shortDescription: "Tabs, windows and exact view restoration",
+    url: WORKSPACE_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Multiple-spool workspace"],
+      [16, "Start or open another spool"],
+      [32, "Switch without losing state"],
+      [49, "Compare in Windows mode"],
+      [64, "Open a Jobs spool in a tab"],
+      [79, "Close and restore tabs"],
+    ],
+  },
+  {
+    id: "qa-export",
+    eyebrow: "Issue and fabrication",
+    title: "QA, weld tracking and export",
+    duration: 138,
+    description: "Resolve fabrication blockers, verify cut calculations, weights and materials, complete the weld register, choose a PDF audience and issue a traceable QR fabrication package.",
+    shortDescription: "Checks, cut list, welds and PDFs",
+    url: QA_EXPORT_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Review and fabrication blockers"],
+      [16, "Show issues on the drawing"],
+      [30, "Verify the cut list"],
+      [49, "Weights and materials"],
+      [65, "Complete the weld register"],
+      [83, "Draft versus issued PDFs"],
+      [98, "Choose the PDF audience"],
+      [116, "QR, 3D and project backup"],
+    ],
+  },
+  {
+    id: "approval-revisions",
+    eyebrow: "Controlled issue",
+    title: "Approval, revisions, PDFs and QR travellers",
+    duration: 141,
+    description: "Follow one spool from Draft to checking, approval and issue, create its controlled PDF and QR traveller, then return it for changes and preserve the superseded revision correctly.",
+    shortDescription: "Submit, approve, issue, revise and trace",
+    url: APPROVAL_REVISIONS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "The controlled revision workflow"],
+      [18, "Submit as Ready to check"],
+      [33, "Approve and record the checker"],
+      [48, "Clear the Ready to Issue gate"],
+      [67, "Create the issued PDF and QR"],
+      [88, "Return issued work for changes"],
+      [107, "Create and check the next revision"],
+      [123, "Review the full revision history"],
+    ],
+  },
+  {
+    id: "weld-register",
+    eyebrow: "Welding and inspection",
+    title: "Weld register, WPS, NDT and repairs",
+    duration: 132,
+    description: "Follow automatic weld numbers from the drawing into the register, assign one or mixed welders, record WPS and completion, complete inspection or NDT and retain the full repair and retest history.",
+    shortDescription: "Numbering, welders, inspection and final sign-off",
+    url: WELD_REGISTER_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Automatic weld numbering"],
+      [20, "Assign one welder to all welds"],
+      [35, "Record mixed welders"],
+      [51, "WPS and weld completion"],
+      [71, "Inspection and NDT results"],
+      [91, "Repairs and retesting"],
+      [108, "Final register sign-off"],
+    ],
+  },
+  {
+    id: "production",
+    eyebrow: "Teams and workshop",
+    title: "Run production and gear checks",
+    duration: 125,
+    description: "Use business roles, allocation, due dates, production stages, holds, gear readiness, workshop messages, mixed welders and the mobile QR traveller. Its opening Jobs section is being aligned with v3.48.",
+    shortDescription: "Production workflow current · Jobs opening update pending",
+    url: PRODUCTION_TUTORIAL_VIDEO_URL,
+    previousLayout: true,
+    updateNotice: "The Production video remains correct after work is opened, but its opening Jobs view uses the previous layout. Start in My day or use the four compact Jobs filters in v3.48.",
+    chapters: [
+      [0, "Business roles and ownership"],
+      [18, "Find the work that matters"],
+      [33, "Allocate and schedule"],
+      [48, "Confirm gear is in the shop"],
+      [62, "Readiness controls and overrides"],
+      [78, "Messages, notes and photos"],
+      [91, "All welds or mixed welders"],
+      [104, "Open the mobile QR traveller"],
+    ],
+  },
+  {
+    id: "business-setup",
+    eyebrow: "Business accounts",
+    title: "Set up a team workspace",
+    duration: 132,
+    description: "Create a business workspace, understand the five included seats, invite people, assign Owner, Admin, Designer, Workshop and Viewer roles, switch workspaces and connect the team to the Jobs workflow.",
+    shortDescription: "Five seats, roles, invites and shared work",
+    url: BUSINESS_SETUP_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Personal versus business accounts"],
+      [16, "Create a business workspace"],
+      [30, "Use the five included seats"],
+      [46, "Assign team roles"],
+      [67, "What Workshop users can do"],
+      [82, "Switch personal and business workspaces"],
+      [98, "Use shared Jobs"],
+      [115, "Manage seats and access"],
+    ],
+  },
+  {
+    id: "cloud-recovery",
+    eyebrow: "Accounts and safety",
+    title: "Cloud save and recovery",
+    duration: 90,
+    description: "Understand local and cloud status, personal and business workspaces, offline saving, last-session recovery, trial access and portable project backups.",
+    shortDescription: "Know exactly where every spool is saved",
+    url: CLOUD_RECOVERY_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Local and cloud save status"],
+      [16, "Personal and business workspaces"],
+      [30, "Work through a connection loss"],
+      [45, "Restore the last session"],
+      [60, "What happens after a trial"],
+      [74, "Export a portable backup"],
+    ],
+  },
+  {
+    id: "import-help",
+    eyebrow: "Tools and learning",
+    title: "Import, measure and get help",
+    duration: 93,
+    description: "Trace a supplied drawing, calibrate it correctly, add measures and notes, find any action by search, ask the in-app helper and choose the right learning path.",
+    shortDescription: "Import assistant, commands and help",
+    url: IMPORT_HELP_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Drawing import assistant"],
+      [16, "Calibrate before tracing"],
+      [29, "Measure and place notes"],
+      [44, "Search the action menu"],
+      [60, "Ask SpoolMate"],
+      [76, "Quick Start and touch controls"],
+    ],
+  },
+];
 const QR_CODE_JS_URL = "https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm";
+const QR_CODE_READER_JS_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/+esm";
 const CLOUD_PROJECTS_TABLE = "spool_projects";
 const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_COMPANIES_TABLE = "companies";
@@ -279,10 +908,22 @@ const CLOUD_COMPANY_MEMBERS_TABLE = "company_members";
 const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
 const CLOUD_PROJECT_PHOTOS_BUCKET = "spool-photos";
 const CLOUD_TEAM_MESSAGES_TABLE = "team_messages";
+const TRIAL_LENGTH_DAYS = 30;
+const BUSINESS_INCLUDED_SEATS = 5;
+const AI_HELPER_FUNCTION = "ai-help";
+const AI_HELPER_TRIAL_DAILY_LIMIT = 10;
+const AI_HELPER_PAID_DAILY_LIMIT = 50;
+const AI_HELPER_MAX_HISTORY = 6;
+const AI_HELPER_WELCOME = "Hi — ask what you are trying to do or what looks wrong. I use the screen you opened me from and give exact PC, iPad or Android steps, including what you should see when it works.";
+const LICENCE_NOTICE_KEY = "spoolmate-licence-notice-v1";
+const LICENCE_UPGRADE_URL = "";
 const CLOUD_AUTOSAVE_DELAY_MS = 1600;
 const AUTH_PROMPT_SESSION_KEY = "isospool-auth-prompt-shown-v1";
 const AUTH_REMEMBER_DEVICE_KEY = "isospool-auth-remember-device-v1";
+const AUTH_GUEST_DEVICE_KEY = "isospool-auth-guest-device-v1";
 const ACTIVE_COMPANY_KEY = "isospool-active-company-v1";
+const ACTIVE_WORKSPACE_KEY = "spoolmate-active-workspace-v1";
+const PENDING_BUSINESS_SIGNUP_KEY = "spoolmate-pending-business-signup-v1";
 const VERSION_CHECK_INTERVAL_MS = 10 * 60 * 1000;
 const PROJECT_FILE_VERSION = 1;
 const FAB_PDF_PAGE_WIDTH_PT = 1190.55;
@@ -292,11 +933,33 @@ const REPORT_CANVAS_HEIGHT = 1240;
 const MM_PER_GRID = 1000;
 const LENGTH_INCREMENT_MM = 1;
 const MIN_LENGTH_MM = 50;
-const MAX_LENGTH_MM = 12000;
+const MAX_LENGTH_MM = 1000000;
+const BIG_SPOOL_DEFAULT_MAX_LENGTH_MM = 12000;
+const BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM = 500;
+const BIG_SPOOL_DEFAULT_CLEARANCE_MM = 150;
+const BIG_SPOOL_PIECE_COLOURS = ["#087f8c", "#d97706", "#7c3aed", "#16803c", "#c0266d", "#2563eb", "#9a3412", "#4f6268"];
+const BIG_SPOOL_PRESETS = {
+  custom: { label: "Custom limits" },
+  ute: { label: "Ute / small tray", lengthMm: 4800, widthMm: 1800, heightMm: 1800, weightKg: 750 },
+  truck: { label: "Truck transport", lengthMm: 12000, widthMm: 2400, heightMm: 2700, weightKg: 5000 },
+  lift: { label: "Site goods lift", lengthMm: 3000, widthMm: 1800, heightMm: 2200, weightKg: 1200 },
+};
+const BIG_SPOOL_JOINT_TYPES = {
+  fieldWeld: "Field weld",
+  flange: "Flanges both sides",
+  groove: "Roll grooves both sides",
+  thread: "Threaded joint",
+};
+const BIG_SPOOL_PRIMARY_JOINT_TYPES = new Set(["fieldWeld", "flange", "groove"]);
+const BIG_SPOOL_JOINT_STATUSES = {
+  planned: "Planned",
+  ready: "Ready for site",
+  complete: "Completed",
+};
 const RUN_CONNECTION_TOLERANCE_MM = 8;
 const ISO_COS = Math.cos(Math.PI / 6);
 const ISO_SIN = Math.sin(Math.PI / 6);
-const FITTING_TOOLS = new Set(["flange", "rollGroove", "valve", "weld", "reducer", "socket"]);
+const FITTING_TOOLS = new Set(["flange", "rollGroove", "threadedEnd", "valve", "weld", "reducer", "socket"]);
 const FITTINGS_FLYOUT_TOOLS = new Set(["tee", "branch", "flange", "reducer", "rollGroove", "valve", "socket", "weld"]);
 const FITTINGS_FLYOUT_ICONS = {
   tee: "#icon-tee",
@@ -508,11 +1171,19 @@ const FLANGE_DRILLING_TABLES = {
   ],
 };
 const FLANGE_STANDARD_KEYS = new Set(Object.keys(FLANGE_STANDARDS));
-const ROLL_GROOVE_SETBACK_MM = 10;
-const ROLL_GROOVE_VISUAL_WIDTH_MM = 18;
+const ROLL_GROOVE_SETBACK_MM = 18;
+const ROLL_GROOVE_VISUAL_WIDTH_MM = 9;
 const REDUCER_SIDE_OPTIONS = new Set(["small", "large"]);
+const REDUCER_TYPE_OPTIONS = new Set(["concentric", "eccentric"]);
 const DRAW_STOP_TOOLS = new Set(["draw", "tee", "branch"]);
-const PREVIEW_MODES = new Set(["carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
+const PREVIEW_MODES = new Set(["illustrated", "tricolor", "carbon", "workshop", "black", "stainless", "red", "ghost", "outline", "cad"]);
+const LEGACY_PREVIEW_MODE_MAP = {
+  workshop: "illustrated",
+  black: "carbon",
+  stainless: "carbon",
+  red: "tricolor",
+  cad: "outline",
+};
 const DRAWING_DETAIL_MODES = new Set(["clean", "fab", "sizes", "callouts", "full"]);
 const DIMENSION_STYLES = new Set(["labels", "redline", "numbered", "chain"]);
 const PIPE_LABEL_MODES = new Set(["auto", "key", "all", "export", "off"]);
@@ -523,6 +1194,7 @@ const PROJECT_STATUS_FLOW = [
   ["readycheck", "Ready to check"],
   ["checked", "Checked"],
   ["issued", "Issued"],
+  ["materialcheck", "Gear check"],
   ["cutting", "Cutting"],
   ["fitup", "Fit-up"],
   ["welded", "Welded"],
@@ -542,8 +1214,13 @@ const PROJECT_STATUS_ALIASES = {
   painting: "finish",
   finished: "finish",
   workshop: "issued",
+  material: "materialcheck",
+  materials: "materialcheck",
+  gear: "materialcheck",
+  gearcheck: "materialcheck",
 };
 const PRODUCTION_PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
+const MATERIAL_CHECK_STATUSES = new Set(["pending", "inshop", "order", "na"]);
 const PRODUCTION_BOARD_FILTERS = {
   active: "Active",
   today: "Due today",
@@ -602,6 +1279,12 @@ const APP_MODE_INSPECTOR_HINT = {
   review: "Checks, workflow, notes and retained history",
   export: "Cut list, weights and material order",
 };
+const APP_MODE_WORKSPACE_TITLE = {
+  draw: "Draw spool",
+  edit: "Edit spool",
+  review: "Review and issue",
+  export: "Export fabrication",
+};
 const SIDE_TOOL_DETAILS = {
   draw: ["Draw", "Create pipe runs from points"],
   select: ["Select", "Pick, edit and drag items"],
@@ -645,13 +1328,13 @@ const TUTORIAL_STEPS = [
     title: "Team messages and spool conversations",
     body: "Comms is for team-wide messages. Each cloud spool also has its own conversation for @mentions, workshop photos, checker comments and resolved actions.",
     target: "#openBrowserProjectButton",
-    targetLabel: "Jobs button, then Comms",
+    targetLabel: "Jobs button, then More and Team comms",
     action: "showComms",
     actionLabel: "Open Comms",
     demo: "comms",
     items: [
-      "Open Jobs, then use Comms for messages that affect the whole team.",
-      "Open Jobs, choose Comms, then use Open spool conversation for messages attached to the current drawing.",
+      "Open Jobs, choose More, then Team comms for messages that affect the whole team.",
+      "From Team comms, use Open spool conversation for messages attached to the current drawing.",
       "Tag a teammate with @name, attach a workshop photo, then resolve the message once addressed.",
       "Owners can promote admins. Admins can approve users and manage shared team spools.",
       "Team messages are shared through Supabase for approved company members.",
@@ -668,7 +1351,8 @@ const TUTORIAL_STEPS = [
     actionLabel: "Open Jobs",
     demo: "jobs",
     items: [
-      "Use the team dashboard for Assigned to me, Due today, Overdue, Ready to check and On hold queues.",
+      "Use My day for My attention, Assigned to me, Ready for checking and On hold queues.",
+      "Workshop users see their own work first; owners and admins see team-wide attention and holds.",
       "Recent team activity shows assignment, due-date, hold, message, pipe-size and stage changes.",
       "Drag cards between stages, or use the stage menu on touch devices.",
       "Assign a person, due date, priority and hold reason directly on the card.",
@@ -740,7 +1424,7 @@ const TUTORIAL_STEPS = [
     kicker: "Angles",
     menuLabel: "Angles / offsets",
     title: "Add 45 degree offsets",
-    body: "In the real drawing, hold Shift while drawing to snap the angled travel to 45 degrees. Enter the offset set first, then keep Shift held while dragging the travel piece.",
+    body: "Enter the offset set first, then hold Shift on a keyboard or Hold 45° beside the drawing on touch while dragging the angled travel.",
     target: "#stepLengthInput",
     targetLabel: "Next run / offset set mm",
     mode: "draw",
@@ -749,8 +1433,9 @@ const TUTORIAL_STEPS = [
     demo: "offset",
     items: [
       "Enter the required offset set distance.",
-      "Hold Shift while dragging the angled travel piece so it snaps to 45 degrees.",
-      "Release Shift after the angled travel, then draw the straight return run. SpoolMate calculates and labels the 45 travel.",
+      "Hold Shift on a keyboard while dragging the angled travel so it snaps to 45 degrees.",
+      "On iPad or Android, press and hold Hold 45° with one finger while dragging the travel with another.",
+      "Release Shift or Hold 45° after the angled travel, then draw the straight return. SpoolMate calculates and labels the 45 travel.",
     ],
   },
   {
@@ -809,16 +1494,16 @@ const TUTORIAL_STEPS = [
     kicker: "Pipe Size",
     menuLabel: "Pipe size",
     title: "Change pipe size from menus",
-    body: "Pipe size is chosen from the pipe/tube menu. Size changes on normal runs and tee connections add reducers where needed. Branches stay as welded cut-ins without reducers.",
-    target: "#pipeSizeSelect",
-    targetLabel: "Pipe / tube menu",
+    body: "Open Pipe & display to choose the next run size and default reducer type. Size changes on normal runs and tee connections add either a concentric or eccentric reducer. Eccentric reducers show their flat side and offset e. Branches stay as welded cut-ins without reducers.",
+    target: "#workspaceSettingsButton",
+    targetLabel: "Pipe & display",
     action: "focusPipeSize",
-    actionLabel: "Open Pipe Size",
+    actionLabel: "Open Pipe & display",
     demo: "reducer",
     items: [
-      "Use the top Pipe / tube menu for the next run size.",
+      "Use Pipe & display > Size for the next run size.",
       "Right-click or long-press selected pipe to change existing sizes from the list.",
-      "Reducers are added for size changes on normal pipe and tee connections. Branch welds stay cut into the main pipe with no reducer.",
+      "Reducers are added for size changes on normal pipe and tee connections. Pick concentric or eccentric, then right-click or long-press an individual reducer to change it. Branch welds stay cut into the main pipe with no reducer.",
       "At a welded branch, changing either straight-through main section updates the whole continuous main. The side outlet keeps its own size.",
     ],
   },
@@ -860,16 +1545,17 @@ const TUTORIAL_STEPS = [
     kicker: "Dimensions",
     menuLabel: "Dimensions",
     title: "Choose the clearest dimension style",
-    body: "Dimensions can be red centre-to-centre lines, numbered dimensions or chain dimensions. Pipe-size labels now have their own visibility menu so the drawing can stay clean.",
-    target: "#dimensionStyleSelect",
-    targetLabel: "Dimension style menu",
+    body: "Dimensions can use calm numbered callouts, traditional red centre-to-centre lines or chain dimensions. Pipe-size labels have their own visibility menu so the drawing can stay clean.",
+    target: "#workspaceSettingsButton",
+    targetLabel: "Pipe & display",
     action: "focusDimensions",
     actionLabel: "Show Styles",
     demo: "dimensions",
     items: [
-      "Red C/C lines are good for fabrication checking.",
-      "Drag red dimension labels away from clashes.",
-      "Use numbered or chain dimensions when labels get crowded.",
+      "Numbered key is the clearest everyday view and keeps the pipe visually dominant.",
+      "Use red C/C lines when you specifically want a traditional red-line check.",
+      "Drag fabrication dimension labels away from clashes.",
+      "Use numbered or chain dimensions when the drawing gets crowded.",
       "Use Pipe labels to show key sizes, all sizes, export-only labels or hide them while drawing.",
     ],
   },
@@ -910,8 +1596,8 @@ const TUTORIAL_STEPS = [
   {
     kicker: "Review",
     menuLabel: "Checks",
-    title: "Check before saving or issuing",
-    body: "The Checks, Cut List, Weights and BOM tabs turn the drawing into fabrication information before anyone starts cutting pipe.",
+    title: "Check the drawing and weld register",
+    body: "Checks, Cut List, Weights, BOM and the weld register turn the drawing into fabrication information before anyone starts cutting pipe.",
     target: '[data-inspector-tab="checks"]',
     targetLabel: "Checks tab",
     mode: "review",
@@ -921,6 +1607,8 @@ const TUTORIAL_STEPS = [
     items: [
       "Checks can highlight issues directly on the drawing.",
       "Cut List and BOM show what needs to be made and ordered.",
+      "Weld markers are numbered W01, W02 and onward automatically.",
+      "Record the welder, WPS, completion and inspection/NDT status in the weld register before issue.",
       "Verify estimated weights and lifting details before fabrication or lifting.",
     ],
   },
@@ -938,12 +1626,59 @@ const TUTORIAL_STEPS = [
     items: [
       "Pick Workshop, Client or Material order PDF style from the Export menu before pressing Fab PDF.",
       "Workshop PDF includes the drawing, dimension key, cut list, weights and takeoff list.",
+      "An issued cloud spool can include its permanent spool/revision QR traveller on the fabrication PDF.",
+      "Scanning the QR opens the current revision, production stage, assignment, due date, holds, notes, photos and weld status for permitted users.",
       "Export 3D gives a clean model image for explaining the spool.",
       "Project export is the backup file if someone needs to import the spool later.",
     ],
   },
 ];
 const BEGINNER_TUTORIAL_STEP_INDEXES = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+const QUICK_START_TUTORIAL_STEP_INDEXES = [4, 5, 6, 8, 13, 16, 17];
+const FIRST_USE_GUIDE_STEPS = [
+  {
+    id: "draw",
+    title: "Draw the first pipe run",
+    message: "Choose Draw, then drag from the yellow point. The preview shows the run before you release.",
+    actionLabel: "Start drawing",
+    target: '[data-tool="draw"]',
+  },
+  {
+    id: "length",
+    title: "Set the exact pipe length",
+    message: "Tap the pipe you just drew, then choose Change length. On a PC, right-click does the same thing.",
+    actionLabel: "Select a pipe",
+    target: "#drawCanvas",
+  },
+  {
+    id: "fittings",
+    title: "Finish the pipe and add fittings",
+    message: "Open Fittings for tees and branches, or tap a pipe/end for flanges, roll grooves, threads, sockets, reducers and welds.",
+    actionLabel: "Open fittings",
+    target: "#fittingsToolButton",
+  },
+  {
+    id: "save",
+    title: "Save the spool",
+    message: "Save keeps this job, spool and revision together. After the first setup, this is a single tap.",
+    actionLabel: "Save spool",
+    target: "#saveBrowserProjectButton",
+  },
+  {
+    id: "review",
+    title: "Review the checks",
+    message: "Open Review. Each real blocker has one Fix button; workshop allocation is handled separately in Jobs.",
+    actionLabel: "Open checks",
+    target: '[data-app-mode="review"]',
+  },
+  {
+    id: "export",
+    title: "Issue the workshop output",
+    message: "Approve and issue the revision, then use Fab PDF. The PDF button stays visible in Simple controls.",
+    actionLabel: "Open export",
+    target: '[data-app-mode="export"]',
+  },
+];
 const LOAD_PLAN_TRAYS = {
   medium: { key: "medium", label: "3460 x 2040 mm tray", lengthMm: 3460, widthMm: 2040 },
   long: { key: "long", label: "4490 x 2040 mm tray", lengthMm: 4490, widthMm: 2040 },
@@ -1003,6 +1738,27 @@ const PIPE_SPECS = {
   },
 };
 const PIPE_SPEC_KEYS = new Set(Object.keys(PIPE_SPECS));
+const FITTING_DATA_PROFILES = {
+  atlasAsmeB169: {
+    label: "Atlas / ASME B16.9 pipe",
+    shortLabel: "Atlas B16.9",
+    help: "Verified pipe elbow, tee and reducer dimensions from the supplied Atlas manual.",
+    sourceStatus: "verified",
+  },
+  as1528Supplier: {
+    label: "AS 1528.3 sanitary tube",
+    shortLabel: "AS 1528.3 / supplier",
+    help: "Atlas verifies fitting weights; centre-to-end and face-to-face dimensions require the selected supplier.",
+    sourceStatus: "supplier confirmation",
+  },
+  workshopBranch: {
+    label: "Fabricated branch / workshop rule",
+    shortLabel: "Workshop branch",
+    help: "Welded branch saddle and cut allowances require the workshop procedure or approved detail.",
+    sourceStatus: "workshop confirmation",
+  },
+};
+const FITTING_DATA_PROFILE_KEYS = new Set(Object.keys(FITTING_DATA_PROFILES));
 const DEFAULT_PIPE_WEIGHT_COEFFICIENT = 0.0246615;
 const PRESSURE_RATING_ASSUMPTIONS = {
   carbon40: {
@@ -1020,17 +1776,32 @@ const PRESSURE_RATING_ASSUMPTIONS = {
 };
 const PRESSURE_WALL_TOLERANCE_FACTOR = 0.875;
 const PRESSURE_Y_COEFFICIENT = 0.4;
+const WELD_GAP_CHOICES_MM = new Set([1.6, 2.4]);
+const DEFAULT_WELD_GAP_MM = 2.4;
 const PROJECT_INFO_DEFAULT = {
   jobNumber: "",
   spoolNumber: "",
   revision: "A",
   drawnBy: "",
   client: "",
+  fittingProfile: "atlasAsmeB169",
+  fittingProfileReference: "",
+  weldGapMm: String(DEFAULT_WELD_GAP_MM),
 };
+const WORKFLOW_KINDS = new Set(["managed", "quick"]);
+
+function normalizeWorkflowKind(value) {
+  const normalized = String(value ?? "managed").trim().toLowerCase();
+  return WORKFLOW_KINDS.has(normalized) ? normalized : "managed";
+}
+
+function isQuickPdfMode(source = state) {
+  return normalizeWorkflowKind(source?.workflowKind) === "quick";
+}
 const ATLAS_BUTTWELD_WEIGHTS = {
   carbon40: {
-    15: { elbow90: 0.08, elbow45: 0.04, reducer: 0.12, tee: 0.09 },
-    20: { elbow90: 0.11, elbow45: 0.06, reducer: 0.15, tee: 0.13 },
+    15: { elbow90: 0.08, elbow45: 0.04, tee: 0.09 },
+    20: { elbow90: 0.11, elbow45: 0.06, reducer: 0.06, tee: 0.13 },
     25: { elbow90: 0.16, elbow45: 0.08, reducer: 0.12, tee: 0.25 },
     32: { elbow90: 0.26, elbow45: 0.13, reducer: 0.16, tee: 0.43 },
     40: { elbow90: 0.37, elbow45: 0.19, reducer: 0.25, tee: 0.61 },
@@ -1131,6 +1902,12 @@ const ATLAS_STAINLESS10_REDUCER_WEIGHTS = {
   "300:200": 7.67,
   "300:250": 7.98,
 };
+// Atlas Schedule 10S welded butt-weld reducer weights are the same for both
+// types except DN40 x DN32, where the eccentric reducer is published as 0.24 kg
+// rather than the 0.21 kg concentric value.
+const ATLAS_STAINLESS10_ECCENTRIC_REDUCER_WEIGHT_OVERRIDES = {
+  "40:32": 0.24,
+};
 const TEE_TAKEOFF_MM = {
   6: 25,
   8: 25,
@@ -1150,6 +1927,27 @@ const TEE_TAKEOFF_MM = {
   200: 178,
   250: 216,
   300: 254,
+};
+// ASME B16.9 long-radius 45 degree elbow centre-to-end dimension B,
+// published in the Atlas carbon and stainless pipe fitting tables.
+// Keep this separate from the 90 degree radius A: A * tan(22.5 degrees)
+// does not reproduce the standard fitting's published B dimension.
+const ELBOW_45_TAKEOFF_MM = {
+  15: 16,
+  20: 19,
+  25: 22,
+  32: 25,
+  40: 29,
+  50: 35,
+  65: 44,
+  80: 51,
+  90: 57,
+  100: 64,
+  125: 79,
+  150: 95,
+  200: 127,
+  250: 159,
+  300: 190,
 };
 const REDUCER_LENGTH_MM = {
   6: 38,
@@ -1301,6 +2099,7 @@ let nextNoteId = 1;
 let nextMeasurementId = 1;
 let state = loadState() ?? blankState();
 let appMode = loadAppMode();
+let interfaceDensity = "simple";
 let noteDrag = null;
 let socketDrag = null;
 let dimensionDrag = null;
@@ -1308,10 +2107,13 @@ let dimensionHitTargets = [];
 let boxSelectDrag = null;
 let measurementDraft = null;
 let shiftAngleSnap = false;
+let touchShiftAnglePointerId = null;
 let touchContextPress = null;
 let pendingDraw = null;
 let activeTouchPointers = new Map();
 let pinchGesture = null;
+let drawingPanGesture = null;
+let drawingViewOffset = { x: 0, y: 0 };
 let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
 let noteDialogResolver = null;
@@ -1319,29 +2121,45 @@ let fieldInputDialogResolver = null;
 let appConfirmDialogResolver = null;
 let noteDialogColour = DEFAULT_NOTE_COLOUR;
 let tutorialStepIndex = 0;
-let tutorialPathMode = "beginner";
+let tutorialPathMode = "quick";
 let tutorialHighlightedElement = null;
 let tutorialPreviewRestoreState = null;
 let tutorialPractice = null;
 let tutorialTrainer = null;
 let tutorialCompletedSteps = new Set();
 let tutorialTrainerSuppressClickUntil = 0;
+let firstUseGuideState = null;
+let firstUseHighlightedElement = null;
+let aiHelperConversation = [];
+let aiHelperBusy = false;
+let aiHelperRemaining = null;
+let aiHelperLastFocused = null;
 let drawingAssistantState = null;
 let appUpdatePromptOpen = false;
 let appUpdateReloadPending = false;
 let appFullscreenPanel = null;
 let focusModeActive = false;
+let focusModeRestoreState = null;
+let temporaryWorkspaceNavigationState = null;
+let previewReturnSurfaceState = null;
+let lastWorkspaceLayoutKind = null;
 let previewFloatDrag = null;
 let previewFloatBounds = loadPreviewFloatBoundsPreference();
 let previewFloatManual = loadPreviewFloatPreference();
 let previewPanelMinimized = false;
 let previewPanelHidden = true;
+let spoolWorkspaceTabs = [];
+let activeSpoolWorkspaceTabId = "";
+let spoolWorkspaceWindowed = false;
+let spoolWorkspaceSwitching = false;
+let spoolWorkspaceSessionPersistTimer = null;
 let actionMenuLastPointerToggleAt = -Infinity;
 let healthHighlight = null;
 let healthHighlightAnimationFrame = 0;
 let startupProjectPromptPending = false;
 let authGateOpen = false;
 let authMode = "signin";
+const recentClientErrors = [];
 let supabaseClient = null;
 let cloudUser = null;
 let cloudProfile = null;
@@ -1354,6 +2172,12 @@ let cloudCompanies = [];
 let cloudCompanyMemberships = [];
 let activeCompany = null;
 let activeCompanyMembership = null;
+let pendingBusinessSignupBusy = false;
+let supportAdminAccess = false;
+let supportAdminAccessCheckedUserId = "";
+let supportAdminBusy = false;
+let supportAdminSelectedUserId = "";
+let supportAdminCurrentDetail = null;
 let companyMembers = [];
 let projectComments = [];
 let projectCommentsProjectId = null;
@@ -1388,8 +2212,20 @@ let projectLibraryReportVisible = false;
 let projectLibraryCommsVisible = false;
 let projectLibraryReportPeriod = "daily";
 let projectLibraryBoardFilter = "active";
+let projectLibraryDashboardView = readTeamDashboardView();
+let projectLibraryMoreVisible = false;
+let projectLibraryJobFilter = readProjectLibraryJobFilter();
+let projectLibraryJobPins = readProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, 80);
+let projectLibraryRecentJobs = readProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, 12);
+let projectLibraryJobPage = 1;
+let dashboardPreferenceSaveTimer = 0;
+let dashboardPreferenceSaveBusy = false;
+const dashboardPreferenceSaveQueue = new Map();
+let qrReaderModulePromise = null;
+let activeQrScanner = null;
 let fabSheetTemplate = loadFabSheetTemplate();
 let loadPlanSelection = new Set();
+let loadPlanItemsCache = [];
 let loadPlanAnimationFrame = 0;
 let currentLoadPlan = null;
 let loadPlanTrayKey = "medium";
@@ -1410,6 +2246,8 @@ let three = {
   navigationMode: "orbit",
   userMovedCamera: false,
   modelCenter: null,
+  previewGrid: null,
+  previewShadowPlane: null,
   interacting: false,
   interactionTimer: 0,
   labelFrameSkip: 0,
@@ -1463,6 +2301,7 @@ function sampleState() {
     ],
     nodeTypes: {},
     reducerSideOverrides: {},
+    reducerTypeOverrides: {},
     dimensionOffsets: {},
     hoveredSegment: null,
     pointer: null,
@@ -1474,7 +2313,8 @@ function sampleState() {
     anglePlane: "xy",
     flangeMode: "single",
     flangeStandard: "ansi150",
-    previewMode: "carbon",
+    reducerType: "concentric",
+    previewMode: "tricolor",
     show3dLabels: true,
     gridScale: 42,
     drawingDetail: "callouts",
@@ -1491,11 +2331,13 @@ function sampleState() {
     locked: false,
     revisionHistory: [],
     spoolUid: createTraceabilityId("SPL"),
+    bigSpool: defaultBigSpoolPlan(),
     weldRegister: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
     productionActivity: [],
     healthAcknowledgements: {},
+    issueAudits: [],
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -1515,7 +2357,8 @@ function hardCodedDrawingDefaults() {
     angleDegrees: 45,
     anglePlane: "xy",
     flangeMode: "single",
-    previewMode: "carbon",
+    reducerType: "concentric",
+    previewMode: "tricolor",
     show3dLabels: true,
     gridScale: 42,
     drawingDetail: "callouts",
@@ -1541,6 +2384,7 @@ function normalizeDrawingDefaults(defaults = {}) {
     anglePlane: normalizeAnglePlane(defaults.anglePlane ?? base.anglePlane),
     flangeMode: normalizeFlangeMode(defaults.flangeMode ?? base.flangeMode),
     flangeStandard: normalizeFlangeStandard(defaults.flangeStandard ?? base.flangeStandard),
+    reducerType: normalizeReducerType(defaults.reducerType ?? base.reducerType),
     previewMode: normalizePreviewMode(defaults.previewMode ?? base.previewMode),
     show3dLabels: defaults.show3dLabels !== false,
     gridScale: clampNumber(Number(defaults.gridScale) || base.gridScale, 24, 72),
@@ -1569,6 +2413,46 @@ function markNumberedDimensionDefaultApplied() {
   }
 }
 
+function triColor3dDefaultApplied() {
+  try {
+    return localStorage.getItem(TRICOLOR_3D_DEFAULT_KEY) === "true";
+  } catch {
+    return true;
+  }
+}
+
+function markTriColor3dDefaultApplied() {
+  try {
+    localStorage.setItem(TRICOLOR_3D_DEFAULT_KEY, "true");
+  } catch {
+    // The tri-colour style still works without localStorage.
+  }
+}
+
+function shouldUseTriColor3dDefault(source) {
+  const mode = String(source?.previewMode ?? "").trim();
+  return !mode || ["illustrated", "carbon", "workshop", "black", "stainless", "red", "cad"].includes(mode);
+}
+
+function applyTriColor3dDefault(target) {
+  if (target && typeof target === "object") target.previewMode = "tricolor";
+  return target;
+}
+
+function migrateTriColor3dDrawingDefaults() {
+  try {
+    const rawDefaults = JSON.parse(localStorage.getItem(USER_DRAWING_DEFAULTS_KEY)) ?? {};
+    if (shouldUseTriColor3dDefault(rawDefaults)) {
+      localStorage.setItem(
+        USER_DRAWING_DEFAULTS_KEY,
+        JSON.stringify({ ...rawDefaults, previewMode: "tricolor" }),
+      );
+    }
+  } catch {
+    // A missing drawing-defaults record does not prevent the current drawing migration.
+  }
+}
+
 function shouldUseNumberedDimensionDefault(rawDefaults) {
   if (!rawDefaults || typeof rawDefaults !== "object") return true;
   return rawDefaults.dimensionStyle === undefined || normalizeDimensionStyle(rawDefaults.dimensionStyle) === "labels";
@@ -1587,6 +2471,14 @@ function readUserDrawingDefaults() {
   try {
     const rawDefaults = JSON.parse(localStorage.getItem(USER_DRAWING_DEFAULTS_KEY)) ?? {};
     const defaults = normalizeDrawingDefaults(rawDefaults);
+    const triColorAlreadyApplied = triColor3dDefaultApplied();
+    if (!triColorAlreadyApplied && shouldUseTriColor3dDefault(rawDefaults)) {
+      applyTriColor3dDefault(defaults);
+      migrateTriColor3dDrawingDefaults();
+      markTriColor3dDefaultApplied();
+    } else if (!triColorAlreadyApplied) {
+      markTriColor3dDefaultApplied();
+    }
     const alreadyApplied = numberedDimensionDefaultApplied();
     if (!alreadyApplied && shouldUseNumberedDimensionDefault(rawDefaults)) {
       markNumberedDimensionDefaultApplied();
@@ -1595,6 +2487,7 @@ function readUserDrawingDefaults() {
     if (!alreadyApplied) markNumberedDimensionDefaultApplied();
     return defaults;
   } catch {
+    markTriColor3dDefaultApplied();
     markNumberedDimensionDefaultApplied();
     return normalizeDrawingDefaults();
   }
@@ -1609,6 +2502,7 @@ function drawingDefaultsFromState(source = state) {
     anglePlane: source?.anglePlane,
     flangeMode: source?.flangeMode,
     flangeStandard: source?.flangeStandard,
+    reducerType: source?.reducerType,
     previewMode: source?.previewMode,
     show3dLabels: source?.show3dLabels !== false,
     gridScale: source?.gridScale,
@@ -1647,6 +2541,7 @@ function blankState(options = {}) {
     measurements: [],
     nodeTypes: {},
     reducerSideOverrides: {},
+    reducerTypeOverrides: {},
     dimensionOffsets: {},
     hoveredSegment: null,
     pointer: null,
@@ -1658,6 +2553,7 @@ function blankState(options = {}) {
     anglePlane: defaults.anglePlane,
     flangeMode: defaults.flangeMode,
     flangeStandard: defaults.flangeStandard,
+    reducerType: defaults.reducerType,
     previewMode: defaults.previewMode,
     show3dLabels: defaults.show3dLabels,
     gridScale: defaults.gridScale,
@@ -1668,6 +2564,7 @@ function blankState(options = {}) {
     showLiftingPoints: defaults.showLiftingPoints,
     liftingSlingAngleDegrees: defaults.liftingSlingAngleDegrees,
     projectId: null,
+    workflowKind: "managed",
     projectInfoPrompted: false,
     projectStatus: "draft",
     checkedBy: "",
@@ -1677,12 +2574,14 @@ function blankState(options = {}) {
     locked: false,
     revisionHistory: [],
     spoolUid: createTraceabilityId("SPL"),
+    bigSpool: defaultBigSpoolPlan(),
     weldRegister: [],
     productionInfo: defaultProductionInfo(),
     productionMessages: [],
     productionActivity: [],
     healthAcknowledgements: {},
-    projectInfo: defaultProjectInfo(),
+    issueAudits: [],
+    projectInfo: defaultProjectInfo(defaults.pipeSpec),
     history: [],
     redoHistory: [],
   };
@@ -1697,12 +2596,32 @@ function loadState() {
       const restored = stateFromPayload(saved, { legacyUnits, applyNewDefaults });
       if (!restored) continue;
 
+      if (saved?.points?.length) {
+        try {
+          localStorage.setItem(LAST_SESSION_RECOVERY_KEY, JSON.stringify({
+            createdAt: new Date().toISOString(),
+            sourceKey: key,
+            state: saved,
+          }));
+        } catch {
+          // The current drawing still loads if recovery storage is unavailable.
+        }
+      }
+
       const alreadyApplied = numberedDimensionDefaultApplied();
       if (!alreadyApplied && shouldUseNumberedDimensionDefault(saved)) {
         applyNumberedDimensionDefault(restored);
         markNumberedDimensionDefaultApplied();
       } else if (!alreadyApplied) {
         markNumberedDimensionDefaultApplied();
+      }
+      const triColorAlreadyApplied = triColor3dDefaultApplied();
+      if (!triColorAlreadyApplied && shouldUseTriColor3dDefault(saved)) {
+        applyTriColor3dDefault(restored);
+        migrateTriColor3dDrawingDefaults();
+        markTriColor3dDefaultApplied();
+      } else if (!triColorAlreadyApplied) {
+        markTriColor3dDefaultApplied();
       }
       setNextIdsFromState(restored);
       return restored;
@@ -1728,6 +2647,7 @@ function statePayload(options = {}) {
     measurements: normalizeMeasurements(state.measurements),
     nodeTypes: normalizeNodeTypes(state.nodeTypes, state.points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(state.reducerSideOverrides, state.points.length),
+    reducerTypeOverrides: normalizeReducerTypeOverrides(state.reducerTypeOverrides, state.points.length),
     dimensionOffsets: normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length),
     activePoint: state.activePoint,
     selectedPoint: state.selectedPoint,
@@ -1740,6 +2660,7 @@ function statePayload(options = {}) {
     anglePlane: state.anglePlane,
     flangeMode: state.flangeMode,
     flangeStandard: normalizeFlangeStandard(state.flangeStandard),
+    reducerType: normalizeReducerType(state.reducerType),
     previewMode: state.previewMode,
     show3dLabels: state.show3dLabels !== false,
     gridScale: state.gridScale,
@@ -1750,6 +2671,7 @@ function statePayload(options = {}) {
     showLiftingPoints: state.showLiftingPoints,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(state.liftingSlingAngleDegrees),
     projectId: state.projectId,
+    workflowKind: normalizeWorkflowKind(state.workflowKind),
     projectInfoPrompted: state.projectInfoPrompted === true,
     projectStatus: normalizeProjectStatus(state.projectStatus),
     checkedBy: String(state.checkedBy ?? "").trim().slice(0, 64),
@@ -1759,12 +2681,14 @@ function statePayload(options = {}) {
     locked: state.locked === true,
     revisionHistory: options.includeRevisionHistory === false ? [] : normalizeRevisionHistory(state.revisionHistory),
     spoolUid: normalizeTraceabilityId(state.spoolUid) || createTraceabilityId("SPL"),
+    bigSpool: normalizeBigSpoolPlan(state.bigSpool, state.edges),
     weldRegister: normalizeWeldRegister(state.weldRegister, state.fittings),
     productionInfo: normalizeProductionInfo(state.productionInfo),
     productionMessages: normalizeProductionMessages(state.productionMessages),
     productionActivity: normalizeProductionActivity(state.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(state.healthAcknowledgements),
-    projectInfo: normalizeProjectInfo(state.projectInfo),
+    issueAudits: normalizeIssueAudits(state.issueAudits),
+    projectInfo: normalizeProjectInfo(state.projectInfo, state.pipeSpec),
   };
 }
 
@@ -1779,6 +2703,7 @@ function persistState() {
   }
   markCloudSaveDirty();
   queueCloudAutosave();
+  captureCurrentSpoolWorkspaceTab();
 }
 
 function stateFromPayload(payload, options = {}) {
@@ -1814,6 +2739,7 @@ function stateFromPayload(payload, options = {}) {
     measurements: normalizeMeasurements(saved.measurements),
     nodeTypes: normalizeNodeTypes(saved.nodeTypes, points.length),
     reducerSideOverrides: normalizeReducerSideOverrides(saved.reducerSideOverrides, points.length),
+    reducerTypeOverrides: normalizeReducerTypeOverrides(saved.reducerTypeOverrides, points.length),
     dimensionOffsets: normalizeDimensionOffsets(saved.dimensionOffsets, edges.length),
     pipeSizeNb: defaultPipeSizeFromSaved(saved, edges, selectedSegments),
     pipeSpec: normalizePipeSpec(saved.pipeSpec),
@@ -1822,6 +2748,7 @@ function stateFromPayload(payload, options = {}) {
     anglePlane: normalizeAnglePlane(saved.anglePlane),
     flangeMode: applyNewDefaults ? "single" : normalizeFlangeMode(saved.flangeMode),
     flangeStandard: applyNewDefaults ? "ansi150" : normalizeFlangeStandard(saved.flangeStandard),
+    reducerType: normalizeReducerType(saved.reducerType),
     previewMode: normalizePreviewMode(saved.previewMode),
     show3dLabels: saved.show3dLabels !== false,
     selectedSegments,
@@ -1836,6 +2763,7 @@ function stateFromPayload(payload, options = {}) {
     showLiftingPoints: applyNewDefaults ? false : saved.showLiftingPoints === true,
     liftingSlingAngleDegrees: normalizeLiftingSlingAngle(saved.liftingSlingAngleDegrees),
     projectId: normalizeProjectId(saved.projectId),
+    workflowKind: normalizeWorkflowKind(saved.workflowKind),
     projectInfoPrompted: saved.projectInfoPrompted === true || hasProjectInfo(saved.projectInfo),
     projectStatus: normalizeProjectStatus(saved.projectStatus),
     checkedBy: String(saved.checkedBy ?? "").trim().slice(0, 64),
@@ -1845,12 +2773,14 @@ function stateFromPayload(payload, options = {}) {
     locked: saved.locked === true,
     revisionHistory: normalizeRevisionHistory(saved.revisionHistory),
     spoolUid: normalizeTraceabilityId(saved.spoolUid) || createTraceabilityId("SPL"),
+    bigSpool: normalizeBigSpoolPlan(saved.bigSpool, edges),
     weldRegister: normalizeWeldRegister(saved.weldRegister, normalizeFittings(saved.fittings, edges.length)),
     productionInfo: normalizeProductionInfo(saved.productionInfo),
     productionMessages: normalizeProductionMessages(saved.productionMessages),
     productionActivity: normalizeProductionActivity(saved.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(saved.healthAcknowledgements),
-    projectInfo: normalizeProjectInfo(saved.projectInfo),
+    issueAudits: normalizeIssueAudits(saved.issueAudits),
+    projectInfo: normalizeProjectInfo(saved.projectInfo, saved.pipeSpec),
     history: [],
     redoHistory: [],
   };
@@ -1915,6 +2845,48 @@ function normalizeHealthAcknowledgements(value) {
   return normalized;
 }
 
+function normalizeIssueAuditFinding(value) {
+  if (!value || typeof value !== "object") return null;
+  const title = String(value.title ?? "").trim().slice(0, 140);
+  if (!title) return null;
+  const severity = value.severity === "blocker" ? "blocker" : "warning";
+  return {
+    severity,
+    category: String(value.category ?? "Drawing").trim().slice(0, 48),
+    title,
+    detail: String(value.detail ?? "").trim().slice(0, 300),
+  };
+}
+
+function normalizeIssueAudit(value) {
+  if (!value || typeof value !== "object") return null;
+  const revision = String(value.revision ?? "").trim().slice(0, 16);
+  const createdAt = String(value.createdAt ?? "").trim().slice(0, 40);
+  if (!revision && !createdAt) return null;
+  const findings = (Array.isArray(value.findings) ? value.findings : [])
+    .map(normalizeIssueAuditFinding)
+    .filter(Boolean)
+    .slice(0, 40);
+  const result = value.result === "overridden" ? "overridden" : "ready";
+  return {
+    id: String(value.id ?? "").trim().slice(0, 80) || `audit-${Date.now().toString(36)}`,
+    revision,
+    revisionUid: normalizeTraceabilityId(value.revisionUid),
+    createdAt,
+    result,
+    issuedBy: String(value.issuedBy ?? "").trim().slice(0, 80),
+    checkedBy: String(value.checkedBy ?? "").trim().slice(0, 80),
+    checkedAt: String(value.checkedAt ?? "").trim().slice(0, 40),
+    overrideReason: String(value.overrideReason ?? "").trim().slice(0, 700),
+    findings,
+  };
+}
+
+function normalizeIssueAudits(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map(normalizeIssueAudit).filter(Boolean).slice(0, 24);
+}
+
 function normalizeReducerSideOverrides(overrides, pointCount) {
   if (!overrides || typeof overrides !== "object") return {};
 
@@ -1926,6 +2898,36 @@ function normalizeReducerSideOverrides(overrides, pointCount) {
       index >= 0 &&
       index < pointCount &&
       REDUCER_SIDE_OPTIONS.has(value)
+    ) {
+      normalized[index] = value;
+    }
+  }
+  return normalized;
+}
+
+function normalizeReducerType(value) {
+  return REDUCER_TYPE_OPTIONS.has(value) ? value : "concentric";
+}
+
+function reducerTypeLabel(value) {
+  return normalizeReducerType(value) === "eccentric" ? "Eccentric" : "Concentric";
+}
+
+function reducerTypeCode(value) {
+  return normalizeReducerType(value) === "eccentric" ? "ECC" : "CONC";
+}
+
+function normalizeReducerTypeOverrides(overrides, pointCount) {
+  if (!overrides || typeof overrides !== "object") return {};
+
+  const normalized = {};
+  for (const [key, value] of Object.entries(overrides)) {
+    const index = Number(key);
+    if (
+      Number.isInteger(index) &&
+      index >= 0 &&
+      index < pointCount &&
+      REDUCER_TYPE_OPTIONS.has(value)
     ) {
       normalized[index] = value;
     }
@@ -1989,6 +2991,18 @@ function reindexReducerSideOverridesAfterPointRemoval(removedIndex) {
   state.reducerSideOverrides = next;
 }
 
+function reindexReducerTypeOverridesAfterPointRemoval(removedIndex) {
+  if (!state.reducerTypeOverrides || typeof state.reducerTypeOverrides !== "object") return;
+
+  const next = {};
+  for (const [key, value] of Object.entries(state.reducerTypeOverrides)) {
+    const index = Number(key);
+    if (!Number.isInteger(index) || index === removedIndex || !REDUCER_TYPE_OPTIONS.has(value)) continue;
+    next[index > removedIndex ? index - 1 : index] = value;
+  }
+  state.reducerTypeOverrides = next;
+}
+
 function reindexDimensionOffsetsAfterSegmentSplit(splitIndex) {
   state.dimensionOffsets = normalizeDimensionOffsets(state.dimensionOffsets, state.edges.length);
   const next = {};
@@ -2017,6 +3031,27 @@ function reindexDimensionOffsetsAfterSegmentRemoval(removedIndex) {
     next[index > removedIndex ? index - 1 : index] = value;
   }
   state.dimensionOffsets = normalizeDimensionOffsets(next, state.edges.length);
+}
+
+function reindexBigSpoolCutsAfterSegmentSplit(splitIndex, splitDistanceMm) {
+  const plan = currentBigSpoolPlan();
+  plan.cuts = plan.cuts.map((cut) => {
+    if (cut.segmentIndex < splitIndex) return cut;
+    if (cut.segmentIndex > splitIndex) return { ...cut, segmentIndex: cut.segmentIndex + 1 };
+    if (cut.distanceFromStartMm < splitDistanceMm) return cut;
+    return {
+      ...cut,
+      segmentIndex: splitIndex + 1,
+      distanceFromStartMm: Math.max(1, Math.round(cut.distanceFromStartMm - splitDistanceMm)),
+    };
+  });
+}
+
+function reindexBigSpoolCutsAfterSegmentRemoval(removedIndex) {
+  const plan = currentBigSpoolPlan();
+  plan.cuts = plan.cuts
+    .filter((cut) => cut.segmentIndex !== removedIndex)
+    .map((cut) => cut.segmentIndex > removedIndex ? { ...cut, segmentIndex: cut.segmentIndex - 1 } : cut);
 }
 
 function normalizeEdges(edges, pointCount) {
@@ -2083,6 +3118,9 @@ function normalizeFittings(fittings, edgeCount) {
         normalized.socketSizeNb = normalizePipeSize(fitting.socketSizeNb ?? SOCKET_SIZE_NB);
         normalized.socketAngle = normalizeSocketAngle(fitting.socketAngle);
       }
+      if (type === "reducer") {
+        normalized.reducerType = normalizeReducerType(fitting.reducerType);
+      }
 
       const weightKg = Number(fitting.weightKg);
       if (type !== "rollGroove" && Number.isFinite(weightKg) && weightKg >= 0) {
@@ -2099,8 +3137,48 @@ function normalizeFittings(fittings, edgeCount) {
     );
 }
 
-function defaultProjectInfo() {
-  return { ...PROJECT_INFO_DEFAULT };
+function defaultFittingDataProfileForSpec(specKey = "carbon40") {
+  return isTubePipeSpec(specKey) ? "as1528Supplier" : "atlasAsmeB169";
+}
+
+function normalizeFittingDataProfile(value, specKey = "carbon40") {
+  const profile = String(value ?? "").trim();
+  return FITTING_DATA_PROFILE_KEYS.has(profile) ? profile : defaultFittingDataProfileForSpec(specKey);
+}
+
+function fittingDataProfileInfo(source = state) {
+  const project = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  const key = normalizeFittingDataProfile(project.fittingProfile, source?.pipeSpec);
+  return {
+    key,
+    ...FITTING_DATA_PROFILES[key],
+    reference: project.fittingProfileReference,
+  };
+}
+
+function syncFittingDataProfileForSpec(previousSpec, nextSpec) {
+  const project = normalizeProjectInfo(state.projectInfo, previousSpec);
+  const previousDefault = defaultFittingDataProfileForSpec(previousSpec);
+  if (!project.fittingProfile || project.fittingProfile === previousDefault) {
+    project.fittingProfile = defaultFittingDataProfileForSpec(nextSpec);
+  }
+  state.projectInfo = normalizeProjectInfo(project, nextSpec);
+}
+
+function defaultProjectInfo(specKey = "carbon40") {
+  return {
+    ...PROJECT_INFO_DEFAULT,
+    fittingProfile: defaultFittingDataProfileForSpec(specKey),
+  };
+}
+
+function normalizeWeldGapMm(value) {
+  const gapMm = Number(value);
+  return WELD_GAP_CHOICES_MM.has(gapMm) ? gapMm : DEFAULT_WELD_GAP_MM;
+}
+
+function projectWeldGapMm(source = state) {
+  return normalizeWeldGapMm(source?.projectInfo?.weldGapMm);
 }
 
 function createTraceabilityId(prefix = "ID") {
@@ -2180,15 +3258,75 @@ function defaultProductionInfo() {
     removeAfter: "",
     lastUpdatedBy: "",
     lastUpdatedAt: "",
+    materialChecklist: defaultMaterialChecklist(),
   };
 }
 
-function normalizeProjectInfo(info) {
+function defaultMaterialChecklist() {
+  return {
+    items: [],
+    checkedBy: "",
+    checkedAt: "",
+    overrideBy: "",
+    overrideAt: "",
+    overrideReason: "",
+  };
+}
+
+function normalizeMaterialCheckStatus(value) {
+  const status = String(value ?? "pending").trim().toLowerCase();
+  return MATERIAL_CHECK_STATUSES.has(status) ? status : "pending";
+}
+
+function normalizeMaterialChecklist(checklist) {
+  const source = checklist && typeof checklist === "object" ? checklist : {};
+  const seen = new Set();
+  const items = (Array.isArray(source.items) ? source.items : [])
+    .map((item, index) => {
+      const label = String(item?.label ?? "").trim().slice(0, 120);
+      if (!label) return null;
+      const custom = item?.custom === true;
+      const key = String(item?.key ?? (custom ? `custom:${item?.id ?? index}` : label)).trim().slice(0, 160);
+      let id = String(item?.id ?? "").trim().slice(0, 120);
+      if (!id) id = `gear-${key.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80) || index}`;
+      if (seen.has(id)) id = `${id}-${index}`;
+      seen.add(id);
+      return {
+        id,
+        key,
+        label,
+        quantity: String(item?.quantity ?? "").trim().slice(0, 48),
+        detail: String(item?.detail ?? "").trim().slice(0, 160),
+        status: normalizeMaterialCheckStatus(item?.status),
+        note: String(item?.note ?? "").trim().slice(0, 180),
+        custom,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 80);
+  return {
+    items,
+    checkedBy: String(source.checkedBy ?? "").trim().slice(0, 120),
+    checkedAt: String(source.checkedAt ?? "").trim(),
+    overrideBy: String(source.overrideBy ?? "").trim().slice(0, 120),
+    overrideAt: String(source.overrideAt ?? "").trim(),
+    overrideReason: String(source.overrideReason ?? "").trim().slice(0, 400),
+  };
+}
+
+function normalizeProjectInfo(info, specKey = "carbon40") {
   const source = info && typeof info === "object" ? info : {};
   return Object.fromEntries(
     Object.keys(PROJECT_INFO_DEFAULT).map((key) => [
       key,
-      String(source[key] ?? "").trim().slice(0, key === "client" ? 56 : 32),
+      key === "fittingProfile"
+        ? normalizeFittingDataProfile(source[key], specKey)
+        : key === "weldGapMm"
+        ? String(normalizeWeldGapMm(source[key]))
+        : String(source[key] ?? "").trim().slice(
+            0,
+            key === "client" ? 56 : key === "fittingProfileReference" ? 80 : 32,
+          ),
     ]),
   );
 }
@@ -2279,6 +3417,7 @@ function normalizeProductionInfo(info) {
     removeAfter: String(source.removeAfter ?? "").trim(),
     lastUpdatedBy: String(source.lastUpdatedBy ?? "").trim().slice(0, 80),
     lastUpdatedAt: String(source.lastUpdatedAt ?? "").trim(),
+    materialChecklist: normalizeMaterialChecklist(source.materialChecklist),
   };
 }
 
@@ -2388,6 +3527,12 @@ function normalizeCompany(row) {
     name: String(row.name ?? "SpoolMate Company").trim().slice(0, 80) || "SpoolMate Company",
     inviteCode: String(row.invite_code ?? "").trim().toUpperCase().slice(0, 16),
     createdBy: normalizeUuid(row.created_by),
+    licenseStatus: String(row.license_status ?? "full").trim().toLowerCase(),
+    trialStartedAt: String(row.trial_started_at ?? ""),
+    trialEndsAt: String(row.trial_ends_at ?? ""),
+    graceEndsAt: String(row.grace_ends_at ?? ""),
+    includedSeats: Math.max(1, Math.floor(Number(row.included_seats) || BUSINESS_INCLUDED_SEATS)),
+    extraSeats: Math.max(0, Math.floor(Number(row.extra_seats) || 0)),
     createdAt: String(row.created_at ?? ""),
     updatedAt: String(row.updated_at ?? ""),
   };
@@ -2398,8 +3543,8 @@ function normalizeCompanyMember(row) {
   const companyId = normalizeUuid(row.company_id);
   const userId = normalizeUuid(row.user_id);
   if (!companyId || !userId) return null;
-  const role = ["owner", "admin", "member"].includes(row.role) ? row.role : "member";
-  const status = ["pending", "approved", "rejected"].includes(row.status) ? row.status : "pending";
+  const role = ["owner", "admin", "designer", "checker", "workshop", "viewer", "member"].includes(row.role) ? row.role : "workshop";
+  const status = ["pending", "invited", "approved", "suspended", "rejected"].includes(row.status) ? row.status : "pending";
   return {
     companyId,
     userId,
@@ -2460,6 +3605,7 @@ function regressionTeeReducerState() {
     notes: [
       { id: 1, text: "TEE REDUCER CHECK", point: { x: 4300, y: 900, z: 0 }, colour: "blue" },
     ],
+    nodeTypes: { 1: "tee" },
     activeTool: "select",
     selectedSegments: [2],
     selectedSegment: 2,
@@ -2469,7 +3615,7 @@ function regressionTeeReducerState() {
     pipeSpec: "carbon40",
     flangeMode: "single",
     flangeStandard: "ansi150",
-    previewMode: "carbon",
+    previewMode: "illustrated",
     show3dLabels: true,
     drawingDetail: "callouts",
     showDimensions: true,
@@ -2481,6 +3627,53 @@ function regressionTeeReducerState() {
     projectInfo: {
       jobNumber: "TEST-KIT",
       spoolNumber: "TEE-REDUCER",
+      revision: "A",
+      drawnBy: "",
+      client: "Regression sample",
+    },
+  };
+}
+
+function regressionLargeOutletTeeState() {
+  return {
+    ...blankState({ userDefaults: false }),
+    points: [
+      { x: 0, y: 0, z: 0 },
+      { x: 4000, y: 0, z: 0 },
+      { x: 8000, y: 0, z: 0 },
+      { x: 4000, y: 3200, z: 0 },
+    ],
+    edges: [
+      { from: 0, to: 1, pipeSizeNb: 80 },
+      { from: 1, to: 2, pipeSizeNb: 100 },
+      { from: 1, to: 3, pipeSizeNb: 150 },
+    ],
+    fittings: [],
+    notes: [
+      { id: 1, text: "LARGE OUTLET TEE CHECK", point: { x: 4300, y: 1000, z: 0 }, colour: "purple" },
+    ],
+    nodeTypes: { 1: "tee" },
+    activeTool: "select",
+    selectedSegments: [2],
+    selectedSegment: 2,
+    selectedPoint: 1,
+    activePoint: 3,
+    pipeSizeNb: 150,
+    pipeSpec: "carbon40",
+    flangeMode: "single",
+    flangeStandard: "ansi150",
+    previewMode: "tricolor",
+    show3dLabels: true,
+    drawingDetail: "callouts",
+    showDimensions: true,
+    dimensionStyle: "numbered",
+    pipeLabelMode: "auto",
+    showLiftingPoints: false,
+    projectInfoPrompted: true,
+    projectStatus: "draft",
+    projectInfo: {
+      jobNumber: "TEST-KIT",
+      spoolNumber: "TEE-LARGE-OUTLET",
       revision: "A",
       drawnBy: "",
       client: "Regression sample",
@@ -2520,7 +3713,7 @@ function regressionBranchNoReducerState() {
     pipeSpec: "carbon40",
     flangeMode: "single",
     flangeStandard: "ansi150",
-    previewMode: "carbon",
+    previewMode: "illustrated",
     show3dLabels: true,
     drawingDetail: "callouts",
     showDimensions: true,
@@ -2606,6 +3799,25 @@ function regressionOffsetSocketsState() {
 
 const REGRESSION_SAMPLES = [
   {
+    key: "bigSpool",
+    title: "Big Spool transport split",
+    detail: "100 metre master assembly divided using a configurable 12 metre transport limit.",
+    build: () => ({
+      ...blankState({ userDefaults: false }),
+      points: [{ x: 0, y: 0, z: 0 }, { x: 100000, y: 0, z: 0 }],
+      edges: [{ from: 0, to: 1, pipeSizeNb: 25 }],
+      activePoint: 1,
+      selectedPoint: 1,
+      projectInfo: { ...defaultProjectInfo("carbon40"), jobNumber: "BIG-TEST", spoolNumber: "SP-BIG", revision: "A" },
+      bigSpool: { ...defaultBigSpoolPlan(), enabled: true, maxTransportLengthMm: 12000, clearanceMm: 150 },
+    }),
+    checks: [
+      "Automatic match joints keep every transport piece inside the selected overall limit.",
+      "Child IDs and A/B match marks stay stable after save and reopen.",
+      "The 2D drawing and 3D model use the same child-piece colours.",
+    ],
+  },
+  {
     key: "workshop",
     title: "Workshop sample",
     detail: "General drawing, reducers, flanges, valve, weld and cut list.",
@@ -2625,6 +3837,17 @@ const REGRESSION_SAMPLES = [
       "Connection is treated as a tee, not a bend.",
       "Reducer is shown at the tee outlet and included in take-off.",
       "3D preview keeps reducer smaller than the main pipe.",
+    ],
+  },
+  {
+    key: "teeLargeOutlet",
+    title: "Large tee outlet",
+    detail: "NB 150 outlet tee with separate reducers to NB 100 and NB 80 straight legs.",
+    build: regressionLargeOutletTeeState,
+    checks: [
+      "Largest connected size defines the equal tee body, even when it is the outlet.",
+      "Both smaller straight legs receive their own reducer.",
+      "Tri-colour 3D shows a full-size tee body without overlapping striped pipe surfaces.",
     ],
   },
   {
@@ -2661,12 +3884,38 @@ const REGRESSION_MANUAL_CHECKS = [
   "On iPad/Android, confirm tool buttons are easy to tap and panels do not cover the drawing unexpectedly.",
 ];
 
+const REGRESSION_LAUNCH_CHECKS = [
+  "Create and confirm a new test account using the production email service.",
+  "Request a password reset, open the email link and set a new password successfully.",
+  "Save a cloud spool on Windows, reopen it on iPad and confirm the same revision and weld register.",
+  "Use two test companies to confirm drawings, comments and private photos cannot cross company boundaries.",
+  "Issue a fabrication PDF, scan its QR code on a phone and confirm the correct spool/revision traveller opens.",
+  "Install the PWA on iPad and Android, then publish a cache bump and confirm the update prompt loads it.",
+  "Open Ask SpoolMate as a guest, trial and expired account; confirm built-in help always works and AI stops at the daily limit without exposing private drawing data.",
+  "Disconnect the internet and confirm local projects remain available with clear cloud/QR limitations.",
+  "Export account data and a project backup, then restore the project on a second browser.",
+  "Delete a disposable test account and confirm its cloud projects/photos are no longer accessible.",
+  "Download diagnostics after a forced offline failure and confirm no email, drawing geometry, notes or tokens appear.",
+];
+
 const REGRESSION_AUTO_CHECKS = [
+  {
+    key: "bigSpool",
+    title: "Big Spool split check",
+    sampleKey: "bigSpool",
+    run: regressionAutoCheckBigSpool,
+  },
   {
     key: "teeReducer",
     title: "Tee reducer check",
     sampleKey: "teeReducer",
     run: regressionAutoCheckTeeReducer,
+  },
+  {
+    key: "teeLargeOutlet",
+    title: "Large tee outlet reducer check",
+    sampleKey: "teeLargeOutlet",
+    run: regressionAutoCheckLargeOutletTee,
   },
   {
     key: "branchNoReducer",
@@ -2681,6 +3930,12 @@ const REGRESSION_AUTO_CHECKS = [
     run: regressionAutoCheckFlangeFlush,
   },
   {
+    key: "preparedEnds",
+    title: "Prepared pipe-end check",
+    sampleKey: "teeReducer",
+    run: regressionAutoCheckPreparedEnds,
+  },
+  {
     key: "flangeDrilling",
     title: "Flange drilling table check",
     sampleKey: "workshop",
@@ -2691,6 +3946,12 @@ const REGRESSION_AUTO_CHECKS = [
     title: "45 offset check",
     sampleKey: "offsetSockets",
     run: regressionAutoCheck45Offset,
+  },
+  {
+    key: "offset45SizeMatrix",
+    title: "45 offset size matrix",
+    sampleKey: "offsetSockets",
+    run: regressionAutoCheck45OffsetSizeMatrix,
   },
   {
     key: "socketDimensions",
@@ -2711,6 +3972,41 @@ const REGRESSION_AUTO_CHECKS = [
     run: regressionAutoCheckStainlessTubeMaterial,
   },
 ];
+
+function regressionAutoCheckBigSpool(segmentData, quantities, definition) {
+  const plan = currentBigSpoolPlan();
+  plan.cuts = suggestedBigSpoolCuts(plan.maxTransportLengthMm, plan.clearanceMm, plan.defaultJointType);
+  refineBigSpoolCutsForConstraints(plan);
+  const layout = bigSpoolLayout(segmentData);
+  const withinLimit = layout.pieces.every((piece) => piece.maxOverallMm <= plan.maxTransportLengthMm + 1);
+  const stableIds = layout.pieces.every((piece, index) => piece.childId === `SP-BIG-${bigSpoolPieceLabel(index)}`);
+  const validJoints = layout.cuts.length === layout.pieces.length - 1
+    && layout.cuts.every((cut, index) => cut.jointId === `J${String(index + 1).padStart(2, "0")}`
+      && cut.distanceFromStartMm >= plan.clearanceMm
+      && cut.distanceFromStartMm <= cut.lengthMm - plan.clearanceMm
+      && Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut.jointType)
+      && Object.hasOwn(BIG_SPOOL_JOINT_STATUSES, cut.status));
+  const childStates = layout.pieces.map((piece) => bigSpoolChildState(piece));
+  const childStatesValid = childStates.every((child, index) =>
+    child?.projectInfo?.spoolNumber === layout.pieces[index].childId
+    && child.edges.length === layout.pieces[index].fragments.length);
+  const engineeringValid = layout.pieces.every((piece) => piece.weightKg >= 0
+    && (!piece.weightKg || piece.cogPoint)
+    && piece.transportLengthMm >= piece.transportWidthMm
+    && piece.transportWidthMm >= piece.transportHeightMm);
+  const childWeightKg = layout.pieces.reduce((sum, piece) => sum + piece.weightKg, 0);
+  const childFabWeightKg = childStates.reduce((sum, child) =>
+    sum + (child ? withTemporaryState(child, () => quantitySummary().totalWeightKg) : 0), 0);
+  const weightBalanced = Math.abs(childWeightKg - childFabWeightKg) <= Math.max(0.1, childFabWeightKg * 0.001);
+  const passed = layout.pieces.length > 1 && withinLimit && stableIds && validJoints
+    && childStatesValid && engineeringValid && weightBalanced;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${layout.pieces.length} child spools and ${layout.cuts.length} field joints; ${formatMass(childWeightKg)} kg reconciled to child fab sheets; largest ${formatLength(Math.max(...layout.pieces.map((piece) => piece.maxOverallMm)))} mm against ${formatLength(plan.maxTransportLengthMm)} mm limit.`,
+  );
+}
 
 function regressionCheckResult(title, sampleKey, passed, detail) {
   const sample = regressionSampleByKey(sampleKey);
@@ -2790,7 +4086,7 @@ function regressionAutoCheckTeeReducer(segmentData, quantities, definition) {
   const takeoffRows = takeoffCountRows(quantities);
   const bomSeparatesTeeAndReducer =
     takeoffRows.some((row) => row.key === "tee:150:equal" && row.quantity === 1) &&
-    takeoffRows.some((row) => row.key === "reducer:auto:150:80" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:concentric:150:80" && row.quantity === 1) &&
     !takeoffRows.some((row) => row.label.startsWith("Reducing tee"));
   const passed =
     reducers.length >= 1 &&
@@ -2810,33 +4106,84 @@ function regressionAutoCheckTeeReducer(segmentData, quantities, definition) {
   );
 }
 
+function regressionAutoCheckLargeOutletTee(segmentData, quantities, definition) {
+  const reducers = quantities.reducers
+    .filter((reducer) => reducer.kind === "tee" && reducer.nodeIndex === 1)
+    .sort((a, b) => a.smallNb - b.smallNb);
+  const reducedSegments = reducers.map((reducer) => reducer.smallSegment.index).sort((a, b) => a - b);
+  const sizePairs = reducers.map((reducer) => `${reducer.largeNb}:${reducer.smallNb}`).sort();
+  const tee = quantities.tees.find((item) => item.nodeIndex === 1);
+  const teeSize = PIPE_SIZES.find((size) => size.nb === 150);
+  const expectedTakeoff = teeTakeoffMm(teeSize);
+  const takeoffRows = takeoffCountRows(quantities);
+  const passed =
+    reducers.length === 2 &&
+    reducedSegments.join(",") === "0,1" &&
+    sizePairs.join(",") === "150:100,150:80" &&
+    tee?.nb === 150 &&
+    tee?.connections?.length === 3 &&
+    tee.connections.every((connection) => Math.abs(Number(connection.takeoffMm) - expectedTakeoff) < 0.001) &&
+    takeoffRows.some((row) => row.key === "tee:150:equal" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:concentric:150:100" && row.quantity === 1) &&
+    takeoffRows.some((row) => row.key === "reducer:auto:concentric:150:80" && row.quantity === 1);
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    `${reducers.length} reducers (${sizePairs.join(", ") || "none"}); NB ${tee?.nb ?? 0} equal tee body.`,
+  );
+}
+
 function regressionAutoCheckBranchNoReducer(segmentData, quantities, definition) {
   const nodeReducers = quantities.reducers.filter((reducer) => reducer.nodeIndex === 1);
   const branchInfo = branchNodeInfo(1, nodeConnections(segmentData).get(1) ?? [], segmentData);
   const mainIndexes = (branchInfo?.mainPair ?? []).map((entry) => entry.segment.index).sort((a, b) => a - b);
   const branchIndexes = (branchInfo?.branchEntries ?? []).map((entry) => entry.segment.index).sort((a, b) => a - b);
+  const branch = quantities.branches.find((item) => item.nodeIndex === 1);
   const linkedFromFirstMain = branchMainLinkedSegmentIndexes([mainIndexes[0]], segmentData);
   const mainSizePropagationExact =
     mainIndexes.length === 2 &&
     mainIndexes.every((index) => linkedFromFirstMain.includes(index)) &&
     branchIndexes.every((index) => !linkedFromFirstMain.includes(index));
-  const mergedMainRun = (quantities.cutSegments ?? []).some((row) =>
+  const mergedMainRow = (quantities.cutSegments ?? []).find((row) =>
     Array.isArray(row.segment?.mergedIndexes) &&
     row.segment.mergedIndexes.includes(0) &&
-    row.segment.mergedIndexes.includes(1),
+    row.segment.mergedIndexes.includes(1)
   );
+  const branchTakeoffOnlyOnOutlet =
+    branch?.connections?.length === 1 &&
+    branch.connections[0].segmentIndex === branchIndexes[0] &&
+    Number(branch.connections[0].takeoffMm) > 0;
+  const branchOutletQuantity = quantities.segments.find((row) => row.segment.index === branchIndexes[0])?.quantity;
+  const branchOutletHasOneWeldGap =
+    Number(branchOutletQuantity?.weldEndCount) === 1 &&
+    Math.abs(Number(branchOutletQuantity?.weldGapMm) - projectWeldGapMm()) < 0.001;
+  const mainTakeoffsAreZero = mainIndexes.every((index) =>
+    Math.abs(Number(quantities.segments.find((row) => row.segment.index === index)?.quantity.bendTakeoffMm)) < 0.001
+  );
+  const expectedMainWeldGap = projectWeldGapMm() * 2;
+  const mergedMainIsFullLength =
+    Math.abs(Number(mergedMainRow?.quantity.centrelineMm) - 8400) < 0.001 &&
+    Number(mergedMainRow?.quantity.weldEndCount) === 2 &&
+    Math.abs(Number(mergedMainRow?.quantity.weldGapMm) - expectedMainWeldGap) < 0.001 &&
+    Math.abs(Number(mergedMainRow?.quantity.cutLengthMm) - (8400 - expectedMainWeldGap)) < 0.001;
   const passed =
     nodeConnectionType(1) === "branch" &&
     quantities.branches.length === 1 &&
+    quantities.tees.length === 0 &&
     nodeReducers.length === 0 &&
-    mergedMainRun &&
+    Boolean(mergedMainRow) &&
+    branchTakeoffOnlyOnOutlet &&
+    branchOutletHasOneWeldGap &&
+    mainTakeoffsAreZero &&
+    mergedMainIsFullLength &&
     mainSizePropagationExact;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `${nodeConnectionType(1)} node, ${nodeReducers.length} reducers at branch, main run ${mergedMainRun ? "merged" : "split"}, ` +
-      `size link ${linkedFromFirstMain.join("+")} with outlet ${branchIndexes.join("+")} excluded.`,
+    `${nodeConnectionType(1)} node, ${quantities.tees.length} tees, ${nodeReducers.length} reducers; ` +
+      `continuous main cut ${formatLength(mergedMainRow?.quantity.cutLengthMm ?? 0)} mm with ${formatWeldGapMm(expectedMainWeldGap)} mm for two end-flange Weld gaps; outlet-only branch take-off ${branchTakeoffOnlyOnOutlet ? "confirmed" : "failed"}.`,
   );
 }
 
@@ -2849,12 +4196,16 @@ function regressionAutoCheckFlangeFlush(segmentData, quantities, definition) {
     const expectedPoint = t <= 0.5 ? segment.start : segment.end;
     return (t === 0 || t === 1) && almostSamePoint(fittingDisplayPoint(segment, fitting), expectedPoint);
   });
-  const passed = flanges.length > 0 && flushFlanges.length === flanges.length;
+  const flangeEndsHaveOneGap = flushFlanges.every((fitting) => {
+    const quantity = quantities.segments.find((row) => row.segment.index === fitting.segmentIndex)?.quantity;
+    return Number(quantity?.weldEndCount) >= 1 && Number(quantity?.weldGapMm) >= projectWeldGapMm();
+  });
+  const passed = flanges.length > 0 && flushFlanges.length === flanges.length && flangeEndsHaveOneGap;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `${flushFlanges.length}/${flanges.length} flange${flanges.length === 1 ? "" : "s"} snapped to pipe ends.`,
+    `${flushFlanges.length}/${flanges.length} flange${flanges.length === 1 ? "" : "s"} snapped to pipe ends with one Weld gap per welded flange connection.`,
   );
 }
 
@@ -2903,18 +4254,77 @@ function regressionAutoCheck45Offset(segmentData, quantities, definition) {
   const angle = normalizeAngle(offsetSegment?.offsetAngleDeg);
   const expectedTravel = offsetTravelLengthMm(setMm, angle);
   const actualTravel = pointLength(offsetSegment?.vector ?? { x: 0, y: 0, z: 0 });
+  const offsetQuantity = quantities.segments.find((row) => row.segment.index === offsetSegment?.index)?.quantity;
+  const offsetElbows = quantities.elbows.filter((elbow) =>
+    elbow.firstSegmentIndex === offsetSegment?.index || elbow.secondSegmentIndex === offsetSegment?.index
+  );
+  const offsetSize = offsetSegment ? pipeSizeForSegment(offsetSegment) : null;
+  const atlasElbowTakeoff = offsetSize ? ELBOW_45_TAKEOFF_MM[offsetSize.nb] : null;
+  const expectedTakeoff = Number.isFinite(atlasElbowTakeoff) ? atlasElbowTakeoff * 2 : 0;
+  const expectedWeldGap = projectWeldGapMm() * 2;
+  const expectedCutLength = Math.max(0, actualTravel - expectedTakeoff - expectedWeldGap);
   const measurementCount = Array.isArray(state.measurements) ? state.measurements.length : 0;
   const passed =
     Boolean(offsetSegment) &&
     Math.abs(angle - 45) < 0.001 &&
     Math.abs(setMm - 1000) <= 1 &&
     Math.abs(actualTravel - expectedTravel) <= 2 &&
+    Number.isFinite(atlasElbowTakeoff) &&
+    offsetElbows.length === 2 &&
+    offsetElbows.every((elbow) => Math.abs(elbow.bend - 45) < 0.01) &&
+    offsetElbows.every((elbow) => {
+      const takeoff = elbow.firstSegmentIndex === offsetSegment.index
+        ? elbow.firstTakeoffMm
+        : elbow.secondTakeoffMm;
+      return Math.abs(Number(takeoff) - atlasElbowTakeoff) < 0.001;
+    }) &&
+    Math.abs(Number(offsetQuantity?.centrelineMm) - actualTravel) < 0.001 &&
+    Math.abs(Number(offsetQuantity?.bendTakeoffMm) - expectedTakeoff) < 0.001 &&
+    Number(offsetQuantity?.weldEndCount) === 2 &&
+    Math.abs(Number(offsetQuantity?.weldGapMm) - expectedWeldGap) < 0.001 &&
+    Math.abs(Number(offsetQuantity?.cutLengthMm) - expectedCutLength) < 0.001 &&
     measurementCount >= 1;
   return regressionCheckResult(
     definition.title,
     definition.sampleKey,
     passed,
-    `Set ${formatLength(setMm)} mm, travel ${formatLength(actualTravel)} mm, ${measurementCount} manual C/C measurement${measurementCount === 1 ? "" : "s"}.`,
+    `Set ${formatLength(setMm)} mm; true travel ${formatLength(actualTravel)} mm; ` +
+      `two Atlas 45 deg B take-offs ${formatLength(expectedTakeoff)} mm; Weld gap ${formatWeldGapMm(expectedWeldGap)} mm; angled cut ${formatLength(offsetQuantity?.cutLengthMm ?? 0)} mm.`,
+  );
+}
+
+function regressionAutoCheck45OffsetSizeMatrix(segmentData, quantities, definition) {
+  const setMm = 1000;
+  const travelMm = setMm * Math.SQRT2;
+  const weldGapMm = projectWeldGapMm() * 2;
+  const atlasCases = [
+    [25, 22],
+    [50, 35],
+    [100, 64],
+    [150, 95],
+    [300, 190],
+  ];
+  const rows = atlasCases.map(([nb, expectedB]) => {
+    const actualB = bendTakeoffMm({ pipeSizeNb: nb }, 45);
+    const cutMm = travelMm - actualB * 2 - weldGapMm;
+    return {
+      nb,
+      expectedB,
+      actualB,
+      cutMm,
+      passed:
+        ELBOW_45_TAKEOFF_MM[nb] === expectedB &&
+        Math.abs(actualB - expectedB) < 0.001 &&
+        Math.abs(cutMm - (travelMm - expectedB * 2 - weldGapMm)) < 0.001 &&
+        cutMm > 0,
+    };
+  });
+  const passed = rows.every((row) => row.passed);
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    rows.map((row) => `DN${row.nb}: B ${formatLength(row.actualB)} mm / cut ${formatLength(row.cutMm)} mm`).join("; "),
   );
 }
 
@@ -2942,6 +4352,31 @@ function regressionAutoCheckSocketDimensions(segmentData, quantities, definition
   );
 }
 
+function regressionAutoCheckPreparedEnds(segmentData, quantities, definition) {
+  const groove = state.fittings.find((fitting) => fitting.type === "rollGroove");
+  const flange = state.fittings.find((fitting) => fitting.type === "flange");
+  const grooveSegment = segmentData.find((segment) => segment.index === groove?.segmentIndex);
+  const flangeSegment = segmentData.find((segment) => segment.index === flange?.segmentIndex);
+  const groovePointIndex = endpointSnappedFittingT(grooveSegment, groove) <= 0.5 ? grooveSegment?.from : grooveSegment?.to;
+  const flangePointIndex = endpointSnappedFittingT(flangeSegment, flange) <= 0.5 ? flangeSegment?.from : flangeSegment?.to;
+  const threadedSegment = segmentData.find((segment) => segment.index === 2);
+  const threaded = { id: -1, type: "threadedEnd", segmentIndex: threadedSegment?.index, t: 1 };
+  state.fittings.push(threaded);
+  const grooveFinished = Boolean(grooveSegment) && endpointHasFinish(grooveSegment, groovePointIndex);
+  const flangeFinished = Boolean(flangeSegment) && endpointHasFinish(flangeSegment, flangePointIndex);
+  const threadedFinished = Boolean(threadedSegment) && endpointHasFinish(threadedSegment, threadedSegment.to);
+  state.fittings.pop();
+  const passed = grooveFinished && flangeFinished && threadedFinished;
+  return regressionCheckResult(
+    definition.title,
+    definition.sampleKey,
+    passed,
+    passed
+      ? "Roll-grooved, flanged and threaded endpoints are excluded from open-end warnings."
+      : "A prepared roll-grooved, flanged or threaded endpoint was incorrectly classified as open.",
+  );
+}
+
 function regressionAutoCheckStateRoundTrip(segmentData, quantities, definition) {
   const payload = statePayload();
   const restored = stateFromPayload(JSON.parse(JSON.stringify(payload)));
@@ -2953,6 +4388,7 @@ function regressionAutoCheckStateRoundTrip(segmentData, quantities, definition) 
     same(restored.measurements, payload.measurements) &&
     same(restored.nodeTypes, payload.nodeTypes) &&
     same(restored.reducerSideOverrides, payload.reducerSideOverrides) &&
+    same(restored.reducerTypeOverrides, payload.reducerTypeOverrides) &&
     same(restored.dimensionOffsets, payload.dimensionOffsets) &&
     same(restored.projectInfo, payload.projectInfo) &&
     restored.pipeSpec === payload.pipeSpec &&
@@ -3065,6 +4501,7 @@ function normalizeRevisionHistory(history) {
       checkedAt: String(entry?.checkedAt ?? entry?.state?.checkedAt ?? "").trim(),
       issuedBy: String(entry?.issuedBy ?? entry?.state?.issuedBy ?? "").trim().slice(0, 120),
       issuedAt: String(entry?.issuedAt ?? entry?.state?.issuedAt ?? "").trim(),
+      issueAudit: normalizeIssueAudit(entry?.issueAudit ?? entry?.state?.issueAudits?.[0]),
       state: entry?.state && typeof entry.state === "object" ? entry.state : null,
     }))
     .filter((entry) => entry.revision || entry.state)
@@ -3157,7 +4594,7 @@ function createProjectId() {
 
 function normalizeFittingPosition(type, value) {
   const fallback = Number.isFinite(Number(value)) ? Number(value) : 0.5;
-  if (type === "flange" || type === "rollGroove") {
+  if (type === "flange" || type === "rollGroove" || type === "threadedEnd") {
     const clamped = clampNumber(fallback, 0, 1);
     return clamped <= 0.5 ? 0 : 1;
   }
@@ -3166,7 +4603,7 @@ function normalizeFittingPosition(type, value) {
 
 function endpointSnappedFittingTForLength(fitting, lengthMm) {
   const t = normalizeFittingPosition(fitting?.type, fitting?.t);
-  if (fitting?.type !== "flange" && fitting?.type !== "rollGroove") return t;
+  if (fitting?.type !== "flange" && fitting?.type !== "rollGroove" && fitting?.type !== "threadedEnd") return t;
   return t <= 0.5 ? 0 : 1;
 }
 
@@ -3280,6 +4717,12 @@ function normalizeConnectionTrustState() {
     if (!bendReducerExistsAtNode(nodeIndex, connected, segmentByIndex)) {
       delete state.reducerSideOverrides[key];
     }
+  }
+
+  const reducerNodes = new Set(autoReducerTransitions(segmentData).map((reducer) => reducer.nodeIndex));
+  state.reducerTypeOverrides = normalizeReducerTypeOverrides(state.reducerTypeOverrides, state.points.length);
+  for (const key of Object.keys(state.reducerTypeOverrides)) {
+    if (!reducerNodes.has(Number(key))) delete state.reducerTypeOverrides[key];
   }
 }
 
@@ -3463,7 +4906,8 @@ function flangeStandardKeyFromText(value) {
 }
 
 function normalizePreviewMode(value) {
-  return PREVIEW_MODES.has(value) ? value : "carbon";
+  const mapped = LEGACY_PREVIEW_MODE_MAP[value] ?? value;
+  return PREVIEW_MODES.has(mapped) ? mapped : "tricolor";
 }
 
 function normalizeDrawingDetail(value) {
@@ -3546,24 +4990,36 @@ function applyDrawingDetailPreset(value) {
 }
 
 function dimensionLinePalette() {
-  const chain = normalizeDimensionStyle(state.dimensionStyle) === "chain";
-  return chain
-    ? {
-        line: "#1f2a2f",
-        halo: "rgba(255, 253, 248, 0.94)",
-        text: "#1f2a2f",
-        fill: "rgba(255, 253, 248, 0.96)",
-        border: "rgba(31, 42, 47, 0.28)",
-        shadow: "rgba(31, 42, 47, 0.08)",
-      }
-    : {
-        line: "#c1121f",
-        halo: "rgba(255, 253, 248, 0.9)",
-        text: "#c1121f",
-        fill: "rgba(255, 253, 248, 0.96)",
-        border: "rgba(193, 18, 31, 0.28)",
-        shadow: "rgba(31, 42, 47, 0.12)",
-      };
+  const style = normalizeDimensionStyle(state.dimensionStyle);
+  const dark = isDarkAppTheme();
+  if (style === "chain") {
+    return {
+      line: dark ? "#c7d4d8" : "#1f2a2f",
+      halo: dark ? "rgba(6, 16, 24, 0.9)" : "rgba(255, 253, 248, 0.94)",
+      text: dark ? "#e8f1f3" : "#1f2a2f",
+      fill: dark ? "rgba(6, 18, 28, 0.95)" : "rgba(255, 253, 248, 0.96)",
+      border: dark ? "rgba(199, 212, 216, 0.3)" : "rgba(31, 42, 47, 0.28)",
+      shadow: dark ? "rgba(0, 0, 0, 0.28)" : "rgba(31, 42, 47, 0.08)",
+    };
+  }
+  if (style === "redline") {
+    return {
+      line: dark ? "#ff6f78" : "#c1121f",
+      halo: dark ? "rgba(6, 16, 24, 0.9)" : "rgba(255, 253, 248, 0.9)",
+      text: dark ? "#ff9aa1" : "#c1121f",
+      fill: dark ? "rgba(6, 18, 28, 0.95)" : "rgba(255, 253, 248, 0.96)",
+      border: dark ? "rgba(255, 111, 120, 0.38)" : "rgba(193, 18, 31, 0.28)",
+      shadow: dark ? "rgba(0, 0, 0, 0.3)" : "rgba(31, 42, 47, 0.12)",
+    };
+  }
+  return {
+    line: dark ? "#88c9d3" : "#526c78",
+    halo: dark ? "rgba(6, 16, 24, 0.9)" : "rgba(247, 245, 239, 0.92)",
+    text: dark ? "#bce4ea" : "#415b66",
+    fill: dark ? "rgba(6, 18, 28, 0.95)" : "rgba(251, 252, 250, 0.97)",
+    border: dark ? "rgba(136, 201, 211, 0.34)" : "rgba(82, 108, 120, 0.3)",
+    shadow: dark ? "rgba(0, 0, 0, 0.3)" : "rgba(31, 42, 47, 0.09)",
+  };
 }
 
 function normalizeLiftingSlingAngle(value) {
@@ -3954,6 +5410,700 @@ function segments() {
   return list;
 }
 
+function defaultBigSpoolPlan() {
+  return {
+    enabled: false,
+    maxTransportLengthMm: BIG_SPOOL_DEFAULT_MAX_LENGTH_MM,
+    maxTransportWidthMm: 0,
+    maxTransportHeightMm: 0,
+    maxTransportWeightKg: 0,
+    clearanceMm: BIG_SPOOL_DEFAULT_CLEARANCE_MM,
+    preset: "custom",
+    transportNote: "",
+    defaultJointType: "fieldWeld",
+    cuts: [],
+    updatedAt: "",
+  };
+}
+
+function normalizeBigSpoolPlan(source, edges = []) {
+  const input = source && typeof source === "object" ? source : {};
+  const maxTransportLengthMm = clampNumber(
+    Math.round(Number(input.maxTransportLengthMm) || BIG_SPOOL_DEFAULT_MAX_LENGTH_MM),
+    BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM,
+    MAX_LENGTH_MM,
+  );
+  const clearanceMm = clampNumber(
+    Math.round(Number(input.clearanceMm) || BIG_SPOOL_DEFAULT_CLEARANCE_MM),
+    50,
+    2000,
+  );
+  const optionalLimit = (value, maximum) => {
+    const numeric = Number(value);
+    return Number.isFinite(numeric) && numeric > 0 ? clampNumber(Math.round(numeric), 1, maximum) : 0;
+  };
+  const maxTransportWidthMm = optionalLimit(input.maxTransportWidthMm, MAX_LENGTH_MM);
+  const maxTransportHeightMm = optionalLimit(input.maxTransportHeightMm, MAX_LENGTH_MM);
+  const maxTransportWeightKg = optionalLimit(input.maxTransportWeightKg, 100000);
+  const preset = Object.hasOwn(BIG_SPOOL_PRESETS, input.preset) ? input.preset : "custom";
+  const defaultJointType = BIG_SPOOL_PRIMARY_JOINT_TYPES.has(input.defaultJointType)
+    ? input.defaultJointType
+    : "fieldWeld";
+  const cuts = Array.isArray(input.cuts)
+    ? input.cuts
+      .map((cut, index) => ({
+        id: String(cut?.id || `CUT-${index + 1}`).replace(/[^a-z0-9_-]/gi, "").slice(0, 48) || `CUT-${index + 1}`,
+        segmentIndex: Math.round(Number(cut?.segmentIndex)),
+        distanceFromStartMm: Math.round(Number(cut?.distanceFromStartMm)),
+        source: cut?.source === "manual" ? "manual" : "auto",
+        jointType: Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut?.jointType) ? cut.jointType : "fieldWeld",
+        status: Object.hasOwn(BIG_SPOOL_JOINT_STATUSES, cut?.status) ? cut.status : "planned",
+        notes: String(cut?.notes ?? "").trim().slice(0, 120),
+      }))
+      .filter((cut) => Number.isInteger(cut.segmentIndex)
+        && cut.segmentIndex >= 0
+        && (!edges.length || cut.segmentIndex < edges.length)
+        && Number.isFinite(cut.distanceFromStartMm)
+        && cut.distanceFromStartMm > 0)
+    : [];
+  return {
+    enabled: input.enabled === true,
+    maxTransportLengthMm,
+    maxTransportWidthMm,
+    maxTransportHeightMm,
+    maxTransportWeightKg,
+    clearanceMm,
+    preset,
+    transportNote: String(input.transportNote ?? "").trim().slice(0, 120),
+    defaultJointType,
+    cuts,
+    updatedAt: String(input.updatedAt ?? "").trim(),
+  };
+}
+
+function currentBigSpoolPlan() {
+  const normalized = normalizeBigSpoolPlan(state.bigSpool, state.edges);
+  if (state.bigSpool && typeof state.bigSpool === "object" && !Array.isArray(state.bigSpool)) {
+    for (const key of Object.keys(state.bigSpool)) {
+      if (!Object.hasOwn(normalized, key)) delete state.bigSpool[key];
+    }
+    Object.assign(state.bigSpool, normalized);
+  } else {
+    state.bigSpool = normalized;
+  }
+  return state.bigSpool;
+}
+
+function bigSpoolJointPreparationText(cut, source = state) {
+  const jointType = Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut?.jointType) ? cut.jointType : "fieldWeld";
+  const weldGapMm = projectWeldGapMm(source);
+  if (jointType === "groove") return "Roll groove on both child ends · rejoin on site with 1 grooved coupling · no weld-gap deduction";
+  if (jointType === "flange") {
+    return `Single flange on both child ends · rejoin with gasket and bolt set · Weld gap ${formatWeldGapMm(weldGapMm)} mm deducted from each pipe cut`;
+  }
+  if (jointType === "thread") return "Thread preparation on both child ends · no weld-gap deduction";
+  return `Field weld · Weld gap ${formatWeldGapMm(weldGapMm)} mm deducted from each child pipe cut (${formatWeldGapMm(weldGapMm * 2)} mm total)`;
+}
+
+function bigSpoolJointShortLabel(cut) {
+  if (cut?.jointType === "groove") return "RG/RG";
+  if (cut?.jointType === "flange") return "FLG/FLG";
+  if (cut?.jointType === "thread") return "THD/THD";
+  return "WELD";
+}
+
+function bigSpoolJointRejoinItemText(cut) {
+  if (cut?.jointType === "groove") return "1 grooved coupling (Victaulic-compatible system to project specification)";
+  if (cut?.jointType === "flange") return "1 flange gasket and matching bolt set";
+  return "";
+}
+
+function bigSpoolSplitDisplayInsetMm(cut, segment) {
+  if (cut?.jointType !== "groove" || !segment) return 0;
+  const lengthMm = pointLength(segment.vector);
+  const pipeOdMm = Number(pipeSizeForSegment(segment)?.od) || 0;
+  return clampNumber(Math.max(75, pipeOdMm * 0.8, lengthMm * 0.008), 75, Math.min(300, lengthMm * 0.2));
+}
+
+function bigSpoolFragmentDisplayGeometry(fragment) {
+  const start = clonePoint(fragment.start);
+  const end = clonePoint(fragment.end);
+  const vector = subtractPoints(fragment.segment.end, fragment.segment.start);
+  const lengthMm = pointLength(vector);
+  if (lengthMm <= 0.001) return { start, end };
+  const direction = scalePoint(vector, 1 / lengthMm);
+  const fragmentLengthMm = pointLength(subtractPoints(end, start));
+  const maximumInsetMm = Math.max(0, fragmentLengthMm * 0.22);
+  const startInsetMm = Math.min(maximumInsetMm, bigSpoolSplitDisplayInsetMm(fragment.startCut, fragment.segment));
+  const endInsetMm = Math.min(maximumInsetMm, bigSpoolSplitDisplayInsetMm(fragment.endCut, fragment.segment));
+  return {
+    start: startInsetMm ? addPoints(start, direction, startInsetMm) : start,
+    end: endInsetMm ? addPoints(end, direction, -endInsetMm) : end,
+  };
+}
+
+function bigSpoolFragmentScreenGeometry(fragment, projectPoint, minimumHalfGapPx = 18) {
+  const display = bigSpoolFragmentDisplayGeometry(fragment);
+  const start = projectPoint(display.start);
+  const end = projectPoint(display.end);
+  const segmentStart = projectPoint(fragment.segment.start);
+  const segmentEnd = projectPoint(fragment.segment.end);
+  const along = normalizeScreenVector({ x: segmentEnd.x - segmentStart.x, y: segmentEnd.y - segmentStart.y });
+  if (fragment.startCut?.jointType === "groove") {
+    const cut = projectPoint(fragment.start);
+    if (Math.hypot(start.x - cut.x, start.y - cut.y) < minimumHalfGapPx) {
+      start.x = cut.x + along.x * minimumHalfGapPx;
+      start.y = cut.y + along.y * minimumHalfGapPx;
+    }
+  }
+  if (fragment.endCut?.jointType === "groove") {
+    const cut = projectPoint(fragment.end);
+    if (Math.hypot(end.x - cut.x, end.y - cut.y) < minimumHalfGapPx) {
+      end.x = cut.x - along.x * minimumHalfGapPx;
+      end.y = cut.y - along.y * minimumHalfGapPx;
+    }
+  }
+  return { start, end, along };
+}
+
+function bigSpoolJointEndFitting(cut, segmentIndex, endpointT, source = state, id = 0) {
+  if (!cut || !Number.isInteger(Number(segmentIndex))) return null;
+  const jointType = Object.hasOwn(BIG_SPOOL_JOINT_TYPES, cut.jointType) ? cut.jointType : "fieldWeld";
+  const base = {
+    id: Number(id) || 0,
+    segmentIndex: Number(segmentIndex),
+    bigSpoolFieldJoint: true,
+    bigSpoolCutId: cut.id,
+    bigSpoolJointType: jointType,
+    fieldJointEnd: endpointT === 0 ? "start" : "end",
+  };
+  if (jointType === "groove") return { ...base, type: "rollGroove", t: endpointT };
+  if (jointType === "flange") {
+    return {
+      ...base,
+      type: "flange",
+      t: endpointT,
+      flangeMode: "single",
+      flangeStandard: normalizeFlangeStandard(source?.flangeStandard),
+    };
+  }
+  if (jointType === "thread") return { ...base, type: "threadedEnd", t: endpointT };
+  return {
+    ...base,
+    type: "weld",
+    t: endpointT === 0 ? 0.04 : 0.96,
+    weldGapMm: projectWeldGapMm(source),
+  };
+}
+
+function bigSpoolPieceLabel(index) {
+  return pointLabel(index);
+}
+
+function bigSpoolPieceColour(index) {
+  return BIG_SPOOL_PIECE_COLOURS[Math.max(0, Number(index) || 0) % BIG_SPOOL_PIECE_COLOURS.length];
+}
+
+function bigSpoolChildId(index) {
+  const base = normalizeProjectInfo(state.projectInfo).spoolNumber || "SP-MASTER";
+  return `${base}-${bigSpoolPieceLabel(index)}`;
+}
+
+function validBigSpoolCuts(segmentData = segments()) {
+  const byIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  const seen = new Set();
+  return currentBigSpoolPlan().cuts
+    .map((cut) => {
+      const segment = byIndex.get(cut.segmentIndex);
+      const lengthMm = segment ? pointLength(segment.vector) : 0;
+      if (!segment || lengthMm <= 1) return null;
+      const distanceFromStartMm = clampNumber(Number(cut.distanceFromStartMm), 1, lengthMm - 1);
+      const key = `${cut.segmentIndex}:${Math.round(distanceFromStartMm)}`;
+      if (seen.has(key)) return null;
+      seen.add(key);
+      return {
+        ...cut,
+        distanceFromStartMm,
+        t: distanceFromStartMm / lengthMm,
+        lengthMm,
+        point: lerpPoint(segment.start, segment.end, distanceFromStartMm / lengthMm),
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.segmentIndex - b.segmentIndex || a.distanceFromStartMm - b.distanceFromStartMm);
+}
+
+function bigSpoolRouteDistances(segmentData = segments()) {
+  const adjacency = new Map();
+  for (const segment of segmentData) {
+    const lengthMm = pointLength(segment.vector);
+    if (!adjacency.has(segment.from)) adjacency.set(segment.from, []);
+    if (!adjacency.has(segment.to)) adjacency.set(segment.to, []);
+    adjacency.get(segment.from).push({ node: segment.to, lengthMm });
+    adjacency.get(segment.to).push({ node: segment.from, lengthMm });
+  }
+  const startNode = segmentData[0]?.from ?? 0;
+  const distances = new Map([...adjacency.keys()].map((node) => [node, Number.POSITIVE_INFINITY]));
+  distances.set(startNode, 0);
+  const open = new Set(adjacency.keys());
+  while (open.size) {
+    let current = null;
+    let best = Number.POSITIVE_INFINITY;
+    for (const node of open) {
+      const distance = distances.get(node) ?? Number.POSITIVE_INFINITY;
+      if (distance < best) {
+        current = node;
+        best = distance;
+      }
+    }
+    if (current === null || !Number.isFinite(best)) break;
+    open.delete(current);
+    for (const neighbour of adjacency.get(current) ?? []) {
+      const next = best + neighbour.lengthMm;
+      if (next < (distances.get(neighbour.node) ?? Number.POSITIVE_INFINITY)) distances.set(neighbour.node, next);
+    }
+  }
+  return distances;
+}
+
+function bigSpoolDistanceToFragment(point, fragment) {
+  const vector = subtractPoints(fragment.end, fragment.start);
+  const lengthSquared = dotPoints(vector, vector);
+  if (lengthSquared <= 0.001) return pointLength(subtractPoints(point, fragment.start));
+  const t = clampNumber(dotPoints(subtractPoints(point, fragment.start), vector) / lengthSquared, 0, 1);
+  return pointLength(subtractPoints(point, lerpPoint(fragment.start, fragment.end, t)));
+}
+
+function bigSpoolPieceForPoint(layout, point) {
+  let bestPiece = null;
+  let bestDistance = Number.POSITIVE_INFINITY;
+  for (const piece of layout.pieces) {
+    for (const fragment of piece.fragments) {
+      const distance = bigSpoolDistanceToFragment(point, fragment);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestPiece = piece;
+      }
+    }
+  }
+  return bestPiece;
+}
+
+function addBigSpoolPieceComponent(piece, weightKg, point, type) {
+  if (!piece || !Number.isFinite(weightKg) || Math.abs(weightKg) < 0.0000001 || !point) return;
+  piece.weightComponents.push({ weightKg, point: clonePoint(point), type });
+}
+
+function applyBigSpoolPieceEngineering(layout, segmentData = segments()) {
+  const quantities = quantitySummary(segmentData);
+  const quantityBySegment = new Map(quantities.segments.map((entry) => [entry.segment.index, entry.quantity]));
+  for (const piece of layout.pieces) piece.weightComponents = [];
+
+  for (const piece of layout.pieces) {
+    for (const fragment of piece.fragments) {
+      const quantity = quantityBySegment.get(fragment.segmentIndex);
+      const segmentLength = pointLength(fragment.segment.vector);
+      const fraction = segmentLength > 0 ? fragment.lengthMm / segmentLength : 0;
+      addBigSpoolPieceComponent(
+        piece,
+        (Number(quantity?.pipeWeightKg) || 0) * fraction,
+        lerpPoint(fragment.start, fragment.end, 0.5),
+        "pipe",
+      );
+    }
+  }
+
+  const addNearest = (weightKg, point, type) => addBigSpoolPieceComponent(bigSpoolPieceForPoint(layout, point), weightKg, point, type);
+  for (const elbow of quantities.elbows) addNearest(elbow.weightKg, state.points[elbow.nodeIndex], "elbow");
+  for (const reducer of quantities.reducers) addNearest(reducer.weightKg, reducerCentrePoint(reducer), "reducer");
+  for (const tee of quantities.tees) addNearest(tee.weightKg, state.points[tee.nodeIndex], "tee");
+  for (const branch of quantities.branches) addNearest(branch.weightKg, state.points[branch.nodeIndex], "branch");
+  for (const fitting of quantities.fittings) addNearest(fitting.weightKg, fitting.point, fitting.fitting.type);
+
+  for (const piece of layout.pieces) {
+    for (const fragment of piece.fragments) {
+      for (const [cut, endpointT, point] of [
+        [fragment.startCut, 0, fragment.start],
+        [fragment.endCut, 1, fragment.end],
+      ]) {
+        const fitting = bigSpoolJointEndFitting(cut, fragment.segmentIndex, endpointT, state, -1);
+        if (!fitting) continue;
+        addBigSpoolPieceComponent(piece, fittingWeightKg(fitting, fragment.segment), point, `split-${fitting.type}`);
+        if (fitting.type === "weld" || fitting.type === "flange") {
+          const gapWeightKg = (projectWeldGapMm() / 1000) * pipeMassPerMetre(fragment.segment);
+          addBigSpoolPieceComponent(piece, -gapWeightKg, point, "split-weld-gap");
+        }
+      }
+    }
+  }
+
+  for (const piece of layout.pieces) {
+    piece.weightKg = piece.weightComponents.reduce((sum, component) => sum + component.weightKg, 0);
+    if (piece.weightKg > 0) {
+      piece.cogPoint = piece.weightComponents.reduce((sum, component) => ({
+        x: sum.x + component.point.x * component.weightKg / piece.weightKg,
+        y: sum.y + component.point.y * component.weightKg / piece.weightKg,
+        z: sum.z + component.point.z * component.weightKg / piece.weightKg,
+      }), { x: 0, y: 0, z: 0 });
+    } else {
+      piece.cogPoint = null;
+    }
+    delete piece.weightComponents;
+  }
+  return layout;
+}
+
+function bigSpoolPieceViolations(piece, plan = currentBigSpoolPlan()) {
+  const violations = [];
+  if (piece.transportLengthMm > plan.maxTransportLengthMm + 1) violations.push("length");
+  if (plan.maxTransportWidthMm > 0 && piece.transportWidthMm > plan.maxTransportWidthMm + 1) violations.push("width");
+  if (plan.maxTransportHeightMm > 0 && piece.transportHeightMm > plan.maxTransportHeightMm + 1) violations.push("height");
+  if (plan.maxTransportWeightKg > 0 && piece.weightKg > plan.maxTransportWeightKg + 0.01) violations.push("weight");
+  return violations;
+}
+
+function bigSpoolPieceReady(piece, plan = currentBigSpoolPlan()) {
+  return bigSpoolPieceViolations(piece, plan).length === 0;
+}
+
+function safeBigSpoolSplitDistance(segment, requestedDistanceMm, clearanceMm) {
+  const lengthMm = pointLength(segment.vector);
+  if (lengthMm <= clearanceMm * 2 + 10) return null;
+  const fittingDistances = state.fittings
+    .filter((fitting) => fitting.segmentIndex === segment.index)
+    .map((fitting) => normalizeFittingPosition(fitting.type, fitting.t) * lengthMm);
+  const allowed = (distance) => distance >= clearanceMm
+    && distance <= lengthMm - clearanceMm
+    && fittingDistances.every((fittingDistance) => Math.abs(distance - fittingDistance) >= clearanceMm);
+  const requested = clampNumber(requestedDistanceMm, clearanceMm, lengthMm - clearanceMm);
+  if (allowed(requested)) return Math.round(requested);
+  const step = Math.max(25, Math.min(100, clearanceMm / 3));
+  for (let offset = step; offset <= lengthMm; offset += step) {
+    const after = requested + offset;
+    const before = requested - offset;
+    if (allowed(after)) return Math.round(after);
+    if (allowed(before)) return Math.round(before);
+  }
+  return null;
+}
+
+function suggestedBigSpoolCuts(
+  maxTransportLengthMm = currentBigSpoolPlan().maxTransportLengthMm,
+  clearanceMm = currentBigSpoolPlan().clearanceMm,
+  jointType = currentBigSpoolPlan().defaultJointType,
+) {
+  const segmentData = segments();
+  const envelopeAllowanceMm = Math.max(...segmentData.map((segment) => Number(pipeSizeForSegment(segment)?.od) || 0), 0);
+  const targetRouteLengthMm = Math.max(BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM, maxTransportLengthMm - envelopeAllowanceMm);
+  const distances = bigSpoolRouteDistances(segmentData);
+  const suggestions = [];
+  const occupied = new Set();
+  for (const segment of segmentData) {
+    const lengthMm = pointLength(segment.vector);
+    const fromDistance = distances.get(segment.from);
+    const toDistance = distances.get(segment.to);
+    if (!Number.isFinite(fromDistance) || !Number.isFinite(toDistance) || lengthMm <= 1) continue;
+    const low = Math.min(fromDistance, toDistance);
+    const high = Math.max(fromDistance, toDistance);
+    if (high - low < 1) continue;
+    let threshold = (Math.floor(low / targetRouteLengthMm) + 1) * targetRouteLengthMm;
+    while (threshold < high - 1) {
+      const requested = toDistance >= fromDistance ? threshold - fromDistance : fromDistance - threshold;
+      const safeDistance = safeBigSpoolSplitDistance(segment, requested, clearanceMm);
+      const key = `${segment.index}:${safeDistance}`;
+      if (safeDistance !== null && !occupied.has(key)) {
+        occupied.add(key);
+        suggestions.push({
+          id: `AUTO-${segment.index + 1}-${Math.round(safeDistance)}`,
+          segmentIndex: segment.index,
+          distanceFromStartMm: safeDistance,
+          source: "auto",
+          jointType: BIG_SPOOL_PRIMARY_JOINT_TYPES.has(jointType) ? jointType : "fieldWeld",
+        });
+      }
+      threshold += targetRouteLengthMm;
+    }
+  }
+  return suggestions;
+}
+
+function refineBigSpoolCutsForConstraints(plan = currentBigSpoolPlan()) {
+  const maximumIterations = Math.min(80, Math.max(12, state.edges.length * 5));
+  let added = 0;
+  for (let iteration = 0; iteration < maximumIterations; iteration += 1) {
+    const layout = bigSpoolLayout();
+    const violating = layout.pieces
+      .map((piece) => ({ piece, violations: bigSpoolPieceViolations(piece, plan) }))
+      .filter((entry) => entry.violations.length)
+      .sort((first, second) => {
+        const firstRatio = Math.max(
+          first.piece.transportLengthMm / Math.max(1, plan.maxTransportLengthMm),
+          plan.maxTransportWidthMm ? first.piece.transportWidthMm / plan.maxTransportWidthMm : 0,
+          plan.maxTransportHeightMm ? first.piece.transportHeightMm / plan.maxTransportHeightMm : 0,
+          plan.maxTransportWeightKg ? first.piece.weightKg / plan.maxTransportWeightKg : 0,
+        );
+        const secondRatio = Math.max(
+          second.piece.transportLengthMm / Math.max(1, plan.maxTransportLengthMm),
+          plan.maxTransportWidthMm ? second.piece.transportWidthMm / plan.maxTransportWidthMm : 0,
+          plan.maxTransportHeightMm ? second.piece.transportHeightMm / plan.maxTransportHeightMm : 0,
+          plan.maxTransportWeightKg ? second.piece.weightKg / plan.maxTransportWeightKg : 0,
+        );
+        return secondRatio - firstRatio;
+      })[0];
+    if (!violating) break;
+
+    const candidates = violating.piece.fragments
+      .filter((fragment) => fragment.lengthMm > plan.clearanceMm * 2 + 20)
+      .map((fragment) => {
+        const segmentLength = pointLength(fragment.segment.vector);
+        const requested = segmentLength * (fragment.t0 + fragment.t1) * 0.5;
+        const distanceFromStartMm = safeBigSpoolSplitDistance(fragment.segment, requested, plan.clearanceMm);
+        if (distanceFromStartMm === null) return null;
+        if (distanceFromStartMm <= segmentLength * fragment.t0 + 2 || distanceFromStartMm >= segmentLength * fragment.t1 - 2) return null;
+        if (plan.cuts.some((cut) => cut.segmentIndex === fragment.segmentIndex && Math.abs(cut.distanceFromStartMm - distanceFromStartMm) < 2)) return null;
+        const vector = subtractPoints(fragment.end, fragment.start);
+        const axisSpread = Math.max(Math.abs(vector.x), Math.abs(vector.y), Math.abs(vector.z));
+        return { fragment, distanceFromStartMm, score: fragment.lengthMm + axisSpread * 0.6 };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+    const candidate = candidates[0];
+    if (!candidate) break;
+    plan.cuts.push({
+      id: `AUTO-C-${candidate.fragment.segmentIndex + 1}-${Math.round(candidate.distanceFromStartMm)}`,
+      segmentIndex: candidate.fragment.segmentIndex,
+      distanceFromStartMm: candidate.distanceFromStartMm,
+      source: "auto",
+      jointType: BIG_SPOOL_PRIMARY_JOINT_TYPES.has(plan.defaultJointType) ? plan.defaultJointType : "fieldWeld",
+      status: "planned",
+      notes: "",
+    });
+    added += 1;
+  }
+  return added;
+}
+
+function bigSpoolLayout(segmentData = segments()) {
+  const cuts = validBigSpoolCuts(segmentData);
+  const cutsBySegment = new Map();
+  for (const cut of cuts) {
+    if (!cutsBySegment.has(cut.segmentIndex)) cutsBySegment.set(cut.segmentIndex, []);
+    cutsBySegment.get(cut.segmentIndex).push(cut);
+  }
+  const fragments = [];
+  for (const segment of segmentData) {
+    const segmentCuts = cutsBySegment.get(segment.index) ?? [];
+    const stops = [0, ...segmentCuts.map((cut) => cut.t), 1];
+    for (let index = 0; index < stops.length - 1; index += 1) {
+      const t0 = stops[index];
+      const t1 = stops[index + 1];
+      const startCut = index > 0 ? segmentCuts[index - 1] : null;
+      const endCut = index < segmentCuts.length ? segmentCuts[index] : null;
+      fragments.push({
+        id: `${segment.index}:${index}`,
+        segmentIndex: segment.index,
+        segment,
+        t0,
+        t1,
+        start: lerpPoint(segment.start, segment.end, t0),
+        end: lerpPoint(segment.start, segment.end, t1),
+        lengthMm: pointLength(segment.vector) * (t1 - t0),
+        startKey: t0 === 0 ? `N:${segment.from}` : `C:${startCut?.id}:after`,
+        endKey: t1 === 1 ? `N:${segment.to}` : `C:${endCut?.id}:before`,
+        startCut,
+        endCut,
+      });
+    }
+  }
+
+  const parent = new Map();
+  const find = (key) => {
+    if (!parent.has(key)) parent.set(key, key);
+    let root = key;
+    while (parent.get(root) !== root) root = parent.get(root);
+    let cursor = key;
+    while (parent.get(cursor) !== cursor) {
+      const next = parent.get(cursor);
+      parent.set(cursor, root);
+      cursor = next;
+    }
+    return root;
+  };
+  const union = (a, b) => {
+    const rootA = find(a);
+    const rootB = find(b);
+    if (rootA !== rootB) parent.set(rootB, rootA);
+  };
+  for (const fragment of fragments) union(fragment.startKey, fragment.endKey);
+
+  const routeDistances = bigSpoolRouteDistances(segmentData);
+  const groups = new Map();
+  for (const fragment of fragments) {
+    const root = find(fragment.startKey);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root).push(fragment);
+  }
+  const pieces = [...groups.values()].map((pieceFragments) => {
+    const points = pieceFragments.flatMap((fragment) => [fragment.start, fragment.end]);
+    const xs = points.map((point) => point.x);
+    const ys = points.map((point) => point.y);
+    const zs = points.map((point) => point.z);
+    const extents = {
+      x: Math.max(...xs) - Math.min(...xs),
+      y: Math.max(...ys) - Math.min(...ys),
+      z: Math.max(...zs) - Math.min(...zs),
+    };
+    const largestOdMm = Math.max(...pieceFragments.map((fragment) => Number(pipeSizeForSegment(fragment.segment)?.od) || 0), 0);
+    const transportDimensions = [extents.x + largestOdMm, extents.y + largestOdMm, extents.z + largestOdMm].sort((a, b) => b - a);
+    const routeStartMm = Math.min(...pieceFragments.map((fragment) => {
+      const fromDistance = routeDistances.get(fragment.segment.from) ?? 0;
+      const toDistance = routeDistances.get(fragment.segment.to) ?? fromDistance + pointLength(fragment.segment.vector);
+      return fromDistance + (toDistance - fromDistance) * fragment.t0;
+    }));
+    return {
+      fragments: pieceFragments,
+      centrelineMm: pieceFragments.reduce((sum, fragment) => sum + fragment.lengthMm, 0),
+      extents,
+      maxOverallMm: transportDimensions[0],
+      transportLengthMm: transportDimensions[0],
+      transportWidthMm: transportDimensions[1],
+      transportHeightMm: transportDimensions[2],
+      largestOdMm,
+      routeStartMm,
+    };
+  }).sort((a, b) => a.routeStartMm - b.routeStartMm);
+
+  for (const [pieceIndex, piece] of pieces.entries()) {
+    piece.index = pieceIndex;
+    piece.label = bigSpoolPieceLabel(pieceIndex);
+    piece.childId = bigSpoolChildId(pieceIndex);
+    piece.colour = bigSpoolPieceColour(pieceIndex);
+    for (const fragment of piece.fragments) fragment.pieceIndex = pieceIndex;
+  }
+  applyBigSpoolPieceEngineering({ pieces, fragments, cuts }, segmentData);
+  const fragmentById = new Map(fragments.map((fragment) => [fragment.id, fragment]));
+  const resolvedCuts = cuts.map((cut, cutIndex) => {
+    const segmentCuts = cutsBySegment.get(cut.segmentIndex) ?? [];
+    const localIndex = segmentCuts.findIndex((item) => item.id === cut.id);
+    const before = fragmentById.get(`${cut.segmentIndex}:${localIndex}`);
+    const after = fragmentById.get(`${cut.segmentIndex}:${localIndex + 1}`);
+    return {
+      ...cut,
+      jointNumber: cutIndex + 1,
+      jointId: `J${String(cutIndex + 1).padStart(2, "0")}`,
+      beforePieceIndex: before?.pieceIndex ?? null,
+      afterPieceIndex: after?.pieceIndex ?? null,
+    };
+  });
+  return { fragments, pieces, cuts: resolvedCuts };
+}
+
+function bigSpoolFragmentsForSegment(segmentIndex, layout = bigSpoolLayout()) {
+  return layout.fragments.filter((fragment) => fragment.segmentIndex === segmentIndex);
+}
+
+function bigSpoolPlanActive() {
+  return currentBigSpoolPlan().enabled === true;
+}
+
+function bigSpoolChildState(piece, masterState = state) {
+  if (!piece) return null;
+  const child = {
+    ...masterState,
+    points: [],
+    edges: [],
+    fittings: [],
+    notes: [],
+    measurements: [],
+    nodeTypes: {},
+    reducerSideOverrides: {},
+    reducerTypeOverrides: {},
+    dimensionOffsets: {},
+    selectedSegments: [],
+    selectedSegment: null,
+    selectedFitting: null,
+    selectedNote: null,
+    selectedMeasurement: null,
+    selectedPoint: null,
+    history: [],
+    redoHistory: [],
+    bigSpool: { ...defaultBigSpoolPlan(), enabled: false },
+    projectInfo: { ...normalizeProjectInfo(masterState.projectInfo, masterState.pipeSpec), spoolNumber: piece.childId },
+    spoolUid: normalizeTraceabilityId(`${normalizeTraceabilityId(masterState.spoolUid) || "SPL"}-${piece.label}`),
+  };
+  const pointIndexByKey = new Map();
+  const addPoint = (point) => {
+    const key = `${Math.round(point.x * 1000)}:${Math.round(point.y * 1000)}:${Math.round(point.z * 1000)}`;
+    if (pointIndexByKey.has(key)) return pointIndexByKey.get(key);
+    const index = child.points.length;
+    child.points.push(clonePoint(point));
+    pointIndexByKey.set(key, index);
+    return index;
+  };
+  const edgeByFragmentId = new Map();
+  for (const fragment of piece.fragments) {
+    const from = addPoint(fragment.start);
+    const to = addPoint(fragment.end);
+    const edgeIndex = child.edges.length;
+    child.edges.push({
+      from,
+      to,
+      pipeSizeNb: normalizePipeSize(fragment.segment.pipeSizeNb),
+      ...normalizeOffsetEdgeMeta(fragment.segment),
+    });
+    edgeByFragmentId.set(fragment.id, edgeIndex);
+  }
+  for (const fitting of masterState.fittings ?? []) {
+    const fittingT = normalizeFittingPosition(fitting.type, fitting.t);
+    const candidates = piece.fragments.filter((fragment) => fragment.segmentIndex === fitting.segmentIndex
+      && fittingT >= fragment.t0 - 0.000001
+      && fittingT <= fragment.t1 + 0.000001);
+    const fragment = candidates.find((candidate) => fittingT < candidate.t1 - 0.000001) ?? candidates[candidates.length - 1];
+    if (!fragment) continue;
+    const span = Math.max(0.000001, fragment.t1 - fragment.t0);
+    const localT = clampNumber((fittingT - fragment.t0) / span, 0, 1);
+    child.fittings.push({
+      ...fitting,
+      segmentIndex: edgeByFragmentId.get(fragment.id),
+      t: normalizeFittingPosition(fitting.type, localT),
+    });
+  }
+  let generatedFittingId = child.fittings.reduce((maximum, fitting) => Math.max(maximum, Number(fitting.id) || 0), 0) + 1;
+  const addSplitEndPreparation = (fragment, cut, endpointT) => {
+    if (!cut) return;
+    const segmentIndex = edgeByFragmentId.get(fragment.id);
+    if (!Number.isInteger(segmentIndex)) return;
+    const fitting = bigSpoolJointEndFitting(cut, segmentIndex, endpointT, masterState, generatedFittingId);
+    generatedFittingId += 1;
+    if (fitting) child.fittings.push(fitting);
+  };
+  for (const fragment of piece.fragments) {
+    addSplitEndPreparation(fragment, fragment.startCut, 0);
+    addSplitEndPreparation(fragment, fragment.endCut, 1);
+  }
+  for (const [originalNode, type] of Object.entries(masterState.nodeTypes ?? {})) {
+    const point = masterState.points?.[Number(originalNode)];
+    if (!point) continue;
+    const childIndex = pointIndexByKey.get(`${Math.round(point.x * 1000)}:${Math.round(point.y * 1000)}:${Math.round(point.z * 1000)}`);
+    if (Number.isInteger(childIndex)) child.nodeTypes[childIndex] = type;
+  }
+  child.activePoint = Math.max(0, child.points.length - 1);
+  child.selectedPoint = child.activePoint;
+  child.weldRegister = normalizeWeldRegister([], child.fittings);
+  return child.points.length && child.edges.length ? child : null;
+}
+
+function bigSpoolPieceLiftData(piece) {
+  const child = bigSpoolChildState(piece);
+  if (!child) return null;
+  return withTemporaryState(child, () => {
+    const quantities = quantitySummary();
+    const cog = centreOfGravityData(quantities);
+    const lugs = suggestedLugPlan(quantities, cog);
+    return { quantities, cog, lugs };
+  });
+}
+
 function runLabelForVector(vector) {
   const normalized = normalizePoint(vector);
   let best = AXES[0];
@@ -4030,9 +6180,28 @@ function getProjection() {
   const maxY = Math.max(...rawPoints.map((point) => point.y));
 
   return {
-    offsetX: rect.width * 0.5 - (minX + maxX) * 0.5,
-    offsetY: rect.height * 0.55 - (minY + maxY) * 0.5,
+    offsetX: rect.width * 0.5 - (minX + maxX) * 0.5 + drawingViewOffset.x,
+    offsetY: rect.height * 0.55 - (minY + maxY) * 0.5 + drawingViewOffset.y,
   };
+}
+
+function fitDrawingToViewport({ announce = true } = {}) {
+  const rect = drawCanvas.getBoundingClientRect();
+  const points = state.points.length ? state.points : [{ x: 0, y: 0, z: 0 }];
+  const rawPoints = points.map((point) => rawIso(point, 1));
+  const rawWidth = Math.max(1, Math.max(...rawPoints.map((point) => point.x)) - Math.min(...rawPoints.map((point) => point.x)));
+  const rawHeight = Math.max(1, Math.max(...rawPoints.map((point) => point.y)) - Math.min(...rawPoints.map((point) => point.y)));
+  const phone = document.body.classList.contains("phone-layout") || rect.width <= 640;
+  const availableWidth = Math.max(120, rect.width - (phone ? 76 : 112));
+  const availableHeight = Math.max(120, rect.height - (phone ? 96 : 120));
+  state.gridScale = clampNumber(Math.min(56, availableWidth / rawWidth, availableHeight / rawHeight), 10, 72);
+  drawingViewOffset = { x: 0, y: 0 };
+  state.previewCandidate = null;
+  updateAll();
+  if (announce) {
+    cursorReadout.textContent = "Whole spool fitted";
+    showAppNotice("Whole spool fitted. Drag empty space to move it, or use two fingers to pan and zoom.");
+  }
 }
 
 function projectIso(point, projection = getProjection()) {
@@ -4067,14 +6236,14 @@ function drawIso() {
 function drawGrid(ctx, width, height, projection) {
   ctx.save();
   const darkTheme = isDarkAppTheme();
-  ctx.fillStyle = darkTheme ? "#061018" : "#f7f3e9";
+  ctx.fillStyle = darkTheme ? "#061018" : "#f7f5ef";
   ctx.fillRect(0, 0, width, height);
 
   const bounds = worldBounds(8);
   const range = Math.min(34, Math.max(8, Math.ceil(Math.max(bounds.maxAbsX, bounds.maxAbsY) + 8)));
 
   ctx.lineWidth = 1;
-  ctx.strokeStyle = darkTheme ? "rgba(0, 174, 255, 0.12)" : "rgba(112, 124, 116, 0.08)";
+  ctx.strokeStyle = darkTheme ? "rgba(0, 174, 255, 0.1)" : "rgba(112, 124, 116, 0.055)";
 
   for (let i = -range; i <= range; i += 1) {
     drawLine(
@@ -4110,9 +6279,9 @@ function drawIsoPaperDots(ctx, width, height, projection, range) {
       const major = x % 5 === 0 && y % 5 === 0;
       ctx.beginPath();
       ctx.fillStyle = isDarkAppTheme()
-        ? major ? "rgba(35, 190, 255, 0.54)" : "rgba(0, 132, 255, 0.28)"
-        : major ? "rgba(38, 80, 78, 0.38)" : "rgba(72, 86, 82, 0.24)";
-      ctx.arc(dot.x, dot.y, major ? 1.9 : 1.25, 0, Math.PI * 2);
+        ? major ? "rgba(35, 190, 255, 0.42)" : "rgba(0, 132, 255, 0.2)"
+        : major ? "rgba(38, 80, 78, 0.24)" : "rgba(72, 86, 82, 0.12)";
+      ctx.arc(dot.x, dot.y, major ? 1.7 : 1.05, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -4179,12 +6348,12 @@ function drawingPipePalette() {
   }
 
   return {
-    pipe: "#1f5f68",
+    pipe: "#174e59",
     selected: "#b95436",
     hovered: "#2563eb",
     highlight: "#fffdf8",
-    shadow: "rgba(31, 42, 47, 0.12)",
-    tee: "#1f5f68",
+    shadow: "rgba(31, 42, 47, 0.1)",
+    tee: "#174e59",
     branch: "#b95436",
   };
 }
@@ -4221,7 +6390,7 @@ function dimensionViewport(ctx, padding = 18) {
 }
 
 function drawSpool2d(ctx, projection, options = {}) {
-  const pipeWidth = 4;
+  const pipeWidth = 5;
   const segmentListForDraw = segments();
   const connections = nodeConnections(segmentListForDraw);
   const viewport = options.viewport ?? dimensionViewport(ctx, 18);
@@ -4304,6 +6473,76 @@ function drawSpool2d(ctx, projection, options = {}) {
   drawPipePointMarkers(ctx, projection, connections);
   drawNumberedDimensionLegend(ctx, dimensionLayout);
 
+  ctx.restore();
+}
+
+function drawBigSpoolBreaks2d(ctx, projection, layout = bigSpoolLayout(), pipeWidth = 5) {
+  if (!layout.cuts.length) return;
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  ctx.font = "900 11px Inter, system-ui, sans-serif";
+  for (const cut of layout.cuts) {
+    const segment = segments().find((item) => item.index === cut.segmentIndex);
+    if (!segment) continue;
+    const point = projectIso(cut.point, projection);
+    const start = projectIso(segment.start, projection);
+    const end = projectIso(segment.end, projection);
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const length = Math.max(1, Math.hypot(dx, dy));
+    const normal = { x: -dy / length, y: dx / length };
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 3;
+    drawLine(ctx, { x: point.x - normal.x * 10, y: point.y - normal.y * 10 }, { x: point.x + normal.x * 10, y: point.y + normal.y * 10 });
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#ffffff";
+    drawLine(ctx, { x: point.x - normal.x * 8, y: point.y - normal.y * 8 }, { x: point.x + normal.x * 8, y: point.y + normal.y * 8 });
+    const label = `${cut.jointId} ${bigSpoolPieceLabel(cut.beforePieceIndex ?? 0)}/${bigSpoolPieceLabel(cut.afterPieceIndex ?? 0)} ${bigSpoolJointShortLabel(cut)}`;
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "rgba(255,255,255,0.95)";
+    ctx.fillStyle = "#111827";
+    const labelOffset = cut.jointType === "groove" ? 34 : 18;
+    ctx.strokeText(label, point.x + normal.x * labelOffset, point.y + normal.y * labelOffset);
+    ctx.fillText(label, point.x + normal.x * labelOffset, point.y + normal.y * labelOffset);
+    if (cut.jointType === "groove") {
+      const matchingFragments = layout.fragments.filter((fragment) => fragment.startCut?.id === cut.id || fragment.endCut?.id === cut.id);
+      for (const fragment of matchingFragments) {
+        const display = bigSpoolFragmentScreenGeometry(fragment, (worldPoint) => projectIso(worldPoint, projection));
+        const atStart = fragment.startCut?.id === cut.id;
+        const endpoint = atStart ? display.start : display.end;
+        const inward = atStart ? 1 : -1;
+        const grooveCentre = {
+          x: endpoint.x + display.along.x * inward * 5,
+          y: endpoint.y + display.along.y * inward * 5,
+        };
+        const grooveNormal = { x: -display.along.y, y: display.along.x };
+        ctx.lineCap = "butt";
+        ctx.strokeStyle = "#4d5754";
+        ctx.lineWidth = 2.8;
+        for (const offset of [-3, 3]) {
+          const centre = {
+            x: grooveCentre.x + display.along.x * offset,
+            y: grooveCentre.y + display.along.y * offset,
+          };
+          drawLine(ctx,
+            { x: centre.x - grooveNormal.x * Math.max(8, pipeWidth * 1.4), y: centre.y - grooveNormal.y * Math.max(8, pipeWidth * 1.4) },
+            { x: centre.x + grooveNormal.x * Math.max(8, pipeWidth * 1.4), y: centre.y + grooveNormal.y * Math.max(8, pipeWidth * 1.4) });
+        }
+        const labelSide = atStart ? -1 : 1;
+        const rgLabel = {
+          x: endpoint.x + grooveNormal.x * labelSide * 17,
+          y: endpoint.y + grooveNormal.y * labelSide * 17,
+        };
+        ctx.font = "900 8px Inter, system-ui, sans-serif";
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
+        ctx.fillStyle = "#526067";
+        ctx.strokeText("RG", rgLabel.x, rgLabel.y);
+        ctx.fillText("RG", rgLabel.x, rgLabel.y);
+      }
+    }
+  }
   ctx.restore();
 }
 
@@ -4530,7 +6769,6 @@ function drawAutoReducers2d(ctx, projection, segmentData) {
     const along = startsAtJoint || startsAfterBend
       ? normalizeScreenVector({ x: placementOther.x - joint.x, y: placementOther.y - joint.y })
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
-    const normal = { x: -along.y, y: along.x };
     const length = 26;
     const largeWidth = Math.max(14, visualPipeWidth(reducer.largeSegment) * 1.45);
     const smallWidth = Math.max(8, visualPipeWidth(reducer.smallSegment) * 0.95);
@@ -4550,17 +6788,73 @@ function drawAutoReducers2d(ctx, projection, segmentData) {
       end = { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
     }
 
-    ctx.beginPath();
-    ctx.moveTo(start.x + normal.x * startWidth * -0.5, start.y + normal.y * startWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * -0.5, end.y + normal.y * endWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * 0.5, end.y + normal.y * endWidth * 0.5);
-    ctx.lineTo(start.x + normal.x * startWidth * 0.5, start.y + normal.y * startWidth * 0.5);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(ctx, start, end, startWidth, endWidth, reducer.reducerType, {
+      label: normalizeReducerType(reducer.reducerType) === "eccentric"
+        ? `ECC e${formatLength(reducer.eccentricOffsetMm)}`
+        : "CONC",
+      labelColor: "#59358f",
+    });
   }
 
   ctx.restore();
+}
+
+function reducerProfile2d(start, end, startWidth, endWidth, reducerType = "concentric") {
+  const along = normalizeScreenVector({ x: end.x - start.x, y: end.y - start.y });
+  const normal = { x: -along.y, y: along.x };
+  const startCentre = { ...start };
+  const endCentre = { ...end };
+  if (normalizeReducerType(reducerType) === "eccentric") {
+    const shift = Math.abs(startWidth - endWidth) * 0.5;
+    if (startWidth >= endWidth) {
+      endCentre.x += normal.x * shift;
+      endCentre.y += normal.y * shift;
+    } else {
+      startCentre.x += normal.x * shift;
+      startCentre.y += normal.y * shift;
+    }
+  }
+  return {
+    normal,
+    startCentre,
+    endCentre,
+    points: [
+      { x: startCentre.x - normal.x * startWidth * 0.5, y: startCentre.y - normal.y * startWidth * 0.5 },
+      { x: endCentre.x - normal.x * endWidth * 0.5, y: endCentre.y - normal.y * endWidth * 0.5 },
+      { x: endCentre.x + normal.x * endWidth * 0.5, y: endCentre.y + normal.y * endWidth * 0.5 },
+      { x: startCentre.x + normal.x * startWidth * 0.5, y: startCentre.y + normal.y * startWidth * 0.5 },
+    ],
+  };
+}
+
+function drawReducerProfile2d(ctx, start, end, startWidth, endWidth, reducerType = "concentric", options = {}) {
+  const profile = reducerProfile2d(start, end, startWidth, endWidth, reducerType);
+  ctx.beginPath();
+  ctx.moveTo(profile.points[0].x, profile.points[0].y);
+  for (const point of profile.points.slice(1)) ctx.lineTo(point.x, point.y);
+  ctx.closePath();
+  if (options.fill !== false) ctx.fill();
+  ctx.stroke();
+
+  if (options.label) {
+    const centre = {
+      x: (profile.startCentre.x + profile.endCentre.x) * 0.5,
+      y: (profile.startCentre.y + profile.endCentre.y) * 0.5,
+    };
+    const offset = Math.max(startWidth, endWidth) * 0.78 + 9;
+    const labelX = centre.x - profile.normal.x * offset;
+    const labelY = centre.y - profile.normal.y * offset;
+    ctx.save();
+    ctx.font = "950 9px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = "rgba(255, 253, 248, 0.97)";
+    ctx.strokeText(options.label, labelX, labelY);
+    ctx.fillStyle = options.labelColor ?? "#59358f";
+    ctx.fillText(options.label, labelX, labelY);
+    ctx.restore();
+  }
 }
 
 function drawFlushEndCaps2d(ctx, projection, segmentData, connections, pipeWidth) {
@@ -4807,7 +7101,7 @@ function drawMeasurement2d(ctx, projection, measurement, selected = false, optio
   const midpoint = { x: (start.x + end.x) * 0.5, y: (start.y + end.y) * 0.5 };
   const label = measurementLabel(measurement);
   const tick = 8;
-  const color = selected ? "#0f766e" : "#c1121f";
+  const color = selected ? "#008fb3" : "#526c78";
   const labelFill = selected ? "rgba(216, 241, 237, 0.96)" : "rgba(255, 253, 248, 0.96)";
   let labelAngle = Math.atan2(dy, dx);
   if (labelAngle > Math.PI / 2 || labelAngle < -Math.PI / 2) {
@@ -4843,7 +7137,7 @@ function drawMeasurement2d(ctx, projection, measurement, selected = false, optio
   roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
   ctx.fillStyle = labelFill;
   ctx.fill();
-  ctx.strokeStyle = selected ? "rgba(15, 118, 110, 0.55)" : "rgba(193, 18, 31, 0.28)";
+  ctx.strokeStyle = selected ? "rgba(0, 143, 179, 0.55)" : "rgba(82, 108, 120, 0.28)";
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.fillStyle = color;
@@ -5408,7 +7702,9 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
 
   const viewport = dimensionLayout?.viewport ?? dimensionViewport(ctx, 12);
   const dark = isDarkAppTheme();
-  const maxItems = 18;
+  const palette = dimensionLinePalette();
+  const availableHeight = Math.max(80, viewport.bottom - viewport.top);
+  const maxItems = Math.max(3, Math.min(18, Math.floor((availableHeight - 64) / 16)));
   const visibleItems = items.slice(0, maxItems);
   const overflowCount = items.length - visibleItems.length;
 
@@ -5438,11 +7734,11 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
   ctx.fillStyle = dark ? "rgba(6, 18, 28, 0.94)" : "rgba(255, 253, 248, 0.94)";
   ctx.fill();
   ctx.shadowColor = "transparent";
-  ctx.strokeStyle = dark ? "rgba(19, 216, 255, 0.34)" : "rgba(193, 18, 31, 0.2)";
+  ctx.strokeStyle = palette.border;
   ctx.lineWidth = 1;
   ctx.stroke();
 
-  ctx.fillStyle = dark ? "#dffbff" : "#7f1d1d";
+  ctx.fillStyle = palette.text;
   ctx.font = "950 11px Inter, system-ui, sans-serif";
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
@@ -5483,7 +7779,7 @@ function drawNumberedDimensionLegend(ctx, dimensionLayout) {
         lines: [],
       });
     }
-    ctx.fillStyle = item.code === "..." ? (dark ? "#7f93a4" : "#657579") : (dark ? "#ff8a8a" : "#c1121f");
+    ctx.fillStyle = item.code === "..." ? (dark ? "#7f93a4" : "#657579") : palette.text;
     ctx.fillText(item.code, itemX, itemY);
     ctx.fillStyle = dark ? "#ecfeff" : "#263538";
     const showEditTag = editableKey && item.code !== "..." && colWidth > 138;
@@ -5802,7 +8098,7 @@ function drawRedArrowDimension(ctx, start, end, segmentIndex, text, dimensionLay
 
   for (const stroke of [
     { color: "rgba(255, 253, 248, 0.94)", width: 6 },
-    { color: "#c1121f", width: 2.4 },
+    { color: "#008fb3", width: 2.4 },
   ]) {
     ctx.strokeStyle = stroke.color;
     ctx.lineWidth = stroke.width;
@@ -5821,10 +8117,10 @@ function drawRedArrowDimension(ctx, start, end, segmentIndex, text, dimensionLay
   roundRect(ctx, -labelWidth * 0.5, -labelHeight * 0.5, labelWidth, labelHeight, 6);
   ctx.fillStyle = "rgba(255, 253, 248, 0.98)";
   ctx.fill();
-  ctx.strokeStyle = "rgba(193, 18, 31, 0.36)";
+  ctx.strokeStyle = "rgba(0, 143, 179, 0.36)";
   ctx.lineWidth = 1;
   ctx.stroke();
-  ctx.fillStyle = "#c1121f";
+  ctx.fillStyle = "#008fb3";
   ctx.fillText(text, 0, 0.5);
   layoutState.labels.push(layout.bounds);
   layoutState.lines.push(...layout.lines);
@@ -6226,19 +8522,10 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
       }
     }
   } else if (fitting.type === "rollGroove") {
-    const grooveHalfSpan = Math.max(3, Math.min(7, pipeWidth * 0.22));
-    const shoulderHalfSpan = grooveHalfSpan * 1.75;
+    const grooveHalfSpan = Math.max(2.5, Math.min(5, pipeWidth * 0.14));
     ctx.lineCap = "butt";
-    ctx.strokeStyle = selected ? "#b42318" : "#d7dde0";
-    ctx.lineWidth = selected ? 3 : 2.8;
-    for (const offset of [-shoulderHalfSpan, shoulderHalfSpan]) {
-      ctx.beginPath();
-      ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.54, along.y * offset + normal.y * fittingWidth * -0.54);
-      ctx.lineTo(along.x * offset + normal.x * fittingWidth * 0.54, along.y * offset + normal.y * fittingWidth * 0.54);
-      ctx.stroke();
-    }
-    ctx.strokeStyle = selected ? "#7f1d1d" : "#1f272a";
-    ctx.lineWidth = selected ? 4 : 3.4;
+    ctx.strokeStyle = selected ? "#7f1d1d" : "#4d5754";
+    ctx.lineWidth = selected ? 3.5 : 2.8;
     for (const offset of [-grooveHalfSpan, grooveHalfSpan]) {
       ctx.beginPath();
       ctx.moveTo(along.x * offset + normal.x * fittingWidth * -0.6, along.y * offset + normal.y * fittingWidth * -0.6);
@@ -6255,6 +8542,36 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
     const labelY = normal.y * (fittingWidth * 0.95 + 8);
     ctx.strokeText("RG", labelX, labelY);
     ctx.fillText("RG", labelX, labelY);
+  } else if (fitting.type === "threadedEnd") {
+    const threadLength = Math.max(20, pipeWidth * 1.35);
+    const endDirection = fitting.t <= 0.5 ? 1 : -1;
+    ctx.lineCap = "butt";
+    ctx.strokeStyle = selected ? "#b42318" : "#4b5563";
+    ctx.lineWidth = selected ? 3 : 2;
+    for (let index = 0; index < 7; index += 1) {
+      const offset = endDirection * (3 + index * (threadLength / 7));
+      const lean = 3.4;
+      ctx.beginPath();
+      ctx.moveTo(
+        along.x * offset + normal.x * (fittingWidth * -0.55 - lean),
+        along.y * offset + normal.y * (fittingWidth * -0.55 - lean),
+      );
+      ctx.lineTo(
+        along.x * (offset + endDirection * 4.2) + normal.x * (fittingWidth * 0.55 + lean),
+        along.y * (offset + endDirection * 4.2) + normal.y * (fittingWidth * 0.55 + lean),
+      );
+      ctx.stroke();
+    }
+    ctx.font = "900 8px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "rgba(255, 253, 248, 0.95)";
+    ctx.fillStyle = selected ? "#b42318" : "#4b5563";
+    const labelX = normal.x * (fittingWidth * 0.95 + 9);
+    const labelY = normal.y * (fittingWidth * 0.95 + 9);
+    ctx.strokeText("THD", labelX, labelY);
+    ctx.fillText("THD", labelX, labelY);
   } else if (fitting.type === "valve") {
     ctx.beginPath();
     ctx.moveTo(along.x * -11, along.y * -11);
@@ -6315,14 +8632,15 @@ function drawFitting2d(ctx, projection, fitting, segment, pipeWidth) {
     ctx.strokeText(label, labelX, labelY);
     ctx.fillText(label, labelX, labelY);
   } else if (fitting.type === "reducer") {
-    ctx.beginPath();
-    ctx.moveTo(along.x * -12 + normal.x * fittingWidth * -0.6, along.y * -12 + normal.y * fittingWidth * -0.6);
-    ctx.lineTo(along.x * 12 + normal.x * fittingWidth * -0.32, along.y * 12 + normal.y * fittingWidth * -0.32);
-    ctx.lineTo(along.x * 12 + normal.x * fittingWidth * 0.32, along.y * 12 + normal.y * fittingWidth * 0.32);
-    ctx.lineTo(along.x * -12 + normal.x * fittingWidth * 0.6, along.y * -12 + normal.y * fittingWidth * 0.6);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(
+      ctx,
+      { x: along.x * -12, y: along.y * -12 },
+      { x: along.x * 12, y: along.y * 12 },
+      fittingWidth * 1.2,
+      fittingWidth * 0.64,
+      fittingReducerType(fitting),
+      { label: reducerTypeCode(fittingReducerType(fitting)), labelColor: selected ? "#b42318" : "#59358f" },
+    );
   }
 
   ctx.restore();
@@ -6334,6 +8652,7 @@ function fittingColor(type) {
   if (type === "reducer") return "#7a4dc2";
   if (type === "socket") return "#0f766e";
   if (type === "rollGroove") return "#0f766e";
+  if (type === "threadedEnd") return "#4b5563";
   return "#3f484b";
 }
 
@@ -6343,6 +8662,7 @@ function fittingFill(type) {
   if (type === "reducer") return "#f1ebff";
   if (type === "socket") return "#dcfce7";
   if (type === "rollGroove") return "#d8f1ed";
+  if (type === "threadedEnd") return "#e5e7eb";
   return "#eef2f0";
 }
 
@@ -6379,6 +8699,11 @@ function formatLength(value) {
   const rounded = Math.round(Number(value) || 0);
   const text = String(rounded);
   return text.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatWeldGapMm(value) {
+  const gapMm = Math.round((Number(value) || 0) * 10) / 10;
+  return gapMm.toFixed(1);
 }
 
 function formatMass(value) {
@@ -6443,6 +8768,39 @@ function visualPipeWidth(segment = null) {
   return Math.max(9, Math.min(34, 6 + Math.sqrt(od) * 1.35));
 }
 
+function triColorSegmentSizeKey(segment) {
+  const size = pipeSizeForSegment(segment);
+  const od = Number(size?.od);
+  return Number.isFinite(od) ? od : Number(size?.nb) || 0;
+}
+
+function updatePreviewSizeColourLegend(segmentData = segments()) {
+  if (!previewSizeColourLegend) return;
+  const showLegend = normalizePreviewMode(state.previewMode) === "tricolor";
+  if (!showLegend) {
+    previewSizeColourLegend.hidden = true;
+    previewSizeColourLegend.innerHTML = "";
+    return;
+  }
+
+  const palette = ["#3c9698", "#d19438", "#7864a8"];
+  const sizes = new Map();
+  for (const segment of segmentData) {
+    const key = triColorSegmentSizeKey(segment);
+    if (!sizes.has(key)) sizes.set(key, pipeSizeForSegment(segment));
+  }
+  const ordered = [...sizes.entries()].sort((first, second) => first[0] - second[0]);
+  previewSizeColourLegend.innerHTML = ordered
+    .map(([, size], index) => `
+      <span>
+        <i style="--size-colour:${palette[index % palette.length]}"></i>
+        ${escapeHtml(pipeSizeDisplayLabel(size))}
+      </span>
+    `)
+    .join("");
+  previewSizeColourLegend.hidden = ordered.length === 0;
+}
+
 function pipeRadiusMetres(segment = null) {
   const od = (segment ? pipeSizeForSegment(segment) : selectedPipeSize()).od;
   const maxOd = maxPipeOdMm();
@@ -6467,13 +8825,14 @@ function pointerPosition(event, canvas = drawCanvas) {
 
 function isCoarseInput() {
   return Boolean(
+    (navigator.maxTouchPoints || 0) > 0 ||
     window.matchMedia?.("(pointer: coarse)")?.matches ||
       window.matchMedia?.("(hover: none)")?.matches,
   );
 }
 
 function isTabletLayout() {
-  return Boolean(window.matchMedia?.("(max-width: 1024px)")?.matches || isCoarseInput());
+  return Boolean(window.matchMedia?.("(max-width: 1100px)")?.matches || isCoarseInput());
 }
 
 function isPhoneLayout() {
@@ -6670,8 +9029,12 @@ function getSnappedCandidate(pointer, options = {}) {
 
 function setShiftAngleSnap(active) {
   const next = active === true && state.activeTool === "draw";
-  if (shiftAngleSnap === next) return;
+  if (shiftAngleSnap === next) {
+    updateTouchShiftAngleButton();
+    return;
+  }
   shiftAngleSnap = next;
+  updateTouchShiftAngleButton();
   if (state.activeTool !== "draw") return;
 
   if (state.pointer) {
@@ -6690,6 +9053,45 @@ function setShiftAngleSnap(active) {
     ? formatPoint(candidate.point)
     : formatPoint(activePoint());
   drawIso();
+}
+
+function updateTouchShiftAngleButton() {
+  if (!touchShiftAngleButton) return;
+  const available = state.activeTool === "draw" && !drawingEditLocked();
+  touchShiftAngleButton.disabled = !available;
+  touchShiftAngleButton.classList.toggle("active", available && shiftAngleSnap);
+  touchShiftAngleButton.setAttribute("aria-pressed", String(available && shiftAngleSnap));
+  touchShiftAngleButton.title = available
+    ? "Press and hold while dragging a 45 degree offset"
+    : "Choose Draw to use Hold 45°";
+}
+
+function setupTouchShiftAngleButton() {
+  if (!touchShiftAngleButton) return;
+  const release = (event = null) => {
+    if (event && touchShiftAnglePointerId !== null && event.pointerId !== touchShiftAnglePointerId) return;
+    touchShiftAnglePointerId = null;
+    setShiftAngleSnap(false);
+  };
+
+  touchShiftAngleButton.addEventListener("pointerdown", (event) => {
+    if (touchShiftAngleButton.disabled || state.activeTool !== "draw") return;
+    event.preventDefault();
+    touchShiftAnglePointerId = event.pointerId;
+    try {
+      touchShiftAngleButton.setPointerCapture(event.pointerId);
+    } catch {
+      // Holding still works when pointer capture is unavailable.
+    }
+    setShiftAngleSnap(true);
+  });
+  touchShiftAngleButton.addEventListener("pointerup", release);
+  touchShiftAngleButton.addEventListener("pointercancel", release);
+  touchShiftAngleButton.addEventListener("lostpointercapture", release);
+  touchShiftAngleButton.addEventListener("click", (event) => event.preventDefault());
+  touchShiftAngleButton.addEventListener("contextmenu", (event) => event.preventDefault());
+  window.addEventListener("blur", () => release());
+  updateTouchShiftAngleButton();
 }
 
 function findNearestSegment(pointer) {
@@ -6828,7 +9230,6 @@ function findNearestAutoReducer(pointer) {
   let nearest = null;
 
   for (const reducer of autoReducerTransitions(segments())) {
-    if (reducer.kind !== "bend") continue;
     const segment = reducerPlacementSegment(reducer);
     if (!segment) continue;
 
@@ -7036,6 +9437,7 @@ function addRunToPoint(from, next, options = {}) {
     state.previewCandidate = null;
     recordHistory({ type: "snapshot", snapshot });
     updateAll();
+    markFirstUseGuideLearned("draw");
     return;
   }
 
@@ -7051,6 +9453,7 @@ function addRunToPoint(from, next, options = {}) {
   state.previewCandidate = null;
   recordHistory({ type: "edge", pointIndex: to, edgeIndex: state.edges.length - 1 });
   updateAll();
+  markFirstUseGuideLearned("draw");
 }
 
 function addAngledRun(direction) {
@@ -7294,18 +9697,29 @@ function takeoffData(segmentData = segments()) {
 
   for (const [nodeIndex, connected] of connections.entries()) {
     if (connected.length >= 3) {
-      const nodeTakeoff = nodeConnectionType(nodeIndex) === "branch"
-        ? branchTakeoffForNode(nodeIndex, connected, segmentData)
-        : teeTakeoffForNode(nodeIndex, connected, segmentData);
-      if (nodeTakeoff) {
-        for (const connection of nodeTakeoff.connections) {
+      if (nodeConnectionType(nodeIndex) === "branch") {
+        const branch = branchTakeoffForNode(nodeIndex, connected, segmentData);
+        if (branch) {
+          for (const connection of branch.connections) {
+            segmentTakeoffs.set(connection.segmentIndex, (segmentTakeoffs.get(connection.segmentIndex) ?? 0) + connection.takeoffMm);
+          }
+          branches.push(branch);
+        }
+        // A fabricated branch is a continuous main pipe with a welded outlet.
+        // It never receives tee take-offs, a tee fitting, or automatic reducers.
+        continue;
+      }
+
+      const tee = teeTakeoffForNode(nodeIndex, connected, segmentData);
+      if (tee) {
+        for (const connection of tee.connections) {
           segmentTakeoffs.set(connection.segmentIndex, (segmentTakeoffs.get(connection.segmentIndex) ?? 0) + connection.takeoffMm);
         }
-        if (nodeTakeoff.type === "branch") {
-          branches.push(nodeTakeoff);
-        } else {
-          tees.push(nodeTakeoff);
-        }
+        tees.push(tee);
+      }
+      for (const reducer of autoReducersForTeeNode(nodeIndex, connected, segmentData)) {
+        applyReducerTakeoff(segmentTakeoffs, reducer);
+        reducers.push(reducer);
       }
       continue;
     }
@@ -7351,6 +9765,56 @@ function takeoffData(segmentData = segments()) {
   return { segmentTakeoffs, elbows, reducers, tees, branches };
 }
 
+function weldedSegmentEndCounts(segmentData = segments(), data = takeoffData(segmentData)) {
+  const segmentIndexes = new Set(segmentData.map((segment) => segment.index));
+  const weldedEnds = new Set();
+  const add = (segmentIndex, nodeIndex) => {
+    if (!segmentIndexes.has(segmentIndex) || !Number.isInteger(Number(nodeIndex))) return;
+    weldedEnds.add(`${segmentIndex}:${Number(nodeIndex)}`);
+  };
+
+  for (const elbow of data.elbows ?? []) {
+    add(elbow.firstSegmentIndex, elbow.nodeIndex);
+    add(elbow.secondSegmentIndex, elbow.nodeIndex);
+  }
+  for (const tee of data.tees ?? []) {
+    for (const connection of tee.connections ?? []) add(connection.segmentIndex, tee.nodeIndex);
+  }
+  // A fabricated branch keeps the main pipe continuous. Only each outlet pipe
+  // meets the welded branch, so the straight-through main receives no gap here.
+  for (const branch of data.branches ?? []) {
+    for (const connection of branch.connections ?? []) add(connection.segmentIndex, branch.nodeIndex);
+  }
+  for (const reducer of data.reducers ?? []) {
+    add(reducer.firstSegmentIndex, reducer.nodeIndex);
+    add(reducer.secondSegmentIndex, reducer.nodeIndex);
+  }
+  // End flanges are welded fitting connections even though the spool terminates
+  // there. Roll-grooved, threaded and genuinely plain/open pipe ends are not.
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  for (const fitting of state.fittings ?? []) {
+    const segment = segmentByIndex.get(Number(fitting.segmentIndex));
+    if (!segment) continue;
+    if (fitting?.type === "flange") {
+      const t = normalizeFittingPosition("flange", fitting.t);
+      if (t === 0) add(segment.index, segment.from);
+      if (t === 1) add(segment.index, segment.to);
+      continue;
+    }
+    if (fitting?.type === "weld" && fitting.bigSpoolFieldJoint === true) {
+      if (fitting.fieldJointEnd === "start") add(segment.index, segment.from);
+      if (fitting.fieldJointEnd === "end") add(segment.index, segment.to);
+    }
+  }
+
+  const counts = new Map(segmentData.map((segment) => [segment.index, 0]));
+  for (const key of weldedEnds) {
+    const segmentIndex = Number(key.split(":")[0]);
+    counts.set(segmentIndex, (counts.get(segmentIndex) ?? 0) + 1);
+  }
+  return counts;
+}
+
 function autoReducerTransitions(segmentData = segments()) {
   const connections = nodeConnections(segmentData);
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
@@ -7384,8 +9848,7 @@ function autoReducersForTeeNode(nodeIndex, connected, segmentData = segments()) 
   if (nodeConnectionType(nodeIndex) === "branch") return [];
 
   const entries = nodeConnectionEntries(nodeIndex, connected, segmentData);
-  const mainPair = mostOppositeEntryPair(entries);
-  if (!mainPair) return [];
+  if (entries.length < 3) return [];
 
   const reducers = [];
   const addTeeReducer = (first, second) => {
@@ -7395,15 +9858,17 @@ function autoReducersForTeeNode(nodeIndex, connected, segmentData = segments()) 
     if (!duplicate) reducers.push(reducer);
   };
 
-  const [first, second] = mainPair;
-  addTeeReducer(first, second);
-
-  const mainSegments = new Set(mainPair.map((entry) => entry.segment.index));
-  const largestMainEntry = [...mainPair].sort((a, b) => b.size.od - a.size.od)[0];
+  // Model a mixed-size connection as an equal tee at the largest connected
+  // size, then reduce every smaller leg. This remains correct when the largest
+  // pipe is the outlet rather than one of the straight-through legs.
+  const largestEntry = [...entries].sort((a, b) =>
+    b.size.od - a.size.od ||
+    b.size.nb - a.size.nb ||
+    a.segment.index - b.segment.index
+  )[0];
   for (const entry of entries) {
-    if (mainSegments.has(entry.segment.index)) continue;
-    if (entry.size.od >= largestMainEntry.size.od || entry.size.nb === largestMainEntry.size.nb) continue;
-    addTeeReducer(largestMainEntry, entry);
+    if (entry.segment.index === largestEntry.segment.index) continue;
+    addTeeReducer(largestEntry, entry);
   }
 
   return reducers;
@@ -7619,6 +10084,8 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   const smallSize = firstIsLarge ? secondSize : firstSize;
   const largeOtherIndex = firstIsLarge ? firstConnection.other : secondConnection.other;
   const smallOtherIndex = firstIsLarge ? secondConnection.other : firstConnection.other;
+  const reducerType = reducerTypeForNode(nodeIndex);
+  const eccentricOffsetMm = reducerEccentricOffsetMm(largeSize, smallSize);
   const placementSide = isBendReducer ? reducerSideForNode(nodeIndex) : "small";
   const placementSegment = placementSide === "large" ? largeSegment : smallSegment;
   const inlineFirstTakeoffMm = Math.min(lengthMm * 0.5, pointLength(firstSegment.vector) * 0.45);
@@ -7632,7 +10099,7 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     : inlineSecondTakeoffMm;
   const firstBendTakeoffMm = isBendReducer ? bendTakeoffMm(firstSegment, options.bend) : 0;
   const secondBendTakeoffMm = isBendReducer ? bendTakeoffMm(secondSegment, options.bend) : 0;
-  const atlasWeightKg = atlasReducerWeightForSizes(largeSize, smallSize);
+  const atlasWeightKg = atlasReducerWeightForSizes(largeSize, smallSize, reducerType);
   const reducerWeightKg = atlasWeightKg ?? (lengthMm / 1000) * ((pipeMassPerMetreForSize(firstSize) + pipeMassPerMetreForSize(secondSize)) * 0.5) * 1.12;
   const reducerWeightSource = atlasWeightKg === null
     ? "estimated"
@@ -7649,6 +10116,8 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     firstTakeoffMm,
     secondTakeoffMm,
     lengthMm,
+    reducerType,
+    eccentricOffsetMm: reducerType === "eccentric" ? eccentricOffsetMm : 0,
     weightKg: reducerWeightKg,
     source: reducerWeightSource,
     kind: isBendReducer ? "bend" : "inline",
@@ -7665,19 +10134,26 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   };
 }
 
-function atlasStainless10ReducerWeightForSizes(largeSize, smallSize) {
+function atlasStainless10ReducerWeightForSizes(largeSize, smallSize, reducerType = "concentric") {
   if (!largeSize || !smallSize) return null;
   const key = `${Number(largeSize.nb)}:${Number(smallSize.nb)}`;
+  const eccentricWeight = ATLAS_STAINLESS10_ECCENTRIC_REDUCER_WEIGHT_OVERRIDES[key];
+  if (normalizeReducerType(reducerType) === "eccentric" && Number.isFinite(eccentricWeight)) return eccentricWeight;
   const weight = ATLAS_STAINLESS10_REDUCER_WEIGHTS[key];
   return Number.isFinite(weight) ? weight : null;
 }
 
-function atlasReducerWeightForSizes(largeSize, smallSize) {
+function atlasReducerWeightForSizes(largeSize, smallSize, reducerType = "concentric") {
   if (!largeSize || !smallSize) return null;
   if (normalizePipeSpec(state.pipeSpec) === "stainless10" && !isTubePipeSize(largeSize)) {
-    return atlasStainless10ReducerWeightForSizes(largeSize, smallSize);
+    return atlasStainless10ReducerWeightForSizes(largeSize, smallSize, reducerType);
   }
   return atlasButtweldWeight(largeSize, "reducer");
+}
+
+function reducerEccentricOffsetMm(firstSize, secondSize) {
+  if (!firstSize || !secondSize) return 0;
+  return Math.max(0, Math.abs(Number(firstSize.od) - Number(secondSize.od)) * 0.5);
 }
 
 function reducerLengthMm(firstSize, secondSize) {
@@ -7691,7 +10167,19 @@ function reducerLengthMm(firstSize, secondSize) {
 
 function bendTakeoffMm(segment, bendDegrees) {
   const size = pipeSizeForSegment(segment);
-  return size.lrRadius * Math.tan((normalizeBendAngle(bendDegrees) * Math.PI / 180) / 2);
+  const bend = normalizeBendAngle(bendDegrees);
+  if (!isTubePipeSize(size)) {
+    if (Math.abs(bend - 45) < 0.5 && Number.isFinite(ELBOW_45_TAKEOFF_MM[size.nb])) {
+      return ELBOW_45_TAKEOFF_MM[size.nb];
+    }
+    if (Math.abs(bend - 90) < 0.5 && Number.isFinite(size.lrRadius)) {
+      return size.lrRadius;
+    }
+  }
+  // Non-standard pipe angles and sanitary tube bends do not have an explicit
+  // centre-to-end table in the supplied Atlas manual, so retain the geometric
+  // centre-line estimate rather than presenting it as an Atlas dimension.
+  return size.lrRadius * Math.tan((bend * Math.PI / 180) / 2);
 }
 
 function largerPipeSize(firstSegment, secondSegment) {
@@ -7717,27 +10205,39 @@ function elbowWeightKg(size, bendDegrees) {
   return pipeMassPerMetreForSize(size) * (size.lrRadius / 1000) * bendRadians;
 }
 
-function segmentQuantity(segment, takeoffs = takeoffData(segments()).segmentTakeoffs) {
+function segmentQuantity(segment, takeoffs = null, weldEndCounts = null) {
+  if (!(takeoffs instanceof Map) || !(weldEndCounts instanceof Map)) {
+    const segmentData = segments();
+    const data = takeoffData(segmentData);
+    if (!(takeoffs instanceof Map)) takeoffs = data.segmentTakeoffs;
+    if (!(weldEndCounts instanceof Map)) weldEndCounts = weldedSegmentEndCounts(segmentData, data);
+  }
   const centrelineMm = pointLength(segment.vector);
   const bendTakeoffMmTotal = takeoffs.get(segment.index) ?? 0;
-  const cutLengthMm = Math.max(0, centrelineMm - bendTakeoffMmTotal);
+  const weldEndCount = Math.max(0, Math.floor(Number(weldEndCounts.get(segment.index)) || 0));
+  const weldGapPerEndMm = projectWeldGapMm();
+  const weldGapMm = weldEndCount * weldGapPerEndMm;
+  const cutLengthMm = Math.max(0, centrelineMm - bendTakeoffMmTotal - weldGapMm);
   const pipeWeightKg = (cutLengthMm / 1000) * pipeMassPerMetre(segment);
   return {
     centrelineMm,
     bendTakeoffMm: bendTakeoffMmTotal,
+    weldEndCount,
+    weldGapPerEndMm,
+    weldGapMm,
     cutLengthMm,
     pipeWeightKg,
   };
 }
 
 function fittingWeightOverride(fitting) {
-  if (fitting?.type === "rollGroove") return null;
+  if (fitting?.type === "rollGroove" || fitting?.type === "threadedEnd") return null;
   const weightKg = Number(fitting?.weightKg);
   return Number.isFinite(weightKg) && weightKg >= 0 ? weightKg : null;
 }
 
 function fittingWeightSource(fitting, segment = null) {
-  if (fitting?.type === "rollGroove") return "zero weight";
+  if (fitting?.type === "rollGroove" || fitting?.type === "threadedEnd") return "zero weight";
   if (fittingWeightOverride(fitting) !== null) return "manual";
   if (atlasFittingWeightKg(fitting, segment) === null) return "estimated";
   if (fitting?.type === "flange" && fittingFlangeStandard(fitting) !== "ansi150") {
@@ -7747,7 +10247,7 @@ function fittingWeightSource(fitting, segment = null) {
 }
 
 function fittingWeightKg(fitting, segment) {
-  if (fitting?.type === "rollGroove") return 0;
+  if (fitting?.type === "rollGroove" || fitting?.type === "threadedEnd") return 0;
   return fittingWeightOverride(fitting) ?? atlasFittingWeightKg(fitting, segment) ?? estimatedFittingWeightKg(fitting, segment);
 }
 
@@ -7802,6 +10302,7 @@ function estimatedFittingWeightKg(fitting, segment) {
     return Math.max(0.06, pipeMassPerMetreForSize(socketSize) * 0.05 + 0.03);
   }
   if (fitting.type === "rollGroove") return 0;
+  if (fitting.type === "threadedEnd") return 0;
   return 0;
 }
 
@@ -7824,14 +10325,17 @@ function fittingQuantities(segmentData = segments()) {
 
 function quantitySummary(segmentData = segments()) {
   const data = takeoffData(segmentData);
+  const weldEndCounts = weldedSegmentEndCounts(segmentData, data);
   const segmentsWithQuantity = segmentData.map((segment) => ({
     segment,
-    quantity: segmentQuantity(segment, data.segmentTakeoffs),
+    quantity: segmentQuantity(segment, data.segmentTakeoffs, weldEndCounts),
   }));
-  const cutSegmentsWithQuantity = branchMergedCutSegments(segmentData, data.segmentTakeoffs);
+  const cutSegmentsWithQuantity = branchMergedCutSegments(segmentData, data.segmentTakeoffs, weldEndCounts);
   const centrelineMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.centrelineMm, 0);
   const cutLengthMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.cutLengthMm, 0);
   const bendTakeoffMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.bendTakeoffMm, 0);
+  const weldEndCount = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.weldEndCount, 0);
+  const weldGapMm = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.weldGapMm, 0);
   const pipeWeightKg = segmentsWithQuantity.reduce((sum, item) => sum + item.quantity.pipeWeightKg, 0);
   const bendWeightKg = data.elbows.reduce((sum, elbow) => sum + elbow.weightKg, 0);
   const reducerWeightKg = data.reducers.reduce((sum, reducer) => sum + reducer.weightKg, 0);
@@ -7851,6 +10355,9 @@ function quantitySummary(segmentData = segments()) {
     centrelineMm,
     cutLengthMm,
     bendTakeoffMm,
+    weldEndCount,
+    weldGapPerEndMm: projectWeldGapMm(),
+    weldGapMm,
     pipeWeightKg,
     bendWeightKg,
     reducerWeightKg,
@@ -7861,10 +10368,14 @@ function quantitySummary(segmentData = segments()) {
   };
 }
 
-function branchMergedCutSegments(segmentData = segments(), segmentTakeoffs = takeoffData(segmentData).segmentTakeoffs) {
+function branchMergedCutSegments(
+  segmentData = segments(),
+  segmentTakeoffs = takeoffData(segmentData).segmentTakeoffs,
+  weldEndCounts = weldedSegmentEndCounts(segmentData),
+) {
   const rawRows = segmentData.map((segment) => ({
     segment,
-    quantity: segmentQuantity(segment, segmentTakeoffs),
+    quantity: segmentQuantity(segment, segmentTakeoffs, weldEndCounts),
   }));
   const rowByIndex = new Map(rawRows.map((row) => [row.segment.index, row]));
   const connections = nodeConnections(segmentData);
@@ -7903,6 +10414,9 @@ function branchMergedCutSegments(segmentData = segments(), segmentTakeoffs = tak
       quantity: {
         centrelineMm: firstRow.quantity.centrelineMm + secondRow.quantity.centrelineMm,
         bendTakeoffMm: firstRow.quantity.bendTakeoffMm + secondRow.quantity.bendTakeoffMm,
+        weldEndCount: firstRow.quantity.weldEndCount + secondRow.quantity.weldEndCount,
+        weldGapPerEndMm: projectWeldGapMm(),
+        weldGapMm: firstRow.quantity.weldGapMm + secondRow.quantity.weldGapMm,
         cutLengthMm: firstRow.quantity.cutLengthMm + secondRow.quantity.cutLengthMm,
         pipeWeightKg: firstRow.quantity.pipeWeightKg + secondRow.quantity.pipeWeightKg,
       },
@@ -8030,11 +10544,11 @@ function takeoffCountRows(quantities = quantitySummary()) {
 
   for (const reducer of quantities.reducers) {
     add(
-      `reducer:auto:${reducer.largeNb}:${reducer.smallNb}`,
-      `Reducer ${pipeSizeDisplayLabelByNb(reducer.largeNb)} x ${pipeSizeDisplayLabelByNb(reducer.smallNb)}`,
+      `reducer:auto:${normalizeReducerType(reducer.reducerType)}:${reducer.largeNb}:${reducer.smallNb}`,
+      `${reducerTypeLabel(reducer.reducerType)} reducer ${pipeSizeDisplayLabelByNb(reducer.largeNb)} x ${pipeSizeDisplayLabelByNb(reducer.smallNb)}`,
       1,
       reducer.weightKg,
-      reducer.source ?? "auto size change",
+      `${reducerDimensionDetail(reducer)} / ${reducer.source ?? "auto size change"}`,
       30,
     );
   }
@@ -8060,9 +10574,10 @@ function takeoffCountRows(quantities = quantitySummary()) {
     }
 
     if (type === "reducer") {
+      const reducerType = fittingReducerType(item.fitting);
       add(
-        `reducer:manual:${size.nb}`,
-        `Manual reducer on ${pipeSizeDisplayLabel(size)}`,
+        `reducer:manual:${reducerType}:${size.nb}`,
+        `Manual ${reducerTypeLabel(reducerType).toLowerCase()} reducer on ${pipeSizeDisplayLabel(size)}`,
         1,
         item.weightKg,
         "confirm outlet size",
@@ -8096,6 +10611,18 @@ function takeoffCountRows(quantities = quantitySummary()) {
       continue;
     }
 
+    if (type === "threadedEnd") {
+      add(
+        `threadedEnd:${size.nb}`,
+        `Threaded pipe end ${pipeSizeDisplayLabel(size)}`,
+        1,
+        0,
+        "0 kg end preparation",
+        61,
+      );
+      continue;
+    }
+
     if (type === "valve") {
       add(`valve:${size.nb}`, `Valve ${pipeSizeDisplayLabel(size)}`, 1, item.weightKg, item.weightSource, 50);
       continue;
@@ -8125,6 +10652,82 @@ function takeoffCountRows(quantities = quantitySummary()) {
       };
     })
     .sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+}
+
+function inferredMaterialChecklistItems(source = state) {
+  const target = drawingStateTarget(source) ?? source;
+  if (!target || typeof target !== "object") return [];
+  try {
+    return withTemporaryState(target, () => takeoffCountRows()
+      .filter((row) => !/^(branch|rollGroove|threadedEnd|weld):/.test(String(row.key)))
+      .map((row, index) => ({
+        id: `gear-${String(row.key).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80) || index}`,
+        key: String(row.key),
+        label: String(row.label),
+        quantity: String(row.countText || (row.quantity ? `x${row.quantity}` : "")),
+        detail: String(row.detail || ""),
+        status: "pending",
+        note: "",
+        custom: false,
+      })));
+  } catch (error) {
+    console.warn("Could not build the gear checklist from the spool take-off.", error);
+    return [];
+  }
+}
+
+function materialChecklistForState(source = state) {
+  const target = drawingStateTarget(source) ?? source;
+  const production = normalizeProductionInfo(target?.productionInfo);
+  const saved = normalizeMaterialChecklist(production.materialChecklist);
+  const byKey = new Map(saved.items.filter((item) => !item.custom).map((item) => [item.key, item]));
+  const inferred = inferredMaterialChecklistItems(target).map((item) => ({
+    ...item,
+    ...(byKey.get(item.key) ?? {}),
+    id: item.id,
+    key: item.key,
+    label: item.label,
+    quantity: item.quantity,
+    detail: item.detail,
+    custom: false,
+  }));
+  return normalizeMaterialChecklist({
+    ...saved,
+    items: [...inferred, ...saved.items.filter((item) => item.custom)],
+  });
+}
+
+function materialChecklistStats(checklist) {
+  const normalized = normalizeMaterialChecklist(checklist);
+  const resolved = normalized.items.filter((item) => item.status === "inshop" || item.status === "na").length;
+  const missing = normalized.items.filter((item) => item.status === "order").length;
+  const pending = normalized.items.filter((item) => item.status === "pending").length;
+  const ready = normalized.items.length > 0 && pending === 0 && missing === 0 && Boolean(normalized.checkedAt);
+  const overridden = Boolean(normalized.overrideAt && normalized.overrideReason);
+  return { total: normalized.items.length, resolved, missing, pending, ready, overridden };
+}
+
+function materialChecklistCanStart(checklist) {
+  const stats = materialChecklistStats(checklist);
+  return stats.ready || stats.overridden;
+}
+
+function materialChecklistSummary(checklist) {
+  const normalized = normalizeMaterialChecklist(checklist);
+  const stats = materialChecklistStats(normalized);
+  if (stats.ready) return `Ready / checked by ${normalized.checkedBy || "team"}`;
+  if (stats.overridden) return `Override / ${normalized.overrideReason}`;
+  if (stats.missing) return `${stats.missing} need ordering`;
+  if (!stats.total) return "No gear list yet";
+  return `${stats.resolved}/${stats.total} confirmed`;
+}
+
+function materialChecklistStatusLabel(value) {
+  const status = normalizeMaterialCheckStatus(value);
+  if (status === "inshop") return "In shop";
+  if (status === "order") return "Needs ordering";
+  if (status === "na") return "Not required";
+  return "Not checked";
 }
 
 function centreOfGravityData(quantities = quantitySummary()) {
@@ -8219,18 +10822,38 @@ function reducerRenderLengthMetres(reducer) {
   return clampNumber(nominalLength, minimumVisibleLength, maxLength);
 }
 
-function teeReducerStartOffsetMetres(reducer) {
+function teeReducerStartOffsetMetres(reducer, style = null) {
   if (!reducerStartsAtJoint(reducer)) return 0;
   const coreRadius = Math.max(
     pipeRadiusMetres(reducer.largeSegment),
     pipeRadiusMetres(reducer.smallSegment),
   );
-  return Math.max(coreRadius * 3.15, 0.18);
+  return teeNodeLegLengthMetres(coreRadius, style);
 }
 
 function reducerSideForNode(nodeIndex) {
   const value = state.reducerSideOverrides?.[nodeIndex];
   return value === "large" ? "large" : "small";
+}
+
+function reducerTypeForNode(nodeIndex) {
+  return normalizeReducerType(state.reducerTypeOverrides?.[nodeIndex] ?? state.reducerType);
+}
+
+function fittingReducerType(fitting) {
+  return normalizeReducerType(fitting?.reducerType ?? state.reducerType);
+}
+
+function reducerDimensionDetail(reducer) {
+  const length = `${formatLength(reducer?.lengthMm ?? 0)} mm H`;
+  if (normalizeReducerType(reducer?.reducerType) !== "eccentric") return length;
+  return `${length}; ${formatLength(reducer?.eccentricOffsetMm ?? 0)} mm centreline offset e`;
+}
+
+function reducerDimensionCompact(reducer) {
+  const length = `H ${formatLength(reducer?.lengthMm ?? 0)} mm`;
+  if (normalizeReducerType(reducer?.reducerType) !== "eccentric") return length;
+  return `${length} · e ${formatLength(reducer?.eccentricOffsetMm ?? 0)} mm`;
 }
 
 function reducerPlacementSide(reducer) {
@@ -8270,7 +10893,7 @@ function reducerScreenOffsetPixels(reducer, joint, placementOther, reducerLength
   return clampNumber(visibleOffset, 2, Math.max(2, screenLength - reducerLengthPx - 2));
 }
 
-function computeAutoReducerRenderTrims(reducers) {
+function computeAutoReducerRenderTrims(reducers, style = null) {
   const trims = new Map();
   const addTrim = (segment, nodeIndex, amount) => {
     if (!segment || !Number.isInteger(nodeIndex) || !Number.isFinite(amount) || amount <= 0) return;
@@ -8283,7 +10906,7 @@ function computeAutoReducerRenderTrims(reducers) {
     if (reducer.kind === "bend") {
       addTrim(reducerPlacementSegment(reducer), reducer.nodeIndex, modelLength);
     } else if (reducerStartsAtJoint(reducer)) {
-      addTrim(reducer.smallSegment, reducer.nodeIndex, teeReducerStartOffsetMetres(reducer) + modelLength);
+      addTrim(reducer.smallSegment, reducer.nodeIndex, teeReducerStartOffsetMetres(reducer, style) + modelLength);
     } else {
       addTrim(reducer.largeSegment, reducer.nodeIndex, modelLength * 0.5);
       addTrim(reducer.smallSegment, reducer.nodeIndex, modelLength * 0.5);
@@ -8573,6 +11196,7 @@ function splitSegmentAt(segmentIndex, t) {
   if (!ensureDrawingEditable("split a pipe run")) return null;
   const edge = state.edges[segmentIndex];
   if (!edge || t <= 0.02 || t >= 0.98) return null;
+  const originalLengthMm = pointLength(subtractPoints(state.points[edge.to], state.points[edge.from]));
 
   const splitPoint = lerpPoint(state.points[edge.from], state.points[edge.to], t);
   const splitIndex = state.points.length;
@@ -8584,6 +11208,7 @@ function splitSegmentAt(segmentIndex, t) {
     { from: splitIndex, to: edge.to, pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? state.pipeSizeNb) },
   );
   reindexDimensionOffsetsAfterSegmentSplit(segmentIndex);
+  reindexBigSpoolCutsAfterSegmentSplit(segmentIndex, originalLengthMm * t);
 
   const normalizedSplitFittingT = (fitting, localT) => {
     if (isEndpointFittingType(fitting.type)) {
@@ -8631,6 +11256,8 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   } else if (type === "socket") {
     fitting.socketSizeNb = normalizePipeSize(options.socketSizeNb ?? SOCKET_SIZE_NB);
     fitting.socketAngle = normalizeSocketAngle(options.socketAngle);
+  } else if (type === "reducer") {
+    fitting.reducerType = normalizeReducerType(options.reducerType ?? state.reducerType);
   }
 
   state.fittings.push(fitting);
@@ -8641,7 +11268,7 @@ function placeFitting(type, segmentIndex, t, options = {}) {
   nextFittingId += 1;
   recordHistory({ type: "fitting" });
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function placeSocketFittings(segmentIndex, positions, options = {}) {
@@ -8670,7 +11297,7 @@ function placeSocketFittings(segmentIndex, positions, options = {}) {
   state.selectedMeasurement = null;
   recordHistory({ type: "fittings", fittingIds });
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function placeNote(point, textOverride = null) {
@@ -8695,7 +11322,7 @@ function placeNote(point, textOverride = null) {
   nextNoteId += 1;
   recordHistory({ type: "note", noteId: note.id });
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function measurementLengthMm(measurement) {
@@ -8763,7 +11390,7 @@ function beginOrFinishMeasurement(pointer) {
   recordHistory({ type: "snapshot", snapshot });
   cursorReadout.textContent = `Measured ${measurementLabel(measurement)}`;
   updateAll();
-  showMobilePanel("inspector");
+  revealInspectorForSelection();
 }
 
 function createUndoSnapshot() {
@@ -8850,7 +11477,9 @@ function undo() {
     state.points.splice(last.pointIndex, 1);
     reindexNodeTypesAfterPointRemoval(last.pointIndex);
     reindexReducerSideOverridesAfterPointRemoval(last.pointIndex);
+    reindexReducerTypeOverridesAfterPointRemoval(last.pointIndex);
     reindexDimensionOffsetsAfterSegmentRemoval(last.edgeIndex);
+    reindexBigSpoolCutsAfterSegmentRemoval(last.edgeIndex);
     state.edges = state.edges.map((edge) => ({
       ...edge,
       from: edge.from > last.pointIndex ? edge.from - 1 : edge.from,
@@ -8912,6 +11541,20 @@ function updateHistoryButtons() {
   if (redoButton) redoButton.disabled = cloudPermissionReadOnly || !redoStack().length;
 }
 
+function updateRoleRestrictedDrawingTools() {
+  const canEdit = currentDrawingProjectPermission().canEdit;
+  for (const button of sideToolButtons) {
+    const tool = sideToolIdForButton(button);
+    if (!tool) continue;
+    if (!button.dataset.editableTitle) button.dataset.editableTitle = button.title || sideToolLabel(tool);
+    const roleRestricted = !canEdit && tool !== "select";
+    button.disabled = roleRestricted;
+    button.title = roleRestricted ? currentPermissionRestrictionText("edit") : button.dataset.editableTitle;
+    button.setAttribute("aria-disabled", String(roleRestricted));
+  }
+  if (!canEdit && state.activeTool !== "select") state.activeTool = "select";
+}
+
 function deleteSelection() {
   if (!ensureDrawingEditable("delete items")) return;
   if (state.selectedNote) {
@@ -8956,6 +11599,7 @@ function deleteSegmentsByIndex(indexes) {
   for (const removedEdgeIndex of selectedSegments) {
     state.edges.splice(removedEdgeIndex, 1);
     reindexDimensionOffsetsAfterSegmentRemoval(removedEdgeIndex);
+    reindexBigSpoolCutsAfterSegmentRemoval(removedEdgeIndex);
     state.fittings = state.fittings.filter((fitting) => fitting.segmentIndex !== removedEdgeIndex);
     state.fittings = state.fittings.map((fitting) => ({
       ...fitting,
@@ -8987,7 +11631,9 @@ function setTool(tool) {
   state.activeTool = tool;
   if (tool !== "draw") {
     shiftAngleSnap = false;
+    touchShiftAnglePointerId = null;
   }
+  updateTouchShiftAngleButton();
   state.previewCandidate = null;
   document.querySelectorAll("[data-tool]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tool === tool);
@@ -8995,6 +11641,7 @@ function setTool(tool) {
   updateFittingsToolButton(tool);
   if (tool === "select") {
     cursorReadout.textContent = "Select - hold Shift to pick multiple runs";
+    markFirstUseGuideLearned("select");
   } else if (tool === "measure") {
     cursorReadout.textContent = "Measure - pick first point";
   }
@@ -9023,7 +11670,10 @@ function setFittingsToolMenuOpen(open) {
   fittingsToolMenu.hidden = !next;
   fittingsToolButton.setAttribute("aria-expanded", String(next));
   document.body.classList.toggle("fittings-tool-menu-open", next);
-  if (next) positionFittingsToolMenu();
+  if (next) {
+    positionFittingsToolMenu();
+    markFirstUseGuideLearned("fittings");
+  }
 }
 
 function positionFittingsToolMenu() {
@@ -9107,7 +11757,7 @@ function updateSegmentList() {
       <span class="segment-main">
         <strong>${escapeHtml(cutRunDisplayTitle(segment))}</strong>
         <small>Cut ${formatLength(quantity.cutLengthMm)} mm / CL ${formatLength(quantity.centrelineMm)} mm / ${formatMass(quantity.pipeWeightKg)} kg</small>
-        <small>${pointDetail ? `${escapeHtml(pointDetail)} / ` : ""}${escapeHtml(pipeSizeSpecLabel(pipeSizeForSegment(segment)))} / deductions ${formatLength(quantity.bendTakeoffMm)} mm</small>
+        <small>${pointDetail ? `${escapeHtml(pointDetail)} / ` : ""}${escapeHtml(pipeSizeSpecLabel(pipeSizeForSegment(segment)))} / fitting deductions ${formatLength(quantity.bendTakeoffMm)} mm / Weld gap ${formatWeldGapMm(quantity.weldGapMm)} mm (${quantity.weldEndCount} welded end${quantity.weldEndCount === 1 ? "" : "s"})</small>
       </span>
       <span class="segment-fit">${fittingCount}</span>
     `;
@@ -9183,7 +11833,7 @@ function updateTakeoffSummary() {
     : "<li>No bend take-off yet.</li>";
   const reducerNotes = quantities.reducers.length
     ? quantities.reducers.map((reducer, index) => {
-        return `<li>Reducer ${index + 1}: ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}</li>`;
+        return `<li>Reducer ${index + 1}: <strong>${escapeHtml(reducerTypeLabel(reducer.reducerType))}</strong> ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - ${escapeHtml(reducerDimensionDetail(reducer))}; take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${escapeHtml(reducer.source ?? "estimated")}</li>`;
       }).join("")
     : "<li>No automatic reducers yet.</li>";
   const teeNotes = quantities.tees.length
@@ -9239,7 +11889,8 @@ function updateTakeoffSummary() {
   takeoffSummary.innerHTML = `
     <div class="takeoff-grid">
       <span>Centreline</span><strong>${formatLength(quantities.centrelineMm)} mm</strong>
-      <span>Deductions</span><strong>${formatLength(quantities.bendTakeoffMm)} mm</strong>
+      <span>Fitting deductions</span><strong>${formatLength(quantities.bendTakeoffMm)} mm</strong>
+      <span>Weld gap</span><strong>${formatWeldGapMm(quantities.weldGapMm)} mm (${formatWeldGapMm(quantities.weldGapPerEndMm)} mm x ${quantities.weldEndCount} welded ends)</strong>
       <span>Cut pipe</span><strong>${formatLength(quantities.cutLengthMm)} mm</strong>
       <span>Pipe weight</span><strong>${formatMass(quantities.pipeWeightKg)} kg</strong>
       <span>Elbows</span><strong>${quantities.elbows.length} / ${formatMass(quantities.bendWeightKg)} kg</strong>
@@ -9302,8 +11953,13 @@ function endpointHasFinish(segment, pointIndex) {
   const endpointT = segment.from === pointIndex ? 0 : 1;
   return state.fittings.some((fitting) =>
     fitting.segmentIndex === segment.index &&
-    (fitting.type === "flange" || fitting.type === "rollGroove") &&
-    Math.abs(fittingDisplayT(segment, fitting) - endpointT) < 0.001,
+    (
+      ((fitting.type === "flange" || fitting.type === "rollGroove" || fitting.type === "threadedEnd")
+        && Math.abs(endpointSnappedFittingT(segment, fitting) - endpointT) < 0.001)
+      || (fitting.type === "weld"
+        && fitting.bigSpoolFieldJoint === true
+        && fitting.fieldJointEnd === (endpointT === 0 ? "start" : "end"))
+    ),
   );
 }
 
@@ -9344,7 +12000,7 @@ function missingReducerIssues(segmentData, quantities) {
         key: `missing-reducer:${nodeIndex}:${segmentIndexes.join("-")}:${connectedSizes.join("-")}`,
         canAcknowledge: true,
         guidance: entries.length >= 3
-          ? "Choose Set as tee when this is a tee fitting; the smaller leg should receive the reducer. Choose Set as branch when the smaller pipe is welded directly into the main and no reducer is required."
+          ? "Choose Set as tee when this is a separate tee fitting; every smaller connected leg receives its own reducer. Choose Set as branch only when an outlet pipe is welded directly into a continuous main and no tee or reducer is required."
           : "Show the joint and confirm both run sizes. Keep the automatic reducer for a real size transition, or acknowledge this exception only when the transition is intentionally handled outside this spool.",
       },
     ));
@@ -9373,10 +12029,31 @@ function drawingHealthItems() {
   if (!segmentData.length) {
     items.push(healthIssue("error", "No pipe runs drawn", "Draw at least one pipe run before issuing or exporting.", { type: "tool", tool: "draw" }));
   }
+  const invalidLengthRuns = segmentData.filter((segment) => pointLength(segment.vector) <= 0.001);
+  if (invalidLengthRuns.length) {
+    items.push(healthIssue(
+      "error",
+      "Invalid pipe run length",
+      `${invalidLengthRuns.length} run${invalidLengthRuns.length === 1 ? "" : "s"} have no usable centreline length.`,
+      { type: "segments", segmentIndexes: invalidLengthRuns.map((segment) => segment.index) },
+    ));
+  }
+  const unusuallyShortRuns = segmentData.filter((segment) => {
+    const length = pointLength(segment.vector);
+    return length > 0.001 && length < MIN_LENGTH_MM;
+  });
+  if (unusuallyShortRuns.length) {
+    items.push(healthIssue(
+      "warning",
+      "Confirm very short pipe runs",
+      `${unusuallyShortRuns.length} run${unusuallyShortRuns.length === 1 ? "" : "s"} are shorter than ${MIN_LENGTH_MM} mm.`,
+      { type: "segments", segmentIndexes: unusuallyShortRuns.map((segment) => segment.index) },
+    ));
+  }
   const pressureLimit = weakestPressureEstimate(segmentData);
   if (pressureLimit) {
     items.push(healthIssue(
-      "warning",
+      "info",
       "Weakest pressure point",
       `${pressureEstimateDetail(pressureLimit)} Verify fittings, flanges, temperature and design code before using this as a rating.`,
       {
@@ -9462,7 +12139,7 @@ function drawingHealthItems() {
     items.push(healthIssue("ok", "Drawing locked", "Edits are blocked until Lock edits is turned off or a new revision is created."));
   }
   if (!items.some((item) => item.severity === "error" || item.severity === "warning")) {
-    items.unshift(healthIssue("ok", "No blocking issues found", "Health check passed for the current drawing."));
+    items.unshift(healthIssue("ok", "Drawing checks clear", "Geometry and drawing checks passed. Workflow approval is shown separately below."));
   }
 
   return items;
@@ -9483,8 +12160,8 @@ function healthSummaryText(items = drawingHealthItems()) {
   const counts = healthCounts(items);
   if (counts.error) return `${counts.error} issue${counts.error === 1 ? "" : "s"} need fixing`;
   if (counts.warning) return `${counts.warning} warning${counts.warning === 1 ? "" : "s"} to review`;
-  if (counts.acknowledged) return `No blocking issues / ${counts.acknowledged} acknowledged`;
-  return "No blocking issues";
+  if (counts.acknowledged) return `Drawing checks clear / ${counts.acknowledged} acknowledged`;
+  return "Drawing checks clear";
 }
 
 function healthIssueClickable(item) {
@@ -9497,6 +12174,9 @@ function projectFieldLabel(field) {
   if (field === "revision") return "revision";
   if (field === "drawnBy") return "drawn by";
   if (field === "client") return "client / area";
+  if (field === "fittingProfile") return "fitting data profile";
+  if (field === "fittingProfileReference") return "supplier / workshop reference";
+  if (field === "weldGapMm") return "weld gap";
   return "project details";
 }
 
@@ -9592,7 +12272,7 @@ function setupHealthIssueClicks() {
 async function handleHealthIssueAction(item, action) {
   if (action === "set-revision-a") {
     if (cloudPermissionReadOnly) {
-      showAppNotice("This team spool is view/comment only. Ask an owner or admin to set the drawing revision.");
+      showAppNotice(cloudReadOnlyMessage("set the drawing revision"));
       return;
     }
     state.projectInfo = normalizeProjectInfo({ ...state.projectInfo, revision: "A" });
@@ -9623,7 +12303,7 @@ async function handleHealthIssueAction(item, action) {
     showHealthPanel();
     showAppNotice(action === "set-branch"
       ? "Connection set as a welded branch. Tee and reducer take-off will not be used there."
-      : "Connection set as a tee. The app will add the smaller-leg reducer when the connected sizes require one.");
+      : "Connection set as a tee. The app will add a separate reducer to every smaller connected leg.");
     return;
   }
   if (action === "acknowledge") {
@@ -9637,8 +12317,8 @@ async function handleHealthIssueAction(item, action) {
 
 async function acknowledgeHealthIssue(item) {
   if (!item?.canAcknowledge || !item.key) return;
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only. Ask a checker, admin or owner to acknowledge the exception.");
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return;
   }
   const response = await openFieldInputDialog({
@@ -9674,8 +12354,8 @@ async function acknowledgeHealthIssue(item) {
 
 function reopenHealthIssue(item) {
   if (!item?.key) return;
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only. Ask a checker, admin or owner to reopen the check.");
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return;
   }
   state.healthAcknowledgements = normalizeHealthAcknowledgements(state.healthAcknowledgements);
@@ -9756,6 +12436,11 @@ function animateHealthIssueHighlight() {
   }
   const now = performance.now();
   drawIso();
+  // The redraw can clear a highlight whose target was removed during an edit.
+  if (!healthHighlight) {
+    healthHighlightAnimationFrame = 0;
+    return;
+  }
   if (now > healthHighlight.expiresAt) {
     healthHighlight = null;
     healthHighlightAnimationFrame = 0;
@@ -9804,31 +12489,284 @@ function currentWorkflowRows() {
   ];
 }
 
+function readyIssueFinding(severity, category, title, detail, action = null, source = null) {
+  return {
+    severity: severity === "blocker" ? "blocker" : "warning",
+    category: String(category ?? "Drawing").trim() || "Drawing",
+    title: String(title ?? "").trim(),
+    detail: String(detail ?? "").trim(),
+    action,
+    source,
+  };
+}
+
+function weldReadyIssueFindings(welds = synchronizeWeldRegister(state)) {
+  const blockers = [];
+  const warnings = [];
+  for (const weld of welds) {
+    const action = { type: "weld", fittingId: weld.fittingId };
+    if (!weld.wps) {
+      blockers.push(readyIssueFinding(
+        "blocker",
+        "Weld register",
+        `${weld.number} is missing a WPS`,
+        "Enter the approved welding procedure before issuing the fabrication drawing.",
+        { ...action, field: "wps" },
+      ));
+    }
+    if (weld.status === "repair") {
+      blockers.push(readyIssueFinding(
+        "blocker",
+        "Weld register",
+        `${weld.number} has an unresolved repair`,
+        weld.repairHistory || "Record the repair, retest and accepted result before issue.",
+        { ...action, field: "status" },
+      ));
+    }
+    const inspectionIncomplete = !weld.inspectionType || !weld.inspectedBy;
+    if (weld.status === "accepted" && inspectionIncomplete) {
+      blockers.push(readyIssueFinding(
+        "blocker",
+        "Weld register",
+        `${weld.number} acceptance record is incomplete`,
+        "Accepted welds require both the inspection/NDT method and inspector name or ID.",
+        { ...action, field: weld.inspectionType ? "inspectedBy" : "inspectionType" },
+      ));
+    } else if (["visual", "ndt"].includes(weld.status) && inspectionIncomplete) {
+      warnings.push(readyIssueFinding(
+        "warning",
+        "Weld register",
+        `${weld.number} inspection details are incomplete`,
+        "Record the inspection/NDT method and inspector name or ID.",
+        { ...action, field: weld.inspectionType ? "inspectedBy" : "inspectionType" },
+      ));
+    } else if (weld.status === "welded") {
+      warnings.push(readyIssueFinding(
+        "warning",
+        "Weld register",
+        `${weld.number} inspection is still pending`,
+        "The weld is marked complete but has not progressed to visual, NDT or accepted.",
+        { ...action, field: "status" },
+      ));
+    }
+  }
+  return { blockers, warnings };
+}
+
+function fittingCalculationSourceSummary(segmentData = segments()) {
+  const profile = fittingDataProfileInfo(state);
+  const connections = nodeConnections(segmentData);
+  const takeoffs = takeoffData(segmentData);
+  const hasTube = segmentData.some((segment) => isTubePipeSize(pipeSizeForSegment(segment)));
+  const hasBranch = [...connections.entries()].some(([nodeIndex, connected]) =>
+    connected.length >= 3 && nodeConnectionType(nodeIndex) === "branch"
+  );
+  const hasNonStandardElbow = takeoffs.elbows.some((elbow) =>
+    Math.abs(Number(elbow.bend) - 45) >= 0.5 && Math.abs(Number(elbow.bend) - 90) >= 0.5
+  );
+  const hasUntabled45 = takeoffs.elbows.some((elbow) =>
+    Math.abs(Number(elbow.bend) - 45) < 0.5 && !Number.isFinite(ELBOW_45_TAKEOFF_MM[elbow.nb])
+  );
+  const reasons = [];
+  const mismatches = [];
+
+  if (hasTube) reasons.push("supplier tube fitting dimensions");
+  if (hasBranch) reasons.push("fabricated branch take-off");
+  if (hasNonStandardElbow) reasons.push("non-standard elbow angle");
+  if (hasUntabled45) reasons.push("45 degree size outside the Atlas B table");
+  if (hasTube && profile.key !== "as1528Supplier") {
+    mismatches.push("select the AS 1528.3 sanitary tube profile");
+  }
+  if (!hasTube && profile.key === "as1528Supplier") {
+    mismatches.push("the AS 1528.3 profile is selected for a pipe drawing");
+  }
+  if (hasBranch && profile.key !== "workshopBranch") {
+    mismatches.push("select the fabricated branch workshop profile");
+  }
+  if (!hasBranch && profile.key === "workshopBranch") {
+    mismatches.push("the workshop branch profile is selected but no branch is present");
+  }
+
+  const verified = profile.key === "atlasAsmeB169" && reasons.length === 0 && mismatches.length === 0;
+  const referenceText = profile.reference ? ` / ${profile.reference}` : "";
+  return {
+    profile,
+    hasTube,
+    hasBranch,
+    hasNonStandardElbow,
+    hasUntabled45,
+    reasons,
+    mismatches,
+    verified,
+    profileText: `${profile.label}${referenceText}`,
+    shortProfileText: `${profile.shortLabel}${profile.reference ? ` / ${profile.reference}` : ""}`,
+    statusLabel: verified ? "Verified dimensions" : `Estimate review: ${[...reasons, ...mismatches].join("; ") || profile.sourceStatus}`,
+  };
+}
+
 function preIssueChecklist() {
   const project = normalizeProjectInfo(state.projectInfo);
   const health = drawingHealthItems();
-  const projectMissing = [
-    project.jobNumber ? "" : "job number",
-    project.spoolNumber ? "" : "spool number",
-    project.revision ? "" : "revision",
+  const segmentData = segments();
+  const fittingSource = fittingCalculationSourceSummary(segmentData);
+  const production = normalizeProductionInfo(state.productionInfo);
+  const welds = synchronizeWeldRegister(state);
+  const projectFields = [
+    ["jobNumber", "job number"],
+    ["spoolNumber", "spool number"],
+    ["revision", "revision"],
+  ];
+  const projectMissing = projectFields.filter(([field]) => !project[field]).map(([, label]) => label);
+  const projectBlockers = projectFields
+    .filter(([field]) => !project[field])
+    .map(([field, label]) => readyIssueFinding(
+      "blocker",
+      "Project",
+      `${label[0].toUpperCase()}${label.slice(1)} missing`,
+      `Add the ${label} before issuing the fabrication drawing.`,
+      { type: "project", field },
+    ));
+  const projectWarnings = [
+    !project.drawnBy
+      ? readyIssueFinding("warning", "Project", "Drawn by is not recorded", "Add the drawing author for traceability.", { type: "project", field: "drawnBy" })
+      : null,
+    !project.client
+      ? readyIssueFinding("warning", "Project", "Client / area is not recorded", "Add the client, plant or work area when it is known.", { type: "project", field: "client" })
+      : null,
   ].filter(Boolean);
+  const healthErrors = health.filter((item) => item.severity === "error" && !item.acknowledged && item.target?.type !== "project");
+  const healthWarnings = health.filter((item) => item.severity === "warning" && !item.acknowledged);
+  const healthBlockers = healthErrors.map((item) => readyIssueFinding(
+    "blocker",
+    "Drawing",
+    item.title,
+    item.detail,
+    { type: "health" },
+    item,
+  ));
+  const drawingWarnings = healthWarnings.map((item) => readyIssueFinding(
+    "warning",
+    "Drawing",
+    item.title,
+    item.detail,
+    { type: "health" },
+    item,
+  ));
+  const dimensionSourceWarnings = [
+    fittingSource.mismatches.length
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "Fitting data profile does not match this drawing",
+          `${fittingSource.profile.label}: ${fittingSource.mismatches.join("; ")}.`,
+          { type: "project", field: "fittingProfile" },
+        )
+      : null,
+    fittingSource.hasTube
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "Sanitary tube fitting dimensions need supplier confirmation",
+          `The supplied Atlas manual verifies AS 1528.3 tube fitting weights but does not publish bend centre-to-end, tee centre-to-end or reducer face-to-face dimensions. Confirm the selected supplier dimensions before issue${fittingSource.profile.reference ? ` (${fittingSource.profile.reference})` : " and record the supplier reference"}.`,
+          { type: "project", field: "fittingProfileReference" },
+        )
+      : null,
+    fittingSource.hasBranch
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "Fabricated branch take-off uses a workshop estimate",
+          `Atlas/ASME B16.9 dimensions cover manufactured tees, not welded-on branches. Confirm the branch saddle and cut allowance against the workshop procedure before issue${fittingSource.profile.reference ? ` (${fittingSource.profile.reference})` : " and record the workshop reference"}.`,
+          { type: "project", field: "fittingProfileReference" },
+        )
+      : null,
+    fittingSource.hasNonStandardElbow || fittingSource.hasUntabled45
+      ? readyIssueFinding(
+          "warning",
+          "Dimensions",
+          "One or more elbow deductions use geometry",
+          "Only published 45 degree B and 90 degree A pipe dimensions are Atlas-verified. Confirm non-standard angles or untabled sizes before issue.",
+        )
+      : null,
+  ].filter(Boolean);
+  const weldFindings = weldReadyIssueFindings(welds);
+  const productionBlockers = production.hold
+    ? [readyIssueFinding(
+        "blocker",
+        "Production",
+        "Spool is on hold",
+        production.holdReason || "Remove the hold or record how it has been resolved.",
+        { type: "production" },
+      )]
+    : [];
+  const dueState = productionDueState(production);
+  const productionWarnings = [
+    !production.assignee
+      ? readyIssueFinding("warning", "Production", "No worker is assigned", "Assign the spool so the workshop knows who owns the next action.", { type: "production" })
+      : null,
+    !production.dueDate
+      ? readyIssueFinding("warning", "Production", "No due date is set", "Set the required workshop or issue date.", { type: "production" })
+      : dueState.key === "overdue"
+      ? readyIssueFinding("warning", "Production", "The due date is overdue", "Review the due date before issuing this revision.", { type: "production" })
+      : null,
+  ].filter(Boolean);
+  const approvalBlockers = state.checkedAt
+    ? []
+    : [readyIssueFinding(
+        "blocker",
+        "Approval",
+        "Drawing has not been approved",
+        projectStatusAtLeast(state.projectStatus, "readycheck")
+          ? "Record the checker before issuing."
+          : "Move the spool to Ready to check, then record the checker.",
+        { type: "approval" },
+      )];
+  const blockers = [
+    ...projectBlockers,
+    ...healthBlockers,
+    ...weldFindings.blockers,
+    ...productionBlockers,
+    ...approvalBlockers,
+  ];
+  const warnings = [
+    ...projectWarnings,
+    ...drawingWarnings,
+    ...dimensionSourceWarnings,
+    ...weldFindings.warnings,
+  ];
   const regressionResults = runRegressionAutoChecks();
+  const sizeLabels = [...new Set(segmentData.map((segment) => pipeSizeDisplayLabel(pipeSizeForSegment(segment))))];
   return {
     projectMissing,
     health,
-    // Missing project fields are reported by projectMissing, avoiding a second
-    // generic drawing-error count for the same fixable item.
-    errors: health.filter((item) => item.severity === "error" && !item.acknowledged && item.target?.type !== "project"),
-    warnings: health.filter((item) => item.severity === "warning" && !item.acknowledged),
+    errors: healthErrors,
+    healthWarnings,
+    dimensionSourceWarnings,
     acknowledged: health.filter((item) => item.acknowledged),
+    projectBlockers,
+    projectWarnings,
+    welds,
+    weldBlockers: weldFindings.blockers,
+    weldWarnings: weldFindings.warnings,
+    productionBlockers,
+    productionWarnings,
+    approvalBlockers,
+    blockers,
+    warnings,
+    findings: [...blockers, ...warnings],
+    materialText: `${pipeSpec().shortLabel} / ${sizeLabels.length ? sizeLabels.join(", ") : pipeSizeDisplayLabelByNb(state.pipeSizeNb)}`,
+    fittingProfileText: fittingSource.profileText,
+    fittingSourceStatus: fittingSource.statusLabel,
+    fittingSourceVerified: fittingSource.verified,
+    weldGapText: `${formatWeldGapMm(projectWeldGapMm())} mm per welded pipe end; open ends 0.0 mm`,
     regressionResults,
     regressionFailures: regressionResults.filter((result) => result.passed !== true),
   };
 }
 
 function preIssueChecklistStatus(checks = preIssueChecklist()) {
-  if (checks.projectMissing.length || checks.errors.length) return "blocked";
-  if (checks.warnings.length || checks.regressionFailures.length || !state.checkedAt) return "review";
+  if (checks.blockers.length) return "blocked";
+  if (checks.warnings.length) return "review";
   return "ready";
 }
 
@@ -9841,49 +12779,114 @@ function preIssueChecklistRowHtml(label, value, status) {
   `;
 }
 
+function preIssueFindingActionLabel(finding) {
+  if (finding.action?.type === "project") return `Edit ${projectFieldLabel(finding.action.field)}`;
+  if (finding.action?.type === "health") return healthIssueTargetHint(finding.source) || "Review drawing";
+  if (finding.action?.type === "weld") return `Open ${finding.title.split(" ")[0]}`;
+  if (finding.action?.type === "production") return "Open Jobs";
+  if (finding.action?.type === "approval") return "Approve drawing";
+  return "";
+}
+
+function preIssueFindingHtml(finding, index) {
+  const actionLabel = preIssueFindingActionLabel(finding);
+  const buttonLabel = finding.severity === "blocker"
+    ? `Fix: ${actionLabel || "Review checks"}`
+    : actionLabel;
+  return `
+    <li class="ready-issue-finding ${escapeHtml(finding.severity)}">
+      <div>
+        <small>${escapeHtml(finding.category)}</small>
+        <strong>${escapeHtml(finding.title)}</strong>
+        ${finding.detail ? `<span>${escapeHtml(finding.detail)}</span>` : ""}
+      </div>
+      ${buttonLabel ? `<button type="button" class="${finding.severity === "blocker" ? "primary-fix" : ""}" data-preissue-finding="${index}">${escapeHtml(buttonLabel)}</button>` : ""}
+    </li>
+  `;
+}
+
+function latestIssueAudit(source = state) {
+  if (!source?.issuedAt || !projectStatusAtLeast(source.projectStatus, "issued")) return null;
+  const audits = normalizeIssueAudits(source.issueAudits);
+  const revisionUid = currentRevisionUid(source);
+  const revision = normalizeProjectInfo(source.projectInfo).revision;
+  return audits.find((audit) => audit.revisionUid && audit.revisionUid === revisionUid)
+    ?? audits.find((audit) => !audit.revisionUid && audit.revision === revision)
+    ?? null;
+}
+
+function issueAuditSummaryHtml(audit = latestIssueAudit()) {
+  if (!audit) return "";
+  const when = audit.createdAt ? new Date(audit.createdAt).toLocaleString() : "time not recorded";
+  const result = audit.result === "overridden" ? "Warnings overridden" : "Passed";
+  return `
+    <div class="ready-issue-audit ${escapeHtml(audit.result)}">
+      <strong>Last issue audit: ${escapeHtml(result)}</strong>
+      <span>Rev ${escapeHtml(audit.revision || "-")} / ${escapeHtml(audit.issuedBy || "unknown")} / ${escapeHtml(when)}</span>
+      ${audit.overrideReason ? `<small>${escapeHtml(audit.overrideReason)}</small>` : ""}
+    </div>
+  `;
+}
+
 function preIssueChecklistCardHtml() {
   const checks = preIssueChecklist();
   const status = preIssueChecklistStatus(checks);
   const projectText = checks.projectMissing.length
     ? `Missing ${checks.projectMissing.join(", ")}`
-    : "Job, spool and revision set";
+    : checks.projectWarnings.length
+    ? `${checks.projectWarnings.length} detail warning${checks.projectWarnings.length === 1 ? "" : "s"}`
+    : "Job, spool, revision and authorship set";
   const healthText = checks.errors.length
     ? `${checks.errors.length} issue${checks.errors.length === 1 ? "" : "s"} to fix`
-    : checks.warnings.length
-    ? `${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} to review`
+    : checks.healthWarnings.length
+    ? `${checks.healthWarnings.length} warning${checks.healthWarnings.length === 1 ? "" : "s"} to review`
     : "No drawing issues";
-  const testText = checks.regressionFailures.length
-    ? `${checks.regressionFailures.length} app self-test${checks.regressionFailures.length === 1 ? "" : "s"} need review; not a spool blocker`
-    : "Test kit passed";
+  const weldText = checks.weldBlockers.length
+    ? `${checks.weldBlockers.length} critical weld item${checks.weldBlockers.length === 1 ? "" : "s"}`
+    : checks.weldWarnings.length
+    ? `${checks.weldWarnings.length} weld warning${checks.weldWarnings.length === 1 ? "" : "s"}`
+    : checks.welds.length
+    ? `${checks.welds.length} weld record${checks.welds.length === 1 ? "" : "s"} ready`
+    : "No weld markers";
   const checkedText = state.checkedAt
     ? `Checked by ${state.checkedBy || "unknown"}`
     : "Not checked yet";
   const issuedText = state.issuedAt
     ? `Issued by ${state.issuedBy || "unknown"}`
     : status === "ready"
-    ? "Ready to issue"
+    ? "GREEN / Ready"
     : status === "review"
-    ? "Needs review before issue"
-    : "Blocked";
+    ? "AMBER / Review"
+    : "RED / Blocked";
 
   return `
     <div class="workflow-card preissue-card preissue-${escapeHtml(status)}">
       <div class="preissue-heading">
-        <strong>Pre-issue check</strong>
+        <strong>Ready to Issue</strong>
         <span>${escapeHtml(issuedText)}</span>
       </div>
       <ul class="workflow-list preissue-list">
-        ${preIssueChecklistRowHtml("Project", projectText, checks.projectMissing.length ? "blocked" : "ready")}
-        ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.warnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Project", projectText, checks.projectBlockers.length ? "blocked" : checks.projectWarnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Material / sizes", checks.materialText, "ready")}
+        ${preIssueChecklistRowHtml("Fitting data", `${checks.fittingProfileText} / ${checks.fittingSourceStatus}`, checks.fittingSourceVerified ? "ready" : "review")}
+        ${preIssueChecklistRowHtml("Weld gap", checks.weldGapText, "ready")}
+        ${preIssueChecklistRowHtml("Drawing checks", healthText, checks.errors.length ? "blocked" : checks.healthWarnings.length ? "review" : "ready")}
+        ${preIssueChecklistRowHtml("Weld register", weldText, checks.weldBlockers.length ? "blocked" : checks.weldWarnings.length ? "review" : "ready")}
+        ${checks.productionBlockers.length ? preIssueChecklistRowHtml("Production", "On hold", "blocked") : ""}
         ${checks.acknowledged.length ? preIssueChecklistRowHtml("Acknowledged", `${checks.acknowledged.length} recorded exception${checks.acknowledged.length === 1 ? "" : "s"}`, "review") : ""}
-        ${preIssueChecklistRowHtml("Test kit", testText, checks.regressionFailures.length ? "review" : "ready")}
-        ${preIssueChecklistRowHtml("Checked", checkedText, state.checkedAt ? "ready" : "review")}
+        ${preIssueChecklistRowHtml("Approval", checkedText, state.checkedAt ? "ready" : "blocked")}
       </ul>
-      <p class="preissue-help">Drawing errors must be fixed or acknowledged with a reason. Test-kit results diagnose SpoolMate itself and do not block this spool.</p>
+      ${checks.findings.length ? `
+        <details class="ready-issue-findings"${status === "blocked" ? " open" : ""}>
+          <summary>${checks.blockers.length ? `${checks.blockers.length} blocker${checks.blockers.length === 1 ? "" : "s"}` : "No blockers"} / ${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"}</summary>
+          <ul>${checks.findings.map(preIssueFindingHtml).join("")}</ul>
+        </details>
+      ` : `<div class="ready-issue-clear"><strong>All issue checks are clear.</strong><span>The fabrication PDF can be issued without an override.</span></div>`}
+      <p class="preissue-help">Red items block issue. Amber items require a recorded override reason. Assignment, due date and gear checks stay in Jobs and do not hold up drawing approval.</p>
       <div class="preissue-actions">
         <button type="button" data-workflow-action="open-health">Review drawing checks</button>
-        ${checks.regressionFailures.length ? `<button type="button" data-workflow-action="open-test-kit">Open app test kit</button>` : ""}
       </div>
+      ${issueAuditSummaryHtml()}
     </div>
   `;
 }
@@ -9905,6 +12908,7 @@ function productionAssigneeChoices() {
 
 function productionWorkflowCardHtml() {
   const production = normalizeProductionInfo(state.productionInfo);
+  const materialChecklist = materialChecklistForState(state);
   return `
     <div class="workflow-card production-workflow-card production-workflow-summary">
       <div class="production-activity-head">
@@ -9916,6 +12920,7 @@ function productionWorkflowCardHtml() {
         <li><span>Due</span><strong>${escapeHtml([production.dueDate, production.dueTime].filter(Boolean).join(" ") || "Not set")}</strong></li>
         <li><span>Priority</span><strong>${escapeHtml(productionPriorityLabel(production.priority))}</strong></li>
         <li><span>Hold</span><strong>${escapeHtml(production.hold ? production.holdReason || "On hold" : "No")}</strong></li>
+        <li><span>Gear check</span><strong>${escapeHtml(production.assignee ? materialChecklistSummary(materialChecklist) : "Assign spool first")}</strong></li>
       </ul>
       <button type="button" data-workflow-action="open-jobs">Open Jobs</button>
     </div>
@@ -9952,18 +12957,90 @@ function productionActivityCardHtml() {
   `;
 }
 
+async function handlePreIssueFinding(index) {
+  const finding = preIssueChecklist().findings[Number(index)];
+  if (!finding) return;
+  if (!finding.action) {
+    showHealthPanel();
+    return;
+  }
+  if (finding.action.type === "project") {
+    await editProjectDetailsFromHealth(finding.action.field);
+    return;
+  }
+  if (finding.action.type === "health" && finding.source) {
+    await focusHealthIssue(finding.source);
+    return;
+  }
+  if (finding.action.type === "production") {
+    const project = normalizeProjectInfo(state.projectInfo);
+    projectLibrarySearch = project.spoolNumber || project.jobNumber || "";
+    setTeamDashboardView("board");
+    await openBrowserProject({ keepSearch: true });
+    window.requestAnimationFrame(() => {
+      const card = [...(projectLibraryList?.querySelectorAll("[data-production-project-id]") ?? [])]
+        .find((item) => item.dataset.productionProjectId === state.projectId);
+      card?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      card?.classList.add("ready-issue-focus");
+      card?.querySelector("[data-production-field='holdReason'], [data-production-field='hold']")?.focus?.();
+      window.setTimeout(() => card?.classList.remove("ready-issue-focus"), 2800);
+    });
+    return;
+  }
+  if (finding.action.type === "approval") {
+    if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
+      const proceed = await confirmAppAction("Move this spool to Ready to check and open the approval form?", {
+        title: "Prepare drawing approval",
+        confirmLabel: "Move and approve",
+      });
+      if (!proceed) return;
+      applyProjectStatusChange("readycheck");
+      updateControls();
+      updateAll();
+    }
+    await markDrawingChecked();
+    return;
+  }
+  if (finding.action.type === "weld") {
+    showHealthPanel();
+    updateWorkflowSummary();
+    window.requestAnimationFrame(() => {
+      const row = workflowSummary?.querySelector(`[data-weld-row="${Number(finding.action.fittingId)}"]`);
+      row?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      row?.querySelector(`[data-weld-field="${CSS.escape(String(finding.action.field || "wps"))}"]`)?.focus?.();
+      row?.classList.add("ready-issue-focus");
+      window.setTimeout(() => row?.classList.remove("ready-issue-focus"), 2800);
+    });
+  }
+}
+
 function updateWorkflowSummary() {
   if (!workflowSummary) return;
   synchronizeWeldRegister(state);
+  const permission = currentDrawingProjectPermission();
   const history = normalizeRevisionHistory(state.revisionHistory);
+  const currentAudit = latestIssueAudit();
   const reviewReady = projectStatusAtLeast(state.projectStatus, "readycheck");
-  const reviewDisabledAttr = cloudPermissionReadOnly
-    ? ' disabled title="View/comment only for your team role"'
+  const reviewDisabledAttr = !permission.canIssue
+    ? ` disabled title="${escapeHtml(currentPermissionRestrictionText("issue"))}"`
     : !reviewReady
     ? ' disabled title="Move the spool to Ready to check before review"'
     : "";
+  const issueDisabledAttr = permission.canIssue
+    ? ""
+    : ` disabled title="${escapeHtml(currentPermissionRestrictionText("issue"))}"`;
+  const issueChecks = preIssueChecklist();
+  const issueBlockerCount = issueChecks.blockers.length;
+  const issueActionLabel = issueBlockerCount
+    ? `Fix ${issueBlockerCount} blocker${issueBlockerCount === 1 ? "" : "s"} before issue`
+    : !state.checkedAt
+      ? "Approve before issue"
+      : "Issue drawing";
+  const editDisabledAttr = permission.canEdit
+    ? ""
+    : ` disabled title="${escapeHtml(currentPermissionRestrictionText("edit"))}"`;
   workflowSummary.innerHTML = `
-    <div class="workflow-card">
+    <div class="workflow-card workflow-status-card">
       <strong>Drawing workflow</strong>
       <ul class="workflow-list">
         ${currentWorkflowRows().map(([label, value]) => `<li><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></li>`).join("")}
@@ -9973,19 +13050,21 @@ function updateWorkflowSummary() {
     <div class="workflow-actions">
       <button type="button" data-workflow-action="mark-checked"${reviewDisabledAttr}>Approve drawing</button>
       <button type="button" data-workflow-action="return-changes"${reviewDisabledAttr}>Return for changes</button>
-      <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>Issue drawing</button>
-      <button type="button" data-workflow-action="new-revision"${cloudPermissionReadOnly ? ' disabled title="View/comment only for your team role"' : ""}>New revision</button>
+      <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${issueDisabledAttr}>${escapeHtml(issueActionLabel)}</button>
+      <button type="button" data-workflow-action="new-revision"${editDisabledAttr}>New revision</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
-      <button type="button" data-workflow-action="save-defaults">Save defaults</button>
     </div>
-    ${productionWorkflowCardHtml()}
     ${weldRegisterCardHtml()}
+    <details class="workflow-more-details">
+      <summary><strong>Workshop handoff & history</strong><span>Production allocation and previous revisions</span></summary>
+      ${productionWorkflowCardHtml()}
     <div class="revision-card">
       <strong>Revision history</strong>
       <div class="revision-current">
         <strong>Current Rev ${escapeHtml(normalizeProjectInfo(state.projectInfo).revision || "-")}</strong>
         <span>${escapeHtml(state.checkedAt ? `Checked by ${state.checkedBy || "unknown"}` : "Not checked")}</span>
         <span>${escapeHtml(state.issuedAt ? `Issued by ${state.issuedBy || "unknown"}` : "Not issued")}</span>
+        ${currentAudit ? `<small class="revision-audit ${escapeHtml(currentAudit.result)}">Issue audit: ${escapeHtml(currentAudit.result === "overridden" ? "Warnings overridden" : "Passed")}</small>` : ""}
       </div>
       ${history.length ? `<ul class="revision-list">${history.map((entry) => `
         <li>
@@ -9993,11 +13072,13 @@ function updateWorkflowSummary() {
             <strong>Rev ${escapeHtml(entry.revision || "-")} / ${escapeHtml(projectStatusLabel(entry.status))}</strong>
             <span>${escapeHtml(entry.createdAt ? new Date(entry.createdAt).toLocaleString() : "not dated")}</span>
             <small>${escapeHtml(entry.checkedAt ? `Checked by ${entry.checkedBy || "unknown"}` : "Not checked")} / ${escapeHtml(entry.issuedAt ? `Issued by ${entry.issuedBy || "unknown"}` : "Not issued")}</small>
+            ${entry.issueAudit ? `<small class="revision-audit ${escapeHtml(entry.issueAudit.result)}">Ready to Issue: ${escapeHtml(entry.issueAudit.result === "overridden" ? `Overridden - ${entry.issueAudit.overrideReason || "reason recorded"}` : "Passed")}</small>` : ""}
           </div>
           <button type="button" data-restore-revision="${escapeHtml(entry.id)}">Restore</button>
         </li>
       `).join("")}</ul>` : "<span>No saved revisions yet.</span>"}
     </div>
+    </details>
   `;
 
   workflowSummary.querySelectorAll("[data-workflow-action]").forEach((button) => {
@@ -10005,6 +13086,14 @@ function updateWorkflowSummary() {
       handleWorkflowAction(button.dataset.workflowAction).catch((error) => {
         console.warn("Drawing workflow action failed.", error);
         showAppNotice(error?.message || "Could not update drawing workflow.");
+      });
+    });
+  });
+  workflowSummary.querySelectorAll("[data-preissue-finding]").forEach((button) => {
+    button.addEventListener("click", () => {
+      handlePreIssueFinding(button.dataset.preissueFinding).catch((error) => {
+        console.warn("Ready to Issue action failed.", error);
+        showAppNotice(error?.message || "Could not open that issue.");
       });
     });
   });
@@ -10022,6 +13111,19 @@ function updateWorkflowSummary() {
   workflowSummary.querySelectorAll("[data-weld-field]").forEach((field) => {
     field.addEventListener("change", () => handleWeldRegisterFieldChange(field));
   });
+  workflowSummary.querySelectorAll("[data-weld-action]").forEach((button) => {
+    button.addEventListener("click", () => handleWeldRegisterAction(button));
+  });
+  workflowSummary.querySelectorAll("[data-weld-assignment-mode]").forEach((select) => {
+    select.addEventListener("change", () => {
+      if (select.value === "mixed") {
+        workflowSummary.querySelector("[data-weld-field='welderId']")?.focus?.();
+        showAppNotice("Mixed welders selected. Enter the welder ID against each numbered weld.");
+      } else {
+        workflowSummary.querySelector("[data-weld-all-input]")?.focus?.();
+      }
+    });
+  });
 }
 
 function weldStatusLabel(value) {
@@ -10036,32 +13138,70 @@ function weldStatusLabel(value) {
 
 function weldRegisterCardHtml() {
   const welds = synchronizeWeldRegister(state);
+  const permission = currentDrawingProjectPermission();
+  const disabledAttr = permission.canManageProduction
+    ? ""
+    : ` disabled title="${escapeHtml(currentPermissionRestrictionText("production"))}"`;
   const spoolUid = ensureSpoolUid(state);
   const revisionUid = currentRevisionUid(state);
+  const namedWelders = [...new Set(welds.map((weld) => weld.welderId.trim()).filter(Boolean))];
+  const welderMode = namedWelders.length > 1 ? "mixed" : "all";
+  const welderSummary = namedWelders.length > 1
+    ? `Mixed welders / ${namedWelders.length} IDs`
+    : namedWelders.length === 1
+    ? `All welds by ${namedWelders[0]}`
+    : "Welder not assigned";
   return `
     <div class="workflow-card weld-register-card">
       <div class="weld-register-head">
-        <div><strong>Weld register</strong><span>${welds.length} numbered weld${welds.length === 1 ? "" : "s"}</span></div>
+        <div><strong>Weld register</strong><span>${welds.length} numbered weld${welds.length === 1 ? "" : "s"} / ${escapeHtml(welderSummary)}</span></div>
         <div class="traceability-ids"><code>${escapeHtml(spoolUid)}</code><code>${escapeHtml(revisionUid)}</code></div>
       </div>
+      ${welds.length ? `
+        <div class="weld-register-bulk">
+          <label>
+            <span>Welder setup</span>
+            <select data-weld-assignment-mode${disabledAttr}>
+              <option value="all"${welderMode === "all" ? " selected" : ""}>One welder for all welds</option>
+              <option value="mixed"${welderMode === "mixed" ? " selected" : ""}>Mixed welders</option>
+            </select>
+          </label>
+          <label class="weld-register-all-welder">
+            <span>All welds done by</span>
+            <input data-weld-all-input value="${escapeHtml(welderMode === "all" ? namedWelders[0] || "" : "")}" maxlength="40" placeholder="Welder name / ID"${disabledAttr} />
+          </label>
+          <button type="button" data-weld-action="apply-all-welder"${disabledAttr}>Apply to every weld</button>
+          <small>Choose Mixed welders to enter a different Welder ID on each numbered row below.</small>
+        </div>
+      ` : ""}
       ${welds.length ? `<div class="weld-register-list">${welds.map((weld) => `
         <section class="weld-register-row" data-weld-row="${weld.fittingId}">
           <div class="weld-register-number"><strong>${escapeHtml(weld.number)}</strong><span>Marker ${weld.fittingId}</span></div>
-          <label><span>Welder ID</span><input data-weld-id="${weld.fittingId}" data-weld-field="welderId" value="${escapeHtml(weld.welderId)}" maxlength="40" placeholder="Welder" /></label>
-          <label><span>WPS</span><input data-weld-id="${weld.fittingId}" data-weld-field="wps" value="${escapeHtml(weld.wps)}" maxlength="48" placeholder="WPS reference" /></label>
-          <label><span>Status</span><select data-weld-id="${weld.fittingId}" data-weld-field="status">${["pending","welded","visual","ndt","accepted","repair"].map((status) => `<option value="${status}"${weld.status === status ? " selected" : ""}>${weldStatusLabel(status)}</option>`).join("")}</select></label>
-          <label><span>Inspection / NDT</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectionType" value="${escapeHtml(weld.inspectionType)}" maxlength="40" placeholder="VT, PT, RT, UT..." /></label>
-          <label><span>Inspector</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectedBy" value="${escapeHtml(weld.inspectedBy)}" maxlength="64" placeholder="Name / ID" /></label>
-          <label class="weld-register-wide"><span>Repair history / notes</span><input data-weld-id="${weld.fittingId}" data-weld-field="repairHistory" value="${escapeHtml(weld.repairHistory)}" maxlength="400" placeholder="Repair, retest and acceptance history" /></label>
+          <label><span>Welder ID</span><input data-weld-id="${weld.fittingId}" data-weld-field="welderId" value="${escapeHtml(weld.welderId)}" maxlength="40" placeholder="Welder"${disabledAttr} /></label>
+          <label><span>WPS</span><input data-weld-id="${weld.fittingId}" data-weld-field="wps" value="${escapeHtml(weld.wps)}" maxlength="48" placeholder="WPS reference"${disabledAttr} /></label>
+          <label><span>Status</span><select data-weld-id="${weld.fittingId}" data-weld-field="status"${disabledAttr}>${["pending","welded","visual","ndt","accepted","repair"].map((status) => `<option value="${status}"${weld.status === status ? " selected" : ""}>${weldStatusLabel(status)}</option>`).join("")}</select></label>
+          <label><span>Inspection / NDT</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectionType" value="${escapeHtml(weld.inspectionType)}" maxlength="40" placeholder="VT, PT, RT, UT..."${disabledAttr} /></label>
+          <label><span>Inspector</span><input data-weld-id="${weld.fittingId}" data-weld-field="inspectedBy" value="${escapeHtml(weld.inspectedBy)}" maxlength="64" placeholder="Name / ID"${disabledAttr} /></label>
+          <label class="weld-register-wide"><span>Repair history / notes</span><input data-weld-id="${weld.fittingId}" data-weld-field="repairHistory" value="${escapeHtml(weld.repairHistory)}" maxlength="400" placeholder="Repair, retest and acceptance history"${disabledAttr} /></label>
         </section>
       `).join("")}</div>` : `<p class="weld-register-empty">Place Weld markers on the drawing. SpoolMate will number them W01, W02 and build the register automatically.</p>`}
     </div>
   `;
 }
 
+function persistProductionState() {
+  persistState();
+  window.clearTimeout(cloudAutosaveTimer);
+  if (!cloudUser || !currentProjectHasCloudRecord()) return Promise.resolve(false);
+  return saveCloudProject({ silent: true, productionOnly: true }).catch((error) => {
+    console.warn("Production cloud save failed.", error);
+    return false;
+  });
+}
+
 function handleWeldRegisterFieldChange(field) {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role.");
+  if (!currentDrawingProjectPermission().canManageProduction) {
+    showAppNotice(currentPermissionRestrictionText("production"));
     updateWorkflowSummary();
     return;
   }
@@ -10072,13 +13212,41 @@ function handleWeldRegisterFieldChange(field) {
   weld[key] = key === "status" ? normalizeWeldStatus(field.value) : String(field.value ?? "").trim();
   if (key === "status" && weld.status !== "pending" && !weld.completedAt) weld.completedAt = new Date().toISOString();
   state.productionActivity = addProductionActivity(state.productionActivity, "weld", `${weld.number} ${key} updated${key === "status" ? ` to ${weldStatusLabel(weld.status)}` : ""}.`, new Date().toISOString());
-  persistState();
+  persistProductionState();
   updateAll({ save: false });
 }
 
+function handleWeldRegisterAction(actionElement) {
+  if (!currentDrawingProjectPermission().canManageProduction) {
+    showAppNotice(currentPermissionRestrictionText("production"));
+    updateWorkflowSummary();
+    return;
+  }
+  const action = actionElement?.dataset?.weldAction;
+  if (action !== "apply-all-welder") return;
+  const input = actionElement.closest(".weld-register-bulk")?.querySelector("[data-weld-all-input]");
+  const welderId = String(input?.value ?? "").trim().slice(0, 40);
+  if (!welderId) {
+    showAppNotice("Enter the welder name or ID before applying it to every weld.");
+    input?.focus?.();
+    return;
+  }
+  const welds = synchronizeWeldRegister(state);
+  for (const weld of welds) weld.welderId = welderId;
+  state.productionActivity = addProductionActivity(state.productionActivity, "weld", `All ${welds.length} welds assigned to ${welderId}.`, new Date().toISOString());
+  persistProductionState();
+  updateAll({ save: false });
+  showAppNotice(`All ${welds.length} welds are assigned to ${welderId}.`);
+}
+
 async function handleWorkflowAction(action) {
-  if (cloudPermissionReadOnly && (action === "mark-checked" || action === "return-changes" || action === "issue-drawing" || action === "new-revision")) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change workflow status.");
+  const permission = currentDrawingProjectPermission();
+  if (["mark-checked", "return-changes", "issue-drawing"].includes(action) && !permission.canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
+    return;
+  }
+  if (action === "new-revision" && !permission.canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     return;
   }
   if (action === "mark-checked") await markDrawingChecked();
@@ -10086,7 +13254,6 @@ async function handleWorkflowAction(action) {
   if (action === "issue-drawing") await issueDrawing();
   if (action === "new-revision") createNextRevision();
   if (action === "share-readonly") shareReadOnlyProject();
-  if (action === "save-defaults") saveCurrentSettingsAsDefaults();
   if (action === "open-jobs") await openBrowserProject();
   if (action === "open-health") showHealthPanel();
   if (action === "open-test-kit") openRegressionDialog();
@@ -10095,8 +13262,8 @@ async function handleWorkflowAction(action) {
 async function handleProductionFieldChange(field) {
   const key = field?.dataset?.productionField;
   if (!key) return;
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to update production allocation.");
+  if (!currentDrawingProjectPermission().canManageProduction) {
+    showAppNotice(currentPermissionRestrictionText("production"));
     updateWorkflowSummary();
     return;
   }
@@ -10132,6 +13299,9 @@ async function handleProductionFieldChange(field) {
     lastUpdatedBy: checkerName(),
     lastUpdatedAt: now,
   });
+  if (state.productionInfo.assignee) {
+    state.productionInfo.materialChecklist = materialChecklistForState(state);
+  }
   const next = normalizeProductionInfo(state.productionInfo);
   if (key === "assignee" && previous.assignee !== next.assignee) {
     state.productionActivity = addProductionActivity(state.productionActivity, "assignee", `Assigned changed from ${previous.assignee || "Unassigned"} to ${next.assignee || "Unassigned"}.`, now);
@@ -10151,7 +13321,7 @@ async function handleProductionFieldChange(field) {
     state.productionActivity = addProductionActivity(state.productionActivity, "hold", `Hold reason changed from ${previous.holdReason || "none"} to ${next.holdReason || "none"}.`, now);
   }
   updateProjectReadout();
-  persistState();
+  await persistProductionState();
   updateWorkflowSummary();
 }
 
@@ -10173,8 +13343,8 @@ async function recordReviewConversationMessage(body) {
 }
 
 async function markDrawingChecked() {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to mark it checked.");
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return;
   }
   if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
@@ -10240,8 +13410,8 @@ async function markDrawingChecked() {
 }
 
 async function returnDrawingForChanges() {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to return it for changes.");
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     return false;
   }
   if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
@@ -10350,14 +13520,10 @@ function applyProjectStatusChange(nextStatus, options = {}) {
 }
 
 function preIssueBlockingMessage(checks) {
-  const parts = [];
-  if (checks.projectMissing.length) {
-    parts.push(`missing ${checks.projectMissing.join(", ")}`);
-  }
-  if (checks.errors.length) {
-    parts.push(`${checks.errors.length} drawing error${checks.errors.length === 1 ? "" : "s"}`);
-  }
-  return parts.join(", ");
+  if (!checks.blockers.length) return "";
+  const titles = checks.blockers.slice(0, 3).map((finding) => finding.title);
+  const remaining = Math.max(0, checks.blockers.length - titles.length);
+  return `${checks.blockers.length} blocker${checks.blockers.length === 1 ? "" : "s"}: ${titles.join("; ")}${remaining ? `; and ${remaining} more` : ""}`;
 }
 
 async function promptForMissingIssueRevision() {
@@ -10383,9 +13549,70 @@ async function promptForMissingIssueRevision() {
   return true;
 }
 
+async function promptForIssueWarningOverride(checks) {
+  const warnings = [...checks.warnings];
+  if (!warnings.length) return "";
+  const warningList = warnings.slice(0, 5).map((finding) => finding.title).join("; ");
+  const response = await openFieldInputDialog({
+    title: "Record issue warning override",
+    label: "Required reason for issuing with warnings",
+    value: "",
+    placeholder: "Reviewed open ends against client mark-up; workshop assignment will follow...",
+    help: `${warnings.length} warning${warnings.length === 1 ? "" : "s"}: ${warningList}${warnings.length > 5 ? "; and more" : ""}. The reason, issuer and time are saved with this revision.`,
+    submitLabel: "Record reason and continue",
+    multiline: true,
+  });
+  if (response === null) return null;
+  const reason = String(response).trim().slice(0, 700);
+  if (!reason) {
+    showAppNotice("Enter a reason before issuing a drawing with warnings.");
+    return null;
+  }
+  return reason;
+}
+
+function issueAuditFindingSnapshot(finding) {
+  return normalizeIssueAuditFinding({
+    severity: finding.severity,
+    category: finding.category,
+    title: finding.title,
+    detail: finding.detail,
+  });
+}
+
+function recordReadyIssueAudit(checks, options = {}) {
+  const now = String(options.now ?? new Date().toISOString());
+  const overrideReason = String(options.overrideReason ?? "").trim().slice(0, 700);
+  const acknowledgedFindings = checks.acknowledged.map((item) => readyIssueFinding(
+    "warning",
+    "Acknowledged drawing exception",
+    item.title,
+    item.acknowledgement?.reason || item.detail,
+  ));
+  const audit = normalizeIssueAudit({
+    id: `audit-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+    revision: normalizeProjectInfo(state.projectInfo).revision || "-",
+    revisionUid: currentRevisionUid(state),
+    createdAt: now,
+    result: overrideReason ? "overridden" : "ready",
+    issuedBy: options.issuedBy,
+    checkedBy: state.checkedBy,
+    checkedAt: state.checkedAt,
+    overrideReason,
+    findings: [...checks.warnings, ...acknowledgedFindings]
+      .map(issueAuditFindingSnapshot)
+      .filter(Boolean),
+  });
+  state.issueAudits = normalizeIssueAudits([
+    audit,
+    ...normalizeIssueAudits(state.issueAudits).filter((entry) => entry.revisionUid !== audit.revisionUid),
+  ]);
+  return audit;
+}
+
 async function issueDrawing(options = {}) {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to issue the drawing.");
+  if (!currentDrawingProjectPermission().canIssue) {
+    showAppNotice(currentPermissionRestrictionText("issue"));
     updateControls();
     return false;
   }
@@ -10402,9 +13629,7 @@ async function issueDrawing(options = {}) {
   }
   const blocking = preIssueBlockingMessage(checks);
   if (blocking) {
-    const nextStep = checks.projectMissing.length
-      ? "Complete the project details shown in Drawing checks."
-      : "Fix the drawing item, or acknowledge an intentional reducer/tee exception with a reason.";
+    const nextStep = "Open Ready to Issue and use the action beside each red item.";
     showAppNotice(`Pre-issue check blocked: ${blocking}. ${nextStep}`);
     showHealthPanel();
     updateWorkflowSummary();
@@ -10418,24 +13643,11 @@ async function issueDrawing(options = {}) {
     return false;
   }
 
-  if (checks.warnings.length || checks.regressionFailures.length) {
-    const warningBits = [];
-    if (checks.warnings.length) {
-      warningBits.push(`${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} still need review`);
-    }
-    if (checks.regressionFailures.length) {
-      warningBits.push(`${checks.regressionFailures.length} SpoolMate self-test${checks.regressionFailures.length === 1 ? "" : "s"} need review but do not describe this spool`);
-    }
-    const proceed = await confirmAppAction(`${warningBits.join(". ")}. Issue drawing anyway?`, {
-      title: "Pre-issue review",
-      confirmLabel: "Issue drawing",
-      tone: "warning",
-    });
-    if (!proceed) {
-      showHealthPanel();
-      updateControls();
-      return false;
-    }
+  const overrideReason = await promptForIssueWarningOverride(checks);
+  if (overrideReason === null) {
+    showHealthPanel();
+    updateControls();
+    return false;
   }
 
   const name = await openFieldInputDialog({
@@ -10466,15 +13678,19 @@ async function issueDrawing(options = {}) {
   state.productionActivity = addProductionActivity(
     state.productionActivity,
     "revision",
-    `Revision ${issuedRevision} issued by ${issuedBy}.`,
+    `Revision ${issuedRevision} issued by ${issuedBy}${overrideReason ? ` with warning override: ${overrideReason}` : "."}`,
     now,
   );
+  const issueAudit = recordReadyIssueAudit(checks, { now, issuedBy, overrideReason });
+  addRevisionSnapshot("Issued after Ready to Issue gate", { issueAudit });
   if (options.targetStatus && normalizeProjectStatus(options.targetStatus) !== "issued") {
     applyProjectStatusChange(options.targetStatus, { now: new Date().toISOString() });
   }
   updateControls();
   updateAll();
-  showAppNotice("Drawing issued. Fab sheets will now show the issued-by details.");
+  showAppNotice(overrideReason
+    ? "Drawing issued with the warning override recorded against this revision."
+    : "Ready to Issue passed. The drawing and fabrication PDF are now approved for issue.");
   return true;
 }
 
@@ -10502,10 +13718,9 @@ function nextRevisionValue(value) {
   return `${current}-1`;
 }
 
-function addRevisionSnapshot(note = "Saved revision") {
+function addRevisionSnapshot(note = "Saved revision", options = {}) {
   const project = normalizeProjectInfo(state.projectInfo);
-  const history = normalizeRevisionHistory(state.revisionHistory);
-  history.unshift({
+  const snapshot = {
     id: `rev-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
     revision: project.revision || "-",
     createdAt: new Date().toISOString(),
@@ -10515,14 +13730,21 @@ function addRevisionSnapshot(note = "Saved revision") {
     checkedAt: String(state.checkedAt ?? "").trim(),
     issuedBy: String(state.issuedBy ?? "").trim(),
     issuedAt: String(state.issuedAt ?? "").trim(),
+    issueAudit: normalizeIssueAudit(options.issueAudit ?? latestIssueAudit()),
     state: statePayload({ includeRevisionHistory: false }),
-  });
+  };
+  const history = normalizeRevisionHistory(state.revisionHistory).filter((entry) => !(
+    snapshot.issuedAt &&
+    entry.revision === snapshot.revision &&
+    entry.issuedAt === snapshot.issuedAt
+  ));
+  history.unshift(snapshot);
   state.revisionHistory = history.slice(0, 12);
 }
 
 function createNextRevision() {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to create a new revision.");
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     return;
   }
   const project = normalizeProjectInfo(state.projectInfo);
@@ -10550,8 +13772,8 @@ function createNextRevision() {
 }
 
 async function restoreRevision(revisionId) {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to restore revisions.");
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     return;
   }
   const entry = normalizeRevisionHistory(state.revisionHistory).find((item) => item.id === revisionId);
@@ -10573,6 +13795,10 @@ async function restoreRevision(revisionId) {
   state = restored;
   state.revisionHistory = history;
   state.projectStatus = "draft";
+  state.checkedBy = "";
+  state.checkedAt = "";
+  state.issuedBy = "";
+  state.issuedAt = "";
   state.locked = false;
   state.productionActivity = addProductionActivity(
     state.productionActivity,
@@ -10605,6 +13831,55 @@ function loadProjectBackups() {
   } catch {
     return [];
   }
+}
+
+function loadLastSessionRecovery() {
+  try {
+    const recovery = JSON.parse(localStorage.getItem(LAST_SESSION_RECOVERY_KEY));
+    if (!recovery?.state || !Array.isArray(recovery.state.points) || recovery.state.points.length < 2) return null;
+    return recovery;
+  } catch {
+    return null;
+  }
+}
+
+async function restoreLastSession() {
+  const recovery = loadLastSessionRecovery();
+  if (!recovery?.state) {
+    showAppNotice("No previous session is available to restore.");
+    updateHomeDashboard();
+    return;
+  }
+  const when = recovery.createdAt ? new Date(recovery.createdAt).toLocaleString() : "the previous session";
+  const proceed = await confirmAppAction(
+    `Restore the drawing captured at ${when}? Your current drawing will be backed up first. The recovered drawing opens as a local copy and will not overwrite a cloud spool automatically.`,
+    {
+      title: "Restore last session",
+      confirmLabel: "Restore local copy",
+      cancelLabel: "Keep current",
+      tone: "warning",
+    },
+  );
+  if (!proceed) return;
+
+  createProjectBackup("before last-session restore");
+  const restored = stateFromPayload(recovery.state);
+  if (!restored) {
+    showAppNotice("The previous session could not be restored.");
+    return;
+  }
+  restored.projectId = null;
+  state = restored;
+  currentCloudProjectOwnerId = null;
+  currentCloudProjectCompanyId = null;
+  cloudPermissionReadOnly = false;
+  resetCloudSaveTracking();
+  three.userMovedCamera = false;
+  setNextIdsFromState(state);
+  closeHomeDashboard();
+  updateControls();
+  updateAll();
+  showAppNotice("Last session restored as a local recovery copy. Use Save when you are ready to keep it.");
 }
 
 function storeProjectBackups(backups) {
@@ -10807,7 +14082,9 @@ function updateProjectReadout() {
   const title = projectDisplayName();
   const status = projectStatusLabel();
   const locked = cloudPermissionReadOnly ? " / View only" : state.locked ? " / Locked" : "";
-  projectReadout.textContent = hasProjectInfo() ? title : "No project set";
+  projectReadout.textContent = isQuickPdfMode()
+    ? `Quick PDF${state.projectId ? " · Saved copy" : " · Temporary"}`
+    : hasProjectInfo() ? title : "No project set";
   projectReadout.title = state.projectId
     ? `${title} - ${status}${locked} - saved in this browser`
     : hasProjectInfo()
@@ -10816,10 +14093,20 @@ function updateProjectReadout() {
 }
 
 function updateWorkflowControls() {
+  const permission = currentDrawingProjectPermission();
   if (projectStatusSelect) projectStatusSelect.value = normalizeProjectStatus(state.projectStatus);
   if (projectStatusSelect) {
-    projectStatusSelect.disabled = cloudPermissionReadOnly;
-    projectStatusSelect.title = cloudPermissionReadOnly ? "Team members can view/comment only. Ask an owner/admin to issue or change status." : "";
+    const canChangeAnyStatus = permission.canEdit || permission.canIssue || permission.canManageProduction;
+    projectStatusSelect.disabled = !canChangeAnyStatus;
+    projectStatusSelect.title = canChangeAnyStatus ? "" : currentPermissionRestrictionText("production");
+    for (const option of projectStatusSelect.options) {
+      const status = normalizeProjectStatus(option.value);
+      option.disabled = status === "checked" || status === "issued"
+        ? !permission.canIssue
+        : status === "draft" || status === "readycheck"
+        ? !(permission.canEdit || permission.canIssue)
+        : !permission.canManageProduction;
+    }
   }
   if (projectAssigneeReadout) {
     const assignee = normalizeProductionInfo(state.productionInfo).assignee.trim();
@@ -10829,10 +14116,10 @@ function updateWorkflowControls() {
   if (projectLockToggle) {
     const issuedLocked = Boolean(state.issuedAt) || projectStatusAtLeast(state.projectStatus, "issued");
     if (issuedLocked) state.locked = true;
-    projectLockToggle.checked = state.locked === true || cloudPermissionReadOnly || issuedLocked;
-    projectLockToggle.disabled = cloudPermissionReadOnly || issuedLocked;
-    projectLockToggle.title = cloudPermissionReadOnly
-      ? "This cloud spool is view/comment only for your team role."
+    projectLockToggle.checked = state.locked === true || !permission.canEdit || issuedLocked;
+    projectLockToggle.disabled = !permission.canEdit || issuedLocked;
+    projectLockToggle.title = !permission.canEdit
+      ? currentPermissionRestrictionText("edit")
       : issuedLocked
       ? "Issued drawings stay locked. Use Return for changes or New revision."
       : "";
@@ -10914,7 +14201,7 @@ function drawingEditLocked() {
 function ensureDrawingEditable(action = "edit this drawing") {
   if (!drawingEditLocked()) return true;
   if (cloudPermissionReadOnly) {
-    showAppNotice(`This team spool is view/comment only for your role. Ask the project owner or a team admin before you ${action}.`);
+    showAppNotice(cloudReadOnlyMessage(action));
   } else {
     showAppNotice(`This drawing is locked as ${projectStatusLabel()}. Unlock edits or create a new revision before you ${action}.`);
   }
@@ -10934,6 +14221,7 @@ function updatePropertiesPanel() {
           ["set-fitting-weight", "Set weight"],
           ...(fitting.fitting.type === "flange" ? [["change-flange-standard", "Flange type"]] : []),
           ...(fitting.fitting.type === "socket" ? [["change-socket-size", "Socket size"]] : []),
+          ...(fitting.fitting.type === "reducer" ? [["change-reducer-type", "Reducer type"]] : []),
           ...(fitting.weightSource === "manual" ? [["clear-fitting-weight", "Clear manual"]] : []),
           ["delete-fitting", "Delete", "danger"],
         ];
@@ -11020,8 +14308,10 @@ function updatePropertiesPanel() {
     const selectedTotals = selectedQuantities.reduce((totals, item) => ({
       centrelineMm: totals.centrelineMm + item.quantity.centrelineMm,
       cutLengthMm: totals.cutLengthMm + item.quantity.cutLengthMm,
+      weldEndCount: totals.weldEndCount + item.quantity.weldEndCount,
+      weldGapMm: totals.weldGapMm + item.quantity.weldGapMm,
       pipeWeightKg: totals.pipeWeightKg + item.quantity.pipeWeightKg,
-    }), { centrelineMm: 0, cutLengthMm: 0, pipeWeightKg: 0 });
+    }), { centrelineMm: 0, cutLengthMm: 0, weldEndCount: 0, weldGapMm: 0, pipeWeightKg: 0 });
     if (selectedSegments.length === 1) {
       const segment = selectedSegments[0];
       const quantity = selectedQuantities[0].quantity;
@@ -11038,7 +14328,8 @@ function updatePropertiesPanel() {
             ["Offset angle", `${formatAngle(offsetMeta.angleDeg)} deg`],
           ] : []),
           ["Cut", `${formatLength(quantity.cutLengthMm)} mm`],
-          ["Deduct", `${formatLength(quantity.bendTakeoffMm)} mm`],
+          ["Fitting deduct", `${formatLength(quantity.bendTakeoffMm)} mm`],
+          ["Weld gap", `${formatWeldGapMm(quantity.weldGapMm)} mm (${formatWeldGapMm(quantity.weldGapPerEndMm)} mm x ${quantity.weldEndCount} welded end${quantity.weldEndCount === 1 ? "" : "s"})`],
           ["Weight", `${formatMass(quantity.pipeWeightKg)} kg`],
         ],
         [
@@ -11054,6 +14345,7 @@ function updatePropertiesPanel() {
       [
         ["Centreline", `${formatLength(selectedTotals.centrelineMm)} mm`],
         ["Cut pipe", `${formatLength(selectedTotals.cutLengthMm)} mm`],
+        ["Weld gap", `${formatWeldGapMm(selectedTotals.weldGapMm)} mm (${formatWeldGapMm(projectWeldGapMm())} mm x ${selectedTotals.weldEndCount} welded end${selectedTotals.weldEndCount === 1 ? "" : "s"})`],
         ["Pipe weight", `${formatMass(selectedTotals.pipeWeightKg)} kg`],
         ["Sizes", new Set(selectedSegments.map((segment) => pipeSizeForSegment(segment).nb)).size === 1 ? pipeSizeDisplayLabel(pipeSizeForSegment(selectedSegments[0])) : "Mixed"],
       ],
@@ -11119,6 +14411,7 @@ function handlePropertyAction(action) {
   if (action === "clear-fitting-weight") clearSelectedFittingWeight();
   if (action === "change-flange-standard") promptSelectedFlangeStandard();
   if (action === "change-socket-size") promptSelectedSocketSize();
+  if (action === "change-reducer-type") toggleSelectedReducerType();
   if (action === "delete-fitting") deleteSelectedFitting();
   if (action === "edit-note") editSelectedNote();
   if (action === "delete-note") deleteSelectedNote();
@@ -11182,6 +14475,15 @@ function promptSelectedSocketSize() {
   const data = selectedFittingData();
   if (!data || data.fitting.type !== "socket") return;
   openSelectedSocketSizeMenu(data.fitting.id);
+}
+
+function toggleSelectedReducerType() {
+  const data = selectedFittingData();
+  if (!data || data.fitting.type !== "reducer" || !ensureDrawingEditable("change reducer type")) return;
+  const snapshot = createUndoSnapshot();
+  data.fitting.reducerType = fittingReducerType(data.fitting) === "eccentric" ? "concentric" : "eccentric";
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
 }
 
 function deleteSelectedFitting() {
@@ -11345,6 +14647,30 @@ function updateAppModeVisibility(mode = appMode) {
   if (inspectorModeHint) {
     inspectorModeHint.textContent = APP_MODE_INSPECTOR_HINT[normalized] ?? APP_MODE_INSPECTOR_HINT.draw;
   }
+  if (workspaceTitle) {
+    workspaceTitle.textContent = APP_MODE_WORKSPACE_TITLE[normalized] ?? APP_MODE_WORKSPACE_TITLE.draw;
+    if (isQuickPdfMode()) workspaceTitle.textContent = normalized === "export" ? "Quick PDF" : "Quick drawing";
+  }
+}
+
+function applyWorkflowKindUi() {
+  const quick = isQuickPdfMode();
+  document.body.dataset.workflowKind = quick ? "quick" : "managed";
+  if (quickPdfBar) quickPdfBar.hidden = !quick;
+
+  const reviewButton = appModeButtons.find((button) => button.dataset.appMode === "review");
+  const exportButton = appModeButtons.find((button) => button.dataset.appMode === "export");
+  if (reviewButton) reviewButton.hidden = quick;
+  if (exportButton) exportButton.textContent = quick ? "PDF" : "Export";
+
+  const saveLabel = saveBrowserProjectButton?.querySelector("span");
+  if (saveLabel) saveLabel.textContent = quick ? "Save copy" : "Save";
+  if (saveBrowserProjectButton) {
+    saveBrowserProjectButton.title = quick
+      ? "Optionally save this quick drawing for later"
+      : "Save project in this browser";
+    saveBrowserProjectButton.setAttribute("aria-label", saveBrowserProjectButton.title);
+  }
 }
 
 function defaultToolForMode(mode = appMode) {
@@ -11388,12 +14714,15 @@ function renderToolSettingsOptions() {
 }
 
 function openToolSettingsDialog() {
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("tools");
   renderToolSettingsOptions();
   if (toolSettingsDialog) toolSettingsDialog.hidden = false;
 }
 
 function closeToolSettingsDialog() {
   if (toolSettingsDialog) toolSettingsDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function resetSideToolVisibility() {
@@ -11430,9 +14759,11 @@ function setupToolSettingsDialog() {
 }
 
 function applyAppMode(mode, options = {}) {
-  const normalized = normalizeAppMode(mode);
+  let normalized = normalizeAppMode(mode);
+  if (isQuickPdfMode() && normalized === "review") normalized = "draw";
   appMode = normalized;
   document.body.dataset.appMode = normalized;
+  applyWorkflowKindUi();
 
   for (const button of appModeButtons) {
     const active = button.dataset.appMode === normalized;
@@ -11457,13 +14788,14 @@ function applyAppMode(mode, options = {}) {
     activateInspectorTab(APP_MODE_DEFAULT_TAB[normalized] ?? "properties");
   }
 
-  if (normalized === "review" || normalized === "export" || hasInspectorSelection()) {
+  if (normalized === "review" || normalized === "export") {
     showMobilePanel("inspector");
-  } else if (!isTabletLayout()) {
-    setInspectorDrawerOpen(false);
+  } else {
+    showMobilePanel("drawing");
   }
 
   closeDrawingContextMenu();
+  if (normalized === "review") markFirstUseGuideLearned("review");
 }
 
 function setupAppModes() {
@@ -11529,8 +14861,852 @@ function setFocusModeButtonState() {
   if (label) label.textContent = focusModeActive ? "Exit" : "Focus";
 }
 
+function currentWorkspaceSurface() {
+  if (isTabletLayout()) {
+    const mobilePanel = document.body.dataset.mobilePanel;
+    if (mobilePanel === "preview" && previewPanelHidden) return "drawing";
+    return mobilePanel === "inspector" || mobilePanel === "preview" ? mobilePanel : "drawing";
+  }
+  if (!previewPanelHidden) return "preview";
+  if (document.body.classList.contains("inspector-drawer-open")) return "inspector";
+  return "drawing";
+}
+
+function captureWorkspaceSurfaceState() {
+  return {
+    surface: currentWorkspaceSurface(),
+    previewHidden: previewPanelHidden,
+    previewMinimized: previewPanelMinimized,
+    previewFloatManual,
+    previewFloatBounds: previewFloatBounds ? { ...previewFloatBounds } : null,
+  };
+}
+
+function restoreWorkspaceSurfaceState(restore) {
+  if (!restore) return;
+  previewPanelHidden = restore.previewHidden;
+  previewPanelMinimized = restore.previewHidden ? false : restore.previewMinimized;
+  previewFloatManual = restore.previewFloatManual;
+  previewFloatBounds = restore.previewFloatBounds ? { ...restore.previewFloatBounds } : null;
+
+  if (isTabletLayout()) {
+    const mobileSurface = restore.surface === "preview" && restore.previewHidden ? "drawing" : restore.surface;
+    showMobilePanel(mobileSurface);
+    return;
+  }
+
+  if (restore.surface === "preview" && !restore.previewHidden) {
+    setInspectorDrawerOpen(false);
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+  } else if (restore.surface === "inspector") {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(true);
+  } else {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(false);
+  }
+}
+
+function activeInspectorTabName() {
+  return document.querySelector('[data-inspector-tab].active:not([hidden])')?.dataset.inspectorTab || "properties";
+}
+
+function currentSpoolNavigationIdentity() {
+  return {
+    projectId: normalizeProjectId(state.projectId),
+    spoolUid: normalizeTraceabilityId(state.spoolUid),
+  };
+}
+
+function captureTemporaryWorkspaceNavigation() {
+  if (temporaryWorkspaceNavigationState) return temporaryWorkspaceNavigationState;
+  temporaryWorkspaceNavigationState = {
+    ...currentSpoolNavigationIdentity(),
+    appMode,
+    activeTool: state.activeTool,
+    gridScale: state.gridScale,
+    drawingViewOffset: { ...drawingViewOffset },
+    selectedSegments: selectedSegmentIndexes(),
+    selectedFitting: state.selectedFitting,
+    selectedNote: state.selectedNote,
+    selectedMeasurement: state.selectedMeasurement,
+    selectedPoint: state.selectedPoint,
+    activePoint: state.activePoint,
+    inspectorTab: activeInspectorTabName(),
+    surfaceState: captureWorkspaceSurfaceState(),
+    focusMode: focusModeActive,
+  };
+  return temporaryWorkspaceNavigationState;
+}
+
+function discardTemporaryWorkspaceNavigation() {
+  temporaryWorkspaceNavigationState = null;
+}
+
+function primaryWorkspaceDialogOpen() {
+  return [
+    homeDashboardDialog,
+    projectLibraryDialog,
+    tutorialDialog,
+    videoTutorialDialog,
+    authDialog,
+    helpDialog,
+    toolSettingsDialog,
+  ].some((dialog) => dialog && !dialog.hidden);
+}
+
+function restoreTemporaryWorkspaceNavigation() {
+  const restore = temporaryWorkspaceNavigationState;
+  if (!restore || primaryWorkspaceDialogOpen()) return false;
+  temporaryWorkspaceNavigationState = null;
+  const identity = currentSpoolNavigationIdentity();
+  if (restore.projectId !== identity.projectId || restore.spoolUid !== identity.spoolUid) {
+    renderWorkspaceLocationStrips();
+    return false;
+  }
+
+  state.gridScale = clampNumber(Number(restore.gridScale) || state.gridScale, 10, 72);
+  drawingViewOffset = {
+    x: Number(restore.drawingViewOffset?.x) || 0,
+    y: Number(restore.drawingViewOffset?.y) || 0,
+  };
+  setSelectedSegments(restore.selectedSegments);
+  state.selectedFitting = Number.isInteger(restore.selectedFitting) &&
+    state.fittings.some((fitting) => fitting.id === restore.selectedFitting)
+    ? restore.selectedFitting
+    : null;
+  state.selectedNote = Number.isInteger(restore.selectedNote) &&
+    state.notes.some((note) => note.id === restore.selectedNote)
+    ? restore.selectedNote
+    : null;
+  state.selectedMeasurement = Number.isInteger(restore.selectedMeasurement) &&
+    normalizeMeasurements(state.measurements).some((measurement) => measurement.id === restore.selectedMeasurement)
+    ? restore.selectedMeasurement
+    : null;
+  state.selectedPoint = Number.isInteger(restore.selectedPoint) && state.points[restore.selectedPoint]
+    ? restore.selectedPoint
+    : null;
+  state.activePoint = Number.isInteger(restore.activePoint) && state.points[restore.activePoint]
+    ? restore.activePoint
+    : Math.max(0, state.points.length - 1);
+
+  applyAppMode(restore.appMode, { persist: false, activateTab: false, keepTool: true });
+  setTool(restore.activeTool);
+  activateInspectorTab(restore.inspectorTab);
+  updateAll({ save: false });
+  restoreWorkspaceSurfaceState(restore.surfaceState);
+  if (restore.focusMode && !focusModeActive) setFocusMode(true);
+  renderWorkspaceLocationStrips();
+  return true;
+}
+
+function normalizeMobileWorkspaceSurface() {
+  if (isTabletLayout() && previewPanelHidden && document.body.dataset.mobilePanel === "preview") {
+    showMobilePanel("drawing");
+  }
+}
+
+function scheduleTemporaryWorkspaceRestore() {
+  queueMicrotask(() => {
+    restoreTemporaryWorkspaceNavigation();
+    window.requestAnimationFrame(normalizeMobileWorkspaceSurface);
+    window.setTimeout(normalizeMobileWorkspaceSurface, 250);
+  });
+}
+
+function createSpoolWorkspaceTabId() {
+  return `spool-tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function cloneSpoolWorkspaceValue(value) {
+  if (typeof structuredClone === "function") {
+    try {
+      return structuredClone(value);
+    } catch {
+      // JSON fallback keeps the workspace available in older WebViews.
+    }
+  }
+  return JSON.parse(JSON.stringify(value));
+}
+
+function spoolWorkspaceStateSnapshot(source = state) {
+  const snapshot = cloneSpoolWorkspaceValue(source);
+  snapshot.pointer = null;
+  snapshot.previewCandidate = null;
+  snapshot.hoveredSegment = null;
+  snapshot.history = Array.isArray(snapshot.history) ? snapshot.history.slice(-40) : [];
+  snapshot.redoHistory = Array.isArray(snapshot.redoHistory) ? snapshot.redoHistory.slice(-40) : [];
+  return snapshot;
+}
+
+function spoolWorkspaceSourceForCurrentState() {
+  if (currentProjectHasCloudRecord()) return "cloud";
+  return state.projectId ? "browser" : "draft";
+}
+
+function spoolWorkspaceLabelFromState(source = state) {
+  const info = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  const job = info.jobNumber || "No job";
+  const spool = info.spoolNumber || "Untitled";
+  return `${job} · ${spool}`;
+}
+
+function spoolWorkspaceTabDetail(tab) {
+  const source = tab?.state ?? state;
+  const info = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  const revision = info.revision || "A";
+  const status = projectStatusLabel(source?.projectStatus);
+  return `Rev ${revision} · ${status}`;
+}
+
+function spoolWorkspaceTabCompactLabel(tab) {
+  const source = tab?.state ?? state;
+  const info = normalizeProjectInfo(source?.projectInfo, source?.pipeSpec);
+  return info.spoolNumber || "Untitled spool";
+}
+
+function captureSpoolWorkspaceUiState() {
+  return {
+    appMode,
+    activeTool: state.activeTool,
+    drawingViewOffset: { ...drawingViewOffset },
+    inspectorTab: activeInspectorTabName(),
+    surfaceState: captureWorkspaceSurfaceState(),
+    focusMode: focusModeActive,
+  };
+}
+
+function captureSpoolWorkspaceCloudState() {
+  return {
+    ownerId: normalizeUuid(currentCloudProjectOwnerId),
+    companyId: normalizeUuid(currentCloudProjectCompanyId),
+    readOnly: cloudPermissionReadOnly === true,
+    dirty: cloudSaveDirty === true,
+    conflict: cloudSaveConflict === true,
+    error: String(cloudSaveError ?? ""),
+    lastSavedAt: String(cloudLastSavedAt ?? ""),
+    remoteUpdatedAt: String(cloudLastRemoteUpdatedAt ?? ""),
+    trackedProjectId: normalizeProjectId(cloudSaveTrackedProjectId),
+  };
+}
+
+function activeSpoolWorkspaceTab() {
+  return spoolWorkspaceTabs.find((tab) => tab.id === activeSpoolWorkspaceTabId) ?? null;
+}
+
+function captureCurrentSpoolWorkspaceTab(options = {}) {
+  if (spoolWorkspaceSwitching) return null;
+  const tab = activeSpoolWorkspaceTab();
+  if (!tab) return null;
+  tab.state = spoolWorkspaceStateSnapshot();
+  tab.projectId = normalizeProjectId(state.projectId);
+  tab.spoolUid = normalizeTraceabilityId(state.spoolUid);
+  tab.source = spoolWorkspaceSourceForCurrentState();
+  tab.label = spoolWorkspaceLabelFromState();
+  tab.ui = captureSpoolWorkspaceUiState();
+  tab.cloud = captureSpoolWorkspaceCloudState();
+  tab.updatedAt = new Date().toISOString();
+  if (options.persist !== false) scheduleSpoolWorkspaceSessionPersist();
+  renderSpoolWorkspaceTabs();
+  if (spoolWorkspaceWindowed) renderSpoolWindowGrid();
+  return tab;
+}
+
+function spoolWorkspaceSessionPayload() {
+  return {
+    version: 1,
+    activeId: activeSpoolWorkspaceTabId,
+    windowed: spoolWorkspaceWindowed,
+    tabs: spoolWorkspaceTabs.slice(0, 8).map((tab) => ({
+      id: tab.id,
+      projectId: tab.projectId,
+      spoolUid: tab.spoolUid,
+      source: tab.source,
+      label: tab.label,
+      updatedAt: tab.updatedAt,
+      state: tab.state,
+      ui: tab.ui,
+      cloud: tab.cloud,
+    })),
+  };
+}
+
+function persistSpoolWorkspaceSession() {
+  window.clearTimeout(spoolWorkspaceSessionPersistTimer);
+  spoolWorkspaceSessionPersistTimer = null;
+  try {
+    sessionStorage.setItem(SPOOL_WORKSPACE_SESSION_KEY, JSON.stringify(spoolWorkspaceSessionPayload()));
+  } catch (error) {
+    console.warn("Open spool tabs could not be stored for this session.", error);
+  }
+}
+
+function scheduleSpoolWorkspaceSessionPersist() {
+  window.clearTimeout(spoolWorkspaceSessionPersistTimer);
+  spoolWorkspaceSessionPersistTimer = window.setTimeout(persistSpoolWorkspaceSession, 180);
+}
+
+function readSpoolWorkspaceSession() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(SPOOL_WORKSPACE_SESSION_KEY));
+    if (!saved || !Array.isArray(saved.tabs)) return null;
+    const candidates = saved.tabs.slice(0, 8).map((tab) => {
+      const restored = stateFromPayload(tab?.state);
+      if (!tab?.id || !restored) return null;
+      return {
+        id: String(tab.id),
+        projectId: normalizeProjectId(tab.projectId ?? restored.projectId),
+        spoolUid: normalizeTraceabilityId(tab.spoolUid ?? restored.spoolUid),
+        source: ["cloud", "browser", "draft"].includes(tab.source) ? tab.source : "browser",
+        label: String(tab.label ?? spoolWorkspaceLabelFromState(restored)),
+        updatedAt: String(tab.updatedAt ?? ""),
+        state: spoolWorkspaceStateSnapshot(tab.state),
+        ui: tab.ui && typeof tab.ui === "object" ? tab.ui : {},
+        cloud: tab.cloud && typeof tab.cloud === "object" ? tab.cloud : {},
+      };
+    }).filter(Boolean);
+    const tabs = [];
+    candidates.forEach((candidate) => {
+      const identity = candidate.projectId
+        ? `${candidate.source}:${candidate.projectId}`
+        : candidate.spoolUid
+          ? `draft:${candidate.spoolUid}`
+          : "";
+      const duplicateIndex = identity
+        ? tabs.findIndex((tab) => (tab.projectId ? `${tab.source}:${tab.projectId}` : tab.spoolUid ? `draft:${tab.spoolUid}` : "") === identity)
+        : -1;
+      if (duplicateIndex < 0) tabs.push(candidate);
+      else if (candidate.id === saved.activeId) tabs[duplicateIndex] = candidate;
+    });
+    if (!tabs.length) return null;
+    return {
+      tabs,
+      activeId: tabs.some((tab) => tab.id === saved.activeId) ? saved.activeId : tabs[0].id,
+      windowed: saved.windowed === true,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function addCurrentStateAsSpoolWorkspaceTab(options = {}) {
+  const tab = {
+    id: options.id || createSpoolWorkspaceTabId(),
+    projectId: normalizeProjectId(state.projectId),
+    spoolUid: normalizeTraceabilityId(state.spoolUid),
+    source: options.source || spoolWorkspaceSourceForCurrentState(),
+    label: spoolWorkspaceLabelFromState(),
+    updatedAt: new Date().toISOString(),
+    state: spoolWorkspaceStateSnapshot(),
+    ui: captureSpoolWorkspaceUiState(),
+    cloud: captureSpoolWorkspaceCloudState(),
+  };
+  spoolWorkspaceTabs.push(tab);
+  activeSpoolWorkspaceTabId = tab.id;
+  scheduleSpoolWorkspaceSessionPersist();
+  renderSpoolWorkspaceTabs();
+  return tab;
+}
+
+function restoreSpoolWorkspaceDrawingState(snapshot) {
+  const restored = stateFromPayload(snapshot);
+  if (!restored) return null;
+  restored.activeTool = DRAW_STOP_TOOLS.has(snapshot.activeTool) || ["select", "note", "measure", "box-select"].includes(snapshot.activeTool)
+    ? snapshot.activeTool
+    : "select";
+  restored.selectedFitting = Number.isInteger(snapshot.selectedFitting) ? snapshot.selectedFitting : null;
+  restored.selectedNote = Number.isInteger(snapshot.selectedNote) ? snapshot.selectedNote : null;
+  restored.selectedSegment = Number.isInteger(snapshot.selectedSegment) ? snapshot.selectedSegment : null;
+  restored.hoveredSegment = null;
+  restored.pointer = null;
+  restored.previewCandidate = null;
+  restored.history = Array.isArray(snapshot.history) ? cloneSpoolWorkspaceValue(snapshot.history).slice(-40) : [];
+  restored.redoHistory = Array.isArray(snapshot.redoHistory) ? cloneSpoolWorkspaceValue(snapshot.redoHistory).slice(-40) : [];
+  return restored;
+}
+
+function restoreSpoolWorkspaceCloudState(tab) {
+  const cloud = tab.cloud ?? {};
+  currentCloudProjectOwnerId = normalizeUuid(cloud.ownerId);
+  currentCloudProjectCompanyId = normalizeUuid(cloud.companyId);
+  cloudPermissionReadOnly = cloud.readOnly === true;
+  cloudSaveDirty = cloud.dirty === true;
+  cloudSaveConflict = cloud.conflict === true;
+  cloudSaveError = String(cloud.error ?? "");
+  cloudLastSavedAt = String(cloud.lastSavedAt ?? "");
+  cloudLastRemoteUpdatedAt = String(cloud.remoteUpdatedAt ?? "");
+  cloudSaveTrackedProjectId = normalizeProjectId(cloud.trackedProjectId ?? state.projectId);
+}
+
+async function flushActiveSpoolWorkspaceTab() {
+  const tab = captureCurrentSpoolWorkspaceTab({ persist: false });
+  if (!tab) return true;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(statePayload()));
+    autoSaveCurrentBrowserProject();
+  } catch (error) {
+    console.warn("The active spool could not be copied to browser recovery before switching tabs.", error);
+  }
+  window.clearTimeout(cloudAutosaveTimer);
+  if (cloudSaveDirty && currentProjectHasCloudRecord() && !cloudPermissionReadOnly) {
+    let attempts = 0;
+    while (cloudAutosaveBusy && attempts < 30) {
+      await new Promise((resolve) => window.setTimeout(resolve, 100));
+      attempts += 1;
+    }
+    if (!cloudAutosaveBusy) {
+      try {
+        await saveCloudProject({ silent: true, autosave: true });
+      } catch (error) {
+        console.warn("Cloud save was queued while changing spool tabs.", error);
+      }
+    } else {
+      queueCurrentCloudSave("tab-switch");
+    }
+  }
+  captureCurrentSpoolWorkspaceTab({ persist: false });
+  persistSpoolWorkspaceSession();
+  return true;
+}
+
+async function restoreSpoolWorkspaceTab(tab) {
+  const restored = restoreSpoolWorkspaceDrawingState(tab.state);
+  if (!restored) return false;
+  spoolWorkspaceSwitching = true;
+  try {
+    closeDrawingContextMenu();
+    setFocusMode(false);
+    state = restored;
+    restoreSpoolWorkspaceCloudState(tab);
+    if (cloudUser) {
+      if (tab.cloud?.companyId) await activateCompanyFromId(tab.cloud.companyId);
+      else if (activeWorkspaceIsBusiness()) activatePersonalWorkspace();
+    }
+    projectComments = [];
+    projectCommentsProjectId = null;
+    three.userMovedCamera = false;
+    setNextIdsFromState(state);
+    drawingViewOffset = {
+      x: Number(tab.ui?.drawingViewOffset?.x) || 0,
+      y: Number(tab.ui?.drawingViewOffset?.y) || 0,
+    };
+    applyAppMode(tab.ui?.appMode || "draw", { persist: false, activateTab: false, keepTool: true });
+    updateControls();
+    withCloudDirtySuppressed(() => updateAll({ save: false }));
+    activateInspectorTab(tab.ui?.inspectorTab || "properties");
+    restoreWorkspaceSurfaceState(tab.ui?.surfaceState);
+    if (tab.ui?.focusMode) setFocusMode(true);
+    updateCloudStatus();
+    if (currentProjectHasCloudRecord()) {
+      loadProjectComments({ silent: true }).catch((error) => console.warn("Spool comments could not be refreshed after changing tabs.", error));
+    }
+    return true;
+  } finally {
+    spoolWorkspaceSwitching = false;
+  }
+}
+
+async function activateSpoolWorkspaceTab(tabId, options = {}) {
+  const target = spoolWorkspaceTabs.find((tab) => tab.id === tabId);
+  if (!target || spoolWorkspaceSwitching) return false;
+  if (target.id === activeSpoolWorkspaceTabId) {
+    if (options.exitWindows !== false) setSpoolWorkspaceWindowed(false);
+    return true;
+  }
+  const previousId = activeSpoolWorkspaceTabId;
+  await flushActiveSpoolWorkspaceTab();
+  activeSpoolWorkspaceTabId = target.id;
+  const restored = await restoreSpoolWorkspaceTab(target);
+  if (!restored) {
+    activeSpoolWorkspaceTabId = previousId;
+    showAppNotice("That open spool tab could not be restored.", { tone: "warning" });
+    return false;
+  }
+  if (options.exitWindows !== false) setSpoolWorkspaceWindowed(false);
+  scheduleSpoolWorkspaceSessionPersist();
+  renderSpoolWorkspaceTabs();
+  return true;
+}
+
+async function openProjectInWorkspaceTab(projectId, source = projectLibrarySource) {
+  const normalizedId = normalizeProjectId(projectId);
+  if (!normalizedId) return false;
+  const existing = spoolWorkspaceTabs.find((tab) => tab.projectId === normalizedId && tab.source === source);
+  if (existing) {
+    closeProjectLibrary();
+    return activateSpoolWorkspaceTab(existing.id);
+  }
+  if (spoolWorkspaceTabs.length >= 8) {
+    showAppNotice("Close one open spool tab before opening another. The workspace supports up to 8 tabs.", { tone: "warning" });
+    return false;
+  }
+  const previousId = activeSpoolWorkspaceTabId;
+  await flushActiveSpoolWorkspaceTab();
+  spoolWorkspaceSwitching = true;
+  try {
+    if (source === "cloud") await openSavedCloudProject(normalizedId, { skipConfirm: true });
+    else await openSavedBrowserProject(normalizedId, { skipConfirm: true });
+  } finally {
+    spoolWorkspaceSwitching = false;
+  }
+  if (normalizeProjectId(state.projectId) !== normalizedId) {
+    await activateSpoolWorkspaceTab(previousId);
+    return false;
+  }
+  addCurrentStateAsSpoolWorkspaceTab({ source });
+  closeProjectLibrary();
+  setSpoolWorkspaceWindowed(false);
+  showAppNotice(`Opened ${projectDisplayName()} in a new spool tab.`, { tone: "success" });
+  return true;
+}
+
+async function createNewSpoolWorkspaceTab() {
+  if (spoolWorkspaceTabs.length >= 8) {
+    showAppNotice("Close one open spool tab before starting another.", { tone: "warning" });
+    return false;
+  }
+  const previousId = activeSpoolWorkspaceTabId;
+  const defaults = nextProjectInfoForNewSpool(state.projectInfo);
+  await flushActiveSpoolWorkspaceTab();
+  persistUserDrawingDefaults();
+  spoolWorkspaceSwitching = true;
+  try {
+    state = blankState();
+    currentCloudProjectOwnerId = null;
+    currentCloudProjectCompanyId = null;
+    cloudPermissionReadOnly = false;
+    resetCloudSaveTracking();
+    projectComments = [];
+    projectCommentsProjectId = null;
+    nextFittingId = 1;
+    nextNoteId = 1;
+    nextMeasurementId = 1;
+    drawingViewOffset = { x: 0, y: 0 };
+    three.userMovedCamera = false;
+    applyAppMode("draw", { persist: false, activateTab: false, keepTool: false });
+    setTool("draw");
+    setPreviewHidden(true);
+    showMobilePanel("drawing");
+    updateControls();
+    updateAll({ save: false });
+  } finally {
+    spoolWorkspaceSwitching = false;
+  }
+  const newTab = addCurrentStateAsSpoolWorkspaceTab({ source: "draft" });
+  setSpoolWorkspaceWindowed(false);
+  const confirmed = await promptForProjectDetails({ force: true, defaults });
+  if (!confirmed) {
+    const newTabIndex = spoolWorkspaceTabs.findIndex((tab) => tab.id === newTab.id);
+    if (newTabIndex >= 0) spoolWorkspaceTabs.splice(newTabIndex, 1);
+    activeSpoolWorkspaceTabId = previousId;
+    const previous = spoolWorkspaceTabs.find((tab) => tab.id === previousId) ?? spoolWorkspaceTabs[0];
+    if (previous) await restoreSpoolWorkspaceTab(previous);
+    persistSpoolWorkspaceSession();
+    renderSpoolWorkspaceTabs();
+    return false;
+  }
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
+  captureCurrentSpoolWorkspaceTab();
+  return true;
+}
+
+async function closeSpoolWorkspaceTab(tabId) {
+  const tabIndex = spoolWorkspaceTabs.findIndex((tab) => tab.id === tabId);
+  if (tabIndex < 0 || spoolWorkspaceTabs.length <= 1) return false;
+  const tab = spoolWorkspaceTabs[tabIndex];
+  const unsavedDraft = !tab.projectId && (tab.state?.edges?.length || tab.state?.fittings?.length || tab.state?.notes?.length);
+  if (unsavedDraft) {
+    const proceed = await confirmAppAction(`Close ${tab.label || "this spool"}? It has not been saved as a project.`, {
+      title: "Close unsaved spool tab",
+      confirmLabel: "Close tab",
+      tone: "warning",
+    });
+    if (!proceed) return false;
+  }
+  if (tab.id === activeSpoolWorkspaceTabId) {
+    await flushActiveSpoolWorkspaceTab();
+    const next = spoolWorkspaceTabs[tabIndex - 1] ?? spoolWorkspaceTabs[tabIndex + 1];
+    spoolWorkspaceTabs.splice(tabIndex, 1);
+    activeSpoolWorkspaceTabId = next.id;
+    await restoreSpoolWorkspaceTab(next);
+  } else {
+    spoolWorkspaceTabs.splice(tabIndex, 1);
+  }
+  persistSpoolWorkspaceSession();
+  renderSpoolWorkspaceTabs();
+  if (spoolWorkspaceWindowed) renderSpoolWindowGrid();
+  return true;
+}
+
+function renderSpoolWorkspaceTabs() {
+  if (!spoolWorkspaceTabsElement) return;
+  const singleSpool = spoolWorkspaceTabs.length <= 1;
+  spoolWorkspaceShell?.classList.toggle("single-spool", singleSpool);
+  document.body.classList.toggle("single-spool-workspace", singleSpool);
+  spoolWorkspaceTabsElement.innerHTML = spoolWorkspaceTabs.map((tab) => {
+    const active = tab.id === activeSpoolWorkspaceTabId;
+    const dirty = tab.cloud?.dirty === true || (!tab.projectId && (tab.state?.edges?.length ?? 0) > 0);
+    return `
+      <div class="spool-workspace-tab-wrap ${active ? "active" : ""}">
+        <button type="button" class="spool-workspace-tab" role="tab" aria-selected="${active ? "true" : "false"}" data-spool-workspace-tab="${escapeHtml(tab.id)}" title="${escapeHtml(tab.label)}">
+          <span class="spool-workspace-tab-state ${dirty ? "dirty" : "saved"}" aria-hidden="true"></span>
+          <span class="spool-workspace-tab-copy">
+            <strong>
+              <span class="spool-workspace-tab-label-full">${escapeHtml(tab.label || "Untitled spool")}</span>
+              <span class="spool-workspace-tab-label-compact">${escapeHtml(spoolWorkspaceTabCompactLabel(tab))}</span>
+            </strong>
+            <small>${escapeHtml(spoolWorkspaceTabDetail(tab))}</small>
+          </span>
+        </button>
+        <button type="button" class="spool-workspace-tab-close" data-close-spool-workspace-tab="${escapeHtml(tab.id)}" aria-label="Close ${escapeHtml(tab.label || "spool")} tab" ${spoolWorkspaceTabs.length <= 1 ? "disabled" : ""}>×</button>
+      </div>
+    `;
+  }).join("");
+  if (spoolWorkspaceWindowButton) {
+    spoolWorkspaceWindowButton.disabled = spoolWorkspaceTabs.length < 2;
+    spoolWorkspaceWindowButton.setAttribute("aria-pressed", String(spoolWorkspaceWindowed));
+    spoolWorkspaceWindowButton.textContent = spoolWorkspaceWindowed ? "Active spool" : `Windows${spoolWorkspaceTabs.length > 1 ? ` (${spoolWorkspaceTabs.length})` : ""}`;
+  }
+}
+
+function drawSpoolWorkspacePreview(canvas, source, colourIndex = 0) {
+  if (!(canvas instanceof HTMLCanvasElement)) return;
+  const rect = canvas.getBoundingClientRect();
+  const ratio = Math.min(2, window.devicePixelRatio || 1);
+  const width = Math.max(240, Math.round(rect.width || 420));
+  const height = Math.max(150, Math.round(rect.height || 220));
+  canvas.width = Math.round(width * ratio);
+  canvas.height = Math.round(height * ratio);
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  const dark = document.documentElement.dataset.theme === "dark";
+  ctx.fillStyle = dark ? "#111b20" : "#fffdf8";
+  ctx.fillRect(0, 0, width, height);
+  const points = Array.isArray(source?.points) && source.points.length ? source.points : [{ x: 0, y: 0, z: 0 }];
+  const projected = points.map((point) => ({
+    x: (Number(point.x) - Number(point.y)) * 0.866,
+    y: (Number(point.x) + Number(point.y)) * 0.5 - Number(point.z),
+  }));
+  const minX = Math.min(...projected.map((point) => point.x));
+  const maxX = Math.max(...projected.map((point) => point.x));
+  const minY = Math.min(...projected.map((point) => point.y));
+  const maxY = Math.max(...projected.map((point) => point.y));
+  const scale = Math.min((width - 54) / Math.max(1, maxX - minX), (height - 48) / Math.max(1, maxY - minY));
+  const toScreen = (index) => ({
+    x: 27 + (projected[index].x - minX) * scale,
+    y: 24 + (projected[index].y - minY) * scale,
+  });
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  const colours = ["#087f9f", "#7c3aed", "#d97706", "#0f766e", "#be123c", "#2563eb"];
+  (Array.isArray(source?.edges) ? source.edges : []).forEach((edge, index) => {
+    if (!projected[edge.from] || !projected[edge.to]) return;
+    const start = toScreen(edge.from);
+    const end = toScreen(edge.to);
+    ctx.strokeStyle = colours[(colourIndex + index) % colours.length];
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.stroke();
+  });
+  ctx.fillStyle = dark ? "#dce7e8" : "#1f2a2f";
+  projected.forEach((_, index) => {
+    const point = toScreen(index);
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 3.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  if (!(source?.edges?.length)) {
+    ctx.fillStyle = dark ? "#8ca1a8" : "#68777d";
+    ctx.font = "700 13px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("New spool — no runs yet", width / 2, height / 2);
+  }
+}
+
+function renderSpoolWindowGrid() {
+  if (!spoolWindowGrid) return;
+  spoolWindowGrid.innerHTML = spoolWorkspaceTabs.map((tab, index) => {
+    const active = tab.id === activeSpoolWorkspaceTabId;
+    const source = tab.state ?? state;
+    const runs = Array.isArray(source.edges) ? source.edges.length : 0;
+    return `
+      <article class="spool-window-card ${active ? "active" : ""}" data-spool-window-card="${escapeHtml(tab.id)}">
+        <div class="spool-window-card-head">
+          <div>
+            <span>${active ? "Active editor" : "Open spool"}</span>
+            <strong>${escapeHtml(tab.label || "Untitled spool")}</strong>
+            <small>${escapeHtml(spoolWorkspaceTabDetail(tab))} · ${runs} run${runs === 1 ? "" : "s"}</small>
+          </div>
+          <button type="button" data-edit-spool-window="${escapeHtml(tab.id)}">Edit</button>
+        </div>
+        <canvas aria-label="Preview of ${escapeHtml(tab.label || "open spool")}" data-spool-window-canvas="${escapeHtml(tab.id)}"></canvas>
+      </article>
+    `;
+  }).join("");
+  spoolWorkspaceTabs.forEach((tab, index) => {
+    const canvas = spoolWindowGrid.querySelector(`[data-spool-window-canvas="${CSS.escape(tab.id)}"]`);
+    drawSpoolWorkspacePreview(canvas, tab.state, index);
+  });
+}
+
+function setSpoolWorkspaceWindowed(active) {
+  spoolWorkspaceWindowed = active === true && spoolWorkspaceTabs.length > 1;
+  document.body.classList.toggle("spool-windowed-mode", spoolWorkspaceWindowed);
+  if (spoolWindowGridShell) spoolWindowGridShell.hidden = !spoolWorkspaceWindowed;
+  if (spoolWorkspaceWindowed) {
+    captureCurrentSpoolWorkspaceTab({ persist: false });
+    renderSpoolWindowGrid();
+  }
+  renderSpoolWorkspaceTabs();
+  scheduleSpoolWorkspaceSessionPersist();
+}
+
+async function initializeSpoolWorkspaceTabs() {
+  const saved = readSpoolWorkspaceSession();
+  if (saved) {
+    spoolWorkspaceTabs = saved.tabs;
+    activeSpoolWorkspaceTabId = saved.activeId;
+    const active = activeSpoolWorkspaceTab();
+    if (active) await restoreSpoolWorkspaceTab(active);
+  } else {
+    addCurrentStateAsSpoolWorkspaceTab();
+  }
+  spoolWorkspaceWindowed = saved?.windowed === true && spoolWorkspaceTabs.length > 1;
+  renderSpoolWorkspaceTabs();
+  setSpoolWorkspaceWindowed(spoolWorkspaceWindowed);
+}
+
+function setupSpoolWorkspaceTabs() {
+  initializeSpoolWorkspaceTabs().catch((error) => console.warn("The open spool workspace could not be restored.", error));
+  spoolWorkspaceTabsElement?.addEventListener("click", (event) => {
+    const closeButton = event.target instanceof Element ? event.target.closest("[data-close-spool-workspace-tab]") : null;
+    if (closeButton) {
+      closeSpoolWorkspaceTab(closeButton.dataset.closeSpoolWorkspaceTab).catch((error) => console.warn("Spool tab could not be closed.", error));
+      return;
+    }
+    const tabButton = event.target instanceof Element ? event.target.closest("[data-spool-workspace-tab]") : null;
+    if (tabButton) {
+      activateSpoolWorkspaceTab(tabButton.dataset.spoolWorkspaceTab).catch((error) => console.warn("Spool tab could not be opened.", error));
+    }
+  });
+  spoolWorkspaceOpenButton?.addEventListener("click", () => {
+    setSpoolWorkspaceWindowed(false);
+    openBrowserProject();
+  });
+  spoolWorkspaceNewButton?.addEventListener("click", () => {
+    createNewSpoolWorkspaceTab().catch((error) => console.warn("A new spool tab could not be started.", error));
+  });
+  spoolWorkspaceWindowButton?.addEventListener("click", () => setSpoolWorkspaceWindowed(!spoolWorkspaceWindowed));
+  spoolWindowGridCloseButton?.addEventListener("click", () => setSpoolWorkspaceWindowed(false));
+  spoolWindowGrid?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-edit-spool-window]") : null;
+    if (!button) return;
+    activateSpoolWorkspaceTab(button.dataset.editSpoolWindow).catch((error) => console.warn("Spool window could not be activated.", error));
+  });
+  window.addEventListener("pagehide", () => {
+    captureCurrentSpoolWorkspaceTab({ persist: false });
+    persistSpoolWorkspaceSession();
+  });
+}
+
+function workspaceLocationValues() {
+  const project = normalizeProjectInfo(state.projectInfo);
+  return {
+    workspace: cloudUser ? activeWorkspaceLabel() : "This device",
+    job: project.jobNumber || "No job",
+    spool: project.spoolNumber || "Untitled",
+    revision: project.revision || "-",
+    status: projectStatusLabel(state.projectStatus),
+  };
+}
+
+function updateWorkspaceDocumentTitle() {
+  const project = normalizeProjectInfo(state.projectInfo);
+  const identity = [project.jobNumber, project.spoolNumber].filter(Boolean).join(" / ");
+  document.title = identity ? `${identity} - SpoolMate` : "SpoolMate";
+}
+
+function renderWorkspaceLocationStrips() {
+  const values = workspaceLocationValues();
+  updateWorkspaceDocumentTitle();
+  for (const strip of document.querySelectorAll("[data-workspace-location]")) {
+    strip.classList.toggle("compact", strip.classList.contains("workspace-location-main"));
+    const configuredContext = strip.dataset.locationContext || "Drawing";
+    const surface = currentWorkspaceSurface();
+    const context = configuredContext === "Drawing"
+      ? surface === "preview"
+        ? "3D"
+        : surface === "inspector"
+        ? "Details"
+        : APP_MODE_WORKSPACE_TITLE[normalizeAppMode(appMode)] || "Drawing"
+      : configuredContext;
+    strip.replaceChildren();
+
+    const contextBadge = document.createElement("span");
+    contextBadge.className = "workspace-location-context";
+    contextBadge.textContent = context;
+    strip.append(contextBadge);
+
+    for (const [key, label] of [
+      ["workspace", "Workspace"],
+      ["job", "Job"],
+      ["spool", "Spool"],
+      ["revision", "Revision"],
+      ["status", "Status"],
+    ]) {
+      const crumb = document.createElement("span");
+      crumb.className = `workspace-location-crumb ${key}`;
+      const caption = document.createElement("small");
+      caption.textContent = label;
+      const value = document.createElement("b");
+      value.textContent = values[key];
+      value.title = values[key];
+      crumb.append(caption, value);
+      strip.append(crumb);
+    }
+
+    if (configuredContext !== "Drawing") {
+      const back = document.createElement("button");
+      back.type = "button";
+      back.className = "workspace-location-return";
+      back.dataset.workspaceReturn = "drawing";
+      back.textContent = "Back to drawing";
+      strip.append(back);
+    }
+  }
+}
+
+document.addEventListener("click", (event) => {
+  const back = event.target instanceof Element ? event.target.closest("[data-workspace-return]") : null;
+  if (!back) return;
+  event.preventDefault();
+  if (authDialog && !authDialog.hidden) {
+    startupProjectPromptPending = false;
+    closeAuthDialog();
+  }
+  else closePrimaryWorkspaceDialogs();
+  scheduleTemporaryWorkspaceRestore();
+});
+
 function setFocusMode(active) {
-  focusModeActive = active === true;
+  const next = active === true;
+  if (next === focusModeActive) return;
+  if (next) {
+    focusModeRestoreState = captureWorkspaceSurfaceState();
+  }
+  focusModeActive = next;
   document.body.classList.toggle("focus-mode", focusModeActive);
   if (focusModeActive) {
     setInspectorDrawerOpen(false);
@@ -11539,6 +15715,10 @@ function setFocusMode(active) {
     closeActionMenu();
     closeDrawingContextMenu();
     if (isTabletLayout()) showMobilePanel("drawing");
+  } else if (focusModeRestoreState) {
+    const restore = focusModeRestoreState;
+    focusModeRestoreState = null;
+    restoreWorkspaceSurfaceState(restore);
   }
   setFocusModeButtonState();
   syncDrawingContextMenuHost();
@@ -11613,6 +15793,7 @@ function previewFloatingActive() {
   return Boolean(
     previewPanel &&
       !previewPanelHidden &&
+      !isTabletLayout() &&
       (previewFloatManual || document.body.classList.contains("drawing-panel-fullscreen")) &&
       !panelFullscreenActive(previewPanel),
   );
@@ -11630,6 +15811,7 @@ function setPreviewFloatButtonState() {
 
 function setPreviewMinimizeButtonState() {
   if (!previewMinimizeButton) return;
+  previewMinimizeButton.hidden = !previewFloatingActive();
   previewMinimizeButton.setAttribute("aria-pressed", String(previewPanelMinimized));
   previewMinimizeButton.title = previewPanelMinimized ? "Restore 3D preview" : "Minimize 3D preview";
   previewMinimizeButton.setAttribute("aria-label", previewMinimizeButton.title);
@@ -11649,6 +15831,9 @@ function updatePreviewFloatingState() {
   const active = previewFloatingActive();
   document.body.classList.toggle("preview-panel-floating", active);
   updatePreviewVisibilityControls();
+  if (previewPanelHidden && isTabletLayout() && document.body.dataset.mobilePanel === "preview") {
+    showMobilePanel("drawing");
+  }
   setPreviewFloatButtonState();
   applyPreviewFloatBounds();
   refreshPreviewAfterLayoutChange();
@@ -11659,6 +15844,9 @@ function togglePreviewFloating() {
   previewPanelHidden = false;
   previewFloatManual = !previewFloatManual;
   storePreviewFloatPreference(previewFloatManual);
+  if (!previewFloatManual) {
+    previewPanelMinimized = false;
+  }
   if (previewFloatManual) {
     showMobilePanel("drawing");
   }
@@ -11667,10 +15855,8 @@ function togglePreviewFloating() {
 
 function togglePreviewMinimized() {
   if (!previewPanel || previewPanelHidden || panelFullscreenActive(previewPanel)) return;
-  if (!previewFloatingActive()) {
-    previewFloatManual = true;
-    storePreviewFloatPreference(true);
-  }
+  if (isTabletLayout()) return;
+  if (!previewFloatingActive()) return;
   previewPanelMinimized = !previewPanelMinimized;
   updatePreviewFloatingState();
 }
@@ -11679,11 +15865,43 @@ function setPreviewHidden(hidden) {
   previewPanelHidden = hidden === true;
   if (previewPanelHidden) {
     previewPanelMinimized = false;
-  } else if (!previewFloatingActive()) {
-    previewFloatManual = true;
-    storePreviewFloatPreference(true);
+  } else {
+    previewPanelMinimized = false;
+  }
+  if (!previewPanelHidden && !isTabletLayout()) {
+    setInspectorDrawerOpen(false);
   }
   updatePreviewFloatingState();
+  // A hidden mobile preview must also release its sheet and scrim. Keeping
+  // data-mobile-panel="preview" after hiding the panel leaves the drawing
+  // greyed out with no visible Close button on iPhone and Android.
+  if (previewPanelHidden && isTabletLayout() && document.body.dataset.mobilePanel === "preview") {
+    showMobilePanel("drawing");
+  }
+}
+
+function openPreviewPreservingWorkspace() {
+  if (previewPanelHidden || currentWorkspaceSurface() !== "preview") {
+    previewReturnSurfaceState = captureWorkspaceSurfaceState();
+  }
+  if (isTabletLayout()) {
+    showMobilePanel("preview");
+  } else {
+    setPreviewHidden(false);
+  }
+  renderWorkspaceLocationStrips();
+}
+
+function closePreviewToPreviousWorkspace() {
+  const restore = previewReturnSurfaceState;
+  previewReturnSurfaceState = null;
+  if (isTabletLayout()) {
+    showMobilePanel("drawing");
+  } else {
+    setPreviewHidden(true);
+  }
+  if (restore) restoreWorkspaceSurfaceState(restore);
+  renderWorkspaceLocationStrips();
 }
 
 function defaultPreviewFloatBounds() {
@@ -11839,8 +16057,8 @@ function setupFloatingPreviewPanel() {
   const previewBar = previewPanel?.querySelector(".panel-bar");
   previewFloatButton?.addEventListener("click", togglePreviewFloating);
   previewMinimizeButton?.addEventListener("click", togglePreviewMinimized);
-  previewHideButton?.addEventListener("click", () => setPreviewHidden(true));
-  previewShowButton?.addEventListener("click", () => setPreviewHidden(false));
+  previewHideButton?.addEventListener("click", closePreviewToPreviousWorkspace);
+  previewShowButton?.addEventListener("click", openPreviewPreservingWorkspace);
   previewBar?.addEventListener("pointerdown", beginPreviewFloatMove);
   previewFloatResize?.addEventListener("pointerdown", beginPreviewFloatResize);
   window.addEventListener("pointermove", updatePreviewFloatDrag);
@@ -11871,6 +16089,8 @@ function setupTouchSelectionGuards() {
 }
 
 function updateTouchComfortClass() {
+  const previousLayout = lastWorkspaceLayoutKind;
+  const previousSurface = previousLayout ? workspaceSurfaceForLayout(previousLayout) : currentWorkspaceSurface();
   const touchMode = isTabletLayout();
   const phoneMode = isPhoneLayout();
   const tabletMode = touchMode && !phoneMode;
@@ -11885,20 +16105,23 @@ function updateTouchComfortClass() {
         previewPanelHidden = true;
         previewPanelMinimized = false;
         localStorage.setItem(PHONE_PREVIEW_DEFAULT_KEY, "applied");
-        window.requestAnimationFrame(updatePreviewFloatingState);
+        window.requestAnimationFrame(() => setPreviewHidden(true));
       }
     } catch {
       previewPanelHidden = true;
       previewPanelMinimized = false;
-      window.requestAnimationFrame(updatePreviewFloatingState);
+      window.requestAnimationFrame(() => setPreviewHidden(true));
     }
   }
+  const nextLayout = workspaceLayoutKind();
+  reconcileWorkspaceLayout(previousLayout, nextLayout, previousSurface);
+  lastWorkspaceLayoutKind = nextLayout;
 }
 
 function setupTouchComfort() {
   updateTouchComfortClass();
   const mediaQueries = [
-    window.matchMedia?.("(max-width: 1024px)"),
+    window.matchMedia?.("(max-width: 1100px)"),
     window.matchMedia?.("(pointer: coarse)"),
     window.matchMedia?.("(hover: none)"),
   ].filter(Boolean);
@@ -11929,7 +16152,6 @@ function storeAppMode(mode) {
 }
 
 function loadPreviewFloatPreference() {
-  if (isTabletLayout()) return false;
   try {
     const saved = localStorage.getItem(PREVIEW_FLOAT_KEY);
     if (saved === "false") return false;
@@ -11937,6 +16159,8 @@ function loadPreviewFloatPreference() {
   } catch {
     // Default below keeps first use cleaner if local storage is not available.
   }
+  // Touch layouts ignore floating while active, but retaining this value means
+  // a convertible device can return to its previous desktop Float/Dock choice.
   return true;
 }
 
@@ -12022,15 +16246,334 @@ function setupAppTheme() {
   }
 }
 
+let actionCommandMatches = [];
+let actionCommandActiveIndex = -1;
+
+function openCommandDrawingTool(tool, mode = "edit") {
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
+    return;
+  }
+  applyAppMode(mode, { keepTool: true });
+  setTool(tool);
+  setFittingsToolMenuOpen(false);
+  showMobilePanel("drawing");
+}
+
+function openCommandInspector(mode, tab, focusSelector = "") {
+  applyAppMode(mode, { keepTool: true });
+  activateInspectorTab(tab);
+  showMobilePanel("inspector");
+  if (focusSelector) {
+    window.requestAnimationFrame(() => {
+      const target = document.querySelector(focusSelector);
+      target?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+      target?.focus?.({ preventScroll: true });
+    });
+  }
+}
+
+function openCommandExport(targetSelector, tab = "bom") {
+  openCommandInspector("export", tab);
+  window.requestAnimationFrame(() => document.querySelector(targetSelector)?.focus?.({ preventScroll: true }));
+}
+
+const ACTION_COMMANDS = [
+  { id: "draw", label: "Draw pipe", detail: "Start drag drawing from a pipe endpoint", category: "Drawing", keywords: "run pipe line centreline drag", capability: "edit", run: () => openCommandDrawingTool("draw", "draw") },
+  { id: "select", label: "Select pipe or fitting", detail: "Inspect and edit an existing drawing item", category: "Drawing", keywords: "pick edit properties right click", run: () => { applyAppMode("edit", { keepTool: true }); setTool("select"); showMobilePanel("drawing"); } },
+  { id: "box-select", label: "Box select multiple runs", detail: "Drag a selection around several pipe runs", category: "Drawing", keywords: "multi multiple group selection", run: () => { applyAppMode("edit", { keepTool: true }); setTool("boxSelect"); showMobilePanel("drawing"); } },
+  { id: "reducer", label: "Reducer tool", detail: "Place a concentric or eccentric reducer", category: "Fitting", keywords: "reduce transition concentric eccentric size change", capability: "edit", run: () => openCommandDrawingTool("reducer") },
+  { id: "tee", label: "Tee tool", detail: "Create or identify a manufactured tee connection", category: "Fitting", keywords: "t piece junction outlet", capability: "edit", run: () => openCommandDrawingTool("tee", "draw") },
+  { id: "branch", label: "Fabricated branch tool", detail: "Create a welded outlet on a continuous main", category: "Fitting", keywords: "welded branch saddle fishmouth outlet", capability: "edit", run: () => openCommandDrawingTool("branch", "draw") },
+  { id: "flange", label: "Flange tool", detail: "Place a flange and choose its standard", category: "Fitting", keywords: "ansi pn din jis table slip on weld neck", capability: "edit", run: () => openCommandDrawingTool("flange") },
+  { id: "groove", label: "Roll-grooved end tool", detail: "Add a grooved pipe-end preparation", category: "Fitting", keywords: "groove victaulic roll groove coupling", capability: "edit", run: () => openCommandDrawingTool("rollGroove") },
+  { id: "thread", label: "Threaded pipe-end tool", detail: "Add a coarse threaded preparation to an endpoint", category: "Fitting", keywords: "thread screw bsp npt threaded end", capability: "edit", run: () => openCommandDrawingTool("threadedEnd") },
+  { id: "socket", label: "Socket tool", detail: "Place and rotate socket outlets", category: "Fitting", keywords: "sockolet outlet rotate spacing", capability: "edit", run: () => openCommandDrawingTool("socket") },
+  { id: "valve", label: "Valve tool", detail: "Place a valve marker on a pipe run", category: "Fitting", keywords: "valve isolation gate ball", capability: "edit", run: () => openCommandDrawingTool("valve") },
+  { id: "weld", label: "Weld marker tool", detail: "Place a numbered weld on the drawing", category: "Weld", keywords: "weld number w01 joint marker", capability: "edit", run: () => openCommandDrawingTool("weld") },
+  { id: "measure", label: "Measure between points", detail: "Pick two points for a manual measurement", category: "Drawing", keywords: "measurement distance tape", capability: "edit", run: () => openCommandDrawingTool("measure", "draw") },
+  { id: "45-offset", label: "Draw a 45 degree offset", detail: "Open Draw and use Shift or Hold 45 degrees", category: "Drawing", keywords: "45 offset travel set shift angled", capability: "edit", run: () => { openCommandDrawingTool("draw", "draw"); showAppNotice("Draw from the yellow endpoint while holding Shift, or use Hold 45 degrees on touch."); } },
+  { id: "dimensions", label: "Dimension settings", detail: "Open drawing dimensions and label controls", category: "Drawing", keywords: "dimension redline chain numbered c c centre", run: () => openCommandInspector("draw", "properties", "#dimensionStyleSelect") },
+  { id: "checks", label: "Drawing checks", detail: "Open QA findings and direct fixes", category: "Review", keywords: "qa quality blocker issue health ready to issue", run: () => showHealthPanel() },
+  { id: "weld-register", label: "Weld register", detail: "Open welder, WPS and inspection/NDT tracking", category: "Review", keywords: "wps ndt inspection welder repair w01 register", run: () => { showHealthPanel(); updateWorkflowSummary(); window.requestAnimationFrame(() => workflowSummary?.querySelector(".weld-register-card")?.scrollIntoView?.({ behavior: "smooth", block: "start" })); } },
+  { id: "notes", label: "Review notes and workflow", detail: "Open revision, approval and production notes", category: "Review", keywords: "comments revision approval workflow return", run: () => openCommandInspector("review", "notes") },
+  { id: "cut-list", label: "Cut list", detail: "Open calculated pipe cut lengths", category: "Fabrication", keywords: "cutting list pipe lengths deductions", run: () => openCommandInspector("review", "cutlist") },
+  { id: "weights", label: "Weights and lifting", detail: "Open spool mass, centre of gravity and lifting data", category: "Fabrication", keywords: "weight mass cog centre gravity lift lug", run: () => openCommandInspector("review", "weights") },
+  { id: "big-spool", label: "Big Spool transport planner", detail: "Split a large master assembly into transport pieces", category: "Fabrication", keywords: "big spool split transport truck lift match joint field weld", capability: "edit", run: () => openBigSpoolDialog() },
+  { id: "bom", label: "Bill of materials", detail: "Open the fabrication material take-off", category: "Fabrication", keywords: "bom material takeoff take off order list", run: () => openCommandInspector("export", "bom") },
+  { id: "preview-3d", label: "Open 3D model", detail: "Show the interactive spool preview", category: "View", keywords: "3d model rotate orbit preview", run: () => openPreviewPreservingWorkspace() },
+  { id: "fit-drawing", label: "Fit drawing to screen", detail: "Zoom and centre the complete spool", category: "View", keywords: "zoom out centre center whole spool", run: () => document.querySelector("#fitDrawingButton")?.click() },
+  { id: "focus", label: "Drawing Focus mode", detail: "Give the drawing the full workspace", category: "View", keywords: "fullscreen full screen maximise maximize", run: () => setFocusMode(true) },
+  { id: "export-pdf", label: "Export fabrication PDF", detail: "Open Export with the Draft or Issued PDF action ready", category: "Export", keywords: "fab sheet pdf workshop drawing print download issued draft", run: () => openCommandExport("#exportReportButton", "bom") },
+  { id: "export-3d", label: "Export 3D image", detail: "Open the 3D image export action", category: "Export", keywords: "png picture render model image", run: () => { openPreviewPreservingWorkspace(); window.requestAnimationFrame(() => document.querySelector("#export3dButton")?.focus?.({ preventScroll: true })); } },
+  { id: "export-project", label: "Export openable project", detail: "Open the project-file export action", category: "Export", keywords: "backup html json share project file", run: () => openCommandExport("#exportProjectButton", "bom") },
+  { id: "save", label: "Save spool", detail: "Save locally and to cloud when available", category: "Project", keywords: "cloud autosave store project", run: () => saveBrowserProjectButton?.click() },
+  { id: "jobs", label: "Open Jobs dashboard", detail: "Find jobs, spools, assignments and production stages", category: "Project", keywords: "job dashboard production team spools", run: () => openBrowserProject() },
+  { id: "dashboard", label: "Open home dashboard", detail: "Continue, restore, start or open a spool", category: "Project", keywords: "home start restore session", run: () => openHomeDashboard() },
+  { id: "project-details", label: "Edit project details", detail: "Job, spool, revision, client and drawing data", category: "Project", keywords: "job number spool number rev revision drawn by client weld gap", capability: "edit", run: () => promptForProjectDetails({ force: true }) },
+  { id: "new-spool", label: "New spool", detail: "Save or discard the current drawing and start again", category: "Project", keywords: "new drawing reset blank", run: () => document.querySelector("#resetButton")?.click() },
+  { id: "import-project", label: "Import spool project", detail: "Open a SpoolMate HTML or JSON project file", category: "Project", keywords: "load upload open file backup", run: () => document.querySelector("#importProjectButton")?.click() },
+  { id: "drawing-assistant", label: "Drawing import assistant", detail: "Trace a supplied drawing, photo or PDF", category: "Project", keywords: "trace image photo supplied drawing calibration", run: () => openDrawingAssistantDialog() },
+  { id: "account", label: "Account and workspace", detail: "Sign in, switch business workspace or manage plan", category: "Account", keywords: "login sign in business team subscription trial", run: () => document.querySelector("#accountButton")?.click() },
+  { id: "tutorial", label: "Interactive tutorial", detail: "Open the guided SpoolMate lessons", category: "Help", keywords: "training learn beginner quick start", run: () => openTutorialDialog() },
+  { id: "videos", label: "Video tutorials", detail: "Watch complete, Jobs and drawing guides", category: "Help", keywords: "training video watch guide", run: () => openVideoTutorialDialog() },
+  { id: "help", label: "Help", detail: "Open help for the current workflow", category: "Help", keywords: "instructions stuck how to support", run: () => openHelpDialog() },
+  { id: "test-kit", label: "Launch test kit", detail: "Open regression and device smoke tests", category: "Diagnostics", keywords: "qa testing regression diagnostics launch", run: () => openRegressionDialog() },
+  { id: "reset-layout", label: "Reset workspace layout", detail: "Close temporary panels and restore the drawing", category: "Setup", keywords: "panels minimized hidden restore layout", run: () => resetWorkspaceLayout() },
+];
+
+function normalizeActionCommandText(value) {
+  return String(value ?? "").trim().toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function actionCommandAllowed(command) {
+  if (command.capability === "edit") return currentDrawingProjectPermission().canEdit;
+  if (command.capability === "issue") return currentDrawingProjectPermission().canIssue;
+  if (command.capability === "production") return currentDrawingProjectPermission().canManageProduction;
+  return true;
+}
+
+function actionCommandDisabledReason(command) {
+  return command.capability ? currentPermissionRestrictionText(command.capability) : "";
+}
+
+function matchingActionCommands(query) {
+  const normalized = normalizeActionCommandText(query);
+  if (!normalized) return [];
+  const terms = normalized.split(/\s+/).filter(Boolean);
+  return ACTION_COMMANDS
+    .map((command) => {
+      const label = normalizeActionCommandText(command.label);
+      const keywords = normalizeActionCommandText(`${command.keywords || ""} ${command.detail || ""} ${command.category || ""}`);
+      const haystack = `${label} ${keywords}`;
+      if (!terms.every((term) => haystack.includes(term))) return null;
+      let score = 0;
+      if (label === normalized) score += 120;
+      else if (label.startsWith(normalized)) score += 90;
+      else if (label.includes(normalized)) score += 65;
+      for (const term of terms) {
+        if (label.startsWith(term)) score += 18;
+        else if (label.includes(term)) score += 10;
+        if (keywords.includes(term)) score += 4;
+      }
+      return { command, score };
+    })
+    .filter(Boolean)
+    .sort((first, second) => second.score - first.score || first.command.label.localeCompare(second.command.label))
+    .slice(0, 12)
+    .map((entry) => entry.command);
+}
+
+function setActiveActionCommand(index) {
+  if (!actionCommandMatches.length) {
+    actionCommandActiveIndex = -1;
+    return;
+  }
+  const enabledIndexes = actionCommandMatches
+    .map((command, commandIndex) => actionCommandAllowed(command) ? commandIndex : -1)
+    .filter((commandIndex) => commandIndex >= 0);
+  if (!enabledIndexes.length) {
+    actionCommandActiveIndex = -1;
+  } else if (enabledIndexes.includes(index)) {
+    actionCommandActiveIndex = index;
+  } else {
+    actionCommandActiveIndex = enabledIndexes[0];
+  }
+  actionCommandResults?.querySelectorAll("[data-action-command]").forEach((button, buttonIndex) => {
+    const active = buttonIndex === actionCommandActiveIndex;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+}
+
+function renderActionCommandResults() {
+  if (!actionCommandInput || !actionCommandResults) return;
+  const query = actionCommandInput.value;
+  actionCommandMatches = matchingActionCommands(query);
+  const searching = Boolean(normalizeActionCommandText(query));
+  document.body.classList.toggle("action-command-searching", searching && actionMenuOpen());
+  actionCommandResults.hidden = !searching;
+  actionCommandResults.replaceChildren();
+  if (!searching) {
+    actionCommandActiveIndex = -1;
+    return;
+  }
+  if (!actionCommandMatches.length) {
+    const empty = document.createElement("div");
+    empty.className = "action-command-empty";
+    empty.textContent = "No matching action. Try a tool, fitting, screen or export name.";
+    actionCommandResults.append(empty);
+    actionCommandActiveIndex = -1;
+    return;
+  }
+  for (const command of actionCommandMatches) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "action-command-result";
+    button.dataset.actionCommand = command.id;
+    button.setAttribute("role", "option");
+    const allowed = actionCommandAllowed(command);
+    button.disabled = !allowed;
+    if (!allowed) button.title = actionCommandDisabledReason(command);
+    const title = document.createElement("strong");
+    title.textContent = command.label;
+    const detail = document.createElement("small");
+    detail.textContent = allowed ? command.detail : actionCommandDisabledReason(command);
+    const category = document.createElement("span");
+    category.textContent = allowed ? command.category : "Restricted";
+    button.append(title, detail, category);
+    actionCommandResults.append(button);
+  }
+  setActiveActionCommand(0);
+}
+
+async function runActionCommand(commandId) {
+  const command = ACTION_COMMANDS.find((item) => item.id === commandId);
+  if (!command) return;
+  if (!actionCommandAllowed(command)) {
+    showAppNotice(actionCommandDisabledReason(command));
+    return;
+  }
+  closeActionMenu();
+  try {
+    await command.run();
+  } catch (error) {
+    console.warn("Command action failed.", error);
+    showAppNotice(error?.message || `Could not open ${command.label}.`);
+  }
+}
+
+function moveActiveActionCommand(direction) {
+  const enabledIndexes = actionCommandMatches
+    .map((command, index) => actionCommandAllowed(command) ? index : -1)
+    .filter((index) => index >= 0);
+  if (!enabledIndexes.length) return;
+  const currentPosition = enabledIndexes.indexOf(actionCommandActiveIndex);
+  const nextPosition = currentPosition < 0
+    ? 0
+    : (currentPosition + direction + enabledIndexes.length) % enabledIndexes.length;
+  setActiveActionCommand(enabledIndexes[nextPosition]);
+  actionCommandResults?.querySelector(".action-command-result.active")?.scrollIntoView?.({ block: "nearest" });
+}
+
 function actionMenuOpen() {
   return Boolean(actionMenuPanel && !actionMenuPanel.hidden);
 }
 
-function openActionMenu() {
+function readInterfaceDensity() {
+  try {
+    return localStorage.getItem(INTERFACE_DENSITY_KEY) === "full" ? "full" : "simple";
+  } catch {
+    return "simple";
+  }
+}
+
+function workspaceSettingsOpen() {
+  return document.body.classList.contains("workspace-settings-open");
+}
+
+function updateWorkspaceSettingsSummary() {
+  const material = pipeSpecSelect?.selectedOptions?.[0]?.textContent?.trim() || "Pipe";
+  const size = pipeSizeSelect?.selectedOptions?.[0]?.textContent?.trim() || "Choose size";
+  if (workspaceSettingsPipeSummary) {
+    workspaceSettingsPipeSummary.textContent = `${material} · ${size}`;
+    workspaceSettingsPipeSummary.title = workspaceSettingsPipeSummary.textContent;
+  }
+  if (workspaceSettingsViewSummary) {
+    const detail = drawingDetailSelect?.selectedOptions?.[0]?.textContent?.trim() || "Drawing";
+    const dimensions = state.showDimensions === false
+      ? "Dimensions off"
+      : dimensionStyleSelect?.selectedOptions?.[0]?.textContent?.trim() || "Dimensions";
+    workspaceSettingsViewSummary.textContent = `${detail} · ${dimensions}`;
+    workspaceSettingsViewSummary.title = workspaceSettingsViewSummary.textContent;
+  }
+}
+
+function closeWorkspaceSettings(options = {}) {
+  if (!workspaceSettingsOpen() && workspaceSettingsScrim?.hidden !== false) return;
+  document.body.classList.remove("workspace-settings-open");
+  workspaceSettingsButton?.setAttribute("aria-expanded", "false");
+  if (workspaceSettingsScrim) workspaceSettingsScrim.hidden = true;
+  if (options.restoreFocus === true) workspaceSettingsButton?.focus({ preventScroll: true });
+}
+
+function openWorkspaceSettings() {
+  if (!workspaceSettingsPanel || !workspaceSettingsButton) return;
+  closeActionMenu();
+  updateWorkspaceSettingsSummary();
+  document.body.classList.add("workspace-settings-open");
+  workspaceSettingsButton.setAttribute("aria-expanded", "true");
+  if (workspaceSettingsScrim) workspaceSettingsScrim.hidden = false;
+  window.requestAnimationFrame(() => {
+    const preferred = workspaceSettingsPanel.querySelector('[data-mode-settings]:not([hidden]) select, [data-mode-settings]:not([hidden]) input');
+    preferred?.focus?.({ preventScroll: true });
+  });
+}
+
+function setInterfaceDensity(value, options = {}) {
+  interfaceDensity = value === "full" ? "full" : "simple";
+  const simple = interfaceDensity === "simple";
+  document.body.classList.toggle("simple-controls", simple);
+  document.body.classList.toggle("full-controls", !simple);
+  document.body.dataset.interfaceDensity = interfaceDensity;
+  for (const button of interfaceDensityButtons) {
+    const active = button.dataset.interfaceDensity === interfaceDensity;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  }
+  if (options.persist !== false) {
+    try {
+      localStorage.setItem(INTERFACE_DENSITY_KEY, interfaceDensity);
+    } catch {
+      // The selected layout still applies when storage is unavailable.
+    }
+  }
+  closeWorkspaceSettings();
+  updateWorkspaceSettingsSummary();
+  renderSpoolWorkspaceTabs();
+  if (options.notice === true) {
+    showAppNotice(simple
+      ? "Simple controls are on. Open Pipe & display or Menu whenever you need more."
+      : "Full controls are on. Every drawing and project setting is visible.");
+  }
+  window.requestAnimationFrame(() => {
+    drawIso();
+    renderFallbackPreview();
+    resizeThree();
+  });
+}
+
+function setupInterfaceDensity() {
+  workspaceSettingsButton?.addEventListener("click", () => {
+    if (workspaceSettingsOpen()) closeWorkspaceSettings({ restoreFocus: true });
+    else openWorkspaceSettings();
+  });
+  workspaceSettingsCloseButton?.addEventListener("click", () => closeWorkspaceSettings({ restoreFocus: true }));
+  workspaceSettingsScrim?.addEventListener("click", () => closeWorkspaceSettings({ restoreFocus: true }));
+  for (const button of interfaceDensityButtons) {
+    button.addEventListener("click", () => setInterfaceDensity(button.dataset.interfaceDensity, { notice: true }));
+  }
+  actionMenuJobsButton?.addEventListener("click", () => openBrowserProjectButton?.click());
+  actionMenuBigSpoolButton?.addEventListener("click", () => bigSpoolButton?.click());
+  actionMenuAccountButton?.addEventListener("click", () => accountButton?.click());
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && workspaceSettingsOpen()) {
+      event.preventDefault();
+      closeWorkspaceSettings({ restoreFocus: true });
+    }
+  });
+  setInterfaceDensity(readInterfaceDensity(), { persist: false });
+}
+
+function openActionMenu(options = {}) {
   if (!actionMenuPanel || !actionMenuButton) return;
   actionMenuPanel.hidden = false;
   actionMenuButton.setAttribute("aria-expanded", "true");
   document.body.classList.add("action-menu-open");
+  renderActionCommandResults();
+  if (options.focusSearch !== false) {
+    window.requestAnimationFrame(() => actionCommandInput?.focus({ preventScroll: true }));
+  }
 }
 
 function closeActionMenu() {
@@ -12038,6 +16581,14 @@ function closeActionMenu() {
   actionMenuPanel.hidden = true;
   actionMenuButton.setAttribute("aria-expanded", "false");
   document.body.classList.remove("action-menu-open");
+  document.body.classList.remove("action-command-searching");
+  if (actionCommandInput) actionCommandInput.value = "";
+  if (actionCommandResults) {
+    actionCommandResults.hidden = true;
+    actionCommandResults.replaceChildren();
+  }
+  actionCommandMatches = [];
+  actionCommandActiveIndex = -1;
 }
 
 function toggleActionMenu() {
@@ -12048,6 +16599,46 @@ function toggleActionMenu() {
   }
 }
 
+async function resetWorkspaceLayout() {
+  focusModeRestoreState = null;
+  focusModeActive = false;
+  document.body.classList.remove("focus-mode");
+  setFocusModeButtonState();
+  await closePanelFullscreen();
+
+  previewPanelHidden = true;
+  previewPanelMinimized = false;
+  previewFloatBounds = null;
+  if (!isTabletLayout()) {
+    previewFloatManual = true;
+    storePreviewFloatPreference(true);
+  }
+  try {
+    localStorage.removeItem(PREVIEW_FLOAT_BOUNDS_KEY);
+    localStorage.removeItem(CONTROL_COLLAPSE_KEY);
+  } catch {
+    // The visible layout still resets when storage is unavailable.
+  }
+
+  for (const section of document.querySelectorAll(".control-panel .control-section.collapsed")) {
+    section.classList.remove("collapsed");
+    section.querySelector(".control-section-toggle")?.setAttribute("aria-expanded", "true");
+  }
+
+  updatePreviewFloatingState();
+  showMobilePanel("drawing");
+  setInspectorDrawerOpen(false);
+  activateInspectorTab(APP_MODE_DEFAULT_TAB[appMode] ?? "properties");
+  setFittingsToolMenuOpen(false);
+  closeDrawingContextMenu();
+  closeActionMenu();
+  requestAnimationFrame(() => {
+    drawIso();
+    schedulePreviewStabilize();
+  });
+  showAppNotice("Workspace layout reset. Drawing restored and temporary panels closed.");
+}
+
 function handleActionMenuToggle(event) {
   event?.preventDefault?.();
   event?.stopPropagation?.();
@@ -12055,6 +16646,12 @@ function handleActionMenuToggle(event) {
 }
 
 function setupActionMenu() {
+  resetWorkspaceLayoutButton?.addEventListener("click", () => {
+    resetWorkspaceLayout().catch((error) => {
+      console.warn("Could not reset workspace layout.", error);
+      showAppNotice("Could not completely reset the layout.");
+    });
+  });
   actionMenuButton?.addEventListener("pointerdown", (event) => {
     if (event.button !== undefined && event.button !== 0) return;
     actionMenuLastPointerToggleAt = performance.now();
@@ -12070,6 +16667,42 @@ function setupActionMenu() {
     handleActionMenuToggle(event);
   });
   actionMenuCloseButton?.addEventListener("click", closeActionMenu);
+  actionCommandInput?.addEventListener("input", renderActionCommandResults);
+  actionCommandInput?.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      moveActiveActionCommand(1);
+      return;
+    }
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      moveActiveActionCommand(-1);
+      return;
+    }
+    if (event.key === "Enter" && actionCommandActiveIndex >= 0) {
+      event.preventDefault();
+      runActionCommand(actionCommandMatches[actionCommandActiveIndex]?.id);
+      return;
+    }
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeActionMenu();
+      actionMenuButton?.focus({ preventScroll: true });
+    }
+  });
+  actionCommandResults?.addEventListener("pointermove", (event) => {
+    const result = event.target.closest("[data-action-command]");
+    if (!result || result.disabled) return;
+    const index = actionCommandMatches.findIndex((command) => command.id === result.dataset.actionCommand);
+    if (index >= 0) setActiveActionCommand(index);
+  });
+  actionCommandResults?.addEventListener("click", (event) => {
+    const result = event.target.closest("[data-action-command]");
+    if (!result || result.disabled) return;
+    event.preventDefault();
+    event.stopPropagation();
+    runActionCommand(result.dataset.actionCommand);
+  });
   actionMenuPanel?.addEventListener("click", (event) => {
     const actionButton = event.target.closest("button");
     if (!actionButton || actionButton === actionMenuCloseButton) return;
@@ -12085,6 +16718,19 @@ function setupActionMenu() {
     if (actionMenuPanel?.contains(target) || actionMenuButton?.contains(target)) return;
     closeActionMenu();
   });
+  document.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      if (!actionMenuOpen()) openActionMenu();
+      else actionCommandInput?.focus({ preventScroll: true });
+      actionCommandInput?.select?.();
+      return;
+    }
+    if (event.key === "Escape" && actionMenuOpen()) {
+      closeActionMenu();
+      actionMenuButton?.focus({ preventScroll: true });
+    }
+  });
 }
 
 function helpSectionForCurrentMode() {
@@ -12096,11 +16742,333 @@ function helpSectionForCurrentMode() {
   return "touch";
 }
 
+function defaultFirstUseGuideState() {
+  return {
+    active: false,
+    compact: true,
+    completed: false,
+    currentStep: 0,
+    learned: [],
+  };
+}
+
+function readFirstUseGuideState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FIRST_USE_GUIDE_KEY) || "null");
+    if (!saved || typeof saved !== "object") return null;
+    const learned = Array.isArray(saved.learned)
+      ? [...new Set(saved.learned.map((id) => String(id ?? "")).filter((id) => FIRST_USE_GUIDE_STEPS.some((step) => step.id === id)))]
+      : [];
+    return {
+      active: saved.active === true,
+      compact: saved.compact !== false,
+      completed: saved.completed === true,
+      currentStep: clampNumber(Math.round(Number(saved.currentStep) || 0), 0, FIRST_USE_GUIDE_STEPS.length - 1),
+      learned,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function persistFirstUseGuideState() {
+  if (!firstUseGuideState) return;
+  try {
+    localStorage.setItem(FIRST_USE_GUIDE_KEY, JSON.stringify(firstUseGuideState));
+  } catch {
+    // First-use help remains available for this session when storage is blocked.
+  }
+}
+
+function firstUseGuideStepIndexById(id) {
+  const index = FIRST_USE_GUIDE_STEPS.findIndex((step) => step.id === id);
+  return index >= 0 ? index : 0;
+}
+
+function currentFirstUseGuideStep() {
+  if (!firstUseGuideState) return FIRST_USE_GUIDE_STEPS[0];
+  firstUseGuideState.currentStep = clampNumber(
+    Math.round(Number(firstUseGuideState.currentStep) || 0),
+    0,
+    FIRST_USE_GUIDE_STEPS.length - 1,
+  );
+  return FIRST_USE_GUIDE_STEPS[firstUseGuideState.currentStep];
+}
+
+function clearFirstUseGuideTarget() {
+  firstUseHighlightedElement?.classList.remove("first-use-focus-target");
+  firstUseHighlightedElement = null;
+}
+
+function syncFirstUseGuideTarget() {
+  clearFirstUseGuideTarget();
+  if (!firstUseGuideState?.active || !firstSpoolGuide || firstSpoolGuide.hidden) return;
+  const target = document.querySelector(currentFirstUseGuideStep()?.target || "");
+  if (!(target instanceof HTMLElement) || target.hidden || target.getClientRects().length === 0) return;
+  firstUseHighlightedElement = target;
+  target.classList.add("first-use-focus-target");
+}
+
+function currentProjectHasSavedRecord() {
+  const projectId = normalizeProjectId(state.projectId);
+  if (!projectId) return false;
+  if (loadSavedBrowserProjects().some((project) => project.id === projectId)) return true;
+  return Boolean(cloudLastSavedAt && !cloudSaveDirty && !cloudSaveError && !cloudSaveConflict);
+}
+
+function firstSpoolLaunchChecklist() {
+  const learned = new Set(firstUseGuideState?.learned || []);
+  const project = normalizeProjectInfo(state.projectInfo);
+  return [
+    { label: "Drawing complete", detail: "Pipe route and fittings are in place.", done: hasDrawingContent() },
+    { label: "Details entered", detail: "Job, spool and revision identify the drawing.", done: Boolean(project.jobNumber && project.spoolNumber && project.revision) },
+    { label: "Checks reviewed", detail: "Drawing health and weld register were opened.", done: learned.has("review") },
+    { label: "Spool saved", detail: "A browser or cloud record exists.", done: currentProjectHasSavedRecord() },
+    { label: "Workshop PDF exported", detail: "The fabrication output was generated.", done: learned.has("export") },
+  ];
+}
+
+function tutorialLaunchChecklistMarkup(step = currentTutorialStep()) {
+  if (step?.demo !== "export") return "";
+  const items = firstSpoolLaunchChecklist();
+  const completeCount = items.filter((item) => item.done).length;
+  return `
+    <section class="tutorial-launch-checklist" aria-label="First spool launch checklist">
+      <div>
+        <strong>First spool checklist</strong>
+        <span>${completeCount} of ${items.length} complete in the real drawing</span>
+      </div>
+      <ul>
+        ${items.map((item) => `
+          <li class="${item.done ? "done" : "pending"}">
+            <b aria-hidden="true">${item.done ? "✓" : "○"}</b>
+            <span><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.detail)}</small></span>
+          </li>
+        `).join("")}
+      </ul>
+    </section>
+  `;
+}
+
+function renderFirstUseGuide() {
+  if (!firstSpoolGuide || !firstUseGuideState) return;
+  const active = firstUseGuideState.active === true;
+  const step = currentFirstUseGuideStep();
+  const position = firstUseGuideState.currentStep;
+  const compact = interfaceDensity === "simple";
+  firstSpoolGuide.hidden = !active;
+  document.body.classList.remove("first-spool-mode");
+  document.body.classList.toggle("first-spool-guide-active", active);
+  if (!active) {
+    clearFirstUseGuideTarget();
+    return;
+  }
+  if (firstSpoolGuideKicker) firstSpoolGuideKicker.textContent = `First spool · Step ${position + 1} of ${FIRST_USE_GUIDE_STEPS.length}`;
+  if (firstSpoolGuideTitle) firstSpoolGuideTitle.textContent = step.title;
+  if (firstSpoolGuideMessage) firstSpoolGuideMessage.textContent = step.message;
+  if (firstSpoolGuideActionButton) firstSpoolGuideActionButton.textContent = step.actionLabel;
+  if (firstSpoolGuideNextButton) firstSpoolGuideNextButton.textContent = position === FIRST_USE_GUIDE_STEPS.length - 1 ? "Finish" : "Next";
+  if (firstSpoolGuideExpandButton) {
+    firstSpoolGuideExpandButton.hidden = false;
+    firstSpoolGuideExpandButton.textContent = compact ? "Full controls" : "Simple controls";
+  }
+  if (firstSpoolGuideProgressBar) firstSpoolGuideProgressBar.style.width = `${((position + 1) / FIRST_USE_GUIDE_STEPS.length) * 100}%`;
+  window.requestAnimationFrame(syncFirstUseGuideTarget);
+}
+
+function activateFirstUseGuide(options = {}) {
+  if (!firstUseGuideState) firstUseGuideState = readFirstUseGuideState() ?? defaultFirstUseGuideState();
+  if (firstUseGuideState.completed && options.force !== true) return false;
+  if (options.reset === true) {
+    firstUseGuideState.learned = [];
+    firstUseGuideState.currentStep = 0;
+  }
+  firstUseGuideState.active = true;
+  firstUseGuideState.completed = false;
+  if (typeof options.compact === "boolean") firstUseGuideState.compact = options.compact;
+  if (options.stepId) firstUseGuideState.currentStep = firstUseGuideStepIndexById(options.stepId);
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+  return true;
+}
+
+function finishFirstUseGuide(message = "First spool tips finished. You can reopen the tutorial from Menu at any time.") {
+  if (!firstUseGuideState) return;
+  firstUseGuideState.active = false;
+  firstUseGuideState.compact = false;
+  firstUseGuideState.completed = true;
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+  if (message) showAppNotice(message);
+}
+
+function markFirstUseGuideLearned(id) {
+  if (!firstUseGuideState || !FIRST_USE_GUIDE_STEPS.some((step) => step.id === id)) return;
+  if (!firstUseGuideState.learned.includes(id)) firstUseGuideState.learned.push(id);
+  if (firstUseGuideState.active && currentFirstUseGuideStep()?.id === id) {
+    const nextIndex = FIRST_USE_GUIDE_STEPS.findIndex((step, index) => (
+      index > firstUseGuideState.currentStep && !firstUseGuideState.learned.includes(step.id)
+    ));
+    if (nextIndex >= 0) {
+      firstUseGuideState.currentStep = nextIndex;
+      if (FIRST_USE_GUIDE_STEPS[nextIndex].id === "review") firstUseGuideState.compact = false;
+    } else {
+      finishFirstUseGuide("First spool workflow complete. Your contextual tips have been cleared.");
+      return;
+    }
+  }
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+}
+
+function advanceFirstUseGuide() {
+  if (!firstUseGuideState?.active) return;
+  if (firstUseGuideState.currentStep >= FIRST_USE_GUIDE_STEPS.length - 1) {
+    finishFirstUseGuide();
+    return;
+  }
+  firstUseGuideState.currentStep += 1;
+  if (currentFirstUseGuideStep()?.id === "review") firstUseGuideState.compact = false;
+  persistFirstUseGuideState();
+  renderFirstUseGuide();
+}
+
+function runFirstUseGuideAction() {
+  const step = currentFirstUseGuideStep();
+  if (!step) return;
+  if (step.id === "draw") {
+    applyAppMode("draw");
+    setTool("draw");
+    showMobilePanel("drawing");
+  } else if (step.id === "length") {
+    applyAppMode("draw");
+    setTool("select");
+    showMobilePanel("drawing");
+    showAppNotice("Tap a pipe to open its actions, then choose Change length. Right-click on PC.");
+  } else if (step.id === "fittings") {
+    applyAppMode("draw");
+    showMobilePanel("drawing");
+    setFittingsToolMenuOpen(true);
+  } else if (step.id === "select") {
+    applyAppMode("draw");
+    setTool("select");
+    showMobilePanel("drawing");
+  } else if (step.id === "save") {
+    saveBrowserProject().catch((error) => {
+      console.warn("First spool save failed.", error);
+      showAppNotice(error?.message || "Could not save the spool.");
+    });
+  } else if (step.id === "review") {
+    showHealthPanel();
+  } else if (step.id === "export") {
+    const exportModeButton = document.querySelector('[data-app-mode="export"]');
+    if (exportModeButton instanceof HTMLButtonElement) {
+      exportModeButton.click();
+    } else {
+      applyAppMode("export");
+    }
+    showMobilePanel("inspector");
+    document.querySelector("#exportIsoButton, #exportReportButton")?.focus({ preventScroll: true });
+  }
+  window.requestAnimationFrame(syncFirstUseGuideTarget);
+}
+
+function setupFirstUseGuide() {
+  const saved = readFirstUseGuideState();
+  firstUseGuideState = saved ?? defaultFirstUseGuideState();
+  const startForNewUser = !saved && !hasDrawingContent() && loadSavedBrowserProjects().length === 0;
+  if (startForNewUser) {
+    firstUseGuideState.active = true;
+    firstUseGuideState.compact = true;
+  }
+  firstSpoolGuideExpandButton?.addEventListener("click", () => {
+    const nextDensity = interfaceDensity === "simple" ? "full" : "simple";
+    firstUseGuideState.compact = nextDensity === "simple";
+    persistFirstUseGuideState();
+    setInterfaceDensity(nextDensity, { notice: true });
+    renderFirstUseGuide();
+  });
+  firstSpoolGuideActionButton?.addEventListener("click", () => {
+    // The guide can be advanced manually, so use the rendered action as the
+    // final source of truth if persisted guide state is one paint behind.
+    if (firstSpoolGuideActionButton.textContent?.trim() === "Open export") {
+      applyAppMode("export");
+      showMobilePanel("inspector");
+      document.querySelector("#exportIsoButton, #exportReportButton")?.focus({ preventScroll: true });
+      window.requestAnimationFrame(syncFirstUseGuideTarget);
+      return;
+    }
+    runFirstUseGuideAction();
+  });
+  firstSpoolGuideNextButton?.addEventListener("click", advanceFirstUseGuide);
+  firstSpoolGuideCloseButton?.addEventListener("click", () => finishFirstUseGuide());
+  window.addEventListener("resize", syncFirstUseGuideTarget);
+  if (startForNewUser) {
+    applyAppMode("draw");
+    setTool("draw");
+  }
+  renderFirstUseGuide();
+}
+
 function tutorialVisibleStepIndexes() {
   const indexes = tutorialPathMode === "all"
     ? TUTORIAL_STEPS.map((_, index) => index)
+    : tutorialPathMode === "quick"
+    ? QUICK_START_TUTORIAL_STEP_INDEXES
     : BEGINNER_TUTORIAL_STEP_INDEXES;
   return indexes.filter((index) => TUTORIAL_STEPS[index]);
+}
+
+function readTutorialProgress() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TUTORIAL_PROGRESS_KEY) || "null");
+    if (!saved || typeof saved !== "object") return null;
+    const completed = Array.isArray(saved.completed)
+      ? saved.completed
+        .map((index) => Math.round(Number(index)))
+        .filter((index) => Number.isFinite(index) && TUTORIAL_STEPS[index])
+      : [];
+    const lastStepIndex = Math.round(Number(saved.lastStepIndex));
+    return {
+      pathMode: saved.pathMode === "all" || saved.pathMode === "beginner" || saved.pathMode === "quick"
+        ? saved.pathMode
+        : "quick",
+      lastStepIndex: Number.isFinite(lastStepIndex) && TUTORIAL_STEPS[lastStepIndex] ? lastStepIndex : null,
+      completed,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function restoreTutorialProgress() {
+  const saved = readTutorialProgress();
+  if (!saved) return;
+  tutorialPathMode = saved.pathMode;
+  tutorialCompletedSteps = new Set(saved.completed);
+  if (saved.lastStepIndex !== null) tutorialStepIndex = saved.lastStepIndex;
+}
+
+function persistTutorialProgress() {
+  try {
+    localStorage.setItem(TUTORIAL_PROGRESS_KEY, JSON.stringify({
+      pathMode: tutorialPathMode,
+      lastStepIndex: tutorialStepIndex,
+      completed: [...tutorialCompletedSteps].sort((a, b) => a - b),
+    }));
+  } catch {
+    // Tutorial still works when browser storage is unavailable.
+  }
+}
+
+function tutorialResumeStepIndex() {
+  const visibleIndexes = tutorialVisibleStepIndexes();
+  if (!visibleIndexes.length) return 0;
+  if (visibleIndexes.includes(tutorialStepIndex) && !tutorialCompletedSteps.has(tutorialStepIndex)) {
+    return tutorialStepIndex;
+  }
+  return visibleIndexes.find((index) => !tutorialCompletedSteps.has(index))
+    ?? visibleIndexes[visibleIndexes.length - 1];
 }
 
 function tutorialVisibleStepPosition(index = tutorialStepIndex) {
@@ -12123,11 +17091,13 @@ function currentTutorialStep() {
 }
 
 function setTutorialPathMode(mode) {
-  const nextMode = mode === "all" ? "all" : "beginner";
+  const nextMode = mode === "all" || mode === "beginner" ? mode : "quick";
   if (tutorialPathMode === nextMode) return;
   tutorialPathMode = nextMode;
   stopTutorialPractice();
-  tutorialStepIndex = tutorialVisibleStepIndexes()[0] ?? 0;
+  tutorialStepIndex = tutorialResumeStepIndex();
+  if (tutorialStepCard) delete tutorialStepCard.dataset.tutorialStepIndex;
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -12953,7 +17923,7 @@ function tutorialTrainerContent(kind, phase, complete) {
           <div class="tutorial-trainer-mode-block">
             <small>3D view</small>
             <button type="button" class="tutorial-trainer-selectlike ${phase >= 1 || complete ? "active" : ""}" data-tutorial-trainer-choice="realistic-view">
-              <span>${phase >= 1 || complete ? "Realistic 3D" : "Choose view style"}</span>
+              <span>${phase >= 1 || complete ? "Illustrated workshop" : "Choose view style"}</span>
             </button>
           </div>
           <div class="tutorial-trainer-mode-block">
@@ -12993,7 +17963,7 @@ function tutorialTrainerContent(kind, phase, complete) {
               <b>${phase === 0 ? "choose view first" : "choose rotate"}</b>
             </div>
           `}
-          <div class="tutorial-trainer-instructions">${complete ? "3D model rotated." : phase === 0 ? "Open the 3D view menu and choose Realistic 3D." : phase === 1 ? "Choose Rotate under Navigation mode." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold on the mini model and drag sideways to rotate it."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "3D model rotated." : phase === 0 ? "Open the 3D view menu and choose Illustrated workshop." : phase === 1 ? "Choose Rotate under Navigation mode." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold on the mini model and drag sideways to rotate it."}</div>
         </div>
       `;
     case "focus":
@@ -13054,6 +18024,7 @@ function tutorialPracticeMarkup(step = currentTutorialStep()) {
       <span>${escapeHtml(message)}</span>
       <small>${escapeHtml(helper)}</small>
       ${tutorialTrainerMarkup(step, { active: practiceActive, complete })}
+      ${complete ? `<button type="button" class="tutorial-use-real-button" data-tutorial-use-real>Try in drawing</button>` : ""}
     </div>
   `;
 }
@@ -13070,6 +18041,7 @@ function startTutorialPractice(step = currentTutorialStep()) {
   if (!details) return null;
   const kind = tutorialTrainerKind(step);
   tutorialCompletedSteps.delete(tutorialStepIndex);
+  persistTutorialProgress();
   tutorialPractice = {
     stepIndex: tutorialStepIndex,
     action: step.action,
@@ -13153,6 +18125,7 @@ function checkTutorialPractice() {
   if (tutorialPracticeCompleteForAction(tutorialPractice.action, tutorialPractice.baseline)) {
     const alreadyComplete = tutorialCompletedSteps.has(tutorialPractice.stepIndex);
     tutorialCompletedSteps.add(tutorialPractice.stepIndex);
+    persistTutorialProgress();
     if (!alreadyComplete) {
       renderTutorialStep();
       return;
@@ -13170,6 +18143,7 @@ function completeTutorialTrainer() {
     tutorialTrainer.shiftCaptureTarget = null;
   }
   tutorialCompletedSteps.add(tutorialStepIndex);
+  persistTutorialProgress();
   if (tutorialPractice) tutorialPractice.complete = true;
   renderTutorialStep();
 }
@@ -13694,7 +18668,120 @@ function handleTutorialTrainerChoice(choice) {
   }
 }
 
+function firstUseGuideStepForTutorial(step = currentTutorialStep()) {
+  if (step?.action === "drawTool") return "draw";
+  if (step?.action === "focusLength") return "length";
+  if (step?.action === "teeTool" || step?.action === "flangeTool") return "fittings";
+  if (step?.action === "selectTool") return "select";
+  if (step?.action === "showChecks") return "review";
+  if (step?.action === "focusExport") return "export";
+  return "";
+}
+
+async function tryTutorialStepInDrawing() {
+  const step = currentTutorialStep();
+  const guideStep = firstUseGuideStepForTutorial(step);
+  discardTemporaryWorkspaceNavigation();
+  closeTutorialDialog();
+  if (guideStep) {
+    activateFirstUseGuide({
+      force: true,
+      stepId: guideStep,
+      compact: firstUseGuideStepIndexById(guideStep) <= firstUseGuideStepIndexById("save"),
+    });
+  }
+
+  await new Promise((resolve) => window.setTimeout(resolve, 80));
+  switch (step.action) {
+    case "focusJobs":
+      await openBrowserProject();
+      break;
+    case "showComms":
+      await openBrowserProject();
+      showProjectLibraryComms();
+      break;
+    case "drawTool":
+      applyAppMode("draw");
+      setTool("draw");
+      showMobilePanel("drawing");
+      break;
+    case "focusLength":
+      applyAppMode("draw");
+      activateInspectorTab("properties");
+      showMobilePanel("inspector");
+      stepLengthInput?.focus({ preventScroll: true });
+      stepLengthInput?.select();
+      break;
+    case "selectTool":
+      applyAppMode("draw");
+      setTool("select");
+      showMobilePanel("drawing");
+      break;
+    case "teeTool":
+      applyAppMode("draw");
+      setTool("tee");
+      showMobilePanel("drawing");
+      setFittingsToolMenuOpen(true);
+      break;
+    case "flangeTool":
+      applyAppMode("edit");
+      setTool("flange");
+      showMobilePanel("drawing");
+      setFittingsToolMenuOpen(true);
+      break;
+    case "focusPipeSize":
+      applyAppMode("draw");
+      showMobilePanel("drawing");
+      openWorkspaceSettings();
+      window.setTimeout(() => pipeSizeSelect?.focus({ preventScroll: true }), 80);
+      break;
+    case "measureTool":
+      applyAppMode("draw");
+      setTool("measure");
+      showMobilePanel("drawing");
+      break;
+    case "focusDimensions":
+      applyAppMode("draw");
+      showMobilePanel("drawing");
+      openWorkspaceSettings();
+      window.setTimeout(() => dimensionStyleSelect?.focus({ preventScroll: true }), 80);
+      break;
+    case "focusMode":
+      applyAppMode("draw");
+      setFocusMode(true);
+      break;
+    case "showPreview":
+      setPreviewHidden(false);
+      showMobilePanel("preview");
+      break;
+    case "showChecks":
+      showHealthPanel();
+      break;
+    case "focusExport":
+      applyAppMode("export");
+      showMobilePanel("inspector");
+      document.querySelector("#exportReportButton")?.focus({ preventScroll: true });
+      break;
+    default:
+      if (step.mode) applyAppMode(step.mode);
+      focusTutorialTarget(step);
+      break;
+  }
+  showAppNotice(`${step.menuLabel || step.kicker} is ready in the real workspace. Your existing drawing has not been changed.`);
+  window.requestAnimationFrame(syncFirstUseGuideTarget);
+}
+
 function handleTutorialTrainerClick(event) {
+  const useRealTarget = event.target instanceof Element ? event.target.closest("[data-tutorial-use-real]") : null;
+  if (useRealTarget && tutorialStepCard?.contains(useRealTarget)) {
+    event.preventDefault();
+    event.stopPropagation();
+    tryTutorialStepInDrawing().catch((error) => {
+      console.warn("Could not open the real tutorial tool.", error);
+      showAppNotice(error?.message || "Could not open that tool in the drawing.");
+    });
+    return;
+  }
   const target = event.target instanceof Element ? event.target.closest("[data-tutorial-trainer-choice]") : null;
   if (!target || !tutorialStepCard?.contains(target)) return;
   if (target instanceof HTMLInputElement || target instanceof HTMLSelectElement || target instanceof HTMLTextAreaElement) return;
@@ -14224,12 +19311,20 @@ function tutorialMenuLabel(step, index) {
 function tutorialMenuMarkup() {
   const visibleIndexes = tutorialVisibleStepIndexes();
   const position = tutorialVisibleStepPosition();
-  const pathName = tutorialPathMode === "all" ? "All topics" : "Beginner tour";
+  const practisedCount = visibleIndexes.filter((index) => tutorialCompletedSteps.has(index)).length;
+  const pathName = tutorialPathMode === "all"
+    ? "All topics"
+    : tutorialPathMode === "beginner"
+    ? "Beginner tour"
+    : "5-minute Quick Start";
   const pathHelp = tutorialPathMode === "all"
     ? "Every feature, including Jobs, team comms and production workflow."
-    : "Start here. This teaches the drawing workflow before the advanced team tools.";
+    : tutorialPathMode === "beginner"
+    ? "The complete first-spool drawing workflow, in a guided order."
+    : "The essentials: draw, exact and 45° runs, fittings, dimensions, checks and export.";
   return `
     <div class="tutorial-mode-switch" aria-label="Tutorial path">
+      <button type="button" data-tutorial-mode="quick" class="${tutorialPathMode === "quick" ? "active" : ""}" aria-pressed="${tutorialPathMode === "quick" ? "true" : "false"}">Quick Start</button>
       <button type="button" data-tutorial-mode="beginner" class="${tutorialPathMode === "beginner" ? "active" : ""}" aria-pressed="${tutorialPathMode === "beginner" ? "true" : "false"}">Beginner tour</button>
       <button type="button" data-tutorial-mode="all" class="${tutorialPathMode === "all" ? "active" : ""}" aria-pressed="${tutorialPathMode === "all" ? "true" : "false"}">All topics</button>
     </div>
@@ -14238,8 +19333,8 @@ function tutorialMenuMarkup() {
       <span>${escapeHtml(pathHelp)}</span>
     </div>
     <div class="tutorial-progress-head">
-      <span>Topic ${position + 1} of ${visibleIndexes.length}</span>
-      <small>${tutorialPathMode === "all" ? "Pick any feature, or use Next and Back." : "Follow these in order to learn your first spool."}</small>
+      <span>Topic ${position + 1} of ${visibleIndexes.length} — ${practisedCount} practised</span>
+      <small>${tutorialPathMode === "all" ? "Pick any feature, or use Next and Back." : tutorialPathMode === "quick" ? "A short launch path for your first usable spool." : "Follow these in order to learn your first spool."}</small>
     </div>
     <label class="tutorial-topic-select-wrap">
       <span>Choose topic</span>
@@ -14296,14 +19391,19 @@ function renderTutorialStep() {
       ${tutorialPracticeMarkup(step)}
       ${showDemo ? tutorialDemoMarkup(step.demo) : ""}
       <div class="tutorial-target-note"><strong>Safe practice</strong><span>${escapeHtml(practiceText)}</span></div>
+      ${tutorialLaunchChecklistMarkup(step)}
     </div>
   `;
   tutorialStepCard.dataset.tutorialStepIndex = String(tutorialStepIndex);
-  if (sameStep) {
-    const copy = tutorialStepCard.querySelector(".tutorial-copy");
-    const visual = tutorialStepCard.querySelector(".tutorial-visual");
+  const copy = tutorialStepCard.querySelector(".tutorial-copy");
+  const visual = tutorialStepCard.querySelector(".tutorial-visual");
+  if (sameStep && !practiceActive) {
     if (copy) copy.scrollTop = previousCopyScroll;
     if (visual) visual.scrollTop = previousVisualScroll;
+  } else {
+    tutorialStepCard.scrollTop = 0;
+    if (copy) copy.scrollTop = 0;
+    if (visual) visual.scrollTop = 0;
   }
   if (practiceActive && !practiceComplete) {
     const currentChoice = tutorialTrainerCurrentChoice();
@@ -14313,7 +19413,7 @@ function renderTutorialStep() {
     currentControl?.classList.add("tutorial-current-control");
   }
   tutorialPrevButton.disabled = visiblePosition === 0;
-  tutorialNextButton.textContent = visiblePosition === visibleIndexes.length - 1 ? "Done" : "Next";
+  tutorialNextButton.textContent = visiblePosition === visibleIndexes.length - 1 ? "Finish tour" : "Next";
   if (tutorialActionButton) {
     tutorialActionButton.hidden = !practiceDetails;
     tutorialActionButton.textContent = tutorialCompletedSteps.has(tutorialStepIndex) ? "Try again" : "Start practice";
@@ -14327,10 +19427,16 @@ function selectTutorialStep(index) {
   const nextIndex = normalizeTutorialStepIndex(index);
   if (nextIndex === tutorialStepIndex) {
     clearTutorialTarget();
+    if (tutorialStepCard) tutorialStepCard.scrollTop = 0;
+    const copy = tutorialStepCard?.querySelector(".tutorial-copy");
+    const visual = tutorialStepCard?.querySelector(".tutorial-visual");
+    if (copy) copy.scrollTop = 0;
+    if (visual) visual.scrollTop = 0;
     return;
   }
   stopTutorialPractice();
   tutorialStepIndex = nextIndex;
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -14357,35 +19463,429 @@ function runTutorialStepAction() {
   }, 120);
 }
 
+function closePrimaryWorkspaceDialogs(except = "") {
+  if (except !== "home" && homeDashboardDialog && !homeDashboardDialog.hidden) closeHomeDashboard();
+  if (except !== "jobs" && projectLibraryDialog && !projectLibraryDialog.hidden) closeProjectLibrary();
+  if (except !== "tutorial" && tutorialDialog && !tutorialDialog.hidden) closeTutorialDialog();
+  if (except !== "video" && videoTutorialDialog && !videoTutorialDialog.hidden) closeVideoTutorialDialog();
+  if (except !== "help" && helpDialog && !helpDialog.hidden) closeHelpDialog();
+  if (except !== "ai" && aiHelperDialog && !aiHelperDialog.hidden) closeAiHelper();
+  if (except !== "auth" && authDialog && !authDialog.hidden && !authGateOpen) closeAuthDialog();
+  if (except !== "support-admin" && supportAdminDialog && !supportAdminDialog.hidden) closeSupportAdminDialog();
+  if (except !== "tools" && toolSettingsDialog && !toolSettingsDialog.hidden) closeToolSettingsDialog();
+  if (except !== "legal" && legalSupportDialog && !legalSupportDialog.hidden) closeLegalSupportDialog();
+  if (except !== "big-spool" && bigSpoolDialog && !bigSpoolDialog.hidden) closeBigSpoolDialog();
+  closeActionMenu();
+}
+
+function renderBigSpoolPlanner() {
+  if (!bigSpoolDialog) return;
+  const plan = currentBigSpoolPlan();
+  const segmentData = segments();
+  const layout = bigSpoolLayout(segmentData);
+  const liftDataByPiece = new Map(layout.pieces.map((piece) => [piece.index, bigSpoolPieceLiftData(piece)]));
+  if (bigSpoolEnabledInput) bigSpoolEnabledInput.checked = plan.enabled;
+  if (bigSpoolMaxLengthInput) bigSpoolMaxLengthInput.value = String(plan.maxTransportLengthMm);
+  if (bigSpoolClearanceInput) bigSpoolClearanceInput.value = String(plan.clearanceMm);
+  if (bigSpoolPresetSelect) bigSpoolPresetSelect.value = plan.preset;
+  if (bigSpoolMaxWidthInput) bigSpoolMaxWidthInput.value = String(plan.maxTransportWidthMm || 0);
+  if (bigSpoolMaxHeightInput) bigSpoolMaxHeightInput.value = String(plan.maxTransportHeightMm || 0);
+  if (bigSpoolMaxWeightInput) bigSpoolMaxWeightInput.value = String(plan.maxTransportWeightKg || 0);
+  if (bigSpoolTransportNoteInput) bigSpoolTransportNoteInput.value = plan.transportNote;
+  if (bigSpoolDefaultJointTypeSelect) bigSpoolDefaultJointTypeSelect.value = plan.defaultJointType;
+  const controlsDisabled = !plan.enabled || !segmentData.length;
+  for (const control of [bigSpoolMaxLengthInput, bigSpoolClearanceInput, bigSpoolPresetSelect, bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput, bigSpoolTransportNoteInput, bigSpoolDefaultJointTypeSelect, bigSpoolSuggestButton, bigSpoolManualSegmentSelect, bigSpoolManualDistanceInput, bigSpoolAddCutButton, bigSpoolClearCutsButton, bigSpoolExportButton, bigSpoolExportPackageButton, bigSpoolLoadPlannerButton]) {
+    if (control) control.disabled = controlsDisabled;
+  }
+
+  const totalCentrelineMm = segmentData.reduce((sum, segment) => sum + pointLength(segment.vector), 0);
+  const largestPiece = layout.pieces.reduce((largest, piece) => Math.max(largest, piece.maxOverallMm), 0);
+  const overLimit = layout.pieces.filter((piece) => !bigSpoolPieceReady(piece, plan)).length;
+  const totalWeightKg = layout.pieces.reduce((sum, piece) => sum + piece.weightKg, 0);
+  const groovedCouplingCount = layout.cuts.filter((cut) => cut.jointType === "groove").length;
+  if (bigSpoolOverview) {
+    bigSpoolOverview.innerHTML = `
+      <article><small>Master assembly</small><strong>${escapeHtml(formatLength(totalCentrelineMm))} mm</strong><span>${segmentData.length} straight run${segmentData.length === 1 ? "" : "s"}</span></article>
+      <article><small>Transport pieces</small><strong>${layout.pieces.length}</strong><span>${layout.cuts.length} match joint${layout.cuts.length === 1 ? "" : "s"}${groovedCouplingCount ? ` · ${groovedCouplingCount} grooved coupling${groovedCouplingCount === 1 ? "" : "s"} required` : ""}</span></article>
+      <article class="${overLimit ? "warning" : "ready"}"><small>Largest envelope</small><strong>${escapeHtml(formatLength(largestPiece))} mm</strong><span>${overLimit ? `${overLimit} still over the selected limit` : "Within the selected limit"}</span></article>
+      <article><small>Assembly weight</small><strong>${escapeHtml(formatMass(totalWeightKg))} kg</strong><span>Calculated across all child spools</span></article>
+    `;
+  }
+
+  if (bigSpoolPieceList) {
+    bigSpoolPieceList.innerHTML = layout.pieces.length
+      ? layout.pieces.map((piece) => {
+          const violations = bigSpoolPieceViolations(piece, plan);
+          const withinLimit = violations.length === 0;
+          const cog = piece.cogPoint ? formatPointCompact(piece.cogPoint) : "Not available";
+          const lift = liftDataByPiece.get(piece.index);
+          const liftSummary = lift?.lugs
+            ? `${lift.lugs.points.length} suggested lugs / ${escapeHtml(formatLength(lift.lugs.separationMm))} mm apart @ ${lift.lugs.slingAngleDegrees}°`
+            : "Lug positions need workshop review";
+          return `
+            <article class="big-spool-piece-card ${withinLimit ? "ready" : "warning"}">
+              <span class="big-spool-piece-swatch" style="--piece-colour:${piece.colour}">${escapeHtml(piece.label)}</span>
+              <div>
+                <strong>${escapeHtml(piece.childId)}</strong>
+                <span>${escapeHtml(formatLength(piece.transportLengthMm))} × ${escapeHtml(formatLength(piece.transportWidthMm))} × ${escapeHtml(formatLength(piece.transportHeightMm))} mm transport envelope</span>
+                <small>${escapeHtml(formatMass(piece.weightKg))} kg / ${escapeHtml(formatLength(piece.centrelineMm))} mm centreline / COG ${escapeHtml(cog)}</small>
+                <small>${liftSummary}</small>
+              </div>
+              <b>${withinLimit ? "Ready" : `Over ${violations.join(" / ")}`}</b>
+            </article>`;
+        }).join("")
+      : `<div class="big-spool-empty">Draw at least one run to create transport pieces.</div>`;
+  }
+
+  if (bigSpoolCutList) {
+    bigSpoolCutList.innerHTML = layout.cuts.length
+      ? layout.cuts.map((cut) => {
+          const before = cut.beforePieceIndex === null ? "?" : bigSpoolPieceLabel(cut.beforePieceIndex);
+          const after = cut.afterPieceIndex === null ? "?" : bigSpoolPieceLabel(cut.afterPieceIndex);
+          return `
+            <article class="big-spool-cut-card" data-big-spool-cut="${escapeHtml(cut.id)}">
+              <span class="big-spool-joint-id">${escapeHtml(cut.jointId)}</span>
+              <div>
+                <strong>Run ${cut.segmentIndex + 1} / match ${escapeHtml(before)}-${escapeHtml(after)}</strong>
+                <label>From run start <input data-big-spool-cut-distance type="number" min="1" max="${Math.max(1, Math.floor(cut.lengthMm - 1))}" step="1" value="${Math.round(cut.distanceFromStartMm)}" /> mm</label>
+                <div class="big-spool-joint-fields">
+                  <label>Connection <select data-big-spool-joint-type>${Object.entries(BIG_SPOOL_JOINT_TYPES).filter(([value]) => BIG_SPOOL_PRIMARY_JOINT_TYPES.has(value)).map(([value, label]) => `<option value="${value}"${cut.jointType === value ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></label>
+                  <label>Status <select data-big-spool-joint-status>${Object.entries(BIG_SPOOL_JOINT_STATUSES).map(([value, label]) => `<option value="${value}"${cut.status === value ? " selected" : ""}>${escapeHtml(label)}</option>`).join("")}</select></label>
+                </div>
+                <label>Site note <input data-big-spool-joint-notes type="text" maxlength="120" value="${escapeHtml(cut.notes || "")}" placeholder="Match mark, access or weld note" /></label>
+                <small class="big-spool-joint-preparation">${escapeHtml(bigSpoolJointPreparationText(cut))}</small>
+                <small>${cut.source === "manual" ? "Manual split" : "Automatic suggestion"} · ${escapeHtml(BIG_SPOOL_JOINT_TYPES[cut.jointType] || "Field weld")}</small>
+              </div>
+              <button class="icon-button compact labeled" data-big-spool-remove-cut type="button">Remove</button>
+            </article>`;
+        }).join("")
+      : `<div class="big-spool-empty">No match joints yet. Ask SpoolMate to suggest pieces or add a split to a selected run.</div>`;
+  }
+
+  if (bigSpoolManualSegmentSelect) {
+    const previous = Math.round(Number(bigSpoolManualSegmentSelect.value));
+    bigSpoolManualSegmentSelect.innerHTML = segmentData.map((segment) =>
+      `<option value="${segment.index}">Run ${segment.index + 1} · ${escapeHtml(formatLength(pointLength(segment.vector)))} mm</option>`
+    ).join("");
+    const preferred = segmentData.some((segment) => segment.index === previous)
+      ? previous
+      : selectedSegmentIndexes()[0] ?? segmentData[0]?.index;
+    if (Number.isInteger(preferred)) bigSpoolManualSegmentSelect.value = String(preferred);
+    updateBigSpoolManualDistanceLimit();
+  }
+}
+
+function updateBigSpoolManualDistanceLimit() {
+  if (!bigSpoolManualSegmentSelect || !bigSpoolManualDistanceInput) return;
+  const segment = segments().find((item) => item.index === Number(bigSpoolManualSegmentSelect.value));
+  const lengthMm = segment ? pointLength(segment.vector) : 0;
+  bigSpoolManualDistanceInput.max = String(Math.max(1, Math.floor(lengthMm - 1)));
+  const current = Number(bigSpoolManualDistanceInput.value);
+  if (!Number.isFinite(current) || current <= 0 || current >= lengthMm) {
+    bigSpoolManualDistanceInput.value = String(Math.max(1, Math.round(lengthMm / 2)));
+  }
+}
+
+function commitBigSpoolPlan(options = {}) {
+  const pendingMax = bigSpoolMaxLengthInput?.dataset.pendingValue || bigSpoolMaxLengthInput?.value;
+  const pendingClearance = bigSpoolClearanceInput?.dataset.pendingValue || bigSpoolClearanceInput?.value;
+  state.bigSpool = normalizeBigSpoolPlan({
+    ...currentBigSpoolPlan(),
+    enabled: bigSpoolEnabledInput?.checked === true,
+    maxTransportLengthMm: pendingMax,
+    clearanceMm: pendingClearance,
+    maxTransportWidthMm: bigSpoolMaxWidthInput?.dataset.pendingValue || bigSpoolMaxWidthInput?.value,
+    maxTransportHeightMm: bigSpoolMaxHeightInput?.dataset.pendingValue || bigSpoolMaxHeightInput?.value,
+    maxTransportWeightKg: bigSpoolMaxWeightInput?.dataset.pendingValue || bigSpoolMaxWeightInput?.value,
+    preset: bigSpoolPresetSelect?.value,
+    transportNote: bigSpoolTransportNoteInput?.value,
+    defaultJointType: bigSpoolDefaultJointTypeSelect?.value,
+    updatedAt: new Date().toISOString(),
+  }, state.edges);
+  renderBigSpoolPlanner();
+  updateAll({ save: options.save !== false });
+  updateControls();
+}
+
+function syncBigSpoolNumericInputs() {
+  const plan = currentBigSpoolPlan();
+  const requestedMax = Number(bigSpoolMaxLengthInput?.dataset.pendingValue || bigSpoolMaxLengthInput?.value);
+  const requestedClearance = Number(bigSpoolClearanceInput?.dataset.pendingValue || bigSpoolClearanceInput?.value);
+  if (Number.isFinite(requestedMax) && requestedMax >= BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM) {
+    plan.maxTransportLengthMm = clampNumber(Math.round(requestedMax), BIG_SPOOL_MIN_TRANSPORT_LENGTH_MM, MAX_LENGTH_MM);
+  }
+  if (Number.isFinite(requestedClearance) && requestedClearance >= 50) {
+    plan.clearanceMm = clampNumber(Math.round(requestedClearance), 50, 2000);
+  }
+  const width = Number(bigSpoolMaxWidthInput?.dataset.pendingValue || bigSpoolMaxWidthInput?.value);
+  const height = Number(bigSpoolMaxHeightInput?.dataset.pendingValue || bigSpoolMaxHeightInput?.value);
+  const weight = Number(bigSpoolMaxWeightInput?.dataset.pendingValue || bigSpoolMaxWeightInput?.value);
+  plan.maxTransportWidthMm = Number.isFinite(width) && width > 0 ? clampNumber(Math.round(width), 1, MAX_LENGTH_MM) : 0;
+  plan.maxTransportHeightMm = Number.isFinite(height) && height > 0 ? clampNumber(Math.round(height), 1, MAX_LENGTH_MM) : 0;
+  plan.maxTransportWeightKg = Number.isFinite(weight) && weight > 0 ? clampNumber(Math.round(weight), 1, 100000) : 0;
+  plan.preset = Object.hasOwn(BIG_SPOOL_PRESETS, bigSpoolPresetSelect?.value) ? bigSpoolPresetSelect.value : "custom";
+  plan.transportNote = String(bigSpoolTransportNoteInput?.value ?? "").trim().slice(0, 120);
+  plan.defaultJointType = BIG_SPOOL_PRIMARY_JOINT_TYPES.has(bigSpoolDefaultJointTypeSelect?.value)
+    ? bigSpoolDefaultJointTypeSelect.value
+    : "fieldWeld";
+  plan.updatedAt = new Date().toISOString();
+  state.bigSpool = normalizeBigSpoolPlan(plan, state.edges);
+  return state.bigSpool;
+}
+
+function openBigSpoolDialog() {
+  if (!bigSpoolDialog) return;
+  if (bigSpoolExportPackageButton) {
+    bigSpoolExportPackageButton.onclick = () => exportBigSpoolChildFabPackage().catch((error) => {
+      console.error("Could not create the Big Spool child fabrication package.", error);
+      showAppNotice("The child fabrication package could not be created. Review the drawing and try again.");
+    });
+  }
+  if (bigSpoolLoadPlannerButton) {
+    bigSpoolLoadPlannerButton.onclick = () => {
+      closeBigSpoolDialog();
+      openLoadPlanDialog();
+    };
+  }
+  if (bigSpoolMaxLengthInput) delete bigSpoolMaxLengthInput.dataset.pendingValue;
+  if (bigSpoolClearanceInput) delete bigSpoolClearanceInput.dataset.pendingValue;
+  for (const input of [bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput]) {
+    if (input) delete input.dataset.pendingValue;
+  }
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("big-spool");
+  renderBigSpoolPlanner();
+  bigSpoolDialog.hidden = false;
+  bigSpoolEnabledInput?.focus({ preventScroll: true });
+}
+
+function closeBigSpoolDialog() {
+  const wasOpen = Boolean(bigSpoolDialog && !bigSpoolDialog.hidden);
+  if (wasOpen) {
+    syncBigSpoolNumericInputs();
+    persistState();
+  }
+  if (bigSpoolDialog) bigSpoolDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
+}
+
+function suggestBigSpoolPieces() {
+  const plan = syncBigSpoolNumericInputs();
+  if (!segments().length) {
+    showAppNotice("Draw the master assembly first, then create transport pieces.");
+    return;
+  }
+  const manualCuts = plan.cuts.filter((cut) => cut.source === "manual");
+  const suggestions = suggestedBigSpoolCuts(plan.maxTransportLengthMm, plan.clearanceMm, plan.defaultJointType)
+    .filter((suggestion) => !manualCuts.some((cut) => cut.segmentIndex === suggestion.segmentIndex
+      && Math.abs(cut.distanceFromStartMm - suggestion.distanceFromStartMm) < plan.clearanceMm));
+  plan.cuts = [...manualCuts, ...suggestions];
+  const constraintCuts = refineBigSpoolCutsForConstraints(plan);
+  plan.updatedAt = new Date().toISOString();
+  renderBigSpoolPlanner();
+  updateAll();
+  const totalSuggestions = suggestions.length + constraintCuts;
+  showAppNotice(totalSuggestions
+    ? `Suggested ${totalSuggestions} safe match joint${totalSuggestions === 1 ? "" : "s"} for the selected transport constraints. You can move or remove each one.`
+    : "The current assembly is already within the selected transport length, or no safe split is available.");
+}
+
+function addManualBigSpoolCut() {
+  const plan = currentBigSpoolPlan();
+  const segment = segments().find((item) => item.index === Number(bigSpoolManualSegmentSelect?.value));
+  if (!segment) return;
+  const requested = Number(bigSpoolManualDistanceInput?.value);
+  const safeDistance = safeBigSpoolSplitDistance(segment, requested, plan.clearanceMm);
+  if (safeDistance === null) {
+    showAppNotice("That run is too short for the selected fitting clearance. Choose another run or reduce the clearance.");
+    return;
+  }
+  if (plan.cuts.some((cut) => cut.segmentIndex === segment.index && Math.abs(cut.distanceFromStartMm - safeDistance) < 2)) {
+    showAppNotice("There is already a match joint at that position.");
+    return;
+  }
+  plan.cuts.push({
+    id: createTraceabilityId("CUT"),
+    segmentIndex: segment.index,
+    distanceFromStartMm: safeDistance,
+    source: "manual",
+    jointType: plan.defaultJointType,
+  });
+  plan.updatedAt = new Date().toISOString();
+  renderBigSpoolPlanner();
+  updateAll();
+}
+
+function exportBigSpoolTransportList() {
+  const layout = bigSpoolLayout();
+  const project = normalizeProjectInfo(state.projectInfo);
+  const plan = currentBigSpoolPlan();
+  const rows = [
+    ["Type", "ID", "Description", "Length mm", "Width mm", "Height mm", "Centreline mm", "Weight kg", "COG X mm", "COG Y mm", "COG Z mm", "Status", "Notes"],
+    ...layout.pieces.map((piece) => [
+      "Transport piece", piece.childId, `Revision ${project.revision || "-"}`,
+      Math.round(piece.transportLengthMm), Math.round(piece.transportWidthMm), Math.round(piece.transportHeightMm),
+      Math.round(piece.centrelineMm), Number(piece.weightKg.toFixed(2)),
+      piece.cogPoint ? Math.round(piece.cogPoint.x) : "",
+      piece.cogPoint ? Math.round(piece.cogPoint.y) : "",
+      piece.cogPoint ? Math.round(piece.cogPoint.z) : "",
+      bigSpoolPieceReady(piece, plan) ? "Ready" : `Over ${bigSpoolPieceViolations(piece, plan).join(" / ")}`,
+      plan.transportNote,
+    ]),
+    ...layout.cuts.map((cut) => [
+      "Match joint", cut.jointId,
+      `Run ${cut.segmentIndex + 1}; ${bigSpoolPieceLabel(cut.beforePieceIndex ?? 0)}-${bigSpoolPieceLabel(cut.afterPieceIndex ?? 0)}; ${BIG_SPOOL_JOINT_TYPES[cut.jointType] || "Field weld"}; ${bigSpoolJointPreparationText(cut)}`,
+      Math.round(cut.distanceFromStartMm), "", "", "", "", "", "", "",
+      BIG_SPOOL_JOINT_STATUSES[cut.status] || "Planned", cut.notes || "",
+    ]),
+    ...layout.cuts
+      .filter((cut) => Boolean(bigSpoolJointRejoinItemText(cut)))
+      .map((cut) => [
+        "Site rejoin item", `${cut.jointId}-REJOIN`, bigSpoolJointRejoinItemText(cut),
+        "", "", "", "", "", "", "", "", "Required", cut.notes || "",
+      ]),
+  ];
+  const csv = rows.map((row) => row.map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  downloadTextFile(csv, `${safeFilePart(project.jobNumber || "job")}-${safeFilePart(project.spoolNumber || "big-spool")}-transport.csv`, "text/csv");
+}
+
+function setupBigSpoolPlanner() {
+  bigSpoolButton?.addEventListener("click", openBigSpoolDialog);
+  bigSpoolCloseButton?.addEventListener("click", closeBigSpoolDialog);
+  bigSpoolDoneButton?.addEventListener("click", closeBigSpoolDialog);
+  bigSpoolEnabledInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolMaxLengthInput?.addEventListener("input", (event) => {
+    event.currentTarget.dataset.pendingValue = event.currentTarget.value;
+    syncBigSpoolNumericInputs();
+  });
+  bigSpoolClearanceInput?.addEventListener("input", (event) => {
+    event.currentTarget.dataset.pendingValue = event.currentTarget.value;
+    syncBigSpoolNumericInputs();
+  });
+  for (const input of [bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput]) {
+    input?.addEventListener("input", (event) => {
+      event.currentTarget.dataset.pendingValue = event.currentTarget.value;
+      syncBigSpoolNumericInputs();
+    });
+    input?.addEventListener("change", () => commitBigSpoolPlan());
+  }
+  bigSpoolTransportNoteInput?.addEventListener("input", syncBigSpoolNumericInputs);
+  bigSpoolTransportNoteInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolDefaultJointTypeSelect?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolPresetSelect?.addEventListener("change", () => {
+    const preset = BIG_SPOOL_PRESETS[bigSpoolPresetSelect.value] ?? BIG_SPOOL_PRESETS.custom;
+    if (preset.lengthMm) bigSpoolMaxLengthInput.value = String(preset.lengthMm);
+    if (preset.widthMm) bigSpoolMaxWidthInput.value = String(preset.widthMm);
+    if (preset.heightMm) bigSpoolMaxHeightInput.value = String(preset.heightMm);
+    if (preset.weightKg) bigSpoolMaxWeightInput.value = String(preset.weightKg);
+    for (const input of [bigSpoolMaxLengthInput, bigSpoolMaxWidthInput, bigSpoolMaxHeightInput, bigSpoolMaxWeightInput]) {
+      if (input) input.dataset.pendingValue = input.value;
+    }
+    commitBigSpoolPlan();
+  });
+  bigSpoolMaxLengthInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolClearanceInput?.addEventListener("change", () => commitBigSpoolPlan());
+  bigSpoolSuggestButton?.addEventListener("click", suggestBigSpoolPieces);
+  bigSpoolManualSegmentSelect?.addEventListener("change", updateBigSpoolManualDistanceLimit);
+  bigSpoolAddCutButton?.addEventListener("click", addManualBigSpoolCut);
+  bigSpoolClearCutsButton?.addEventListener("click", () => {
+    currentBigSpoolPlan().cuts = [];
+    renderBigSpoolPlanner();
+    updateAll();
+  });
+  bigSpoolExportButton?.addEventListener("click", exportBigSpoolTransportList);
+  bigSpoolCutList?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-big-spool-remove-cut]") : null;
+    if (!button) return;
+    const card = button.closest("[data-big-spool-cut]");
+    const id = card?.dataset.bigSpoolCut;
+    const plan = currentBigSpoolPlan();
+    plan.cuts = plan.cuts.filter((cut) => cut.id !== id);
+    plan.updatedAt = new Date().toISOString();
+    renderBigSpoolPlanner();
+    updateAll();
+  });
+  bigSpoolCutList?.addEventListener("change", (event) => {
+    const target = event.target instanceof Element ? event.target : null;
+    const card = target?.closest("[data-big-spool-cut]");
+    const plan = currentBigSpoolPlan();
+    const cut = plan.cuts.find((item) => item.id === card?.dataset.bigSpoolCut);
+    if (!cut || !target) return;
+    if (target.matches("[data-big-spool-joint-type]")) cut.jointType = BIG_SPOOL_PRIMARY_JOINT_TYPES.has(target.value) ? target.value : "fieldWeld";
+    if (target.matches("[data-big-spool-joint-status]")) cut.status = Object.hasOwn(BIG_SPOOL_JOINT_STATUSES, target.value) ? target.value : "planned";
+    if (target.matches("[data-big-spool-joint-notes]")) cut.notes = String(target.value ?? "").trim().slice(0, 120);
+    if (!target.matches("[data-big-spool-cut-distance]")) {
+      plan.updatedAt = new Date().toISOString();
+      renderBigSpoolPlanner();
+      updateAll();
+      return;
+    }
+    const input = target;
+    const segment = cut ? segments().find((item) => item.index === cut.segmentIndex) : null;
+    if (!cut || !segment) return;
+    const safeDistance = safeBigSpoolSplitDistance(segment, Number(input.value), currentBigSpoolPlan().clearanceMm);
+    if (safeDistance === null) {
+      renderBigSpoolPlanner();
+      showAppNotice("That position is too close to a fitting or pipe end.");
+      return;
+    }
+    cut.distanceFromStartMm = safeDistance;
+    cut.source = "manual";
+    currentBigSpoolPlan().updatedAt = new Date().toISOString();
+    renderBigSpoolPlanner();
+    updateAll();
+  });
+  bigSpoolDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === bigSpoolDialog) closeBigSpoolDialog();
+  });
+  bigSpoolDialog?.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeBigSpoolDialog();
+  });
+}
+
 function openTutorialDialog(index = null) {
   if (!tutorialDialog) return;
-  const visibleIndexes = tutorialVisibleStepIndexes();
-  tutorialStepIndex = index === null ? (visibleIndexes[0] ?? 0) : normalizeTutorialStepIndex(index);
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("tutorial");
+  const requestedIndex = Math.round(Number(index));
+  if (index !== null && Number.isFinite(requestedIndex) && TUTORIAL_STEPS[requestedIndex] && !tutorialVisibleStepIndexes().includes(requestedIndex)) {
+    tutorialPathMode = BEGINNER_TUTORIAL_STEP_INDEXES.includes(requestedIndex) ? "beginner" : "all";
+  }
+  tutorialStepIndex = index === null ? tutorialResumeStepIndex() : normalizeTutorialStepIndex(requestedIndex);
+  persistTutorialProgress();
   tutorialDialog.hidden = false;
   document.body.classList.add("tutorial-running");
   stopTutorialPractice();
   minimizePreviewForTutorial();
+  if (tutorialStepCard) delete tutorialStepCard.dataset.tutorialStepIndex;
   renderTutorialStep();
   tutorialNextButton?.focus();
 }
 
 function closeTutorialDialog() {
+  persistTutorialProgress();
   if (tutorialDialog) tutorialDialog.hidden = true;
   document.body.classList.remove("tutorial-running");
   clearTutorialTarget();
   stopTutorialPractice();
   restorePreviewAfterTutorial();
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function tutorialNextStep() {
   const visibleIndexes = tutorialVisibleStepIndexes();
   const position = tutorialVisibleStepPosition();
   if (position >= visibleIndexes.length - 1) {
+    const practisedCount = visibleIndexes.filter((index) => tutorialCompletedSteps.has(index)).length;
     closeTutorialDialog();
+    showAppNotice(practisedCount === visibleIndexes.length
+      ? "Tutorial complete. Your practice progress is saved, and you can reopen any topic from Menu."
+      : `Tutorial closed with ${practisedCount} of ${visibleIndexes.length} topics practised. Reopen it to continue where you left off.`);
     return;
   }
   stopTutorialPractice();
   tutorialStepIndex = visibleIndexes[position + 1] ?? tutorialStepIndex;
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -14394,6 +19894,7 @@ function tutorialPreviousStep() {
   const position = tutorialVisibleStepPosition();
   stopTutorialPractice();
   tutorialStepIndex = visibleIndexes[Math.max(0, position - 1)] ?? tutorialStepIndex;
+  persistTutorialProgress();
   renderTutorialStep();
 }
 
@@ -14404,6 +19905,7 @@ function updateTutorialCoachPosition() {
 }
 
 function setupTutorialDialog() {
+  restoreTutorialProgress();
   tutorialButton?.addEventListener("click", () => openTutorialDialog());
   tutorialProgress?.addEventListener("click", (event) => {
     const modeTarget = event.target instanceof Element ? event.target.closest("[data-tutorial-mode]") : null;
@@ -14439,6 +19941,846 @@ function setupTutorialDialog() {
   window.addEventListener("scroll", updateTutorialCoachPosition, true);
 }
 
+let videoTutorialTrigger = null;
+let activeVideoTutorialId = (() => {
+  try {
+    return localStorage.getItem(VIDEO_TUTORIAL_SELECTION_KEY) || VIDEO_TUTORIALS[0].id;
+  } catch {
+    return VIDEO_TUTORIALS[0].id;
+  }
+})();
+
+function getVideoTutorial(videoId = activeVideoTutorialId) {
+  return VIDEO_TUTORIALS.find((tutorial) => tutorial.id === videoId) || VIDEO_TUTORIALS[0];
+}
+
+function renderVideoTutorialLibrary() {
+  if (!videoTutorialLibrary) return;
+  videoTutorialLibrary.innerHTML = VIDEO_TUTORIALS.map((tutorial, index) => `
+    <button
+      class="video-tutorial-library-item"
+      type="button"
+      data-video-tutorial-id="${escapeHtml(tutorial.id)}"
+      aria-pressed="${tutorial.id === activeVideoTutorialId ? "true" : "false"}"
+    >
+      <span class="video-tutorial-library-number">${String(index + 1).padStart(2, "0")}</span>
+      <span class="video-tutorial-library-copy">
+        <span>${escapeHtml(tutorial.eyebrow)} · ${formatVideoTutorialTime(tutorial.duration)}</span>
+        <strong>${escapeHtml(tutorial.title)}</strong>
+        <small>${escapeHtml(tutorial.shortDescription)}</small>
+      </span>
+      <span class="video-tutorial-library-play" aria-hidden="true">${tutorial.previousLayout ? "UPDATE" : "▶"}</span>
+    </button>
+  `).join("");
+}
+
+function renderVideoTutorialChapters(tutorial) {
+  if (!videoTutorialChapterSelect) return;
+  videoTutorialChapterSelect.innerHTML = tutorial.chapters
+    .map(([time, label]) => `<option value="${Number(time)}">${escapeHtml(label)}</option>`)
+    .join("");
+}
+
+function selectVideoTutorial(videoId, { reset = true, autoplay = false } = {}) {
+  if (!videoTutorialPlayer) return;
+  const tutorial = getVideoTutorial(videoId);
+  const changed = tutorial.id !== activeVideoTutorialId;
+  activeVideoTutorialId = tutorial.id;
+  try {
+    localStorage.setItem(VIDEO_TUTORIAL_SELECTION_KEY, activeVideoTutorialId);
+  } catch {
+    // Private browsing can disable local storage; the library still works for this session.
+  }
+  renderVideoTutorialLibrary();
+  renderVideoTutorialChapters(tutorial);
+  if (videoTutorialNowPlayingKicker) {
+    videoTutorialNowPlayingKicker.textContent = `${tutorial.eyebrow} · ${formatVideoTutorialTime(tutorial.duration)}`;
+  }
+  if (videoTutorialNowPlayingTitle) videoTutorialNowPlayingTitle.textContent = tutorial.title;
+  if (videoTutorialNowPlayingDescription) videoTutorialNowPlayingDescription.textContent = tutorial.description;
+
+  const source = videoTutorialPlayer.querySelector("source");
+  const sourceChanged = source?.getAttribute("src") !== tutorial.url;
+  if (source && sourceChanged) {
+    videoTutorialPlayer.pause();
+    source.setAttribute("src", tutorial.url);
+    videoTutorialPlayer.load();
+  } else if (reset && (changed || videoTutorialPlayer.ended)) {
+    videoTutorialPlayer.currentTime = 0;
+  }
+  if (autoplay && tutorial.previousLayout) {
+    showAppNotice(tutorial.updateNotice || "Part of this video shows the previous Jobs layout. Use the current interactive Jobs guide for exact v3.48 controls.", { tone: "warning" });
+  } else if (autoplay) {
+    videoTutorialPlayer.play().catch(() => {
+      showAppNotice("The video is ready. Press play to begin.");
+    });
+  }
+  syncVideoTutorialControls();
+}
+
+function openVideoTutorialDialog(trigger = null, videoId = activeVideoTutorialId) {
+  if (!videoTutorialDialog) return;
+  captureTemporaryWorkspaceNavigation();
+  if (trigger instanceof HTMLElement) videoTutorialTrigger = trigger;
+  closePrimaryWorkspaceDialogs("video");
+  selectVideoTutorial(videoId, { reset: false });
+  videoTutorialDialog.hidden = false;
+  document.body.classList.add("video-tutorial-open");
+  syncVideoTutorialControls();
+  videoTutorialCloseButton?.focus();
+}
+
+function closeVideoTutorialDialog() {
+  if (!videoTutorialDialog) return;
+  videoTutorialPlayer?.pause();
+  videoTutorialDialog.hidden = true;
+  document.body.classList.remove("video-tutorial-open");
+  if (videoTutorialTrigger?.isConnected) videoTutorialTrigger.focus();
+  videoTutorialTrigger = null;
+  scheduleTemporaryWorkspaceRestore();
+}
+
+function formatVideoTutorialTime(seconds) {
+  const value = Math.max(0, Math.round(Number(seconds) || 0));
+  const minutes = Math.floor(value / 60);
+  return `${minutes}:${String(value % 60).padStart(2, "0")}`;
+}
+
+function syncVideoTutorialControls() {
+  if (!videoTutorialPlayer) return;
+  const tutorial = getVideoTutorial();
+  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : tutorial.duration;
+  const currentTime = Number.isFinite(videoTutorialPlayer.currentTime) ? videoTutorialPlayer.currentTime : 0;
+  if (videoTutorialTime) {
+    videoTutorialTime.textContent = `${formatVideoTutorialTime(currentTime)} / ${formatVideoTutorialTime(duration)}`;
+  }
+  if (videoTutorialPlayButton) {
+    const playing = !videoTutorialPlayer.paused && !videoTutorialPlayer.ended;
+    videoTutorialPlayButton.textContent = playing ? "Pause" : "Play";
+    videoTutorialPlayButton.setAttribute("aria-label", playing ? "Pause video" : "Play video");
+    videoTutorialPlayButton.setAttribute("aria-pressed", String(playing));
+  }
+  if (videoTutorialChapterSelect) {
+    const chapters = [...videoTutorialChapterSelect.options]
+      .map((option) => Number(option.value))
+      .filter(Number.isFinite);
+    const chapter = chapters.reduce((selected, value) => value <= currentTime + 0.5 ? value : selected, chapters[0] ?? 0);
+    videoTutorialChapterSelect.value = String(chapter);
+  }
+}
+
+function seekVideoTutorial(deltaSeconds) {
+  if (!videoTutorialPlayer) return;
+  const duration = Number.isFinite(videoTutorialPlayer.duration) ? videoTutorialPlayer.duration : getVideoTutorial().duration;
+  videoTutorialPlayer.currentTime = Math.max(0, Math.min(duration, videoTutorialPlayer.currentTime + deltaSeconds));
+  syncVideoTutorialControls();
+}
+
+async function toggleVideoTutorialPlayback() {
+  if (!videoTutorialPlayer) return;
+  try {
+    if (videoTutorialPlayer.paused || videoTutorialPlayer.ended) {
+      await videoTutorialPlayer.play();
+    } else {
+      videoTutorialPlayer.pause();
+    }
+  } catch {
+    showAppNotice("Press play on the video to continue.");
+  }
+  syncVideoTutorialControls();
+}
+
+async function jumpToVideoTutorialChapter(event) {
+  if (!videoTutorialPlayer || !videoTutorialChapterSelect) return;
+  const chapterTime = Number(event?.currentTarget?.value ?? videoTutorialChapterSelect.value);
+  if (!Number.isFinite(chapterTime)) return;
+  videoTutorialPlayer.currentTime = chapterTime;
+  try {
+    await videoTutorialPlayer.play();
+  } catch {
+    showAppNotice("The section is ready. Press play to continue.");
+  }
+  syncVideoTutorialControls();
+}
+
+async function copyVideoTutorialLink() {
+  const tutorial = getVideoTutorial();
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+    await navigator.clipboard.writeText(tutorial.url);
+    showAppNotice(`${tutorial.title} link copied.`);
+  } catch {
+    showAppNotice("Open the video, then copy its address from the browser.");
+  }
+}
+
+function setupVideoTutorialDialog() {
+  if (!VIDEO_TUTORIALS.some((tutorial) => tutorial.id === activeVideoTutorialId)) {
+    activeVideoTutorialId = VIDEO_TUTORIALS[0].id;
+  }
+  renderVideoTutorialLibrary();
+  renderVideoTutorialChapters(getVideoTutorial());
+  videoTutorialButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
+  tutorialVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
+  helpVideoButton?.addEventListener("click", (event) => openVideoTutorialDialog(event.currentTarget));
+  for (const button of tutorialVideoLaunchButtons) {
+    button.addEventListener("click", (event) => {
+      openVideoTutorialDialog(event.currentTarget, event.currentTarget.dataset.openVideoTutorial);
+    });
+  }
+  videoTutorialLibrary?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-video-tutorial-id]") : null;
+    if (!button) return;
+    selectVideoTutorial(button.dataset.videoTutorialId);
+  });
+  videoTutorialCloseButton?.addEventListener("click", closeVideoTutorialDialog);
+  videoTutorialCopyLinkButton?.addEventListener("click", copyVideoTutorialLink);
+  videoTutorialBackButton?.addEventListener("click", () => seekVideoTutorial(-10));
+  videoTutorialPlayButton?.addEventListener("click", toggleVideoTutorialPlayback);
+  videoTutorialForwardButton?.addEventListener("click", () => seekVideoTutorial(10));
+  videoTutorialChapterSelect?.addEventListener("input", jumpToVideoTutorialChapter);
+  for (const eventName of ["loadedmetadata", "durationchange", "timeupdate", "play", "pause", "ended"]) {
+    videoTutorialPlayer?.addEventListener(eventName, syncVideoTutorialControls);
+  }
+  videoTutorialDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === videoTutorialDialog) closeVideoTutorialDialog();
+  });
+  videoTutorialPlayer?.addEventListener("error", () => {
+    showAppNotice(`${getVideoTutorial().title} could not load. Check the internet connection or try again shortly.`);
+  });
+}
+
+const AI_HELPER_LOCAL_GUIDE = [
+  {
+    patterns: [["45", "offset"], ["45", "degree"], ["shift", "angle"]],
+    answer: "To draw a 45° offset:\n1. Choose Draw and enter the required offset set in Next run / offset set.\n2. Hold Shift on a keyboard, or hold the Hold 45° drawing control on touch, while dragging the angled travel.\n3. Release it, draw the straight return, then press Enter or switch to Select to finish.",
+    tutorial: "Angles / offsets",
+    help: "draw",
+  },
+  {
+    patterns: [["draw", "pipe"], ["first", "run"], ["start", "drawing"], ["start", "spool"], ["first", "spool"]],
+    answer: "To start a spool:\n1. From Home choose New spool and enter the job, spool and revision details.\n2. Choose Draw.\n3. Press and drag from the yellow active point to the next point on the isometric paper.\n4. Continue from each new yellow point.\n5. Press Enter on a keyboard, or choose Select on touch, when the shape is finished.\n\nYou should see each run stay connected and the yellow point move to the end you can draw from next.",
+    tutorial: "Draw pipe",
+    help: "draw",
+  },
+  {
+    patterns: [["finish", "drawing"], ["stop", "drawing"], ["end", "draw"]],
+    answer: "To stop drawing without losing the spool:\n1. Press Enter on a keyboard.\n2. On iPad/Android, choose Select after placing the final run.\n3. Save when the badge shows the drawing has changed.\n\nYou should see the existing pipe remain in place and selection/edit controls become available.",
+    tutorial: "Draw pipe",
+    help: "draw",
+  },
+  {
+    patterns: [["flange"], ["add", "fitting"], ["end", "fitting"]],
+    answer: "To add a flange:\n1. Open Edit and choose Fittings > Flange.\n2. Tap the pipe endpoint where the flange belongs.\n3. Or choose Select, right-click/long-press the endpoint and use Add fitting > Flange.\n4. To change its standard later, select or long-press the flange and choose Flange standard.\n\nYou should see the flange symbol at the endpoint in 2D and a bolted flange in 3D.",
+    tutorial: "End fittings",
+    help: "edit",
+  },
+  {
+    patterns: [["tee"], ["branch"], ["cut", "in"]],
+    answer: "Choose the connection deliberately:\n1. Use Fittings > Tee for a manufactured tee fitting.\n2. Use Fittings > Branch for a smaller pipe welded into the side of a larger main.\n3. Tap the main run at the connection point, then draw the new leg.\n4. Set the outlet pipe size before finishing the leg.\n\nYou should see a tee body for Tee, but a direct welded outlet for Branch. A branch does not receive an automatic tee reducer.",
+    tutorial: "Tee / branch",
+    help: "draw",
+  },
+  {
+    patterns: [["socket"], ["long", "press", "pipe"]],
+    answer: "To build a socket layout:\n1. Choose Select.\n2. Right-click the host pipe on PC, or long-press it on iPad/Android.\n3. Choose Add sockets and set the socket size, count and spacing.\n4. Press Apply.\n5. Select a socket later to rotate it, or drag it along the host run.\n\nYou should see every socket attached to the selected pipe and reflected in the drawing and 3D preview.",
+    tutorial: "Sockets",
+    help: "edit",
+  },
+  {
+    patterns: [["pipe", "size"], ["change", "size"], ["reducer"]],
+    answer: "To change pipe size:\n1. Open Pipe & display and choose the next Size.\n2. Choose the default reducer type: Concentric or Eccentric.\n3. Draw the smaller run, or select an existing run and change its size.\n4. Right-click or long-press the automatic reducer if this one needs the other type.\n5. Review the type in the 2D label, 3D label, takeoff and PDF.\n\nConcentric reducers use centred ends. Eccentric reducers show the flat side and centreline offset e. Both ASME B16.9 types use the Atlas face-to-face H for the selected large nominal size. A welded Branch is a direct cut-in and receives no automatic reducer.",
+    tutorial: "Pipe size",
+    help: "edit",
+  },
+  {
+    patterns: [["dimension"], ["measurement"], ["measure"]],
+    answer: "For a temporary check, choose Measure and pick two points; this does not change the pipe. For fabrication dimensions:\n1. Turn Dimensions on.\n2. Choose Red C/C lines, Numbered key or Chain dims.\n3. Use Select to drag any crowded red label into a clearer position.\n\nYou should see the chosen dimensions update without changing the spool geometry.",
+    tutorial: "Dimensions",
+    help: "review",
+  },
+  {
+    patterns: [["issue"], ["approve"], ["ready", "check"], ["drawing", "blocked"], ["spool", "blocked"], ["fix", "blocker"]],
+    answer: "To clear an issue blocker:\n1. Open Review > Checks.\n2. Read the first blocking item and press its Fix or Show on drawing button.\n3. Complete the required project details, revision, drawing checks and weld information.\n4. Move the spool to Ready to check, record approval, then issue it.\n\nYou should see the blocker disappear as it is fixed. Issuing records the issuer and locks that revision.",
+    tutorial: "Approve / return",
+    help: "review",
+  },
+  {
+    patterns: [["cloud", "spool"], ["saved", "spool"], ["missing", "project"], ["other", "device"]],
+    answer: "To find cloud spools:\n1. Open Account and confirm the same email is signed in on this device.\n2. Open Jobs.\n3. Change the source to Cloud and search the job or spool number.\n4. Use Open tab if you want to keep the current spool open as well.\n\nYou should see cloud projects follow the account across PC, iPad and Android. Device projects remain only in the browser where they were saved.",
+    help: "account",
+  },
+  {
+    patterns: [["trial"], ["expired"], ["read", "only"], ["licence"]],
+    answer: "During the trial, cloud editing and collaboration are enabled. After expiry:\n1. Existing permitted cloud spools stay available to open, view and export.\n2. Cloud saves and team changes pause.\n3. Built-in Ask SpoolMate guidance and tutorials still work.\n4. Extra AI answers resume when the trial or licence is active.\n\nYou should see the account described as read only rather than seeing its saved spools deleted.",
+    help: "account",
+  },
+  {
+    patterns: [["fab", "pdf"], ["fabrication", "pdf"], ["export", "pdf"], ["qr", "code"]],
+    answer: "To create workshop paperwork:\n1. Open Export and choose the PDF style.\n2. Review any blocker and use its Fix button.\n3. Confirm the job, spool, revision and issue status.\n4. Press Fab PDF.\n\nYou should see fabrication information on the PDF. An issued cloud spool with a permanent identity also includes its spool/revision QR traveller.",
+    tutorial: "Export",
+    help: "export",
+  },
+  {
+    patterns: [["weld", "register"], ["weld", "number"], ["wps"], ["ndt"]],
+    answer: "To complete the weld register:\n1. Open Review and locate the W01, W02 and onward weld rows.\n2. Choose All welds done by when one welder completed every weld, or Mixed welders for separate IDs.\n3. Record the WPS, completion and inspection/NDT status.\n4. Resolve any missing required inspection details before issue.\n\nYou should see every drawing weld matched to one complete register row.",
+    help: "review",
+  },
+  {
+    patterns: [["production", "stage"], ["assign", "worker"], ["due", "date"], ["on", "hold"]],
+    answer: "To prepare a spool for the workshop:\n1. Open Jobs and choose My day for your role-focused work, or Full board for every production stage.\n2. Assign the worker and due date, then open Gear check.\n3. Confirm inferred pipe/fittings as In shop, mark missing items Needs ordering, and add extra gear.\n4. Record the checker and confirm readiness.\n\nYou should see Cutting become available only after the check or an authorised override. The result also appears on the mobile QR traveller.",
+    tutorial: "Production board",
+    help: "account",
+  },
+  {
+    patterns: [["jobs", "dashboard"], ["my", "day"], ["many", "jobs"], ["job", "filter"], ["needs", "attention"]],
+    answer: "Use the Jobs screen in two layers:\n1. Jobs is the compact manager list. Filter it with Active, My jobs, Completed or All, and use search for a job, client, spool or worker.\n2. My day is the action list: My/Team attention, Assigned to me, Ready for checking and On hold. Workshop users only see their own urgent work; owners and admins see team issues.\n3. Press Review on a job with issues to jump straight to its problem list.\n4. Open More for the Jobs guide, Team comms and daily or weekly reports.\n\nYou should see each spool only once in My day, under the most urgent queue that applies.",
+    tutorial: "Production board",
+    help: "account",
+  },
+  {
+    patterns: [["3d"], ["preview"], ["rotate", "model"]],
+    answer: "In 3D Preview:\n1. Choose Rotate, then drag to spin the model.\n2. Choose Move to pan along the spool.\n3. Use the mouse wheel or two-finger pinch to zoom.\n4. Press Fit whenever the model is cropped or lost.\n\nYou should see the complete spool centred without changing the 2D drawing. Phones and tablets use the 3D panel so the workspace remains usable.",
+    tutorial: "3D preview",
+    help: "touch",
+  },
+  {
+    patterns: [["simple", "controls"], ["full", "controls"], ["too", "many", "controls"], ["pipe", "display"]],
+    answer: "Use Simple controls for the clearest drawing workspace. Pipe size, material, dimensions and drawing display choices are grouped under Pipe & display. Save and Menu stay at the top, and drawing tools only appear in the modes where they apply.\n\nTo see every setting at once, open Menu > Workspace controls > Full. Your choice is remembered on this device.",
+    help: "touch",
+  },
+  {
+    patterns: [["ipad"], ["android"], ["tablet"], ["touch"]],
+    answer: "On iPad and Android, use Select before long-pressing a pipe or fitting. Keep your finger still until the context menu opens. Use two-finger pinch for zoom, tap Details or 3D above the drawing when needed, and hold Hold 45° while dragging a 45 degree offset.",
+    help: "touch",
+  },
+  {
+    patterns: [["roll", "groove"], ["rg", "end"], ["grooved", "end"], ["victaulic"]],
+    answer: "To add a roll-grooved pipe end:\n1. Choose Select.\n2. Right-click the open pipe end on PC, or long-press it on iPad/Android.\n3. Choose Pipe end > Roll groove.\n4. Open 3D if you want to confirm the groove visually.\n\nYou should see an RG marker at that endpoint. A roll groove is a prepared end, so Review must not report it as an open pipe end.",
+    tutorial: "End fittings",
+    help: "edit",
+  },
+  {
+    patterns: [["thread", "end"], ["threaded", "pipe"], ["add", "thread"]],
+    answer: "To add a threaded end:\n1. Choose Select.\n2. Right-click the pipe endpoint, or long-press it on touch.\n3. Choose Pipe end > Threaded.\n4. Use 3D Preview and Fit to check the coarse thread is wrapped around the actual pipe end.\n\nThreads can only be applied at a pipe endpoint, not in the middle of a run.",
+    tutorial: "End fittings",
+    help: "edit",
+  },
+  {
+    patterns: [["big", "spool"], ["split", "spool"], ["transport", "pieces"], ["rg", "split"], ["field", "weld", "split"], ["flange", "split"], ["child", "fabrication"], ["match", "joint"]],
+    answer: "To split a large assembly for transport:\n1. Draw the complete master assembly, then open Big Spool.\n2. Turn on Use Big Spool for this drawing and enter the job's actual transport limits.\n3. Choose the default split connection: field weld, RG/RG or flange/flange.\n4. Press Suggest safe splits, then review and adjust each match joint.\n5. Export the child fabrication package.\n\nThe everyday master drawing and 3D model stay continuous. Split gaps, end preparations and match marks appear on the child fabrication drawings where the pieces are actually made.",
+    help: "export",
+  },
+  {
+    patterns: [["multiple", "spools"], ["spool", "tabs"], ["windowed", "mode"], ["open", "another", "spool"], ["every", "open", "spool"], ["tabs", "windows"], ["independent", "zoom"]],
+    answer: "Use the spool tabs above the workspace to keep several drawings open:\n1. Choose + Open to load another spool into a new tab.\n2. Select a tab to switch drawings; each tab keeps its own zoom, selection, tool and Details/3D state.\n3. Choose Windows to compare the open spools together.\n4. Close a tab only after its Saved status is current.\n\nOpening a spool in a tab does not replace the other open drawings.",
+    help: "account",
+  },
+  {
+    patterns: [["weld", "gap"], ["1.6"], ["2.4"]],
+    answer: "Set the fabrication weld gap in Project details to 1.6 mm or 2.4 mm. SpoolMate deducts that gap only where there is a welded pipe-to-fitting or generated field-weld connection. It does not deduct a gap from a free pipe end, roll groove or flanged split. Fab sheets label the deduction as Weld gap so the workshop can see why the cut changed.",
+    help: "review",
+  },
+  {
+    patterns: [["gear", "check"], ["gear", "shop"], ["needs", "ordering"]],
+    answer: "After a spool is allocated, open Jobs > Production and choose Gear check:\n1. Confirm the inferred pipe and fittings that are already In shop.\n2. Mark missing items as Needs ordering.\n3. Add any extra workshop gear that is not inferred from the drawing.\n4. Record the checker and confirm readiness.\n\nCutting remains blocked until the checklist is confirmed or an authorised override is recorded.",
+    tutorial: "Production board",
+    help: "account",
+  },
+  {
+    patterns: [["autosave"], ["save", "failed"], ["restore", "session"], ["offline", "save"]],
+    answer: "Watch the save badge at the top of the app: Saving, Saved with a time, Local only or Save failed. If the connection drops, cloud changes stay in the offline queue and retry after reconnecting. If a save still fails, open Menu > Restore last session to recover the most recent local safety copy before making more changes.",
+    help: "account",
+  },
+  {
+    patterns: [["change", "length"], ["edit", "length"], ["right", "click", "length"]],
+    answer: "To change an existing pipe length:\n1. Choose Select.\n2. Right-click the run on PC, or long-press it on iPad/Android.\n3. Choose Change length, enter the new centre-to-centre value, then apply it.\n4. Check the connected fittings and fabrication dimensions before saving.\n\nYou should see the selected run update while the rest of the connected spool remains attached.",
+    tutorial: "Select / edit",
+    help: "edit",
+  },
+  {
+    patterns: [["fitting", "profile"], ["project", "details"], ["required", "details"], ["revision", "field"]],
+    answer: "Project details controls the information and calculation source printed on the spool:\n1. Enter the job number, spool number and revision used by your organisation.\n2. Record Drawn by and the client/area when known.\n3. Choose the approved fitting data profile for that job; do not use a supplier profile until its dimensions are confirmed.\n4. Choose the workshop's 1.6 mm or 2.4 mm weld gap.\n\nYou should see these details in Review and on the fabrication output. Changing an issued spool should be done through Return for changes or a new revision, not by overwriting the issued revision.",
+    help: "review",
+  },
+  {
+    patterns: [["which", "tutorial"], ["choose", "tutorial"], ["new", "user", "tutorial"]],
+    answer: "For a new user, start with Video tutorials > Complete workflow. Then use the shorter Drawing, Pipe ends and Sockets videos for individual tools. If you prefer to practise inside the app, open Tutorial and begin with Draw pipe; it will guide you through a first spool one step at a time.",
+    tutorial: "Draw pipe",
+    help: "draw",
+  },
+];
+
+function normalizeAiHelperText(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/[°º]/g, " degree ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function aiHelperGuideMatch(question, minimumScore = 2) {
+  const normalized = normalizeAiHelperText(question);
+  if (!normalized) return null;
+  let best = null;
+  let bestScore = 0;
+  for (const entry of AI_HELPER_LOCAL_GUIDE) {
+    for (const pattern of entry.patterns) {
+      if (!pattern.every((term) => normalized.includes(normalizeAiHelperText(term)))) continue;
+      const score = pattern.length * 2 + pattern.reduce((total, term) => total + Math.min(2, normalizeAiHelperText(term).length / 8), 0);
+      if (score > bestScore) {
+        best = entry;
+        bestScore = score;
+      }
+    }
+  }
+  return bestScore >= minimumScore ? best : null;
+}
+
+function aiHelperCurrentSurface() {
+  if (homeDashboardDialog && !homeDashboardDialog.hidden) return "Home dashboard";
+  if (projectLibraryDialog && !projectLibraryDialog.hidden) return "Jobs dashboard";
+  if (projectDialog && !projectDialog.hidden) return "Project details";
+  if (bigSpoolDialog && !bigSpoolDialog.hidden) return "Big Spool planner";
+  if (loadPlanDialog && !loadPlanDialog.hidden) return "Load planner";
+  if (spoolWorkspaceWindowed && spoolWindowGridShell && !spoolWindowGridShell.hidden) return "Multi-spool windows";
+  if (!previewPanelHidden) return `3D preview / ${appMode}`;
+  return `${appMode.charAt(0).toUpperCase()}${appMode.slice(1)} workspace`;
+}
+
+function aiHelperSuggestedQuestions() {
+  const surface = aiHelperCurrentSurface();
+  if (surface === "Home dashboard") {
+    return [
+      ["Start a spool", "What is the quickest way to start my first spool?"],
+      ["Open a job", "How do I find and open a saved job or cloud spool?"],
+      ["Choose a tutorial", "Which tutorial should a new user start with?"],
+      ["Restore work", "How do I restore my last session if something went wrong?"],
+    ];
+  }
+  if (surface === "Project details") {
+    return [
+      ["Fitting profile", "Which fitting data profile should I choose?"],
+      ["Weld gap", "Should I choose a 1.6 mm or 2.4 mm weld gap?"],
+      ["Required details", "Which project details are required before issue?"],
+      ["Revision", "How should I use the spool revision field?"],
+    ];
+  }
+  if (surface === "Jobs dashboard") {
+    return [
+      ["Find cloud spools", "Where are my cloud spools and how do I find the right job?"],
+      ["Assign work", "How do I assign a worker and due date?"],
+      ["Gear check", "How does the workshop gear check work?"],
+      ["QR traveller", "How does the spool QR traveller work?"],
+    ];
+  }
+  if (surface === "Big Spool planner") {
+    return [
+      ["Create safe splits", "How do I split a Big Spool into safe transport pieces?"],
+      ["Split connections", "How do field weld, RG/RG and flange split connections work?"],
+      ["Child drawings", "Where do the Big Spool split marks and end preparations appear?"],
+      ["Export package", "How do I export the child fabrication package?"],
+    ];
+  }
+  if (surface === "Multi-spool windows") {
+    return [
+      ["Open another", "How do I open another spool without replacing this one?"],
+      ["Tabs vs windows", "How do spool tabs and windowed mode work?"],
+      ["Independent views", "Does every open spool keep its own zoom and selection?"],
+      ["Save safely", "How do I know every open spool has saved?"],
+    ];
+  }
+  if (surface.startsWith("3D preview")) {
+    return [
+      ["Move the model", "How do I rotate, pan, zoom and fit the 3D model?"],
+      ["Pipe colours", "What do the different pipe colours mean in 3D?"],
+      ["Check fittings", "How do I check tees, branches and reducers in 3D?"],
+      ["Pipe ends", "How should roll grooves and threaded ends look in 3D?"],
+    ];
+  }
+  if (appMode === "edit") {
+    return [
+      ["Change a length", "How do I right-click or long-press a pipe and change its length?"],
+      ["Add pipe ends", "How do I add roll grooves, flanges or threaded pipe ends?"],
+      ["Sockets", "How do I add, space and rotate sockets?"],
+      ["Tee or branch", "What is the difference between a tee and a branch?"],
+    ];
+  }
+  if (appMode === "review") {
+    return [
+      ["Fix a blocker", "Why is this spool blocked and how do I fix the exact issue?"],
+      ["Weld register", "How do I complete the weld register for one or mixed welders?"],
+      ["Weld gaps", "Where are 1.6 mm and 2.4 mm weld gaps deducted?"],
+      ["Ready to issue", "What must be complete before I can issue this spool?"],
+    ];
+  }
+  if (appMode === "export") {
+    return [
+      ["Fab PDF", "How do I create the fabrication PDF?"],
+      ["QR code", "When does the spool and revision QR code appear?"],
+      ["Child package", "How do I export Big Spool child fabrication drawings?"],
+      ["Export blocked", "Why is export blocked and which Fix button should I use?"],
+    ];
+  }
+  return [
+    ["Start drawing", "How do I start and finish drawing a spool?"],
+    ["45 degree offset", "How do I draw a true 45 degree offset?"],
+    ["Change pipe size", "How do I change pipe size and get an automatic reducer?"],
+    ["Add a branch", "How do I add a tee or welded branch correctly?"],
+  ];
+}
+
+function renderAiHelperSuggestions() {
+  if (!aiHelperSuggestions) return;
+  aiHelperSuggestions.replaceChildren();
+  for (const [label, question] of aiHelperSuggestedQuestions()) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = label;
+    button.dataset.aiSuggestion = question;
+    aiHelperSuggestions.append(button);
+  }
+}
+
+function updateAiHelperScreenContext() {
+  if (!aiHelperContext) return;
+  const surface = aiHelperCurrentSurface();
+  const parts = [surface];
+  if (/workspace|3D preview|Multi-spool/.test(surface)) {
+    parts.push(`tool: ${String(state.activeTool || "select")}`);
+    parts.push(`Details: ${activeInspectorTabName()}`);
+  }
+  aiHelperContext.textContent = `Helping with: ${parts.join(" / ")}`;
+  renderAiHelperSuggestions();
+}
+
+function aiHelperMessageId() {
+  return `ai-help-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function resetAiHelperConversation() {
+  aiHelperConversation = [{
+    id: aiHelperMessageId(),
+    role: "assistant",
+    text: AI_HELPER_WELCOME,
+    source: "Built-in guide",
+    welcome: true,
+  }];
+  renderAiHelperConversation();
+  updateAiHelperScreenContext();
+}
+
+function appendAiHelperMessage(role, text, options = {}) {
+  const message = {
+    id: aiHelperMessageId(),
+    role: role === "user" ? "user" : "assistant",
+    text: String(text ?? "").trim(),
+    source: options.source ?? "",
+    question: String(options.question ?? "").trim(),
+    action: options.action ?? null,
+    allowAi: options.allowAi === true,
+    welcome: options.welcome === true,
+    feedback: "",
+  };
+  aiHelperConversation.push(message);
+  if (aiHelperConversation.length > 24) aiHelperConversation.splice(1, aiHelperConversation.length - 24);
+  renderAiHelperConversation();
+  return message;
+}
+
+function aiHelperCanUseAi() {
+  return Boolean(navigator.onLine && cloudUser && hasActiveCloudLicense());
+}
+
+function aiHelperDailyLimit() {
+  if (!cloudUser || !hasActiveCloudLicense()) return 0;
+  return cloudLicenceState() === "trial" ? AI_HELPER_TRIAL_DAILY_LIMIT : AI_HELPER_PAID_DAILY_LIMIT;
+}
+
+function updateAiHelperAvailability() {
+  if (!aiHelperMode || !aiHelperQuota) return;
+  updateAiHelperScreenContext();
+  const stateName = cloudLicenceState();
+  if (aiHelperBusy) {
+    aiHelperMode.textContent = "Finding an answer…";
+    aiHelperQuota.textContent = "Please keep this panel open";
+    return;
+  }
+  if (!navigator.onLine) {
+    aiHelperMode.textContent = "Built-in help";
+    aiHelperQuota.textContent = "Offline — instant guides still work";
+    return;
+  }
+  if (!cloudUser) {
+    aiHelperMode.textContent = "Built-in help";
+    aiHelperQuota.textContent = "Sign in for extra AI answers";
+    return;
+  }
+  if (!hasActiveCloudLicense()) {
+    aiHelperMode.textContent = "Built-in help";
+    aiHelperQuota.textContent = "AI paused on read-only access";
+    return;
+  }
+  const limit = aiHelperDailyLimit();
+  aiHelperMode.textContent = stateName === "trial" ? "Trial AI help" : "AI help available";
+  aiHelperQuota.textContent = Number.isInteger(aiHelperRemaining)
+    ? `${aiHelperRemaining} of ${limit} AI questions left today`
+    : `Up to ${limit} AI questions per day`;
+}
+
+function aiHelperActionButton(label, action, message) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = label;
+  button.dataset.aiAction = action;
+  button.dataset.aiMessageId = message.id;
+  return button;
+}
+
+function renderAiHelperConversation() {
+  if (!aiHelperMessages) return;
+  aiHelperMessages.replaceChildren();
+  for (const message of aiHelperConversation) {
+    const article = document.createElement("article");
+    article.className = `ai-helper-message ${message.role}`;
+    article.dataset.aiMessage = message.id;
+
+    const bubble = document.createElement("div");
+    bubble.className = "ai-helper-bubble";
+    const text = document.createElement("p");
+    text.textContent = message.text;
+    bubble.append(text);
+
+    if (message.role === "assistant" && message.source) {
+      const source = document.createElement("small");
+      source.textContent = message.source;
+      bubble.append(source);
+    }
+    article.append(bubble);
+
+    if (message.role === "assistant" && !message.welcome) {
+      const actions = document.createElement("div");
+      actions.className = "ai-helper-message-actions";
+      if (message.action?.tutorial) actions.append(aiHelperActionButton("Open tutorial", "tutorial", message));
+      if (message.action?.help) actions.append(aiHelperActionButton("Open help", "help", message));
+      if (message.action?.account) actions.append(aiHelperActionButton("Open account", "account", message));
+      if (message.allowAi && aiHelperCanUseAi()) actions.append(aiHelperActionButton("Ask AI instead", "ask-ai", message));
+      if (message.feedback) {
+        const feedback = document.createElement("span");
+        feedback.className = "ai-helper-feedback-note";
+        feedback.textContent = message.feedback === "solved" ? "Marked solved" : "Tell me what still looks wrong below";
+        actions.append(feedback);
+      } else {
+        actions.append(aiHelperActionButton("Solved", "solved", message));
+        actions.append(aiHelperActionButton("Still stuck", "stuck", message));
+      }
+      article.append(actions);
+    }
+    aiHelperMessages.append(article);
+  }
+  requestAnimationFrame(() => {
+    aiHelperMessages.scrollTop = aiHelperMessages.scrollHeight;
+  });
+}
+
+function aiHelperSafeContext() {
+  return {
+    appVersion: APP_VERSION,
+    mode: normalizeAppMode(appMode),
+    activeTool: String(state.activeTool || "select").slice(0, 30),
+    layout: window.innerWidth <= 680 ? "phone" : isTabletLayout() ? "tablet" : "desktop",
+    touch: (navigator.maxTouchPoints || 0) > 0,
+    online: navigator.onLine,
+    signedIn: Boolean(cloudUser),
+    licence: cloudLicenceState(),
+    hasDrawing: hasDrawingContent(),
+    projectStatus: normalizeProjectStatus(state.projectStatus),
+    drawingLocked: state.locked === true || cloudPermissionReadOnly,
+    surface: aiHelperCurrentSurface(),
+    inspectorTab: activeInspectorTabName(),
+    previewOpen: !previewPanelHidden,
+    windowedWorkspace: spoolWorkspaceWindowed,
+    hasSelection: selectedSegmentIndexes().length > 0 || Boolean(state.selectedFitting),
+    hasMultipleOpenSpools: spoolWorkspaceTabs.length > 1,
+  };
+}
+
+function aiHelperApiHistory() {
+  return aiHelperConversation
+    .filter((message) => !message.welcome && (message.role === "user" || message.role === "assistant"))
+    .slice(-AI_HELPER_MAX_HISTORY)
+    .map((message) => ({
+      role: message.role,
+      content: message.text.slice(0, 700),
+    }));
+}
+
+function aiHelperFallbackMessage(reason = "unavailable") {
+  if (reason === "offline") {
+    return "The AI connection is offline, but the built-in guides still work. Try naming the exact tool or action, such as flange, pipe size, issue, cloud spools or fab PDF.";
+  }
+  if (!cloudUser) {
+    return "That question is not in the built-in guide yet. Sign in for extra AI answers, or open the Tutorial and Help sections for the complete app walkthrough.";
+  }
+  if (!hasActiveCloudLicense()) {
+    return "That question is not in the built-in guide yet. Extra AI answers are paused while the cloud account is read only, but Tutorial and Help remain available.";
+  }
+  return "The AI helper could not connect just now. Built-in guides still work, and you can try again without losing the drawing.";
+}
+
+async function sendAiHelperQuestion(value, options = {}) {
+  const question = String(value ?? "").trim().slice(0, 500);
+  if (!question || aiHelperBusy) return;
+  const history = aiHelperApiHistory();
+  if (options.appendUser !== false) appendAiHelperMessage("user", question);
+  if (aiHelperInput) aiHelperInput.value = "";
+
+  const guide = aiHelperGuideMatch(question);
+  if (guide && options.forceAi !== true) {
+    appendAiHelperMessage("assistant", guide.answer, {
+      source: "Built-in guide",
+      question,
+      action: { tutorial: guide.tutorial || "", help: guide.help || "" },
+      allowAi: true,
+    });
+    return;
+  }
+
+  if (!aiHelperCanUseAi()) {
+    appendAiHelperMessage("assistant", aiHelperFallbackMessage(!navigator.onLine ? "offline" : "unavailable"), {
+      source: "Built-in guide",
+      question,
+      action: { help: guide?.help || helpSectionForCurrentMode(), account: !cloudUser },
+    });
+    return;
+  }
+
+  aiHelperBusy = true;
+  if (aiHelperSendButton) aiHelperSendButton.disabled = true;
+  if (aiHelperInput) aiHelperInput.disabled = true;
+  updateAiHelperAvailability();
+  try {
+    const client = await ensureSupabaseClient();
+    if (!client || !cloudUser) throw new Error("Cloud session unavailable");
+    const { data, error } = await client.functions.invoke(AI_HELPER_FUNCTION, {
+      body: {
+        question,
+        history,
+        context: aiHelperSafeContext(),
+      },
+    });
+    if (error || !data?.answer) throw error || new Error("AI answer missing");
+    aiHelperRemaining = Number.isFinite(Number(data.remaining)) ? Math.max(0, Number(data.remaining)) : aiHelperRemaining;
+    const recommended = guide || aiHelperGuideMatch(question, 1);
+    appendAiHelperMessage("assistant", String(data.answer).trim().slice(0, 4000), {
+      source: data.code === "daily_limit" ? "Built-in guide" : "AI helper",
+      question,
+      action: { tutorial: recommended?.tutorial || "", help: recommended?.help || helpSectionForCurrentMode() },
+    });
+  } catch (error) {
+    console.warn("AI helper request failed.", error?.name || "request-error");
+    appendAiHelperMessage("assistant", aiHelperFallbackMessage("error"), {
+      source: "Built-in guide",
+      question,
+      action: { help: guide?.help || helpSectionForCurrentMode() },
+    });
+  } finally {
+    aiHelperBusy = false;
+    if (aiHelperSendButton) aiHelperSendButton.disabled = false;
+    if (aiHelperInput) aiHelperInput.disabled = false;
+    updateAiHelperAvailability();
+    aiHelperInput?.focus();
+  }
+}
+
+function openAiHelper() {
+  if (!aiHelperDialog) return;
+  if (!aiHelperConversation.length) resetAiHelperConversation();
+  aiHelperLastFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  aiHelperDialog.hidden = false;
+  aiHelperButton?.setAttribute("aria-expanded", "true");
+  closeActionMenu();
+  updateAiHelperScreenContext();
+  updateAiHelperAvailability();
+  requestAnimationFrame(() => aiHelperInput?.focus());
+}
+
+function closeAiHelper() {
+  if (aiHelperDialog) aiHelperDialog.hidden = true;
+  aiHelperButton?.setAttribute("aria-expanded", "false");
+  if (aiHelperLastFocused?.isConnected) aiHelperLastFocused.focus({ preventScroll: true });
+  aiHelperLastFocused = null;
+}
+
+function openAiHelperTutorial(message) {
+  const topic = message?.action?.tutorial;
+  const index = topic ? TUTORIAL_STEPS.findIndex((step) => step.menuLabel === topic) : -1;
+  closeAiHelper();
+  openTutorialDialog(index >= 0 ? index : null);
+}
+
+function handleAiHelperAction(event) {
+  const button = event.target instanceof Element ? event.target.closest("[data-ai-action]") : null;
+  if (!button) return;
+  const message = aiHelperConversation.find((item) => item.id === button.dataset.aiMessageId);
+  if (!message) return;
+  const action = button.dataset.aiAction;
+  if (action === "tutorial") {
+    openAiHelperTutorial(message);
+  } else if (action === "help") {
+    const section = message.action?.help || helpSectionForCurrentMode();
+    closeAiHelper();
+    openHelpDialog(section);
+  } else if (action === "account") {
+    closeAiHelper();
+    openAuthDialog({ mode: "signin" });
+  } else if (action === "ask-ai" && message.question) {
+    sendAiHelperQuestion(message.question, { forceAi: true, appendUser: false });
+  } else if (action === "solved") {
+    message.feedback = "solved";
+    renderAiHelperConversation();
+  } else if (action === "stuck") {
+    message.feedback = "stuck";
+    renderAiHelperConversation();
+    if (aiHelperInput) {
+      aiHelperInput.value = message.question ? `I am still stuck with: ${message.question}\nWhat should I check next?` : "I am still stuck. What should I check next?";
+      aiHelperInput.focus();
+      aiHelperInput.setSelectionRange(aiHelperInput.value.length, aiHelperInput.value.length);
+    }
+  }
+}
+
+function setupAiHelper() {
+  resetAiHelperConversation();
+  aiHelperButton?.addEventListener("click", () => {
+    if (aiHelperDialog?.hidden === false) closeAiHelper();
+    else openAiHelper();
+  });
+  aiHelperCloseButton?.addEventListener("click", closeAiHelper);
+  aiHelperClearButton?.addEventListener("click", resetAiHelperConversation);
+  aiHelperDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === aiHelperDialog) closeAiHelper();
+  });
+  aiHelperForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    sendAiHelperQuestion(aiHelperInput?.value);
+  });
+  aiHelperInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      aiHelperForm?.requestSubmit();
+    }
+  });
+  aiHelperSuggestions?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-ai-suggestion]") : null;
+    if (button) sendAiHelperQuestion(button.dataset.aiSuggestion);
+  });
+  aiHelperMessages?.addEventListener("click", handleAiHelperAction);
+  window.addEventListener("online", updateAiHelperAvailability);
+  window.addEventListener("offline", updateAiHelperAvailability);
+  updateAiHelperAvailability();
+}
+
 function setHelpTab(section) {
   const key = helpPanels.some((panel) => panel.dataset.helpPanel === section) ? section : "touch";
   for (const button of helpTabButtons) {
@@ -14453,6 +20795,8 @@ function setHelpTab(section) {
 
 function openHelpDialog(section = helpSectionForCurrentMode()) {
   if (!helpDialog) return;
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("help");
   setHelpTab(section);
   helpDialog.hidden = false;
   closeActionMenu();
@@ -14460,6 +20804,7 @@ function openHelpDialog(section = helpSectionForCurrentMode()) {
 
 function closeHelpDialog() {
   if (helpDialog) helpDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function setupHelpDialog() {
@@ -14499,10 +20844,20 @@ function populateFlangeStandardOptions() {
 }
 
 function updateControls() {
+  applyWorkflowKindUi();
   populateFlangeStandardOptions();
   if (appVersionBadge) {
     appVersionBadge.textContent = APP_VERSION;
     appVersionBadge.title = `SpoolMate ${APP_VERSION} build ${APP_BUILD_DATE}`;
+  }
+  if (bigSpoolButton) {
+    const active = bigSpoolPlanActive();
+    bigSpoolButton.classList.toggle("active", active);
+    bigSpoolButton.setAttribute("aria-pressed", String(active));
+    const pieceCount = active ? bigSpoolLayout().pieces.length : 0;
+    bigSpoolButton.title = active
+      ? `Big Spool is active · ${pieceCount} transport piece${pieceCount === 1 ? "" : "s"}`
+      : "Break a large assembly into transport spools";
   }
   stepLengthInput.value = String(state.stepLength);
   updateSelectionControls();
@@ -14512,7 +20867,31 @@ function updateControls() {
   pipeSpecSelect.value = normalizePipeSpec(state.pipeSpec);
   flangeModeSelect.value = normalizeFlangeMode(state.flangeMode);
   if (flangeStandardSelect) flangeStandardSelect.value = normalizeFlangeStandard(state.flangeStandard);
+  if (reducerTypeSelect) reducerTypeSelect.value = normalizeReducerType(state.reducerType);
   if (fabSheetTemplateSelect) fabSheetTemplateSelect.value = normalizeFabSheetTemplate(fabSheetTemplate);
+  const quickPdf = isQuickPdfMode();
+  const issuedPdfReady = !quickPdf && Boolean(state.issuedAt) && projectStatusAtLeast(state.projectStatus, "issued");
+  const pdfButtonLabel = quickPdf ? "Download PDF" : issuedPdfReady ? "Download issued PDF" : "Download draft PDF";
+  document.querySelectorAll("#exportReportButton span, #exportIsoButton span, #exportPanelPdfButton span").forEach((label) => {
+    label.textContent = pdfButtonLabel;
+  });
+  const exportPanelPdfHint = document.querySelector("#exportPanelPdfHint");
+  if (exportPanelPdfHint) {
+    exportPanelPdfHint.textContent = quickPdf
+      ? "Downloads the quick working sheet immediately. Check every dimension before fabrication."
+      : issuedPdfReady
+        ? "Downloads the issued fabrication PDF with its approved revision and QR traveller."
+        : "Downloads a clearly marked draft PDF for checking before formal issue.";
+  }
+  for (const button of [document.querySelector("#exportReportButton"), document.querySelector("#exportIsoButton"), document.querySelector("#exportPanelPdfButton")]) {
+    if (!button) continue;
+    button.title = quickPdf
+      ? "Download a quick working PDF without the managed approval workflow"
+      : issuedPdfReady
+      ? "Download the approved fabrication sheet PDF"
+      : "Download a watermarked draft PDF";
+    button.setAttribute("aria-label", button.title);
+  }
   const previewMode = normalizePreviewMode(state.previewMode);
   if (previewModeSelect) previewModeSelect.value = previewMode;
   if (previewModePanelSelect) previewModePanelSelect.value = previewMode;
@@ -14531,7 +20910,11 @@ function updateControls() {
   liftingAngleSelect.disabled = !state.showLiftingPoints;
   updateWorkflowControls();
   updateHistoryButtons();
+  updateRoleRestrictedDrawingTools();
   setTool(state.activeTool);
+  renderRoleAccessNotice();
+  renderWorkspaceLocationStrips();
+  updateWorkspaceSettingsSummary();
 }
 
 function updateAll(options = {}) {
@@ -14552,9 +20935,8 @@ function updateAll(options = {}) {
   updatePipeSizeControls();
   updatePropertiesPanel();
   update3dPreview();
-  if (!isTabletLayout() && (appMode === "draw" || appMode === "edit") && !hasInspectorSelection()) {
-    setInspectorDrawerOpen(false);
-  }
+  renderRoleAccessNotice();
+  renderWorkspaceLocationStrips();
   if (save) persistState();
   checkTutorialPractice();
 }
@@ -14629,13 +21011,35 @@ function setupMobilePanels() {
   }
 
   inspectorShowButton?.addEventListener("click", () => showMobilePanel("inspector"));
+  inspectorOpenPreviewButton?.addEventListener("click", () => showMobilePanel("preview"));
+  previewOpenInspectorButton?.addEventListener("click", () => showMobilePanel("inspector"));
 
   mobilePanelScrim?.addEventListener("click", () => showMobilePanel("drawing"));
   if (isTabletLayout()) {
     showMobilePanel("drawing");
   } else {
-    setInspectorDrawerOpen(appMode === "review" || appMode === "export" || hasInspectorSelection());
+    setInspectorDrawerOpen(appMode === "review" || appMode === "export");
   }
+}
+
+function openLegalSupportDialog() {
+  closePrimaryWorkspaceDialogs("legal");
+  closeActionMenu();
+  closeAuthDialog();
+  if (legalSupportDialog) legalSupportDialog.hidden = false;
+}
+
+function closeLegalSupportDialog() {
+  if (legalSupportDialog) legalSupportDialog.hidden = true;
+}
+
+function setupLegalSupportDialog() {
+  legalSupportMenuButton?.addEventListener("click", openLegalSupportDialog);
+  legalSupportCloseButton?.addEventListener("click", closeLegalSupportDialog);
+  legalDiagnosticsButton?.addEventListener("click", downloadDiagnosticReport);
+  legalSupportDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === legalSupportDialog) closeLegalSupportDialog();
+  });
 }
 
 function hasInspectorSelection() {
@@ -14648,8 +21052,78 @@ function hasInspectorSelection() {
   );
 }
 
+function revealInspectorForSelection() {
+  // Selection should not replace the drawing with a sheet on touch devices,
+  // and it should not dismiss a 3D model the user explicitly opened.
+  if (isTabletLayout() || !previewPanelHidden) return;
+  setInspectorDrawerOpen(true);
+}
+
+function workspaceLayoutKind() {
+  if (isPhoneLayout()) return "phone";
+  if (isTabletLayout()) return "tablet";
+  return "desktop";
+}
+
+function workspaceSurfaceForLayout(layout = workspaceLayoutKind()) {
+  if (layout === "phone" || layout === "tablet") {
+    const panel = document.body.dataset.mobilePanel;
+    return panel === "inspector" || panel === "preview" ? panel : "drawing";
+  }
+  if (!previewPanelHidden) return "preview";
+  if (document.body.classList.contains("inspector-drawer-open")) return "inspector";
+  return "drawing";
+}
+
+function clearMobileSheetPresentation() {
+  document.body.classList.remove("mobile-panel-open");
+  controlPanel?.classList.remove("mobile-sheet-open");
+  previewPanel?.classList.remove("mobile-sheet-open");
+  if (mobilePanelScrim) mobilePanelScrim.hidden = true;
+}
+
+function reconcileWorkspaceLayout(previousLayout, nextLayout, previousSurface = "drawing") {
+  if (!previousLayout || previousLayout === nextLayout) {
+    updatePreviewFloatingState();
+    return;
+  }
+
+  const movingToTouch = nextLayout === "phone" || nextLayout === "tablet";
+  if (movingToTouch) {
+    document.body.classList.remove("inspector-drawer-open");
+    document.body.classList.add("inspector-drawer-closed");
+    previewPanelMinimized = false;
+    showMobilePanel(previousSurface);
+    return;
+  }
+
+  clearMobileSheetPresentation();
+  document.body.dataset.mobilePanel = "drawing";
+  if (previousSurface === "preview") {
+    previewPanelHidden = false;
+    previewPanelMinimized = false;
+    setInspectorDrawerOpen(false);
+    updatePreviewFloatingState();
+  } else if (previousSurface === "inspector") {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(true);
+  } else {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+    setInspectorDrawerOpen(false);
+  }
+}
+
 function setInspectorDrawerOpen(open) {
   const next = Boolean(open);
+  if (next && !isTabletLayout() && !previewPanelHidden && !panelFullscreenActive(previewPanel)) {
+    previewPanelHidden = true;
+    previewPanelMinimized = false;
+    updatePreviewFloatingState();
+  }
   document.body.classList.toggle("inspector-drawer-open", next);
   document.body.classList.toggle("inspector-drawer-closed", !next);
   controlPanel?.setAttribute("aria-hidden", String(!next));
@@ -14665,26 +21139,45 @@ function showMobilePanel(panel = "drawing") {
   if (!isTabletLayout()) {
     if (requested === "inspector") {
       setInspectorDrawerOpen(true);
+    } else if (requested === "preview") {
+      setInspectorDrawerOpen(false);
+      previewPanelHidden = false;
+      previewPanelMinimized = false;
+      updatePreviewFloatingState();
     } else if (requested === "drawing") {
       setInspectorDrawerOpen(false);
     }
     return;
   }
   let normalized = requested;
-  if (normalized === "preview" && previewPanelHidden) {
-    previewPanelHidden = false;
+  const previousPanel = document.body.dataset.mobilePanel || "drawing";
+  let previewLayoutChanged = false;
+  if (normalized === "preview") {
+    if (previewPanelHidden) {
+      previewPanelHidden = false;
+      previewLayoutChanged = true;
+    }
+    if (previewPanelMinimized) {
+      previewPanelMinimized = false;
+      previewLayoutChanged = true;
+    }
+  } else if (previousPanel === "preview" && !previewPanelHidden) {
+    previewPanelHidden = true;
     previewPanelMinimized = false;
-    updatePreviewFloatingState();
+    previewLayoutChanged = true;
   }
-  if (normalized === "preview" && isTabletLayout() && previewFloatManual && !document.body.classList.contains("drawing-panel-fullscreen")) {
-    previewFloatManual = false;
-    storePreviewFloatPreference(false);
+  const previewDomOutOfSync = normalized === "preview" && Boolean(
+    previewPanel?.hidden || document.body.classList.contains("preview-panel-hidden")
+  );
+  if (previewLayoutChanged || previewDomOutOfSync) {
     updatePreviewFloatingState();
   }
   const sheetOpen = normalized !== "drawing";
 
   document.body.dataset.mobilePanel = normalized;
   document.body.classList.toggle("mobile-panel-open", sheetOpen);
+  document.body.classList.remove("inspector-drawer-open");
+  document.body.classList.add("inspector-drawer-closed");
   controlPanel?.classList.toggle("mobile-sheet-open", normalized === "inspector");
   previewPanel?.classList.toggle("mobile-sheet-open", normalized === "preview");
 
@@ -14712,16 +21205,30 @@ function setupAuthDialog() {
   accountButton?.addEventListener("click", () => {
     openAuthDialog();
   });
-  accountMenuButton?.addEventListener("click", () => {
-    closeActionMenu();
-    openAuthDialog();
-  });
 
   authSignInModeButton?.addEventListener("click", () => setAuthMode("signin"));
   authCreateModeButton?.addEventListener("click", () => setAuthMode("signup"));
+  authAccountTypeInput?.addEventListener("change", updateBusinessSignupFields);
   authRememberDeviceInput?.addEventListener("change", saveAuthRememberPreference);
+  workspaceSwitcher?.addEventListener("change", () => {
+    selectWorkspace(workspaceSwitcher.value).catch((error) => {
+      console.warn("Workspace change failed.", error);
+      showAppNotice(error?.message || "Could not change workspace.");
+    });
+  });
+  accountWorkspaceList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-workspace-id]");
+    if (!button) return;
+    selectWorkspace(button.dataset.workspaceId).catch((error) => {
+      console.warn("Workspace change failed.", error);
+      showAppNotice(error?.message || "Could not change workspace.");
+    });
+  });
 
-  authCloseButton?.addEventListener("click", closeAuthDialog);
+  authCloseButton?.addEventListener("click", () => {
+    if (authGateOpen) rememberGuestModeOnDevice();
+    closeAuthDialog();
+  });
   authDialog?.addEventListener("pointerdown", (event) => {
     if (event.target === authDialog && !authGateOpen) {
       closeAuthDialog();
@@ -14730,7 +21237,11 @@ function setupAuthDialog() {
 
   authDialogForm?.addEventListener("submit", (event) => {
     event.preventDefault();
-    if (authMode === "signup") {
+    if (authMode === "recovery-request") {
+      sendPasswordResetEmail();
+    } else if (authMode === "recovery-update") {
+      updateRecoveredPassword();
+    } else if (authMode === "signup") {
       signUpWithSupabase();
     } else {
       signInWithSupabase();
@@ -14744,6 +21255,17 @@ function setupAuthDialog() {
   authResendButton?.addEventListener("click", () => {
     resendSignupEmail();
   });
+
+  authForgotPasswordButton?.addEventListener("click", () => setAuthMode("recovery-request"));
+  authBackToSignInButton?.addEventListener("click", () => setAuthMode("signin"));
+  authSendResetButton?.addEventListener("click", sendPasswordResetEmail);
+  authUpdatePasswordButton?.addEventListener("click", updateRecoveredPassword);
+  accountExportDataButton?.addEventListener("click", exportCloudAccountData);
+  diagnosticReportButton?.addEventListener("click", downloadDiagnosticReport);
+  legalSupportButton?.addEventListener("click", openLegalSupportDialog);
+  accountDeleteButton?.addEventListener("click", deleteCloudAccount);
+  accountPlanUpgradeButton?.addEventListener("click", requestLicenceUpgrade);
+  licenceBannerUpgradeButton?.addEventListener("click", requestLicenceUpgrade);
 
   authSignOutButton?.addEventListener("click", () => {
     signOutFromSupabase();
@@ -14784,18 +21306,74 @@ function setupAuthDialog() {
   });
 }
 
-function setAuthMode(mode, options = {}) {
-  authMode = mode === "signup" ? "signup" : "signin";
-  const createMode = authMode === "signup";
+function setupSupportAdminDialog() {
+  supportAdminButton?.addEventListener("click", () => {
+    closeAuthDialog();
+    openSupportAdminDialog().catch((error) => {
+      console.warn("Support Admin could not open.", error);
+      showAppNotice(error?.message || "Support Admin could not open.", { tone: "error" });
+    });
+  });
+  supportAdminCloseButton?.addEventListener("click", closeSupportAdminDialog);
+  supportAdminDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === supportAdminDialog) closeSupportAdminDialog();
+  });
+  supportAdminSearchForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    searchSupportAdminUsers().catch((error) => setSupportAdminStatus(error?.message || "Account search failed.", "error"));
+  });
+  supportAdminRefreshButton?.addEventListener("click", () => {
+    loadSupportAdminOverview().catch((error) => setSupportAdminStatus(error?.message || "Overview refresh failed.", "error"));
+  });
+  supportAdminResultList?.addEventListener("click", (event) => {
+    const accountButton = event.target.closest("[data-support-user-id]");
+    if (!accountButton) return;
+    loadSupportAdminUser(accountButton.dataset.supportUserId).catch((error) => {
+      setSupportAdminStatus(error?.message || "Account details could not be loaded.", "error");
+    });
+  });
+  supportAdminDetail?.addEventListener("click", (event) => {
+    const actionButton = event.target.closest("[data-support-admin-action]");
+    if (!actionButton) return;
+    runSupportAdminAction(actionButton).catch((error) => {
+      setSupportAdminStatus(error?.message || "Support action failed.", "error");
+    });
+  });
+}
 
-  authSignInModeButton?.classList.toggle("active", !createMode);
+function setAuthMode(mode, options = {}) {
+  const allowedModes = new Set(["signin", "signup", "recovery-request", "recovery-update"]);
+  authMode = allowedModes.has(mode) ? mode : "signin";
+  const createMode = authMode === "signup";
+  const resetRequestMode = authMode === "recovery-request";
+  const resetUpdateMode = authMode === "recovery-update";
+  const credentialMode = authMode === "signin" || createMode;
+
+  authSignInModeButton?.classList.toggle("active", authMode === "signin");
   authCreateModeButton?.classList.toggle("active", createMode);
-  authSignInModeButton?.setAttribute("aria-selected", String(!createMode));
+  authSignInModeButton?.setAttribute("aria-selected", String(authMode === "signin"));
   authCreateModeButton?.setAttribute("aria-selected", String(createMode));
 
-  if (authDialogTitle) authDialogTitle.textContent = createMode ? "Create account" : "Sign in";
+  if (authEmailField) authEmailField.hidden = resetUpdateMode;
+  if (authPasswordField) authPasswordField.hidden = resetRequestMode;
+  if (authPasswordConfirmField) authPasswordConfirmField.hidden = !resetUpdateMode;
+  if (authRememberField) authRememberField.hidden = !credentialMode;
+  if (authAccountTypeField) authAccountTypeField.hidden = !createMode;
+  updateBusinessSignupFields();
+  if (authPasswordInput) authPasswordInput.required = !resetRequestMode;
+  if (authPasswordConfirmInput) authPasswordConfirmInput.required = resetUpdateMode;
+
+  if (authDialogTitle) {
+    authDialogTitle.textContent = createMode
+      ? "Create account"
+      : resetRequestMode
+      ? "Reset password"
+      : resetUpdateMode
+      ? "Choose new password"
+      : "Sign in";
+  }
   if (authSignInButton) {
-    authSignInButton.hidden = createMode;
+    authSignInButton.hidden = authMode !== "signin";
     authSignInButton.disabled = Boolean(cloudUser);
   }
   if (authSignUpButton) {
@@ -14803,16 +21381,32 @@ function setAuthMode(mode, options = {}) {
     authSignUpButton.disabled = Boolean(cloudUser);
   }
   if (authResendButton) authResendButton.hidden = !createMode || Boolean(cloudUser);
+  if (authForgotPasswordButton) authForgotPasswordButton.hidden = authMode !== "signin" || Boolean(cloudUser);
+  if (authBackToSignInButton) authBackToSignInButton.hidden = credentialMode;
+  if (authSendResetButton) authSendResetButton.hidden = !resetRequestMode;
+  if (authUpdatePasswordButton) authUpdatePasswordButton.hidden = !resetUpdateMode;
+  if (accountExportDataButton) accountExportDataButton.hidden = !cloudUser;
+  if (accountDeleteButton) accountDeleteButton.hidden = !cloudUser;
   if (authPasswordInput) {
-    authPasswordInput.autocomplete = createMode ? "new-password" : "current-password";
+    authPasswordInput.autocomplete = createMode || resetUpdateMode ? "new-password" : "current-password";
+    if (resetUpdateMode) authPasswordInput.placeholder = "At least 8 characters";
+    else authPasswordInput.removeAttribute("placeholder");
   }
   if (authModeHelp) {
     authModeHelp.textContent = createMode
       ? "Create an account, then check your inbox for the confirmation email. If it does not arrive, press Resend email."
+      : resetRequestMode
+      ? "Enter your account email. The reset link returns you to SpoolMate to choose a new password."
+      : resetUpdateMode
+      ? "Choose a new password with at least 8 characters, then enter it again to confirm."
       : "Use the email and password you created for SpoolMate.";
   }
   if (authDialogStatus && !options.keepStatus) {
-    authDialogStatus.textContent = cloudUser
+    authDialogStatus.textContent = resetRequestMode
+      ? "Request a secure password-reset email."
+      : resetUpdateMode
+      ? "Your recovery link has been accepted. Set your new password now."
+      : cloudUser
       ? `${cloudUser.email || "Signed in"} - ${cloudLicenseText()}`
       : createMode
       ? "Create an account to start a free trial and save spool projects to the cloud."
@@ -14820,8 +21414,16 @@ function setAuthMode(mode, options = {}) {
   }
 }
 
+function updateBusinessSignupFields() {
+  const business = authMode === "signup" && authAccountTypeInput?.value === "business";
+  if (authBusinessNameField) authBusinessNameField.hidden = !business;
+  if (authBusinessNameInput) authBusinessNameInput.required = business;
+}
+
 function openAuthDialog(options = {}) {
   if (!authDialog) return;
+  captureTemporaryWorkspaceNavigation();
+  if (!options.startup) closePrimaryWorkspaceDialogs("auth");
   loadAuthRememberPreference();
   updateCloudStatus();
   setAuthMode(options.mode ?? authMode, { keepStatus: options.startup });
@@ -14829,7 +21431,7 @@ function openAuthDialog(options = {}) {
   authDialog.classList.toggle("auth-gate", authGateOpen);
   document.body.classList.toggle("auth-gate-open", authGateOpen);
   if (authCloseButton) {
-    authCloseButton.textContent = authGateOpen ? "Continue as guest" : "Close";
+    authCloseButton.textContent = authGateOpen ? "Continue without account" : "Close";
     authCloseButton.title = authGateOpen ? "Use SpoolMate without cloud sync on this device" : "Close account panel";
   }
   if (options.startup) {
@@ -14839,7 +21441,9 @@ function openAuthDialog(options = {}) {
     }
   }
   authDialog.hidden = false;
-  if (cloudUser) {
+  if (authMode === "recovery-update") {
+    authPasswordInput?.focus();
+  } else if (cloudUser) {
     authSignOutButton?.focus();
   } else {
     authEmailInput?.focus();
@@ -14856,6 +21460,7 @@ function closeAuthDialog() {
     authCloseButton.title = "Close account panel";
   }
   if (authDialog) authDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
   if (startupProjectPromptPending) {
     startupProjectPromptPending = false;
     window.setTimeout(() => openHomeDashboard({ startup: true }), 150);
@@ -14892,6 +21497,22 @@ function authPromptRememberedOnDevice() {
   }
 }
 
+function rememberGuestModeOnDevice() {
+  try {
+    localStorage.setItem(AUTH_GUEST_DEVICE_KEY, "yes");
+  } catch {
+    // Guest mode still works for this session if browser storage is unavailable.
+  }
+}
+
+function guestModeRememberedOnDevice() {
+  try {
+    return localStorage.getItem(AUTH_GUEST_DEVICE_KEY) === "yes";
+  } catch {
+    return false;
+  }
+}
+
 async function runStartupPrompts() {
   await initSupabase();
   if (await maybeOpenProjectFromUrl()) return;
@@ -14902,7 +21523,7 @@ async function runStartupPrompts() {
 function maybeOpenStartupAuthPrompt() {
   if (!authDialog || cloudUser) return false;
   if (authDialog.hidden === false) return true;
-  if (authPromptRememberedOnDevice()) return false;
+  if (authPromptRememberedOnDevice() || guestModeRememberedOnDevice()) return false;
 
   openAuthDialog({ startup: true });
   return true;
@@ -14994,7 +21615,13 @@ async function signUpWithSupabase() {
   const credentials = authCredentials();
   if (!credentials || !(await ensureSupabaseClient())) return;
   if (await reloadIfOutdatedBeforeAuth()) return;
-
+  const businessSignup = authAccountTypeInput?.value === "business";
+  const businessName = String(authBusinessNameInput?.value ?? "").trim();
+  if (businessSignup && !businessName) {
+    showAppNotice("Enter the business name.");
+    authBusinessNameInput?.focus();
+    return;
+  }
   authSignUpButton.disabled = true;
   updateCloudStatus("Creating account...", "");
   try {
@@ -15003,9 +21630,26 @@ async function signUpWithSupabase() {
       password: credentials.password,
       options: {
         emailRedirectTo: location.href.split("#")[0],
+        data: {
+          account_type: businessSignup ? "business" : "personal",
+          business_name: businessSignup ? businessName.slice(0, 80) : "",
+          business_workspace_created: false,
+        },
       },
     });
     if (error) throw error;
+    try {
+      if (businessSignup) {
+        localStorage.setItem(PENDING_BUSINESS_SIGNUP_KEY, JSON.stringify({
+          email: credentials.email.toLowerCase(),
+          name: businessName.slice(0, 80),
+        }));
+      } else {
+        localStorage.removeItem(PENDING_BUSINESS_SIGNUP_KEY);
+      }
+    } catch {
+      // Account metadata still carries the setup across email confirmation.
+    }
     if (data?.session) {
       await applyCloudSession(data.session);
       saveAuthRememberPreference();
@@ -15028,6 +21672,64 @@ async function signUpWithSupabase() {
   } finally {
     authSignUpButton.disabled = false;
     setAuthMode("signup", { keepStatus: true });
+  }
+}
+
+function pendingBusinessSignup() {
+  try {
+    const pending = JSON.parse(localStorage.getItem(PENDING_BUSINESS_SIGNUP_KEY));
+    if (pending && typeof pending === "object") {
+      const name = String(pending.name ?? "").trim().slice(0, 80);
+      const email = String(pending.email ?? "").trim().toLowerCase();
+      if (name && email) return { name, email };
+    }
+  } catch {
+    // Fall through to the account metadata saved during signup.
+  }
+  const metadata = cloudUser?.user_metadata;
+  if (metadata?.account_type !== "business" || metadata?.business_workspace_created === true) return null;
+  const name = String(metadata.business_name ?? "").trim().slice(0, 80);
+  const email = String(cloudUser?.email ?? "").trim().toLowerCase();
+  return name && email ? { name, email } : null;
+}
+
+async function completePendingBusinessSignup() {
+  const pending = pendingBusinessSignup();
+  if (!pending || !supabaseClient || !cloudUser || pendingBusinessSignupBusy) return false;
+  if (pending.email !== String(cloudUser.email ?? "").trim().toLowerCase()) return false;
+  pendingBusinessSignupBusy = true;
+  try {
+    const existing = workspaceCompanyOptions().find(({ company, membership }) =>
+      membership.role === "owner" && company.name.toLowerCase() === pending.name.toLowerCase()
+    );
+    let companyId = existing?.company.id || null;
+    if (!companyId) {
+      const { data, error } = await supabaseClient.rpc("create_company", { company_name: pending.name });
+      if (error) throw error;
+      const created = Array.isArray(data) ? data[0] : data;
+      companyId = normalizeUuid(created?.company_id);
+      await loadTeamWorkspace({ silent: true });
+    }
+    if (companyId) await activateCompanyFromId(companyId);
+    await supabaseClient.auth.updateUser({
+      data: {
+        account_type: "business",
+        business_name: pending.name,
+        business_workspace_created: true,
+      },
+    });
+    try {
+      localStorage.removeItem(PENDING_BUSINESS_SIGNUP_KEY);
+    } catch {
+      // The duplicate-name check prevents accidental repeat creation.
+    }
+    return Boolean(companyId);
+  } catch (error) {
+    console.warn("Business workspace setup is waiting to complete.", error);
+    showAppNotice(error?.message || "Your account was created, but the business workspace could not be created yet.");
+    return false;
+  } finally {
+    pendingBusinessSignupBusy = false;
   }
 }
 
@@ -15096,15 +21798,25 @@ function ensureHomeDashboardShell() {
         <div class="home-dashboard-account" id="homeDashboardAccount">Guest mode - local projects only</div>
         <div class="home-dashboard-stats" id="homeDashboardStats">0 saved spools on this device</div>
         <div class="home-dashboard-grid">
+          <button class="home-dashboard-action quick-pdf" id="homeDashboardQuickPdfButton" type="button">
+            <svg><use href="#icon-report"></use></svg>
+            <strong>Quick PDF</strong>
+            <span>No account or job workflow. Draw the spool, check it and download the PDF.</span>
+          </button>
           <button class="home-dashboard-action primary" id="homeDashboardContinueButton" type="button">
             <svg><use href="#icon-draw"></use></svg>
             <strong>Continue drawing</strong>
             <span>Return to the spool on screen.</span>
           </button>
+          <button class="home-dashboard-action recovery" id="homeDashboardRestoreButton" type="button" hidden>
+            <svg><use href="#icon-undo"></use></svg>
+            <strong>Restore last session</strong>
+            <span>Recover the drawing saved when this app session started.</span>
+          </button>
           <button class="home-dashboard-action" id="homeDashboardNewButton" type="button">
             <svg><use href="#icon-reset"></use></svg>
-            <strong>New spool</strong>
-            <span>Start a fresh drawing with job details.</span>
+            <strong>Managed job</strong>
+            <span>Use saving, review, issue, QR and production workflow.</span>
           </button>
           <button class="home-dashboard-action" id="homeDashboardJobsButton" type="button">
             <svg><use href="#icon-sample"></use></svg>
@@ -15115,6 +21827,11 @@ function ensureHomeDashboardShell() {
             <svg><use href="#icon-help"></use></svg>
             <strong>Tutorial</strong>
             <span>Walk through the main workflow.</span>
+          </button>
+          <button class="home-dashboard-action video-guide" id="homeDashboardVideoButton" type="button">
+            <svg><use href="#icon-image"></use></svg>
+            <strong>Video tutorials</strong>
+            <span>Complete workflow and focused feature guides.</span>
           </button>
           <button class="home-dashboard-action" id="homeDashboardSampleButton" type="button">
             <svg><use href="#icon-sample"></use></svg>
@@ -15163,9 +21880,12 @@ function ensureHomeDashboardShell() {
   homeDashboardStats = document.querySelector("#homeDashboardStats");
   homeDashboardCloseButton = document.querySelector("#homeDashboardCloseButton");
   homeDashboardContinueButton = document.querySelector("#homeDashboardContinueButton");
+  homeDashboardQuickPdfButton = document.querySelector("#homeDashboardQuickPdfButton");
+  homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
   homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
   homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
   homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
+  homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
   homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
   homeDashboardAccountButton = document.querySelector("#homeDashboardAccountButton");
   homeDashboardToolsButton = document.querySelector("#homeDashboardToolsButton");
@@ -15180,6 +21900,19 @@ function setupHomeDashboard() {
   });
   homeDashboardCloseButton?.addEventListener("click", closeHomeDashboard);
   homeDashboardContinueButton?.addEventListener("click", closeHomeDashboard);
+  homeDashboardQuickPdfButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    startQuickPdfDrawing().catch((error) => {
+      console.warn("Quick PDF start failed.", error);
+      showAppNotice(error?.message || "Quick PDF could not be started.");
+    });
+  });
+  homeDashboardRestoreButton?.addEventListener("click", () => {
+    restoreLastSession().catch((error) => {
+      console.warn("Last session restore failed.", error);
+      showAppNotice(error?.message || "Could not restore the last session.");
+    });
+  });
   homeDashboardNewButton?.addEventListener("click", () => {
     closeHomeDashboard();
     startNewDrawing().catch((error) => {
@@ -15197,6 +21930,9 @@ function setupHomeDashboard() {
   homeDashboardTutorialButton?.addEventListener("click", () => {
     closeHomeDashboard();
     openTutorialDialog();
+  });
+  homeDashboardVideoButton?.addEventListener("click", (event) => {
+    openVideoTutorialDialog(event.currentTarget);
   });
   homeDashboardSampleButton?.addEventListener("click", () => {
     closeHomeDashboard();
@@ -15222,6 +21958,8 @@ function setupHomeDashboard() {
 }
 
 function openHomeDashboard(options = {}) {
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("home");
   ensureHomeDashboardShell();
   if (!homeDashboardDialog) {
     if (options.startup) promptForProjectDetails();
@@ -15236,14 +21974,16 @@ function openHomeDashboard(options = {}) {
 function closeHomeDashboard() {
   if (homeDashboardDialog) homeDashboardDialog.hidden = true;
   document.body.classList.remove("home-dashboard-open");
+  scheduleTemporaryWorkspaceRestore();
 }
 
 function updateHomeDashboard() {
   const localProjects = loadSavedBrowserProjects();
   const cloudCount = Array.isArray(cloudProjectCache) ? cloudProjectCache.length : null;
-  const useCloudCount = Boolean(cloudUser && hasActiveCloudLicense() && cloudCount !== null);
+  const useCloudCount = Boolean(cloudUser && hasCloudReadAccess() && cloudCount !== null);
   const savedCount = useCloudCount ? cloudCount : localProjects.length;
   const savedLabel = `${savedCount} saved spool${savedCount === 1 ? "" : "s"}`;
+  if (homeDashboardContinueButton) homeDashboardContinueButton.hidden = !hasDrawingContent();
 
   if (homeDashboardSubtitle) {
     homeDashboardSubtitle.textContent = hasDrawingContent()
@@ -15259,12 +21999,24 @@ function updateHomeDashboard() {
   }
 
   if (homeDashboardStats) {
-    const scope = cloudUser && hasActiveCloudLicense()
+    const scope = cloudUser && hasCloudReadAccess()
       ? cloudCount === null
         ? "Open Jobs to refresh cloud projects."
-        : "Cloud project list loaded."
+        : hasActiveCloudLicense()
+        ? "Cloud project list loaded."
+        : "Cloud projects are available in read-only mode."
       : "Browser storage only.";
     homeDashboardStats.textContent = `${savedLabel}. ${scope}`;
+  }
+
+  if (homeDashboardRestoreButton) {
+    const recovery = loadLastSessionRecovery();
+    homeDashboardRestoreButton.hidden = !recovery;
+    const detail = homeDashboardRestoreButton.querySelector("span");
+    if (detail && recovery) {
+      const when = recovery.createdAt ? new Date(recovery.createdAt).toLocaleString() : "previous session";
+      detail.textContent = `Recover ${recovery.state?.projectInfo?.spoolNumber || "the previous drawing"} from ${when}.`;
+    }
   }
 }
 
@@ -15298,19 +22050,33 @@ function ensureProjectLibraryDashboardShell() {
     title.textContent = "Job dashboard";
     projectLibrarySubtitle = document.createElement("small");
     projectLibrarySubtitle.id = "projectLibrarySubtitle";
-    projectLibrarySubtitle.textContent = "Use the production board or open a job folder, then tap a spool drawing.";
+    projectLibrarySubtitle.textContent = "Start with jobs needing attention, then open one job to see its spools.";
     headerText.append(title, projectLibrarySubtitle);
     header.append(headerText);
     card.insertBefore(header, projectLibraryList);
   }
 
   const existingToolbar = card.querySelector(".project-dashboard-toolbar");
+  if (existingToolbar && !projectLibrarySourceButton) {
+    const sourceButton = document.createElement("button");
+    sourceButton.className = "icon-button labeled";
+    sourceButton.id = "projectLibrarySourceButton";
+    sourceButton.type = "button";
+    sourceButton.hidden = true;
+    sourceButton.innerHTML = `
+      <svg><use href="#icon-sample"></use></svg>
+      <span>This device</span>
+    `;
+    existingToolbar.insertBefore(sourceButton, projectLibraryGuideButton ?? existingToolbar.firstElementChild?.nextSibling ?? null);
+    projectLibrarySourceButton = sourceButton;
+  }
   if (existingToolbar && !projectLibraryGuideButton) {
     const guideButton = document.createElement("a");
     guideButton.className = "icon-button labeled";
     guideButton.id = "projectLibraryGuideButton";
     guideButton.href = "#projectJobsGuide";
     guideButton.setAttribute("role", "button");
+    guideButton.hidden = true;
     guideButton.innerHTML = `
       <svg><use href="#icon-help"></use></svg>
       <span>Guide</span>
@@ -15323,6 +22089,7 @@ function ensureProjectLibraryDashboardShell() {
     reportButton.className = "icon-button labeled";
     reportButton.id = "projectLibraryReportButton";
     reportButton.type = "button";
+    reportButton.hidden = true;
     reportButton.innerHTML = `
       <svg><use href="#icon-report"></use></svg>
       <span>Report</span>
@@ -15335,6 +22102,7 @@ function ensureProjectLibraryDashboardShell() {
     commsButton.className = "icon-button labeled";
     commsButton.id = "projectLibraryCommsButton";
     commsButton.type = "button";
+    commsButton.hidden = true;
     commsButton.innerHTML = `
       <svg><use href="#icon-note"></use></svg>
       <span>Comms</span>
@@ -15343,7 +22111,7 @@ function ensureProjectLibraryDashboardShell() {
     projectLibraryCommsButton = commsButton;
   }
 
-  if (!projectLibrarySearchInput || !projectLibraryNewButton || !projectLibrarySaveButton || !projectLibraryCommsButton) {
+  if (!projectLibrarySearchInput || !projectLibrarySourceButton || !projectLibraryNewButton || !projectLibrarySaveButton || !projectLibraryCommsButton) {
     const toolbar = document.createElement("div");
     toolbar.className = "project-dashboard-toolbar";
     toolbar.setAttribute("aria-label", "Job dashboard tools");
@@ -15352,15 +22120,19 @@ function ensureProjectLibraryDashboardShell() {
         <span>Search jobs, spools or clients</span>
         <input id="projectLibrarySearchInput" type="search" placeholder="Search job, spool, client, assignee or status" autocomplete="off" />
       </label>
-      <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button">
+      <button class="icon-button labeled" id="projectLibrarySourceButton" type="button" hidden>
+        <svg><use href="#icon-sample"></use></svg>
+        <span>This device</span>
+      </button>
+      <a class="icon-button labeled" id="projectLibraryGuideButton" href="#projectJobsGuide" role="button" hidden>
         <svg><use href="#icon-help"></use></svg>
         <span>Guide</span>
       </a>
-      <button class="icon-button labeled" id="projectLibraryCommsButton" type="button">
+      <button class="icon-button labeled" id="projectLibraryCommsButton" type="button" hidden>
         <svg><use href="#icon-note"></use></svg>
         <span>Comms</span>
       </button>
-      <button class="icon-button labeled" id="projectLibraryReportButton" type="button">
+      <button class="icon-button labeled" id="projectLibraryReportButton" type="button" hidden>
         <svg><use href="#icon-report"></use></svg>
         <span>Report</span>
       </button>
@@ -15368,13 +22140,14 @@ function ensureProjectLibraryDashboardShell() {
         <svg><use href="#icon-reset"></use></svg>
         <span>New spool</span>
       </button>
-      <button class="primary-button" id="projectLibrarySaveButton" type="button">
+      <button class="primary-button" id="projectLibrarySaveButton" type="button" hidden>
         <svg><use href="#icon-export"></use></svg>
         <span>Save current</span>
       </button>
     `;
     card.insertBefore(toolbar, card.querySelector("#projectLibraryGuideSlot") ?? projectLibraryList);
     projectLibrarySearchInput = document.querySelector("#projectLibrarySearchInput");
+    projectLibrarySourceButton = document.querySelector("#projectLibrarySourceButton");
     projectLibraryGuideButton = document.querySelector("#projectLibraryGuideButton");
     projectLibraryCommsButton = document.querySelector("#projectLibraryCommsButton");
     projectLibraryReportButton = document.querySelector("#projectLibraryReportButton");
@@ -15390,6 +22163,78 @@ function ensureProjectLibraryDashboardShell() {
   bindProjectLibraryGuideButton();
   bindProjectLibraryCommsButton();
   bindProjectLibraryReportButton();
+}
+
+function passwordRecoveryRedirectUrl() {
+  const url = new URL(location.href);
+  url.hash = "";
+  url.search = "";
+  return url.toString();
+}
+
+async function sendPasswordResetEmail() {
+  const email = authEmail();
+  if (!email || !(await ensureSupabaseClient())) return;
+  authSendResetButton.disabled = true;
+  updateCloudStatus("Sending reset email...", "saving");
+  try {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: passwordRecoveryRedirectUrl(),
+    });
+    if (error) throw error;
+    saveAuthRememberPreference();
+    if (authDialogStatus) authDialogStatus.textContent = "If that email has a SpoolMate account, a reset link has been sent. Check the inbox and junk/spam folders.";
+    updateCloudStatus("Reset email sent", "saved");
+    showAppNotice("If that email has an account, a password-reset link has been sent.", { tone: "success" });
+  } catch (error) {
+    recordClientError("password-reset-request", error);
+    updateCloudStatus("Reset email failed", "warning");
+    showAppNotice(error?.message || "Could not send the password-reset email.");
+  } finally {
+    authSendResetButton.disabled = false;
+  }
+}
+
+function openPasswordRecoveryUpdate() {
+  if (authPasswordInput) authPasswordInput.value = "";
+  if (authPasswordConfirmInput) authPasswordConfirmInput.value = "";
+  openAuthDialog({ mode: "recovery-update" });
+  if (authDialogStatus) authDialogStatus.textContent = "Recovery link accepted. Choose a new password to finish.";
+}
+
+async function updateRecoveredPassword() {
+  if (!(await ensureSupabaseClient())) return;
+  const password = String(authPasswordInput?.value ?? "");
+  const confirmPassword = String(authPasswordConfirmInput?.value ?? "");
+  if (password.length < 8) {
+    showAppNotice("Use at least 8 characters for the new password.");
+    authPasswordInput?.focus();
+    return;
+  }
+  if (password !== confirmPassword) {
+    showAppNotice("The two passwords do not match.");
+    authPasswordConfirmInput?.focus();
+    return;
+  }
+  authUpdatePasswordButton.disabled = true;
+  try {
+    const { error } = await supabaseClient.auth.updateUser({ password });
+    if (error) throw error;
+    authPasswordInput.value = "";
+    authPasswordConfirmInput.value = "";
+    const cleanUrl = new URL(location.href);
+    cleanUrl.hash = "";
+    cleanUrl.searchParams.delete("password-recovery");
+    history.replaceState(null, "", cleanUrl);
+    setAuthMode("signin");
+    updateCloudStatus("Password updated", "saved");
+    showAppNotice("Password updated successfully.", { tone: "success" });
+  } catch (error) {
+    recordClientError("password-update", error);
+    showAppNotice(error?.message || "Could not update the password.");
+  } finally {
+    authUpdatePasswordButton.disabled = false;
+  }
 }
 
 function bindProjectLibraryGuideButton() {
@@ -15568,7 +22413,15 @@ function setupProjectDialog() {
   projectLibrarySearchInput?.addEventListener("input", () => {
     projectLibrarySearch = projectLibrarySearchInput.value;
     projectLibraryOpenFolderKey = "";
+    projectLibraryJobPage = 1;
     renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  });
+  projectLibrarySourceButton?.addEventListener("click", () => {
+    const nextSource = projectLibrarySource === "cloud" ? "browser" : "cloud";
+    openBrowserProject({ keepSearch: true, source: nextSource }).catch((error) => {
+      console.warn("Project source switch failed.", error);
+      showAppNotice(error?.message || "Could not switch the project source.");
+    });
   });
   projectLibraryNewButton?.addEventListener("click", () => {
     closeProjectLibrary();
@@ -15577,7 +22430,7 @@ function setupProjectDialog() {
   projectLibrarySaveButton?.addEventListener("click", () => {
     saveBrowserProject({ silent: true })
       .then((saved) => {
-        if (saved) return openBrowserProject({ keepSearch: true });
+        if (saved) return openBrowserProject({ keepSearch: true, source: hasActiveCloudLicense() ? undefined : "browser" });
         return null;
       })
       .catch((error) => {
@@ -15624,7 +22477,9 @@ function setupProjectDialog() {
         showAppNotice(error?.message || "Could not add team message.");
       });
   });
-  projectLibraryList?.addEventListener("click", handleProjectLibraryActivation);
+  projectLibraryList?.addEventListener("click", (event) => {
+    handleProjectLibraryActivation(event);
+  });
   projectLibraryList?.addEventListener("change", (event) => {
     handleProjectLibraryFieldChange(event).catch((error) => {
       console.warn("Production field update failed.", error);
@@ -15636,19 +22491,19 @@ function setupProjectDialog() {
   projectLibraryList?.addEventListener("dragleave", handleProjectLibraryDragLeave);
   projectLibraryList?.addEventListener("drop", handleProjectLibraryDrop);
   projectLibraryList?.addEventListener("dragend", handleProjectLibraryDragEnd);
-  projectLibraryList?.addEventListener("pointerup", (event) => {
-    if (event.pointerType === "mouse") return;
-    handleProjectLibraryActivation(event);
-  });
-  projectLibraryList?.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter" && event.key !== " ") return;
-    handleProjectLibraryActivation(event);
-  });
 }
 
 function handleProjectLibraryActivation(event) {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
+
+  const libraryAction = target.closest("[data-project-library-action]");
+  if (libraryAction) {
+    event.preventDefault();
+    event.stopPropagation();
+    handleProjectLibraryAction(libraryAction);
+    return;
+  }
 
   const productionAction = target.closest("[data-production-action]");
   if (productionAction) {
@@ -15680,10 +22535,11 @@ function handleProjectLibraryActivation(event) {
   const folderOpen = target.closest("[data-project-folder-open]");
   if (folderOpen) {
     const folderKey = folderOpen.dataset.projectFolderOpen ?? "";
+    const focus = folderOpen.dataset.jobFocus ?? "";
     event.preventDefault();
     event.stopPropagation();
     if (shouldSkipProjectLibraryActivation(`folder:${folderKey}`)) return;
-    openProjectLibraryFolder(folderKey);
+    openProjectLibraryFolder(folderKey, focus);
     return;
   }
 
@@ -15703,10 +22559,31 @@ function handleProjectLibraryActivation(event) {
     return;
   }
 
+  const newWindowTarget = target.closest("[data-open-project-window]");
+  if (newWindowTarget) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (shouldSkipProjectLibraryActivation(`window:${newWindowTarget.dataset.openProjectWindow ?? ""}`)) return;
+    openProjectInWorkspaceTab(
+      newWindowTarget.dataset.openProjectWindow,
+      newWindowTarget.dataset.projectSource,
+    ).catch((error) => {
+      console.warn("Could not open spool tab.", error);
+      showAppNotice("That spool could not be opened in a tab.", { tone: "warning" });
+    });
+    return;
+  }
+
   const openTarget = target.closest("[data-open-project-id]");
   if (!openTarget) return;
   event.preventDefault();
   event.stopPropagation();
+  if (event.ctrlKey || event.metaKey || event.shiftKey) {
+    openProjectInWorkspaceTab(openTarget.dataset.openProjectId, openTarget.dataset.projectSource).catch((error) => {
+      console.warn("Could not open spool tab.", error);
+    });
+    return;
+  }
   if (shouldSkipProjectLibraryActivation(`open:${openTarget.dataset.openProjectId ?? ""}`)) return;
   if (openTarget.dataset.projectSource === "cloud") {
     openSavedCloudProject(openTarget.dataset.openProjectId).catch((error) => {
@@ -15720,6 +22597,53 @@ function handleProjectLibraryActivation(event) {
 
 function handleProjectLibraryAction(actionElement) {
   const action = actionElement?.dataset?.projectLibraryAction;
+  if (!action) return;
+  const actionKey = [
+    "library-action",
+    action,
+    actionElement.dataset.dashboardView,
+    actionElement.dataset.jobFilter,
+    actionElement.dataset.jobKey,
+    actionElement.dataset.jobPage,
+    actionElement.dataset.reportPeriod,
+  ].filter(Boolean).join(":");
+  if (shouldSkipProjectLibraryActivation(actionKey, 1500)) return;
+  if (action === "dashboard-view") {
+    setTeamDashboardView(actionElement.dataset.dashboardView);
+    return;
+  }
+  if (action === "job-filter") {
+    setProjectLibraryJobFilter(actionElement.dataset.jobFilter);
+    return;
+  }
+  if (action === "pin-job") {
+    toggleProjectLibraryJobPin(actionElement.dataset.jobKey);
+    return;
+  }
+  if (action === "job-page") {
+    const page = Number.parseInt(actionElement.dataset.jobPage, 10);
+    if (Number.isFinite(page) && page > 0) {
+      projectLibraryJobPage = page;
+      renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+    }
+    return;
+  }
+  if (action === "toggle-dashboard-more") {
+    projectLibraryMoreVisible = !projectLibraryMoreVisible;
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+    return;
+  }
+  if (action === "scan-qr") {
+    openQrScanner().catch((error) => {
+      console.warn("QR scanner could not open.", error);
+      showAppNotice(error?.message || "The QR scanner could not be opened.");
+    });
+    return;
+  }
+  if (action === "show-guide") {
+    showProjectLibraryGuide();
+    return;
+  }
   if (action === "hide-guide") {
     hideProjectLibraryGuide();
     return;
@@ -15787,7 +22711,12 @@ function handleProjectLibraryAction(actionElement) {
 
 async function handleProjectLibraryFieldChange(event) {
   const target = event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement ? event.target : null;
-  if (!target?.dataset.productionField) return;
+  if (!target) return;
+  if (target.dataset.materialCheckField) {
+    await handleMaterialChecklistFieldChange(target);
+    return;
+  }
+  if (!target.dataset.productionField) return;
   const projectId = target.dataset.projectId;
   if (!projectId) return;
 
@@ -15841,10 +22770,108 @@ async function handleProjectLibraryFieldChange(event) {
   await updateSavedProjectWorkflow(projectId, updates);
 }
 
+async function handleMaterialChecklistFieldChange(field) {
+  const projectId = field.dataset.projectId;
+  const itemId = field.dataset.materialItemId;
+  const key = field.dataset.materialCheckField;
+  const project = projectLibraryProjects.find((item) => item.id === projectId);
+  if (!project || !itemId || !["status", "note"].includes(key)) return;
+  if (!projectPermission(project).canManageProduction) {
+    showAppNotice(roleRequirementText("production"));
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+    return;
+  }
+  const checklist = materialChecklistForState(savedProjectState(project));
+  const item = checklist.items.find((entry) => entry.id === itemId);
+  if (!item) return;
+  item[key] = key === "status" ? normalizeMaterialCheckStatus(field.value) : String(field.value ?? "").trim().slice(0, 180);
+  checklist.checkedAt = "";
+  checklist.checkedBy = "";
+  checklist.overrideAt = "";
+  checklist.overrideBy = "";
+  checklist.overrideReason = "";
+  await updateSavedProjectWorkflow(projectId, { productionInfo: { materialChecklist: checklist } });
+}
+
 async function handleProjectLibraryProductionAction(actionButton) {
   const projectId = actionButton.dataset.projectId;
   if (!projectId) return;
   const action = actionButton.dataset.productionAction;
+  const project = projectLibraryProjects.find((item) => item.id === projectId);
+  const permission = projectPermission(project);
+  if (action === "add-material-item") {
+    if (!permission.canManageProduction) throw new Error(roleRequirementText("production"));
+    const response = await openFieldInputDialog({
+      title: "Add workshop gear",
+      label: "Required item",
+      value: "",
+      placeholder: "Gaskets, bolts, purge gear, consumables...",
+      help: "Use this for anything the drawing material take-off cannot infer.",
+      submitLabel: "Add to checklist",
+    });
+    const label = String(response ?? "").trim().slice(0, 120);
+    if (!label) return;
+    const checklist = materialChecklistForState(savedProjectState(project));
+    checklist.items.push({
+      id: `gear-custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+      key: `custom:${Date.now().toString(36)}`,
+      label,
+      quantity: "",
+      detail: "Added workshop item",
+      status: "pending",
+      note: "",
+      custom: true,
+    });
+    checklist.checkedAt = "";
+    checklist.overrideAt = "";
+    checklist.overrideReason = "";
+    await updateSavedProjectWorkflow(projectId, { productionInfo: { materialChecklist: checklist } });
+    return;
+  }
+  if (action === "confirm-material-check") {
+    if (!permission.canManageProduction) throw new Error(roleRequirementText("production"));
+    const production = savedProjectProductionInfo(project);
+    const checklist = materialChecklistForState(savedProjectState(project));
+    const stats = materialChecklistStats(checklist);
+    if (!production.assignee) throw new Error("Assign the spool before confirming its gear checklist.");
+    if (!stats.total) throw new Error("Add at least one required item before confirming gear ready.");
+    if (stats.pending || stats.missing) {
+      throw new Error(`Resolve the gear checklist first: ${stats.pending} not checked and ${stats.missing} needing ordering.`);
+    }
+    const now = new Date().toISOString();
+    checklist.checkedAt = now;
+    checklist.checkedBy = checkerName() || production.assignee || "Team member";
+    checklist.overrideAt = "";
+    checklist.overrideBy = "";
+    checklist.overrideReason = "";
+    await updateSavedProjectWorkflow(projectId, {
+      productionInfo: { materialChecklist: checklist },
+      status: normalizeProjectStatus(savedProjectState(project)?.projectStatus) === "issued" ? "materialcheck" : undefined,
+    });
+    showAppNotice("Gear checklist confirmed. This spool is ready to start fabrication.");
+    return;
+  }
+  if (action === "override-material-check") {
+    if (!permission.canIssue) throw new Error("Only a checker or team admin can authorise starting with missing gear.");
+    const response = await openFieldInputDialog({
+      title: "Authorise gear-check override",
+      label: "Required reason",
+      value: "",
+      placeholder: "Item arriving before fit-up; cutting authorised to begin...",
+      help: "The reason, author and time are retained in the spool activity history.",
+      submitLabel: "Record override",
+      multiline: true,
+    });
+    const reason = String(response ?? "").trim().slice(0, 400);
+    if (!reason) return;
+    const checklist = materialChecklistForState(savedProjectState(project));
+    checklist.overrideAt = new Date().toISOString();
+    checklist.overrideBy = checkerName() || "Checker";
+    checklist.overrideReason = reason;
+    await updateSavedProjectWorkflow(projectId, { productionInfo: { materialChecklist: checklist } });
+    showAppNotice("Gear-check override recorded.");
+    return;
+  }
   if (action === "add-message") {
     const card = actionButton.closest(".production-spool-card");
     const input = card?.querySelector("[data-production-message-input]");
@@ -15933,9 +22960,9 @@ function handleProjectLibraryDragEnd() {
   projectLibraryDrag = null;
 }
 
-function shouldSkipProjectLibraryActivation(key) {
+function shouldSkipProjectLibraryActivation(key, debounceMs = 500) {
   const now = Date.now();
-  if (projectLibraryLastActivation.key === key && now - projectLibraryLastActivation.at < 500) {
+  if (projectLibraryLastActivation.key === key && now - projectLibraryLastActivation.at < debounceMs) {
     return true;
   }
   projectLibraryLastActivation = { key, at: now };
@@ -15945,6 +22972,7 @@ function shouldSkipProjectLibraryActivation(key) {
 function setupLoadPlanner() {
   loadPlanButton?.addEventListener("click", openLoadPlanDialog);
   loadPlanCloseButton?.addEventListener("click", closeLoadPlanDialog);
+  loadPlanDoneButton?.addEventListener("click", closeLoadPlanDialog);
   loadPlanPlayButton?.addEventListener("click", playTruckLoadAnimation);
   loadPlanProjectList?.addEventListener("change", handleLoadPlanChoiceChange);
   loadPlanJobSelect?.addEventListener("change", () => {
@@ -15978,6 +23006,11 @@ function setupLoadPlanner() {
     if (event.target === loadPlanDialog) {
       closeLoadPlanDialog();
     }
+  });
+  loadPlanDialog?.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest("button") : null;
+    if (button?.id === "loadPlanSelectAllButton") setVisibleLoadPlanSelection(true);
+    if (button?.id === "loadPlanDeselectAllButton") setVisibleLoadPlanSelection(false);
   });
 }
 
@@ -16155,6 +23188,7 @@ function setupThree(THREE, OrbitControls) {
   });
   three.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   three.renderer.shadowMap.enabled = true;
+  if (THREE.PCFSoftShadowMap) three.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   three.renderer.outputColorSpace = THREE.SRGBColorSpace;
   three.renderer.toneMapping = THREE.ACESFilmicToneMapping;
   three.renderer.toneMappingExposure = 1.05;
@@ -16165,6 +23199,12 @@ function setupThree(THREE, OrbitControls) {
   const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
   keyLight.position.set(9, -12, 13);
   keyLight.castShadow = true;
+  keyLight.shadow.mapSize.set(1024, 1024);
+  keyLight.shadow.camera.left = -18;
+  keyLight.shadow.camera.right = 18;
+  keyLight.shadow.camera.top = 18;
+  keyLight.shadow.camera.bottom = -18;
+  keyLight.shadow.bias = -0.0003;
   three.scene.add(keyLight);
 
   const fillLight = new THREE.DirectionalLight(0xe5efec, 1.15);
@@ -16180,6 +23220,16 @@ function setupThree(THREE, OrbitControls) {
   grid.position.z = -0.02;
   three.previewGrid = grid;
   three.scene.add(grid);
+
+  const shadowPlane = new THREE.Mesh(
+    new THREE.PlaneGeometry(32, 32),
+    new THREE.ShadowMaterial({ color: 0x4b5250, transparent: true, opacity: 0 }),
+  );
+  shadowPlane.position.z = -0.035;
+  shadowPlane.receiveShadow = true;
+  shadowPlane.visible = false;
+  three.previewShadowPlane = shadowPlane;
+  three.scene.add(shadowPlane);
 
   three.controls = new OrbitControls(three.camera, three.renderer.domElement);
   three.controls.enableDamping = true;
@@ -16320,6 +23370,14 @@ function updateThreeSceneStyle(style) {
     material.opacity = gridOpacity;
     material.needsUpdate = true;
   }
+
+  if (three.previewShadowPlane?.material) {
+    const shadowOpacity = clampNumber(Number(style.contactShadowOpacity) || 0, 0, 0.28);
+    three.previewShadowPlane.visible = shadowOpacity > 0.001;
+    three.previewShadowPlane.material.opacity = shadowOpacity;
+    three.previewShadowPlane.material.color?.setHex(style.contactShadowColor ?? 0x4b5250);
+    three.previewShadowPlane.material.needsUpdate = true;
+  }
 }
 
 function update3dPreview() {
@@ -16352,6 +23410,34 @@ function endpointRenderBasePoint(start, end, renderedSegment, side, clearanceMet
     : end.clone().addScaledVector(axis, -offset);
 }
 
+function setupNetworkAwareness() {
+  window.addEventListener("offline", () => {
+    if (cloudSaveDirty && state.projectId) queueCurrentCloudSave("offline");
+    else updateCloudStatus("Offline / local projects available", "warning");
+    showAppNotice("You are offline. Drawing changes stay on this device and cloud changes are queued until the connection returns.", { tone: "warning" });
+  });
+  window.addEventListener("online", () => {
+    updateCloudStatus();
+    const queued = currentCloudSaveQueueEntry();
+    if (queued) {
+      showAppNotice("Connection restored. Retrying the queued cloud save.", { tone: "success" });
+      retryQueuedCloudSave({ automatic: true });
+    } else {
+      showAppNotice("Connection restored. Cloud changes can sync again.", { tone: "success" });
+    }
+  });
+  cloudSyncStatus?.addEventListener("click", () => {
+    if (currentCloudSaveQueueEntry() || cloudSaveError) {
+      retryQueuedCloudSave();
+      return;
+    }
+    showAppNotice(cloudLastSavedAt
+      ? `Last saved to cloud at ${formatCloudSaveTime(cloudLastSavedAt, { full: true })}.`
+      : cloudSyncStatus.title || "This drawing is currently stored on this device.");
+  });
+  if (!navigator.onLine) updateCloudStatus("Offline / local projects available", "warning");
+}
+
 function nodeFittingClearanceMetres(nodeIndex, segment, connections, segmentByIndex, segmentData, style) {
   const connected = connections.get(nodeIndex) ?? [];
   if (connected.length < 3) return 0;
@@ -16371,9 +23457,13 @@ function nodeFittingClearanceMetres(nodeIndex, segment, connections, segmentByIn
     .filter(Boolean)
     .map((connectedSegment) => pipeRadiusMetres(connectedSegment));
   const coreRadius = Math.max(radiusForNode(nodeIndex, connections, segmentByIndex), ...radii);
+  return teeNodeLegLengthMetres(coreRadius, style);
+}
+
+function teeNodeLegLengthMetres(coreRadius, style = null) {
   return style?.lineDrawing
     ? Math.max(coreRadius * 3.8, 0.2)
-    : Math.max(coreRadius * 3.0, 0.16);
+    : Math.max(coreRadius * 3.15, 0.18);
 }
 
 function segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style) {
@@ -16389,6 +23479,11 @@ function fittingRenderPosition(fitting, start, end, renderedSegment, pipeRadius,
   const segmentLengthMm = axis.length() * 1000;
   const t = endpointSnappedFittingTForLength(fitting, segmentLengthMm);
   axis.normalize();
+
+  if (fitting.type === "threadedEnd") {
+    if (t <= 0.000001) return start.clone();
+    if (t >= 0.999999) return end.clone();
+  }
 
   if (renderedSegment) {
     const startBase = endpointRenderBasePoint(start, end, renderedSegment, "start", endpointClearances?.start);
@@ -16556,20 +23651,60 @@ function rebuildThreeSpool() {
   const reducerMaterial = previewMaterial(style, "reducer");
   const socketMaterial = previewMaterial(style, "socket");
   const grooveMaterial = previewMaterial(style, "groove");
+  const illustratedSeamMaterial = style.illustrated
+    ? new THREE.LineBasicMaterial({
+        color: style.weldSeamColor ?? 0x343938,
+        transparent: true,
+        opacity: 0.88,
+        depthTest: true,
+      })
+    : null;
 
   const modelPoints = state.points.map((point) => {
     const modelPoint = toModelUnits(point);
     return new THREE.Vector3(modelPoint.x, modelPoint.y, modelPoint.z);
   });
   const segmentData = segments();
+  updatePreviewSizeColourLegend(segmentData);
   const connections = nodeConnections(segmentData);
   const elbowTrims = computeGraphElbowTrims(modelPoints, segmentData, connections);
   const autoReducers = autoReducerTransitions(segmentData);
-  const reducerTrims = computeAutoReducerRenderTrims(autoReducers);
+  const reducerTrims = computeAutoReducerRenderTrims(autoReducers, style);
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
   const renderedSegments = new Map();
+  const threadedEndSides = new Set(
+    state.fittings
+      .filter((fitting) => fitting.type === "threadedEnd")
+      .map((fitting) => {
+        const segment = segmentByIndex.get(fitting.segmentIndex);
+        const side = segment ? fittingEndpointSide(fitting, pointLength(segment.vector)) : null;
+        return side ? `${fitting.segmentIndex}:${side}` : null;
+      })
+      .filter(Boolean),
+  );
+  const triColorSizeKeys = [...new Set(segmentData.map(triColorSegmentSizeKey))].sort((a, b) => a - b);
+  const triColorMaterials = new Map();
+  const pipeMaterialForSegment = (segment) => {
+    if (!style.triColor) return pipeMaterial;
+    const sizeKey = triColorSegmentSizeKey(segment);
+    if (triColorMaterials.has(sizeKey)) return triColorMaterials.get(sizeKey);
+
+    const palette = style.triColorPalette ?? [0x3c9698, 0xd19438, 0x7864a8];
+    const sizeIndex = Math.max(0, triColorSizeKeys.indexOf(sizeKey));
+    const color = palette[sizeIndex % palette.length];
+    const material = previewMaterial({
+      ...style,
+      colors: {
+        ...style.colors,
+        pipe: color,
+      },
+    }, "pipe");
+    triColorMaterials.set(sizeKey, material);
+    return material;
+  };
 
   for (const segment of segmentData) {
+    const segmentPipeMaterial = pipeMaterialForSegment(segment);
     const segmentRadius = pipeRadiusMetres(segment);
     const start = modelPoints[segment.from].clone();
     const end = modelPoints[segment.to].clone();
@@ -16578,48 +23713,69 @@ function rebuildThreeSpool() {
     const endTrim = elbowTrims.segment.get(`${segment.index}:${segment.to}`) ?? 0;
     const startReducerTrim = reducerTrims.get(`${segment.index}:${segment.from}`) ?? 0;
     const endReducerTrim = reducerTrims.get(`${segment.index}:${segment.to}`) ?? 0;
-    start.addScaledVector(direction, startTrim + startReducerTrim);
-    end.addScaledVector(direction, -(endTrim + endReducerTrim));
+    const nodeClearances = segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style);
+    start.addScaledVector(direction, startTrim + Math.max(startReducerTrim, nodeClearances.start));
+    end.addScaledVector(direction, -(endTrim + Math.max(endReducerTrim, nodeClearances.end)));
+    const threadLength = threadedPipeEndLength(segmentRadius);
+    if (threadedEndSides.has(`${segment.index}:start`)) {
+      start.addScaledVector(direction, threadLength);
+    }
+    if (threadedEndSides.has(`${segment.index}:end`)) {
+      end.addScaledVector(direction, -threadLength);
+    }
     renderedSegments.set(segment.index, { start: start.clone(), end: end.clone() });
 
     if (start.distanceTo(end) < segmentRadius * 0.5) {
       continue;
     }
 
-    if (style.lineDrawing) {
-      group.add(outlinePipeBetween(start, end, segmentRadius, pipeMaterial, {
-        startCap: (connections.get(segment.from)?.length ?? 0) <= 1,
-        endCap: (connections.get(segment.to)?.length ?? 0) <= 1,
-      }));
-    } else {
-      const pipe = cylinderBetween(
-        start,
-        end,
-        segmentRadius,
-        pipeMaterial,
-        32,
-      );
-      pipe.castShadow = true;
-      pipe.receiveShadow = true;
-      group.add(pipe);
+    const renderFragments = [{ t0: 0, t1: 1, pieceIndex: null }];
+    const originalStart = modelPoints[segment.from];
+    const originalEnd = modelPoints[segment.to];
+    for (const fragment of renderFragments) {
+      const fragmentStart = fragment.t0 === 0
+        ? start.clone()
+        : originalStart.clone().lerp(originalEnd, fragment.t0);
+      const fragmentEnd = fragment.t1 === 1
+        ? end.clone()
+        : originalStart.clone().lerp(originalEnd, fragment.t1);
+      if (fragmentStart.distanceTo(fragmentEnd) < segmentRadius * 0.25) continue;
+      if (style.lineDrawing) {
+        group.add(outlinePipeBetween(fragmentStart, fragmentEnd, segmentRadius, segmentPipeMaterial, {
+          startCap: fragment.t0 > 0 || (connections.get(segment.from)?.length ?? 0) <= 1,
+          endCap: fragment.t1 < 1 || (connections.get(segment.to)?.length ?? 0) <= 1,
+        }));
+      } else {
+        const pipe = cylinderBetween(fragmentStart, fragmentEnd, segmentRadius, segmentPipeMaterial, 32);
+        pipe.castShadow = true;
+        pipe.receiveShadow = true;
+        group.add(pipe);
+      }
     }
   }
 
   for (const elbowData of elbowTrims.elbows) {
+    const elbowSegment = segmentData.reduce((closest, segment) => {
+      if (!closest) return segment;
+      const candidateDifference = Math.abs(pipeRadiusMetres(segment) - elbowData.radius);
+      const closestDifference = Math.abs(pipeRadiusMetres(closest) - elbowData.radius);
+      return candidateDifference < closestDifference ? segment : closest;
+    }, null);
+    const elbowPipeMaterial = elbowSegment ? pipeMaterialForSegment(elbowSegment) : pipeMaterial;
     const elbow = style.lineDrawing
       ? outlineElbowBetween(
         elbowData.entry,
         elbowData.joint,
         elbowData.exit,
         elbowData.radius,
-        pipeMaterial,
+        elbowPipeMaterial,
       )
       : curvedElbowBetween(
         elbowData.entry,
         elbowData.joint,
         elbowData.exit,
         elbowData.radius,
-        pipeMaterial,
+        elbowPipeMaterial,
         32,
       );
     if (!style.lineDrawing) {
@@ -16627,6 +23783,33 @@ function rebuildThreeSpool() {
       elbow.receiveShadow = true;
     }
     group.add(elbow);
+
+    if (illustratedSeamMaterial) {
+      const entryAxis = elbowData.joint.clone().sub(elbowData.entry);
+      const exitAxis = elbowData.exit.clone().sub(elbowData.joint);
+      if (entryAxis.length() > 0.0001) {
+        const seam = outlineRing(
+          elbowData.entry,
+          entryAxis,
+          elbowData.radius * 1.012,
+          illustratedSeamMaterial,
+        );
+        seam.renderOrder = 4;
+        seam.userData.illustratedWeldSeam = true;
+        group.add(seam);
+      }
+      if (exitAxis.length() > 0.0001) {
+        const seam = outlineRing(
+          elbowData.exit,
+          exitAxis,
+          elbowData.radius * 1.012,
+          illustratedSeamMaterial,
+        );
+        seam.renderOrder = 4;
+        seam.userData.illustratedWeldSeam = true;
+        group.add(seam);
+      }
+    }
   }
 
   for (const [index, point] of modelPoints.entries()) {
@@ -16667,6 +23850,7 @@ function rebuildThreeSpool() {
   for (const fitting of state.fittings) {
     const segment = segmentByIndex.get(fitting.segmentIndex);
     if (!segment) continue;
+    const segmentPipeMaterial = pipeMaterialForSegment(segment);
     const startModel = toModelUnits(segment.start);
     const endModel = toModelUnits(segment.end);
     const start = new THREE.Vector3(startModel.x, startModel.y, startModel.z);
@@ -16735,6 +23919,12 @@ function rebuildThreeSpool() {
       group.add(socketAssembly(position, direction, radius, fitting, socketMaterial, style));
     } else if (fitting.type === "rollGroove") {
       group.add(rollGrooveAssembly(position, direction, radius, grooveMaterial, style));
+    } else if (fitting.type === "threadedEnd") {
+      const endpointSide = fittingEndpointSide(fitting, start.distanceTo(end) * 1000);
+      const outward = endpointSide === "start"
+        ? direction.clone().multiplyScalar(-1)
+        : direction.clone();
+      group.add(threadedPipeEndAssembly(position, outward, radius, segmentPipeMaterial, grooveMaterial, style));
     }
   }
 
@@ -16755,6 +23945,7 @@ function rebuildThreeSpool() {
     }
   }
 
+  addIllustratedModelOutlines(group, style);
   three.spoolGroup = group;
   three.scene.add(group);
   build3dPipeLabels(segmentData, modelPoints);
@@ -16799,7 +23990,71 @@ function previewViewStyle() {
     socket: 0xb6c4bd,
     groove: 0x7e817d,
   };
+  const illustratedColors = {
+    pipe: 0xd9dad6,
+    joint: 0xd0d2ce,
+    flange: 0xe5e5e0,
+    bolt: 0x676b69,
+    gasket: 0x3b3f3e,
+    valve: 0xc9cbc7,
+    weld: 0x8d9390,
+    reducer: 0xd3d5d1,
+    socket: 0xc8cfcb,
+    groove: 0x555a58,
+  };
+  const triColorPalette = [0x3c9698, 0xd19438, 0x7864a8];
   const styles = {
+    illustrated: {
+      background: 0xfbfaf6,
+      gridColors: [0xc7cbc7, 0xe4e6e2],
+      gridOpacity: 0,
+      basic: false,
+      physical: true,
+      wireframe: false,
+      opacity: 1,
+      metalness: 0.04,
+      roughness: 0.58,
+      clearcoat: 0.12,
+      clearcoatRoughness: 0.56,
+      emissive: 0x2a2c2b,
+      emissiveIntensity: 0.025,
+      detailModel: true,
+      illustrated: true,
+      outlineColor: 0x252827,
+      weldSeamColor: 0x343938,
+      contactShadowColor: 0x59605d,
+      contactShadowOpacity: 0.13,
+      colors: illustratedColors,
+    },
+    tricolor: {
+      background: 0xfbfaf6,
+      gridColors: [0xc7cbc7, 0xe4e6e2],
+      gridOpacity: 0,
+      basic: false,
+      physical: true,
+      wireframe: false,
+      opacity: 1,
+      metalness: 0.035,
+      roughness: 0.56,
+      clearcoat: 0.11,
+      clearcoatRoughness: 0.55,
+      emissive: 0x202322,
+      emissiveIntensity: 0.02,
+      detailModel: true,
+      illustrated: true,
+      triColor: true,
+      triColorPalette,
+      outlineColor: 0x252827,
+      weldSeamColor: 0x343938,
+      contactShadowColor: 0x59605d,
+      contactShadowOpacity: 0.13,
+      colors: {
+        ...illustratedColors,
+        pipe: triColorPalette[0],
+        joint: 0xc9ccc8,
+        reducer: 0xd5d7d3,
+      },
+    },
     carbon: {
       basic: false,
       physical: stainless,
@@ -16938,7 +24193,7 @@ function previewViewStyle() {
       },
     },
   };
-  return styles[mode] ?? styles.carbon;
+  return styles[mode] ?? styles.illustrated;
 }
 
 function previewMaterial(style, part) {
@@ -16970,6 +24225,9 @@ function previewMaterial(style, part) {
     roughness: part === "gasket" ? Math.max(0.62, style.roughness + 0.16) : style.roughness,
     emissive: style.emissive ?? 0x000000,
     emissiveIntensity: style.emissiveIntensity ?? 0,
+    polygonOffset: style.illustrated === true,
+    polygonOffsetFactor: style.illustrated === true ? 1 : 0,
+    polygonOffsetUnits: style.illustrated === true ? 1 : 0,
   };
 
   if (style.physical || style.clearcoat) {
@@ -16981,6 +24239,93 @@ function previewMaterial(style, part) {
   }
 
   return new THREE.MeshStandardMaterial(materialParams);
+}
+
+function addIllustratedModelOutlines(group, style) {
+  if (!style.illustrated || !group) return;
+  const THREE = three.module;
+  const meshes = [];
+  group.traverse((child) => {
+    if (child?.isMesh && child.geometry && child.userData?.illustratedOutline !== true) {
+      meshes.push(child);
+    }
+  });
+  if (!meshes.length) return;
+
+  const outlineColor = style.outlineColor ?? 0x252827;
+  const shellMaterial = new THREE.MeshBasicMaterial({
+    color: outlineColor,
+    side: THREE.BackSide,
+    depthWrite: false,
+  });
+  const edgeMaterial = new THREE.LineBasicMaterial({
+    color: outlineColor,
+    transparent: true,
+    opacity: 0.92,
+  });
+
+  for (const mesh of meshes) {
+    // The back-face shell gives long straight pipes a crisp silhouette, but it
+    // creates black crescents where curved elbows and nested fittings overlap.
+    // Keep it subtle and only use it on direct, non-curved spool components.
+    const useShell = mesh.parent === group && mesh.geometry.type !== "TubeGeometry";
+    if (useShell) {
+      const shell = new THREE.Mesh(mesh.geometry, shellMaterial);
+      shell.scale.setScalar(1.008);
+      shell.castShadow = false;
+      shell.receiveShadow = false;
+      shell.renderOrder = 1;
+      shell.userData.illustratedOutline = true;
+      mesh.add(shell);
+    }
+
+    const edges = new THREE.LineSegments(
+      illustratedEdgesGeometry(mesh, 26),
+      edgeMaterial,
+    );
+    edges.scale.setScalar(1.003);
+    edges.renderOrder = 2;
+    edges.userData.illustratedOutline = true;
+    mesh.add(edges);
+  }
+}
+
+function illustratedEdgesGeometry(mesh, thresholdAngle = 26) {
+  const THREE = three.module;
+  const edges = new THREE.EdgesGeometry(mesh.geometry, thresholdAngle);
+  if (!mesh.userData?.illustratedHideStartEdge || mesh.geometry.type !== "CylinderGeometry") {
+    return edges;
+  }
+
+  const position = edges.getAttribute("position");
+  const height = Number(mesh.geometry.parameters?.height) || 0;
+  if (!position || height <= 0) return edges;
+
+  const startY = -height * 0.5;
+  const tolerance = Math.max(height * 0.0001, 0.00001);
+  const filtered = [];
+  for (let index = 0; index + 1 < position.count; index += 2) {
+    const firstY = position.getY(index);
+    const secondY = position.getY(index + 1);
+    const isInternalStartRing =
+      Math.abs(firstY - startY) <= tolerance &&
+      Math.abs(secondY - startY) <= tolerance;
+    if (isInternalStartRing) continue;
+
+    filtered.push(
+      position.getX(index),
+      firstY,
+      position.getZ(index),
+      position.getX(index + 1),
+      secondY,
+      position.getZ(index + 1),
+    );
+  }
+
+  const cleaned = new THREE.BufferGeometry();
+  cleaned.setAttribute("position", new THREE.Float32BufferAttribute(filtered, 3));
+  edges.dispose();
+  return cleaned;
 }
 
 function cylinderBetween(start, end, radius, material, radialSegments) {
@@ -17110,19 +24455,12 @@ function outlineBandMarker(position, direction, radius, material, width = 0.18) 
   return group;
 }
 
-function outlineRollGrooveMarker(position, direction, radius, material, width = 0.12) {
+function outlineRollGrooveMarker(position, direction, radius, material, width = 0.009) {
   const group = new three.module.Group();
   const axis = direction.clone().normalize();
   const basis = radialBasis(axis);
-  const visualWidth = clampNumber(width, 0.016, 0.032);
-  const grooveWidth = visualWidth * 0.42;
-  const ringOffsets = [
-    -visualWidth * 0.5,
-    -grooveWidth * 0.5,
-    grooveWidth * 0.5,
-    visualWidth * 0.5,
-  ];
-  for (const offset of ringOffsets) {
+  const grooveWidth = clampNumber(width, 0.008, 0.014);
+  for (const offset of [-grooveWidth * 0.5, grooveWidth * 0.5]) {
     group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, radius * 1.006, material));
   }
 
@@ -17465,83 +24803,170 @@ function socketAssembly(position, direction, pipeRadius, fitting, material, styl
 function rollGrooveAssembly(position, direction, pipeRadius, material, style) {
   const THREE = three.module;
   const axis = direction.clone().normalize();
-  const markerLength = clampNumber(
-    Math.max(ROLL_GROOVE_VISUAL_WIDTH_MM / 1000, pipeRadius * 0.075),
-    0.016,
-    0.03,
+  const grooveWidth = clampNumber(
+    ROLL_GROOVE_VISUAL_WIDTH_MM / 1000 + pipeRadius * 0.015,
+    0.008,
+    0.014,
   );
-  const grooveSpacing = markerLength * 0.38;
 
   if (style.lineDrawing) {
-    return outlineRollGrooveMarker(position, axis, pipeRadius, material, markerLength);
+    return outlineRollGrooveMarker(position, axis, pipeRadius, material, grooveWidth);
   }
 
   const group = new THREE.Group();
-  const brightColor = 0xdce3e6;
-  const highlightColor = 0xf7fafb;
-  const darkColor = 0x15191b;
-  const baseMaterialParams = {
-    transparent: true,
-    opacity: Math.min(0.96, Math.max(0.72, style.opacity ?? 1)),
-    metalness: Math.min(0.9, Math.max(0.58, style.metalness ?? 0.35)),
-    roughness: Math.min(0.3, Math.max(0.12, style.roughness ?? 0.24)),
-  };
-  const darkBandMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: darkColor, transparent: true, opacity: Math.min(0.92, style.opacity ?? 1) })
+  const grooveColor = material?.color?.getHex?.() ?? 0x555a58;
+  const grooveMaterial = style.basic
+    ? new THREE.MeshBasicMaterial({
+        color: grooveColor,
+        transparent: true,
+        opacity: Math.min(0.78, style.opacity ?? 1),
+      })
     : new THREE.MeshStandardMaterial({
-      transparent: true,
-      opacity: Math.min(0.92, style.opacity ?? 1),
-      color: darkColor,
-      metalness: 0.36,
-      roughness: 0.46,
-    });
-  const bandMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: brightColor, transparent: baseMaterialParams.transparent, opacity: baseMaterialParams.opacity })
-    : new THREE.MeshPhysicalMaterial({
-      ...baseMaterialParams,
-      color: brightColor,
-      clearcoat: 0.76,
-      clearcoatRoughness: 0.1,
-    });
-  const lipMaterial = style.basic
-    ? new THREE.MeshBasicMaterial({ color: highlightColor, transparent: baseMaterialParams.transparent, opacity: 1 })
-    : new THREE.MeshPhysicalMaterial({
-      ...baseMaterialParams,
-      color: highlightColor,
-      opacity: 1,
-      metalness: 0.86,
-      roughness: 0.11,
-      clearcoat: 0.86,
-      clearcoatRoughness: 0.08,
-    });
-  const lineMaterial = new THREE.LineBasicMaterial({
-    color: highlightColor,
-    transparent: style.opacity < 1,
-    opacity: Math.min(0.94, (style.opacity ?? 1) + 0.08),
+        color: grooveColor,
+        transparent: true,
+        opacity: Math.min(0.82, style.opacity ?? 1),
+        metalness: Math.min(0.46, style.metalness ?? 0.18),
+        roughness: Math.max(0.52, style.roughness ?? 0.56),
+        polygonOffset: style.illustrated === true,
+        polygonOffsetFactor: -1,
+        polygonOffsetUnits: -1,
+      });
+  const edgeMaterial = new THREE.LineBasicMaterial({
+    color: style.outlineColor ?? 0x343938,
+    transparent: true,
+    opacity: 0.82,
   });
 
-  const polishedBand = cylinderBetween(
-    position.clone().addScaledVector(axis, -markerLength * 0.5),
-    position.clone().addScaledVector(axis, markerLength * 0.5),
-    pipeRadius * 1.006,
-    bandMaterial,
+  // A Victaulic-style roll groove is cold formed into the pipe: it has a
+  // gasket-seat land at the end, a narrow recessed band and rounded corners.
+  // Keep the overlay almost flush so it reads as an indentation, not a collar.
+  const grooveBand = cylinderBetween(
+    position.clone().addScaledVector(axis, -grooveWidth * 0.5),
+    position.clone().addScaledVector(axis, grooveWidth * 0.5),
+    pipeRadius * 1.001,
+    grooveMaterial,
     48,
   );
-  polishedBand.castShadow = true;
-  polishedBand.receiveShadow = true;
-  group.add(polishedBand);
+  grooveBand.castShadow = false;
+  grooveBand.receiveShadow = true;
+  grooveBand.userData.rollGrooveFloor = true;
+  group.add(grooveBand);
 
-  const grooveTube = clampNumber(pipeRadius * 0.036, 0.0045, 0.013);
-  const lipTube = clampNumber(pipeRadius * 0.014, 0.0025, 0.006);
-  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
-    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.012, grooveTube, darkBandMaterial, 8, 48));
+  const cornerTube = clampNumber(pipeRadius * 0.008, 0.0015, 0.0035);
+  for (const offset of [-grooveWidth * 0.5, grooveWidth * 0.5]) {
+    group.add(torusRing(
+      position.clone().addScaledVector(axis, offset),
+      axis,
+      pipeRadius * 0.996,
+      cornerTube,
+      grooveMaterial,
+      6,
+      48,
+    ));
+    group.add(outlineRing(
+      position.clone().addScaledVector(axis, offset),
+      axis,
+      pipeRadius * 1.004,
+      edgeMaterial,
+    ));
   }
-  for (const offset of [-markerLength * 0.5, markerLength * 0.5]) {
-    group.add(torusRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.018, lipTube, lipMaterial, 8, 48));
+  return group;
+}
+
+function threadedPipeEndLength(pipeRadius) {
+  return clampNumber(0.065 + pipeRadius * 0.2, 0.068, 0.105);
+}
+
+function threadedPipeEndAssembly(position, outwardDirection, pipeRadius, pipeMaterial, detailMaterial, style) {
+  const THREE = three.module;
+  const group = new THREE.Group();
+  const outward = outwardDirection.clone().normalize();
+  const basis = radialBasis(outward);
+  const threadLength = threadedPipeEndLength(pipeRadius);
+  const turns = clampNumber(Math.round(threadLength / 0.017), 4, 6);
+  const pointCount = turns * 32;
+  const shoulder = position.clone().addScaledVector(outward, -threadLength);
+  const shoulderRadius = pipeRadius * 0.92;
+  const endRadius = pipeRadius * 0.84;
+  const threadTube = clampNumber(pipeRadius * 0.024, 0.0018, 0.0046);
+  const points = [];
+
+  for (let index = 0; index <= pointCount; index += 1) {
+    const progress = index / pointCount;
+    const angle = progress * turns * Math.PI * 2;
+    // The dark helix sits partly inside a reduced machined section. Its outer
+    // edge remains below the original pipe OD, so it reads as a cut thread
+    // instead of a spring or collar wrapped around the pipe.
+    const machinedRadius = endRadius + (shoulderRadius - endRadius) * progress;
+    const grooveRadius = machinedRadius + threadTube * 0.12;
+    const radial = basis.u.clone().multiplyScalar(Math.cos(angle))
+      .add(basis.v.clone().multiplyScalar(Math.sin(angle)))
+      .multiplyScalar(grooveRadius);
+    points.push(
+      position.clone()
+        .addScaledVector(outward, -progress * threadLength)
+        .add(radial),
+    );
   }
-  for (const offset of [-grooveSpacing * 0.5, grooveSpacing * 0.5]) {
-    group.add(outlineRing(position.clone().addScaledVector(axis, offset), axis, pipeRadius * 1.026, lineMaterial));
+
+  if (style.lineDrawing) {
+    group.add(outlinePipeBetween(shoulder, position, shoulderRadius, pipeMaterial, {
+      startCap: false,
+      endCap: true,
+    }));
+    const lineMaterial = new THREE.LineBasicMaterial({
+      color: detailMaterial?.color?.getHex?.() ?? 0x596563,
+      transparent: true,
+      opacity: 0.9,
+    });
+    group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), lineMaterial));
+  } else {
+    const machinedSection = taperedCylinderBetween(
+      shoulder,
+      position,
+      shoulderRadius,
+      endRadius,
+      pipeMaterial,
+      48,
+    );
+    machinedSection.castShadow = true;
+    machinedSection.receiveShadow = true;
+    machinedSection.userData.threadedMachinedSection = true;
+    group.add(machinedSection);
+
+    const curve = new THREE.CatmullRomCurve3(points);
+    const threadColor = style.triColor
+      ? 0x53615f
+      : detailMaterial?.color?.getHex?.() ?? 0x596563;
+    const threadMaterial = style.basic
+      ? new THREE.MeshBasicMaterial({ color: threadColor })
+      : new THREE.MeshStandardMaterial({
+          color: threadColor,
+          metalness: 0.3,
+          roughness: 0.48,
+        });
+    const thread = new THREE.Mesh(
+      new THREE.TubeGeometry(curve, pointCount, threadTube, 8, false),
+      threadMaterial,
+    );
+    thread.castShadow = true;
+    thread.receiveShadow = true;
+    thread.userData.threadedPipeEnd = true;
+    group.add(thread);
   }
+
+  const runoutMaterial = new THREE.LineBasicMaterial({
+    color: style.outlineColor ?? detailMaterial?.color?.getHex?.() ?? 0x596563,
+    transparent: true,
+    opacity: 0.82,
+  });
+  group.add(outlineRing(
+    shoulder,
+    outward,
+    pipeRadius * 0.995,
+    runoutMaterial,
+  ));
+  group.add(outlineRing(position, outward, endRadius * 1.004, runoutMaterial));
   return group;
 }
 
@@ -17591,7 +25016,7 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     end = start.clone().addScaledVector(placementDirection, modelLength);
   } else if (startsAtJoint) {
     const offset = clampNumber(
-      teeReducerStartOffsetMetres(reducer),
+      teeReducerStartOffsetMetres(reducer, style),
       0.015,
       Math.max(0.015, placementLength - modelLength),
     );
@@ -17721,14 +25146,13 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
   const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
   const mainPair = mostOppositeRenderEntryPair(entries);
   const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
-  const length = Math.max(coreRadius * 3.0, 0.16);
+  const length = teeNodeLegLengthMetres(coreRadius);
 
   if (mainPair) {
-    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius));
     const main = cylinderBetween(
       position.clone().addScaledVector(mainPair[0].direction, length),
       position.clone().addScaledVector(mainPair[1].direction, length),
-      mainRadius,
+      coreRadius,
       material,
       28,
     );
@@ -17739,15 +25163,14 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
 
   for (const entry of entries) {
     if (mainPair && mainPair.includes(entry)) continue;
-    const branchRadius = entry.radius;
-    const branchLength = Math.max(length, branchRadius * 4.0, 0.16);
     const branch = cylinderBetween(
-      position.clone().addScaledVector(entry.direction, -branchRadius * 0.04),
-      position.clone().addScaledVector(entry.direction, branchLength),
-      branchRadius,
+      position.clone().addScaledVector(entry.direction, -coreRadius * 0.04),
+      position.clone().addScaledVector(entry.direction, length),
+      coreRadius,
       material,
       28,
     );
+    branch.userData.illustratedHideStartEdge = true;
     branch.castShadow = true;
     branch.receiveShadow = true;
     group.add(branch);
@@ -17759,22 +25182,6 @@ function teeNodeAssembly(position, connected, modelPoints, radius, material, seg
   core.receiveShadow = true;
   group.add(core);
 
-  if (mainPair) {
-    const ringTube = clampNumber(coreRadius * 0.045, 0.004, 0.014);
-    for (const entry of entries) {
-      if (mainPair.includes(entry)) continue;
-      group.add(torusRing(
-        position.clone().addScaledVector(entry.direction, entry.radius * 0.18),
-        entry.direction,
-        entry.radius * 1.02,
-        ringTube,
-        material,
-        8,
-        36,
-      ));
-    }
-  }
-
   return group;
 }
 
@@ -17784,30 +25191,27 @@ function outlineTeeMarker(position, connected, modelPoints, radius, material, se
   const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
   const mainPair = mostOppositeRenderEntryPair(entries);
   const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
-  const length = Math.max(coreRadius * 3.8, 0.2);
+  const length = teeNodeLegLengthMetres(coreRadius, { lineDrawing: true });
 
   if (mainPair) {
-    const mainRadius = Math.max(...mainPair.map((entry) => entry.radius));
     group.add(outlinePipeBetween(
       position.clone().addScaledVector(mainPair[0].direction, length),
       position.clone().addScaledVector(mainPair[1].direction, length),
-      mainRadius,
+      coreRadius,
       material,
     ));
   }
 
   for (const entry of entries) {
     if (mainPair && mainPair.includes(entry)) continue;
-    const branchRadius = entry.radius;
-    const branchLength = Math.max(length, branchRadius * 4.0, 0.2);
-    const branchStart = position.clone().addScaledVector(entry.direction, branchRadius * 0.2);
-    const branchEnd = position.clone().addScaledVector(entry.direction, branchLength);
+    const branchStart = position.clone().addScaledVector(entry.direction, coreRadius * 0.2);
+    const branchEnd = position.clone().addScaledVector(entry.direction, length);
 
-    group.add(outlineRing(branchStart, entry.direction, branchRadius, material));
+    group.add(outlineRing(branchStart, entry.direction, coreRadius, material));
     group.add(outlinePipeBetween(
       branchStart,
       branchEnd,
-      branchRadius,
+      coreRadius,
       material,
       { endCap: true },
     ));
@@ -17842,6 +25246,7 @@ function branchNodeAssembly(nodeIndex, position, connected, modelPoints, segment
       material,
       24,
     );
+    collar.userData.illustratedHideStartEdge = true;
     collar.castShadow = true;
     collar.receiveShadow = true;
     group.add(collar);
@@ -18203,6 +25608,39 @@ function build3dPipeLabels(segmentData, modelPoints) {
   }
 
   const quantities = quantitySummary(segmentData);
+  for (const reducer of quantities.reducers) {
+    const modelPoint = toModelUnits(reducerCentrePoint(reducer));
+    const label = document.createElement("div");
+    label.className = "pipe-size-label reducer-type-label";
+    const lines = [
+      `${reducerTypeCode(reducer.reducerType)} REDUCER`,
+      `${pipeSizeDisplayLabelByNb(reducer.largeNb)} x ${pipeSizeDisplayLabelByNb(reducer.smallNb)} · ${reducerDimensionCompact(reducer)}`,
+    ];
+    for (const [index, line] of lines.entries()) {
+      const element = document.createElement(index === 0 ? "span" : "small");
+      element.textContent = line;
+      label.append(element);
+    }
+    previewLabelLayer.append(label);
+    three.labels.push({ element: label, point: new three.module.Vector3(modelPoint.x, modelPoint.y, modelPoint.z) });
+  }
+
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  for (const fitting of state.fittings.filter((item) => item.type === "reducer")) {
+    const segment = segmentByIndex.get(fitting.segmentIndex);
+    if (!segment) continue;
+    const modelPoint = toModelUnits(fittingDisplayPoint(segment, fitting));
+    const label = document.createElement("div");
+    label.className = "pipe-size-label reducer-type-label";
+    const title = document.createElement("span");
+    title.textContent = `${reducerTypeCode(fittingReducerType(fitting))} REDUCER`;
+    const detail = document.createElement("small");
+    detail.textContent = "Confirm outlet size";
+    label.append(title, detail);
+    previewLabelLayer.append(label);
+    three.labels.push({ element: label, point: new three.module.Vector3(modelPoint.x, modelPoint.y, modelPoint.z) });
+  }
+
   const liftPoint = centreOfGravityData(quantities);
   if (state.showLiftingPoints && liftPoint) {
     const modelPoint = toModelUnits(liftPoint.point);
@@ -18353,8 +25791,6 @@ function frameThreeCamera(options = {}) {
   const size = box.getSize(new THREE.Vector3());
   const center = box.getCenter(new THREE.Vector3());
   const maxDim = Math.max(size.x, size.y, size.z, 5);
-  const halfHeight = maxDim * 0.78;
-  const halfWidth = halfHeight * aspect;
   const preserveView = three.userMovedCamera && options.reset !== true && three.controls;
   const previousTarget = preserveView ? three.controls.target.clone() : null;
   const previousOffset = preserveView ? three.camera.position.clone().sub(previousTarget) : null;
@@ -18364,10 +25800,6 @@ function frameThreeCamera(options = {}) {
   const previousZoom = preserveView ? three.camera.zoom : 1;
   const target = preserveView ? center.clone().add(previousTargetOffset) : center.clone();
 
-  three.camera.left = -halfWidth;
-  three.camera.right = halfWidth;
-  three.camera.top = halfHeight;
-  three.camera.bottom = -halfHeight;
   three.camera.near = 0.1;
   three.camera.far = maxDim * 20 + 100;
   if (preserveView && previousOffset.length() > 0.001) {
@@ -18379,6 +25811,35 @@ function frameThreeCamera(options = {}) {
     three.camera.zoom = 1;
   }
   three.camera.lookAt(target);
+  three.camera.updateMatrixWorld(true);
+
+  // Fit the visible projection rather than a square based on the longest run.
+  // Long horizontal spools otherwise become tiny inside a wide phone/tablet panel.
+  const viewRight = new THREE.Vector3(1, 0, 0).applyQuaternion(three.camera.quaternion);
+  const viewUp = new THREE.Vector3(0, 1, 0).applyQuaternion(three.camera.quaternion);
+  const corners = [
+    new THREE.Vector3(box.min.x, box.min.y, box.min.z),
+    new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+    new THREE.Vector3(box.min.x, box.max.y, box.min.z),
+    new THREE.Vector3(box.min.x, box.max.y, box.max.z),
+    new THREE.Vector3(box.max.x, box.min.y, box.min.z),
+    new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+    new THREE.Vector3(box.max.x, box.max.y, box.min.z),
+    new THREE.Vector3(box.max.x, box.max.y, box.max.z),
+  ];
+  let projectedHalfWidth = 0;
+  let projectedHalfHeight = 0;
+  corners.forEach((corner) => {
+    const relative = corner.sub(target);
+    projectedHalfWidth = Math.max(projectedHalfWidth, Math.abs(relative.dot(viewRight)));
+    projectedHalfHeight = Math.max(projectedHalfHeight, Math.abs(relative.dot(viewUp)));
+  });
+  const halfHeight = Math.max(projectedHalfHeight, projectedHalfWidth / Math.max(aspect, 0.25), 0.55) * 1.18;
+  const halfWidth = halfHeight * aspect;
+  three.camera.left = -halfWidth;
+  three.camera.right = halfWidth;
+  three.camera.top = halfHeight;
+  three.camera.bottom = -halfHeight;
   three.camera.updateProjectionMatrix();
 
   if (three.controls) {
@@ -18405,6 +25866,7 @@ function renderFallbackPreview() {
   if (fallbackCanvas.hidden) return;
 
   const style = fallbackPreviewStyle();
+  updatePreviewSizeColourLegend();
   const { ctx, width, height } = resizeCanvas(fallbackCanvas);
   ctx.clearRect(0, 0, width, height);
   ctx.fillStyle = style.background;
@@ -18415,8 +25877,9 @@ function renderFallbackPreview() {
   const maxX = Math.max(...projected.map((point) => point.x));
   const minY = Math.min(...projected.map((point) => point.y));
   const maxY = Math.max(...projected.map((point) => point.y));
-  const span = Math.max(maxX - minX, maxY - minY, 1);
-  const scale = Math.min(width, height) / (span * 1.55);
+  const spanX = Math.max(maxX - minX, 1);
+  const spanY = Math.max(maxY - minY, 1);
+  const scale = Math.min((width * 0.84) / spanX, (height * 0.72) / spanY);
   const offset = {
     x: width * 0.5 - ((minX + maxX) * 0.5) * scale,
     y: height * 0.55 - ((minY + maxY) * 0.5) * scale,
@@ -18439,12 +25902,13 @@ function renderFallbackPreview() {
       depth: (projectPreviewPoint(segment.start).depth + projectPreviewPoint(segment.end).depth) * 0.5,
     }))
     .sort((a, b) => a.depth - b.depth);
+  const fallbackDrawSegments = fallbackSegments;
 
   ctx.save();
   ctx.lineCap = "butt";
   ctx.lineJoin = "round";
 
-  for (const segment of fallbackSegments) {
+  for (const segment of fallbackDrawSegments) {
     const segmentPipeWidth = Math.max(12, visualPipeWidth(segment) * 1.02);
     drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style);
 
@@ -18545,6 +26009,44 @@ function fallbackPreviewStyle() {
     ghost: false,
   };
   const styles = {
+    illustrated: {
+      background: "#fbfaf6",
+      shadow: "rgba(53, 59, 56, 0.08)",
+      gridStroke: "rgba(82, 91, 87, 0)",
+      pipeStops: ["#c4c7c3", "#eeeeea", "#b8bcb8"],
+      highlight: "rgba(255, 255, 255, 0.88)",
+      fittingStroke: "#252827",
+      fittingFill: "#d8dad6",
+      nodeFill: "#d0d2ce",
+      nodeStroke: "#252827",
+      weldStroke: "#4d5350",
+      inkStroke: "#252827",
+      inked: true,
+      outline: false,
+      ghost: false,
+    },
+    tricolor: {
+      background: "#fbfaf6",
+      shadow: "rgba(53, 59, 56, 0.08)",
+      gridStroke: "rgba(82, 91, 87, 0)",
+      pipeStops: ["#2d777a", "#64b8ba", "#245f62"],
+      triColor: true,
+      triColorPipeStops: [
+        ["#2d777a", "#64b8ba", "#245f62"],
+        ["#a9681c", "#e2ac55", "#8a5115"],
+        ["#54437f", "#9582c5", "#45366c"],
+      ],
+      highlight: "rgba(255, 255, 255, 0.72)",
+      fittingStroke: "#252827",
+      fittingFill: "#d8dad6",
+      nodeFill: "#c9ccc8",
+      nodeStroke: "#252827",
+      weldStroke: "#4d5350",
+      inkStroke: "#252827",
+      inked: true,
+      outline: false,
+      ghost: false,
+    },
     carbon: stainless ? stainlessStyle : carbonStyle,
     black: carbonStyle,
     workshop: {
@@ -18612,10 +26114,15 @@ function fallbackPreviewStyle() {
       ghost: false,
     },
   };
-  return styles[mode] ?? styles.carbon;
+  return styles[mode] ?? styles.illustrated;
 }
 
 function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
+  const pipeStops = Number.isInteger(segment._bigSpoolPieceIndex)
+    ? bigSpoolFallbackColourStops(segment._bigSpoolPieceIndex)
+    : style.triColor
+    ? triColorFallbackPipeStops(segment, style)
+    : style.pipeStops;
   if (style.outline) {
     const dx = segment.end2.x - segment.start2.x;
     const dy = segment.end2.y - segment.start2.y;
@@ -18625,7 +26132,7 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
     const normal = { x: -along.y, y: along.x };
     const halfWidth = segmentPipeWidth * 0.5;
 
-    ctx.strokeStyle = style.pipeStops[0];
+    ctx.strokeStyle = pipeStops[0];
     ctx.lineCap = "round";
     ctx.lineWidth = 2.5;
     drawLine(
@@ -18661,14 +26168,20 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
     return;
   }
 
-  ctx.lineWidth = segmentPipeWidth + 7;
-  ctx.strokeStyle = style.shadow;
-  drawLine(ctx, { x: segment.start2.x + 4, y: segment.start2.y + 6 }, { x: segment.end2.x + 4, y: segment.end2.y + 6 });
+  if (style.inked) {
+    ctx.lineWidth = segmentPipeWidth + 4;
+    ctx.strokeStyle = style.inkStroke ?? style.fittingStroke;
+    drawLine(ctx, segment.start2, segment.end2);
+  } else {
+    ctx.lineWidth = segmentPipeWidth + 7;
+    ctx.strokeStyle = style.shadow;
+    drawLine(ctx, { x: segment.start2.x + 4, y: segment.start2.y + 6 }, { x: segment.end2.x + 4, y: segment.end2.y + 6 });
+  }
 
   const gradient = ctx.createLinearGradient(segment.start2.x, segment.start2.y, segment.end2.x, segment.end2.y);
-  gradient.addColorStop(0, style.pipeStops[0]);
-  gradient.addColorStop(0.52, style.pipeStops[1]);
-  gradient.addColorStop(1, style.pipeStops[2]);
+  gradient.addColorStop(0, pipeStops[0]);
+  gradient.addColorStop(0.52, pipeStops[1]);
+  gradient.addColorStop(1, pipeStops[2]);
   ctx.lineWidth = segmentPipeWidth;
   ctx.strokeStyle = gradient;
   drawLine(ctx, segment.start2, segment.end2);
@@ -18678,12 +26191,78 @@ function drawFallbackPreviewPipe(ctx, segment, segmentPipeWidth, style) {
   drawLine(ctx, segment.start2, segment.end2);
 }
 
+function bigSpoolFallbackColourStops(pieceIndex) {
+  const colour = bigSpoolPieceColour(pieceIndex);
+  return [colour, colour, colour];
+}
+
+function drawBigSpoolBreaksFallback(ctx, toScreen, layout, style) {
+  if (!layout.cuts.length) return;
+  ctx.save();
+  ctx.font = "900 12px Inter, system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "bottom";
+  for (const cut of layout.cuts) {
+    const point = toScreen(projectPreviewPoint(cut.point));
+    ctx.fillStyle = style.background;
+    ctx.strokeStyle = "#111827";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = style.background;
+    ctx.fillStyle = style.outline ? style.fittingStroke : "#111827";
+    const label = `${cut.jointId} ${bigSpoolJointShortLabel(cut)}`;
+    ctx.strokeText(label, point.x, point.y - 12);
+    ctx.fillText(label, point.x, point.y - 12);
+    if (cut.jointType === "groove") {
+      const matchingFragments = layout.fragments.filter((fragment) => fragment.startCut?.id === cut.id || fragment.endCut?.id === cut.id);
+      for (const fragment of matchingFragments) {
+        const display = bigSpoolFragmentDisplayGeometry(fragment);
+        const start = toScreen(projectPreviewPoint(display.start));
+        const end = toScreen(projectPreviewPoint(display.end));
+        const endpoint = fragment.startCut?.id === cut.id ? start : end;
+        const along = normalizeScreenVector({ x: end.x - start.x, y: end.y - start.y });
+        const normal = { x: -along.y, y: along.x };
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = "#4d5754";
+        for (const offset of [-3, 3]) {
+          drawLine(ctx,
+            { x: endpoint.x + along.x * offset - normal.x * 10, y: endpoint.y + along.y * offset - normal.y * 10 },
+            { x: endpoint.x + along.x * offset + normal.x * 10, y: endpoint.y + along.y * offset + normal.y * 10 });
+        }
+        ctx.font = "900 9px Inter, system-ui, sans-serif";
+        ctx.strokeStyle = style.background;
+        ctx.fillStyle = style.outline ? style.fittingStroke : "#4d5754";
+        ctx.strokeText("RG", endpoint.x + normal.x * 18, endpoint.y + normal.y * 18);
+        ctx.fillText("RG", endpoint.x + normal.x * 18, endpoint.y + normal.y * 18);
+      }
+    }
+  }
+  ctx.restore();
+}
+
+function triColorFallbackPipeStops(segment, style) {
+  const sizeKeys = [...new Set(segments().map(triColorSegmentSizeKey))].sort((a, b) => a - b);
+  const sizeIndex = Math.max(0, sizeKeys.indexOf(triColorSegmentSizeKey(segment)));
+  const palette = style.triColorPipeStops ?? [
+    ["#2d777a", "#64b8ba", "#245f62"],
+    ["#a9681c", "#e2ac55", "#8a5115"],
+    ["#54437f", "#9582c5", "#45366c"],
+  ];
+  return palette[sizeIndex % palette.length];
+}
+
 function drawFallbackFlushEndCaps(ctx, fallbackSegments, connections, style) {
   ctx.save();
   ctx.lineCap = "butt";
-  ctx.strokeStyle = style.pipeStops[0];
 
   for (const segment of fallbackSegments) {
+    ctx.strokeStyle = style.inked
+      ? (style.inkStroke ?? style.fittingStroke)
+      : (style.triColor ? triColorFallbackPipeStops(segment, style)[0] : style.pipeStops[0]);
     const segmentPipeWidth = Math.max(12, visualPipeWidth(segment) * 1.02);
     const capLineWidth = style.outline ? 2.5 : Math.max(2, segmentPipeWidth * 0.2);
     const capHalf = style.outline ? segmentPipeWidth * 0.52 : segmentPipeWidth * 0.52;
@@ -18752,7 +26331,6 @@ function drawAutoReducersFallback(ctx, fallbackSegments, connections, style) {
     const along = startsAtJoint || startsAfterBend
       ? normalizeScreenVector({ x: placementOther.x - joint.x, y: placementOther.y - joint.y })
       : normalizeScreenVector({ x: smallOther.x - largeOther.x, y: smallOther.y - largeOther.y });
-    const normal = { x: -along.y, y: along.x };
     const length = 30;
     const largeWidth = Math.max(10, visualPipeWidth(reducer.largeSegment));
     const smallWidth = Math.max(7, visualPipeWidth(reducer.smallSegment));
@@ -18772,14 +26350,13 @@ function drawAutoReducersFallback(ctx, fallbackSegments, connections, style) {
       end = { x: joint.x + along.x * length * 0.5, y: joint.y + along.y * length * 0.5 };
     }
 
-    ctx.beginPath();
-    ctx.moveTo(start.x + normal.x * startWidth * -0.5, start.y + normal.y * startWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * -0.5, end.y + normal.y * endWidth * -0.5);
-    ctx.lineTo(end.x + normal.x * endWidth * 0.5, end.y + normal.y * endWidth * 0.5);
-    ctx.lineTo(start.x + normal.x * startWidth * 0.5, start.y + normal.y * startWidth * 0.5);
-    ctx.closePath();
-    if (!style.outline) ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(ctx, start, end, startWidth, endWidth, reducer.reducerType, {
+      fill: !style.outline,
+      label: normalizeReducerType(reducer.reducerType) === "eccentric"
+        ? `ECC e${formatLength(reducer.eccentricOffsetMm)}`
+        : "CONC",
+      labelColor: style.fittingStroke,
+    });
   }
 
   ctx.restore();
@@ -18878,7 +26455,7 @@ function drawFallbackTeeMarkers(ctx, fallbackSegments, connections, style, pipeW
   ctx.save();
   ctx.lineCap = "butt";
   ctx.lineJoin = "round";
-  ctx.strokeStyle = style.pipeStops[0];
+  ctx.strokeStyle = style.inked ? (style.inkStroke ?? style.fittingStroke) : style.pipeStops[0];
   ctx.lineWidth = style.outline ? 3 : Math.max(7, pipeWidth * 0.48);
 
   for (const [nodeIndex, connected] of connections.entries()) {
@@ -18910,7 +26487,7 @@ function drawFallbackTeeMarkers(ctx, fallbackSegments, connections, style, pipeW
         drawLine(ctx, joint, { x: joint.x + vector.x * 22, y: joint.y + vector.y * 22 });
       }
 
-      ctx.strokeStyle = style.pipeStops[0];
+      ctx.strokeStyle = style.inked ? (style.inkStroke ?? style.fittingStroke) : style.pipeStops[0];
       ctx.lineWidth = style.outline ? 3 : Math.max(7, pipeWidth * 0.48);
       continue;
     }
@@ -18989,14 +26566,15 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
     ctx.lineTo(normal.x * body * 1.32 + along.x * body * 0.38, normal.y * body * 1.32 + along.y * body * 0.38);
     ctx.stroke();
   } else if (fitting.type === "reducer") {
-    ctx.beginPath();
-    ctx.moveTo(along.x * -15 + normal.x * pipeWidth * -0.7, along.y * -15 + normal.y * pipeWidth * -0.7);
-    ctx.lineTo(along.x * 15 + normal.x * pipeWidth * -0.38, along.y * 15 + normal.y * pipeWidth * -0.38);
-    ctx.lineTo(along.x * 15 + normal.x * pipeWidth * 0.38, along.y * 15 + normal.y * pipeWidth * 0.38);
-    ctx.lineTo(along.x * -15 + normal.x * pipeWidth * 0.7, along.y * -15 + normal.y * pipeWidth * 0.7);
-    ctx.closePath();
-    if (!style.outline) ctx.fill();
-    ctx.stroke();
+    drawReducerProfile2d(
+      ctx,
+      { x: along.x * -15, y: along.y * -15 },
+      { x: along.x * 15, y: along.y * 15 },
+      pipeWidth * 1.4,
+      pipeWidth * 0.76,
+      fittingReducerType(fitting),
+      { fill: !style.outline, label: reducerTypeCode(fittingReducerType(fitting)), labelColor: style.fittingStroke },
+    );
   } else if (fitting.type === "flange") {
     const offsets = fittingFlangeMode(fitting) === "single" ? [0] : [-8, 8];
     for (const offset of offsets) {
@@ -19015,22 +26593,11 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
       }
     }
   } else if (fitting.type === "rollGroove") {
-    const grooveHalfSpan = Math.max(4, pipeWidth * 0.16);
-    const shoulderHalfSpan = grooveHalfSpan * 1.9;
+    const grooveHalfSpan = Math.max(3, pipeWidth * 0.11);
     const halfWidth = pipeWidth * 0.7;
     ctx.lineCap = "butt";
-    const silverStroke = style.outline ? style.fittingStroke : "#d9e0e3";
-    const darkStroke = style.outline ? style.fittingStroke : "#171d20";
-    ctx.strokeStyle = silverStroke;
-    ctx.lineWidth = style.outline ? 2.4 : 3.2;
-    for (const offset of [-shoulderHalfSpan, shoulderHalfSpan]) {
-      ctx.beginPath();
-      ctx.moveTo(along.x * offset + normal.x * -halfWidth, along.y * offset + normal.y * -halfWidth);
-      ctx.lineTo(along.x * offset + normal.x * halfWidth, along.y * offset + normal.y * halfWidth);
-      ctx.stroke();
-    }
-    ctx.strokeStyle = darkStroke;
-    ctx.lineWidth = style.outline ? 3 : 3.8;
+    ctx.strokeStyle = style.outline ? style.fittingStroke : "#4d5754";
+    ctx.lineWidth = style.outline ? 2.4 : 2.8;
     for (const offset of [-grooveHalfSpan, grooveHalfSpan]) {
       ctx.beginPath();
       ctx.moveTo(along.x * offset + normal.x * -halfWidth, along.y * offset + normal.y * -halfWidth);
@@ -19047,6 +26614,36 @@ function drawFitting3dFallback(ctx, fitting, start, end, point, pipeWidth, style
     const labelY = normal.y * (pipeWidth * 0.95 + 8);
     ctx.strokeText("RG", labelX, labelY);
     ctx.fillText("RG", labelX, labelY);
+  } else if (fitting.type === "threadedEnd") {
+    const threadLength = Math.max(20, pipeWidth * 1.35);
+    const endDirection = fitting.t <= 0.5 ? 1 : -1;
+    const halfWidth = pipeWidth * 0.62;
+    ctx.lineCap = "butt";
+    ctx.strokeStyle = style.outline ? style.fittingStroke : "#4b5563";
+    ctx.lineWidth = style.outline ? 2.2 : 2.6;
+    for (let index = 0; index < 7; index += 1) {
+      const offset = endDirection * (2 + index * (threadLength / 7));
+      ctx.beginPath();
+      ctx.moveTo(
+        along.x * offset + normal.x * -halfWidth,
+        along.y * offset + normal.y * -halfWidth,
+      );
+      ctx.lineTo(
+        along.x * (offset + endDirection * 4.4) + normal.x * halfWidth,
+        along.y * (offset + endDirection * 4.4) + normal.y * halfWidth,
+      );
+      ctx.stroke();
+    }
+    ctx.font = "900 9px Inter, system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = style.background;
+    ctx.fillStyle = style.outline ? style.fittingStroke : "#4b5563";
+    const labelX = normal.x * (pipeWidth * 0.95 + 9);
+    const labelY = normal.y * (pipeWidth * 0.95 + 9);
+    ctx.strokeText("THD", labelX, labelY);
+    ctx.fillText("THD", labelX, labelY);
   } else if (fitting.type === "socket") {
     const socketAngle = fittingSocketAngle(fitting) * Math.PI / 180;
     const branch = normalizeScreenVector({
@@ -19137,6 +26734,605 @@ function safeFilePart(value, fallback) {
   return cleaned || fallback;
 }
 
+function redactDiagnosticText(value) {
+  return String(value ?? "")
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email removed]")
+    .replace(/Bearer\s+[A-Za-z0-9._~-]+/gi, "Bearer [token removed]")
+    .replace(/eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g, "[token removed]")
+    .slice(0, 500);
+}
+
+function recordClientError(kind, error) {
+  const detail = String(error?.message || error?.reason || error || "").toLowerCase();
+  const category = /network|fetch|offline|connection/.test(detail)
+    ? "network"
+    : /auth|session|jwt|token|sign.?in/.test(detail)
+    ? "authentication"
+    : /storage|quota|indexeddb|localstorage/.test(detail)
+    ? "storage"
+    : /permission|policy|row.level|forbidden|unauthori[sz]ed/.test(detail)
+    ? "permission"
+    : "application";
+  recentClientErrors.unshift({
+    at: new Date().toISOString(),
+    kind: String(kind || "error").slice(0, 60),
+    type: redactDiagnosticText(error?.name || "Error").replace(/[^a-z0-9 _-]/gi, "").slice(0, 40) || "Error",
+    category,
+  });
+  recentClientErrors.splice(12);
+}
+
+function setupLaunchDiagnostics() {
+  window.addEventListener("error", (event) => {
+    recordClientError("window-error", event.error || event.message);
+  });
+  window.addEventListener("unhandledrejection", (event) => {
+    recordClientError("unhandled-rejection", event.reason);
+  });
+}
+
+async function diagnosticReportPayload() {
+  const health = drawingHealthItems();
+  const regression = runRegressionAutoChecks();
+  let serviceWorker = { supported: "serviceWorker" in navigator, controlled: Boolean(navigator.serviceWorker?.controller) };
+  try {
+    const registration = await navigator.serviceWorker?.getRegistration?.();
+    serviceWorker = {
+      ...serviceWorker,
+      registered: Boolean(registration),
+      installing: Boolean(registration?.installing),
+      waiting: Boolean(registration?.waiting),
+      active: Boolean(registration?.active),
+    };
+  } catch (error) {
+    recordClientError("service-worker-diagnostic", error);
+  }
+  return {
+    generatedAt: new Date().toISOString(),
+    app: { version: APP_VERSION, buildDate: APP_BUILD_DATE },
+    environment: {
+      userAgent: navigator.userAgent,
+      language: navigator.language,
+      online: navigator.onLine,
+      viewport: { width: window.innerWidth, height: window.innerHeight, pixelRatio: window.devicePixelRatio },
+      touchPoints: navigator.maxTouchPoints || 0,
+      standalone: window.matchMedia?.("(display-mode: standalone)")?.matches === true,
+    },
+    serviceWorker,
+    cloud: {
+      configured: supabaseConfigured(),
+      signedIn: Boolean(cloudUser),
+      activeLicense: hasActiveCloudLicense(),
+      teamApproved: activeCompanyIsApproved(),
+      currentProjectHasCloudRecord: currentProjectHasCloudRecord(),
+      saveDirty: cloudSaveDirty,
+      saveBusy: cloudAutosaveBusy,
+      saveConflict: cloudSaveConflict,
+      saveError: Boolean(cloudSaveError),
+    },
+    drawing: {
+      points: state.points.length,
+      runs: state.edges.length,
+      fittings: state.fittings.length,
+      measurements: state.measurements.length,
+      notes: (state.notes ?? []).length,
+      status: normalizeProjectStatus(state.projectStatus),
+      locked: state.locked === true,
+      revisionCount: normalizeRevisionHistory(state.revisionHistory).length,
+      health: health.reduce((summary, item) => {
+        const key = item.level === "error" ? "errors" : item.level === "warning" ? "warnings" : "info";
+        summary[key] += 1;
+        return summary;
+      }, { errors: 0, warnings: 0, info: 0 }),
+    },
+    regression: {
+      passed: regression.filter((item) => item.passed).length,
+      total: regression.length,
+      failedChecks: regression.filter((item) => !item.passed).map((item) => item.title),
+    },
+    recentErrors: recentClientErrors.slice(),
+    privacyNote: "This report excludes drawing geometry, project names, notes, photos, email addresses, passwords and authentication tokens.",
+  };
+}
+
+async function downloadDiagnosticReport() {
+  try {
+    const report = await diagnosticReportPayload();
+    downloadTextFile(JSON.stringify(report, null, 2), `spoolmate-diagnostics-${safeFilePart(APP_VERSION, "version")}-${Date.now()}.json`);
+    showAppNotice("Diagnostic report downloaded. Review it before attaching it to a public support request.", { tone: "success" });
+  } catch (error) {
+    recordClientError("diagnostic-download", error);
+    showAppNotice(error?.message || "Could not create the diagnostic report.");
+  }
+}
+
+async function exportCloudAccountData() {
+  if (!(await ensureSupabaseClient()) || !cloudUser) {
+    showAppNotice("Sign in before exporting account data.");
+    return;
+  }
+  accountExportDataButton.disabled = true;
+  try {
+    const own = (table, fields, column) => supabaseClient.from(table).select(fields).eq(column, cloudUser.id);
+    const [projectsResult, membershipsResult, commentsResult, messagesResult] = await Promise.all([
+      own(CLOUD_PROJECTS_TABLE, "id,owner_id,company_id,name,project_info,drawing_state,created_at,updated_at", "owner_id"),
+      own(CLOUD_COMPANY_MEMBERS_TABLE, "company_id,user_id,email,role,status,created_at,updated_at", "user_id"),
+      own(CLOUD_PROJECT_COMMENTS_TABLE, "id,project_id,company_id,author_id,author_email,body,mentions,photo_path,resolved,resolved_at,resolved_by,created_at,updated_at", "author_id"),
+      own(CLOUD_TEAM_MESSAGES_TABLE, "id,company_id,author_id,author_email,body,pinned,completed,completed_at,remove_after,created_at,updated_at", "author_id"),
+    ]);
+    const failed = [projectsResult, membershipsResult, commentsResult, messagesResult].find((result) => result.error);
+    if (failed?.error) throw failed.error;
+    const companyIds = [...new Set((membershipsResult.data ?? []).map((row) => row.company_id).filter(Boolean))];
+    let companies = [];
+    if (companyIds.length) {
+      const result = await supabaseClient.from(CLOUD_COMPANIES_TABLE).select("id,name,created_by,created_at,updated_at").in("id", companyIds);
+      if (result.error) throw result.error;
+      companies = result.data ?? [];
+    }
+    const payload = {
+      exportedAt: new Date().toISOString(),
+      appVersion: APP_VERSION,
+      account: { id: cloudUser.id, email: cloudUser.email, createdAt: cloudUser.created_at, profile: cloudProfile },
+      memberships: membershipsResult.data ?? [],
+      companies,
+      ownedCloudProjects: projectsResult.data ?? [],
+      authoredProjectComments: commentsResult.data ?? [],
+      authoredTeamMessages: messagesResult.data ?? [],
+      localBrowserProjects: loadSavedBrowserProjects(),
+      note: "Workshop photo paths are listed, but private photo binaries are not included in this JSON export.",
+    };
+    downloadTextFile(JSON.stringify(payload, null, 2), `spoolmate-account-export-${new Date().toISOString().slice(0, 10)}.json`);
+    showAppNotice("Account data export downloaded.", { tone: "success" });
+  } catch (error) {
+    recordClientError("account-data-export", error);
+    showAppNotice(error?.message || "Could not export account data.");
+  } finally {
+    accountExportDataButton.disabled = false;
+  }
+}
+
+async function deleteCloudAccount() {
+  if (!(await ensureSupabaseClient()) || !cloudUser) return;
+  const proceed = await confirmAppAction(
+    "Permanently delete this cloud account, its owned cloud projects and uploaded photos? Team owners must transfer or remove other members first. Local browser projects will remain on this device.",
+    { title: "Delete cloud account", confirmLabel: "Continue", tone: "danger" },
+  );
+  if (!proceed) return;
+  const confirmation = await openFieldInputDialog({
+    title: "Confirm permanent deletion",
+    label: "Type DELETE",
+    value: "",
+    type: "text",
+    help: "This cannot be undone. Export your account data first if you need a copy.",
+    submitLabel: "Delete account",
+  });
+  if (String(confirmation ?? "").trim().toUpperCase() !== "DELETE") {
+    showAppNotice("Account deletion cancelled because DELETE was not entered.");
+    return;
+  }
+  accountDeleteButton.disabled = true;
+  try {
+    const { data, error } = await supabaseClient.functions.invoke("delete-account", { body: { confirmation: "DELETE" } });
+    if (error) throw error;
+    if (!data?.deleted) throw new Error(data?.message || "The delete-account function did not confirm deletion.");
+    await applyCloudSession(null);
+    closeAuthDialog();
+    showAppNotice("Cloud account deleted. Local projects remain on this device.", { tone: "success" });
+  } catch (error) {
+    recordClientError("account-delete", error);
+    showAppNotice(error?.message || "Could not delete the cloud account. Confirm the protected delete-account Edge Function is deployed.");
+  } finally {
+    accountDeleteButton.disabled = false;
+  }
+}
+
+function resetSupportAdminAccess() {
+  supportAdminAccess = false;
+  supportAdminAccessCheckedUserId = "";
+  supportAdminSelectedUserId = "";
+  supportAdminCurrentDetail = null;
+  if (supportAdminButton) supportAdminButton.hidden = true;
+  if (supportAdminDialog) supportAdminDialog.hidden = true;
+}
+
+async function supportAdminErrorMessage(error) {
+  try {
+    const payload = await error?.context?.json?.();
+    if (payload?.message) return String(payload.message);
+  } catch {
+    // The function client may already have consumed the response body.
+  }
+  return String(error?.message || "Support Admin request failed.");
+}
+
+async function invokeSupportAdmin(action, body = {}) {
+  if (!(await ensureSupabaseClient()) || !cloudUser) throw new Error("Sign in before opening Support Admin.");
+  const { data, error } = await supabaseClient.functions.invoke(SUPPORT_ADMIN_FUNCTION, {
+    body: { action, ...body },
+  });
+  if (error) throw new Error(await supportAdminErrorMessage(error));
+  if (!data?.ok) throw new Error(data?.message || "Support Admin request failed.");
+  return data;
+}
+
+async function refreshSupportAdminAccess(options = {}) {
+  const userId = cloudUser?.id || "";
+  if (!userId) {
+    resetSupportAdminAccess();
+    return false;
+  }
+  if (!options.force && supportAdminAccessCheckedUserId === userId) return supportAdminAccess;
+  supportAdminAccessCheckedUserId = userId;
+  supportAdminAccess = false;
+  if (supportAdminButton) supportAdminButton.hidden = true;
+  try {
+    const result = await invokeSupportAdmin("me");
+    supportAdminAccess = result.authorised === true;
+    if (supportAdminButton) supportAdminButton.hidden = !supportAdminAccess;
+    if (supportAdminIdentity && supportAdminAccess) {
+      supportAdminIdentity.textContent = `${result.operator?.displayName || "SpoolMate operator"} / ${cloudUser.email || cloudUser.id} / protected server access confirmed`;
+    }
+  } catch (error) {
+    const message = String(error?.message || "");
+    if (!/not a SpoolMate platform administrator|401|403/i.test(message)) {
+      console.warn("Support Admin access check failed.", error);
+    }
+  }
+  return supportAdminAccess;
+}
+
+function setSupportAdminStatus(message, tone = "") {
+  if (!supportAdminStatus) return;
+  supportAdminStatus.textContent = String(message || "Ready.");
+  if (tone) supportAdminStatus.dataset.tone = tone;
+  else delete supportAdminStatus.dataset.tone;
+}
+
+function setSupportAdminBusy(busy) {
+  supportAdminBusy = Boolean(busy);
+  supportAdminSearchButton?.toggleAttribute("disabled", supportAdminBusy);
+  supportAdminRefreshButton?.toggleAttribute("disabled", supportAdminBusy);
+  supportAdminDetail?.querySelectorAll("button, select, input, textarea").forEach((control) => {
+    control.disabled = supportAdminBusy || control.dataset.supportPermanentDisabled === "true";
+  });
+}
+
+function supportAdminDate(value, includeTime = true) {
+  const date = value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.getTime())) return "Not recorded";
+  return includeTime
+    ? date.toLocaleString([], { dateStyle: "medium", timeStyle: "short" })
+    : date.toLocaleDateString([], { dateStyle: "medium" });
+}
+
+function supportAdminStatusLabel(status) {
+  return ({
+    trial: "Trial",
+    paid: "Paid",
+    grace: "Grace",
+    full: "Full",
+    expired: "Expired",
+    setup: "Setup needed",
+  })[String(status || "").toLowerCase()] || String(status || "Unknown");
+}
+
+function supportAdminSelectOptions(values, current) {
+  return values.map(([value, label]) =>
+    `<option value="${escapeHtml(value)}"${value === current ? " selected" : ""}>${escapeHtml(label)}</option>`
+  ).join("");
+}
+
+function renderSupportAdminOverview(payload) {
+  const stats = payload?.stats ?? {};
+  const items = [
+    [stats.users ?? 0, "Accounts"],
+    [stats.activeUsers30d ?? 0, "Active 30 days"],
+    [stats.personalTrials ?? 0, "Personal trials"],
+    [stats.personalExpired ?? 0, "Need attention"],
+    [stats.businesses ?? 0, "Businesses"],
+    [stats.cloudSpools ?? 0, "Cloud spools"],
+  ];
+  if (supportAdminSummary) {
+    supportAdminSummary.innerHTML = items.map(([value, label]) => `
+      <div class="support-admin-stat"><strong>${escapeHtml(String(value))}</strong><span>${escapeHtml(label)}</span></div>
+    `).join("");
+  }
+  if (supportAdminIdentity && payload?.operator) {
+    supportAdminIdentity.textContent = `${payload.operator.displayName || "SpoolMate operator"} / ${cloudUser?.email || cloudUser?.id || "signed in"} / protected server access confirmed`;
+  }
+  renderSupportAdminAudit(payload?.recentAudit ?? []);
+}
+
+function renderSupportAdminAudit(entries) {
+  if (!supportAdminAuditList) return;
+  if (!entries.length) {
+    supportAdminAuditList.innerHTML = '<div class="support-admin-audit-entry"><strong>No repairs recorded yet</strong><small>The first account change will appear here.</small></div>';
+    return;
+  }
+  supportAdminAuditList.innerHTML = entries.map((entry) => {
+    const failed = entry.after_state?.status === "failed";
+    return `
+      <div class="support-admin-audit-entry">
+        <strong>${escapeHtml(String(entry.action || "support action").replaceAll("_", " "))}</strong>
+        <small>${escapeHtml(entry.reason || "No reason recorded")}</small>
+        <small>${escapeHtml(supportAdminDate(entry.created_at))}${failed ? " / failed" : ""}</small>
+      </div>
+    `;
+  }).join("");
+}
+
+async function loadSupportAdminOverview() {
+  setSupportAdminBusy(true);
+  setSupportAdminStatus("Loading live account health…");
+  try {
+    const payload = await invokeSupportAdmin("overview");
+    renderSupportAdminOverview(payload);
+    setSupportAdminStatus("Live account overview refreshed.", "success");
+    return payload;
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
+async function openSupportAdminDialog() {
+  if (!supportAdminDialog) return;
+  const authorised = await refreshSupportAdminAccess({ force: true });
+  if (!authorised) throw new Error("This account is not authorised for SpoolMate Support Admin.");
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("support-admin");
+  supportAdminDialog.hidden = false;
+  setSupportAdminStatus("Loading live account health…");
+  await loadSupportAdminOverview();
+  window.setTimeout(() => supportAdminSearchInput?.focus(), 30);
+}
+
+function closeSupportAdminDialog() {
+  if (supportAdminDialog) supportAdminDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
+}
+
+function renderSupportAdminResults(users) {
+  if (!supportAdminResultList || !supportAdminResultCount) return;
+  supportAdminResultCount.textContent = `${users.length} ${users.length === 1 ? "account" : "accounts"}`;
+  if (!users.length) {
+    supportAdminResultList.innerHTML = '<div class="support-admin-empty"><strong>No account matched</strong><span>Try the complete email address or user ID.</span></div>';
+    return;
+  }
+  supportAdminResultList.innerHTML = users.map((user) => `
+    <button class="support-admin-result${user.id === supportAdminSelectedUserId ? " active" : ""}" type="button" data-support-user-id="${escapeHtml(user.id)}">
+      <strong>${escapeHtml(user.email || user.displayName || "Account without email")}</strong>
+      <small>${escapeHtml(user.displayName || user.id)}</small>
+      <span class="support-admin-result-meta">
+        <span class="support-admin-chip ${user.licenceActive ? "active" : "warning"}">${escapeHtml(supportAdminStatusLabel(user.licenceStatus))}</span>
+        <span class="support-admin-chip">${Number(user.cloudSpools) || 0} spools</span>
+        <span class="support-admin-chip">${Number(user.businesses) || 0} businesses</span>
+      </span>
+    </button>
+  `).join("");
+}
+
+async function searchSupportAdminUsers() {
+  const query = String(supportAdminSearchInput?.value || "").trim();
+  if (query.length < 2) {
+    supportAdminSearchInput?.focus();
+    throw new Error("Enter at least two characters to search.");
+  }
+  setSupportAdminBusy(true);
+  setSupportAdminStatus(`Searching for “${query}”…`);
+  try {
+    const result = await invokeSupportAdmin("search", { query });
+    renderSupportAdminResults(result.users ?? []);
+    setSupportAdminStatus(result.users?.length ? "Select an account to diagnose it." : "No customer account matched that search.");
+    return result.users ?? [];
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
+function supportAdminAccountFacts(detail) {
+  const user = detail?.user ?? {};
+  return [
+    ["Created", supportAdminDate(user.createdAt)],
+    ["Last sign-in", supportAdminDate(user.lastSignInAt)],
+    ["Email confirmed", supportAdminDate(user.confirmedAt)],
+    ["Account type", user.accountType || "Not recorded"],
+  ].map(([label, value]) => `<span class="support-admin-chip"><b>${escapeHtml(label)}:</b> ${escapeHtml(value)}</span>`).join("");
+}
+
+function renderSupportAdminMembership(membership, targetUserId) {
+  const company = membership.company;
+  if (!company) return "";
+  const ownerLocked = membership.role === "owner";
+  const licenceValues = [["trial", "Trial"], ["paid", "Paid"], ["grace", "Grace"], ["full", "Full"], ["expired", "Expired"]];
+  const roleValues = ownerLocked
+    ? [["owner", "Owner"]]
+    : [["admin", "Admin"], ["designer", "Designer"], ["checker", "Checker"], ["workshop", "Workshop"], ["viewer", "Viewer"]];
+  const statusValues = ownerLocked
+    ? [["approved", "Approved"]]
+    : [["pending", "Pending"], ["invited", "Invited"], ["approved", "Approved"], ["suspended", "Suspended"], ["rejected", "Rejected"]];
+  return `
+    <div class="support-admin-membership" data-support-company-card="${escapeHtml(company.id)}">
+      <div class="support-admin-project-row">
+        <div>
+          <strong>${escapeHtml(company.name || "Business workspace")}</strong>
+          <small>${escapeHtml(membership.role)} / ${escapeHtml(membership.status)} / created ${escapeHtml(supportAdminDate(company.created_at, false))}</small>
+        </div>
+        <span class="support-admin-chip ${["paid", "full"].includes(company.license_status) ? "active" : "warning"}">${escapeHtml(supportAdminStatusLabel(company.license_status))}</span>
+      </div>
+      <div class="support-admin-control-grid">
+        <label class="support-admin-control"><span>Business licence</span><select data-support-company-status>${supportAdminSelectOptions(licenceValues, company.license_status)}</select></label>
+        <label class="support-admin-control"><span>Included seats</span><input data-support-included-seats type="number" min="1" max="10000" value="${Number(company.included_seats) || 5}" /></label>
+        <label class="support-admin-control"><span>Extra seats</span><input data-support-extra-seats type="number" min="0" max="10000" value="${Number(company.extra_seats) || 0}" /></label>
+        <label class="support-admin-control"><span>Trial/grace days</span><input data-support-company-days type="number" min="1" max="3650" value="30" /></label>
+        <button class="primary-button" type="button" data-support-admin-action="company" data-company-id="${escapeHtml(company.id)}" data-target-user-id="${escapeHtml(targetUserId)}">Apply business access</button>
+      </div>
+      <div class="support-admin-control-grid">
+        <label class="support-admin-control"><span>Member role</span><select data-support-member-role${ownerLocked ? ' data-support-permanent-disabled="true" disabled' : ""}>${supportAdminSelectOptions(roleValues, membership.role)}</select></label>
+        <label class="support-admin-control"><span>Membership state</span><select data-support-member-status${ownerLocked ? ' data-support-permanent-disabled="true" disabled' : ""}>${supportAdminSelectOptions(statusValues, membership.status)}</select></label>
+        <button class="icon-button labeled" type="button" data-support-admin-action="membership" data-company-id="${escapeHtml(company.id)}" data-target-user-id="${escapeHtml(targetUserId)}"${ownerLocked ? ' data-support-permanent-disabled="true" disabled title="Use the ownership-transfer workflow for an Owner"' : ""}>Repair membership</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSupportAdminDetail(detail) {
+  if (!supportAdminDetail) return;
+  supportAdminCurrentDetail = detail;
+  const user = detail?.user ?? {};
+  const profile = detail?.profile ?? { license_status: "trial", trial_ends_at: null, grace_ends_at: null };
+  const licenceValues = [["trial", "Trial"], ["paid", "Paid"], ["grace", "Grace"], ["full", "Full"], ["expired", "Expired"]];
+  const memberships = detail?.memberships ?? [];
+  const projects = detail?.projects ?? [];
+  const personalDates = profile.license_status === "grace"
+    ? `Grace ends ${supportAdminDate(profile.grace_ends_at)}`
+    : profile.license_status === "trial"
+    ? `Trial ends ${supportAdminDate(profile.trial_ends_at)}`
+    : supportAdminStatusLabel(profile.license_status);
+  const projectRows = projects.slice(0, 20).map((project) => `
+    <div class="support-admin-project">
+      <div class="support-admin-project-row">
+        <strong>${escapeHtml(project.name || project.spoolNumber || project.id)}</strong>
+        <small>${escapeHtml(supportAdminDate(project.updatedAt))}</small>
+      </div>
+      <small>${escapeHtml([project.jobNumber && `Job ${project.jobNumber}`, project.spoolNumber && `Spool ${project.spoolNumber}`, project.status].filter(Boolean).join(" / ") || project.id)}</small>
+    </div>
+  `).join("");
+  const auditRows = (detail?.audit ?? []).slice(0, 12).map((entry) => `
+    <div class="support-admin-project">
+      <div class="support-admin-project-row"><strong>${escapeHtml(String(entry.action || "support action").replaceAll("_", " "))}</strong><small>${escapeHtml(supportAdminDate(entry.created_at))}</small></div>
+      <small>${escapeHtml(entry.reason || "No reason recorded")}</small>
+    </div>
+  `).join("");
+
+  supportAdminDetail.innerHTML = `
+    <div class="support-admin-account-head">
+      <div>
+        <h3>${escapeHtml(user.email || user.displayName || "Customer account")}</h3>
+        <div class="support-admin-account-id">${escapeHtml(user.id || "")}</div>
+      </div>
+      <div class="support-admin-chip-row">${supportAdminAccountFacts(detail)}</div>
+    </div>
+    <label class="support-admin-reason">
+      <span>Reason for the repair <b>(required and permanently audited)</b></span>
+      <textarea id="supportAdminReason" maxlength="500" placeholder="Example: Customer reported their paid account became read-only after changing devices."></textarea>
+    </label>
+    <div class="support-admin-panel-grid">
+      <section class="support-admin-panel">
+        <strong>Personal cloud access</strong>
+        <div class="support-admin-chip-row"><span class="support-admin-chip">${escapeHtml(personalDates)}</span><span class="support-admin-chip">${projects.length} owned cloud spools</span></div>
+        <div class="support-admin-control-grid">
+          <label class="support-admin-control"><span>Licence</span><select id="supportPersonalStatus">${supportAdminSelectOptions(licenceValues, profile.license_status || "trial")}</select></label>
+          <label class="support-admin-control"><span>Trial/grace days</span><input id="supportPersonalDays" type="number" min="1" max="3650" value="30" /></label>
+          <button class="primary-button" type="button" data-support-admin-action="personal" data-target-user-id="${escapeHtml(user.id)}">Apply personal access</button>
+        </div>
+      </section>
+      <section class="support-admin-panel">
+        <strong>Account recovery</strong>
+        <p>Send the standard secure Supabase password-reset email. SpoolMate never displays or changes the customer’s password here.</p>
+        <button class="icon-button labeled" type="button" data-support-admin-action="password-reset" data-target-user-id="${escapeHtml(user.id)}">Send password-reset email</button>
+      </section>
+      <section class="support-admin-panel wide">
+        <strong>Businesses and memberships (${memberships.length})</strong>
+        ${memberships.length ? memberships.map((membership) => renderSupportAdminMembership(membership, user.id)).join("") : "<p>This customer does not belong to a business workspace.</p>"}
+      </section>
+      <section class="support-admin-panel">
+        <strong>Recent cloud spools (${projects.length})</strong>
+        ${projectRows || "<p>No owned cloud spools were found.</p>"}
+      </section>
+      <section class="support-admin-panel">
+        <strong>Support history</strong>
+        ${auditRows || "<p>No earlier support repairs were found for this account.</p>"}
+      </section>
+    </div>
+  `;
+}
+
+async function loadSupportAdminUser(userId) {
+  const targetUserId = normalizeUuid(userId);
+  if (!targetUserId) throw new Error("That customer account ID is invalid.");
+  supportAdminSelectedUserId = targetUserId;
+  supportAdminResultList?.querySelectorAll("[data-support-user-id]").forEach((button) => {
+    button.classList.toggle("active", button.dataset.supportUserId === targetUserId);
+  });
+  setSupportAdminBusy(true);
+  setSupportAdminStatus("Loading account, businesses and cloud spools…");
+  try {
+    const result = await invokeSupportAdmin("detail", { targetUserId });
+    renderSupportAdminDetail(result.detail);
+    setSupportAdminStatus("Account diagnosis loaded. Enter a reason before making any change.", "success");
+    return result.detail;
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
+async function runSupportAdminAction(button) {
+  if (supportAdminBusy || !supportAdminSelectedUserId) return;
+  const action = button.dataset.supportAdminAction;
+  const targetUserId = button.dataset.targetUserId || supportAdminSelectedUserId;
+  const reason = String(document.querySelector("#supportAdminReason")?.value || "").trim();
+  if (reason.length < 8) {
+    document.querySelector("#supportAdminReason")?.focus();
+    throw new Error("Enter a clear support reason of at least 8 characters first.");
+  }
+  const labels = {
+    personal: "change this customer’s personal licence",
+    company: "change this business licence and seat allowance",
+    membership: "change this customer’s business membership",
+    "password-reset": "send this customer a password-reset email",
+  };
+  const confirmed = await confirmAppAction(
+    `Confirm that you want to ${labels[action] || "apply this support repair"}. The reason and before/after values will be permanently audited.`,
+    { title: "Confirm audited support action", confirmLabel: "Apply and record", tone: "warning" },
+  );
+  if (!confirmed) return;
+
+  const companyCard = button.closest("[data-support-company-card]");
+  let functionAction = "";
+  let payload = { targetUserId, reason };
+  if (action === "personal") {
+    functionAction = "set-personal-licence";
+    payload = {
+      ...payload,
+      status: document.querySelector("#supportPersonalStatus")?.value,
+      days: document.querySelector("#supportPersonalDays")?.value,
+    };
+  } else if (action === "company") {
+    functionAction = "set-company-entitlements";
+    payload = {
+      ...payload,
+      companyId: button.dataset.companyId,
+      status: companyCard?.querySelector("[data-support-company-status]")?.value,
+      includedSeats: companyCard?.querySelector("[data-support-included-seats]")?.value,
+      extraSeats: companyCard?.querySelector("[data-support-extra-seats]")?.value,
+      days: companyCard?.querySelector("[data-support-company-days]")?.value,
+    };
+  } else if (action === "membership") {
+    functionAction = "set-membership";
+    payload = {
+      ...payload,
+      companyId: button.dataset.companyId,
+      role: companyCard?.querySelector("[data-support-member-role]")?.value,
+      status: companyCard?.querySelector("[data-support-member-status]")?.value,
+    };
+  } else if (action === "password-reset") {
+    functionAction = "send-password-reset";
+    payload = { ...payload, redirectTo: `${location.origin}${location.pathname}` };
+  } else {
+    throw new Error("Unknown Support Admin action.");
+  }
+
+  setSupportAdminBusy(true);
+  setSupportAdminStatus("Applying the audited repair…");
+  try {
+    await invokeSupportAdmin(functionAction, payload);
+    setSupportAdminStatus("Support repair applied and recorded in the audit history.", "success");
+    await Promise.all([loadSupportAdminUser(targetUserId), loadSupportAdminOverview()]);
+  } finally {
+    setSupportAdminBusy(false);
+  }
+}
+
 function supabaseConfigured() {
   return Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 }
@@ -19153,6 +27349,77 @@ function formatCloudSaveTime(value, options = {}) {
   return options.full
     ? date.toLocaleString()
     : date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function readCloudSaveQueue() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CLOUD_SAVE_QUEUE_KEY));
+    return (Array.isArray(raw) ? raw : [])
+      .filter((entry) => normalizeProjectId(entry?.projectId) && entry?.record?.drawing_state)
+      .slice(0, 20);
+  } catch {
+    return [];
+  }
+}
+
+function writeCloudSaveQueue(entries) {
+  try {
+    localStorage.setItem(CLOUD_SAVE_QUEUE_KEY, JSON.stringify((Array.isArray(entries) ? entries : []).slice(0, 20)));
+  } catch (error) {
+    console.warn("Could not store the offline cloud-save queue.", error);
+  }
+}
+
+function currentCloudSaveQueueEntry() {
+  const projectId = normalizeProjectId(state.projectId);
+  if (!projectId) return null;
+  return readCloudSaveQueue().find((entry) =>
+    normalizeProjectId(entry.projectId) === projectId &&
+    (!entry.userId || entry.userId === cloudUser?.id)
+  ) ?? null;
+}
+
+function removeQueuedCloudSave(projectId = state.projectId) {
+  const id = normalizeProjectId(projectId);
+  if (!id) return;
+  writeCloudSaveQueue(readCloudSaveQueue().filter((entry) =>
+    normalizeProjectId(entry.projectId) !== id || (entry.userId && entry.userId !== cloudUser?.id)
+  ));
+}
+
+function queueCurrentCloudSave(reason = "offline", error = null, options = {}) {
+  const permission = currentDrawingProjectPermission();
+  const productionOnly = options.productionOnly === true;
+  if (
+    !cloudUser ||
+    !hasActiveCloudLicense() ||
+    (!permission.canEdit && !(productionOnly && permission.canManageProduction)) ||
+    !hasDrawingContent()
+  ) return false;
+  const record = cloudProjectRecord();
+  const projectId = normalizeProjectId(record.id);
+  if (!projectId) return false;
+  const queuedAt = new Date().toISOString();
+  const entry = {
+    projectId,
+    userId: cloudUser.id,
+    companyId: normalizeUuid(record.company_id),
+    queuedAt,
+    reason,
+    scope: productionOnly ? "production" : "drawing",
+    baseRemoteUpdatedAt: cloudLastRemoteUpdatedAt || cloudLastSavedAt || "",
+    record,
+  };
+  const remaining = readCloudSaveQueue().filter((item) =>
+    normalizeProjectId(item.projectId) !== projectId || (item.userId && item.userId !== cloudUser.id)
+  );
+  writeCloudSaveQueue([entry, ...remaining]);
+  cloudSaveDirty = true;
+  if (error) {
+    cloudSaveError = error?.message ? `Cloud save failed: ${error.message}` : "Cloud save failed.";
+  }
+  updateCloudStatus(reason === "offline" ? "Queued offline" : "Save failed / queued for retry", reason === "offline" ? "queued" : "error");
+  return true;
 }
 
 function readCloudSaveMetaStore() {
@@ -19225,11 +27492,13 @@ function currentProjectHasCloudRecord() {
 
 function cloudSaveTitle(defaultTitle) {
   const lines = [defaultTitle].filter(Boolean);
+  const queued = currentCloudSaveQueueEntry();
   if (cloudUser?.email) lines.push(cloudUser.email);
   if (cloudUser) lines.push(cloudLicenseText());
   if (activeCompany && activeCompanyMembership?.status === "approved") lines.push(`Team: ${activeCompany.name}`);
   if (state.projectId) lines.push(`Project: ${projectDisplayName()}`);
   if (cloudLastSavedAt) lines.push(`Last cloud save: ${formatCloudSaveTime(cloudLastSavedAt, { full: true })}`);
+  if (queued?.queuedAt) lines.push(`Recovery copy queued: ${formatCloudSaveTime(queued.queuedAt, { full: true })}`);
   if (cloudSaveDirty) lines.push("This drawing has changes waiting to save.");
   if (cloudSaveConflict) lines.push("A newer cloud copy was detected. Press Save to choose whether to overwrite it.");
   if (cloudSaveError) lines.push(cloudSaveError);
@@ -19264,6 +27533,7 @@ function markCloudSaveClean(remoteUpdatedAt, options = {}) {
   cloudSaveError = "";
   cloudLastSavedAt = updatedAt;
   cloudLastRemoteUpdatedAt = updatedAt;
+  removeQueuedCloudSave(id);
 
   if (id && options.writeMeta !== false) {
     const store = readCloudSaveMetaStore();
@@ -19282,6 +27552,36 @@ function markCloudSaveClean(remoteUpdatedAt, options = {}) {
 function markCloudSaveFailed(error) {
   cloudSaveError = error?.message ? `Cloud save failed: ${error.message}` : "Cloud save failed.";
   updateCloudStatus("Cloud save failed", "error");
+}
+
+async function retryQueuedCloudSave(options = {}) {
+  const queued = currentCloudSaveQueueEntry();
+  if (!queued && !cloudSaveError && !cloudSaveDirty) {
+    showAppNotice(cloudLastSavedAt
+      ? `All changes were saved to cloud at ${formatCloudSaveTime(cloudLastSavedAt, { full: true })}.`
+      : "There are no failed cloud changes to recover.");
+    return false;
+  }
+  if (!navigator.onLine) {
+    queueCurrentCloudSave("offline");
+    if (!options.automatic) showAppNotice("Your recovery copy is safely queued on this device and will retry when the connection returns.");
+    return false;
+  }
+  if (!options.automatic) createProjectBackup("before cloud save recovery");
+  cloudSaveError = "";
+  updateCloudStatus("Retrying cloud save...", "saving");
+  try {
+    const saved = await saveCloudProject({
+      silent: true,
+      recovery: true,
+      productionOnly: queued?.scope === "production",
+    });
+    if (saved && !options.automatic) showAppNotice("Recovered changes saved to cloud.", { tone: "success" });
+    return saved;
+  } catch (error) {
+    if (!options.automatic) showAppNotice("The cloud save still failed. Your recovery copy remains queued on this device.", { tone: "warning" });
+    return false;
+  }
 }
 
 function remoteCloudProjectIsNewer(remoteUpdatedAt) {
@@ -19359,8 +27659,10 @@ function withCloudDirtySuppressed(callback) {
 
 function updateCloudStatus(message = null, mode = "") {
   ensureCloudSaveTrackingProject();
+  const queued = currentCloudSaveQueueEntry();
   const signedIn = Boolean(cloudUser);
   const active = signedIn && hasActiveCloudLicense();
+  const readable = signedIn && hasCloudReadAccess();
   const teamSuffix = activeCompany && activeCompanyMembership?.status === "approved"
     ? ` / ${activeCompany.name}`
     : activeCompany && activeCompanyMembership?.status === "pending"
@@ -19375,6 +27677,10 @@ function updateCloudStatus(message = null, mode = "") {
         ? "Cloud conflict"
         : cloudSaveError
         ? "Cloud save failed"
+        : queued
+        ? navigator.onLine
+          ? "Cloud save queued"
+          : "Queued offline"
         : cloudSaveDirty
         ? state.projectId
           ? "Unsaved changes"
@@ -19384,12 +27690,15 @@ function updateCloudStatus(message = null, mode = "") {
         : hasDrawingContent()
         ? "Not cloud saved"
         : "Cloud ready"
+      : readable
+      ? "Cloud read only"
       : cloudProfile
-      ? "Trial expired"
+      ? "Licence inactive"
       : "Cloud setup needed"
     : "Local only";
-  const text = message || defaultMessage;
-  const inferredMode = mode
+  const inferredMode = (!navigator.onLine && queued ? "queued" : "")
+    || mode
+    || (message && /queued|offline copy/i.test(message) ? "queued" : "")
     || (message && /conflict|newer/i.test(message) ? "conflict" : "")
     || (message && /failed|unavailable/i.test(message) ? "error" : "")
     || (message && /saving|loading|connecting|resending|creating|signing/i.test(message) ? "saving" : "")
@@ -19400,17 +27709,46 @@ function updateCloudStatus(message = null, mode = "") {
     || (cloudSaveError ? "error" : "")
     || (cloudSaveDirty ? "dirty" : "")
     || (hasCloudRecord && cloudLastSavedAt ? "saved" : "signed-in");
+  const canonicalMode = inferredMode === "saving" || inferredMode === "dirty"
+    ? "saving"
+    : inferredMode === "queued"
+    ? "queued"
+    : inferredMode === "error" || inferredMode === "conflict"
+    ? "error"
+    : inferredMode === "saved" || (active && hasCloudRecord && cloudLastSavedAt && !cloudSaveDirty)
+    ? "saved"
+    : "local";
+  let text = canonicalMode === "saving"
+    ? "Saving…"
+    : canonicalMode === "error"
+    ? "Save failed"
+    : canonicalMode === "saved"
+    ? "Saved to cloud"
+    : "Local only";
+  if (canonicalMode === "queued") {
+    text = navigator.onLine ? "Queued / Retry" : "Queued offline";
+  } else if (canonicalMode === "error") {
+    text = "Save failed / Retry";
+  } else if (canonicalMode === "saved") {
+    text = `Saved ${formatCloudSaveTime(cloudLastSavedAt) || "to cloud"}`;
+  }
 
   if (cloudSyncStatus) {
     cloudSyncStatus.textContent = text;
-    cloudSyncStatus.title = cloudSaveTitle(signedIn && cloudUser?.email ? `${cloudUser.email}${teamSuffix}` : "Not signed in");
-    cloudSyncStatus.classList.toggle("signed-in", inferredMode === "signed-in");
-    cloudSyncStatus.classList.toggle("saving", inferredMode === "saving");
-    cloudSyncStatus.classList.toggle("saved", inferredMode === "saved");
-    cloudSyncStatus.classList.toggle("dirty", inferredMode === "dirty");
-    cloudSyncStatus.classList.toggle("conflict", inferredMode === "conflict");
-    cloudSyncStatus.classList.toggle("error", inferredMode === "error");
-    cloudSyncStatus.classList.toggle("warning", inferredMode === "warning");
+    cloudSyncStatus.dataset.status = canonicalMode;
+    cloudSyncStatus.title = cloudSaveTitle([
+      canonicalMode === "saving" ? "Saving changes to cloud" : "",
+      canonicalMode === "queued" ? "A recovery copy is stored on this device. Press to retry." : "",
+      canonicalMode === "saved" ? "All changes saved to cloud" : "",
+      canonicalMode === "error" ? (message || cloudSaveError || defaultMessage) : "",
+      canonicalMode === "local" ? defaultMessage : "",
+      signedIn && cloudUser?.email ? `${cloudUser.email}${teamSuffix}` : "Not signed in",
+    ].filter(Boolean).join(" / "));
+    cloudSyncStatus.setAttribute("aria-label", `${text}. ${cloudSyncStatus.title}`);
+    cloudSyncStatus.setAttribute("aria-disabled", String(canonicalMode !== "queued" && canonicalMode !== "error"));
+    for (const status of ["signed-in", "saving", "saved", "dirty", "queued", "conflict", "error", "warning", "local"]) {
+      cloudSyncStatus.classList.toggle(status, status === canonicalMode);
+    }
   }
   if (accountButtonLabel) {
     accountButtonLabel.textContent = signedIn ? "Account" : "Sign in";
@@ -19427,39 +27765,245 @@ function updateCloudStatus(message = null, mode = "") {
   if (authSignInButton) authSignInButton.disabled = signedIn;
   if (authSignUpButton) authSignUpButton.disabled = signedIn;
   setAuthMode(authMode, { keepStatus: true });
+  updateLicencePresentation();
   if (saveBrowserProjectButton) {
     saveBrowserProjectButton.title = signedIn && active
       ? "Save project to cloud and this browser"
+      : signedIn && readable
+      ? "Save local projects in this browser; cloud editing is paused"
       : "Save project in this browser";
   }
   if (openBrowserProjectButton) {
-    openBrowserProjectButton.title = signedIn && active
-      ? "Open cloud saved project"
+    openBrowserProjectButton.title = signedIn && readable
+      ? active
+        ? "Open cloud saved project"
+        : "Open cloud saved project in read-only mode"
       : "Open saved project from this browser";
   }
+  renderRoleAccessNotice();
+  renderWorkspaceLocationStrips();
+}
+
+function cloudProfileDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+}
+
+function cloudLicenceState(profile = cloudProfile, nowValue = Date.now()) {
+  if (!profile) return "setup";
+  const status = String(profile.license_status ?? "trial").toLowerCase();
+  if (status === "full" || status === "paid") return status;
+  const now = Number(nowValue) || Date.now();
+  if (status === "grace" || status === "past_due") {
+    const graceEnds = cloudProfileDate(profile.grace_ends_at);
+    return graceEnds && graceEnds.getTime() > now ? "grace" : "expired";
+  }
+  if (status === "trial") {
+    const trialEnds = cloudProfileDate(profile.trial_ends_at);
+    return trialEnds && trialEnds.getTime() > now ? "trial" : "expired";
+  }
+  return "expired";
+}
+
+function businessLicenceState(company = activeCompany, nowValue = Date.now()) {
+  if (!company) return "setup";
+  return cloudLicenceState({
+    license_status: company.licenseStatus,
+    trial_ends_at: company.trialEndsAt,
+    grace_ends_at: company.graceEndsAt,
+  }, nowValue);
+}
+
+function activeWorkspaceIsBusiness() {
+  return Boolean(activeCompany && activeCompanyMembership?.status === "approved");
+}
+
+function activeWorkspaceLabel() {
+  return activeWorkspaceIsBusiness() ? activeCompany.name : "Personal";
+}
+
+function licenceDaysRemaining(value, nowValue = Date.now()) {
+  const endsAt = cloudProfileDate(value);
+  if (!endsAt) return 0;
+  return Math.max(0, Math.ceil((endsAt.getTime() - (Number(nowValue) || Date.now())) / 86400000));
+}
+
+function licenceDaysText(days) {
+  const count = Math.max(0, Number(days) || 0);
+  return `${count} day${count === 1 ? "" : "s"}`;
 }
 
 function cloudLicenseText(profile = cloudProfile) {
   if (!cloudUser) return "Local only";
-  if (!profile) return "No licence profile";
-  const status = String(profile.license_status ?? "trial").toLowerCase();
-  if (status === "full") return "Full licence";
-  if (status === "paid") return "Paid licence";
-  const trialEnds = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-  if (status === "trial" && trialEnds && trialEnds > new Date()) {
-    const days = Math.max(1, Math.ceil((trialEnds - new Date()) / 86400000));
+  const business = activeWorkspaceIsBusiness();
+  const source = business
+    ? {
+        license_status: activeCompany.licenseStatus,
+        trial_ends_at: activeCompany.trialEndsAt,
+        grace_ends_at: activeCompany.graceEndsAt,
+      }
+    : profile;
+  if (!source) return "No licence profile";
+  const state = business ? businessLicenceState(activeCompany) : cloudLicenceState(source);
+  if (state === "full") return "Full licence";
+  if (state === "paid") return "Paid licence";
+  if (state === "grace") {
+    const days = Math.max(1, licenceDaysRemaining(source.grace_ends_at));
+    return `Payment grace ${days} day${days === 1 ? "" : "s"} left`;
+  }
+  if (state === "trial") {
+    const days = Math.max(1, licenceDaysRemaining(source.trial_ends_at));
     return `Trial ${days} day${days === 1 ? "" : "s"} left`;
   }
-  return "Trial expired";
+  return "Read-only cloud access";
+}
+
+function hasCloudReadAccess(profile = cloudProfile) {
+  return Boolean(cloudUser && profile);
 }
 
 function hasActiveCloudLicense(profile = cloudProfile) {
-  if (!cloudUser || !profile) return false;
-  const status = String(profile.license_status ?? "trial").toLowerCase();
-  if (status === "full" || status === "paid") return true;
-  if (status !== "trial") return false;
-  const trialEnds = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null;
-  return Boolean(trialEnds && trialEnds > new Date());
+  if (!cloudUser) return false;
+  if (activeWorkspaceIsBusiness()) {
+    return ["full", "paid", "trial", "grace"].includes(businessLicenceState(activeCompany));
+  }
+  if (!profile) return false;
+  return ["full", "paid", "trial", "grace"].includes(cloudLicenceState(profile));
+}
+
+function cloudReadOnlyMessage(action = "change this cloud spool") {
+  if (!hasActiveCloudLicense()) {
+    return `Your trial or licence has expired. Existing cloud spools remain available to view and export, but you cannot ${action} until the licence is upgraded.`;
+  }
+  return `This team spool is view/comment only for your role. Ask the project owner or a team admin before you ${action}.`;
+}
+
+function licenceWarningModel(profile = cloudProfile) {
+  const business = activeWorkspaceIsBusiness();
+  const source = business
+    ? { trial_ends_at: activeCompany?.trialEndsAt, grace_ends_at: activeCompany?.graceEndsAt }
+    : profile;
+  const state = business ? businessLicenceState(activeCompany) : cloudLicenceState(profile);
+  if (state === "trial") {
+    const days = licenceDaysRemaining(source?.trial_ends_at);
+    if (days > 7) return null;
+    const level = days <= 1 ? "trial-1" : days <= 3 ? "trial-3" : "trial-7";
+    return {
+      state,
+      level,
+      title: days <= 1 ? "Trial ends within one day" : `Trial ends in ${days} days`,
+      message: "Upgrade to keep cloud editing, saving and collaboration active. Your existing cloud spools will remain available to view and export.",
+    };
+  }
+  if (state === "grace") {
+    const days = Math.max(1, licenceDaysRemaining(source?.grace_ends_at));
+    return {
+      state,
+      level: `grace-${days}`,
+      title: `Payment grace period: ${days} day${days === 1 ? "" : "s"} left`,
+      message: "Cloud editing remains active during the grace period. Update the licence before it changes to read-only access.",
+    };
+  }
+  if (state === "expired") {
+    return {
+      state,
+      level: "expired",
+      title: "Cloud projects are read only",
+      message: "You can still open, view and export existing cloud spools. Cloud saves, edits, comments, photos and team changes are paused.",
+    };
+  }
+  return null;
+}
+
+function setAccountCapabilities(items) {
+  if (!accountPlanCapabilities) return;
+  accountPlanCapabilities.replaceChildren(...items.map((text) => {
+    const item = document.createElement("li");
+    item.textContent = text;
+    return item;
+  }));
+}
+
+function updateLicencePresentation() {
+  const signedIn = Boolean(cloudUser);
+  const business = activeWorkspaceIsBusiness();
+  const state = business ? businessLicenceState(activeCompany) : cloudLicenceState();
+  const licenceSource = business
+    ? { trial_ends_at: activeCompany?.trialEndsAt, grace_ends_at: activeCompany?.graceEndsAt }
+    : cloudProfile;
+  const warning = signedIn ? licenceWarningModel() : null;
+
+  if (accountPlanPanel) {
+    accountPlanPanel.hidden = !signedIn;
+    accountPlanPanel.classList.toggle("expired", state === "expired");
+    accountPlanPanel.classList.toggle("grace", state === "grace");
+  }
+  if (accountPlanUpgradeButton) accountPlanUpgradeButton.hidden = !signedIn || state === "full" || state === "paid";
+  if (signedIn) {
+    const plan = state === "full"
+      ? { badge: "Owner", title: "Full licence", message: "Permanent cloud access is active.", countdown: "No trial expiry." }
+      : state === "paid"
+      ? { badge: "Paid", title: "Paid licence", message: "Full cloud access is active.", countdown: "Licence active." }
+      : state === "grace"
+      ? { badge: "Grace", title: "Payment grace period", message: "Cloud access remains active temporarily.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(licenceSource?.grace_ends_at)))} remaining.` }
+      : state === "trial"
+      ? { badge: "Trial", title: `${TRIAL_LENGTH_DAYS}-day ${business ? "business " : ""}cloud trial`, message: "Full cloud saving and collaboration are active.", countdown: `${licenceDaysText(Math.max(1, licenceDaysRemaining(licenceSource?.trial_ends_at)))} remaining.` }
+      : { badge: "Expired", title: "Read-only cloud access", message: "Existing cloud spools stay available; cloud editing is paused.", countdown: "Upgrade to restore cloud saving and collaboration." };
+    if (accountPlanBadge) accountPlanBadge.textContent = plan.badge;
+    if (accountPlanTitle) accountPlanTitle.textContent = plan.title;
+    if (accountPlanMessage) accountPlanMessage.textContent = plan.message;
+    if (accountPlanCountdown) accountPlanCountdown.textContent = plan.countdown;
+    setAccountCapabilities(state === "expired"
+      ? [
+          "Open, view, download and export existing cloud spools",
+          "Continue creating local browser projects on this device",
+          "Use built-in Ask SpoolMate guides while extra AI answers are paused",
+          "Cloud saves, edits, comments, photos and team changes are paused",
+        ]
+      : [
+          "Create, edit and synchronise cloud spools across devices",
+          business
+            ? `${activeCompany.includedSeats} included people plus ${activeCompany.extraSeats} additional paid seat${activeCompany.extraSeats === 1 ? "" : "s"}`
+            : "Use your private Personal workspace across devices",
+          state === "trial" ? "Use up to 10 Ask SpoolMate AI answers each day" : "Use up to 50 Ask SpoolMate AI answers each day",
+          "Download project and account-data exports at any time",
+        ]);
+  }
+
+  if (licenceBanner) {
+    licenceBanner.hidden = !warning;
+    licenceBanner.classList.toggle("expired", warning?.state === "expired");
+    licenceBanner.classList.toggle("grace", warning?.state === "grace");
+  }
+  if (licenceBannerTitle && warning) licenceBannerTitle.textContent = warning.title;
+  if (licenceBannerMessage && warning) licenceBannerMessage.textContent = warning.message;
+  updateAiHelperAvailability();
+}
+
+function maybeShowLicenceWarning() {
+  if (!cloudUser) return;
+  const warning = licenceWarningModel();
+  if (!warning) return;
+  const key = `${cloudUser.id}:${warning.level}`;
+  try {
+    if (localStorage.getItem(LICENCE_NOTICE_KEY) === key) return;
+    localStorage.setItem(LICENCE_NOTICE_KEY, key);
+  } catch {
+    // The persistent banner still provides the warning when storage is unavailable.
+  }
+  showAppNotice(warning.message, { title: warning.title, tone: "warning", timeoutMs: 9000 });
+}
+
+function requestLicenceUpgrade() {
+  if (LICENCE_UPGRADE_URL) {
+    window.open(LICENCE_UPGRADE_URL, "_blank", "noopener,noreferrer");
+    return;
+  }
+  showAppNotice("Online licence checkout is not connected yet. Contact the SpoolMate operator to activate or renew this account.", {
+    title: "Licence upgrade",
+    tone: "warning",
+    timeoutMs: 9000,
+  });
 }
 
 function activeCompanyIsApproved() {
@@ -19467,11 +28011,11 @@ function activeCompanyIsApproved() {
 }
 
 function activeCompanyCanAdmin() {
-  return activeCompanyIsApproved() && ["owner", "admin"].includes(activeCompanyMembership?.role);
+  return hasActiveCloudLicense() && activeCompanyIsApproved() && ["owner", "admin"].includes(activeCompanyMembership?.role);
 }
 
 function activeCompanyCanManageRoles() {
-  return activeCompanyIsApproved() && activeCompanyMembership?.role === "owner";
+  return hasActiveCloudLicense() && activeCompanyIsApproved() && activeCompanyMembership?.role === "owner";
 }
 
 function companyMembershipForCurrentUser(companyId) {
@@ -19499,6 +28043,7 @@ function projectPermission(project, options = {}) {
       canComment: false,
       canEdit: true,
       canIssue: true,
+      canManageProduction: true,
       canDelete: true,
       label: "Local editable",
     };
@@ -19507,24 +28052,158 @@ function projectPermission(project, options = {}) {
   const ownerId = normalizeUuid(project?.ownerId);
   const companyId = normalizeUuid(project?.companyId);
   const ownsProject = Boolean(cloudUser?.id && ownerId === cloudUser.id);
-  const companyMember = currentUserIsCompanyMember(companyId);
-  const companyAdmin = currentUserCanAdminCompany(companyId);
-  const canEdit = ownsProject || companyAdmin;
+  const membership = companyMembershipForCurrentUser(companyId);
+  const companyMember = membership?.status === "approved";
+  const role = membership?.role || "";
+  const companyAdmin = companyMember && ["owner", "admin"].includes(role);
+  const canWriteCloud = hasActiveCloudLicense();
+  const personal = !companyId;
+  const canEdit = canWriteCloud && (personal
+    ? ownsProject
+    : companyMember && ["owner", "admin", "designer", "checker"].includes(role));
+  const canIssue = canWriteCloud && (personal
+    ? ownsProject
+    : companyMember && ["owner", "admin", "checker"].includes(role));
+  const canManageProduction = canWriteCloud && (personal
+    ? ownsProject
+    : companyMember && ["owner", "admin", "checker", "workshop"].includes(role));
 
   return {
-    canView: ownsProject || companyMember,
-    canComment: ownsProject || companyMember,
+    canView: hasCloudReadAccess() && (ownsProject || companyMember),
+    canComment: canWriteCloud && (ownsProject || (companyMember && role !== "viewer")),
     canEdit,
-    canIssue: canEdit,
-    canDelete: ownsProject || companyAdmin,
+    canIssue,
+    canManageProduction,
+    canDelete: canWriteCloud && (personal ? ownsProject : companyAdmin),
     label: canEdit
       ? ownsProject
         ? "Owner editable"
-        : "Team admin editable"
+        : `${role || "Business"} editable`
+      : !canWriteCloud
+      ? "Licence expired / read only"
       : companyMember
-      ? "Member view/comment"
+      ? `${role || "Business"} access`
       : "Cloud read only",
   };
+}
+
+function workspaceCompanyOptions() {
+  return cloudCompanyMemberships
+    .filter((member) => member.status === "approved")
+    .map((member) => ({
+      company: cloudCompanies.find((company) => company.id === member.companyId),
+      membership: member,
+    }))
+    .filter((item) => item.company);
+}
+
+function renderWorkspaceChoices() {
+  const signedIn = Boolean(cloudUser);
+  const options = workspaceCompanyOptions();
+  const currentValue = activeWorkspaceIsBusiness() ? `business:${activeCompany.id}` : "personal";
+
+  if (workspaceSwitcher) {
+    workspaceSwitcher.hidden = !signedIn;
+    workspaceSwitcher.replaceChildren();
+    const personal = document.createElement("option");
+    personal.value = "personal";
+    personal.textContent = "Personal";
+    workspaceSwitcher.append(personal);
+    for (const { company } of options) {
+      const option = document.createElement("option");
+      option.value = `business:${company.id}`;
+      option.textContent = company.name;
+      workspaceSwitcher.append(option);
+    }
+    workspaceSwitcher.value = currentValue;
+  }
+
+  if (accountWorkspacePanel) accountWorkspacePanel.hidden = !signedIn;
+  if (!accountWorkspaceList) return;
+  accountWorkspaceList.replaceChildren();
+  if (!signedIn) return;
+
+  const choices = [
+    { value: "personal", title: "Personal", detail: "Private jobs and your personal licence" },
+    ...options.map(({ company, membership }) => ({
+      value: `business:${company.id}`,
+      title: company.name,
+      detail: `Business workspace / ${businessRoleLabel(membership.role)}`,
+    })),
+  ];
+  for (const choice of choices) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "account-workspace-choice";
+    button.classList.toggle("active", choice.value === currentValue);
+    button.dataset.workspaceId = choice.value;
+    const title = document.createElement("b");
+    title.textContent = choice.title;
+    const detail = document.createElement("small");
+    detail.textContent = choice.detail;
+    button.append(title, detail);
+    accountWorkspaceList.append(button);
+  }
+}
+
+async function selectWorkspace(value) {
+  const selection = String(value ?? "personal");
+  if (selection === "personal") {
+    activatePersonalWorkspace();
+  } else if (selection.startsWith("business:")) {
+    const activated = await activateCompanyFromId(selection.slice(9));
+    if (!activated) throw new Error("You do not have approved access to that business.");
+  }
+  projectLibraryOpenFolderKey = "";
+  if (projectLibraryDialog && !projectLibraryDialog.hidden && projectLibrarySource === "cloud") {
+    await openBrowserProject({ source: "cloud", keepSearch: true });
+  }
+}
+
+function businessRoleLabel(role) {
+  return ({
+    owner: "Owner",
+    admin: "Admin",
+    designer: "Designer",
+    checker: "Checker",
+    workshop: "Workshop",
+    viewer: "Viewer",
+    member: "Workshop",
+  })[role] || "Workshop";
+}
+
+function roleRequirementText(capability) {
+  if (capability === "issue") return "Approval and issue require a Checker, Admin or Owner.";
+  if (capability === "production") return "Production and weld updates require a Workshop, Checker, Admin or Owner.";
+  if (capability === "edit") return "Drawing edits require a Designer, Checker, Admin or Owner.";
+  if (capability === "comment") return "Comments require a Workshop role or higher.";
+  if (capability === "delete") return "Deleting business spools requires an Admin or Owner.";
+  return "Ask a business Admin or Owner for access.";
+}
+
+function currentRoleAccessText() {
+  if (!activeCompanyIsApproved()) return "";
+  const role = activeCompanyMembership?.role || "workshop";
+  const label = businessRoleLabel(role);
+  if (role === "owner" || role === "admin" || role === "checker") return "";
+  if (role === "designer") return `${label} access: drawing and comments are available. ${roleRequirementText("issue")} ${roleRequirementText("production")}`;
+  if (role === "viewer") return `${label} access: view and export only. ${roleRequirementText("comment")} ${roleRequirementText("edit")}`;
+  return `${label} access: production, weld and comment controls are available. ${roleRequirementText("edit")} ${roleRequirementText("issue")}`;
+}
+
+function renderRoleAccessNotice() {
+  if (!roleAccessNotice) return;
+  const text = currentRoleAccessText();
+  roleAccessNotice.hidden = !text;
+  roleAccessNotice.textContent = text;
+}
+
+function currentPermissionRestrictionText(capability) {
+  if (!hasActiveCloudLicense()) return cloudReadOnlyMessage("perform this action");
+  if (activeCompanyIsApproved()) return roleRequirementText(capability);
+  if (capability === "issue") return "Only the owner of a Personal spool can approve or issue it.";
+  if (capability === "delete") return "Only the owner of a Personal spool can delete it.";
+  return "Only the owner of this Personal spool can change it.";
 }
 
 function currentDrawingProjectPermission() {
@@ -19562,12 +28241,16 @@ function clearTeamWorkspace() {
   teamMessagesCompanyId = null;
   teamMessagesError = "";
   renderTeamWorkspace();
+  renderWorkspaceChoices();
   renderProjectLibraryComms(projectLibraryProjects);
   renderProjectComments();
 }
 
 function storedActiveCompanyId() {
   try {
+    const workspace = String(localStorage.getItem(ACTIVE_WORKSPACE_KEY) ?? "");
+    if (workspace === "personal") return null;
+    if (workspace.startsWith("business:")) return normalizeUuid(workspace.slice(9));
     return normalizeUuid(localStorage.getItem(ACTIVE_COMPANY_KEY));
   } catch {
     return null;
@@ -19579,11 +28262,37 @@ function storeActiveCompanyId(companyId) {
     const id = normalizeUuid(companyId);
     if (id) {
       localStorage.setItem(ACTIVE_COMPANY_KEY, id);
+      localStorage.setItem(ACTIVE_WORKSPACE_KEY, `business:${id}`);
     } else {
       localStorage.removeItem(ACTIVE_COMPANY_KEY);
+      localStorage.setItem(ACTIVE_WORKSPACE_KEY, "personal");
     }
   } catch {
     // Team selection still works for this session if local storage is blocked.
+  }
+}
+
+function storedWorkspacePrefersPersonal() {
+  try {
+    return localStorage.getItem(ACTIVE_WORKSPACE_KEY) === "personal";
+  } catch {
+    return false;
+  }
+}
+
+function activatePersonalWorkspace() {
+  activeCompany = null;
+  activeCompanyMembership = null;
+  companyMembers = [];
+  storeActiveCompanyId(null);
+  cloudProjectCache = null;
+  renderTeamWorkspace();
+  renderWorkspaceChoices();
+  updateCloudStatus();
+  updateLicencePresentation();
+  hydrateCloudDashboardPreferences();
+  if (projectLibraryDialog && !projectLibraryDialog.hidden) {
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
   }
 }
 
@@ -19598,8 +28307,14 @@ function setActiveCompanyFromId(companyId) {
   activeCompany = company;
   activeCompanyMembership = membership;
   storeActiveCompanyId(id);
+  cloudProjectCache = null;
   renderTeamWorkspace();
+  renderWorkspaceChoices();
   updateCloudStatus();
+  hydrateCloudDashboardPreferences();
+  if (projectLibraryDialog && !projectLibraryDialog.hidden) {
+    renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  }
   return true;
 }
 
@@ -19612,7 +28327,7 @@ async function activateCompanyFromId(companyId) {
 }
 
 async function loadTeamWorkspace(options = {}) {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense()) {
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess()) {
     clearTeamWorkspace();
     return;
   }
@@ -19634,7 +28349,7 @@ async function loadTeamWorkspace(options = {}) {
     if (companyIds.length) {
       const { data: companyRows, error: companyError } = await supabaseClient
         .from(CLOUD_COMPANIES_TABLE)
-        .select("id,name,invite_code,created_by,created_at,updated_at")
+        .select("id,name,invite_code,created_by,license_status,trial_started_at,trial_ends_at,grace_ends_at,included_seats,extra_seats,created_at,updated_at")
         .in("id", companyIds);
       if (companyError) throw companyError;
       companies = (companyRows ?? []).map(normalizeCompany).filter(Boolean);
@@ -19642,18 +28357,19 @@ async function loadTeamWorkspace(options = {}) {
 
     cloudCompanies = companies;
     const savedCompanyId = storedActiveCompanyId();
-    activeCompanyMembership =
-      memberships.find((member) => member.status === "approved" && member.companyId === savedCompanyId) ||
-      memberships.find((member) => member.status === "approved") ||
-      memberships.find((member) => member.companyId === savedCompanyId) ||
-      memberships[0] ||
-      null;
+    activeCompanyMembership = storedWorkspacePrefersPersonal()
+      ? null
+      : memberships.find((member) => member.status === "approved" && member.companyId === savedCompanyId) ||
+        memberships.find((member) => member.companyId === savedCompanyId) ||
+        memberships.find((member) => member.status === "approved") ||
+        memberships[0] ||
+        null;
     activeCompany = activeCompanyMembership
       ? companies.find((company) => company.id === activeCompanyMembership.companyId) ?? null
       : null;
     if (activeCompany) {
       storeActiveCompanyId(activeCompany.id);
-    } else {
+    } else if (!storedWorkspacePrefersPersonal()) {
       storeActiveCompanyId(null);
     }
 
@@ -19662,6 +28378,7 @@ async function loadTeamWorkspace(options = {}) {
       await loadTeamMessages({ silent: true });
     }
     renderTeamWorkspace();
+    renderWorkspaceChoices();
     updateCloudStatus();
   } catch (error) {
     console.warn("Could not load team workspace.", error);
@@ -19694,25 +28411,42 @@ function renderTeamWorkspace(errorMessage = "") {
   if (!signedIn) return;
 
   const active = hasActiveCloudLicense();
-  if (teamCreateButton) teamCreateButton.disabled = !active;
-  if (teamJoinButton) teamJoinButton.disabled = !active;
-  if (teamRefreshButton) teamRefreshButton.disabled = !active;
+  if (teamCreateButton) teamCreateButton.disabled = !signedIn;
+  if (teamJoinButton) teamJoinButton.disabled = !signedIn;
+  if (teamRefreshButton) teamRefreshButton.disabled = !hasCloudReadAccess();
 
   if (teamWorkspaceStatus) {
     if (errorMessage) {
       teamWorkspaceStatus.textContent = errorMessage;
     } else if (!active) {
-      teamWorkspaceStatus.textContent = "An active trial or licence is required for team projects.";
+      teamWorkspaceStatus.textContent = activeCompany
+        ? `${activeCompany.name} is available read only. Upgrade to change team projects, members or messages.`
+        : "Team access is read only. Upgrade to create or join a team.";
     } else if (!activeCompany) {
-      teamWorkspaceStatus.textContent = "No team workspace yet. Create one or join with an invite code.";
+      teamWorkspaceStatus.textContent = cloudCompanies.length
+        ? "Personal is selected. Choose a business workspace above, create another, or join with an invite code."
+        : "No business workspace yet. Create one or join with an invite code.";
     } else if (activeCompanyMembership?.status === "pending") {
       teamWorkspaceStatus.textContent = `Join request for ${activeCompany.name} is waiting for approval.`;
     } else if (activeCompanyMembership?.status === "rejected") {
       teamWorkspaceStatus.textContent = `Join request for ${activeCompany.name} was rejected.`;
     } else {
       const invite = activeCompany.inviteCode ? ` Invite code: ${activeCompany.inviteCode}.` : "";
-      const roleText = activeCompanyMembership?.role ? ` Your role: ${activeCompanyMembership.role}.` : "";
-      teamWorkspaceStatus.textContent = `Using ${activeCompany.name} for shared cloud projects.${roleText}${invite}`;
+      const roleText = activeCompanyMembership?.role ? ` Your role: ${businessRoleLabel(activeCompanyMembership.role)}.` : "";
+      teamWorkspaceStatus.textContent = `Business jobs belong to ${activeCompany.name}.${roleText}${invite}`;
+    }
+  }
+
+  if (businessSeatSummary) {
+    businessSeatSummary.hidden = !activeCompany;
+    if (activeCompany) {
+      const seatLimit = Math.max(1, activeCompany.includedSeats + activeCompany.extraSeats);
+      const seatUsage = companyMembers.filter((member) => ["pending", "invited", "approved"].includes(member.status)).length;
+      const extraText = activeCompany.extraSeats
+        ? `${activeCompany.extraSeats} additional paid seat${activeCompany.extraSeats === 1 ? "" : "s"} active.`
+        : "Extra people can be added as paid seats when billing is connected.";
+      businessSeatSummary.textContent = `${seatUsage} of ${seatLimit} seats used. ${activeCompany.includedSeats} included. ${extraText}`;
+      businessSeatSummary.classList.toggle("full", seatUsage >= seatLimit);
     }
   }
 
@@ -19721,7 +28455,7 @@ function renderTeamWorkspace(errorMessage = "") {
   if (!activeCompany) {
     const empty = document.createElement("div");
     empty.className = "team-empty";
-    empty.textContent = "Create a team, then share its invite code with the people you want to approve.";
+    empty.textContent = "Choose a business above, or create one and share its invite code.";
     teamMembersList.append(empty);
     return;
   }
@@ -19749,7 +28483,7 @@ function renderTeamWorkspace(errorMessage = "") {
     title.textContent = member.email || (member.userId === cloudUser?.id ? "You" : "Team member");
 
     const detail = document.createElement("span");
-    detail.textContent = `${member.role} / ${member.status}`;
+    detail.textContent = `${businessRoleLabel(member.role)} / ${member.status}`;
     main.append(title, detail);
     row.append(main);
 
@@ -19759,7 +28493,13 @@ function renderTeamWorkspace(errorMessage = "") {
       const roleSelect = document.createElement("select");
       roleSelect.dataset.teamMemberRole = member.userId;
       roleSelect.title = "Change this user's team role";
-      for (const [value, label] of [["member", "Member"], ["admin", "Admin"]]) {
+      for (const [value, label] of [
+        ["admin", "Admin"],
+        ["designer", "Designer"],
+        ["checker", "Checker"],
+        ["workshop", "Workshop"],
+        ["viewer", "Viewer"],
+      ]) {
         const option = document.createElement("option");
         option.value = value;
         option.textContent = label;
@@ -19789,10 +28529,6 @@ function renderTeamWorkspace(errorMessage = "") {
 
 async function createTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
-  if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required to create a team.");
-    return;
-  }
 
   const companyName = String(teamCompanyNameInput?.value ?? "").trim() || "SpoolMate Company";
   if (teamCreateButton) teamCreateButton.disabled = true;
@@ -19808,16 +28544,12 @@ async function createTeamCompany() {
     console.warn("Could not create team.", error);
     showAppNotice(error?.message || "Could not create team.");
   } finally {
-    if (teamCreateButton) teamCreateButton.disabled = !hasActiveCloudLicense();
+    if (teamCreateButton) teamCreateButton.disabled = !cloudUser;
   }
 }
 
 async function joinTeamCompany() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
-  if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required to join a team.");
-    return;
-  }
 
   const joinCode = String(teamInviteCodeInput?.value ?? "").trim().toUpperCase();
   if (!joinCode) {
@@ -19838,18 +28570,21 @@ async function joinTeamCompany() {
     console.warn("Could not join team.", error);
     showAppNotice(error?.message || "Could not join team.");
   } finally {
-    if (teamJoinButton) teamJoinButton.disabled = !hasActiveCloudLicense();
+    if (teamJoinButton) teamJoinButton.disabled = !cloudUser;
   }
 }
 
 async function reviewTeamMember(userId, approved) {
-  if (!supabaseClient || !activeCompanyCanAdmin()) return;
+  if (!supabaseClient || !activeCompanyCanAdmin()) {
+    showAppNotice(cloudReadOnlyMessage("change team membership"));
+    return;
+  }
   const memberId = normalizeUuid(userId);
   if (!memberId || !activeCompany) return;
 
   const { error } = await supabaseClient
     .from(CLOUD_COMPANY_MEMBERS_TABLE)
-    .update({ status: approved ? "approved" : "rejected", role: "member" })
+    .update({ status: approved ? "approved" : "rejected", role: "workshop" })
     .eq("company_id", activeCompany.id)
     .eq("user_id", memberId);
   if (error) {
@@ -19861,11 +28596,11 @@ async function reviewTeamMember(userId, approved) {
 
 async function updateTeamMemberRole(userId, role) {
   if (!supabaseClient || !activeCompanyCanManageRoles()) {
-    showAppNotice("Only the team owner can change member roles.");
+    showAppNotice(hasActiveCloudLicense() ? "Only the team owner can change member roles." : cloudReadOnlyMessage("change team roles"));
     return;
   }
   const memberId = normalizeUuid(userId);
-  const nextRole = role === "admin" ? "admin" : "member";
+  const nextRole = ["admin", "designer", "checker", "workshop", "viewer"].includes(role) ? role : "workshop";
   if (!memberId || !activeCompany || memberId === cloudUser?.id) return;
 
   const { error } = await supabaseClient
@@ -20023,6 +28758,10 @@ async function insertProjectCommentRecord(body, options = {}) {
 
 async function toggleProjectCommentResolved(commentId, resolved) {
   if (!supabaseClient || !cloudUser) return;
+  if (!hasActiveCloudLicense()) {
+    showAppNotice(cloudReadOnlyMessage("resolve or reopen cloud comments"));
+    return;
+  }
   projectCommentsBusy = true;
   renderProjectComments();
   try {
@@ -20046,8 +28785,14 @@ function renderProjectComments(errorMessage = "") {
   if (projectCommentAddButton) {
     projectCommentAddButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy || (!String(projectCommentInput?.value ?? "").trim() && !pendingProjectCommentPhoto);
   }
+  if (projectCommentInput) {
+    projectCommentInput.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy;
+    projectCommentInput.placeholder = cloudUser && !hasActiveCloudLicense()
+      ? "Read only until the licence is upgraded"
+      : "Message, note or @mention";
+  }
   if (projectCommentRefreshButton) {
-    projectCommentRefreshButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy || !state.projectId;
+    projectCommentRefreshButton.disabled = !cloudUser || !hasCloudReadAccess() || projectCommentsBusy || !state.projectId;
   }
   if (projectCommentPhotoButton) {
     projectCommentPhotoButton.disabled = !cloudUser || !hasActiveCloudLicense() || projectCommentsBusy;
@@ -20068,10 +28813,11 @@ function renderProjectComments(errorMessage = "") {
     empty("Sign in to use cloud comments.");
     return;
   }
-  if (!hasActiveCloudLicense()) {
-    empty("An active trial or licence is required for cloud comments.");
+  if (!hasCloudReadAccess()) {
+    empty("Cloud comments are unavailable until the account profile is ready.");
     return;
   }
+  if (!hasActiveCloudLicense()) empty("Read-only: existing comments and workshop photos remain visible, but new activity is paused.");
   if (!state.projectId) {
     empty("Save this spool to the cloud before adding comments.");
     return;
@@ -20135,7 +28881,8 @@ function renderProjectComments(errorMessage = "") {
     resolveButton.dataset.projectCommentAction = comment.resolved ? "reopen" : "resolve";
     resolveButton.dataset.projectCommentId = comment.id;
     resolveButton.textContent = comment.resolved ? "Reopen" : "Resolve";
-    resolveButton.disabled = projectCommentsBusy;
+    resolveButton.disabled = projectCommentsBusy || !hasActiveCloudLicense();
+    if (!hasActiveCloudLicense()) resolveButton.title = "Upgrade the licence to change cloud comments.";
     actions.append(resolveButton);
 
     item.append(header, body);
@@ -20146,7 +28893,7 @@ function renderProjectComments(errorMessage = "") {
 }
 
 async function loadProjectComments(options = {}) {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !state.projectId) {
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess() || !state.projectId) {
     projectComments = [];
     projectCommentsProjectId = state.projectId ?? null;
     renderProjectComments();
@@ -20181,7 +28928,7 @@ async function loadProjectComments(options = {}) {
 async function addProjectComment() {
   if (!(await ensureSupabaseClient()) || !cloudUser) return;
   if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required for cloud comments.");
+    showAppNotice(cloudReadOnlyMessage("add cloud comments or workshop photos"));
     return;
   }
 
@@ -20226,7 +28973,7 @@ async function addProjectComment() {
 }
 
 async function loadTeamMessages(options = {}) {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !activeCompanyIsApproved()) {
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess() || !activeCompanyIsApproved()) {
     teamMessages = [];
     teamMessagesCompanyId = activeCompany?.id ?? null;
     teamMessagesError = "";
@@ -20271,7 +29018,7 @@ async function addTeamMessage(bodyText = "") {
     return;
   }
   if (!hasActiveCloudLicense()) {
-    showAppNotice("An active trial or licence is required for team messages.");
+    showAppNotice(cloudReadOnlyMessage("post team messages"));
     return;
   }
 
@@ -20305,6 +29052,10 @@ async function addTeamMessage(bodyText = "") {
 
 async function completeTeamMessage(messageId) {
   if (!(await ensureSupabaseClient()) || !cloudUser || !activeCompanyIsApproved()) return;
+  if (!hasActiveCloudLicense()) {
+    showAppNotice(cloudReadOnlyMessage("complete team messages"));
+    return;
+  }
   const id = normalizeUuid(messageId);
   if (!id) return;
 
@@ -20377,15 +29128,18 @@ async function initSupabase() {
     try {
       const { createClient } = await import(SUPABASE_JS_URL);
       supabaseClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        window.setTimeout(() => {
+          if (event === "PASSWORD_RECOVERY") openPasswordRecoveryUpdate();
+          applyCloudSession(session).catch((sessionError) => {
+            console.warn("Cloud session update failed.", sessionError);
+            updateCloudStatus("Cloud setup needed", "warning");
+          });
+        }, 0);
+      });
       const { data, error } = await supabaseClient.auth.getSession();
       if (error) throw error;
       await applyCloudSession(data?.session ?? null);
-      supabaseClient.auth.onAuthStateChange((_event, session) => {
-        applyCloudSession(session).catch((sessionError) => {
-          console.warn("Cloud session update failed.", sessionError);
-          updateCloudStatus("Cloud setup needed", "warning");
-        });
-      });
     } catch (error) {
       console.warn("Supabase failed to initialise.", error);
       updateCloudStatus("Cloud unavailable", "warning");
@@ -20399,6 +29153,10 @@ async function applyCloudSession(session) {
   cloudUser = session?.user ?? null;
   cloudProjectCache = null;
   if (!cloudUser) {
+    window.clearTimeout(dashboardPreferenceSaveTimer);
+    dashboardPreferenceSaveQueue.clear();
+    dashboardPreferenceSaveBusy = false;
+    resetSupportAdminAccess();
     cloudProfile = null;
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
@@ -20411,8 +29169,17 @@ async function applyCloudSession(session) {
 
   cloudProfile = await ensureCloudProfile();
   await loadTeamWorkspace({ silent: true });
+  hydrateCloudDashboardPreferences();
+  await completePendingBusinessSignup();
   loadCloudSaveMetaForCurrentProject();
+  if (currentProjectHasCloudRecord() && !hasActiveCloudLicense()) {
+    cloudPermissionReadOnly = true;
+    state.locked = true;
+    updateControls();
+  }
   updateCloudStatus();
+  refreshSupportAdminAccess().catch((error) => console.warn("Support Admin availability check failed.", error));
+  maybeShowLicenceWarning();
   if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
     queueCloudAutosave();
   }
@@ -20427,7 +29194,7 @@ async function ensureCloudProfile() {
   const selectProfile = async () => {
     const { data, error } = await supabaseClient
       .from(CLOUD_PROFILES_TABLE)
-      .select("id,email,license_status,trial_started_at,trial_ends_at")
+      .select("*")
       .eq("id", cloudUser.id)
       .maybeSingle();
     if (error) throw error;
@@ -20455,6 +29222,10 @@ async function ensureCloudProfile() {
 function queueCloudAutosave() {
   if (!supabaseClient || !cloudUser || !hasActiveCloudLicense() || !state.projectId || !hasDrawingContent()) return;
   if (cloudSaveConflict) return;
+  if (!navigator.onLine) {
+    queueCurrentCloudSave("offline");
+    return;
+  }
   window.clearTimeout(cloudAutosaveTimer);
   cloudAutosaveTimer = window.setTimeout(() => {
     saveCloudProject({ silent: true, autosave: true }).catch((error) => {
@@ -20466,14 +29237,21 @@ function queueCloudAutosave() {
 
 async function saveCloudProject(options = {}) {
   if (!supabaseClient || !cloudUser) return false;
+  const permission = currentDrawingProjectPermission();
+  const productionOnly = options.productionOnly === true && permission.canManageProduction;
   if (!hasActiveCloudLicense()) {
     updateCloudStatus(cloudLicenseText(), "warning");
-    if (!options.silent) showAppNotice("This account does not have an active trial or licence.");
+    if (!options.silent) showAppNotice(cloudReadOnlyMessage("save cloud changes"));
     return false;
   }
-  if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
+  if (cloudPermissionReadOnly && currentProjectHasCloudRecord() && !productionOnly) {
     updateCloudStatus("View/comment only", "warning");
-    if (!options.silent) showAppNotice("This team spool is view/comment only for your role. Ask the owner or a team admin to save changes.");
+    if (!options.silent) showAppNotice(cloudReadOnlyMessage("save changes"));
+    return false;
+  }
+  if (!navigator.onLine) {
+    queueCurrentCloudSave("offline", null, { productionOnly });
+    if (!options.silent) showAppNotice("Cloud save queued on this device. It will retry when the connection returns.");
     return false;
   }
   if (cloudAutosaveBusy) return false;
@@ -20502,6 +29280,7 @@ async function saveCloudProject(options = {}) {
     window.setTimeout(() => updateCloudStatus(), 1600);
     return true;
   } catch (error) {
+    queueCurrentCloudSave("failed", error, { productionOnly });
     markCloudSaveFailed(error);
     throw error;
   } finally {
@@ -20510,7 +29289,7 @@ async function saveCloudProject(options = {}) {
 }
 
 async function loadSavedCloudProjects() {
-  if (!supabaseClient || !cloudUser || !hasActiveCloudLicense()) return [];
+  if (!supabaseClient || !cloudUser || !hasCloudReadAccess()) return [];
   if (cloudProjectCache) return cloudProjectCache;
 
   const { data, error } = await supabaseClient
@@ -20520,7 +29299,10 @@ async function loadSavedCloudProjects() {
   if (error) throw error;
   cloudProjectCache = (data ?? [])
     .map(mapCloudProject)
-    .filter((project) => project.id && stateFromPayload(project.state));
+    .filter((project) => project.id && stateFromPayload(project.state))
+    .filter((project) => activeWorkspaceIsBusiness()
+      ? project.companyId === activeCompany.id
+      : !project.companyId && project.ownerId === cloudUser.id);
   return cloudProjectCache;
 }
 
@@ -20570,14 +29352,275 @@ async function openSavedCloudProject(projectId, options = {}) {
   updateControls();
   withCloudDirtySuppressed(() => updateAll());
   closeProjectLibrary();
-  updateCloudStatus("Cloud project opened", "saved");
+  updateCloudStatus(cloudPermissionReadOnly ? "Cloud project opened read only" : "Cloud project opened", cloudPermissionReadOnly ? "warning" : "saved");
   await loadProjectComments({ silent: true });
   window.setTimeout(() => updateCloudStatus(), 1600);
+}
+
+function closeQrScanner() {
+  if (!activeQrScanner) return;
+  activeQrScanner.stopped = true;
+  if (activeQrScanner.frame) cancelAnimationFrame(activeQrScanner.frame);
+  for (const track of activeQrScanner.stream?.getTracks?.() ?? []) track.stop();
+  activeQrScanner.dialog?.remove();
+  activeQrScanner = null;
+}
+
+function scannedSpoolTravellerUrl(value) {
+  const scanned = new URL(String(value ?? "").trim(), location.href);
+  const currentPath = location.pathname.replace(/\/+$/, "");
+  const scannedPath = scanned.pathname.replace(/\/+$/, "");
+  if (scanned.origin !== location.origin || scannedPath !== currentPath) {
+    throw new Error("That QR code is not a SpoolMate link from this app.");
+  }
+  const projectId = normalizeProjectId(scanned.searchParams.get("project"));
+  if (!projectId || scanned.searchParams.get("traveller") !== "1") {
+    throw new Error("That QR code does not contain a valid spool traveller.");
+  }
+  scanned.hash = "";
+  return scanned;
+}
+
+async function qrReader() {
+  if (!qrReaderModulePromise) {
+    qrReaderModulePromise = import(QR_CODE_READER_JS_URL)
+      .then((module) => module.default ?? module)
+      .catch((error) => {
+        qrReaderModulePromise = null;
+        throw error;
+      });
+  }
+  return qrReaderModulePromise;
+}
+
+async function decodeQrCanvas(canvas) {
+  if (!canvas?.width || !canvas?.height) return "";
+  if ("BarcodeDetector" in globalThis) {
+    try {
+      const detector = new BarcodeDetector({ formats: ["qr_code"] });
+      const detected = await detector.detect(canvas);
+      if (detected[0]?.rawValue) return detected[0].rawValue;
+    } catch {
+      // Safari and older Android browsers fall through to the canvas reader.
+    }
+  }
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const read = await qrReader();
+  return read(pixels.data, pixels.width, pixels.height, { inversionAttempts: "attemptBoth" })?.data ?? "";
+}
+
+function drawQrSourceToCanvas(source, canvas) {
+  const sourceWidth = Number(source.videoWidth || source.naturalWidth || source.width || 0);
+  const sourceHeight = Number(source.videoHeight || source.naturalHeight || source.height || 0);
+  if (!sourceWidth || !sourceHeight) return false;
+  const scale = Math.min(1, 960 / Math.max(sourceWidth, sourceHeight));
+  canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+  canvas.height = Math.max(1, Math.round(sourceHeight * scale));
+  canvas.getContext("2d", { willReadFrequently: true }).drawImage(source, 0, 0, canvas.width, canvas.height);
+  return true;
+}
+
+async function scanQrImageFile(file, canvas) {
+  if (!file) return "";
+  if ("createImageBitmap" in globalThis) {
+    const bitmap = await createImageBitmap(file);
+    try {
+      drawQrSourceToCanvas(bitmap, canvas);
+      return await decodeQrCanvas(canvas);
+    } finally {
+      bitmap.close?.();
+    }
+  }
+  const image = new Image();
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    await new Promise((resolve, reject) => {
+      image.onload = resolve;
+      image.onerror = () => reject(new Error("That image could not be opened."));
+      image.src = objectUrl;
+    });
+    drawQrSourceToCanvas(image, canvas);
+    return await decodeQrCanvas(canvas);
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+function openScannedSpoolTraveller(value) {
+  const url = scannedSpoolTravellerUrl(value);
+  closeQrScanner();
+  location.assign(url.toString());
+}
+
+async function openQrScanner() {
+  closeQrScanner();
+  const dialog = document.createElement("div");
+  dialog.id = "qrScannerDialog";
+  dialog.className = "qr-scanner-backdrop";
+  dialog.tabIndex = -1;
+  dialog.innerHTML = `
+    <main class="qr-scanner" role="dialog" aria-modal="true" aria-labelledby="qrScannerTitle">
+      <header><div><span>Workshop shortcut</span><h1 id="qrScannerTitle">Scan spool QR</h1></div><button type="button" data-qr-close aria-label="Close QR scanner">Close</button></header>
+      <div class="qr-scanner-camera">
+        <video autoplay muted playsinline aria-label="Camera preview"></video>
+        <div class="qr-scanner-target" aria-hidden="true"></div>
+        <canvas hidden></canvas>
+      </div>
+      <p class="qr-scanner-status" role="status">Starting the rear camera…</p>
+      <div class="qr-scanner-alternatives">
+        <label class="qr-scanner-file"><strong>Choose QR photo</strong><span>Use a saved screenshot or camera photo</span><input type="file" accept="image/*" data-qr-file /></label>
+        <label class="qr-scanner-link"><span>Or paste a spool traveller link</span><div><input type="url" inputmode="url" autocomplete="off" placeholder="https://…?project=…&traveller=1" data-qr-link /><button type="button" data-qr-open-link>Open</button></div></label>
+      </div>
+      <small class="qr-scanner-privacy">Camera frames stay on this device and are used only to read the QR code.</small>
+    </main>`;
+  document.body.append(dialog);
+  const scanner = {
+    dialog,
+    video: dialog.querySelector("video"),
+    canvas: dialog.querySelector("canvas"),
+    status: dialog.querySelector(".qr-scanner-status"),
+    stream: null,
+    frame: 0,
+    stopped: false,
+    busy: false,
+    lastAttempt: 0,
+  };
+  activeQrScanner = scanner;
+
+  const showScanError = (error) => {
+    if (!activeQrScanner || scanner.stopped) return;
+    scanner.status.textContent = error?.message || "No SpoolMate QR code was found. Try holding the camera steadier.";
+    scanner.status.classList.add("error");
+  };
+  const openValue = (value) => {
+    try {
+      openScannedSpoolTraveller(value);
+    } catch (error) {
+      showScanError(error);
+    }
+  };
+
+  dialog.querySelector("[data-qr-close]")?.addEventListener("click", closeQrScanner);
+  dialog.addEventListener("click", (event) => { if (event.target === dialog) closeQrScanner(); });
+  dialog.addEventListener("keydown", (event) => { if (event.key === "Escape") closeQrScanner(); });
+  dialog.querySelector("[data-qr-open-link]")?.addEventListener("click", () => openValue(dialog.querySelector("[data-qr-link]")?.value));
+  dialog.querySelector("[data-qr-link]")?.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    openValue(event.currentTarget.value);
+  });
+  dialog.querySelector("[data-qr-file]")?.addEventListener("change", async (event) => {
+    const file = event.currentTarget.files?.[0];
+    if (!file) return;
+    scanner.status.classList.remove("error");
+    scanner.status.textContent = "Reading the QR photo…";
+    try {
+      const value = await scanQrImageFile(file, scanner.canvas);
+      if (!value) throw new Error("No QR code was found in that image. Try a closer, sharper photo.");
+      openValue(value);
+    } catch (error) {
+      showScanError(error);
+    } finally {
+      event.currentTarget.value = "";
+    }
+  });
+
+  dialog.focus();
+  if (!navigator.mediaDevices?.getUserMedia) {
+    scanner.status.textContent = "Live camera scanning is not available here. Choose a QR photo below instead.";
+    scanner.status.classList.add("error");
+    return;
+  }
+
+  try {
+    scanner.stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } },
+    });
+    if (scanner.stopped) {
+      for (const track of scanner.stream.getTracks()) track.stop();
+      return;
+    }
+    scanner.video.srcObject = scanner.stream;
+    await scanner.video.play();
+    scanner.status.textContent = "Point the camera at a SpoolMate fabrication-sheet QR code.";
+    scanner.status.classList.remove("error");
+  } catch (error) {
+    console.warn("QR camera permission was not available.", error);
+    scanner.status.textContent = "Camera access was unavailable. Allow camera permission or choose a QR photo below.";
+    scanner.status.classList.add("error");
+    return;
+  }
+
+  const scanFrame = async (time) => {
+    if (scanner.stopped || activeQrScanner !== scanner) return;
+    if (!scanner.busy && time - scanner.lastAttempt > 240 && scanner.video.readyState >= 2) {
+      scanner.lastAttempt = time;
+      scanner.busy = true;
+      try {
+        if (drawQrSourceToCanvas(scanner.video, scanner.canvas)) {
+          const value = await decodeQrCanvas(scanner.canvas);
+          if (value) {
+            openValue(value);
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn("QR frame could not be decoded.", error);
+        scanner.status.textContent = "The scanner needs a connection to load its reader. You can still paste the traveller link.";
+        scanner.status.classList.add("error");
+      } finally {
+        scanner.busy = false;
+      }
+    }
+    scanner.frame = requestAnimationFrame(scanFrame);
+  };
+  scanner.frame = requestAnimationFrame(scanFrame);
+}
+
+function projectWindowUrl(projectId, source = projectLibrarySource) {
+  const id = normalizeProjectId(projectId);
+  if (!id) return "";
+  const url = new URL(location.href);
+  url.search = "";
+  url.hash = "";
+  if (source === "cloud") {
+    url.searchParams.set("project", id);
+  } else {
+    url.searchParams.set("localProject", id);
+  }
+  return url.toString();
+}
+
+function openProjectInNewWindow(projectId, source = projectLibrarySource) {
+  const url = projectWindowUrl(projectId, source);
+  if (!url) {
+    showAppNotice("That spool could not be opened in a new window.");
+    return false;
+  }
+  const opened = window.open(url, "_blank");
+  if (!opened) {
+    showAppNotice("The browser blocked the new spool window. Allow pop-ups for SpoolMate, or hold Ctrl/Command while pressing Open.");
+    return false;
+  }
+  try {
+    opened.opener = null;
+  } catch {
+    // The new window is still isolated by the browser when opener access is blocked.
+  }
+  showAppNotice("Spool opened in a separate window. The Jobs dashboard will stay here.");
+  return true;
 }
 
 async function maybeOpenProjectFromUrl() {
   if (location.protocol === "file:") return false;
   const params = new URLSearchParams(location.search);
+  const localProjectId = normalizeProjectId(params.get("localProject"));
+  if (localProjectId) {
+    await openSavedBrowserProject(localProjectId, { skipConfirm: true });
+    return true;
+  }
   const projectId = normalizeProjectId(params.get("project"));
   const traveller = params.get("traveller") === "1";
   if (!projectId) return false;
@@ -20592,41 +29635,121 @@ async function maybeOpenProjectFromUrl() {
     skipConfirm: true,
     readOnly: params.get("readonly") === "1",
   });
-  if (traveller && state.projectId === projectId) openSpoolTraveller();
+  if (traveller && state.projectId === projectId) {
+    openSpoolTraveller({
+      requestedRevisionUid: params.get("revision"),
+      requestedChildSpoolId: params.get("child"),
+    });
+  }
   return true;
 }
 
-function openSpoolTraveller() {
+function resolveSpoolTravellerRevision(requestedRevisionUid) {
+  const requested = normalizeTraceabilityId(requestedRevisionUid);
+  const currentUid = currentRevisionUid(state);
+  if (!requested || requested === currentUid) {
+    return { drawingState: state, requested, currentUid, displayedUid: currentUid, historical: false, missing: false };
+  }
+  for (const entry of normalizeRevisionHistory(state.revisionHistory)) {
+    if (!entry.state) continue;
+    const snapshot = stateFromPayload(entry.state);
+    if (!snapshot) continue;
+    const snapshotUid = currentRevisionUid(snapshot);
+    if (snapshotUid === requested) {
+      return { drawingState: snapshot, requested, currentUid, displayedUid: snapshotUid, historical: true, missing: false };
+    }
+  }
+  return { drawingState: state, requested, currentUid, displayedUid: currentUid, historical: false, missing: true };
+}
+
+function openSpoolTraveller(options = {}) {
   document.querySelector("#spoolTravellerDialog")?.remove();
-  const project = normalizeProjectInfo(state.projectInfo);
+  const revision = resolveSpoolTravellerRevision(options.requestedRevisionUid);
+  const masterDrawingState = revision.drawingState;
+  const requestedChildSpoolId = String(options.requestedChildSpoolId ?? "").trim();
+  let drawingState = masterDrawingState;
+  let childPiece = null;
+  let childLayout = null;
+  if (requestedChildSpoolId) {
+    const childResult = withTemporaryState(masterDrawingState, () => {
+      if (!bigSpoolPlanActive()) return null;
+      const layout = bigSpoolLayout();
+      const piece = layout.pieces.find((item) => item.childId === requestedChildSpoolId);
+      const child = piece ? bigSpoolChildState(piece, masterDrawingState) : null;
+      return child ? { child, piece, layout } : null;
+    });
+    if (childResult) {
+      drawingState = childResult.child;
+      childPiece = childResult.piece;
+      childLayout = childResult.layout;
+    }
+  }
+  const project = normalizeProjectInfo(drawingState.projectInfo);
+  const masterProject = normalizeProjectInfo(masterDrawingState.projectInfo);
   const production = normalizeProductionInfo(state.productionInfo);
-  const welds = synchronizeWeldRegister(state);
+  const materialChecklist = materialChecklistForState(state);
+  const welds = synchronizeWeldRegister(drawingState);
+  const issueAudit = latestIssueAudit(drawingState);
+  const acceptedWelds = welds.filter((weld) => weld.status === "accepted").length;
   const activeNotes = projectComments.filter((comment) => !comment.resolved);
   const photos = projectComments.filter((comment) => comment.photoPath);
-  const drawingImage = buildSpoolReportCanvas("client").toDataURL("image/jpeg", 0.78);
+  const drawingImage = withTemporaryState(drawingState, () => buildSpoolReportCanvas("client").toDataURL("image/jpeg", 0.78));
+  const relatedJoints = childPiece && childLayout
+    ? childLayout.cuts.filter((cut) => cut.beforePieceIndex === childPiece.index || cut.afterPieceIndex === childPiece.index)
+    : [];
+  const childBanner = requestedChildSpoolId && !childPiece
+    ? `<section class="spool-traveller-revision warning"><strong>Child spool could not be found</strong><p>${escapeHtml(requestedChildSpoolId)} is not present in this saved Big Spool breakdown. The master assembly is shown.</p></section>`
+    : childPiece
+    ? `<section class="spool-traveller-revision history"><strong>Big Spool child fabrication piece</strong><p>Child ${escapeHtml(childPiece.childId)} of master ${escapeHtml(masterProject.spoolNumber || "unnamed spool")}. Transport envelope ${escapeHtml(formatLength(childPiece.transportLengthMm))} × ${escapeHtml(formatLength(childPiece.transportWidthMm))} × ${escapeHtml(formatLength(childPiece.transportHeightMm))} mm; ${escapeHtml(formatMass(childPiece.weightKg))} kg.</p></section>`
+    : "";
+  const revisionBanner = revision.missing
+    ? `<section class="spool-traveller-revision warning"><strong>Revision could not be verified</strong><p>This QR asks for ${escapeHtml(revision.requested)}, but that saved snapshot is unavailable. Current revision ${escapeHtml(revision.currentUid)} is shown. Check the fabrication sheet before work continues.</p></section>`
+    : revision.historical
+    ? `<section class="spool-traveller-revision history"><strong>Issued revision snapshot</strong><p>You scanned ${escapeHtml(revision.displayedUid)}. The live spool is now ${escapeHtml(revision.currentUid)}.</p><button type="button" data-traveller-latest>Show latest revision</button></section>`
+    : "";
   const dialog = document.createElement("div");
   dialog.id = "spoolTravellerDialog";
   dialog.className = "spool-traveller-backdrop";
   dialog.innerHTML = `
     <main class="spool-traveller" role="dialog" aria-modal="true" aria-label="Spool traveller">
       <header class="spool-traveller-header">
-        <div><span>Spool traveller</span><h1>${escapeHtml(project.spoolNumber || "Unnamed spool")}</h1><code>${escapeHtml(currentRevisionUid(state))}</code></div>
+        <div><span>Spool traveller</span><h1>${escapeHtml(project.spoolNumber || "Unnamed spool")}</h1><code>${escapeHtml(revision.displayedUid)}</code></div>
         <button type="button" data-traveller-close aria-label="Close traveller">Close</button>
       </header>
-      <img class="spool-traveller-drawing" src="${drawingImage}" alt="Current spool drawing revision ${escapeHtml(project.revision || "-")}" />
+      ${revisionBanner}
+      ${childBanner}
+      ${production.hold ? `<section class="spool-traveller-hold"><strong>ON HOLD — DO NOT FABRICATE</strong><p>${escapeHtml(production.holdReason || "No reason recorded")}</p></section>` : ""}
       <section class="spool-traveller-grid">
         <article><span>Revision</span><strong>${escapeHtml(project.revision || "-")}</strong></article>
-        <article><span>Stage</span><strong>${escapeHtml(projectStatusLabel())}</strong></article>
+        <article><span>Live stage</span><strong>${escapeHtml(projectStatusLabel(state.projectStatus))}</strong></article>
         <article><span>Assigned</span><strong>${escapeHtml(production.assignee || "Unassigned")}</strong></article>
         <article><span>Due</span><strong>${escapeHtml(formatProductionDue(production) || "Not set")}</strong></article>
+        <article><span>Gear check</span><strong>${escapeHtml(production.assignee ? materialChecklistSummary(materialChecklist) : "Not allocated")}</strong></article>
+        <article><span>Welds accepted</span><strong>${acceptedWelds} / ${welds.length}</strong></article>
+        <article><span>Issue audit</span><strong>${escapeHtml(issueAudit ? issueAudit.result === "overridden" ? "Warnings overridden" : "Passed" : "Not recorded")}</strong></article>
       </section>
-      ${production.hold ? `<section class="spool-traveller-hold"><strong>ON HOLD</strong><p>${escapeHtml(production.holdReason || "No reason recorded")}</p></section>` : ""}
-      <section class="spool-traveller-section"><h2>Current notes</h2>${activeNotes.length ? `<ul>${activeNotes.slice(-12).map((comment) => `<li><p>${escapeHtml(comment.body)}</p><span>${escapeHtml(comment.authorEmail || "Team member")} / ${escapeHtml(comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "")}</span></li>`).join("")}</ul>` : `<p>No active spool notes.</p>`}</section>
-      <section class="spool-traveller-section"><h2>Workshop photos</h2><div class="spool-traveller-photos">${photos.length ? photos.slice(-12).map((comment) => `<figure><img data-traveller-photo="${escapeHtml(comment.photoPath)}" alt="Workshop photo" loading="lazy" /><figcaption>${escapeHtml(comment.body)}</figcaption></figure>`).join("") : `<p>No workshop photos attached.</p>`}</div></section>
-      <section class="spool-traveller-section"><h2>Weld register</h2>${welds.length ? `<div class="traveller-weld-list">${welds.map((weld) => `<article><strong>${escapeHtml(weld.number)}</strong><span>${escapeHtml(weldStatusLabel(weld.status))}</span><small>${escapeHtml([weld.welderId && `Welder ${weld.welderId}`, weld.wps, weld.inspectionType].filter(Boolean).join(" / ") || "Details pending")}</small></article>`).join("")}</div>` : `<p>No weld markers registered.</p>`}</section>
+      <nav class="spool-traveller-actions" aria-label="Spool traveller actions"><a href="#travellerDrawing">View drawing</a><button type="button" data-traveller-open-full>Open full spool</button></nav>
+      <img id="travellerDrawing" class="spool-traveller-drawing" src="${drawingImage}" alt="Spool drawing revision ${escapeHtml(project.revision || "-")}" />
+      <details class="spool-traveller-section"${issueAudit?.result === "overridden" ? " open" : ""}>
+        <summary><span>Ready to Issue audit</span><b>${escapeHtml(issueAudit ? issueAudit.result === "overridden" ? "Override" : "Passed" : "None")}</b></summary>
+        ${issueAudit ? `
+          <p>Recorded ${escapeHtml(issueAudit.createdAt ? new Date(issueAudit.createdAt).toLocaleString() : "without a timestamp")} by ${escapeHtml(issueAudit.issuedBy || "unknown")}.</p>
+          ${issueAudit.overrideReason ? `<p><strong>Override reason:</strong> ${escapeHtml(issueAudit.overrideReason)}</p>` : ""}
+          ${issueAudit.findings.length ? `<ul>${issueAudit.findings.map((finding) => `<li><p>${escapeHtml(finding.title)}</p><span>${escapeHtml(`${finding.category}${finding.detail ? ` / ${finding.detail}` : ""}`)}</span></li>`).join("")}</ul>` : `<p>No warnings were recorded when this revision was issued.</p>`}
+        ` : `<p>This revision predates Ready to Issue auditing or has not been issued.</p>`}
+      </details>
+      <details class="spool-traveller-section"${activeNotes.length ? " open" : ""}><summary><span>Current notes</span><b>${activeNotes.length}</b></summary>${activeNotes.length ? `<ul>${activeNotes.slice(-12).map((comment) => `<li><p>${escapeHtml(comment.body)}</p><span>${escapeHtml(comment.authorEmail || "Team member")} / ${escapeHtml(comment.createdAt ? new Date(comment.createdAt).toLocaleString() : "")}</span></li>`).join("")}</ul>` : `<p>No active spool notes.</p>`}</details>
+      <details class="spool-traveller-section"><summary><span>Workshop photos</span><b>${photos.length}</b></summary><div class="spool-traveller-photos">${photos.length ? photos.slice(-12).map((comment) => `<figure><img data-traveller-photo="${escapeHtml(comment.photoPath)}" alt="Workshop photo" loading="lazy" /><figcaption>${escapeHtml(comment.body)}</figcaption></figure>`).join("") : `<p>No workshop photos attached.</p>`}</div></details>
+      <details class="spool-traveller-section"><summary><span>Weld register</span><b>${welds.length}</b></summary>${welds.length ? `<div class="traveller-weld-list">${welds.map((weld) => `<article><strong>${escapeHtml(weld.number)}</strong><span>${escapeHtml(weldStatusLabel(weld.status))}</span><small>${escapeHtml([weld.welderId && `Welder ${weld.welderId}`, weld.wps, weld.inspectionType].filter(Boolean).join(" / ") || "Details pending")}</small></article>`).join("")}</div>` : `<p>No weld markers registered.</p>`}</details>
+      ${childPiece ? `<details class="spool-traveller-section" open><summary><span>Field connections</span><b>${relatedJoints.length}</b></summary>${relatedJoints.length ? `<div class="traveller-weld-list">${relatedJoints.map((joint) => `<article><strong>${escapeHtml(joint.jointId)}</strong><span>${escapeHtml(BIG_SPOOL_JOINT_STATUSES[joint.status] || "Planned")}</span><small>${escapeHtml(BIG_SPOOL_JOINT_TYPES[joint.jointType] || "Field weld")}${joint.notes ? ` / ${escapeHtml(joint.notes)}` : ""}</small></article>`).join("")}</div>` : `<p>No field connections touch this child spool.</p>`}</details>` : ""}
     </main>`;
   document.body.append(dialog);
   dialog.querySelector("[data-traveller-close]")?.addEventListener("click", () => dialog.remove());
+  dialog.querySelector("[data-traveller-open-full]")?.addEventListener("click", () => dialog.remove());
+  dialog.querySelector("[data-traveller-latest]")?.addEventListener("click", () => openSpoolTraveller({
+    requestedRevisionUid: revision.currentUid,
+    requestedChildSpoolId,
+  }));
   dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.remove(); });
   dialog.querySelectorAll("[data-traveller-photo]").forEach((image) => hydrateProjectCommentPhoto(image, image.dataset.travellerPhoto));
 }
@@ -20639,7 +29762,9 @@ async function deleteSavedCloudProject(projectId) {
   }
   if (!record) return;
   if (!projectPermission(record, { source: "cloud" }).canDelete) {
-    showAppNotice("Only the project owner or a team admin can delete this cloud spool.");
+    showAppNotice(hasActiveCloudLicense()
+      ? "Only the project owner or a team admin can delete this cloud spool."
+      : cloudReadOnlyMessage("delete cloud spools"));
     return;
   }
 
@@ -20724,14 +29849,17 @@ function autoSaveCurrentBrowserProject() {
 
 async function saveBrowserProject(options = {}) {
   if (cloudPermissionReadOnly && currentProjectHasCloudRecord()) {
-    showAppNotice("This team spool is view/comment only for your role. Ask the project owner or a team admin to save changes.");
+    showAppNotice(cloudReadOnlyMessage("save changes"));
     return false;
   }
-  const info = await openProjectDetailsDialog({
-    title: state.projectId ? "Save project" : cloudUser && hasActiveCloudLicense() ? "Save cloud project" : "Save as project",
-    action: "Save project",
-    defaults: state.projectInfo,
-  });
+  const canQuickSave = Boolean(state.projectId && hasProjectInfo() && options.forceDetails !== true);
+  const info = canQuickSave
+    ? normalizeProjectInfo(state.projectInfo, state.pipeSpec)
+    : await openProjectDetailsDialog({
+        title: state.projectId ? "Save project details" : cloudUser && hasActiveCloudLicense() ? "Save cloud project" : "Save as project",
+        action: "Save project",
+        defaults: state.projectInfo,
+      });
   if (!info) return false;
 
   state.projectInfo = info;
@@ -20751,10 +29879,13 @@ async function saveBrowserProject(options = {}) {
   if (!options.silent) {
     showAppNotice(`Saved ${projectDisplayName(info)} ${savedToCloud ? "to the cloud and this browser" : "in this browser"}.`);
   }
+  markFirstUseGuideLearned("save");
   return true;
 }
 
 async function openBrowserProject(options = {}) {
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("jobs");
   ensureProjectLibraryDashboardShell();
   projectLibraryGuideVisible = false;
   projectLibraryCommsVisible = false;
@@ -20769,11 +29900,17 @@ async function openBrowserProject(options = {}) {
   if (!options.keepFolder) {
     projectLibraryOpenFolderKey = "";
   }
-  const useCloud = Boolean(cloudUser && hasActiveCloudLicense());
+  const useCloud = options.source === "browser"
+    ? false
+    : options.source === "cloud"
+    ? Boolean(cloudUser && hasCloudReadAccess())
+    : Boolean(cloudUser && hasCloudReadAccess());
   projectLibrarySource = useCloud ? "cloud" : "browser";
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = useCloud
-      ? "Loading cloud saved spools. The list will appear here."
+      ? hasActiveCloudLicense()
+        ? "Loading cloud saved spools. The list will appear here."
+        : "Loading cloud saved spools in read-only mode."
       : "Loading saved spools from this device/browser.";
   }
   renderProjectLibraryMessage(useCloud ? "Loading cloud saved spools..." : "Loading saved spools...");
@@ -20863,6 +30000,18 @@ function renderProjectLibraryMessage(message) {
   projectLibraryList.append(notice);
 }
 
+function bindRenderedProjectLibraryActions(root = projectLibraryList) {
+  root?.querySelectorAll("[data-project-library-action]").forEach((control) => {
+    if (control.dataset.projectLibraryActionBound === "true") return;
+    control.dataset.projectLibraryActionBound = "true";
+    control.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      handleProjectLibraryAction(control);
+    });
+  });
+}
+
 function promiseWithTimeout(promise, timeoutMs, message = "Timed out") {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error(message)), timeoutMs);
@@ -20880,12 +30029,33 @@ function promiseWithTimeout(promise, timeoutMs, message = "Timed out") {
 
 function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
+  applyRoleDefaultTeamDashboardView();
   ensureProjectLibraryDashboardShell();
   ensureProjectLibraryGuideSlot();
   ensureProjectLibraryCommsSlot();
   ensureProjectLibraryReportSlot();
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
   projectLibraryProjects = Array.isArray(projects) ? [...projects] : [];
+  const canSwitchProjectSource = Boolean(cloudUser && hasCloudReadAccess());
+  if (projectLibrarySourceButton) {
+    projectLibrarySourceButton.hidden = !canSwitchProjectSource;
+    const label = projectLibrarySourceButton.querySelector("span");
+    if (label) label.textContent = projectLibrarySource === "cloud" ? "This device" : "Cloud";
+    projectLibrarySourceButton.title = projectLibrarySource === "cloud"
+      ? "Show projects stored only in this browser"
+      : hasActiveCloudLicense()
+      ? "Show cloud saved projects"
+      : "Show cloud saved projects in read-only mode";
+  }
+  if (projectLibrarySaveButton) {
+    const currentCloudReadOnly = currentProjectHasCloudRecord() && !currentDrawingProjectPermission().canEdit;
+    projectLibrarySaveButton.disabled = currentCloudReadOnly;
+    projectLibrarySaveButton.title = currentCloudReadOnly
+      ? "This cloud spool is read only. You can still export it."
+      : hasActiveCloudLicense()
+      ? "Save the current spool"
+      : "Save the current local spool in this browser";
+  }
   const filteredProjects = filterProjectLibraryProjects(projectLibraryProjects);
   const query = projectLibrarySearch.trim();
   if (projectLibraryCommsVisible) renderProjectLibraryComms(filteredProjects);
@@ -20895,10 +30065,12 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   }
   if (projectLibrarySubtitle) {
     projectLibrarySubtitle.textContent = projectLibrarySource === "cloud"
-      ? activeCompanyIsApproved()
-        ? `Cloud projects include your own spools and ${activeCompany.name} team spools. Use the production board or open a job folder.`
-        : "Projects are saved to your SpoolMate cloud account. Use the production board or open a job folder."
-      : "Projects are saved on this device/browser. Use the production board or open a job folder.";
+      ? !hasActiveCloudLicense()
+        ? `${activeWorkspaceLabel()} cloud projects are read only. You can open, review and export them; upgrade to save changes.`
+        : activeCompanyIsApproved()
+        ? `Showing jobs owned by ${activeCompany.name}. Use My day for immediate actions or Jobs for the compact list.`
+        : "Showing your private Personal jobs. Use My day for immediate actions or Jobs for the compact list."
+      : "Projects are saved on this device/browser. Search, open a job or switch to My day for immediate actions.";
   }
   projectLibraryList.innerHTML = "";
 
@@ -20928,48 +30100,18 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
     empty.className = "project-library-empty";
     empty.textContent = `No saved spools match "${query}".`;
     projectLibraryList.append(empty);
+    bindRenderedProjectLibraryActions();
     return;
   }
 
-  projectLibraryList.append(projectProductionBoard(filteredProjects));
-
-  const folders = projectFolders(filteredProjects);
-  for (const folder of folders) {
-    const section = document.createElement("section");
-    section.className = "project-folder";
-    section.dataset.projectFolderKey = folder.key;
-
-    const summary = document.createElement("button");
-    summary.type = "button";
-    summary.className = "project-folder-summary project-folder-launcher";
-    summary.dataset.projectFolderOpen = folder.key;
-    summary.setAttribute("aria-label", `Open ${folder.title} saved spools`);
-    summary.title = "Open this job";
-
-    const folderMain = document.createElement("div");
-    folderMain.className = "project-folder-main";
-
-    const title = document.createElement("strong");
-    title.textContent = folder.title;
-
-    const meta = document.createElement("span");
-    meta.textContent = folder.meta;
-
-    folderMain.append(title, meta);
-
-    const count = document.createElement("span");
-    count.className = "project-folder-count";
-    count.textContent = `${folder.projects.length} spool${folder.projects.length === 1 ? "" : "s"}`;
-
-    const openIcon = document.createElement("span");
-    openIcon.className = "project-folder-toggle-icon";
-    openIcon.setAttribute("aria-hidden", "true");
-    openIcon.textContent = "Open";
-
-    summary.append(folderMain, count, openIcon);
-    section.append(summary);
-    projectLibraryList.append(section);
+  if (projectLibraryDashboardView === "board") {
+    projectLibraryList.append(projectProductionBoard(filteredProjects));
+  } else if (projectLibraryDashboardView === "today") {
+    projectLibraryList.append(projectTodayBoard(filteredProjects));
+  } else {
+    projectLibraryList.append(projectJobsOverview(filteredProjects));
   }
+  bindRenderedProjectLibraryActions();
 }
 
 function renderProjectLibraryFolderWindow(folder) {
@@ -21003,20 +30145,36 @@ function renderProjectLibraryFolderWindow(folder) {
   header.append(copy, backButton);
   windowCard.append(header);
   windowCard.append(projectJobSummaryCard(folder));
+  windowCard.append(projectProductionBoard(folder.projects));
 
   const drawings = document.createElement("div");
   drawings.className = "project-job-window-spools";
+  const drawingsTitle = document.createElement("div");
+  drawingsTitle.className = "project-job-drawings-title";
+  drawingsTitle.innerHTML = `<strong>Spool drawings</strong><span>Open a drawing for dimensions, checks, revisions and fabrication sheets.</span>`;
+  drawings.append(drawingsTitle);
   for (const project of folder.projects) {
     drawings.append(projectLibraryRow(project));
   }
   windowCard.append(drawings);
   projectLibraryList.append(windowCard);
+  bindRenderedProjectLibraryActions();
 }
 
-function openProjectLibraryFolder(folderKey) {
+function openProjectLibraryFolder(folderKey, focus = "") {
   if (!folderKey) return;
   projectLibraryOpenFolderKey = folderKey;
+  rememberProjectLibraryRecentJob(folderKey);
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  if (focus === "attention") {
+    window.requestAnimationFrame(() => {
+      const attentionList = projectLibraryList?.querySelector(".project-job-today");
+      if (!attentionList) return;
+      attentionList.scrollIntoView({ behavior: "smooth", block: "start" });
+      attentionList.classList.add("attention");
+      window.setTimeout(() => attentionList.classList.remove("attention"), 1600);
+    });
+  }
 }
 
 function closeProjectLibraryFolder() {
@@ -21050,6 +30208,227 @@ function savedProjectProductionInfo(project) {
 
 function savedProjectProductionMessages(project) {
   return activeProductionMessages(savedProjectState(project)?.productionMessages);
+}
+
+function readTeamDashboardView() {
+  try {
+    const view = localStorage.getItem(TEAM_DASHBOARD_VIEW_KEY);
+    return ["jobs", "today", "board"].includes(view) ? view : "jobs";
+  } catch {
+    return "jobs";
+  }
+}
+
+function hasSavedTeamDashboardView() {
+  try {
+    return ["jobs", "today", "board"].includes(localStorage.getItem(TEAM_DASHBOARD_VIEW_KEY));
+  } catch {
+    return false;
+  }
+}
+
+function roleDefaultTeamDashboardView() {
+  if (!activeCompanyIsApproved()) return "jobs";
+  const role = String(activeCompanyMembership?.role ?? "").trim().toLowerCase();
+  return ["workshop", "member", "checker"].includes(role) ? "today" : "jobs";
+}
+
+function applyRoleDefaultTeamDashboardView() {
+  if (hasSavedTeamDashboardView()) return;
+  projectLibraryDashboardView = roleDefaultTeamDashboardView();
+}
+
+function setTeamDashboardView(view) {
+  projectLibraryDashboardView = ["jobs", "today", "board"].includes(view) ? view : "jobs";
+  projectLibraryJobPage = 1;
+  try {
+    localStorage.setItem(TEAM_DASHBOARD_VIEW_KEY, projectLibraryDashboardView);
+  } catch (error) {
+    console.warn("Could not remember the team dashboard view.", error);
+  }
+  queueCloudDashboardPreferencesSave();
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function readProjectLibraryStringList(key, limit = 80) {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(parsed)
+      ? parsed.map((value) => String(value ?? "")).filter(Boolean).slice(0, limit)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function storeProjectLibraryStringList(key, values, limit = 80) {
+  try {
+    localStorage.setItem(key, JSON.stringify([...new Set(values)].slice(0, limit)));
+  } catch (error) {
+    console.warn("Could not remember the Jobs dashboard preference.", error);
+  }
+}
+
+function readProjectLibraryJobFilter() {
+  try {
+    const filter = localStorage.getItem(JOB_DASHBOARD_FILTER_KEY);
+    return ["active", "mine", "completed", "all"].includes(filter) ? filter : "active";
+  } catch {
+    return "active";
+  }
+}
+
+function setProjectLibraryJobFilter(filter) {
+  projectLibraryJobFilter = ["active", "mine", "completed", "all"].includes(filter)
+    ? filter
+    : "active";
+  projectLibraryJobPage = 1;
+  try {
+    localStorage.setItem(JOB_DASHBOARD_FILTER_KEY, projectLibraryJobFilter);
+  } catch (error) {
+    console.warn("Could not remember the Jobs filter.", error);
+  }
+  queueCloudDashboardPreferencesSave();
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function toggleProjectLibraryJobPin(folderKey) {
+  if (!folderKey) return;
+  projectLibraryJobPins = projectLibraryJobPins.includes(folderKey)
+    ? projectLibraryJobPins.filter((key) => key !== folderKey)
+    : [folderKey, ...projectLibraryJobPins];
+  storeProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, projectLibraryJobPins, 80);
+  queueCloudDashboardPreferencesSave();
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+}
+
+function rememberProjectLibraryRecentJob(folderKey) {
+  if (!folderKey) return;
+  projectLibraryRecentJobs = [folderKey, ...projectLibraryRecentJobs.filter((key) => key !== folderKey)].slice(0, 12);
+  storeProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, projectLibraryRecentJobs, 12);
+  queueCloudDashboardPreferencesSave();
+}
+
+function dashboardPreferenceWorkspaceKey() {
+  return activeCompanyIsApproved() && activeCompany?.id ? `company:${activeCompany.id}` : "personal";
+}
+
+function normalizedJobsDashboardPreference(value) {
+  const input = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+  const view = ["jobs", "today", "board"].includes(input.view) ? input.view : null;
+  const filter = ["active", "mine", "completed", "all"].includes(input.filter) ? input.filter : null;
+  const boardFilter = normalizeProductionBoardFilter(input.boardFilter);
+  const pins = Array.isArray(input.pins) ? input.pins.map((key) => String(key ?? "")).filter(Boolean).slice(0, 80) : [];
+  const recents = Array.isArray(input.recents) ? input.recents.map((key) => String(key ?? "")).filter(Boolean).slice(0, 12) : [];
+  return { view, filter, boardFilter, pins: [...new Set(pins)], recents: [...new Set(recents)] };
+}
+
+function currentJobsDashboardPreference() {
+  return {
+    version: JOB_DASHBOARD_PREFERENCES_VERSION,
+    view: projectLibraryDashboardView,
+    filter: projectLibraryJobFilter,
+    boardFilter: normalizeProductionBoardFilter(projectLibraryBoardFilter),
+    pins: [...new Set(projectLibraryJobPins)].slice(0, 80),
+    recents: [...new Set(projectLibraryRecentJobs)].slice(0, 12),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function applyJobsDashboardPreference(value) {
+  const preference = normalizedJobsDashboardPreference(value);
+  if (!preference.view || !preference.filter) return false;
+  projectLibraryDashboardView = preference.view;
+  projectLibraryJobFilter = preference.filter;
+  projectLibraryBoardFilter = preference.boardFilter;
+  projectLibraryJobPins = preference.pins;
+  projectLibraryRecentJobs = preference.recents;
+  try {
+    localStorage.setItem(TEAM_DASHBOARD_VIEW_KEY, projectLibraryDashboardView);
+    localStorage.setItem(JOB_DASHBOARD_FILTER_KEY, projectLibraryJobFilter);
+  } catch {
+    // The active session still uses the cloud preference when local storage is unavailable.
+  }
+  storeProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, projectLibraryJobPins, 80);
+  storeProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, projectLibraryRecentJobs, 12);
+  return true;
+}
+
+function hydrateCloudDashboardPreferences() {
+  if (!cloudUser || !cloudProfile) return false;
+  const root = cloudProfile.dashboard_preferences;
+  const workspaces = root?.jobsDashboard?.workspaces;
+  const preference = workspaces?.[dashboardPreferenceWorkspaceKey()];
+  if (applyJobsDashboardPreference(preference)) return true;
+  queueCloudDashboardPreferencesSave();
+  return false;
+}
+
+function queueCloudDashboardPreferencesSave() {
+  if (!supabaseClient || !cloudUser || !cloudProfile) return;
+  dashboardPreferenceSaveQueue.set(dashboardPreferenceWorkspaceKey(), currentJobsDashboardPreference());
+  window.clearTimeout(dashboardPreferenceSaveTimer);
+  dashboardPreferenceSaveTimer = window.setTimeout(() => {
+    flushCloudDashboardPreferences().catch((error) => {
+      console.warn("Could not sync Jobs dashboard preferences.", error);
+    });
+  }, 650);
+}
+
+async function flushCloudDashboardPreferences() {
+  if (dashboardPreferenceSaveBusy || !supabaseClient || !cloudUser || !cloudProfile || !dashboardPreferenceSaveQueue.size) return;
+  dashboardPreferenceSaveBusy = true;
+  const userId = cloudUser.id;
+  const queued = new Map(dashboardPreferenceSaveQueue);
+  dashboardPreferenceSaveQueue.clear();
+  try {
+    const { data: remoteProfile, error: readError } = await supabaseClient
+      .from(CLOUD_PROFILES_TABLE)
+      .select("dashboard_preferences")
+      .eq("id", userId)
+      .maybeSingle();
+    if (readError) throw readError;
+    const remotePreferences = remoteProfile?.dashboard_preferences;
+    const existing = remotePreferences && typeof remotePreferences === "object"
+      ? remotePreferences
+      : cloudProfile.dashboard_preferences && typeof cloudProfile.dashboard_preferences === "object"
+      ? cloudProfile.dashboard_preferences
+      : {};
+    const existingJobs = existing.jobsDashboard && typeof existing.jobsDashboard === "object" ? existing.jobsDashboard : {};
+    const workspaces = existingJobs.workspaces && typeof existingJobs.workspaces === "object"
+      ? { ...existingJobs.workspaces }
+      : {};
+    for (const [workspaceKey, preference] of queued) workspaces[workspaceKey] = preference;
+    const dashboardPreferences = {
+      ...existing,
+      jobsDashboard: {
+        ...existingJobs,
+        version: JOB_DASHBOARD_PREFERENCES_VERSION,
+        workspaces,
+      },
+    };
+    const { data, error } = await supabaseClient
+      .from(CLOUD_PROFILES_TABLE)
+      .update({ dashboard_preferences: dashboardPreferences })
+      .eq("id", userId)
+      .select("dashboard_preferences")
+      .maybeSingle();
+    if (error) throw error;
+    if (cloudUser?.id === userId && data) cloudProfile = { ...cloudProfile, ...data };
+  } catch (error) {
+    for (const [workspaceKey, preference] of queued) {
+      if (!dashboardPreferenceSaveQueue.has(workspaceKey)) dashboardPreferenceSaveQueue.set(workspaceKey, preference);
+    }
+    throw error;
+  } finally {
+    dashboardPreferenceSaveBusy = false;
+    if (dashboardPreferenceSaveQueue.size) {
+      window.clearTimeout(dashboardPreferenceSaveTimer);
+      dashboardPreferenceSaveTimer = window.setTimeout(() => {
+        flushCloudDashboardPreferences().catch((error) => console.warn("Jobs preference retry failed.", error));
+      }, 1400);
+    }
+  }
 }
 
 function savedProjectProductionActivity(project) {
@@ -21242,13 +30621,139 @@ function projectJobMetrics(projects = []) {
     summary.total += 1;
     if (status === "readycheck") summary.readycheck += 1;
     if (status === "checked") summary.checked += 1;
-    if (status === "issued") summary.issued += 1;
+    if (status === "issued" || status === "materialcheck") summary.issued += 1;
     if (status === "complete") summary.fabricated += 1;
     if (status !== "complete" && dueState.key === "overdue") summary.overdue += 1;
     if (status !== "complete" && dueState.key === "today") summary.dueToday += 1;
     if (status !== "complete" && production.hold) summary.onHold += 1;
     return summary;
   }, { total: 0, readycheck: 0, checked: 0, issued: 0, fabricated: 0, overdue: 0, dueToday: 0, onHold: 0 });
+}
+
+function projectJobOverviewData(folder) {
+  const metrics = projectJobMetrics(folder.projects);
+  const visible = folder.projects.filter((project) => !productionProjectHidden(project));
+  const active = visible.filter((project) => normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "complete");
+  const attention = active.filter(productionProjectNeedsAttention);
+  const mine = active.filter((project) => productionAssignedToCurrentUser(savedProjectProductionInfo(project)));
+  const assignees = [...new Set(active
+    .map((project) => savedProjectProductionInfo(project).assignee)
+    .filter(Boolean))];
+  const nextDue = active
+    .map((project) => savedProjectProductionInfo(project))
+    .filter((production) => production.dueDate)
+    .sort((first, second) => `${first.dueDate} ${first.dueTime}`.localeCompare(`${second.dueDate} ${second.dueTime}`))[0] ?? null;
+  return {
+    folder,
+    metrics,
+    active: active.length,
+    completed: visible.filter((project) => normalizeProjectStatus(savedProjectState(project)?.projectStatus) === "complete").length,
+    attention: attention.length,
+    mine: mine.length,
+    assignees,
+    nextDue,
+    pinned: projectLibraryJobPins.includes(folder.key),
+    recentIndex: projectLibraryRecentJobs.indexOf(folder.key),
+  };
+}
+
+function projectJobMatchesOverviewFilter(job, filter = projectLibraryJobFilter) {
+  if (filter === "attention") return job.attention > 0;
+  if (filter === "active") return job.active > 0;
+  if (filter === "mine") return job.mine > 0;
+  if (filter === "completed") return job.active === 0 && job.completed > 0;
+  return true;
+}
+
+function projectJobOverviewRow(job) {
+  const { folder, metrics } = job;
+  const progress = metrics.total ? Math.round((job.completed / metrics.total) * 100) : 0;
+  const dueText = job.nextDue ? formatProductionDue(job.nextDue) : "No due date";
+  const assigneeText = job.assignees.length
+    ? job.assignees.slice(0, 2).join(", ") + (job.assignees.length > 2 ? ` +${job.assignees.length - 2}` : "")
+    : "Unassigned";
+  const row = document.createElement("article");
+  row.className = "job-overview-row";
+  row.classList.toggle("needs-attention", job.attention > 0);
+  row.classList.toggle("complete", job.active === 0 && job.completed > 0);
+  row.innerHTML = `
+    <button type="button" class="job-overview-pin ${job.pinned ? "active" : ""}" data-project-library-action="pin-job" data-job-key="${escapeHtml(folder.key)}" aria-label="${job.pinned ? "Unpin" : "Pin"} ${escapeHtml(folder.title)}" title="${job.pinned ? "Unpin job" : "Pin job"}">
+      <span aria-hidden="true">${job.pinned ? "★" : "☆"}</span>
+    </button>
+    <button type="button" class="job-overview-open" data-project-folder-open="${escapeHtml(folder.key)}"${job.attention ? ` data-job-focus="attention"` : ""} aria-label="${job.attention ? `Review ${job.attention} attention item${job.attention === 1 ? "" : "s"} in` : "Open"} ${escapeHtml(folder.title)}">
+      <span class="job-overview-name"><strong>${escapeHtml(folder.title)}</strong><small>${escapeHtml(folder.meta)}</small></span>
+      <span class="job-overview-progress"><i style="--job-progress:${progress}%"></i><small>${progress}% fabricated</small></span>
+      <span class="job-overview-meta"><strong>${job.active} active</strong><small>${job.completed} of ${metrics.total} complete</small></span>
+      <span class="job-overview-meta"><strong>${escapeHtml(dueText)}</strong><small>${escapeHtml(assigneeText)}</small></span>
+      <span class="job-overview-badges">
+        ${job.attention ? `<b class="attention">${job.attention} attention</b>` : ""}
+        ${metrics.readycheck ? `<b>${metrics.readycheck} to check</b>` : ""}
+        ${metrics.onHold ? `<b class="hold">${metrics.onHold} hold</b>` : ""}
+        ${!job.attention && !metrics.readycheck && !metrics.onHold ? `<b class="clear">${job.active ? "On track" : "Complete"}</b>` : ""}
+      </span>
+      <span class="job-overview-arrow" aria-hidden="true">${job.attention ? `Review ${job.attention}` : "Open"}</span>
+    </button>
+  `;
+  return row;
+}
+
+function projectJobsOverview(projects) {
+  const allJobs = projectFolders(projects).map(projectJobOverviewData);
+  const counts = {
+    active: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "active")).length,
+    mine: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "mine")).length,
+    completed: allJobs.filter((job) => projectJobMatchesOverviewFilter(job, "completed")).length,
+    all: allJobs.length,
+  };
+  const filtered = allJobs
+    .filter((job) => projectJobMatchesOverviewFilter(job))
+    .sort((first, second) => {
+      if (first.pinned !== second.pinned) return first.pinned ? -1 : 1;
+      if (first.attention !== second.attention) return second.attention - first.attention;
+      const firstRecent = first.recentIndex < 0 ? Number.MAX_SAFE_INTEGER : first.recentIndex;
+      const secondRecent = second.recentIndex < 0 ? Number.MAX_SAFE_INTEGER : second.recentIndex;
+      if (firstRecent !== secondRecent) return firstRecent - secondRecent;
+      return String(second.folder.latest).localeCompare(String(first.folder.latest));
+    });
+  const pageSize = 12;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / pageSize));
+  projectLibraryJobPage = Math.min(Math.max(1, projectLibraryJobPage), pageCount);
+  const pageJobs = filtered.slice((projectLibraryJobPage - 1) * pageSize, projectLibraryJobPage * pageSize);
+  const section = document.createElement("section");
+  section.className = "job-overview-card";
+  section.innerHTML = `
+    <div class="job-overview-head">
+      <div><strong>Jobs</strong><span>Open one job to see its production board and spool drawings.</span></div>
+      <span>${filtered.length} showing</span>
+    </div>
+    <div class="job-overview-filters" aria-label="Filter jobs">
+      ${[
+        ["active", "Active"],
+        ["mine", "My jobs"],
+        ["completed", "Completed"],
+        ["all", "All"],
+      ].map(([key, label]) => `<button type="button" class="${projectLibraryJobFilter === key ? "active" : ""}" data-project-library-action="job-filter" data-job-filter="${key}">${label} <b>${counts[key]}</b></button>`).join("")}
+    </div>
+  `;
+  const list = document.createElement("div");
+  list.className = "job-overview-list";
+  if (pageJobs.length) {
+    pageJobs.forEach((job) => list.append(projectJobOverviewRow(job)));
+  } else {
+    list.innerHTML = `<div class="project-library-empty">No jobs match this filter.</div>`;
+  }
+  section.append(list);
+  if (pageCount > 1) {
+    const pager = document.createElement("div");
+    pager.className = "job-overview-pager";
+    pager.innerHTML = `
+      <button type="button" data-project-library-action="job-page" data-job-page="${projectLibraryJobPage - 1}"${projectLibraryJobPage === 1 ? " disabled" : ""}>Previous</button>
+      <span>Page ${projectLibraryJobPage} of ${pageCount}</span>
+      <button type="button" data-project-library-action="job-page" data-job-page="${projectLibraryJobPage + 1}"${projectLibraryJobPage === pageCount ? " disabled" : ""}>Next</button>
+    `;
+    section.append(pager);
+  }
+  return section;
 }
 
 function projectNeedsTodayItems(projects = []) {
@@ -21334,6 +30839,7 @@ function normalizeProductionBoardFilter(value) {
 
 function setProjectLibraryBoardFilter(value) {
   projectLibraryBoardFilter = normalizeProductionBoardFilter(value);
+  queueCloudDashboardPreferencesSave();
   renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
 }
 
@@ -21409,16 +30915,62 @@ function productionBoardFilterCounts(projects = projectLibraryProjects) {
   }, {});
 }
 
-function productionStatusQuickActions(status, canEdit, projectId) {
-  const disabledAttr = canEdit ? "" : ' disabled title="View/comment only for your team role"';
+function productionStatusQuickActions(status, canManage, projectId) {
+  const disabledAttr = canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`;
   const actions = [
     ["readycheck", "Ready"],
     ["issued", "Issued"],
+    ["materialcheck", "Gear check"],
     ["complete", "Fabbed"],
   ].filter(([nextStatus]) => normalizeProjectStatus(status) !== nextStatus);
   return actions
     .map(([nextStatus, label]) => `<button type="button" data-production-action="set-status" data-status="${nextStatus}" data-project-id="${escapeHtml(projectId)}"${disabledAttr}>${label}</button>`)
     .join("");
+}
+
+function productionMaterialChecklistHtml(project, checklist, permission) {
+  const normalized = normalizeMaterialChecklist(checklist);
+  const stats = materialChecklistStats(normalized);
+  const canManage = permission.canManageProduction;
+  const disabledAttr = canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`;
+  const overrideDisabledAttr = permission.canIssue
+    ? ""
+    : ` disabled title="Only a checker or team admin can authorise starting with missing gear"`;
+  const statusClass = stats.ready ? "ready" : stats.overridden ? "override" : stats.missing ? "missing" : "pending";
+  return `
+    <details class="production-material-checklist ${statusClass}"${stats.ready || stats.missing ? " open" : ""}>
+      <summary>
+        <strong>Gear check</strong>
+        <span>${escapeHtml(materialChecklistSummary(normalized))}</span>
+      </summary>
+      <p>Confirm the pipe, fittings and added workshop items are physically available before cutting starts.</p>
+      ${normalized.items.length ? `<div class="material-check-list">${normalized.items.map((item) => `
+        <div class="material-check-row ${escapeHtml(item.status)}">
+          <div class="material-check-item">
+            <strong>${escapeHtml(item.label)}</strong>
+            <span>${escapeHtml([item.quantity, item.detail].filter(Boolean).join(" / ") || (item.custom ? "Added workshop item" : "Required by drawing"))}</span>
+          </div>
+          <label>
+            <span>Availability</span>
+            <select data-material-check-field="status" data-material-item-id="${escapeHtml(item.id)}" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>
+              ${["pending", "inshop", "order", "na"].map((status) => `<option value="${status}"${item.status === status ? " selected" : ""}>${escapeHtml(materialChecklistStatusLabel(status))}</option>`).join("")}
+            </select>
+          </label>
+          <label class="material-check-note">
+            <span>Note / location</span>
+            <input data-material-check-field="note" data-material-item-id="${escapeHtml(item.id)}" data-project-id="${escapeHtml(project.id)}" value="${escapeHtml(item.note)}" maxlength="180" placeholder="Rack, heat number, PO..."${disabledAttr} />
+          </label>
+        </div>
+      `).join("")}</div>` : `<p class="material-check-empty">No material could be inferred yet. Add the required workshop gear manually.</p>`}
+      ${normalized.checkedAt ? `<div class="material-check-result ready"><strong>Checklist confirmed</strong><span>${escapeHtml(normalized.checkedBy || "Team")} / ${escapeHtml(new Date(normalized.checkedAt).toLocaleString())}</span></div>` : ""}
+      ${stats.overridden ? `<div class="material-check-result override"><strong>Authorised override</strong><span>${escapeHtml(normalized.overrideReason)} / ${escapeHtml(normalized.overrideBy || "Checker")}</span></div>` : ""}
+      <div class="material-check-actions">
+        <button type="button" data-production-action="add-material-item" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add item</button>
+        <button type="button" class="primary" data-production-action="confirm-material-check" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Confirm gear ready</button>
+        <button type="button" data-production-action="override-material-check" data-project-id="${escapeHtml(project.id)}"${overrideDisabledAttr}>Authorised override</button>
+      </div>
+    </details>
+  `;
 }
 
 function cloneProjectDrawingState(project) {
@@ -21459,11 +31011,15 @@ async function persistProjectWorkflowUpdate(project, nextDrawingState, updatedAt
 
   if (source === "cloud") {
     if (!(await ensureSupabaseClient()) || !cloudUser || !hasActiveCloudLicense()) {
-      showAppNotice("Sign in with an active licence to update cloud production items.");
+      showAppNotice(cloudUser
+        ? cloudReadOnlyMessage("update cloud production items")
+        : "Sign in with an active licence to update cloud production items.");
       return false;
     }
-    if (!projectPermission(project, { source: "cloud" }).canEdit) {
-      showAppNotice("Only the project owner or a team admin can update this cloud spool.");
+    if (!projectPermission(project, { source: "cloud" }).canManageProduction) {
+      showAppNotice(hasActiveCloudLicense()
+        ? "Your business role does not allow production updates."
+        : cloudReadOnlyMessage("update cloud production items"));
       return false;
     }
     updateCloudStatus("Updating production...", "");
@@ -21508,6 +31064,12 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
     lastUpdatedBy: checkerName(),
     lastUpdatedAt: now,
   });
+  if (nextProduction.assignee) {
+    nextProduction.materialChecklist = materialChecklistForState({
+      ...targetState,
+      productionInfo: nextProduction,
+    });
+  }
   let activity = normalizeProductionActivity(targetState.productionActivity);
 
   if (updates.status !== undefined) {
@@ -21520,6 +31082,13 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
     }
     if (projectStatusAtLeast(previousStatus, "checked") && projectStatusIndex(nextStatus) < projectStatusIndex("checked")) {
       throw new Error("Open the spool and use Return for changes so the checker comment and revision are preserved.");
+    }
+    if (
+      projectStatusIndex(previousStatus) < projectStatusIndex("cutting") &&
+      projectStatusAtLeast(nextStatus, "cutting") &&
+      !materialChecklistCanStart(nextProduction.materialChecklist)
+    ) {
+      throw new Error("Complete the Gear check before starting Cutting, or have a checker record an authorised override.");
     }
     targetState.projectStatus = nextStatus;
     if (nextStatus !== previousStatus) {
@@ -21562,6 +31131,19 @@ async function updateSavedProjectWorkflow(projectId, updates = {}) {
     !(Object.prototype.hasOwnProperty.call(changedProduction, "hold") && nextProduction.hold)
   ) {
     activity = addProductionActivity(activity, "hold", `Hold reason changed from ${previousProduction.holdReason || "none"} to ${nextProduction.holdReason || "none"}.`, now);
+  }
+  if (Object.prototype.hasOwnProperty.call(changedProduction, "materialChecklist")) {
+    const previousChecklist = normalizeMaterialChecklist(previousProduction.materialChecklist);
+    const nextChecklist = normalizeMaterialChecklist(nextProduction.materialChecklist);
+    const previousStats = materialChecklistStats(previousChecklist);
+    const nextStats = materialChecklistStats(nextChecklist);
+    if (!previousChecklist.checkedAt && nextChecklist.checkedAt) {
+      activity = addProductionActivity(activity, "gear", `Gear checklist confirmed: ${nextStats.resolved}/${nextStats.total} items resolved.`, now);
+    } else if (previousChecklist.overrideAt !== nextChecklist.overrideAt && nextChecklist.overrideAt) {
+      activity = addProductionActivity(activity, "gear", `Gear-check override authorised: ${nextChecklist.overrideReason}.`, now);
+    } else if (previousStats.resolved !== nextStats.resolved || previousStats.missing !== nextStats.missing || previousStats.total !== nextStats.total) {
+      activity = addProductionActivity(activity, "gear", `Gear checklist updated: ${nextStats.resolved}/${nextStats.total} resolved; ${nextStats.missing} need ordering.`, now);
+    }
   }
 
   let messages = normalizeProductionMessages(targetState.productionMessages);
@@ -21663,7 +31245,8 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
       : "Cloud"
     : "Browser";
   const spoolMessages = dashboardCommsItems(projects);
-  const cloudReady = Boolean(cloudUser && hasActiveCloudLicense() && activeCompanyIsApproved());
+  const cloudReadable = Boolean(cloudUser && hasCloudReadAccess() && activeCompanyIsApproved());
+  const cloudWritable = Boolean(cloudReadable && hasActiveCloudLicense());
   const visibleTeamMessages = (teamMessagesCompanyId === activeCompany?.id ? teamMessages : [])
     .filter((message) => !message.completed || message.pinned)
     .slice(0, 12);
@@ -21676,7 +31259,7 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
           <span>${escapeHtml(sourceLabel)} messages, active yard notes and spool actions in one place.</span>
         </div>
         <div class="team-comms-actions">
-          <button type="button" data-project-library-action="refresh-team-messages"${cloudReady ? "" : " disabled"}>Refresh</button>
+          <button type="button" data-project-library-action="refresh-team-messages"${cloudReadable ? "" : " disabled"}>Refresh</button>
           <button type="button" data-project-library-action="hide-comms">Hide</button>
         </div>
       </div>
@@ -21685,18 +31268,18 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
         <section class="team-comms-panel">
           <div class="team-comms-panel-head">
             <strong>General team messages</strong>
-            <span>${cloudReady ? teamMessagesBusy ? "Refreshing..." : "Shared with the active company" : "Cloud team required"}</span>
+            <span>${cloudReadable ? teamMessagesBusy ? "Refreshing..." : cloudWritable ? "Shared with the active company" : "Read-only team history" : "Cloud team required"}</span>
           </div>
-          ${cloudReady ? `
+          ${cloudWritable ? `
             <div class="team-comms-compose">
               <input data-team-message-input type="text" maxlength="500" placeholder="Message for the team" />
               <button type="button" data-project-library-action="add-team-message">Post</button>
             </div>
           ` : `
-            <div class="team-comms-empty">Sign in to an approved company team to post shared team messages.</div>
+            <div class="team-comms-empty">${cloudReadable ? "Team messages are read only until the licence is upgraded." : "Sign in to an approved company team to post shared team messages."}</div>
           `}
           <div class="team-comms-list">
-            ${visibleTeamMessages.length ? visibleTeamMessages.map(teamMessageHtml).join("") : `<div class="team-comms-empty">${cloudReady ? "No team messages yet." : "Team messages will appear here."}</div>`}
+            ${visibleTeamMessages.length ? visibleTeamMessages.map((message) => teamMessageHtml(message, cloudWritable)).join("") : `<div class="team-comms-empty">${cloudReadable ? "No team messages yet." : "Team messages will appear here."}</div>`}
           </div>
         </section>
         <section class="team-comms-panel">
@@ -21713,7 +31296,7 @@ function renderProjectLibraryComms(projects = projectLibraryProjects, errorMessa
   `;
 }
 
-function teamMessageHtml(message) {
+function teamMessageHtml(message, canWrite = hasActiveCloudLicense()) {
   const meta = [
     message.authorEmail || "Team member",
     message.createdAt ? new Date(message.createdAt).toLocaleString() : "Just now",
@@ -21723,13 +31306,14 @@ function teamMessageHtml(message) {
     <article class="team-comms-message${message.completed ? " done" : ""}${message.pinned ? " pinned" : ""}">
       <p>${escapeHtml(message.body)}</p>
       <small>${escapeHtml(meta)}</small>
-      ${message.completed ? `<span class="team-comms-done">Done</span>` : `<button type="button" data-project-library-action="complete-team-message" data-team-message-id="${escapeHtml(message.id)}">Done</button>`}
+      ${message.completed ? `<span class="team-comms-done">Done</span>` : `<button type="button" data-project-library-action="complete-team-message" data-team-message-id="${escapeHtml(message.id)}"${canWrite ? "" : ' disabled title="Upgrade the licence to change team messages"'}>Done</button>`}
     </article>
   `;
 }
 
-function spoolMessageHtml(item) {
-  const { project, message } = item;
+  function spoolMessageHtml(item) {
+    const { project, message } = item;
+    const canManage = projectPermission(project).canManageProduction;
   const production = savedProjectProductionInfo(project);
   const meta = [
     savedProjectDetailLine(project),
@@ -21742,7 +31326,7 @@ function spoolMessageHtml(item) {
       <button type="button" class="team-comms-open" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">${escapeHtml(savedProjectSpoolTitle(project))}</button>
       <p>${escapeHtml(message.body)}</p>
       <small>${escapeHtml(meta)}</small>
-      <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(message.id)}">Done</button>
+      <button type="button" data-production-action="complete-message" data-project-id="${escapeHtml(project.id)}" data-message-id="${escapeHtml(message.id)}"${canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`}>Done</button>
     </article>
   `;
 }
@@ -21795,7 +31379,7 @@ function projectLibraryGuideCard() {
     <ol>
       <li>
         <strong>Save each spool first.</strong>
-        <span>Use Save current so the spool appears in the job list and production board.</span>
+        <span>Save from the drawing screen so the spool appears in the job list and production board.</span>
       </li>
       <li>
         <strong>Move the spool through stages.</strong>
@@ -21810,8 +31394,8 @@ function projectLibraryGuideCard() {
         <span>Add a message to a card, mark it Done when handled, and it will be set to disappear after one week.</span>
       </li>
       <li>
-        <strong>Open Comms for the team view.</strong>
-        <span>Use Comms to post general team messages and see all active spool notes in one place.</span>
+        <strong>Use More for team tools.</strong>
+        <span>Open More for the Jobs guide, Team comms and daily or weekly reports without crowding the main toolbar.</span>
       </li>
     </ol>
     <p>Quick rule: the board is for tracking production. Use Open when you need to edit the drawing itself.</p>
@@ -21976,7 +31560,7 @@ function projectLibraryReportData(projects = null) {
   const onHold = enriched.filter((item) => item.production.hold);
   const readyToCheck = enriched.filter((item) => item.status === "readycheck");
   const readyToIssue = enriched.filter((item) => item.status === "checked");
-  const issued = enriched.filter((item) => item.status === "issued");
+  const issued = enriched.filter((item) => item.status === "issued" || item.status === "materialcheck");
   const fabrication = enriched.filter((item) => ["cutting", "fitup", "welded", "finish"].includes(item.status));
   const actionQueue = enriched
     .filter((item) => item.status !== "complete" && !item.production.hold)
@@ -22332,12 +31916,14 @@ function productionProjectHidden(project) {
 function projectProductionCard(project) {
   const savedState = savedProjectState(project);
   const production = savedProjectProductionInfo(project);
+  const materialChecklist = materialChecklistForState(savedState);
+  const materialStats = materialChecklistStats(materialChecklist);
   const messages = savedProjectProductionMessages(project);
   const activeMessage = [...messages].reverse().find((message) => !message.completed) ?? null;
   const status = normalizeProjectStatus(savedState?.projectStatus);
   const permission = projectPermission(project);
-  const canEdit = permission.canEdit;
-  const disabledAttr = canEdit ? "" : ' disabled title="View/comment only for your team role"';
+  const canManage = permission.canManageProduction;
+  const disabledAttr = canManage ? "" : ` disabled title="${escapeHtml(roleRequirementText("production"))}"`;
   const dueState = productionDueState(production);
   const card = document.createElement("article");
   card.className = "production-spool-card";
@@ -22346,8 +31932,8 @@ function projectProductionCard(project) {
   card.classList.toggle("overdue", dueState.key === "overdue");
   card.classList.toggle("due-today", dueState.key === "today");
   card.classList.toggle("complete", status === "complete");
-  card.classList.toggle("read-only", !canEdit);
-  card.draggable = canEdit;
+  card.classList.toggle("read-only", !canManage);
+  card.draggable = canManage;
   card.dataset.productionProjectId = project.id;
   card.dataset.projectSource = project.source ?? projectLibrarySource;
   card.dataset.productionStatus = status;
@@ -22357,10 +31943,11 @@ function projectProductionCard(project) {
     production.dueDate ? `Due ${formatProductionDue(production)}` : "No due date",
     productionPriorityLabel(production.priority),
   ];
+  if (production.assignee) parts.push(`Gear ${materialChecklistSummary(materialChecklist)}`);
   if (production.hold) parts.unshift(production.holdReason ? `Hold: ${production.holdReason}` : "On hold");
   if (status === "complete" && production.removeAfter) parts.push(`Hides ${new Date(production.removeAfter).toLocaleDateString()}`);
-  if (!canEdit) parts.push(permission.label);
-  const quickActions = productionStatusQuickActions(status, canEdit, project.id);
+  if (!canManage) parts.push(`${permission.label} / production locked`);
+  const quickActions = productionStatusQuickActions(status, canManage, project.id);
   const latestActivity = [...savedProjectProductionActivity(project)].reverse()[0] ?? null;
 
   card.innerHTML = `
@@ -22369,15 +31956,18 @@ function projectProductionCard(project) {
         <strong>${escapeHtml(savedProjectSpoolTitle(project))}</strong>
         <span>${escapeHtml(savedProjectDetailLine(project))}</span>
       </button>
-      <span class="production-drag-handle" aria-hidden="true">${canEdit ? "Drag" : "View"}</span>
+      <span class="production-drag-handle" aria-hidden="true">${canManage ? "Drag" : "View"}</span>
     </div>
     <div class="production-card-badges">
       <span class="status">${escapeHtml(projectStatusLabel(status))}</span>
       <span class="due ${escapeHtml(dueState.key)}">${escapeHtml(dueState.label)}</span>
       <span class="priority ${escapeHtml(production.priority)}">${escapeHtml(productionPriorityLabel(production.priority))}</span>
       ${production.hold ? `<span class="hold">Hold</span>` : ""}
+      ${production.assignee ? `<span class="gear ${materialStats.ready ? "ready" : materialStats.overridden ? "override" : materialStats.missing ? "missing" : "pending"}">${escapeHtml(materialStats.ready ? "Gear ready" : materialStats.overridden ? "Gear override" : materialStats.missing ? "Gear missing" : "Gear check")}</span>` : ""}
     </div>
     <small class="production-card-meta">${escapeHtml(parts.join(" / "))}</small>
+    <details class="production-card-details">
+      <summary>Details and updates</summary>
     ${latestActivity ? `
       <div class="production-card-activity">
         <span>${escapeHtml(latestActivity.actor || "Team")}</span>
@@ -22427,13 +32017,16 @@ function projectProductionCard(project) {
         </div>
       ` : ""}
       <div class="production-message-compose">
-        <input data-production-message-input data-project-id="${escapeHtml(project.id)}" type="text" maxlength="240" placeholder="${canEdit ? "Message / yard note" : "Use spool comments or team Comms"}"${disabledAttr} />
+        <input data-production-message-input data-project-id="${escapeHtml(project.id)}" type="text" maxlength="240" placeholder="${canManage ? "Message / yard note" : "Production updates require Workshop or higher"}"${disabledAttr} />
         <button type="button" data-production-action="add-message" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add</button>
       </div>
     </div>
+    ${production.assignee ? productionMaterialChecklistHtml(project, materialChecklist, permission) : `<p class="material-check-unassigned">Assign this spool to create its gear checklist.</p>`}
+    </details>
     <div class="production-card-actions">
       ${quickActions}
       <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">Open</button>
+      <button type="button" data-open-project-window="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}" title="Open this spool in the multi-spool workspace">Open tab</button>
     </div>
   `;
   return card;
@@ -22490,58 +32083,199 @@ function projectRecentActivityItems(projects = [], limit = 7) {
     .slice(0, limit);
 }
 
+function productionProjectWasReturned(project) {
+  if (normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "draft") return false;
+  return savedProjectProductionActivity(project)
+    .slice(-3)
+    .some((entry) => /returned for changes/i.test(String(entry?.text ?? "")));
+}
+
+function productionProjectNeedsAttention(project) {
+  if (productionProjectHidden(project)) return false;
+  const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+  if (status === "complete") return false;
+  const production = savedProjectProductionInfo(project);
+  const dueState = productionDueState(production);
+  const gearNeedsAttention = status === "materialcheck" && !materialChecklistCanStart(materialChecklistForState(savedProjectState(project)));
+  return production.hold || gearNeedsAttention || dueState.key === "overdue" || dueState.key === "today" || productionProjectWasReturned(project);
+}
+
+function productionProjectNeedsActionWithoutHold(project) {
+  if (productionProjectHidden(project)) return false;
+  const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+  if (status === "complete") return false;
+  const production = savedProjectProductionInfo(project);
+  const dueState = productionDueState(production);
+  const gearNeedsAttention = status === "materialcheck" && !materialChecklistCanStart(materialChecklistForState(savedProjectState(project)));
+  return !production.hold && (gearNeedsAttention || dueState.key === "overdue" || dueState.key === "today" || productionProjectWasReturned(project));
+}
+
+function projectTodayRole() {
+  return String(activeCompanyMembership?.role ?? "").trim().toLowerCase();
+}
+
+function projectTodayGroups(projects = []) {
+  const visible = sortedProductionProjects(projects.filter((project) => {
+    return !productionProjectHidden(project) && normalizeProjectStatus(savedProjectState(project)?.projectStatus) !== "complete";
+  }));
+  const role = projectTodayRole();
+  const teamAttention = !activeCompanyIsApproved() || ["owner", "admin"].includes(role);
+  const teamChecking = !activeCompanyIsApproved() || ["owner", "admin", "checker"].includes(role);
+  const assigned = (project) => productionAssignedToCurrentUser(savedProjectProductionInfo(project));
+  const personalScope = (project) => teamAttention || assigned(project);
+
+  const attention = visible.filter((project) => personalScope(project) && productionProjectNeedsActionWithoutHold(project));
+  const attentionIds = new Set(attention.map((project) => project.id));
+  const hold = visible.filter((project) => {
+    const production = savedProjectProductionInfo(project);
+    return !attentionIds.has(project.id) && production.hold && (teamAttention || assigned(project));
+  });
+  const holdIds = new Set(hold.map((project) => project.id));
+  const ready = visible.filter((project) => {
+    if (attentionIds.has(project.id) || holdIds.has(project.id)) return false;
+    const status = normalizeProjectStatus(savedProjectState(project)?.projectStatus);
+    return status === "readycheck" && (teamChecking || assigned(project));
+  });
+  const readyIds = new Set(ready.map((project) => project.id));
+  const mine = visible.filter((project) => {
+    return assigned(project) && !attentionIds.has(project.id) && !holdIds.has(project.id) && !readyIds.has(project.id);
+  });
+  return { attention, mine, ready, hold, teamAttention, teamChecking };
+}
+
+function projectTodayCard(project) {
+  const savedState = savedProjectState(project);
+  const production = savedProjectProductionInfo(project);
+  const status = normalizeProjectStatus(savedState?.projectStatus);
+  const dueState = productionDueState(production);
+  const returned = productionProjectWasReturned(project);
+  const actionLabel = status === "readycheck"
+    ? "Review spool"
+    : status === "checked"
+    ? "Open to issue"
+    : status === "draft"
+    ? "Open drawing"
+    : "Open spool";
+  const card = document.createElement("article");
+  card.className = "team-today-spool";
+  card.classList.toggle("attention", productionProjectNeedsAttention(project));
+  card.innerHTML = `
+    <div class="team-today-spool-main">
+      <span>${escapeHtml(savedProjectDetailLine(project))}</span>
+      <strong>${escapeHtml(savedProjectSpoolTitle(project))}</strong>
+      <small>${escapeHtml(production.assignee || "Unassigned")} / ${escapeHtml(production.dueDate ? formatProductionDue(production) : "No due date")}</small>
+    </div>
+    <div class="team-today-spool-badges" aria-label="Spool status">
+      <span class="status">${escapeHtml(projectStatusLabel(status))}</span>
+      ${dueState.key !== "none" ? `<span class="${escapeHtml(dueState.key)}">${escapeHtml(dueState.label)}</span>` : ""}
+      ${production.hold ? `<span class="hold">On hold</span>` : ""}
+      ${returned ? `<span class="returned">Returned</span>` : ""}
+    </div>
+    ${production.hold && production.holdReason ? `<p class="team-today-hold">${escapeHtml(production.holdReason)}</p>` : ""}
+    <button type="button" class="team-today-primary" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">${escapeHtml(actionLabel)}</button>
+  `;
+  return card;
+}
+
+function projectTodaySection(title, description, projects, emptyText, tone) {
+  const section = document.createElement("section");
+  section.className = `team-today-section ${tone}`;
+  section.innerHTML = `
+    <header>
+      <div><strong>${escapeHtml(title)}</strong><span>${escapeHtml(description)}</span></div>
+      <b>${projects.length}</b>
+    </header>
+  `;
+  const list = document.createElement("div");
+  list.className = "team-today-list";
+  if (!projects.length) {
+    list.innerHTML = `<div class="team-today-empty">${escapeHtml(emptyText)}</div>`;
+  } else {
+    for (const project of projects.slice(0, 6)) list.append(projectTodayCard(project));
+    if (projects.length > 6) {
+      const more = document.createElement("button");
+      more.type = "button";
+      more.className = "team-today-more";
+      more.dataset.projectLibraryAction = "dashboard-view";
+      more.dataset.dashboardView = "board";
+      more.textContent = `See ${projects.length - 6} more on the full board`;
+      list.append(more);
+    }
+  }
+  section.append(list);
+  return section;
+}
+
+function projectTodayBoard(projects) {
+  const section = document.createElement("section");
+  section.className = "team-today-board";
+  const groups = projectTodayGroups(projects);
+  const attentionTitle = groups.teamAttention ? "Team attention" : "My attention";
+  const attentionDescription = groups.teamAttention
+    ? "Overdue, due today, returned or blocked by missing gear"
+    : "Your overdue, due today, returned or gear-blocked spools";
+  section.append(
+    projectTodaySection(attentionTitle, attentionDescription, groups.attention, "Nothing needs your attention.", "attention"),
+    projectTodaySection("Assigned to me", "Your active work without a current blocker", groups.mine, "No active work is assigned to you.", "mine"),
+    projectTodaySection("Ready for checking", groups.teamChecking ? "The checking queue" : "Your work waiting for checking", groups.ready, "Nothing is waiting for checking.", "ready"),
+    projectTodaySection("On hold", groups.teamAttention ? "Team blockers with recorded reasons" : "Your blocked work", groups.hold, "No work is on hold.", "hold"),
+  );
+  return section;
+}
+
 function projectDashboardCard(projects, options = {}) {
   const card = document.createElement("section");
-  card.className = "project-dashboard-card team-work-dashboard";
+  card.className = "project-dashboard-card team-work-dashboard team-dashboard-simple";
   const counts = productionBoardFilterCounts(projects);
+  const groups = projectTodayGroups(projects);
   const recentActivity = projectRecentActivityItems(projects);
   const totalCount = options.totalCount ?? projects.length;
   const resultText = options.query && totalCount !== projects.length
     ? `${projects.length} matching of ${totalCount} saved spool${totalCount === 1 ? "" : "s"}`
-    : `${projects.length} saved spool${projects.length === 1 ? "" : "s"}`;
+    : `${counts.active ?? 0} active spool${counts.active === 1 ? "" : "s"}`;
   const title = projectLibrarySource === "cloud"
-    ? activeCompanyIsApproved() ? `${activeCompany.name} team dashboard` : "Cloud team dashboard"
-    : "Browser production dashboard";
-  const queues = [
-    ["mine", "Assigned to me", "Nothing assigned to you."],
-    ["today", "Due today", "Nothing due today."],
-    ["overdue", "Overdue", "No overdue spools."],
-    ["readycheck", "Ready to check", "No checking queue."],
-    ["hold", "On hold", "No hold items."],
-  ];
+    ? activeCompanyIsApproved() ? `${activeCompany.name} team` : "Cloud team"
+    : "This device";
 
   card.innerHTML = `
     <div class="team-dashboard-head">
       <div>
+        <span class="team-dashboard-eyebrow">Production</span>
         <strong>${escapeHtml(title)}</strong>
-        <span>${escapeHtml(resultText)} / ${counts.active ?? 0} active</span>
+        <span>${escapeHtml(resultText)}</span>
       </div>
-      <div class="team-dashboard-actions">
-        <button type="button" data-project-library-action="show-report" data-report-period="daily">Daily report</button>
-        <button type="button" data-project-library-action="show-report" data-report-period="weekly">Weekly report</button>
-        <button type="button" data-project-library-action="show-comms">Team comms</button>
-      </div>
+      <button type="button" class="team-scan-button" data-project-library-action="scan-qr" aria-label="Scan a spool QR code">
+        <span aria-hidden="true">▣</span><strong>Scan QR</strong><small>Open a spool</small>
+      </button>
     </div>
-    <div class="team-dashboard-layout">
-      <div class="team-dashboard-queues production-command-grid" aria-label="Team work queues">
-        ${queues.map(([filter, label, hint]) => productionCommandStripItem(projects, filter, label, hint, counts, projectLibraryBoardFilter)).join("")}
+    <nav class="team-dashboard-tabs" aria-label="Team dashboard view">
+      <button type="button" class="${projectLibraryDashboardView === "jobs" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="jobs">Jobs <b>${projectFolders(projects).length}</b></button>
+      <button type="button" class="${projectLibraryDashboardView === "today" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="today">My day <b>${groups.attention.length + groups.mine.length + groups.ready.length + groups.hold.length}</b></button>
+      <button type="button" class="${projectLibraryDashboardView === "board" ? "active" : ""}" data-project-library-action="dashboard-view" data-dashboard-view="board">Full board <b>${counts.active ?? 0}</b></button>
+      <button type="button" class="${projectLibraryMoreVisible ? "active" : ""}" data-project-library-action="toggle-dashboard-more" aria-expanded="${projectLibraryMoreVisible}">More</button>
+    </nav>
+    ${projectLibraryMoreVisible ? `
+      <div class="team-dashboard-more-panel">
+        <div class="team-dashboard-actions">
+          <button type="button" data-project-library-action="show-guide">Jobs guide</button>
+          <button type="button" data-project-library-action="show-report" data-report-period="daily">Daily report</button>
+          <button type="button" data-project-library-action="show-report" data-report-period="weekly">Weekly report</button>
+          <button type="button" data-project-library-action="show-comms">Team comms</button>
+        </div>
+        <section class="team-dashboard-activity" aria-label="Recent team activity">
+          <div class="team-dashboard-activity-head"><strong>Recent activity</strong><span>Latest team changes</span></div>
+          <div class="team-dashboard-activity-list">
+            ${recentActivity.length ? recentActivity.map(({ project, entry }) => `
+              <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
+                <span>${escapeHtml(savedProjectSpoolTitle(project))}</span>
+                <strong>${escapeHtml(entry.text)}</strong>
+                <small>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</small>
+              </button>
+            `).join("") : `<div class="team-dashboard-empty">No team activity yet.</div>`}
+          </div>
+        </section>
       </div>
-      <section class="team-dashboard-activity" aria-label="Recent team activity">
-        <div class="team-dashboard-activity-head">
-          <strong>Recent team activity</strong>
-          <span>Latest assignment, due-date, hold, note and stage changes</span>
-        </div>
-        <div class="team-dashboard-activity-list">
-          ${recentActivity.length ? recentActivity.map(({ project, entry }) => `
-            <button type="button" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
-              <span>${escapeHtml(savedProjectSpoolTitle(project))}</span>
-              <strong>${escapeHtml(entry.text)}</strong>
-              <small>${escapeHtml(entry.actor || "Team")} / ${escapeHtml(formatProductionActivityTime(entry.createdAt))}</small>
-            </button>
-          `).join("") : `<div class="team-dashboard-empty">No team activity yet. Assign a spool or move one to begin the history.</div>`}
-        </div>
-      </section>
-    </div>
+    ` : ""}
   `;
   return card;
 }
@@ -22711,10 +32445,22 @@ function projectLibraryRow(project) {
     deleteButton.dataset.deleteProjectId = project.id;
     deleteButton.dataset.projectSource = project.source ?? projectLibrarySource;
     deleteButton.disabled = !permission.canDelete;
-    if (!permission.canDelete) deleteButton.title = "Only the project owner or a team admin can delete this cloud spool.";
+    if (!permission.canDelete) {
+      deleteButton.title = hasActiveCloudLicense()
+        ? "Only the project owner or a team admin can delete this cloud spool."
+        : "Cloud deletion is paused while the licence is inactive.";
+    }
 
     openButton.dataset.projectSource = project.source ?? projectLibrarySource;
-    row.append(main, openButton, deleteButton);
+    const newWindowButton = document.createElement("button");
+    newWindowButton.type = "button";
+    newWindowButton.className = "project-library-action";
+    newWindowButton.textContent = "Open tab";
+    newWindowButton.dataset.openProjectWindow = project.id;
+    newWindowButton.dataset.projectSource = project.source ?? projectLibrarySource;
+    newWindowButton.title = "Keep the current spool open and load this one in another in-app tab";
+
+    row.append(main, openButton, newWindowButton, deleteButton);
     return row;
 }
 
@@ -22814,9 +32560,10 @@ function closeProjectLibrary() {
   ensureProjectLibraryGuideSlot();
   ensureProjectLibraryReportSlot();
   if (projectLibraryDialog) projectLibraryDialog.hidden = true;
+  scheduleTemporaryWorkspaceRestore();
 }
 
-async function openSavedBrowserProject(projectId) {
+async function openSavedBrowserProject(projectId, options = {}) {
   clearPendingProjectCommentPhoto();
   const record = loadSavedBrowserProjects().find((project) => project.id === projectId);
   if (!record) {
@@ -22825,7 +32572,7 @@ async function openSavedBrowserProject(projectId) {
     return;
   }
 
-  if (state.projectId !== record.id && hasDrawingContent()) {
+  if (!options.skipConfirm && state.projectId !== record.id && hasDrawingContent()) {
     const proceed = await confirmAppAction("Open this project? Your current drawing will be replaced.", {
       title: "Open saved spool",
       confirmLabel: "Open spool",
@@ -23097,32 +32844,63 @@ function loadPlanItemFromPayload(id, name, payload, projectInfo, updatedAt = "",
   });
 }
 
+function loadPlanItemsFromPayload(id, name, payload, projectInfo, updatedAt = "", source = "saved") {
+  const restored = stateFromPayload(payload);
+  if (!restored) return [];
+  const children = withTemporaryState(restored, () => {
+    if (!bigSpoolPlanActive()) return [];
+    const layout = bigSpoolLayout();
+    if (layout.pieces.length < 2) return [];
+    return layout.pieces.map((piece) => ({
+      piece,
+      child: bigSpoolChildState(piece, restored),
+    })).filter((entry) => entry.child);
+  });
+  if (!children.length) {
+    const item = loadPlanItemFromPayload(id, name, payload, projectInfo, updatedAt, source);
+    return item ? [item] : [];
+  }
+  return children.map(({ piece, child }) => {
+    const childName = `${name || projectDisplayName(projectInfo)} / ${piece.childId}`;
+    const item = loadPlanItemFromPayload(`${id}:child:${piece.label}`, childName, child, child.projectInfo, updatedAt, `${source}-big-spool-child`);
+    if (!item) return null;
+    return {
+      ...item,
+      parentId: id,
+      parentSpoolNumber: normalizeProjectInfo(projectInfo).spoolNumber,
+      childSpoolId: piece.childId,
+      weightKg: piece.weightKg,
+      lengthMm: piece.transportLengthMm,
+      widthMm: piece.transportWidthMm,
+      heightMm: piece.transportHeightMm,
+    };
+  }).filter(Boolean);
+}
+
 function loadPlanAvailableItems() {
   const items = [];
   const currentPayload = statePayload();
-  const current = loadPlanItemFromPayload(
+  items.push(...loadPlanItemsFromPayload(
     "__current__",
     `${projectDisplayName(currentPayload.projectInfo)} (current)`,
     currentPayload,
     currentPayload.projectInfo,
     "",
     "current",
-  );
-  if (current) items.push(current);
+  ));
 
   const projects = loadSavedBrowserProjects()
     .filter((project) => project.id !== state.projectId)
     .sort((first, second) => String(second.updatedAt).localeCompare(String(first.updatedAt)));
 
   for (const project of projects) {
-    const item = loadPlanItemFromPayload(
+    items.push(...loadPlanItemsFromPayload(
       project.id,
       project.name || projectDisplayName(project.projectInfo),
       project.state,
       project.projectInfo,
       project.updatedAt,
-    );
-    if (item) items.push(item);
+    ));
   }
 
   return items;
@@ -23187,13 +32965,22 @@ function renderLoadPlanJobOptions(items = loadPlanAvailableItems()) {
   loadPlanJobSelect.disabled = !choices.length;
 }
 
-function loadPlanVisibleItems(items = loadPlanAvailableItems()) {
-  if (!loadPlanJobKey) return [];
-  return items.filter((item) => item.jobKey === loadPlanJobKey);
+function loadPlanVisibleItems(items = null) {
+  const availableItems = Array.isArray(items)
+    ? items
+    : loadPlanItemsCache.length ? loadPlanItemsCache : loadPlanAvailableItems();
+  const selectedJobKey = loadPlanJobSelect?.value || loadPlanJobKey;
+  if (!selectedJobKey) return [];
+  loadPlanJobKey = selectedJobKey;
+  return availableItems.filter((item) => item.jobKey === selectedJobKey);
 }
 
-function selectedLoadPlanItems(items = loadPlanVisibleItems()) {
-  return items.filter((item) => loadPlanSelection.has(item.id)).slice(0, LOAD_PLAN_MAX_SPOOLS);
+function selectedLoadPlanItems(items = null) {
+  const availableItems = Array.isArray(items) ? items : loadPlanItemsCache;
+  const checkedIds = new Set([...loadPlanProjectList?.querySelectorAll('input[type="checkbox"]:checked') ?? []]
+    .map((input) => input.value));
+  if (checkedIds.size) loadPlanSelection = checkedIds;
+  return availableItems.filter((item) => loadPlanSelection.has(item.id)).slice(0, LOAD_PLAN_MAX_SPOOLS);
 }
 
 function loadPlanItemMeta(item) {
@@ -23233,6 +33020,7 @@ function renderLoadPlanProjectChoices() {
   if (loadPlanTraySelect) loadPlanTraySelect.value = normalizeLoadPlanTrayKey(loadPlanTrayKey);
   if (loadPlanRackSelect) loadPlanRackSelect.value = normalizeLoadPlanRackKey(loadPlanRackKey);
   const allItems = loadPlanAvailableItems();
+  loadPlanItemsCache = allItems;
   renderLoadPlanJobOptions(allItems);
   const items = loadPlanVisibleItems(allItems);
   const validIds = new Set(items.map((item) => item.id));
@@ -23316,19 +33104,24 @@ function updateLoadPlanBulkButtons(items = loadPlanVisibleItems()) {
 }
 
 function setVisibleLoadPlanSelection(selectAll) {
-  const items = loadPlanVisibleItems();
-  if (!items.length) return;
+  const checkboxes = [...loadPlanProjectList?.querySelectorAll('input[type="checkbox"]') ?? []];
+  if (!checkboxes.length) return;
+  const visibleIds = new Set(checkboxes.map((checkbox) => checkbox.value));
+  const items = loadPlanItemsCache.filter((item) => visibleIds.has(item.id));
 
   if (selectAll) {
-    loadPlanSelection = new Set(items.slice(0, LOAD_PLAN_MAX_SPOOLS).map((item) => item.id));
-    if (items.length > LOAD_PLAN_MAX_SPOOLS) {
+    loadPlanSelection = new Set(checkboxes.slice(0, LOAD_PLAN_MAX_SPOOLS).map((checkbox) => checkbox.value));
+    if (checkboxes.length > LOAD_PLAN_MAX_SPOOLS) {
       showAppNotice(`Selected the first ${LOAD_PLAN_MAX_SPOOLS} spools. This load planner handles up to ${LOAD_PLAN_MAX_SPOOLS} at once.`);
     }
   } else {
     loadPlanSelection.clear();
   }
-
-  renderLoadPlanProjectChoices();
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = loadPlanSelection.has(checkbox.value);
+  });
+  updateLoadPlanBulkButtons(items);
+  updateLoadPlanPendingSelection(items);
 }
 
 function updateLoadPlanPendingSelection(items = loadPlanVisibleItems()) {
@@ -23659,7 +33452,12 @@ function createTruckLoadPlan(items) {
 
 function openLoadPlanDialog() {
   if (!loadPlanDialog) return;
+  if (loadPlanSelectAllButton) loadPlanSelectAllButton.onclick = () => setVisibleLoadPlanSelection(true);
+  if (loadPlanDeselectAllButton) loadPlanDeselectAllButton.onclick = () => setVisibleLoadPlanSelection(false);
+  if (loadPlanPlayButton) loadPlanPlayButton.onclick = playTruckLoadAnimation;
+  if (loadPlanProjectList) loadPlanProjectList.onchange = handleLoadPlanChoiceChange;
   loadPlanSelection = new Set();
+  loadPlanItemsCache = [];
   loadPlanJobKey = "";
   loadPlanViewMode = "layout";
   updateLoadPlanViewControls();
@@ -24932,6 +34730,133 @@ function redrawLoadPlanIfOpen() {
   }
 }
 
+function quickPdfProjectInfo(previousInfo = state.projectInfo) {
+  const now = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  const date = `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}`;
+  const time = `${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const previous = normalizeProjectInfo(previousInfo);
+  return normalizeProjectInfo({
+    ...defaultProjectInfo(state.pipeSpec),
+    jobNumber: `QUICK-${date}`,
+    spoolNumber: `SP-${time}`,
+    revision: "A",
+    drawnBy: previous.drawnBy,
+    client: "Quick PDF",
+  }, state.pipeSpec);
+}
+
+async function startQuickPdfDrawing() {
+  clearPendingProjectCommentPhoto();
+  const previousInfo = normalizeProjectInfo(state.projectInfo);
+  if (hasDrawingContent()) {
+    const choice = await openNewDrawingDialog();
+    if (choice === "cancel") return false;
+    if (choice === "save") {
+      const saved = await saveBrowserProject({ silent: true });
+      if (!saved) return false;
+    }
+  }
+
+  persistUserDrawingDefaults();
+  state = blankState();
+  state.workflowKind = "quick";
+  state.projectInfo = quickPdfProjectInfo(previousInfo);
+  state.projectInfoPrompted = true;
+  state.projectId = null;
+  currentCloudProjectOwnerId = null;
+  currentCloudProjectCompanyId = null;
+  cloudPermissionReadOnly = false;
+  resetCloudSaveTracking();
+  projectComments = [];
+  projectCommentsProjectId = null;
+  nextFittingId = 1;
+  nextNoteId = 1;
+  three.userMovedCamera = false;
+  if (firstUseGuideState) {
+    firstUseGuideState.active = false;
+    persistFirstUseGuideState();
+    renderFirstUseGuide();
+  }
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  updateControls();
+  updateAll({ save: false });
+  showAppNotice("Quick PDF is ready. Draw the spool, add fittings, then press Download PDF.");
+  return true;
+}
+
+async function convertQuickPdfToManagedWorkflow() {
+  if (!isQuickPdfMode()) return;
+  const quickInfo = normalizeProjectInfo(state.projectInfo);
+  const info = await openProjectDetailsDialog({
+    title: "Use managed workflow",
+    action: "Continue as managed job",
+    defaults: {
+      ...quickInfo,
+      jobNumber: "",
+      spoolNumber: quickInfo.spoolNumber || "SP-01",
+      client: quickInfo.client === "Quick PDF" ? "" : quickInfo.client,
+    },
+  });
+  if (!info) return;
+
+  state.workflowKind = "managed";
+  state.projectInfo = info;
+  state.projectInfoPrompted = true;
+  if (!state.projectId) state.projectId = createProjectId();
+  applyWorkflowKindUi();
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  updateControls();
+  updateAll();
+  activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: hasDrawingContent() ? "review" : "draw" });
+  showAppNotice("Managed workflow is active. This spool now has saving, review, issue, QR and production controls.");
+}
+
+function setupQuickPdfMode() {
+  quickPdfMenuButton?.addEventListener("click", () => {
+    closeActionMenu();
+    startQuickPdfDrawing().catch((error) => {
+      console.warn("Quick PDF start failed.", error);
+      showAppNotice(error?.message || "Quick PDF could not be started.");
+    });
+  });
+  quickPdfDrawButton?.addEventListener("click", () => {
+    applyAppMode("draw");
+    setTool("draw");
+    showMobilePanel("drawing");
+  });
+  quickPdfFittingsButton?.addEventListener("click", () => {
+    applyAppMode("draw");
+    showMobilePanel("drawing");
+    setFittingsToolMenuOpen(true);
+  });
+  quickPdfDownloadButton?.addEventListener("click", async () => {
+    if (quickPdfDownloadButton.disabled) return;
+    const originalLabel = quickPdfDownloadButton.textContent;
+    quickPdfDownloadButton.disabled = true;
+    quickPdfDownloadButton.textContent = "Creating PDF…";
+    try {
+      await exportIsoImage();
+    } finally {
+      quickPdfDownloadButton.disabled = false;
+      quickPdfDownloadButton.textContent = originalLabel;
+    }
+  });
+  quickPdfManagedButton?.addEventListener("click", () => {
+    convertQuickPdfToManagedWorkflow().catch((error) => {
+      console.warn("Managed workflow conversion failed.", error);
+      showAppNotice(error?.message || "Could not change to managed workflow.");
+    });
+  });
+  applyWorkflowKindUi();
+}
+
 async function startNewDrawing() {
   clearPendingProjectCommentPhoto();
   let nextProjectDefaults = null;
@@ -24947,6 +34872,7 @@ async function startNewDrawing() {
 
   persistUserDrawingDefaults();
   state = blankState();
+  state.workflowKind = "managed";
   currentCloudProjectOwnerId = null;
   currentCloudProjectCompanyId = null;
   cloudPermissionReadOnly = false;
@@ -24956,9 +34882,22 @@ async function startNewDrawing() {
   nextFittingId = 1;
   nextNoteId = 1;
   three.userMovedCamera = false;
+  // A new spool is always a drawing task. Do not inherit Review/Export from
+  // the previous spool or from the user's last persisted workspace mode.
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
   updateControls();
   updateAll({ save: false });
-  await promptForProjectDetails({ force: true, defaults: nextProjectDefaults });
+  const created = await promptForProjectDetails({ force: true, defaults: nextProjectDefaults });
+  applyAppMode("draw");
+  setTool("draw");
+  setPreviewHidden(true);
+  showMobilePanel("drawing");
+  if (created) {
+    activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
+  }
 }
 
 function loadSampleDrawing() {
@@ -25068,6 +35007,15 @@ function renderRegressionDialog() {
         </label>
       `).join("")}
     </div>
+    <strong>Launch smoke test</strong>
+    <div class="regression-check-grid launch-check-grid">
+      ${REGRESSION_LAUNCH_CHECKS.map((check, index) => `
+        <label>
+          <input type="checkbox" data-launch-check="${index}" />
+          <span>${escapeHtml(check)}</span>
+        </label>
+      `).join("")}
+    </div>
   `;
 }
 
@@ -25103,6 +35051,7 @@ async function loadRegressionSample(key) {
 
 function setupRegressionDialog() {
   regressionChecklistButton?.addEventListener("click", openRegressionDialog);
+  regressionDiagnosticsButton?.addEventListener("click", downloadDiagnosticReport);
   regressionCloseButton?.addEventListener("click", closeRegressionDialog);
   regressionDialog?.addEventListener("pointerdown", (event) => {
     if (event.target === regressionDialog) closeRegressionDialog();
@@ -25599,6 +35548,7 @@ async function buildSpoolFromDrawingAssistant() {
   state.measurements = [];
   state.nodeTypes = {};
   state.reducerSideOverrides = {};
+  state.reducerTypeOverrides = {};
   state.dimensionOffsets = {};
   state.activePoint = points.length - 1;
   state.selectedPoint = points.length - 1;
@@ -25648,7 +35598,7 @@ function closeNewDrawingDialog(choice = "cancel") {
 }
 
 async function promptForProjectDetails(options = {}) {
-  if (!options.force && (state.projectInfoPrompted || hasProjectInfo() || hasDrawingContent())) return;
+  if (!options.force && (state.projectInfoPrompted || hasProjectInfo() || hasDrawingContent())) return true;
   const info = await openProjectDetailsDialog({
     title: "New drawing details",
     action: "Start drawing",
@@ -25665,9 +35615,14 @@ async function promptForProjectDetails(options = {}) {
     resetCloudSaveTracking();
     projectComments = [];
     projectCommentsProjectId = null;
+    activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
+    applyAppMode("draw");
+    setTool("draw");
+    showMobilePanel("drawing");
   }
   updateControls();
   updateAll();
+  return Boolean(info);
 }
 
 async function editProjectDetailsFromHealth(field = "jobNumber") {
@@ -25695,18 +35650,27 @@ function openProjectDetailsDialog(options = {}) {
     projectDialogResolver = null;
   }
 
-  const defaults = normalizeProjectInfo(options.defaults ?? state.projectInfo);
+  const defaults = normalizeProjectInfo(options.defaults ?? state.projectInfo, state.pipeSpec);
   for (const [field, input] of Object.entries(projectDialogInputs)) {
     if (input) input.value = defaults[field] ?? "";
   }
+  updateProjectFittingProfileHelp();
   if (projectDialogTitle) projectDialogTitle.textContent = options.title ?? "Project details";
+  const advancedFields = new Set(["client", "fittingProfile", "fittingProfileReference", "weldGapMm"]);
+  const focusField = Object.prototype.hasOwnProperty.call(projectDialogInputs, options.focusField)
+    ? options.focusField
+    : "jobNumber";
+  const isNewDrawing = String(options.action ?? "").toLowerCase().includes("start");
+  if (projectDialogSubtitle) {
+    projectDialogSubtitle.textContent = isNewDrawing
+      ? "Enter the four essentials. Fabrication defaults can stay unchanged."
+      : "Confirm the identifiers, or open Advanced fabrication setup only when needed.";
+  }
+  if (projectDialogAdvanced) projectDialogAdvanced.open = options.openAdvanced === true || advancedFields.has(focusField);
   projectDialogSubmitButton.textContent = options.action ?? "Save project";
   closeProjectJobPicker();
   updateProjectJobPickerButton();
   projectDialog.hidden = false;
-  const focusField = Object.prototype.hasOwnProperty.call(projectDialogInputs, options.focusField)
-    ? options.focusField
-    : "jobNumber";
   const focusInput = projectDialogInputs[focusField] ?? projectDialogInputs.jobNumber;
   focusInput?.focus();
   focusInput?.select?.();
@@ -25729,7 +35693,14 @@ function projectDetailsFromDialog() {
     Object.fromEntries(
       Object.entries(projectDialogInputs).map(([field, input]) => [field, input?.value ?? ""]),
     ),
+    state.pipeSpec,
   );
+}
+
+function updateProjectFittingProfileHelp() {
+  if (!projectDialogFittingProfileHelp) return;
+  const key = normalizeFittingDataProfile(projectDialogInputs.fittingProfile?.value, state.pipeSpec);
+  projectDialogFittingProfileHelp.textContent = FITTING_DATA_PROFILES[key].help;
 }
 
 async function promptProjectDetailsFallback(defaults = state.projectInfo) {
@@ -25769,7 +35740,16 @@ async function promptProjectDetailsFallback(defaults = state.projectInfo) {
     submitLabel: "Save details",
   });
   if (drawnBy === null) return null;
-  return normalizeProjectInfo({ jobNumber, spoolNumber, client, revision, drawnBy });
+  return normalizeProjectInfo({
+    jobNumber,
+    spoolNumber,
+    client,
+    revision,
+    drawnBy,
+    fittingProfile: current.fittingProfile,
+    fittingProfileReference: current.fittingProfileReference,
+    weldGapMm: current.weldGapMm,
+  }, state.pipeSpec);
 }
 
 function exportProjectFile() {
@@ -26095,24 +36075,247 @@ function export3dImage() {
   downloadCanvas(fallbackCanvas, "pipe-spool-3d.png");
 }
 
-function exportIsoImage() {
-  exportFabSheetPdf().catch((error) => {
+async function exportIsoImage() {
+  markFirstUseGuideLearned("export");
+  if (isQuickPdfMode()) {
+    if (!hasDrawingContent()) {
+      applyAppMode("draw");
+      showAppNotice("Draw at least one pipe run before downloading the Quick PDF.");
+      return;
+    }
+    try {
+      await exportFabSheetPdf({ quick: true });
+      showAppNotice("Quick PDF downloaded. Check every dimension before fabrication; it is not an issued drawing.");
+    } catch (error) {
+      console.warn("Could not export quick PDF.", error);
+      showAppNotice("Could not create the Quick PDF. A PNG working sheet will be used instead.");
+      exportSpoolReportImage({ quick: true });
+    }
+    return;
+  }
+  const draft = !state.issuedAt || !projectStatusAtLeast(state.projectStatus, "issued");
+  if (draft) {
+    const checks = preIssueChecklist();
+    const summary = checks.blockers.length
+      ? `${checks.blockers.length} issue check${checks.blockers.length === 1 ? "" : "s"} remain.`
+      : "The drawing has not been formally issued.";
+    const proceed = await confirmAppAction(
+      `${summary} You can still download it now as a clearly marked DRAFT — NOT FOR FABRICATION PDF. The official workshop PDF and QR traveller remain available after approval and issue.`,
+      {
+        title: "Download draft PDF?",
+        confirmLabel: "Download draft",
+        cancelLabel: "Not now",
+        tone: "warning",
+      },
+    );
+    if (!proceed) return;
+  }
+  try {
+    await exportFabSheetPdf({ draft });
+    if (draft) {
+      showAppNotice("Draft PDF downloaded. It is marked NOT FOR FABRICATION and does not include an issued QR traveller.");
+    }
+  } catch (error) {
     console.warn("Could not export fab sheet PDF.", error);
     showAppNotice("Could not create the PDF. The PNG fab sheet export will be used instead.");
-    exportSpoolReportImage();
-  });
+    exportSpoolReportImage({ draft });
+  }
 }
 
-function exportSpoolReportImage() {
+function markDraftPdfCanvas(canvas) {
+  if (!canvas) return canvas;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  const diagonalSize = Math.max(42, Math.round(Math.min(canvas.width, canvas.height) * 0.075));
+  ctx.save();
+  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.rotate(-Math.PI / 7);
+  ctx.globalAlpha = 0.13;
+  ctx.fillStyle = "#c62828";
+  ctx.font = `950 ${diagonalSize}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("DRAFT — NOT FOR FABRICATION", 0, 0);
+  ctx.restore();
+
+  const bandHeight = Math.max(38, Math.round(canvas.height * 0.045));
+  ctx.save();
+  ctx.fillStyle = "rgba(198, 40, 40, 0.94)";
+  ctx.fillRect(0, 0, canvas.width, bandHeight);
+  ctx.fillRect(0, canvas.height - bandHeight, canvas.width, bandHeight);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `950 ${Math.max(16, Math.round(bandHeight * 0.43))}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("DRAFT — NOT FOR FABRICATION", canvas.width / 2, bandHeight / 2);
+  ctx.fillText("UNISSUED COPY — COMPLETE READY TO ISSUE BEFORE WORKSHOP USE", canvas.width / 2, canvas.height - bandHeight / 2);
+  ctx.restore();
+  return canvas;
+}
+
+function markQuickPdfCanvas(canvas) {
+  if (!canvas) return canvas;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+  const bandHeight = Math.max(34, Math.round(canvas.height * 0.038));
+  ctx.save();
+  ctx.fillStyle = "rgba(0, 101, 122, 0.96)";
+  ctx.fillRect(0, canvas.height - bandHeight, canvas.width, bandHeight);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `900 ${Math.max(14, Math.round(bandHeight * 0.39))}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("QUICK PDF · USER CHECK REQUIRED · NOT FORMALLY ISSUED", canvas.width / 2, canvas.height - bandHeight / 2);
+  ctx.restore();
+  return canvas;
+}
+
+function exportSpoolReportImage(options = {}) {
   const template = normalizeFabSheetTemplate(fabSheetTemplate);
-  downloadCanvas(buildSpoolReportCanvas(template), `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}.png`);
+  const canvas = buildSpoolReportCanvas(template);
+  if (options.quick) markQuickPdfCanvas(canvas);
+  else if (options.draft) markDraftPdfCanvas(canvas);
+  const suffix = options.quick ? "-QUICK-PDF" : options.draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
+  downloadCanvas(canvas, `pipe-spool-${FAB_SHEET_TEMPLATES[template].filename}${suffix}.png`);
 }
 
-async function exportFabSheetPdf() {
+function buildBigSpoolFieldJointReportCanvas(layout = bigSpoolLayout()) {
+  if (!bigSpoolPlanActive() || !layout.pieces.length) return null;
+  const plan = currentBigSpoolPlan();
+  const canvas = document.createElement("canvas");
+  canvas.width = REPORT_CANVAS_WIDTH;
+  canvas.height = Math.max(REPORT_CANVAS_HEIGHT, 430 + layout.pieces.length * 76 + layout.cuts.length * 72);
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#f7f3e9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  drawReportHeader(ctx, canvas.width, { title: "Big Spool transport and field-joint plan", subtitle: `${currentRevisionUid(state)} / master assembly breakdown`, shortLabel: "Transport" });
+  let y = 146;
+  ctx.fillStyle = "#123a40";
+  ctx.font = "900 18px Inter, system-ui, sans-serif";
+  ctx.fillText("Selected constraints", 30, y);
+  y += 30;
+  ctx.fillStyle = "#263f44";
+  ctx.font = "800 13px Inter, system-ui, sans-serif";
+  const limitText = [
+    `Length ${formatLength(plan.maxTransportLengthMm)} mm`,
+    plan.maxTransportWidthMm ? `Width ${formatLength(plan.maxTransportWidthMm)} mm` : "Width not limited",
+    plan.maxTransportHeightMm ? `Height ${formatLength(plan.maxTransportHeightMm)} mm` : "Height not limited",
+    plan.maxTransportWeightKg ? `Weight ${formatMass(plan.maxTransportWeightKg)} kg` : "Weight not limited",
+  ].join(" / ");
+  ctx.fillText(limitText, 30, y);
+  y += 24;
+  if (plan.transportNote) {
+    ctx.fillStyle = "#5b6a6d";
+    drawWrappedReportText(ctx, `Transport note: ${plan.transportNote}`, 30, y, canvas.width - 60, 18);
+    y += 38;
+  }
+  const groovedCouplingCount = layout.cuts.filter((cut) => cut.jointType === "groove").length;
+  const flangeRejoinCount = layout.cuts.filter((cut) => cut.jointType === "flange").length;
+  if (groovedCouplingCount || flangeRejoinCount) {
+    const siteItems = [
+      groovedCouplingCount ? `${groovedCouplingCount} grooved coupling${groovedCouplingCount === 1 ? "" : "s"}` : "",
+      flangeRejoinCount ? `${flangeRejoinCount} flange gasket and bolt set${flangeRejoinCount === 1 ? "" : "s"}` : "",
+    ].filter(Boolean).join(" / ");
+    ctx.fillStyle = "#075e68";
+    ctx.font = "900 13px Inter, system-ui, sans-serif";
+    ctx.fillText(`Site rejoin materials required: ${siteItems}`, 30, y);
+    y += 28;
+  }
+
+  ctx.fillStyle = "#123a40";
+  ctx.font = "900 17px Inter, system-ui, sans-serif";
+  ctx.fillText("Child spools", 30, y);
+  y += 18;
+  for (const piece of layout.pieces) {
+    const ready = bigSpoolPieceReady(piece, plan);
+    ctx.fillStyle = ready ? "#eef8f2" : "#fff2df";
+    roundRect(ctx, 28, y, canvas.width - 56, 62, 8);
+    ctx.fill();
+    ctx.fillStyle = piece.colour;
+    roundRect(ctx, 38, y + 10, 42, 42, 7);
+    ctx.fill();
+    ctx.fillStyle = "#18363c";
+    ctx.font = "900 14px Inter, system-ui, sans-serif";
+    ctx.fillText(piece.childId, 94, y + 24);
+    ctx.font = "800 12px Inter, system-ui, sans-serif";
+    ctx.fillStyle = "#5b6a6d";
+    ctx.fillText(`${formatLength(piece.transportLengthMm)} × ${formatLength(piece.transportWidthMm)} × ${formatLength(piece.transportHeightMm)} mm / ${formatMass(piece.weightKg)} kg / ${ready ? "READY" : `OVER ${bigSpoolPieceViolations(piece, plan).join(" / ").toUpperCase()}`}`, 94, y + 46);
+    y += 70;
+  }
+
+  y += 12;
+  ctx.fillStyle = "#123a40";
+  ctx.font = "900 17px Inter, system-ui, sans-serif";
+  ctx.fillText("Field-joint register", 30, y);
+  y += 18;
+  if (!layout.cuts.length) {
+    ctx.fillStyle = "#5b6a6d";
+    ctx.font = "800 13px Inter, system-ui, sans-serif";
+    ctx.fillText("No field joints recorded.", 30, y + 24);
+  }
+  for (const cut of layout.cuts) {
+    ctx.fillStyle = "#ffffff";
+    roundRect(ctx, 28, y, canvas.width - 56, 58, 8);
+    ctx.fill();
+    ctx.strokeStyle = "#d4dddc";
+    ctx.stroke();
+    ctx.fillStyle = "#123a40";
+    ctx.font = "900 14px Inter, system-ui, sans-serif";
+    ctx.fillText(`${cut.jointId} · ${bigSpoolPieceLabel(cut.beforePieceIndex ?? 0)} / ${bigSpoolPieceLabel(cut.afterPieceIndex ?? 0)} · ${BIG_SPOOL_JOINT_TYPES[cut.jointType] || "Field weld"}`, 40, y + 23);
+    ctx.fillStyle = "#5b6a6d";
+    ctx.font = "800 12px Inter, system-ui, sans-serif";
+    const detail = `Run ${cut.segmentIndex + 1} at ${formatLength(cut.distanceFromStartMm)} mm · ${bigSpoolJointPreparationText(cut)} · ${BIG_SPOOL_JOINT_STATUSES[cut.status] || "Planned"}${cut.notes ? ` · ${cut.notes}` : ""}`;
+    ctx.fillText(fitCanvasText(ctx, detail, canvas.width - 80), 40, y + 44);
+    y += 66;
+  }
+  return canvas;
+}
+
+async function exportBigSpoolChildFabPackage() {
+  syncBigSpoolNumericInputs();
+  const layout = bigSpoolLayout();
+  if (!bigSpoolPlanActive() || layout.pieces.length < 2) {
+    showAppNotice("Create at least two Big Spool transport pieces before exporting the child fabrication package.");
+    return;
+  }
+  const masterState = state;
+  const pages = [];
+  try {
+    for (const piece of layout.pieces) {
+      const child = bigSpoolChildState(piece, masterState);
+      if (!child) continue;
+      state = child;
+      normalizeDrawingTrustState();
+      const canvas = buildSpoolReportCanvas("workshop");
+      if (masterState.issuedAt) await drawTraceabilityQr(canvas, piece.childId);
+      pages.push({ dataUrl: canvas.toDataURL("image/jpeg", 0.92), width: canvas.width, height: canvas.height });
+    }
+  } finally {
+    state = masterState;
+    updateAll({ save: false });
+    updateControls();
+  }
+  const fieldJointCanvas = buildBigSpoolFieldJointReportCanvas(layout);
+  if (fieldJointCanvas) pages.push({ dataUrl: fieldJointCanvas.toDataURL("image/jpeg", 0.92), width: fieldJointCanvas.width, height: fieldJointCanvas.height });
+  if (!pages.length) return;
+  const project = normalizeProjectInfo(masterState.projectInfo);
+  downloadBytes(buildImagePdf(pages), `${safeFilePart(project.jobNumber, "job")}-${safeFilePart(project.spoolNumber, "big-spool")}-CHILD-FAB-PACKAGE.pdf`, "application/pdf");
+  showAppNotice(`Child fabrication package created with ${layout.pieces.length} child spools and the field-joint register.`);
+}
+
+async function exportFabSheetPdf(options = {}) {
   const { name } = exportedProjectPayload();
   const template = normalizeFabSheetTemplate(fabSheetTemplate);
+  const draft = options.draft === true;
+  const quick = options.quick === true;
   const reportCanvas = buildSpoolReportCanvas(template);
-  await drawTraceabilityQr(reportCanvas);
+  if (quick) {
+    markQuickPdfCanvas(reportCanvas);
+  } else if (draft) {
+    markDraftPdfCanvas(reportCanvas);
+  } else {
+    await drawTraceabilityQr(reportCanvas);
+  }
   const pages = [
     {
       dataUrl: reportCanvas.toDataURL("image/jpeg", 0.92),
@@ -26121,34 +36324,47 @@ async function exportFabSheetPdf() {
     },
   ];
 
-  const weldRegisterCanvas = buildWeldRegisterReportCanvas();
-  if (weldRegisterCanvas) {
-    pages.push({
-      dataUrl: weldRegisterCanvas.toDataURL("image/jpeg", 0.92),
-      width: weldRegisterCanvas.width,
-      height: weldRegisterCanvas.height,
-    });
-  }
+  // Fast Mode intentionally creates one working sheet. Managed exports retain
+  // the field-joint, weld-register and 3D report pages.
+  if (!quick) {
+    const bigSpoolCanvas = buildBigSpoolFieldJointReportCanvas();
+    if (bigSpoolCanvas) {
+      if (draft) markDraftPdfCanvas(bigSpoolCanvas);
+      pages.push({ dataUrl: bigSpoolCanvas.toDataURL("image/jpeg", 0.92), width: bigSpoolCanvas.width, height: bigSpoolCanvas.height });
+    }
 
-  const modelViews = capture3dReportViews();
-  if (modelViews.length) {
-    try {
-      const modelCanvas = await buildModelReportCanvas(modelViews);
+    const weldRegisterCanvas = buildWeldRegisterReportCanvas();
+    if (weldRegisterCanvas) {
+      if (draft) markDraftPdfCanvas(weldRegisterCanvas);
       pages.push({
-        dataUrl: modelCanvas.toDataURL("image/jpeg", 0.92),
-        width: modelCanvas.width,
-        height: modelCanvas.height,
+        dataUrl: weldRegisterCanvas.toDataURL("image/jpeg", 0.92),
+        width: weldRegisterCanvas.width,
+        height: weldRegisterCanvas.height,
       });
-    } catch (error) {
-      console.warn("Could not add 3D preview page to fab sheet PDF.", error);
+    }
+
+    const modelViews = capture3dReportViews();
+    if (modelViews.length) {
+      try {
+        const modelCanvas = await buildModelReportCanvas(modelViews);
+        if (draft) markDraftPdfCanvas(modelCanvas);
+        pages.push({
+          dataUrl: modelCanvas.toDataURL("image/jpeg", 0.92),
+          width: modelCanvas.width,
+          height: modelCanvas.height,
+        });
+      } catch (error) {
+        console.warn("Could not add 3D preview page to fab sheet PDF.", error);
+      }
     }
   }
 
   const pdfBytes = buildImagePdf(pages);
-  downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}.pdf`, "application/pdf");
+  const suffix = quick ? "-QUICK-PDF" : draft ? "-DRAFT-NOT-FOR-FABRICATION" : "";
+  downloadBytes(pdfBytes, `${name}-${FAB_SHEET_TEMPLATES[template].filename}${suffix}.pdf`, "application/pdf");
 }
 
-function spoolTravellerUrl() {
+function spoolTravellerUrl(childSpoolId = "") {
   const url = new URL(location.href);
   url.hash = "";
   url.search = "";
@@ -26156,16 +36372,17 @@ function spoolTravellerUrl() {
   if (projectId) url.searchParams.set("project", projectId);
   url.searchParams.set("traveller", "1");
   url.searchParams.set("revision", currentRevisionUid(state));
+  if (childSpoolId) url.searchParams.set("child", childSpoolId);
   return url.toString();
 }
 
-async function drawTraceabilityQr(canvas) {
+async function drawTraceabilityQr(canvas, childSpoolId = "") {
   if (!canvas || !state.issuedAt) return canvas;
   try {
     const module = await import(QR_CODE_JS_URL);
     const qr = module.default ?? module;
     const qrCanvas = document.createElement("canvas");
-    await qr.toCanvas(qrCanvas, spoolTravellerUrl(), { width: 150, margin: 1, errorCorrectionLevel: "M" });
+    await qr.toCanvas(qrCanvas, spoolTravellerUrl(childSpoolId), { width: 150, margin: 1, errorCorrectionLevel: "M" });
     const ctx = canvas.getContext("2d");
     const size = 150;
     const x = canvas.width - size - 36;
@@ -26179,7 +36396,7 @@ async function drawTraceabilityQr(canvas) {
     ctx.fillStyle = "#1f3438";
     ctx.font = "900 13px Inter, system-ui, sans-serif";
     ctx.textAlign = "center";
-    ctx.fillText("SCAN SPOOL TRAVELLER", x + size / 2, y - 14);
+    ctx.fillText(childSpoolId ? `SCAN ${childSpoolId}` : "SCAN SPOOL TRAVELLER", x + size / 2, y - 14);
     ctx.drawImage(qrCanvas, x, y, size, size);
     ctx.font = "800 9px ui-monospace, monospace";
     ctx.fillText(currentRevisionUid(state), x + size / 2, y + size + 8);
@@ -26550,6 +36767,8 @@ function buildTakeoffReportCanvas() {
 
 function drawReportClientPanel(ctx, area, quantities) {
   const project = normalizeProjectInfo(state.projectInfo);
+  const issueAudit = latestIssueAudit();
+  const fittingSource = fittingCalculationSourceSummary();
   ctx.save();
   roundRect(ctx, area.x, area.y, area.width, area.height, 10);
   ctx.fillStyle = "#fffdf8";
@@ -26573,8 +36792,12 @@ function drawReportClientPanel(ctx, area, quantities) {
     ["Status", projectStatusLabel()],
     ["Checked", state.checkedAt ? `${new Date(state.checkedAt).toLocaleDateString()}${state.checkedBy ? ` by ${state.checkedBy}` : ""}` : "Unchecked"],
     ["Issued", state.issuedAt ? `${new Date(state.issuedAt).toLocaleDateString()}${state.issuedBy ? ` by ${state.issuedBy}` : ""}` : "Not issued"],
+    ["Ready to Issue", issueAudit ? issueAudit.result === "overridden" ? "Warnings overridden" : "Passed" : "Not recorded"],
     ["Material", pipeSpec().label],
+    ["Fitting data", fittingSource.shortProfileText],
+    ["Calculation source", fittingSource.statusLabel],
     ["Pipe centreline", `${formatLength(quantities.centrelineMm)} mm`],
+    ["Weld gap", `${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end / ${formatWeldGapMm(quantities.weldGapMm)} mm total`],
     ["Estimated weight", `${formatMass(quantities.totalWeightKg)} kg`],
     ["Fittings", `${quantities.fittings.length + quantities.elbows.length + quantities.tees.length + quantities.reducers.length} item${quantities.fittings.length + quantities.elbows.length + quantities.tees.length + quantities.reducers.length === 1 ? "" : "s"}`],
   ];
@@ -26666,7 +36889,13 @@ function drawReportHeader(ctx, width, options = {}) {
     ? `Issued ${new Date(state.issuedAt).toLocaleDateString()}${state.issuedBy ? ` by ${state.issuedBy}` : ""}`
     : "Not issued";
   const status = `${projectStatusLabel()}${state.locked ? " / Locked" : ""}`;
-  const exported = new Date().toLocaleString();
+  const issueAudit = latestIssueAudit();
+  const fittingSource = fittingCalculationSourceSummary();
+  const issueAuditText = issueAudit
+    ? issueAudit.result === "overridden"
+      ? "Warnings overridden"
+      : "Passed"
+    : "Not recorded";
   const subtitleWithVersion = `${subtitle} / ${APP_VERSION}`;
 
   ctx.save();
@@ -26698,7 +36927,9 @@ function drawReportHeader(ctx, width, options = {}) {
   ctx.font = "800 13px Inter, system-ui, sans-serif";
   ctx.fillStyle = "#6a7475";
   ctx.fillText(truncateReportText(ctx, subtitleWithVersion, 820), 136, 73);
-  const clientLine = project.client ? `Client / area: ${project.client} / ${pipeSpec().label}` : `${pipeSpec().label} / ${checked}`;
+  const clientLine = project.client
+    ? `Client / area: ${project.client} / ${pipeSpec().label} / ${fittingSource.shortProfileText}`
+    : `${pipeSpec().label} / ${fittingSource.shortProfileText} / ${checked}`;
   drawReportPill(ctx, `${templateLabel} sheet`, 136, 84, 130);
   drawReportPill(ctx, state.issuedAt ? "Issued" : projectStatusLabel(), 274, 84, 116, {
     issued: Boolean(state.issuedAt),
@@ -26720,7 +36951,7 @@ function drawReportHeader(ctx, width, options = {}) {
   drawReportInfoTile(ctx, "Drawn by", project.drawnBy || "-", right - tileW * 4 - gap * 3, tileY + tileH + 8, tileW, tileH);
   drawReportInfoTile(ctx, "Checked", checked, right - tileW * 3 - gap * 2, tileY + tileH + 8, tileW, tileH);
   drawReportInfoTile(ctx, "Issued", issued, right - tileW * 2 - gap, tileY + tileH + 8, tileW, tileH);
-  drawReportInfoTile(ctx, "Exported", exported, right - tileW, tileY + tileH + 8, tileW, tileH);
+  drawReportInfoTile(ctx, "Ready to issue", issueAuditText, right - tileW, tileY + tileH + 8, tileW, tileH, { strong: Boolean(issueAudit && issueAudit.result === "ready") });
   ctx.restore();
 }
 
@@ -26884,6 +37115,7 @@ function reportRelevantPoints() {
 
 function drawReportTakeoff(ctx, area, quantities, options = {}) {
   const compact = options.compact === true;
+  const fittingSource = fittingCalculationSourceSummary();
   ctx.save();
   roundRect(ctx, area.x, area.y, area.width, area.height, 10);
   ctx.fillStyle = "#fffdf8";
@@ -26930,8 +37162,8 @@ function drawReportTakeoff(ctx, area, quantities, options = {}) {
   drawWrappedReportText(
     ctx,
     state.showLiftingPoints
-      ? `${pipeSpec().label} pipe. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
-      : `${pipeSpec().label} pipe. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set.`,
+      ? `${pipeSpec().label}. Fitting data: ${fittingSource.profileText}. ${fittingSource.statusLabel}. Weld gap ${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end; open ends 0.0 mm. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set. Verify lug design, welds, sling angles and ratings before lifting.`
+      : `${pipeSpec().label}. Fitting data: ${fittingSource.profileText}. ${fittingSource.statusLabel}. Weld gap ${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end; open ends 0.0 mm. Pipe kg/m and standard tee/elbow/reducer table weights used where available; roll grooves add 0 kg; branch welds, valves, sockets, adjusted flange standards and weld allowances are estimated unless manually set.`,
     x,
     area.y + area.height - 36,
     area.width - 48,
@@ -26944,7 +37176,8 @@ function drawReportTotals(ctx, x, y, width, quantities, options = {}) {
   const compact = options.compact === true;
   const totals = [
     ["Centreline", `${formatLength(quantities.centrelineMm)} mm`],
-    ["Deductions", `${formatLength(quantities.bendTakeoffMm)} mm`],
+    ["Fitting deductions", `${formatLength(quantities.bendTakeoffMm)} mm`],
+    ["Weld gap", `${formatWeldGapMm(quantities.weldGapMm)} mm`],
     ["Cut pipe", `${formatLength(quantities.cutLengthMm)} mm`],
     ...(compact ? [] : [
       ["Pipe weight", `${formatMass(quantities.pipeWeightKg)} kg`],
@@ -27115,10 +37348,11 @@ function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
 
   const columns = [
     { label: "ID", x: 0, align: "left" },
-    { label: "Size", x: Math.min(98, width * 0.18), align: "left" },
-    { label: "C/C mm", x: width * 0.42, align: "right" },
-    { label: "Deduct mm", x: width * 0.6, align: "right" },
-    { label: "Cut mm", x: width * 0.78, align: "right" },
+    { label: "Size", x: Math.min(88, width * 0.15), align: "left" },
+    { label: "C/C mm", x: width * 0.38, align: "right" },
+    { label: "Fitting mm", x: width * 0.52, align: "right" },
+    { label: "Weld gap", x: width * 0.66, align: "right" },
+    { label: "Cut mm", x: width * 0.8, align: "right" },
     { label: "Weight kg", x: width, align: "right" },
   ];
 
@@ -27161,6 +37395,7 @@ function drawReportRunTable(ctx, x, y, width, quantities, options = {}) {
       pipeSizeDisplayLabel(size),
       `${formatLength(quantity.centrelineMm)}`,
       `${formatLength(quantity.bendTakeoffMm)}`,
+      `${formatWeldGapMm(quantity.weldGapMm)}`,
       `${formatLength(quantity.cutLengthMm)}`,
       `${formatMass(quantity.pipeWeightKg)}`,
     ];
@@ -27194,6 +37429,10 @@ function drawReportCompactFabricationNotes(ctx, x, y, width, quantities) {
   for (const item of acknowledgedChecks.slice(0, 3)) {
     notes.push(`ACKNOWLEDGED CHECK: ${item.title} - ${item.acknowledgement.reason} (${item.acknowledgement.by || "Reviewer"}).`);
   }
+  notes.push(
+    `Weld gap ${formatWeldGapMm(quantities.weldGapPerEndMm)} mm per welded pipe end; ` +
+    `${formatWeldGapMm(quantities.weldGapMm)} mm total across ${quantities.weldEndCount} welded end${quantities.weldEndCount === 1 ? "" : "s"}. Open pipe ends receive no weld-gap deduction.`,
+  );
   if (quantities.elbows.length) {
     notes.push(`${quantities.elbows.length} bend${quantities.elbows.length === 1 ? "" : "s"} / ${formatLength(quantities.bendTakeoffMm)} mm total deduction / ${formatMass(quantities.bendWeightKg)} kg.`);
   }
@@ -27204,12 +37443,18 @@ function drawReportCompactFabricationNotes(ctx, x, y, width, quantities) {
     notes.push(`${quantities.branches.length} branch weld${quantities.branches.length === 1 ? "" : "s"} / ${formatMass(quantities.branchWeightKg)} kg. Branches stay cut into the main pipe.`);
   }
   if (quantities.reducers.length) {
-    notes.push(`${quantities.reducers.length} reducer${quantities.reducers.length === 1 ? "" : "s"} / ${formatMass(quantities.reducerWeightKg)} kg. Size changes are included in take-off.`);
+    const concentricCount = quantities.reducers.filter((reducer) => normalizeReducerType(reducer.reducerType) === "concentric").length;
+    const eccentricCount = quantities.reducers.length - concentricCount;
+    const typeSummary = [
+      concentricCount ? `${concentricCount} concentric` : "",
+      eccentricCount ? `${eccentricCount} eccentric` : "",
+    ].filter(Boolean).join(" / ");
+    notes.push(`${typeSummary} reducer${quantities.reducers.length === 1 ? "" : "s"} / ${formatMass(quantities.reducerWeightKg)} kg. H and eccentric offset e are listed in the reducer deductions.`);
   }
   if (quantities.fittings.length) {
     notes.push(`${quantities.fittings.length} end/socket/valve/weld fitting${quantities.fittings.length === 1 ? "" : "s"} / ${formatMass(quantities.fittingWeightKg)} kg.`);
   }
-  if (!notes.length) notes.push("No fittings or deductions yet. Cut lengths are centre-to-centre pipe lengths.");
+  if (notes.length === 1) notes.push("No fittings yet. Cut lengths retain their full centre-to-centre length at open pipe ends.");
 
   ctx.fillStyle = "#1f3438";
   ctx.font = "900 18px Inter, system-ui, sans-serif";
@@ -27325,7 +37570,7 @@ function drawReportReducerNotes(ctx, x, y, width, quantities) {
   }
 
   for (const [index, reducer] of quantities.reducers.entries()) {
-    const line = `R${index + 1} ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}`;
+    const line = `R${index + 1} ${reducerTypeLabel(reducer.reducerType)} ${pipeSizeDisplayLabelByNb(reducer.largeNb)} to ${pipeSizeDisplayLabelByNb(reducer.smallNb)} - ${reducerDimensionDetail(reducer)}; take off ${formatLength(reducer.firstTakeoffMm + reducer.secondTakeoffMm)} mm total / ${formatMass(reducer.weightKg)} kg ${reducer.source ?? "estimated"}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
 
@@ -27348,7 +37593,10 @@ function drawReportFittingNotes(ctx, x, y, width, quantities) {
 
   for (const item of quantities.fittings) {
     const distance = pointLength(subtractPoints(item.point, item.segment.start));
-    const line = `${fittingActionLabel(item.fitting.type)} run ${item.segment.index + 1} @ ${formatLength(distance)} mm - ${formatMass(item.weightKg)} kg ${item.weightSource}`;
+    const fittingLabel = item.fitting.type === "reducer"
+      ? `${reducerTypeLabel(fittingReducerType(item.fitting)).toLowerCase()} reducer`
+      : fittingActionLabel(item.fitting.type);
+    const line = `${fittingLabel} run ${item.segment.index + 1} @ ${formatLength(distance)} mm - ${formatMass(item.weightKg)} kg ${item.weightSource}`;
     y = drawWrappedReportText(ctx, line, x, y, width, 18);
   }
 
@@ -27442,7 +37690,7 @@ function endpointSegmentHitForPoint(pointHit) {
 }
 
 function isEndpointFittingType(type) {
-  return type === "flange" || type === "rollGroove";
+  return type === "flange" || type === "rollGroove" || type === "threadedEnd";
 }
 
 function snapEndpointFittingPlacementT(type, hit, pointer = null) {
@@ -27529,9 +37777,19 @@ function renderDrawingContextMenu() {
         action: () => placeContextFitting("rollGroove"),
       },
       {
-        label: "Add reducer",
-        detail: "On this run",
-        action: () => placeContextFitting("reducer"),
+        label: "Add threaded pipe end",
+        detail: "Thread preparation on nearest pipe end / 0 kg",
+        action: () => placeContextFitting("threadedEnd"),
+      },
+      {
+        label: "Add concentric reducer",
+        detail: "Centred transition / outlet size to be confirmed",
+        action: () => placeContextFitting("reducer", { reducerType: "concentric" }),
+      },
+      {
+        label: "Add eccentric reducer",
+        detail: "Flat-side transition / outlet size to be confirmed",
+        action: () => placeContextFitting("reducer", { reducerType: "eccentric" }),
       },
       {
         label: "Add sockets",
@@ -27549,12 +37807,19 @@ function renderDrawingContextMenu() {
     });
   }
 
-  if (target?.reducerHit?.reducer?.kind === "bend") {
+  if (target?.reducerHit?.reducer) {
     actions.push({
-      label: "Move reducer to other side",
-      detail: reducerSideDetail(target.reducerHit.reducer),
-      action: () => toggleContextBendReducerSide(),
+      label: `Set as ${target.reducerHit.reducer.reducerType === "eccentric" ? "concentric" : "eccentric"}`,
+      detail: `${reducerTypeLabel(target.reducerHit.reducer.reducerType)} now; ${reducerDimensionDetail(target.reducerHit.reducer)}`,
+      action: () => toggleContextAutoReducerType(),
     });
+    if (target.reducerHit.reducer.kind === "bend") {
+      actions.push({
+        label: "Move reducer to other side",
+        detail: reducerSideDetail(target.reducerHit.reducer),
+        action: () => toggleContextBendReducerSide(),
+      });
+    }
   }
 
   const pointConnections = target?.pointHit
@@ -27575,7 +37840,7 @@ function renderDrawingContextMenu() {
       segment: target.fittingHit.segmentHit.segment,
     };
     const weightKg = fittingWeightKg(fittingData.fitting, fittingData.segment);
-    if (fittingData.fitting.type !== "rollGroove") {
+    if (fittingData.fitting.type !== "rollGroove" && fittingData.fitting.type !== "threadedEnd") {
       actions.push({
         label: "Set fitting weight",
         detail: `${formatMass(weightKg)} kg ${fittingWeightSource(fittingData.fitting, fittingData.segment)}`,
@@ -27611,6 +37876,14 @@ function renderDrawingContextMenu() {
         label: "Spin socket 90 deg",
         detail: `Current ${formatAngle(fittingSocketAngle(target.fittingHit.fitting))} deg around pipe`,
         action: () => rotateContextSocket(),
+      });
+    }
+
+    if (target.fittingHit.fitting.type === "reducer") {
+      actions.push({
+        label: `Set as ${fittingReducerType(target.fittingHit.fitting) === "eccentric" ? "concentric" : "eccentric"}`,
+        detail: `${reducerTypeLabel(fittingReducerType(target.fittingHit.fitting))} now`,
+        action: () => toggleContextManualReducerType(),
       });
     }
 
@@ -27830,6 +38103,13 @@ function renderMobileDrawingContextMenu(target) {
         action: () => rotateContextSocket(),
       });
     }
+    if (fitting.type === "reducer") {
+      actions.push({
+        label: `Set as ${fittingReducerType(fitting) === "eccentric" ? "concentric" : "eccentric"}`,
+        detail: `${reducerTypeLabel(fittingReducerType(fitting))} now`,
+        action: () => toggleContextManualReducerType(),
+      });
+    }
     actions.push({
       label: `Delete ${fittingActionLabel(fitting.type)}`,
       detail: "Remove this fitting only",
@@ -27840,13 +38120,21 @@ function renderMobileDrawingContextMenu(target) {
     return;
   }
 
-  if (target?.reducerHit?.reducer?.kind === "bend") {
-    addDrawingContextHeader("Reducer", "Bend reducer actions");
+  if (target?.reducerHit?.reducer) {
+    const reducer = target.reducerHit.reducer;
+    addDrawingContextHeader(`${reducerTypeLabel(reducer.reducerType)} reducer`, reducerDimensionDetail(reducer));
     actions.push({
-      label: "Move reducer to other side",
-      detail: reducerSideDetail(target.reducerHit.reducer),
-      action: () => toggleContextBendReducerSide(),
+      label: `Set as ${reducer.reducerType === "eccentric" ? "concentric" : "eccentric"}`,
+      detail: reducer.reducerType === "eccentric" ? "Use centred ends" : "Use flat side and show offset e",
+      action: () => toggleContextAutoReducerType(),
     });
+    if (reducer.kind === "bend") {
+      actions.push({
+        label: "Move reducer to other side",
+        detail: reducerSideDetail(reducer),
+        action: () => toggleContextBendReducerSide(),
+      });
+    }
     appendDrawingContextActions(actions);
     return;
   }
@@ -27888,7 +38176,7 @@ function renderMobileDrawingContextMenu(target) {
       },
       {
         label: "Add fitting",
-        detail: "Flange, groove, reducer or sockets",
+        detail: "Flange, groove, thread, reducer or sockets",
         action: () => renderMobileFittingMenu(),
         keepOpen: true,
       },
@@ -27953,9 +38241,19 @@ function renderMobileFittingMenu() {
       action: () => placeContextFitting("rollGroove"),
     },
     {
-      label: "Reducer",
-      detail: "On this run",
-      action: () => placeContextFitting("reducer"),
+      label: "Threaded pipe end",
+      detail: "Thread preparation on nearest pipe end / 0 kg",
+      action: () => placeContextFitting("threadedEnd"),
+    },
+    {
+      label: "Concentric reducer",
+      detail: "Centred transition / confirm outlet size",
+      action: () => placeContextFitting("reducer", { reducerType: "concentric" }),
+    },
+    {
+      label: "Eccentric reducer",
+      detail: "Flat-side transition / confirm outlet size",
+      action: () => placeContextFitting("reducer", { reducerType: "eccentric" }),
     },
     {
       label: "Sockets",
@@ -28168,6 +38466,14 @@ function touchDistance(pointerEntries) {
   return Math.hypot(first.clientX - second.clientX, first.clientY - second.clientY);
 }
 
+function touchCentre(pointerEntries) {
+  if (pointerEntries.length < 2) return { x: 0, y: 0 };
+  return {
+    x: (pointerEntries[0][1].clientX + pointerEntries[1][1].clientX) * 0.5,
+    y: (pointerEntries[0][1].clientY + pointerEntries[1][1].clientY) * 0.5,
+  };
+}
+
 function beginPinchGesture() {
   const pointerEntries = firstTwoTouchPointers();
   const startDistance = touchDistance(pointerEntries);
@@ -28204,7 +38510,10 @@ function beginPinchGesture() {
     ids: pointerEntries.map(([id]) => id),
     startDistance,
     startScale: state.gridScale,
+    startCentre: touchCentre(pointerEntries),
+    startOffset: { ...drawingViewOffset },
   };
+  drawingPanGesture = null;
 }
 
 function updatePinchGesture() {
@@ -28216,10 +38525,55 @@ function updatePinchGesture() {
 
   const distance = touchDistance(pointerEntries);
   if (distance <= 0) return false;
-  state.gridScale = clampNumber(pinchGesture.startScale * (distance / pinchGesture.startDistance), 24, 72);
+  const centre = touchCentre(pointerEntries);
+  state.gridScale = clampNumber(pinchGesture.startScale * (distance / pinchGesture.startDistance), 10, 72);
+  drawingViewOffset = {
+    x: pinchGesture.startOffset.x + centre.x - pinchGesture.startCentre.x,
+    y: pinchGesture.startOffset.y + centre.y - pinchGesture.startCentre.y,
+  };
   state.previewCandidate = null;
-  cursorReadout.textContent = `Zoom ${Math.round(state.gridScale)}`;
+  cursorReadout.textContent = `Move / zoom ${Math.round(state.gridScale)}`;
   drawIso();
+  return true;
+}
+
+function beginDrawingPan(event, pointer) {
+  if (!isTouchLikeEvent(event) || state.activeTool !== "select") return false;
+  if (findNearestNote(pointer) || findNearestDimensionTarget(pointer) || findNearestMeasurement(pointer) ||
+      findNearestPoint(pointer) || findNearestSegment(pointer) || findNearestFitting(pointer)) return false;
+  cancelTouchContextPress();
+  drawingPanGesture = {
+    pointerId: event.pointerId,
+    startClient: { x: event.clientX, y: event.clientY },
+    startOffset: { ...drawingViewOffset },
+  };
+  drawCanvas.setPointerCapture?.(event.pointerId);
+  cursorReadout.textContent = "Drag to move drawing";
+  return true;
+}
+
+function updateDrawingPan(event) {
+  if (!drawingPanGesture || drawingPanGesture.pointerId !== event.pointerId || pinchGesture) return false;
+  drawingViewOffset = {
+    x: drawingPanGesture.startOffset.x + event.clientX - drawingPanGesture.startClient.x,
+    y: drawingPanGesture.startOffset.y + event.clientY - drawingPanGesture.startClient.y,
+  };
+  cursorReadout.textContent = "Moving drawing";
+  drawIso();
+  event.preventDefault();
+  return true;
+}
+
+function finishDrawingPan(event) {
+  if (!drawingPanGesture || drawingPanGesture.pointerId !== event.pointerId) return false;
+  try {
+    drawCanvas.releasePointerCapture?.(event.pointerId);
+  } catch {
+    // Pointer capture may already be released.
+  }
+  drawingPanGesture = null;
+  cursorReadout.textContent = "Drawing moved";
+  event.preventDefault();
   return true;
 }
 
@@ -28259,7 +38613,13 @@ function finishTouchContextPress(event) {
     return true;
   }
 
+  const target = contextTargetFromPointer(press.pointer);
   selectContextHitOnTouch(press.pointer, event);
+  if (!drawingEditLocked() && (target.segmentHit || target.fittingHit || target.pointHit)) {
+    showMobilePanel("drawing");
+    openDrawingContextMenuFromPointer(press.pointer, press.clientX, press.clientY);
+    cursorReadout.textContent = "Choose a pipe action";
+  }
   event.preventDefault();
   return true;
 }
@@ -28392,7 +38752,7 @@ function selectContextHitOnTouch(pointer, event) {
     clearSelectedSegments();
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -28404,7 +38764,7 @@ function selectContextHitOnTouch(pointer, event) {
     clearSelectedSegments();
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -28417,7 +38777,7 @@ function selectContextHitOnTouch(pointer, event) {
     clearSelectedSegments();
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -28430,7 +38790,7 @@ function selectContextHitOnTouch(pointer, event) {
     state.activePoint = state.selectedPoint;
     setTool("select");
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
   }
 }
 
@@ -28756,6 +39116,7 @@ function evenlySpacedSocketPositions(count, minT, maxT) {
 function fittingActionLabel(type) {
   if (type === "flange") return "flange";
   if (type === "rollGroove") return "roll groove";
+  if (type === "threadedEnd") return "threaded pipe end";
   if (type === "valve") return "valve";
   if (type === "weld") return "weld";
   if (type === "reducer") return "reducer";
@@ -28767,7 +39128,9 @@ function fittingModeText(fittingData) {
   const fitting = fittingData?.fitting ?? fittingData;
   if (fitting?.type === "flange") return `${fittingFlangeMode(fitting)} / ${flangeStandardLabel(fittingFlangeStandard(fitting))}`;
   if (fitting?.type === "rollGroove") return "0 kg roll groove";
+  if (fitting?.type === "threadedEnd") return "0 kg threaded end preparation";
   if (fitting?.type === "socket") return `NB ${fittingSocketSizeNb(fitting)} socket / ${formatAngle(fittingSocketAngle(fitting))} deg`;
+  if (fitting?.type === "reducer") return `${reducerTypeLabel(fittingReducerType(fitting))} reducer / outlet size required`;
   return fittingData?.weightSource ?? "estimated";
 }
 
@@ -28811,6 +39174,35 @@ function toggleContextBendReducerSide() {
   } else {
     state.reducerSideOverrides[reducer.nodeIndex] = "large";
   }
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function toggleContextAutoReducerType() {
+  if (!ensureDrawingEditable("change reducer type")) return;
+  const reducer = drawingContextTarget?.reducerHit?.reducer;
+  if (!reducer) return;
+
+  const snapshot = createUndoSnapshot();
+  state.reducerTypeOverrides = normalizeReducerTypeOverrides(state.reducerTypeOverrides, state.points.length);
+  const nextType = normalizeReducerType(reducer.reducerType) === "eccentric" ? "concentric" : "eccentric";
+  if (nextType === normalizeReducerType(state.reducerType)) {
+    delete state.reducerTypeOverrides[reducer.nodeIndex];
+  } else {
+    state.reducerTypeOverrides[reducer.nodeIndex] = nextType;
+  }
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+}
+
+function toggleContextManualReducerType() {
+  if (!ensureDrawingEditable("change reducer type")) return;
+  const fitting = drawingContextTarget?.fittingHit?.fitting;
+  if (!fitting || fitting.type !== "reducer") return;
+
+  const snapshot = createUndoSnapshot();
+  fitting.reducerType = fittingReducerType(fitting) === "eccentric" ? "concentric" : "eccentric";
+  state.selectedFitting = fitting.id;
   recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
@@ -28947,6 +39339,7 @@ function deleteContextPoint() {
   state.points.splice(pointHit.index, 1);
   reindexNodeTypesAfterPointRemoval(pointHit.index);
   reindexReducerSideOverridesAfterPointRemoval(pointHit.index);
+  reindexReducerTypeOverridesAfterPointRemoval(pointHit.index);
   state.selectedPoint = null;
   state.activePoint = Math.max(0, Math.min(state.activePoint, state.points.length - 1));
   recordHistory({ type: "snapshot", snapshot });
@@ -29032,7 +39425,13 @@ async function editSegmentLengthFromDimensionSource(segment, options = {}) {
   } else {
     setSelectedSegmentLength(text);
   }
-  showMobilePanel("inspector");
+  markFirstUseGuideLearned("length");
+  if (options.sourceType === "context") {
+    showMobilePanel("drawing");
+    showAppNotice(`Pipe length set to ${formatLength(pointLength(segments()[segment.index]?.vector ?? segment.vector))} mm.`);
+  } else {
+    revealInspectorForSelection();
+  }
   return true;
 }
 
@@ -29707,7 +40106,7 @@ function finishBoxSelect(event) {
     const last = selectedSegments[selectedSegments.length - 1];
     state.activePoint = last.to;
     state.selectedPoint = selectedSegments.length === 1 ? last.to : null;
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
   } else {
     state.selectedPoint = null;
   }
@@ -29908,6 +40307,7 @@ drawCanvas.addEventListener("pointermove", (event) => {
     event.preventDefault();
     return;
   }
+  if (updateDrawingPan(event)) return;
   if (updateBoxSelect(event)) return;
   if (updateNoteDrag(event)) return;
   if (updateSocketDrag(event)) return;
@@ -29995,6 +40395,10 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     return;
   }
+  if (beginDrawingPan(event, pointer)) {
+    event.preventDefault();
+    return;
+  }
   const activeEditTool = state.activeTool === "measure" ||
     state.activeTool === "note" ||
     state.activeTool === "tee" ||
@@ -30055,7 +40459,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
       state.selectedMeasurement = null;
       clearSelectedSegments();
       updateAll({ save: false });
-      showMobilePanel("inspector");
+      revealInspectorForSelection();
       return;
     }
     cancelTouchContextPress();
@@ -30071,7 +40475,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
       state.selectedMeasurement = null;
       clearSelectedSegments();
       updateAll({ save: false });
-      showMobilePanel("inspector");
+      revealInspectorForSelection();
       return;
     }
     beginSocketDrag(event, fittingHit, pointer);
@@ -30106,7 +40510,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     state.selectedPoint = null;
     clearSelectedSegments();
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -30119,7 +40523,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
     state.selectedNote = null;
     state.selectedMeasurement = null;
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -30139,7 +40543,7 @@ drawCanvas.addEventListener("pointerdown", (event) => {
   if (state.activeTool === "select") {
     state.selectedFitting = event.shiftKey || event.ctrlKey || event.metaKey ? null : fittingAtHit ? fittingAtHit.id : null;
     updateAll({ save: false });
-    showMobilePanel("inspector");
+    revealInspectorForSelection();
     return;
   }
 
@@ -30150,6 +40554,10 @@ drawCanvas.addEventListener("pointerdown", (event) => {
 
 drawCanvas.addEventListener("pointerup", (event) => {
   if (finishPinchGestureForPointer(event)) return;
+  if (finishDrawingPan(event)) {
+    releaseTrackedTouchPointer(event);
+    return;
+  }
   if (finishBoxSelect(event)) {
     releaseTrackedTouchPointer(event);
     return;
@@ -30175,6 +40583,7 @@ drawCanvas.addEventListener("pointerup", (event) => {
 });
 drawCanvas.addEventListener("pointercancel", (event) => {
   releaseTrackedTouchPointer(event);
+  finishDrawingPan(event);
   cancelTouchContextPress();
   cancelPendingDraw();
   cancelBoxSelect();
@@ -30194,8 +40603,12 @@ document.querySelectorAll("[data-axis]").forEach((button) => {
   button.addEventListener("click", (event) => {
     const axis = axisByKey.get(button.dataset.axis);
     if (!axis) return;
-    if (event.shiftKey && addShiftAngleRun(axis)) return;
+    if (event.shiftKey && addShiftAngleRun(axis)) {
+      markFirstUseGuideLearned("length");
+      return;
+    }
     addRun(axis, state.stepLength);
+    markFirstUseGuideLearned("length");
   });
 });
 
@@ -30236,7 +40649,9 @@ document.querySelector("#anglePositiveButton").addEventListener("click", () => a
 document.querySelector("#angleNegativeButton").addEventListener("click", () => addAngledRun(-1));
 
 pipeSpecSelect.addEventListener("change", () => {
+  const previousSpec = normalizePipeSpec(state.pipeSpec);
   state.pipeSpec = normalizePipeSpec(pipeSpecSelect.value);
+  syncFittingDataProfileForSpec(previousSpec, state.pipeSpec);
   normalizeEdgePipeSizesForState();
   populatePipeSizeOptions();
   if (state.previewMode === "black" || state.previewMode === "stainless") {
@@ -30246,6 +40661,8 @@ pipeSpecSelect.addEventListener("change", () => {
   }
   updateAll();
 });
+
+projectDialogInputs.fittingProfile?.addEventListener("change", updateProjectFittingProfileHelp);
 
 pipeSizeSelect.addEventListener("change", () => {
   const pipeSizeNb = pipeSizeNbForSpec(pipeSizeSelect.value, state.pipeSpec);
@@ -30259,13 +40676,19 @@ pipeSizeSelect.addEventListener("change", () => {
 });
 
 projectStatusSelect?.addEventListener("change", async () => {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to change the drawing status.");
+  const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
+  const currentStatus = normalizeProjectStatus(state.projectStatus);
+  const permission = currentDrawingProjectPermission();
+  const capability = nextStatus === "checked" || nextStatus === "issued"
+    ? "issue"
+    : nextStatus === "draft" || nextStatus === "readycheck"
+    ? "edit"
+    : "production";
+  if (!permission[capability === "issue" ? "canIssue" : capability === "edit" ? "canEdit" : "canManageProduction"]) {
+    showAppNotice(currentPermissionRestrictionText(capability));
     updateControls();
     return;
   }
-  const nextStatus = normalizeProjectStatus(projectStatusSelect.value);
-  const currentStatus = normalizeProjectStatus(state.projectStatus);
   if (nextStatus === "checked" && currentStatus !== "checked") {
     projectStatusSelect.value = currentStatus;
     await markDrawingChecked();
@@ -30283,6 +40706,17 @@ projectStatusSelect?.addEventListener("change", async () => {
     showHealthPanel();
     return;
   }
+  if (
+    projectStatusIndex(currentStatus) < projectStatusIndex("cutting") &&
+    projectStatusAtLeast(nextStatus, "cutting") &&
+    !materialChecklistCanStart(materialChecklistForState(state))
+  ) {
+    showAppNotice("Complete the Gear check in Jobs before starting Cutting, or ask a checker to record an authorised override.");
+    projectStatusSelect.value = currentStatus;
+    setTeamDashboardView("board");
+    await openBrowserProject({ keepSearch: true });
+    return;
+  }
   if (projectStatusAtLeast(nextStatus, "issued") && !state.issuedAt) {
     const issued = await issueDrawing({ targetStatus: nextStatus });
     if (!issued) {
@@ -30297,8 +40731,8 @@ projectStatusSelect?.addEventListener("change", async () => {
 });
 
 projectLockToggle?.addEventListener("change", () => {
-  if (cloudPermissionReadOnly) {
-    showAppNotice("This team spool is view/comment only for your role. Ask an owner/admin to unlock or edit it.");
+  if (!currentDrawingProjectPermission().canEdit) {
+    showAppNotice(currentPermissionRestrictionText("edit"));
     updateControls();
     return;
   }
@@ -30362,6 +40796,11 @@ flangeModeSelect.addEventListener("change", () => {
 flangeStandardSelect?.addEventListener("change", () => {
   state.flangeStandard = normalizeFlangeStandard(flangeStandardSelect.value);
   persistState();
+});
+
+reducerTypeSelect?.addEventListener("change", () => {
+  state.reducerType = normalizeReducerType(reducerTypeSelect.value);
+  updateAll();
 });
 
 previewModeSelect?.addEventListener("change", () => setPreviewMode(previewModeSelect.value));
@@ -30436,9 +40875,6 @@ document.querySelector("#sampleButton").addEventListener("click", loadSampleDraw
 undoButton?.addEventListener("click", undo);
 redoButton?.addEventListener("click", redo);
 document.querySelector("#resetButton").addEventListener("click", startNewDrawing);
-healthCheckButton?.addEventListener("click", showHealthPanel);
-newRevisionButton?.addEventListener("click", createNextRevision);
-shareReadOnlyButton?.addEventListener("click", shareReadOnlyProject);
 saveDefaultsButton?.addEventListener("click", saveCurrentSettingsAsDefaults);
 saveBrowserProjectButton?.addEventListener("click", () => {
   saveBrowserProject().catch((error) => {
@@ -30481,6 +40917,7 @@ drawingAssistantBuildButton?.addEventListener("click", buildSpoolFromDrawingAssi
 document.querySelector("#export3dButton").addEventListener("click", export3dImage);
 document.querySelector("#exportReportButton").addEventListener("click", exportIsoImage);
 document.querySelector("#exportIsoButton").addEventListener("click", exportIsoImage);
+document.querySelector("#exportPanelPdfButton").addEventListener("click", exportIsoImage);
 fabSheetTemplateSelect?.addEventListener("change", () => {
   storeFabSheetTemplate(fabSheetTemplateSelect.value);
   updateControls();
@@ -30490,9 +40927,10 @@ document.querySelector("#zoomInButton").addEventListener("click", () => {
   updateAll();
 });
 document.querySelector("#zoomOutButton").addEventListener("click", () => {
-  state.gridScale = Math.max(24, state.gridScale - 5);
+  state.gridScale = Math.max(10, state.gridScale - 5);
   updateAll();
 });
+document.querySelector("#fitDrawingButton")?.addEventListener("click", () => fitDrawingToViewport());
 
 document.addEventListener("keydown", (event) => {
   const isEnterKey = event.key === "Enter" || event.code === "NumpadEnter";
@@ -30538,6 +40976,14 @@ document.addEventListener("keydown", (event) => {
       closeAuthDialog();
       return;
     }
+    if (supportAdminDialog && !supportAdminDialog.hidden) {
+      closeSupportAdminDialog();
+      return;
+    }
+    if (legalSupportDialog && !legalSupportDialog.hidden) {
+      closeLegalSupportDialog();
+      return;
+    }
     if (toolSettingsDialog && !toolSettingsDialog.hidden) {
       closeToolSettingsDialog();
       return;
@@ -30556,6 +41002,10 @@ document.addEventListener("keydown", (event) => {
     }
     if (drawingAssistantDialog && !drawingAssistantDialog.hidden) {
       closeDrawingAssistantDialog();
+      return;
+    }
+    if (aiHelperDialog && !aiHelperDialog.hidden) {
+      closeAiHelper();
       return;
     }
     if (helpDialog && !helpDialog.hidden) {
@@ -30616,6 +41066,8 @@ function keyboardBlockingOverlayOpen() {
     (projectDialog && !projectDialog.hidden) ||
     (newDrawingDialog && !newDrawingDialog.hidden) ||
     (authDialog && !authDialog.hidden) ||
+    (supportAdminDialog && !supportAdminDialog.hidden) ||
+    (legalSupportDialog && !legalSupportDialog.hidden) ||
     (homeDashboardDialog && !homeDashboardDialog.hidden) ||
     (projectLibraryDialog && !projectLibraryDialog.hidden) ||
     (regressionDialog && !regressionDialog.hidden) ||
@@ -30623,6 +41075,7 @@ function keyboardBlockingOverlayOpen() {
     (fieldInputDialog && !fieldInputDialog.hidden) ||
     (appConfirmDialog && !appConfirmDialog.hidden) ||
     (noteDialog && !noteDialog.hidden) ||
+    (aiHelperDialog && !aiHelperDialog.hidden) ||
     (helpDialog && !helpDialog.hidden) ||
     (tutorialDialog && !tutorialDialog.hidden) ||
     (loadPlanDialog && !loadPlanDialog.hidden) ||
@@ -30643,9 +41096,6 @@ window.addEventListener("resize", () => {
   schedulePreviewStabilize();
   redrawLoadPlanIfOpen();
   renderDrawingAssistant();
-  if (!isTabletLayout()) {
-    setInspectorDrawerOpen(appMode === "review" || appMode === "export" || hasInspectorSelection());
-  }
 });
 window.addEventListener("blur", () => setShiftAngleSnap(false));
 document.addEventListener("scroll", handleDocumentScrollForContextMenu, true);
@@ -30665,26 +41115,38 @@ if (drawingAssistantCanvas?.parentElement) resizeObserver.observe(drawingAssista
 setupCollapsibleControls();
 setupInspectorTabs();
 setupAppModes();
+setupInterfaceDensity();
 setupMobilePanels();
 setupFittingsToolMenu();
 setupAppTheme();
 setupActionMenu();
 setupAuthDialog();
+setupSupportAdminDialog();
+setupLegalSupportDialog();
 setupHomeDashboard();
+setupQuickPdfMode();
+setupFirstUseGuide();
 setupProjectDialog();
 setupToolSettingsDialog();
 setupFieldInputDialog();
 setupAppConfirmDialog();
 setupNoteDialog();
 setupTutorialDialog();
+setupVideoTutorialDialog();
+setupTouchShiftAngleButton();
 setupRegressionDialog();
 setupHelpDialog();
+setupAiHelper();
+setupLaunchDiagnostics();
 setupPanelFullscreen();
 setupFloatingPreviewPanel();
 setupHealthIssueClicks();
 setupTouchComfort();
 setupTouchSelectionGuards();
 setupLoadPlanner();
+setupBigSpoolPlanner();
+setupSpoolWorkspaceTabs();
+setupNetworkAwareness();
 registerServiceWorker();
 setupAppVersionChecks();
 populatePipeSizeOptions();
