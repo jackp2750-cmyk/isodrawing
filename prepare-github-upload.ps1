@@ -92,4 +92,3 @@ Write-Host $target -ForegroundColor Cyan
 Write-Host "$fileCount files, $totalMegabytes MB; no videos, audio, archives, or .env files."
 Write-Host "Open that folder and upload its CONTENTS to the root of the GitHub main branch."
 Write-Host "Do not upload the UPLOAD-TO-GITHUB parent folder itself."
-

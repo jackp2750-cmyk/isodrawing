@@ -8,6 +8,7 @@ private/
 .env
 .env.*
 !.env.example
+supabase/.temp/
 
 # Rendered/raw media belongs in Supabase Storage, not the source repository.
 *.mp4

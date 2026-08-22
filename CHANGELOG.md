@@ -1,6 +1,18 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.62`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.64`.
+
+## v3.64 - Expanded real-app video library
+
+- Replaced the outdated Jobs video with a current compact Jobs and My day walkthrough.
+- Added detailed real-app guides for Quick PDF, iPad/iPhone/Android controls, concentric and eccentric reducers, editing common mistakes, business-team setup and advanced Big Spool planning.
+- Added direct chapter navigation for each new workflow and refreshed the PWA cache so installed devices load the expanded library.
+
+## v3.63 - Detailed fabrication video guides
+
+- Added five real-app guides for tees/branches/reducers, 45-degree offset calculations, 3D model inspection, approval/revisions/PDF/QR control and the complete weld register.
+- Added accurate chapter navigation for every new guide so users can jump directly to one fabrication task without replaying the entire video.
+- Published the matching MP4 files to the public Supabase tutorial library and updated PWA asset versions so PC, iPad and Android receive the expanded library.
 
 ## v3.62 - Concentric and eccentric reducers
 

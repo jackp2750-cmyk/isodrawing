@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.62`
+Current app version: `v3.64`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -10,7 +10,7 @@ Big Spool V1-V3 keeps one very large master assembly and turns it into transport
 
 The Jobs production board includes a generated Gear check after allocation. Workshop staff confirm inferred pipe and fittings, add extra gear where needed, record items needing ordering, and confirm readiness before Cutting can begin. The weld register supports assigning one welder to every weld or recording mixed welders per weld.
 
-The built-in video tutorial library now contains 12 real-app guides: the complete workflow, Jobs, drawing, pipe ends, sockets, Big Spool, multi-spool workspaces, QA/export, production, cloud recovery, import/help and a shareable promotional overview. Every guide includes play/pause, 10-second rewind and fast-forward controls, and direct chapter navigation.
+The built-in video tutorial library now contains 22 real-app guides. The expanded set replaces the old Jobs video and adds first spool to Quick PDF, iPad/iPhone/Android controls, concentric versus eccentric reducers, editing and fixing mistakes, business-team setup and advanced Big Spool planning. Every guide includes play/pause, 10-second rewind and fast-forward controls, and direct chapter navigation.
 
 Ask SpoolMate now recognises the current workspace surface, tool and Inspector tab, changes its suggested questions for Jobs, Big Spool, 3D, Draw, Edit, Review and Export, and gives exact PC/touch steps with a visible expected result. Its signed-in AI context contains workflow state only; project names, drawing geometry, notes and photos are not sent.
 

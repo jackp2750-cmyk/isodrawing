@@ -436,14 +436,14 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.62";
-const APP_BUILD_DATE = "2026-08-13";
+const APP_VERSION = "v3.64";
+const APP_BUILD_DATE = "2026-08-19";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Complete-Workflow-Fullscreen-Web.mp4`;
-const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-Dashboard-Fullscreen-Web.mp4`;
+const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-My-Day-Current-Fullscreen-Web.mp4`;
 const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Masterclass-Fullscreen-Web.mp4`;
 const PIPE_ENDS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Pipe-End-Preparations-Fullscreen.mp4`;
 const SOCKETS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Sockets-In-Detail-Fullscreen.mp4`;
@@ -453,6 +453,17 @@ const QA_EXPORT_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/t
 const PRODUCTION_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Teams-Production-Fullscreen-Web.mp4`;
 const CLOUD_RECOVERY_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Cloud-Recovery-Fullscreen-Web.mp4`;
 const IMPORT_HELP_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Import-Help-Fullscreen-Web.mp4`;
+const TEES_REDUCERS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Tees-Branches-Reducers-Fullscreen-Web.mp4`;
+const OFFSETS_45_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-45-Degree-Offsets-Cut-Lengths-Fullscreen-Web.mp4`;
+const APPROVAL_REVISIONS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Approval-Revisions-PDF-QR-Fullscreen-Web.mp4`;
+const WELD_REGISTER_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Weld-Register-NDT-Repairs-Fullscreen-Web.mp4`;
+const THREE_D_INSPECTION_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-3D-Inspection-Controls-Fullscreen-Web.mp4`;
+const QUICK_PDF_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Quick-PDF-First-Spool-Fullscreen-Web.mp4`;
+const TOUCH_CONTROLS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-iPad-Android-Touch-Controls-Web.mp4`;
+const REDUCERS_DETAIL_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Concentric-Eccentric-Reducers-Fullscreen-Web.mp4`;
+const EDITING_FIXES_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Editing-Fixing-Mistakes-Fullscreen-Web.mp4`;
+const BUSINESS_SETUP_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Business-Account-Team-Setup-Fullscreen-Web.mp4`;
+const BIG_SPOOL_ADVANCED_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Big-Spool-Advanced-Fullscreen-Web.mp4`;
 const VIDEO_TUTORIALS = [
   {
     id: "complete",
@@ -486,31 +497,40 @@ const VIDEO_TUTORIALS = [
   },
   {
     id: "jobs",
-    eyebrow: "Focused guide",
-    title: "Use the Jobs dashboard",
-    duration: 385,
-    description: "The dashboard was streamlined in v3.48. Use the current interactive Jobs guide for exact controls while the revised Freya-narrated footage is prepared.",
-    shortDescription: "Revised v3.48 video being prepared",
+    eyebrow: "Current Jobs guide",
+    title: "Use Jobs and My day",
+    duration: 142,
+    description: "Use the current compact Jobs list, search and filters, open a job folder, work through My day, review the full production board and find reports without being overwhelmed by a large job list.",
+    shortDescription: "Current compact dashboard and daily workflow",
     url: JOBS_TUTORIAL_VIDEO_URL,
-    previousLayout: true,
-    updateNotice: "The Jobs video shows the previous dashboard. Open More > Jobs guide for the exact v3.48 workflow while the revised Freya version is prepared.",
     chapters: [
-      [0, "What the Jobs tab is for"],
-      [23, "Save the spool first"],
-      [46, "Know where the list comes from"],
-      [71, "Use My day"],
-      [95, "Open tools from More"],
-      [119, "Understand the full board"],
-      [144, "Reduce the board with filters"],
-      [166, "Allocate the spool"],
-      [192, "Put blocked work on hold"],
-      [216, "Add a yard note"],
-      [236, "Search and review job issues"],
-      [262, "Open team Comms from More"],
-      [288, "Open reports from More"],
-      [314, "Open a spool by QR"],
-      [338, "Return to the drawing"],
-      [361, "Recommended daily routine"],
+      [0, "Jobs and My day overview"],
+      [17, "Search, filter and pin jobs"],
+      [36, "Open a compact job folder"],
+      [56, "Work through My day"],
+      [74, "Review urgent work"],
+      [90, "Use the full production board"],
+      [107, "More tools and reports"],
+      [121, "Recommended daily routine"],
+    ],
+  },
+  {
+    id: "quick-pdf",
+    eyebrow: "Fast individual workflow",
+    title: "First spool to Quick PDF",
+    duration: 127,
+    description: "Draw a straightforward spool without a business account, set exact and 45 degree runs, add pipe ends, make precise edits, inspect it in 3D and download a clearly marked working PDF.",
+    shortDescription: "Draw, check and download without the full workflow",
+    url: QUICK_PDF_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "When to use Quick PDF"],
+      [16, "Start a Quick PDF spool"],
+      [29, "Draw exact and 45 degree runs"],
+      [47, "Add fittings and prepared ends"],
+      [64, "Edit lengths and pipe sizes"],
+      [81, "Fit and inspect in 3D"],
+      [93, "Download the working PDF"],
+      [111, "Convert to managed workflow"],
     ],
   },
   {
@@ -542,6 +562,61 @@ const VIDEO_TUTORIALS = [
       [485, "Weld numbering"],
       [513, "Dimensions and labels"],
       [544, "Measure, notes and 3D check"],
+    ],
+  },
+  {
+    id: "tees-reducers",
+    eyebrow: "Connections in detail",
+    title: "Tees, branches and automatic reducers",
+    duration: 133,
+    description: "Build one clear spool while learning the exact difference between a manufactured tee, a fabricated branch and an automatic reducer, including pipe-size changes, fitting deductions and the final 3D and cut-list checks.",
+    shortDescription: "Tee bodies, fabricated branches and size transitions",
+    url: TEES_REDUCERS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Know the three connection types"],
+      [19, "Add a manufactured tee"],
+      [35, "Tee centre-to-end deductions"],
+      [50, "Add a fabricated branch"],
+      [67, "Create an automatic reducer"],
+      [87, "Change a branch outlet size"],
+      [106, "Check 3D and the cut list"],
+    ],
+  },
+  {
+    id: "reducers-detail",
+    eyebrow: "Reducer guide",
+    title: "Concentric and eccentric reducers",
+    duration: 127,
+    description: "See when SpoolMate inserts a reducer automatically, choose concentric or eccentric construction, compare both in the isometric and 3D model, and verify face-to-face and cut-list information.",
+    shortDescription: "Automatic transitions, types and dimensions",
+    url: REDUCERS_DETAIL_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "How automatic reducers work"],
+      [16, "Choose the default reducer type"],
+      [32, "Read the concentric symbol"],
+      [46, "Inspect concentric in 3D"],
+      [63, "Change one reducer to eccentric"],
+      [79, "Inspect eccentric in 3D"],
+      [93, "Verify the cut list"],
+      [110, "Branches are not reducers"],
+    ],
+  },
+  {
+    id: "offsets-45",
+    eyebrow: "Calculation guide",
+    title: "45 degree offsets and cut lengths",
+    duration: 126,
+    description: "Create a true one-plane 45 degree offset on PC or touch, follow set multiplied by the square root of two through to travel, then verify elbow take-offs, weld gaps and the resulting angled pipe cut.",
+    shortDescription: "Set, travel, deductions and the finished cut",
+    url: OFFSETS_45_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "The one-plane offset method"],
+      [18, "Enter the required set"],
+      [32, "Draw with Shift or Hold 45"],
+      [50, "Calculate set multiplied by square root of two"],
+      [71, "Finish and dimension the offset"],
+      [86, "Calculate the angled pipe cut"],
+      [103, "Weld gaps and the 3D check"],
     ],
   },
   {
@@ -582,6 +657,63 @@ const VIDEO_TUTORIALS = [
     ],
   },
   {
+    id: "touch-controls",
+    eyebrow: "iPad, iPhone and Android",
+    title: "Use SpoolMate on touch screens",
+    duration: 130,
+    description: "Learn the tablet and phone layout, exact runs, Hold 45, zoom, pan, Fit, long-press editing, mobile Details, 3D controls and the compact action menu.",
+    shortDescription: "Touch drawing, navigation and editing",
+    url: TOUCH_CONTROLS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "The touch workspace"],
+      [16, "Draw an exact run"],
+      [30, "Use Hold 45"],
+      [46, "Zoom, pan and Fit"],
+      [60, "Long-press to edit"],
+      [76, "Use the mobile Details sheet"],
+      [92, "Inspect the 3D model"],
+      [107, "Find actions on a small screen"],
+    ],
+  },
+  {
+    id: "editing-fixes",
+    eyebrow: "Editing guide",
+    title: "Edit and fix common mistakes",
+    duration: 133,
+    description: "Correct lengths and sizes, use Undo and Redo, place or remove fittings, box-select runs, recover the view with Fit or layout reset, and jump directly from a QA warning to the problem.",
+    shortDescription: "Fast corrections without redrawing the spool",
+    url: EDITING_FIXES_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Select before editing"],
+      [16, "Correct an exact length"],
+      [33, "Undo and Redo safely"],
+      [50, "Change a pipe size"],
+      [65, "Add or remove a fitting"],
+      [81, "Use box selection"],
+      [96, "Recover zoom and layout"],
+      [112, "Fix issues from Review"],
+    ],
+  },
+  {
+    id: "three-d-inspection",
+    eyebrow: "3D inspection",
+    title: "Control and inspect the 3D model",
+    duration: 147,
+    description: "Use Full, Rotate, Move, zoom and Fit on PC, iPad and Android, compare every model style, inspect tee, reducer, branch, offset and prepared-end geometry, then export a clean 3D image.",
+    shortDescription: "Orbit, pan, zoom, styles and fabrication checks",
+    url: THREE_D_INSPECTION_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Open the live 3D model"],
+      [18, "Orbit smoothly in Rotate mode"],
+      [34, "Move, zoom and Fit"],
+      [49, "Choose the right model style"],
+      [68, "Read the size-colour key and labels"],
+      [85, "Inspect a fabricated branch"],
+      [103, "Inspect offsets and prepared ends"],
+      [121, "Export a clean 3D image"],
+    ],
+  },
+  {
     id: "big-spool",
     eyebrow: "Transport planning",
     title: "Plan and split a Big Spool",
@@ -597,6 +729,26 @@ const VIDEO_TUTORIALS = [
       [64, "Add a manual split"],
       [82, "Use the load planner"],
       [96, "Keep the master continuous"],
+    ],
+  },
+  {
+    id: "big-spool-advanced",
+    eyebrow: "Advanced transport planning",
+    title: "Master Big Spool planning",
+    duration: 166,
+    description: "Apply custom truck, lift or access limits, review suggested and manual split positions, choose flanges, roll grooves or field welds, build a populated load plan and create linked child fabrication spools.",
+    shortDescription: "Limits, split joints, load plans and child spools",
+    url: BIG_SPOOL_ADVANCED_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "When to use Big Spool"],
+      [19, "Set real transport limits"],
+      [35, "Review suggested pieces"],
+      [52, "Choose flanges or roll grooves"],
+      [73, "Apply field-weld gaps"],
+      [91, "Add a manual split"],
+      [107, "Build the load plan"],
+      [121, "Create child fabrication spools"],
+      [141, "Inspect and issue every child"],
     ],
   },
   {
@@ -636,6 +788,43 @@ const VIDEO_TUTORIALS = [
     ],
   },
   {
+    id: "approval-revisions",
+    eyebrow: "Controlled issue",
+    title: "Approval, revisions, PDFs and QR travellers",
+    duration: 141,
+    description: "Follow one spool from Draft to checking, approval and issue, create its controlled PDF and QR traveller, then return it for changes and preserve the superseded revision correctly.",
+    shortDescription: "Submit, approve, issue, revise and trace",
+    url: APPROVAL_REVISIONS_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "The controlled revision workflow"],
+      [18, "Submit as Ready to check"],
+      [33, "Approve and record the checker"],
+      [48, "Clear the Ready to Issue gate"],
+      [67, "Create the issued PDF and QR"],
+      [88, "Return issued work for changes"],
+      [107, "Create and check the next revision"],
+      [123, "Review the full revision history"],
+    ],
+  },
+  {
+    id: "weld-register",
+    eyebrow: "Welding and inspection",
+    title: "Weld register, WPS, NDT and repairs",
+    duration: 132,
+    description: "Follow automatic weld numbers from the drawing into the register, assign one or mixed welders, record WPS and completion, complete inspection or NDT and retain the full repair and retest history.",
+    shortDescription: "Numbering, welders, inspection and final sign-off",
+    url: WELD_REGISTER_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Automatic weld numbering"],
+      [20, "Assign one welder to all welds"],
+      [35, "Record mixed welders"],
+      [51, "WPS and weld completion"],
+      [71, "Inspection and NDT results"],
+      [91, "Repairs and retesting"],
+      [108, "Final register sign-off"],
+    ],
+  },
+  {
     id: "production",
     eyebrow: "Teams and workshop",
     title: "Run production and gear checks",
@@ -654,6 +843,25 @@ const VIDEO_TUTORIALS = [
       [78, "Messages, notes and photos"],
       [91, "All welds or mixed welders"],
       [104, "Open the mobile QR traveller"],
+    ],
+  },
+  {
+    id: "business-setup",
+    eyebrow: "Business accounts",
+    title: "Set up a team workspace",
+    duration: 132,
+    description: "Create a business workspace, understand the five included seats, invite people, assign Owner, Admin, Designer, Workshop and Viewer roles, switch workspaces and connect the team to the Jobs workflow.",
+    shortDescription: "Five seats, roles, invites and shared work",
+    url: BUSINESS_SETUP_TUTORIAL_VIDEO_URL,
+    chapters: [
+      [0, "Personal versus business accounts"],
+      [16, "Create a business workspace"],
+      [30, "Use the five included seats"],
+      [46, "Assign team roles"],
+      [67, "What Workshop users can do"],
+      [82, "Switch personal and business workspaces"],
+      [98, "Use shared Jobs"],
+      [115, "Manage seats and access"],
     ],
   },
   {
