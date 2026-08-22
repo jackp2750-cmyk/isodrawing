@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.64`
+Current app version: `v3.65`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -9,6 +9,8 @@ The start dashboard offers two deliberately separate routes. Quick PDF needs no 
 Big Spool V1-V3 keeps one very large master assembly and turns it into transport-ready child spools. The planner can optimise against job-specific length, width, height and weight limits, calculates child weight and centre of gravity, suggests lift points, and records the field connection type, readiness and notes at every split. Each split can generate roll grooves on both child ends, flanges on both ends or a field weld with the selected project weld-gap deductions. Stable child identities flow into the load planner, child fabrication PDF package and child-specific QR spool traveller.
 
 The Jobs production board includes a generated Gear check after allocation. Workshop staff confirm inferred pipe and fittings, add extra gear where needed, record items needing ordering, and confirm readiness before Cutting can begin. The weld register supports assigning one welder to every weld or recording mixed welders per weld.
+
+Workshop stock is a separate cloud ledger for real items held in the shop. Every item can receive a permanent printable QR label; staff can scan it during stocktake, receive stock, use a quantity on the currently open cloud spool or return unused material. Personal stock remains private, Business stock is shared with approved workspace members, and every quantity change keeps an actor, time and optional spool link.
 
 The built-in video tutorial library now contains 22 real-app guides. The expanded set replaces the old Jobs video and adds first spool to Quick PDF, iPad/iPhone/Android controls, concentric versus eccentric reducers, editing and fixing mistakes, business-team setup and advanced Big Spool planning. Every guide includes play/pause, 10-second rewind and fast-forward controls, and direct chapter navigation.
 
@@ -52,7 +54,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Export polished fabrication PDF sheets, 3D images and project files, including workshop, client/approval and material order/take-off PDF styles.
 - Use the Drawing import assistant to upload a supplied drawing/photo/PDF, calibrate a known dimension and trace centreline runs into a SpoolMate spool.
 - Learn the app with a 5-minute Quick Start, a complete Beginner tour or the full topic library; progress is saved and resumes automatically.
-- Choose from the 12-guide in-app video library, then copy the current video's public link when sharing training or the promotional overview with a prospective customer.
+- Choose from the 22-guide in-app video library, then copy the current video's public link when sharing training or the promotional overview with a prospective customer.
 - After any completed mini practice, use Try in drawing to open the matching real tool without changing the current drawing first.
 - Give first-time users a temporary First Spool layout that emphasises Draw, exact length, Fittings, Select and Save before revealing Review and Export.
 - Follow contextual real-workspace prompts that clear as drawing, exact runs, fittings, selection, saving, checks and export are learned.
@@ -64,6 +66,9 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Open a saved spool in a separate browser window or tab while keeping Jobs open, making side-by-side work on multiple spools possible; each tab is titled with its job and spool number.
 - Scan issued fabrication-sheet QR codes with the device camera or a saved QR photo to open the permitted cloud spool traveller.
 - Verify the scanned spool revision before workshop use: historical issued snapshots are shown when available and a clear warning appears if the requested revision cannot be found.
+- Create workshop stock items with codes, categories, locations, units and low-stock levels; print one or many permanent QR labels from an A4-ready label sheet.
+- Scan stock labels with a live camera, saved QR photo or pasted link, then receive, count, use or return the item without searching the register manually.
+- Run a workshop stocktake with visible counted progress, and attach consumed stock to the exact open cloud spool with a permanent movement history.
 - Use Ask SpoolMate for instant built-in guidance and, for unfamiliar questions on active accounts, protected AI answers through a Supabase Edge Function. The helper sends only the question, short help history and safe screen/tool context—not drawing geometry, project names, notes or photos.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
 - See cloud save confidence at a glance with the exact last-saved time, saving, offline-queued, failed and conflict states; press a failed or queued status once to retry from its protected device copy.
@@ -129,6 +134,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - `supabase-migration-v295-trial-access.sql` - existing-database migration for expired read-only access, grace periods and hardened cloud writes.
 - `supabase-migration-v296-ai-helper.sql` - private daily AI allowance counters and protected service-role RPCs.
 - `supabase-migration-v318-business-workspaces.sql` - Personal/Business workspace ownership, business licences, roles and five-seat enforcement.
+- `supabase/migrations/20260822050724_workshop_stock.sql` - secure workshop stock items, movement history, RLS and atomic stock/spool RPC.
 - `supabase/functions/ai-help/index.ts` - authenticated OpenAI proxy for Ask SpoolMate; the API key stays in Supabase secrets.
 - `verify-app.cjs` - release integrity checks for code, controls, PWA assets, engineering tables and Supabase RPC wiring.
 - `CHANGELOG.md` - current update log.
@@ -240,6 +246,7 @@ With Supabase configured:
 - Personal jobs stay private; Business workspaces share business-owned projects.
 - A Business workspace includes five people and can receive extra paid-seat entitlement.
 - Team members can use a spool conversation with mentions, private workshop photos and resolved messages.
+- Personal accounts can keep a private workshop-stock register; approved Business members share their active workspace's stock register and QR labels.
 - Jobs Comms can share general team messages across an approved company.
 - Users can request password-reset emails and securely choose a new password after returning to the app.
 - Account includes a JSON data export, privacy/support information, diagnostics and protected account deletion.
@@ -248,13 +255,15 @@ With Supabase configured:
 
 ## Supabase Setup
 
-For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql`, `supabase-migration-v296-ai-helper.sql` and `supabase-migration-v318-business-workspaces.sql` in that order as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`, followed by `supabase-migration-v318-business-workspaces.sql`.
+For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql`, `supabase-migration-v296-ai-helper.sql`, `supabase-migration-v318-business-workspaces.sql` and `supabase/migrations/20260822050724_workshop_stock.sql` in that order as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`; its current version already includes workshop stock.
 
 The v2.95 migration must be applied before publishing the matching frontend. It separates authenticated read access from active-licence write access, adds the seven-day grace-state field and keeps expired cloud data visible without allowing edits. Trial expiry does not delete cloud data.
 
 The v2.96 migration adds private per-user daily AI counters. Trial accounts receive up to 10 AI answers per UTC day; paid, full and grace accounts receive up to 50. Guest and expired users keep the complete built-in helper without creating API cost.
 
 The v3.18 migration separates Personal and Business licences, includes five seats in each Business workspace, reserves seats for pending members, and keeps Business projects attached to the business if their original creator leaves.
+
+The v3.65 migration adds the workshop-stock register and immutable movement ledger. It enables RLS, grants only the required Data API operations, keeps the privileged stock mutation helper in the non-exposed `private` schema and exposes one authenticated RPC that checks the active workspace before changing a quantity.
 
 Until online billing is connected, activate the owner account or a manually paid customer from the SQL Editor using the UUID shown in Authentication > Users:
 

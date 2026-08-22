@@ -215,6 +215,7 @@ let homeDashboardQuickPdfButton = document.querySelector("#homeDashboardQuickPdf
 let homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
 let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
 let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
+let homeDashboardWorkshopStockButton = document.querySelector("#homeDashboardWorkshopStockButton");
 let homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
 let homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
 let homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
@@ -236,6 +237,32 @@ let projectLibraryCommsSlot = document.querySelector("#projectLibraryCommsSlot")
 let projectLibrarySpoolConversation = document.querySelector("#projectLibrarySpoolConversation");
 let projectLibraryNewButton = document.querySelector("#projectLibraryNewButton");
 let projectLibrarySaveButton = document.querySelector("#projectLibrarySaveButton");
+const workshopStockDialog = document.querySelector("#workshopStockDialog");
+const workshopStockCloseButton = document.querySelector("#workshopStockCloseButton");
+const workshopStockSubtitle = document.querySelector("#workshopStockSubtitle");
+const workshopStockSearchInput = document.querySelector("#workshopStockSearchInput");
+const workshopStockScanButton = document.querySelector("#workshopStockScanButton");
+const workshopStocktakeButton = document.querySelector("#workshopStocktakeButton");
+const workshopStockPrintButton = document.querySelector("#workshopStockPrintButton");
+const workshopStockRefreshButton = document.querySelector("#workshopStockRefreshButton");
+const workshopStockAddButton = document.querySelector("#workshopStockAddButton");
+const workshopStockCurrentSpool = document.querySelector("#workshopStockCurrentSpool");
+const workshopStockSummary = document.querySelector("#workshopStockSummary");
+const workshopStockList = document.querySelector("#workshopStockList");
+const workshopStockDetail = document.querySelector("#workshopStockDetail");
+const workshopStockItemForm = document.querySelector("#workshopStockItemForm");
+const workshopStockEditorTitle = document.querySelector("#workshopStockEditorTitle");
+const workshopStockEditorCancelButton = document.querySelector("#workshopStockEditorCancelButton");
+const workshopStockEditorSaveButton = document.querySelector("#workshopStockEditorSaveButton");
+const workshopStockCodeInput = document.querySelector("#workshopStockCodeInput");
+const workshopStockNameInput = document.querySelector("#workshopStockNameInput");
+const workshopStockCategoryInput = document.querySelector("#workshopStockCategoryInput");
+const workshopStockLocationInput = document.querySelector("#workshopStockLocationInput");
+const workshopStockUnitInput = document.querySelector("#workshopStockUnitInput");
+const workshopStockMinimumInput = document.querySelector("#workshopStockMinimumInput");
+const workshopStockInitialQuantityField = document.querySelector("#workshopStockInitialQuantityField");
+const workshopStockInitialQuantityInput = document.querySelector("#workshopStockInitialQuantityInput");
+const workshopStockDescriptionInput = document.querySelector("#workshopStockDescriptionInput");
 const healthSummary = document.querySelector("#healthSummary");
 const bomSummary = document.querySelector("#bomSummary");
 const workflowSummary = document.querySelector("#workflowSummary");
@@ -267,6 +294,7 @@ const actionMenuCloseButton = document.querySelector("#actionMenuCloseButton");
 const actionCommandInput = document.querySelector("#actionCommandInput");
 const actionCommandResults = document.querySelector("#actionCommandResults");
 const actionMenuJobsButton = document.querySelector("#actionMenuJobsButton");
+const actionMenuWorkshopStockButton = document.querySelector("#actionMenuWorkshopStockButton");
 const actionMenuBigSpoolButton = document.querySelector("#actionMenuBigSpoolButton");
 const actionMenuAccountButton = document.querySelector("#actionMenuAccountButton");
 const workspaceSettingsButton = document.querySelector("#workspaceSettingsButton");
@@ -436,8 +464,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.64";
-const APP_BUILD_DATE = "2026-08-19";
+const APP_VERSION = "v3.65";
+const APP_BUILD_DATE = "2026-08-22";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
@@ -904,6 +932,8 @@ const QR_CODE_READER_JS_URL = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/+esm";
 const CLOUD_PROJECTS_TABLE = "spool_projects";
 const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_COMPANIES_TABLE = "companies";
+const WORKSHOP_STOCK_ITEMS_TABLE = "workshop_stock_items";
+const WORKSHOP_STOCK_MOVEMENTS_TABLE = "workshop_stock_movements";
 const CLOUD_COMPANY_MEMBERS_TABLE = "company_members";
 const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
 const CLOUD_PROJECT_PHOTOS_BUCKET = "spool-photos";
@@ -2190,6 +2220,18 @@ let teamMessages = [];
 let teamMessagesCompanyId = null;
 let teamMessagesBusy = false;
 let teamMessagesError = "";
+let workshopStockItems = [];
+let workshopStockMovements = [];
+let workshopStockProjectMovements = [];
+let workshopStockWorkspaceKey = "";
+let workshopStockSelectedItemId = "";
+let workshopStockSearch = "";
+let workshopStockBusy = false;
+let workshopStocktakeActive = false;
+let workshopStocktakeCountedIds = new Set();
+let workshopStockPrintSelection = new Set();
+let workshopStockEditingItemId = "";
+let workshopStockRouteHandled = false;
 let currentCloudProjectOwnerId = null;
 let currentCloudProjectCompanyId = null;
 let cloudSaveDirty = false;
@@ -16309,6 +16351,7 @@ const ACTION_COMMANDS = [
   { id: "export-project", label: "Export openable project", detail: "Open the project-file export action", category: "Export", keywords: "backup html json share project file", run: () => openCommandExport("#exportProjectButton", "bom") },
   { id: "save", label: "Save spool", detail: "Save locally and to cloud when available", category: "Project", keywords: "cloud autosave store project", run: () => saveBrowserProjectButton?.click() },
   { id: "jobs", label: "Open Jobs dashboard", detail: "Find jobs, spools, assignments and production stages", category: "Project", keywords: "job dashboard production team spools", run: () => openBrowserProject() },
+  { id: "workshop-stock", label: "Workshop stock", detail: "Scan stock, print QR labels, take counts and assign items to spools", category: "Workshop", keywords: "inventory materials stocktake qr labels receive use spool workshop", run: () => openWorkshopStock() },
   { id: "dashboard", label: "Open home dashboard", detail: "Continue, restore, start or open a spool", category: "Project", keywords: "home start restore session", run: () => openHomeDashboard() },
   { id: "project-details", label: "Edit project details", detail: "Job, spool, revision, client and drawing data", category: "Project", keywords: "job number spool number rev revision drawn by client weld gap", capability: "edit", run: () => promptForProjectDetails({ force: true }) },
   { id: "new-spool", label: "New spool", detail: "Save or discard the current drawing and start again", category: "Project", keywords: "new drawing reset blank", run: () => document.querySelector("#resetButton")?.click() },
@@ -19466,6 +19509,7 @@ function runTutorialStepAction() {
 function closePrimaryWorkspaceDialogs(except = "") {
   if (except !== "home" && homeDashboardDialog && !homeDashboardDialog.hidden) closeHomeDashboard();
   if (except !== "jobs" && projectLibraryDialog && !projectLibraryDialog.hidden) closeProjectLibrary();
+  if (except !== "workshop-stock" && workshopStockDialog && !workshopStockDialog.hidden) closeWorkshopStock();
   if (except !== "tutorial" && tutorialDialog && !tutorialDialog.hidden) closeTutorialDialog();
   if (except !== "video" && videoTutorialDialog && !videoTutorialDialog.hidden) closeVideoTutorialDialog();
   if (except !== "help" && helpDialog && !helpDialog.hidden) closeHelpDialog();
@@ -20230,6 +20274,11 @@ const AI_HELPER_LOCAL_GUIDE = [
     patterns: [["production", "stage"], ["assign", "worker"], ["due", "date"], ["on", "hold"]],
     answer: "To prepare a spool for the workshop:\n1. Open Jobs and choose My day for your role-focused work, or Full board for every production stage.\n2. Assign the worker and due date, then open Gear check.\n3. Confirm inferred pipe/fittings as In shop, mark missing items Needs ordering, and add extra gear.\n4. Record the checker and confirm readiness.\n\nYou should see Cutting become available only after the check or an authorised override. The result also appears on the mobile QR traveller.",
     tutorial: "Production board",
+    help: "account",
+  },
+  {
+    patterns: [["workshop", "stock"], ["stocktake"], ["stock", "qr"], ["inventory"], ["use", "stock", "spool"]],
+    answer: "Use Workshop stock as the shared material ledger:\n1. Open Menu > Workshop stock.\n2. Add each stocked item with its code, category, location, unit and low-stock level.\n3. Select items and press Print labels to attach permanent QR labels to bins, racks or individual items.\n4. Start Stocktake and scan each label, then enter the physical count.\n5. Open a cloud spool and press Use on current spool when material leaves the workshop shelf.\n\nEvery receipt, count, use and return is recorded. Personal stock stays private; business stock is shared only with approved members of the active workspace.",
     help: "account",
   },
   {
@@ -21823,6 +21872,11 @@ function ensureHomeDashboardShell() {
             <strong>Jobs</strong>
             <span>Open saved spools by job or team.</span>
           </button>
+          <button class="home-dashboard-action workshop-stock" id="homeDashboardWorkshopStockButton" type="button">
+            <svg><use href="#icon-report"></use></svg>
+            <strong>Workshop stock</strong>
+            <span>Scan stock, print QR labels, take counts and assign materials to spools.</span>
+          </button>
           <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
             <svg><use href="#icon-help"></use></svg>
             <strong>Tutorial</strong>
@@ -21884,6 +21938,7 @@ function ensureHomeDashboardShell() {
   homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreButton");
   homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
   homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
+  homeDashboardWorkshopStockButton = document.querySelector("#homeDashboardWorkshopStockButton");
   homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
   homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
   homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
@@ -21925,6 +21980,13 @@ function setupHomeDashboard() {
     openBrowserProject().catch((error) => {
       console.warn("Open jobs failed.", error);
       showAppNotice(error?.message || "Open jobs failed.");
+    });
+  });
+  homeDashboardWorkshopStockButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    openWorkshopStock().catch((error) => {
+      console.warn("Open workshop stock failed.", error);
+      showAppNotice(workshopStockErrorMessage(error), { tone: "warning" });
     });
   });
   homeDashboardTutorialButton?.addEventListener("click", () => {
@@ -26854,13 +26916,15 @@ async function exportCloudAccountData() {
   accountExportDataButton.disabled = true;
   try {
     const own = (table, fields, column) => supabaseClient.from(table).select(fields).eq(column, cloudUser.id);
-    const [projectsResult, membershipsResult, commentsResult, messagesResult] = await Promise.all([
+    const [projectsResult, membershipsResult, commentsResult, messagesResult, stockItemsResult, stockMovementsResult] = await Promise.all([
       own(CLOUD_PROJECTS_TABLE, "id,owner_id,company_id,name,project_info,drawing_state,created_at,updated_at", "owner_id"),
       own(CLOUD_COMPANY_MEMBERS_TABLE, "company_id,user_id,email,role,status,created_at,updated_at", "user_id"),
       own(CLOUD_PROJECT_COMMENTS_TABLE, "id,project_id,company_id,author_id,author_email,body,mentions,photo_path,resolved,resolved_at,resolved_by,created_at,updated_at", "author_id"),
       own(CLOUD_TEAM_MESSAGES_TABLE, "id,company_id,author_id,author_email,body,pinned,completed,completed_at,remove_after,created_at,updated_at", "author_id"),
+      own(WORKSHOP_STOCK_ITEMS_TABLE, "id,owner_id,company_id,stock_code,name,description,category,location,unit,quantity_on_hand,minimum_quantity,archived,created_at,updated_at", "owner_id"),
+      own(WORKSHOP_STOCK_MOVEMENTS_TABLE, "id,stock_item_id,project_id,actor_id,movement_type,quantity_change,quantity_before,quantity_after,note,created_at", "actor_id"),
     ]);
-    const failed = [projectsResult, membershipsResult, commentsResult, messagesResult].find((result) => result.error);
+    const failed = [projectsResult, membershipsResult, commentsResult, messagesResult, stockItemsResult, stockMovementsResult].find((result) => result.error);
     if (failed?.error) throw failed.error;
     const companyIds = [...new Set((membershipsResult.data ?? []).map((row) => row.company_id).filter(Boolean))];
     let companies = [];
@@ -26878,6 +26942,8 @@ async function exportCloudAccountData() {
       ownedCloudProjects: projectsResult.data ?? [],
       authoredProjectComments: commentsResult.data ?? [],
       authoredTeamMessages: messagesResult.data ?? [],
+      ownedWorkshopStockItems: stockItemsResult.data ?? [],
+      authoredWorkshopStockMovements: stockMovementsResult.data ?? [],
       localBrowserProjects: loadSavedBrowserProjects(),
       note: "Workshop photo paths are listed, but private photo binaries are not included in this JSON export.",
     };
@@ -28147,6 +28213,7 @@ function renderWorkspaceChoices() {
 }
 
 async function selectWorkspace(value) {
+  const previousWorkspace = workshopStockWorkspaceIdentity();
   const selection = String(value ?? "personal");
   if (selection === "personal") {
     activatePersonalWorkspace();
@@ -28154,9 +28221,13 @@ async function selectWorkspace(value) {
     const activated = await activateCompanyFromId(selection.slice(9));
     if (!activated) throw new Error("You do not have approved access to that business.");
   }
+  if (workshopStockWorkspaceIdentity() !== previousWorkspace) resetWorkshopStockCache();
   projectLibraryOpenFolderKey = "";
   if (projectLibraryDialog && !projectLibraryDialog.hidden && projectLibrarySource === "cloud") {
     await openBrowserProject({ source: "cloud", keepSearch: true });
+  }
+  if (workshopStockDialog && !workshopStockDialog.hidden) {
+    await loadWorkshopStock({ force: true });
   }
 }
 
@@ -29162,6 +29233,8 @@ async function applyCloudSession(session) {
     currentCloudProjectCompanyId = null;
     cloudPermissionReadOnly = false;
     resetCloudSaveTracking();
+    resetWorkshopStockCache();
+    if (workshopStockDialog && !workshopStockDialog.hidden) closeWorkshopStock();
     clearTeamWorkspace();
     updateCloudStatus();
     return;
@@ -29185,6 +29258,9 @@ async function applyCloudSession(session) {
   }
   if (!travellerRouteHandled && new URLSearchParams(location.search).get("traveller") === "1") {
     window.setTimeout(() => maybeOpenProjectFromUrl().catch((error) => console.warn("Could not open spool traveller.", error)), 100);
+  }
+  if (!workshopStockRouteHandled && new URLSearchParams(location.search).get("stockItem") === "1") {
+    window.setTimeout(() => maybeOpenProjectFromUrl().catch((error) => console.warn("Could not open workshop stock QR.", error)), 100);
   }
 }
 
@@ -29357,6 +29433,717 @@ async function openSavedCloudProject(projectId, options = {}) {
   window.setTimeout(() => updateCloudStatus(), 1600);
 }
 
+function workshopStockWorkspaceIdentity() {
+  if (!cloudUser) return "";
+  return activeWorkspaceIsBusiness()
+    ? `business:${activeCompany.id}`
+    : `personal:${cloudUser.id}`;
+}
+
+function workshopStockCanChangeQuantity() {
+  if (!cloudUser || !hasActiveCloudLicense()) return false;
+  if (!activeWorkspaceIsBusiness()) return true;
+  return activeCompanyMembership?.status === "approved"
+    && ["owner", "admin", "checker", "workshop"].includes(activeCompanyMembership?.role);
+}
+
+function workshopStockCanEditItem(item) {
+  if (!item || !workshopStockCanChangeQuantity()) return false;
+  if (!item.companyId) return item.ownerId === cloudUser?.id;
+  return item.ownerId === cloudUser?.id || activeCompanyCanAdmin();
+}
+
+function workshopStockQuantityText(value, unit = "ea", options = {}) {
+  const quantity = Number(value);
+  const text = Number.isFinite(quantity)
+    ? quantity.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 3 })
+    : "0";
+  return options.valueOnly ? text : `${text} ${String(unit || "ea").trim()}`;
+}
+
+function mapWorkshopStockItem(row) {
+  return {
+    id: normalizeUuid(row?.id),
+    ownerId: normalizeUuid(row?.owner_id),
+    companyId: normalizeUuid(row?.company_id),
+    stockCode: String(row?.stock_code ?? "").trim(),
+    name: String(row?.name ?? "").trim(),
+    description: String(row?.description ?? "").trim(),
+    category: String(row?.category ?? "General").trim() || "General",
+    location: String(row?.location ?? "").trim(),
+    unit: String(row?.unit ?? "ea").trim() || "ea",
+    quantityOnHand: Math.max(0, Number(row?.quantity_on_hand) || 0),
+    minimumQuantity: Math.max(0, Number(row?.minimum_quantity) || 0),
+    archived: row?.archived === true,
+    createdAt: String(row?.created_at ?? ""),
+    updatedAt: String(row?.updated_at ?? ""),
+  };
+}
+
+function mapWorkshopStockMovement(row) {
+  return {
+    id: String(row?.id ?? ""),
+    stockItemId: normalizeUuid(row?.stock_item_id),
+    projectId: normalizeProjectId(row?.project_id),
+    actorId: normalizeUuid(row?.actor_id),
+    movementType: String(row?.movement_type ?? ""),
+    quantityChange: Number(row?.quantity_change) || 0,
+    quantityBefore: Number(row?.quantity_before) || 0,
+    quantityAfter: Number(row?.quantity_after) || 0,
+    note: String(row?.note ?? "").trim(),
+    createdAt: String(row?.created_at ?? ""),
+  };
+}
+
+function workshopStockItemFromId(itemId = workshopStockSelectedItemId) {
+  const id = normalizeUuid(itemId);
+  return workshopStockItems.find((item) => item.id === id) ?? null;
+}
+
+function workshopStockFilteredItems() {
+  const query = workshopStockSearch.trim().toLowerCase();
+  if (!query) return workshopStockItems;
+  return workshopStockItems.filter((item) => [
+    item.stockCode,
+    item.name,
+    item.category,
+    item.location,
+    item.description,
+  ].some((value) => String(value).toLowerCase().includes(query)));
+}
+
+function workshopStockItemIsLow(item) {
+  return Boolean(item && item.minimumQuantity > 0 && item.quantityOnHand <= item.minimumQuantity);
+}
+
+function workshopStockErrorMessage(error) {
+  const message = String(error?.message ?? error ?? "");
+  if (/workshop_stock|relation .* does not exist|schema cache/i.test(message)) {
+    return "Workshop stock needs its Supabase database update before it can be used.";
+  }
+  return message || "Workshop stock could not be loaded.";
+}
+
+async function loadWorkshopStockMovements(itemId = workshopStockSelectedItemId) {
+  const id = normalizeUuid(itemId);
+  workshopStockMovements = [];
+  if (!supabaseClient || !cloudUser || !id) return [];
+  const { data, error } = await supabaseClient
+    .from(WORKSHOP_STOCK_MOVEMENTS_TABLE)
+    .select("id,stock_item_id,project_id,actor_id,movement_type,quantity_change,quantity_before,quantity_after,note,created_at")
+    .eq("stock_item_id", id)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) throw error;
+  workshopStockMovements = (data ?? []).map(mapWorkshopStockMovement);
+  return workshopStockMovements;
+}
+
+async function loadWorkshopStockProjectMovements() {
+  workshopStockProjectMovements = [];
+  const projectId = normalizeProjectId(state.projectId);
+  if (!supabaseClient || !cloudUser || !projectId || !currentProjectHasCloudRecord()) return [];
+  const { data, error } = await supabaseClient
+    .from(WORKSHOP_STOCK_MOVEMENTS_TABLE)
+    .select("id,stock_item_id,project_id,actor_id,movement_type,quantity_change,quantity_before,quantity_after,note,created_at")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) throw error;
+  workshopStockProjectMovements = (data ?? []).map(mapWorkshopStockMovement);
+  return workshopStockProjectMovements;
+}
+
+async function loadWorkshopStock(options = {}) {
+  if (!(await ensureSupabaseClient())) return false;
+  if (!cloudUser) {
+    openAuthDialog();
+    showAppNotice("Sign in to open workshop stock. Personal accounts get private stock; business accounts share it with the team.");
+    return false;
+  }
+  const workspaceKey = workshopStockWorkspaceIdentity();
+  const force = options.force === true || workshopStockWorkspaceKey !== workspaceKey;
+  if (!force && workshopStockItems.length) {
+    await Promise.all([
+      loadWorkshopStockMovements(),
+      loadWorkshopStockProjectMovements(),
+    ]);
+    renderWorkshopStock();
+    return true;
+  }
+
+  workshopStockBusy = true;
+  renderWorkshopStock();
+  try {
+    let query = supabaseClient
+      .from(WORKSHOP_STOCK_ITEMS_TABLE)
+      .select("id,owner_id,company_id,stock_code,name,description,category,location,unit,quantity_on_hand,minimum_quantity,archived,created_at,updated_at")
+      .eq("archived", false)
+      .order("category", { ascending: true })
+      .order("name", { ascending: true });
+    query = activeWorkspaceIsBusiness()
+      ? query.eq("company_id", activeCompany.id)
+      : query.is("company_id", null).eq("owner_id", cloudUser.id);
+    const { data, error } = await query;
+    if (error) throw error;
+    workshopStockItems = (data ?? []).map(mapWorkshopStockItem).filter((item) => item.id);
+    workshopStockWorkspaceKey = workspaceKey;
+    workshopStockPrintSelection = new Set(
+      [...workshopStockPrintSelection].filter((id) => workshopStockItems.some((item) => item.id === id)),
+    );
+    if (workshopStockSelectedItemId && !workshopStockItemFromId()) workshopStockSelectedItemId = "";
+    if (!workshopStockSelectedItemId && options.itemId) workshopStockSelectedItemId = normalizeUuid(options.itemId) || "";
+    await Promise.all([
+      loadWorkshopStockMovements(),
+      loadWorkshopStockProjectMovements(),
+    ]);
+    return true;
+  } finally {
+    workshopStockBusy = false;
+    renderWorkshopStock();
+  }
+}
+
+function resetWorkshopStockCache() {
+  workshopStockItems = [];
+  workshopStockMovements = [];
+  workshopStockProjectMovements = [];
+  workshopStockWorkspaceKey = "";
+  workshopStockSelectedItemId = "";
+  workshopStocktakeActive = false;
+  workshopStocktakeCountedIds = new Set();
+  workshopStockPrintSelection = new Set();
+}
+
+function workshopStockCurrentProjectIdForItem(item) {
+  const projectId = normalizeProjectId(state.projectId);
+  if (!item || !projectId || !currentProjectHasCloudRecord()) return "";
+  if (!currentDrawingProjectPermission().canManageProduction) return "";
+  if (item.companyId) {
+    return normalizeUuid(currentCloudProjectCompanyId) === item.companyId ? projectId : "";
+  }
+  return !currentCloudProjectCompanyId && normalizeUuid(currentCloudProjectOwnerId) === cloudUser?.id ? projectId : "";
+}
+
+function workshopStockCurrentSpoolHtml() {
+  const projectId = normalizeProjectId(state.projectId);
+  const saved = projectId && currentProjectHasCloudRecord();
+  if (!saved) {
+    return `<div><strong>No cloud spool selected</strong><span>Open or save a cloud spool before using stock on it. You can still receive, count and print labels.</span></div>`;
+  }
+  const project = normalizeProjectInfo(state.projectInfo);
+  const netByItem = new Map();
+  for (const movement of workshopStockProjectMovements) {
+    netByItem.set(movement.stockItemId, (netByItem.get(movement.stockItemId) ?? 0) + movement.quantityChange);
+  }
+  const used = [...netByItem.entries()]
+    .map(([itemId, change]) => ({ item: workshopStockItemFromId(itemId), quantity: Math.max(0, -change) }))
+    .filter((entry) => entry.item && entry.quantity > 0);
+  return `
+    <div><strong>Using stock on ${escapeHtml(project.jobNumber || "Job not set")} / ${escapeHtml(project.spoolNumber || "Spool not set")}</strong><span>Every Use action is recorded against cloud spool ${escapeHtml(projectId)}.</span></div>
+    <div class="workshop-stock-spool-usage">${used.length
+      ? used.slice(0, 5).map((entry) => `<span>${escapeHtml(entry.item.stockCode)} · ${escapeHtml(workshopStockQuantityText(entry.quantity, entry.item.unit))}</span>`).join("")
+      : `<span>No workshop stock recorded on this spool yet.</span>`}</div>`;
+}
+
+function workshopStockMovementLabel(type) {
+  return ({
+    received: "Received",
+    used_on_spool: "Used on spool",
+    returned_from_spool: "Returned",
+    stocktake: "Stocktake",
+  })[type] || "Stock update";
+}
+
+function renderWorkshopStockSummary(items = workshopStockFilteredItems()) {
+  if (!workshopStockSummary) return;
+  const low = workshopStockItems.filter(workshopStockItemIsLow).length;
+  const locations = new Set(workshopStockItems.map((item) => item.location).filter(Boolean)).size;
+  const counted = workshopStocktakeCountedIds.size;
+  workshopStockSummary.innerHTML = `
+    <article><span>Items</span><strong>${workshopStockItems.length}</strong><small>${items.length} shown</small></article>
+    <article class="${low ? "warning" : "ready"}"><span>Low stock</span><strong>${low}</strong><small>${low ? "Needs attention" : "All above minimum"}</small></article>
+    <article><span>Locations</span><strong>${locations}</strong><small>Workshop storage areas</small></article>
+    <article class="${workshopStocktakeActive ? "active" : ""}"><span>Stocktake</span><strong>${workshopStocktakeActive ? `${counted}/${workshopStockItems.length}` : "Off"}</strong><small>${workshopStocktakeActive ? "Items counted this session" : "Start when ready"}</small></article>`;
+}
+
+function renderWorkshopStockList(items = workshopStockFilteredItems()) {
+  if (!workshopStockList) return;
+  if (workshopStockBusy) {
+    workshopStockList.innerHTML = `<div class="workshop-stock-empty"><strong>Loading workshop stock…</strong><span>Checking the active ${escapeHtml(activeWorkspaceLabel())} workspace.</span></div>`;
+    return;
+  }
+  if (!items.length) {
+    workshopStockList.innerHTML = `<div class="workshop-stock-empty"><strong>${workshopStockItems.length ? "No matching stock" : "No stock items yet"}</strong><span>${workshopStockItems.length ? "Try a different search." : "Add the first item, enter its starting quantity and print its QR label."}</span></div>`;
+    return;
+  }
+  workshopStockList.innerHTML = items.map((item) => {
+    const low = workshopStockItemIsLow(item);
+    const selected = item.id === workshopStockSelectedItemId;
+    const counted = workshopStocktakeCountedIds.has(item.id);
+    const canUse = Boolean(workshopStockCurrentProjectIdForItem(item));
+    return `
+      <article class="workshop-stock-row ${selected ? "selected" : ""} ${low ? "low" : ""}" data-stock-row="${escapeHtml(item.id)}">
+        <label class="workshop-stock-label-check" title="Include this item when printing labels"><input type="checkbox" data-stock-print-id="${escapeHtml(item.id)}" ${workshopStockPrintSelection.has(item.id) ? "checked" : ""} /><span>QR</span></label>
+        <button class="workshop-stock-row-main" type="button" data-stock-action="view" data-stock-id="${escapeHtml(item.id)}">
+          <span class="workshop-stock-code">${escapeHtml(item.stockCode)}</span>
+          <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml([item.category, item.location].filter(Boolean).join(" · ") || "No location set")}</small></span>
+        </button>
+        <span class="workshop-stock-quantity ${low ? "low" : ""}"><strong>${escapeHtml(workshopStockQuantityText(item.quantityOnHand, item.unit))}</strong><small>${low ? `Minimum ${escapeHtml(workshopStockQuantityText(item.minimumQuantity, item.unit))}` : "Available"}</small></span>
+        <div class="workshop-stock-row-actions">
+          <button type="button" data-stock-action="count" data-stock-id="${escapeHtml(item.id)}" class="${counted ? "counted" : ""}">${counted ? "Counted" : "Count"}</button>
+          <button type="button" data-stock-action="use" data-stock-id="${escapeHtml(item.id)}" ${canUse ? "" : "disabled title=\"Open a matching cloud spool first\""}>Use on spool</button>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+async function hydrateWorkshopStockQr(item) {
+  const image = workshopStockDetail?.querySelector(`[data-stock-qr-image="${item.id}"]`);
+  if (!image) return;
+  try {
+    const module = await import(QR_CODE_JS_URL);
+    const qr = module.default ?? module;
+    image.src = await qr.toDataURL(workshopStockItemUrl(item), { width: 240, margin: 1, errorCorrectionLevel: "M" });
+  } catch (error) {
+    console.warn("Workshop stock QR could not be generated.", error);
+    image.alt = "QR code unavailable while offline";
+  }
+}
+
+function renderWorkshopStockDetail() {
+  if (!workshopStockDetail) return;
+  const item = workshopStockItemFromId();
+  workshopStockDetail.classList.toggle("has-item", Boolean(item));
+  if (!item) {
+    workshopStockDetail.innerHTML = `<div class="workshop-stock-detail-empty"><strong>Select or scan an item</strong><span>See quantity, recent movements, QR label and spool actions here.</span></div>`;
+    return;
+  }
+  const low = workshopStockItemIsLow(item);
+  const canChange = workshopStockCanChangeQuantity();
+  const canEdit = workshopStockCanEditItem(item);
+  const projectId = workshopStockCurrentProjectIdForItem(item);
+  const history = workshopStockMovements.length
+    ? workshopStockMovements.map((movement) => `
+        <li>
+          <span class="workshop-stock-movement-icon ${movement.quantityChange < 0 ? "out" : movement.quantityChange > 0 ? "in" : "same"}">${movement.quantityChange > 0 ? "+" : movement.quantityChange < 0 ? "−" : "="}</span>
+          <div><strong>${escapeHtml(workshopStockMovementLabel(movement.movementType))}</strong><span>${escapeHtml(movement.note || (movement.projectId ? `Spool ${movement.projectId}` : "Workshop stock"))}</span><small>${escapeHtml(movement.createdAt ? new Date(movement.createdAt).toLocaleString() : "")}</small></div>
+          <b>${escapeHtml(workshopStockQuantityText(Math.abs(movement.quantityChange), item.unit))}</b>
+        </li>`).join("")
+    : `<li class="workshop-stock-history-empty">No stock movements recorded yet.</li>`;
+  workshopStockDetail.innerHTML = `
+    <section class="workshop-stock-item-head ${low ? "low" : ""}">
+      <div><span>${escapeHtml(item.stockCode)}</span><h2>${escapeHtml(item.name)}</h2><p>${escapeHtml(item.description || "No description")}</p></div>
+      <div class="workshop-stock-item-balance"><strong>${escapeHtml(workshopStockQuantityText(item.quantityOnHand, item.unit))}</strong><span>${low ? `Low · minimum ${escapeHtml(workshopStockQuantityText(item.minimumQuantity, item.unit))}` : "Available now"}</span></div>
+    </section>
+    <section class="workshop-stock-meta"><span><b>Category</b>${escapeHtml(item.category)}</span><span><b>Location</b>${escapeHtml(item.location || "Not set")}</span><span><b>Workspace</b>${escapeHtml(activeWorkspaceLabel())}</span></section>
+    <section class="workshop-stock-qr-panel"><img data-stock-qr-image="${escapeHtml(item.id)}" alt="QR code for ${escapeHtml(item.name)}" /><div><strong>Permanent stock QR</strong><span>Print this label and attach it to the bin, rack or item. Scanning opens this exact stock record.</span><button type="button" data-stock-detail-action="print">Print this label</button></div></section>
+    <div class="workshop-stock-detail-actions">
+      <button type="button" class="primary" data-stock-detail-action="use" ${projectId && canChange ? "" : "disabled"}>Use on current spool</button>
+      <button type="button" data-stock-detail-action="return" ${projectId && canChange ? "" : "disabled"}>Return from spool</button>
+      <button type="button" data-stock-detail-action="receive" ${canChange ? "" : "disabled"}>Receive stock</button>
+      <button type="button" data-stock-detail-action="count" ${canChange ? "" : "disabled"}>Enter stocktake count</button>
+      <button type="button" data-stock-detail-action="edit" ${canEdit ? "" : "disabled"}>Edit details</button>
+      <button type="button" class="danger" data-stock-detail-action="archive" ${canEdit ? "" : "disabled"}>Archive</button>
+    </div>
+    ${!projectId ? `<p class="workshop-stock-project-hint">Open a cloud spool from this ${escapeHtml(activeWorkspaceLabel())} workspace to enable Use and Return.</p>` : ""}
+    <section class="workshop-stock-history"><div><strong>Movement history</strong><span>Every quantity change is recorded.</span></div><ol>${history}</ol></section>`;
+  hydrateWorkshopStockQr(item);
+}
+
+function renderWorkshopStock() {
+  if (!workshopStockDialog) return;
+  const items = workshopStockFilteredItems();
+  if (workshopStockSubtitle) {
+    workshopStockSubtitle.textContent = cloudUser
+      ? `${activeWorkspaceLabel()} stock · printable QR labels, stocktake and spool usage.`
+      : "Sign in to use cloud workshop stock.";
+  }
+  if (workshopStockCurrentSpool) workshopStockCurrentSpool.innerHTML = workshopStockCurrentSpoolHtml();
+  if (workshopStocktakeButton) {
+    workshopStocktakeButton.setAttribute("aria-pressed", String(workshopStocktakeActive));
+    workshopStocktakeButton.classList.toggle("active", workshopStocktakeActive);
+    const label = workshopStocktakeButton.querySelector("span:last-child");
+    if (label) label.textContent = workshopStocktakeActive ? "Finish stocktake" : "Start stocktake";
+  }
+  const canChange = workshopStockCanChangeQuantity();
+  if (workshopStockAddButton) workshopStockAddButton.disabled = !canChange;
+  renderWorkshopStockSummary(items);
+  renderWorkshopStockList(items);
+  renderWorkshopStockDetail();
+}
+
+function workshopStockItemUrl(item) {
+  const url = new URL(location.href);
+  url.hash = "";
+  url.search = "";
+  url.searchParams.set("stock", item.id);
+  url.searchParams.set("stockItem", "1");
+  return url.toString();
+}
+
+async function printWorkshopStockLabels(items) {
+  const records = (Array.isArray(items) ? items : []).filter(Boolean);
+  if (!records.length) {
+    showAppNotice("Select at least one stock item to print.");
+    return false;
+  }
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    showAppNotice("The browser blocked the label preview. Allow pop-ups for SpoolMate and try again.");
+    return false;
+  }
+  printWindow.document.write("<!doctype html><title>SpoolMate stock labels</title><p style='font:700 16px system-ui;padding:24px'>Preparing QR labels…</p>");
+  try {
+    const module = await import(QR_CODE_JS_URL);
+    const qr = module.default ?? module;
+    const labels = await Promise.all(records.map(async (item) => ({
+      item,
+      dataUrl: await qr.toDataURL(workshopStockItemUrl(item), { width: 320, margin: 1, errorCorrectionLevel: "M" }),
+    })));
+    const workspace = escapeHtml(activeWorkspaceLabel());
+    printWindow.document.open();
+    printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>SpoolMate stock labels</title><style>
+      *{box-sizing:border-box}body{margin:0;padding:14mm;font-family:Arial,sans-serif;color:#13272d;background:#fff}.toolbar{position:sticky;top:0;display:flex;gap:8px;justify-content:flex-end;padding:8px;margin:-8px -8px 12px;background:#fff;border-bottom:1px solid #ccd7da}.toolbar button{padding:9px 14px;border:1px solid #60767d;border-radius:7px;background:#fff;font-weight:700}.toolbar .primary{background:#087e96;color:#fff;border-color:#087e96}.labels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8mm}.label{break-inside:avoid;min-height:76mm;display:grid;grid-template-columns:38mm minmax(0,1fr);gap:5mm;align-items:center;padding:6mm;border:1.4px solid #1b3339;border-radius:4mm}.label img{width:38mm;height:38mm}.label small{display:block;color:#456068;font-size:9pt;font-weight:700;text-transform:uppercase}.label h1{margin:2mm 0 1mm;font-size:16pt}.label code{display:block;font-size:13pt;font-weight:900}.label p{margin:2mm 0 0;font-size:10pt}.label .scan{color:#087e96;font-weight:800}@media print{body{padding:8mm}.toolbar{display:none}.labels{gap:5mm}.label{min-height:68mm}}
+    </style></head><body><div class="toolbar"><button onclick="window.close()">Close</button><button class="primary" onclick="window.print()">Print labels</button></div><main class="labels">${labels.map(({ item, dataUrl }) => `<article class="label"><img src="${dataUrl}" alt=""><div><small>SpoolMate · ${workspace}</small><h1>${escapeHtml(item.name)}</h1><code>${escapeHtml(item.stockCode)}</code><p>${escapeHtml(item.category)}${item.location ? ` · ${escapeHtml(item.location)}` : ""}</p><p class="scan">Scan to count or use on a spool</p></div></article>`).join("")}</main></body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    return true;
+  } catch (error) {
+    printWindow.close();
+    throw error;
+  }
+}
+
+function openWorkshopStockEditor(item = null) {
+  if (!workshopStockItemForm) return;
+  workshopStockEditingItemId = item?.id ?? "";
+  workshopStockItemForm.hidden = false;
+  if (workshopStockEditorTitle) workshopStockEditorTitle.textContent = item ? "Edit stock item" : "Add stock item";
+  workshopStockCodeInput.value = item?.stockCode ?? "";
+  workshopStockNameInput.value = item?.name ?? "";
+  workshopStockCategoryInput.value = item?.category ?? "General";
+  workshopStockLocationInput.value = item?.location ?? "";
+  workshopStockUnitInput.value = item?.unit ?? "ea";
+  workshopStockMinimumInput.value = String(item?.minimumQuantity ?? 0);
+  workshopStockInitialQuantityInput.value = "0";
+  workshopStockDescriptionInput.value = item?.description ?? "";
+  if (workshopStockInitialQuantityField) workshopStockInitialQuantityField.hidden = Boolean(item);
+  workshopStockItemForm.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  window.requestAnimationFrame(() => workshopStockCodeInput?.focus());
+}
+
+function closeWorkshopStockEditor() {
+  workshopStockEditingItemId = "";
+  if (workshopStockItemForm) workshopStockItemForm.hidden = true;
+}
+
+async function saveWorkshopStockItem() {
+  if (!supabaseClient || !cloudUser || !workshopStockCanChangeQuantity()) {
+    throw new Error(cloudReadOnlyMessage("change workshop stock"));
+  }
+  const payload = {
+    stock_code: String(workshopStockCodeInput?.value ?? "").trim().toUpperCase(),
+    name: String(workshopStockNameInput?.value ?? "").trim(),
+    description: String(workshopStockDescriptionInput?.value ?? "").trim(),
+    category: String(workshopStockCategoryInput?.value ?? "General").trim() || "General",
+    location: String(workshopStockLocationInput?.value ?? "").trim(),
+    unit: String(workshopStockUnitInput?.value ?? "ea").trim() || "ea",
+    minimum_quantity: Math.max(0, Number(workshopStockMinimumInput?.value) || 0),
+    updated_at: new Date().toISOString(),
+  };
+  if (!payload.stock_code || !payload.name) throw new Error("Enter both a stock code and item name.");
+  const editing = workshopStockItemFromId(workshopStockEditingItemId);
+  let savedRow;
+  if (editing) {
+    const { data, error } = await supabaseClient
+      .from(WORKSHOP_STOCK_ITEMS_TABLE)
+      .update(payload)
+      .eq("id", editing.id)
+      .select("id,owner_id,company_id,stock_code,name,description,category,location,unit,quantity_on_hand,minimum_quantity,archived,created_at,updated_at")
+      .single();
+    if (error) throw error;
+    savedRow = data;
+  } else {
+    const { data, error } = await supabaseClient
+      .from(WORKSHOP_STOCK_ITEMS_TABLE)
+      .insert({
+        ...payload,
+        owner_id: cloudUser.id,
+        company_id: activeWorkspaceIsBusiness() ? activeCompany.id : null,
+        quantity_on_hand: 0,
+        archived: false,
+      })
+      .select("id,owner_id,company_id,stock_code,name,description,category,location,unit,quantity_on_hand,minimum_quantity,archived,created_at,updated_at")
+      .single();
+    if (error) throw error;
+    savedRow = data;
+    const startingQuantity = Math.max(0, Number(workshopStockInitialQuantityInput?.value) || 0);
+    if (startingQuantity > 0) {
+      const { error: movementError } = await supabaseClient.rpc("record_workshop_stock_movement", {
+        p_item_id: savedRow.id,
+        p_movement_type: "received",
+        p_quantity: startingQuantity,
+        p_project_id: null,
+        p_note: "Opening workshop stock",
+      });
+      if (movementError) throw movementError;
+    }
+  }
+  workshopStockSelectedItemId = normalizeUuid(savedRow?.id) || "";
+  closeWorkshopStockEditor();
+  await loadWorkshopStock({ force: true });
+  showAppNotice(editing ? "Workshop stock details updated." : "Stock item added. Its permanent QR label is ready to print.", { tone: "success" });
+}
+
+async function recordWorkshopStockMovement(item, movementType, quantity, options = {}) {
+  if (!item || !supabaseClient || !cloudUser) throw new Error("Select a workshop stock item first.");
+  if (!workshopStockCanChangeQuantity()) throw new Error(cloudReadOnlyMessage("change workshop stock"));
+  const projectId = options.projectId || null;
+  const { data, error } = await supabaseClient.rpc("record_workshop_stock_movement", {
+    p_item_id: item.id,
+    p_movement_type: movementType,
+    p_quantity: quantity,
+    p_project_id: projectId,
+    p_note: String(options.note ?? "").trim().slice(0, 500),
+  });
+  if (error) throw error;
+  const result = data ?? {};
+  item.quantityOnHand = Math.max(0, Number(result.quantityAfter ?? result.quantity_after) || 0);
+  if (movementType === "stocktake") workshopStocktakeCountedIds.add(item.id);
+  await Promise.all([
+    loadWorkshopStockMovements(item.id),
+    loadWorkshopStockProjectMovements(),
+  ]);
+  renderWorkshopStock();
+  return result;
+}
+
+async function promptWorkshopStockMovement(item, movementType) {
+  const projectId = ["used_on_spool", "returned_from_spool"].includes(movementType)
+    ? workshopStockCurrentProjectIdForItem(item)
+    : "";
+  if (["used_on_spool", "returned_from_spool"].includes(movementType) && !projectId) {
+    throw new Error("Open and cloud-save a spool from this workspace before assigning stock to it.");
+  }
+  const stocktake = movementType === "stocktake";
+  const title = stocktake
+    ? `Count ${item.stockCode}`
+    : movementType === "received"
+    ? `Receive ${item.stockCode}`
+    : movementType === "returned_from_spool"
+    ? `Return ${item.stockCode}`
+    : `Use ${item.stockCode} on spool`;
+  const response = await openFieldInputDialog({
+    title,
+    label: stocktake ? `Actual quantity in workshop (${item.unit})` : `Quantity (${item.unit})`,
+    value: stocktake ? String(item.quantityOnHand) : "1",
+    type: "number",
+    min: stocktake ? 0 : 0.001,
+    step: 0.001,
+    unit: item.unit,
+    help: stocktake
+      ? `Current recorded quantity is ${workshopStockQuantityText(item.quantityOnHand, item.unit)}. Enter what you physically counted.`
+      : projectId
+      ? `This will be recorded against ${projectDisplayName()}.`
+      : "This movement will be added to the permanent stock history.",
+    submitLabel: stocktake ? "Save count" : "Record quantity",
+  });
+  if (response === null) return false;
+  const quantity = Number(response);
+  if (!Number.isFinite(quantity) || quantity < 0 || (!stocktake && quantity <= 0)) throw new Error("Enter a valid stock quantity.");
+  await recordWorkshopStockMovement(item, movementType, quantity, {
+    projectId: projectId || null,
+    note: projectId ? `${projectDisplayName()} · ${movementType === "returned_from_spool" ? "unused stock returned" : "used for fabrication"}` : stocktake ? "Workshop stocktake" : "Stock received",
+  });
+  showAppNotice(stocktake
+    ? `${item.stockCode} counted at ${workshopStockQuantityText(quantity, item.unit)}.`
+    : `${workshopStockMovementLabel(movementType)} recorded for ${item.stockCode}.`, { tone: "success" });
+  return true;
+}
+
+async function archiveWorkshopStockItem(item) {
+  if (!workshopStockCanEditItem(item)) throw new Error("Only the stock creator or a business Admin can archive this item.");
+  const proceed = await confirmAppAction(`Archive ${item.stockCode} · ${item.name}? Its movement history will be kept.`, {
+    title: "Archive stock item",
+    confirmLabel: "Archive item",
+    tone: "warning",
+  });
+  if (!proceed) return false;
+  const { error } = await supabaseClient
+    .from(WORKSHOP_STOCK_ITEMS_TABLE)
+    .update({ archived: true, updated_at: new Date().toISOString() })
+    .eq("id", item.id);
+  if (error) throw error;
+  workshopStockSelectedItemId = "";
+  await loadWorkshopStock({ force: true });
+  showAppNotice("Stock item archived. Its audit history has been retained.", { tone: "success" });
+  return true;
+}
+
+async function selectWorkshopStockItem(itemId) {
+  const item = workshopStockItemFromId(itemId);
+  if (!item) throw new Error("That stock item was not found in the active workspace.");
+  workshopStockSelectedItemId = item.id;
+  await loadWorkshopStockMovements(item.id);
+  renderWorkshopStock();
+  workshopStockDetail?.scrollIntoView?.({ block: "nearest" });
+  return item;
+}
+
+async function openWorkshopStock(options = {}) {
+  captureTemporaryWorkspaceNavigation();
+  closePrimaryWorkspaceDialogs("workshop-stock");
+  closeActionMenu();
+  if (!(await ensureSupabaseClient())) return false;
+  if (!cloudUser) {
+    openAuthDialog();
+    showAppNotice("Sign in to use workshop stock across your devices.");
+    return false;
+  }
+  if (!workshopStockDialog) return false;
+  workshopStockDialog.hidden = false;
+  document.body.classList.add("workshop-stock-open");
+  try {
+    const requestedItemId = normalizeUuid(options.itemId);
+    if (requestedItemId) {
+      const previousWorkspace = workshopStockWorkspaceIdentity();
+      const { data: requestedItem, error: requestedItemError } = await supabaseClient
+        .from(WORKSHOP_STOCK_ITEMS_TABLE)
+        .select("id,company_id")
+        .eq("id", requestedItemId)
+        .eq("archived", false)
+        .maybeSingle();
+      if (requestedItemError) throw requestedItemError;
+      if (!requestedItem) throw new Error("That stock QR is not available to this account, or the item was archived.");
+      const companyId = normalizeUuid(requestedItem.company_id);
+      if (companyId && normalizeUuid(activeCompany?.id) !== companyId) {
+        const activated = await activateCompanyFromId(companyId);
+        if (!activated) throw new Error("This account does not have approved access to the QR label's business workspace.");
+      } else if (!companyId && activeWorkspaceIsBusiness()) {
+        activatePersonalWorkspace();
+      }
+      if (workshopStockWorkspaceIdentity() !== previousWorkspace) resetWorkshopStockCache();
+      workshopStockSelectedItemId = requestedItemId;
+    }
+    await loadWorkshopStock({ force: options.force === true, itemId: options.itemId });
+    if (options.itemId && !workshopStockItemFromId(options.itemId)) {
+      throw new Error("That QR label belongs to stock outside the active workspace, or the item was archived.");
+    }
+    renderWorkshopStock();
+    workshopStockSearchInput?.focus?.({ preventScroll: true });
+    return true;
+  } catch (error) {
+    console.warn("Workshop stock could not be opened.", error);
+    showAppNotice(workshopStockErrorMessage(error), { tone: "warning" });
+    renderWorkshopStock();
+    return false;
+  }
+}
+
+function closeWorkshopStock() {
+  closeWorkshopStockEditor();
+  if (workshopStockDialog) workshopStockDialog.hidden = true;
+  document.body.classList.remove("workshop-stock-open");
+  scheduleTemporaryWorkspaceRestore();
+  const params = new URLSearchParams(location.search);
+  if (params.get("stockItem") === "1") {
+    params.delete("stock");
+    params.delete("stockItem");
+    const next = `${location.pathname}${params.toString() ? `?${params}` : ""}${location.hash}`;
+    history.replaceState(null, "", next);
+  }
+}
+
+function setupWorkshopStock() {
+  actionMenuWorkshopStockButton?.addEventListener("click", () => openWorkshopStock());
+  workshopStockCloseButton?.addEventListener("click", closeWorkshopStock);
+  workshopStockDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === workshopStockDialog) closeWorkshopStock();
+  });
+  workshopStockSearchInput?.addEventListener("input", () => {
+    workshopStockSearch = workshopStockSearchInput.value;
+    renderWorkshopStock();
+  });
+  workshopStockScanButton?.addEventListener("click", () => openQrScanner({ context: "stock" }));
+  workshopStockRefreshButton?.addEventListener("click", () => loadWorkshopStock({ force: true }).catch((error) => showAppNotice(workshopStockErrorMessage(error))));
+  workshopStockAddButton?.addEventListener("click", () => openWorkshopStockEditor());
+  workshopStockEditorCancelButton?.addEventListener("click", closeWorkshopStockEditor);
+  workshopStockItemForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (workshopStockEditorSaveButton) workshopStockEditorSaveButton.disabled = true;
+    saveWorkshopStockItem().catch((error) => {
+      console.warn("Workshop stock item could not be saved.", error);
+      showAppNotice(workshopStockErrorMessage(error), { tone: "warning" });
+    }).finally(() => {
+      if (workshopStockEditorSaveButton) workshopStockEditorSaveButton.disabled = false;
+    });
+  });
+  workshopStocktakeButton?.addEventListener("click", () => {
+    workshopStocktakeActive = !workshopStocktakeActive;
+    if (workshopStocktakeActive) workshopStocktakeCountedIds = new Set();
+    renderWorkshopStock();
+    showAppNotice(workshopStocktakeActive
+      ? "Stocktake started. Scan labels or press Count beside each item."
+      : `Stocktake finished with ${workshopStocktakeCountedIds.size} of ${workshopStockItems.length} items counted.`);
+  });
+  workshopStockPrintButton?.addEventListener("click", () => {
+    const filtered = workshopStockFilteredItems();
+    const selected = filtered.filter((item) => workshopStockPrintSelection.has(item.id));
+    printWorkshopStockLabels(selected.length ? selected : filtered).catch((error) => showAppNotice(error?.message || "QR labels could not be prepared."));
+  });
+  workshopStockList?.addEventListener("change", (event) => {
+    const checkbox = event.target.closest("[data-stock-print-id]");
+    if (!checkbox) return;
+    if (checkbox.checked) workshopStockPrintSelection.add(checkbox.dataset.stockPrintId);
+    else workshopStockPrintSelection.delete(checkbox.dataset.stockPrintId);
+  });
+  workshopStockList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-stock-action]");
+    if (!button) return;
+    const item = workshopStockItemFromId(button.dataset.stockId);
+    if (!item) return;
+    const action = button.dataset.stockAction;
+    const task = action === "view"
+      ? selectWorkshopStockItem(item.id)
+      : action === "count"
+      ? promptWorkshopStockMovement(item, "stocktake")
+      : action === "use"
+      ? promptWorkshopStockMovement(item, "used_on_spool")
+      : null;
+    task?.catch?.((error) => showAppNotice(workshopStockErrorMessage(error), { tone: "warning" }));
+  });
+  workshopStockDetail?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-stock-detail-action]");
+    if (!button) return;
+    const item = workshopStockItemFromId();
+    if (!item) return;
+    const action = button.dataset.stockDetailAction;
+    const task = action === "print"
+      ? printWorkshopStockLabels([item])
+      : action === "use"
+      ? promptWorkshopStockMovement(item, "used_on_spool")
+      : action === "return"
+      ? promptWorkshopStockMovement(item, "returned_from_spool")
+      : action === "receive"
+      ? promptWorkshopStockMovement(item, "received")
+      : action === "count"
+      ? promptWorkshopStockMovement(item, "stocktake")
+      : action === "archive"
+      ? archiveWorkshopStockItem(item)
+      : action === "edit"
+      ? Promise.resolve(openWorkshopStockEditor(item))
+      : null;
+    task?.catch?.((error) => showAppNotice(workshopStockErrorMessage(error), { tone: "warning" }));
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && workshopStockDialog && !workshopStockDialog.hidden && workshopStockItemForm?.hidden !== false) {
+      event.preventDefault();
+      closeWorkshopStock();
+    }
+  });
+}
+
 function closeQrScanner() {
   if (!activeQrScanner) return;
   activeQrScanner.stopped = true;
@@ -29366,7 +30153,7 @@ function closeQrScanner() {
   activeQrScanner = null;
 }
 
-function scannedSpoolTravellerUrl(value) {
+function scannedSpoolMateTarget(value) {
   const scanned = new URL(String(value ?? "").trim(), location.href);
   const currentPath = location.pathname.replace(/\/+$/, "");
   const scannedPath = scanned.pathname.replace(/\/+$/, "");
@@ -29374,11 +30161,22 @@ function scannedSpoolTravellerUrl(value) {
     throw new Error("That QR code is not a SpoolMate link from this app.");
   }
   const projectId = normalizeProjectId(scanned.searchParams.get("project"));
-  if (!projectId || scanned.searchParams.get("traveller") !== "1") {
-    throw new Error("That QR code does not contain a valid spool traveller.");
+  if (projectId && scanned.searchParams.get("traveller") === "1") {
+    scanned.hash = "";
+    return { kind: "spool", url: scanned, projectId };
   }
-  scanned.hash = "";
-  return scanned;
+  const stockItemId = normalizeUuid(scanned.searchParams.get("stock"));
+  if (stockItemId && scanned.searchParams.get("stockItem") === "1") {
+    scanned.hash = "";
+    return { kind: "stock", url: scanned, stockItemId };
+  }
+  throw new Error("That QR code does not contain a valid spool traveller or workshop stock item.");
+}
+
+function scannedSpoolTravellerUrl(value) {
+  const target = scannedSpoolMateTarget(value);
+  if (target.kind !== "spool") throw new Error("That QR code is for workshop stock, not a spool traveller.");
+  return target.url;
 }
 
 async function qrReader() {
@@ -29448,20 +30246,27 @@ async function scanQrImageFile(file, canvas) {
 }
 
 function openScannedSpoolTraveller(value) {
-  const url = scannedSpoolTravellerUrl(value);
+  const target = scannedSpoolMateTarget(value);
   closeQrScanner();
-  location.assign(url.toString());
+  if (target.kind === "stock" && cloudUser) {
+    openWorkshopStock({ itemId: target.stockItemId, force: true }).catch((error) => {
+      showAppNotice(workshopStockErrorMessage(error), { tone: "warning" });
+    });
+    return;
+  }
+  location.assign(target.url.toString());
 }
 
-async function openQrScanner() {
+async function openQrScanner(options = {}) {
   closeQrScanner();
+  const stockContext = options.context === "stock";
   const dialog = document.createElement("div");
   dialog.id = "qrScannerDialog";
   dialog.className = "qr-scanner-backdrop";
   dialog.tabIndex = -1;
   dialog.innerHTML = `
     <main class="qr-scanner" role="dialog" aria-modal="true" aria-labelledby="qrScannerTitle">
-      <header><div><span>Workshop shortcut</span><h1 id="qrScannerTitle">Scan spool QR</h1></div><button type="button" data-qr-close aria-label="Close QR scanner">Close</button></header>
+      <header><div><span>Workshop shortcut</span><h1 id="qrScannerTitle">${stockContext ? "Scan stock QR" : "Scan SpoolMate QR"}</h1></div><button type="button" data-qr-close aria-label="Close QR scanner">Close</button></header>
       <div class="qr-scanner-camera">
         <video autoplay muted playsinline aria-label="Camera preview"></video>
         <div class="qr-scanner-target" aria-hidden="true"></div>
@@ -29470,7 +30275,7 @@ async function openQrScanner() {
       <p class="qr-scanner-status" role="status">Starting the rear camera…</p>
       <div class="qr-scanner-alternatives">
         <label class="qr-scanner-file"><strong>Choose QR photo</strong><span>Use a saved screenshot or camera photo</span><input type="file" accept="image/*" data-qr-file /></label>
-        <label class="qr-scanner-link"><span>Or paste a spool traveller link</span><div><input type="url" inputmode="url" autocomplete="off" placeholder="https://…?project=…&traveller=1" data-qr-link /><button type="button" data-qr-open-link>Open</button></div></label>
+        <label class="qr-scanner-link"><span>Or paste a SpoolMate QR link</span><div><input type="url" inputmode="url" autocomplete="off" placeholder="Spool traveller or stock-item link" data-qr-link /><button type="button" data-qr-open-link>Open</button></div></label>
       </div>
       <small class="qr-scanner-privacy">Camera frames stay on this device and are used only to read the QR code.</small>
     </main>`;
@@ -29544,7 +30349,9 @@ async function openQrScanner() {
     }
     scanner.video.srcObject = scanner.stream;
     await scanner.video.play();
-    scanner.status.textContent = "Point the camera at a SpoolMate fabrication-sheet QR code.";
+    scanner.status.textContent = stockContext
+      ? "Point the camera at a printed workshop stock QR label."
+      : "Point the camera at a SpoolMate spool or stock QR code.";
     scanner.status.classList.remove("error");
   } catch (error) {
     console.warn("QR camera permission was not available.", error);
@@ -29568,7 +30375,7 @@ async function openQrScanner() {
         }
       } catch (error) {
         console.warn("QR frame could not be decoded.", error);
-        scanner.status.textContent = "The scanner needs a connection to load its reader. You can still paste the traveller link.";
+        scanner.status.textContent = "The scanner needs a connection to load its reader. You can still paste the SpoolMate QR link.";
         scanner.status.classList.add("error");
       } finally {
         scanner.busy = false;
@@ -29616,6 +30423,17 @@ function openProjectInNewWindow(projectId, source = projectLibrarySource) {
 async function maybeOpenProjectFromUrl() {
   if (location.protocol === "file:") return false;
   const params = new URLSearchParams(location.search);
+  const stockItemId = normalizeUuid(params.get("stock"));
+  if (stockItemId && params.get("stockItem") === "1") {
+    await initSupabase();
+    if (!cloudUser) {
+      openAuthDialog({ startup: true });
+      return true;
+    }
+    workshopStockRouteHandled = true;
+    await openWorkshopStock({ itemId: stockItemId, force: true });
+    return true;
+  }
   const localProjectId = normalizeProjectId(params.get("localProject"));
   if (localProjectId) {
     await openSavedBrowserProject(localProjectId, { skipConfirm: true });
@@ -41124,6 +41942,7 @@ setupAuthDialog();
 setupSupportAdminDialog();
 setupLegalSupportDialog();
 setupHomeDashboard();
+setupWorkshopStock();
 setupQuickPdfMode();
 setupFirstUseGuide();
 setupProjectDialog();

@@ -98,6 +98,16 @@ Deno.serve(async (request) => {
       }
     }
 
+    // Personal stock belongs to the person and is removed with its movement
+    // history. Business stock is company-owned and remains available when a
+    // non-owner team member leaves.
+    const { error: personalStockError } = await admin
+      .from("workshop_stock_items")
+      .delete()
+      .eq("owner_id", userId)
+      .is("company_id", null);
+    if (personalStockError && personalStockError.code !== "42P01") throw personalStockError;
+
     // Personal projects belong to the person. A sole owner's business projects
     // also go with the business; projects created by a non-owner employee stay
     // attached to that business when the employee leaves.

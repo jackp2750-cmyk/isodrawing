@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=364" />
+    <link rel="stylesheet" href="./styles.css?v=365" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.64</span>
+              <span class="version-badge" id="appVersionBadge">v3.65</span>
             </div>
           </div>
 
@@ -384,6 +384,10 @@
                   <button class="icon-button labeled" id="actionMenuJobsButton" type="button" title="Open job dashboard" aria-label="Open job dashboard">
                     <svg><use href="#icon-sample"></use></svg>
                     <span>Jobs</span>
+                  </button>
+                  <button class="icon-button labeled" id="actionMenuWorkshopStockButton" type="button" title="Open workshop stock" aria-label="Open workshop stock">
+                    <svg><use href="#icon-report"></use></svg>
+                    <span>Workshop stock</span>
                   </button>
                   <button class="icon-button labeled" id="actionMenuBigSpoolButton" type="button" title="Open Big Spool planner" aria-label="Open Big Spool planner">
                     <svg><use href="#icon-measure"></use></svg>
@@ -1047,6 +1051,11 @@
               <strong>Jobs</strong>
               <span>Open saved spools by job or team.</span>
             </button>
+            <button class="home-dashboard-action workshop-stock" id="homeDashboardWorkshopStockButton" type="button">
+              <svg><use href="#icon-report"></use></svg>
+              <strong>Workshop stock</strong>
+              <span>Scan stock, print QR labels, take counts and assign materials to spools.</span>
+            </button>
             <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
               <svg><use href="#icon-help"></use></svg>
               <strong>Tutorial</strong>
@@ -1352,6 +1361,69 @@
           </section>
           <div class="project-library-report-slot" id="projectLibraryReportSlot" hidden></div>
           <div class="project-library-list" id="projectLibraryList" aria-live="polite"></div>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop workshop-stock-backdrop" id="workshopStockDialog" hidden>
+        <section class="project-dialog-card workshop-stock-card" role="dialog" aria-modal="true" aria-labelledby="workshopStockTitle">
+          <div class="project-dialog-header workshop-stock-header">
+            <div>
+              <span class="workshop-stock-kicker">Workshop control</span>
+              <strong id="workshopStockTitle">Workshop stock</strong>
+              <small id="workshopStockSubtitle">Printable QR labels, live quantities, stocktake and spool usage.</small>
+            </div>
+            <button class="icon-button compact labeled" id="workshopStockCloseButton" type="button">Close</button>
+          </div>
+          <div class="workspace-location-strip" data-workspace-location data-location-context="Workshop stock"></div>
+          <div class="workshop-stock-toolbar" aria-label="Workshop stock tools">
+            <label class="workshop-stock-search">
+              <span>Search stock</span>
+              <input id="workshopStockSearchInput" type="search" placeholder="Item, code, category or location" autocomplete="off" />
+            </label>
+            <button class="icon-button labeled" id="workshopStockScanButton" type="button">
+              <span aria-hidden="true">▣</span><span>Scan QR</span>
+            </button>
+            <button class="icon-button labeled" id="workshopStocktakeButton" type="button" aria-pressed="false">
+              <svg><use href="#icon-measure"></use></svg><span>Start stocktake</span>
+            </button>
+            <button class="icon-button labeled" id="workshopStockPrintButton" type="button">
+              <svg><use href="#icon-export"></use></svg><span>Print labels</span>
+            </button>
+            <button class="icon-button labeled" id="workshopStockRefreshButton" type="button">
+              <svg><use href="#icon-reset"></use></svg><span>Refresh</span>
+            </button>
+            <button class="primary-button" id="workshopStockAddButton" type="button">Add stock item</button>
+          </div>
+          <div class="workshop-stock-current-spool" id="workshopStockCurrentSpool" aria-live="polite"></div>
+          <div class="workshop-stock-summary" id="workshopStockSummary" aria-live="polite"></div>
+          <div class="workshop-stock-layout">
+            <main class="workshop-stock-list" id="workshopStockList" aria-live="polite"></main>
+            <aside class="workshop-stock-detail" id="workshopStockDetail" aria-live="polite">
+              <div class="workshop-stock-detail-empty">
+                <strong>Select or scan an item</strong>
+                <span>See quantity, recent movements, QR label and spool actions here.</span>
+              </div>
+            </aside>
+          </div>
+          <form class="workshop-stock-editor" id="workshopStockItemForm" hidden>
+            <div class="workshop-stock-editor-head">
+              <div><span>Stock record</span><strong id="workshopStockEditorTitle">Add stock item</strong></div>
+              <button class="icon-button compact labeled" id="workshopStockEditorCancelButton" type="button">Cancel</button>
+            </div>
+            <div class="workshop-stock-editor-grid">
+              <label class="field"><span>Stock code</span><input id="workshopStockCodeInput" type="text" maxlength="80" placeholder="VALVE-050" required /></label>
+              <label class="field workshop-stock-name-field"><span>Item name</span><input id="workshopStockNameInput" type="text" maxlength="160" placeholder="50 NB butterfly valve" required /></label>
+              <label class="field"><span>Category</span><input id="workshopStockCategoryInput" type="text" maxlength="80" value="General" placeholder="Valves" required /></label>
+              <label class="field"><span>Location</span><input id="workshopStockLocationInput" type="text" maxlength="120" placeholder="Rack B / Shelf 2" /></label>
+              <label class="field"><span>Unit</span><input id="workshopStockUnitInput" type="text" maxlength="20" value="ea" placeholder="ea, m, kg" required /></label>
+              <label class="field"><span>Low-stock level</span><input id="workshopStockMinimumInput" type="number" min="0" step="0.001" value="0" /></label>
+              <label class="field" id="workshopStockInitialQuantityField"><span>Starting quantity</span><input id="workshopStockInitialQuantityInput" type="number" min="0" step="0.001" value="0" /></label>
+              <label class="field workshop-stock-description-field"><span>Description / supplier note</span><textarea id="workshopStockDescriptionInput" rows="2" maxlength="1000" placeholder="Optional stock details"></textarea></label>
+            </div>
+            <div class="project-dialog-actions workshop-stock-editor-actions">
+              <button class="primary-button" id="workshopStockEditorSaveButton" type="submit">Save stock item</button>
+            </div>
+          </form>
         </section>
       </div>
 
@@ -2121,6 +2193,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=364"></script>
+    <script defer src="./app.js?v=365"></script>
   </body>
 </html>

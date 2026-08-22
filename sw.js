@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v364-expanded-video-guides";
+const CACHE_NAME = "spoolmate-v365-workshop-stock";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=364",
-  "./app.js?v=364",
+  "./styles.css?v=365",
+  "./app.js?v=365",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

@@ -1,6 +1,19 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.64`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.65`.
+
+## v3.65 - Workshop stock and QR stocktake
+
+- Added Personal and Business workshop-stock registers with secure workspace separation.
+- Added permanent printable QR labels for every stock item, including multi-label print sheets.
+- Added camera/photo QR scanning on PC, iPad, iPhone and Android for both spool travellers and stock labels.
+- Added stocktake mode with physical counts, counted progress and an immutable movement history.
+- Added Receive, Use on current spool and Return from spool actions with atomic quantity updates.
+- Linked every stock use/return movement to the exact cloud spool and surfaced the current spool's used-stock summary.
+- Added low-stock levels, categories, workshop locations, search, archive-with-history and role-aware controls.
+- Added RLS, explicit Data API grants and an authenticated transactional stock RPC in the Supabase migration.
+- Kept Business stock and movement history intact when a team member leaves, while Personal stock remains covered by account export and deletion.
+- Updated the responsive stock layout for desktop, iPad, Android tablets and phones, and bumped the PWA cache to `spoolmate-v365-workshop-stock`.
 
 ## v3.64 - Expanded real-app video library
 

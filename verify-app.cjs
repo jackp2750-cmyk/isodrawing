@@ -17,6 +17,7 @@ const REQUIRED_FILES = [
   "supabase-migration-v318-business-workspaces.sql",
   "supabase-migration-v338-support-admin.sql",
   "supabase-migration-v339-jobs-dashboard-preferences.sql",
+  "supabase/migrations/20260822050724_workshop_stock.sql",
   "supabase/functions/delete-account/index.ts",
   "supabase/functions/ai-help/index.ts",
   "supabase/functions/support-admin/index.ts",
@@ -101,6 +102,7 @@ const aiHelperMigration = read("supabase-migration-v296-ai-helper.sql");
 const businessWorkspaceMigration = read("supabase-migration-v318-business-workspaces.sql");
 const supportAdminMigration = read("supabase-migration-v338-support-admin.sql");
 const jobsDashboardPreferencesMigration = read("supabase-migration-v339-jobs-dashboard-preferences.sql");
+const workshopStockMigration = read("supabase/migrations/20260822050724_workshop_stock.sql");
 const jobsStoryboard = read("video-production/storyboard-jobs.json");
 const jobsVoiceover = read("video-production/jobs-voiceover-script.txt");
 const jobsCaptions = read("video-production/spoolmate-jobs-tutorial.srt");
@@ -226,6 +228,42 @@ assert(
     && css.includes(".action-command-result")
     && css.includes("max-height: min(52dvh, 420px)"),
   "Searchable command palette or keyboard/touch behavior is incomplete",
+);
+assert(
+  html.includes('id="workshopStockDialog"')
+    && html.includes('id="workshopStockSearchInput"')
+    && html.includes('id="workshopStockScanButton"')
+    && html.includes('id="workshopStocktakeButton"')
+    && html.includes('id="workshopStockPrintButton"')
+    && html.includes('id="workshopStockItemForm"')
+    && app.includes('const WORKSHOP_STOCK_ITEMS_TABLE = "workshop_stock_items"')
+    && app.includes('const WORKSHOP_STOCK_MOVEMENTS_TABLE = "workshop_stock_movements"')
+    && /function\s+openWorkshopStock\s*\(/.test(app)
+    && /function\s+printWorkshopStockLabels\s*\(/.test(app)
+    && /function\s+recordWorkshopStockMovement\s*\(/.test(app)
+    && /function\s+scannedSpoolMateTarget\s*\(/.test(app)
+    && app.includes('p_movement_type: movementType')
+    && app.includes('p_project_id: projectId')
+    && app.includes('stockItem", "1"')
+    && app.includes('This account does not have approved access to the QR label\'s business workspace.')
+    && app.includes('ownedWorkshopStockItems: stockItemsResult.data ?? []')
+    && css.includes(".workshop-stock-card")
+    && css.includes(".workshop-stock-row")
+    && css.includes("@media (max-width: 820px)")
+    && /create table if not exists public\.workshop_stock_items/.test(workshopStockMigration)
+    && /create table if not exists public\.workshop_stock_movements/.test(workshopStockMigration)
+    && /alter table public\.workshop_stock_items enable row level security/.test(workshopStockMigration)
+    && /create or replace function private\.record_workshop_stock_movement_internal/.test(workshopStockMigration)
+    && /security definer/.test(workshopStockMigration)
+    && /create or replace function public\.record_workshop_stock_movement/.test(workshopStockMigration)
+    && /security invoker/.test(workshopStockMigration)
+    && /owner_id uuid references auth\.users\(id\) on delete set null/.test(workshopStockMigration)
+    && /stock_item_id uuid not null references public\.workshop_stock_items\(id\) on delete cascade/.test(workshopStockMigration)
+    && /actor_id uuid references auth\.users\(id\) on delete set null/.test(workshopStockMigration)
+    && /role in \('owner', 'admin', 'checker', 'workshop'\)/.test(workshopStockMigration)
+    && deleteAccountFunction.includes('.from("workshop_stock_items")')
+    && /grant select, insert on public\.workshop_stock_items to authenticated/.test(workshopStockMigration),
+  "Workshop stock register, QR labels, stocktake, spool usage, RLS or responsive layout is incomplete",
 );
 assert(
   html.includes('id="spoolWorkspaceTabs"')
