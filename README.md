@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.65`
+Current app version: `v3.66`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -11,6 +11,8 @@ Big Spool V1-V3 keeps one very large master assembly and turns it into transport
 The Jobs production board includes a generated Gear check after allocation. Workshop staff confirm inferred pipe and fittings, add extra gear where needed, record items needing ordering, and confirm readiness before Cutting can begin. The weld register supports assigning one welder to every weld or recording mixed welders per weld.
 
 Workshop stock is a separate cloud ledger for real items held in the shop. Every item can receive a permanent printable QR label; staff can scan it during stocktake, receive stock, use a quantity on the currently open cloud spool or return unused material. Personal stock remains private, Business stock is shared with approved workspace members, and every quantity change keeps an actor, time and optional spool link.
+
+Smart Spool Kits turn a cloud spool's BOM and Gear check into a live picking list. Staff can reserve available workshop stock, flag shortages for ordering, scan stock QR labels while assembling the kit and pick material onto the exact spool. Reservations protect promised stock without reducing the physical count; picking creates the stock movement and synchronises the result back to Gear check.
 
 The built-in video tutorial library now contains 22 real-app guides. The expanded set replaces the old Jobs video and adds first spool to Quick PDF, iPad/iPhone/Android controls, concentric versus eccentric reducers, editing and fixing mistakes, business-team setup and advanced Big Spool planning. Every guide includes play/pause, 10-second rewind and fast-forward controls, and direct chapter navigation.
 
@@ -69,6 +71,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Create workshop stock items with codes, categories, locations, units and low-stock levels; print one or many permanent QR labels from an A4-ready label sheet.
 - Scan stock labels with a live camera, saved QR photo or pasted link, then receive, count, use or return the item without searching the register manually.
 - Run a workshop stocktake with visible counted progress, and attach consumed stock to the exact open cloud spool with a permanent movement history.
+- Build a Smart Spool Kit from the cloud spool BOM and Gear check, reserve workshop stock, scan QR labels into the kit, record shortages, copy an order list and pick material onto the exact spool.
 - Use Ask SpoolMate for instant built-in guidance and, for unfamiliar questions on active accounts, protected AI answers through a Supabase Edge Function. The helper sends only the question, short help history and safe screen/tool context—not drawing geometry, project names, notes or photos.
 - Save projects locally in the browser or, when Supabase is configured, save projects to the cloud.
 - See cloud save confidence at a glance with the exact last-saved time, saving, offline-queued, failed and conflict states; press a failed or queued status once to retry from its protected device copy.
@@ -255,7 +258,7 @@ With Supabase configured:
 
 ## Supabase Setup
 
-For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql`, `supabase-migration-v296-ai-helper.sql`, `supabase-migration-v318-business-workspaces.sql` and `supabase/migrations/20260822050724_workshop_stock.sql` in that order as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`; its current version already includes workshop stock.
+For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql`, `supabase-migration-v296-ai-helper.sql`, `supabase-migration-v318-business-workspaces.sql`, `supabase/migrations/20260822050724_workshop_stock.sql` and `supabase/migrations/20260822063407_smart_spool_kits.sql` in that order as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`; its current version already includes workshop stock and Smart Spool Kits.
 
 The v2.95 migration must be applied before publishing the matching frontend. It separates authenticated read access from active-licence write access, adds the seven-day grace-state field and keeps expired cloud data visible without allowing edits. Trial expiry does not delete cloud data.
 
@@ -264,6 +267,8 @@ The v2.96 migration adds private per-user daily AI counters. Trial accounts rece
 The v3.18 migration separates Personal and Business licences, includes five seats in each Business workspace, reserves seats for pending members, and keeps Business projects attached to the business if their original creator leaves.
 
 The v3.65 migration adds the workshop-stock register and immutable movement ledger. It enables RLS, grants only the required Data API operations, keeps the privileged stock mutation helper in the non-exposed `private` schema and exposes one authenticated RPC that checks the active workspace before changing a quantity.
+
+The v3.66 migration adds BOM-backed Smart Spool Kit requirements, protected reservations, transactional QR picking and shortage/order tracking. It keeps Personal and Business stock isolated, prevents ordinary spool use or stocktake from consuming reserved quantities, and limits kit changes to licensed production roles.
 
 Until online billing is connected, activate the owner account or a manually paid customer from the SQL Editor using the UUID shown in Authentication > Users:
 

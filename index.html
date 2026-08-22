@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=365" />
+    <link rel="stylesheet" href="./styles.css?v=366" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.65</span>
+              <span class="version-badge" id="appVersionBadge">v3.66</span>
             </div>
           </div>
 
@@ -1405,6 +1405,35 @@
               </div>
             </aside>
           </div>
+          <section class="workshop-stock-kit-panel" id="workshopStockKitPanel" hidden aria-labelledby="workshopStockKitTitle">
+            <div class="workshop-stock-kit-header">
+              <div><span>Stock-backed Gear check</span><strong id="workshopStockKitTitle">Smart Spool Kit</strong><small id="workshopStockKitSubtitle">Reserve, pick or order every requirement for this spool.</small></div>
+              <button class="icon-button compact labeled" id="workshopStockKitCloseButton" type="button">Back to stock</button>
+            </div>
+            <div class="workshop-stock-kit-toolbar">
+              <button class="primary-button" id="workshopStockKitRefreshButton" type="button">Refresh from spool BOM</button>
+              <button class="icon-button labeled" id="workshopStockKitScanButton" type="button"><span aria-hidden="true">▣</span><span>Scan into kit</span></button>
+              <button class="icon-button labeled" id="workshopStockKitOrderListButton" type="button"><svg><use href="#icon-export"></use></svg><span>Copy order list</span></button>
+            </div>
+            <div class="workshop-stock-kit-summary" id="workshopStockKitSummary" aria-live="polite"></div>
+            <div class="workshop-stock-kit-lines" id="workshopStockKitLines" aria-live="polite"></div>
+            <form class="workshop-stock-kit-allocation" id="workshopStockKitAllocationForm" hidden>
+              <div class="workshop-stock-editor-head">
+                <div><span>Kit allocation</span><strong id="workshopStockKitAllocationTitle">Match workshop stock</strong></div>
+                <button class="icon-button compact labeled" id="workshopStockKitAllocationCancelButton" type="button">Cancel</button>
+              </div>
+              <p id="workshopStockKitAllocationHelp"></p>
+              <div class="workshop-stock-kit-allocation-grid">
+                <label class="field workshop-stock-kit-stock-field"><span>Workshop stock item</span><select id="workshopStockKitStockSelect"></select></label>
+                <label class="field"><span>Reserve now</span><input id="workshopStockKitReserveInput" type="number" min="0" step="0.001" value="0" /></label>
+                <label class="field"><span>Needs ordering</span><input id="workshopStockKitOrderInput" type="number" min="0" step="0.001" value="0" /></label>
+                <label class="field workshop-stock-kit-note-field"><span>Location / PO / note</span><input id="workshopStockKitNoteInput" type="text" maxlength="500" placeholder="Rack, purchase order or supplier note" /></label>
+              </div>
+              <div class="project-dialog-actions workshop-stock-editor-actions">
+                <button class="primary-button" id="workshopStockKitAllocationSaveButton" type="submit">Save allocation</button>
+              </div>
+            </form>
+          </section>
           <form class="workshop-stock-editor" id="workshopStockItemForm" hidden>
             <div class="workshop-stock-editor-head">
               <div><span>Stock record</span><strong id="workshopStockEditorTitle">Add stock item</strong></div>
@@ -2193,6 +2222,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=365"></script>
+    <script defer src="./app.js?v=366"></script>
   </body>
 </html>

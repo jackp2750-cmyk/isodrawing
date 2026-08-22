@@ -1,6 +1,18 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.65`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.66`.
+
+## v3.66 - Smart Spool Kits
+
+- Added Smart Spool Kits generated from each cloud spool's BOM and manually added Gear check items.
+- Added stock matching, protected reservations, picked quantities, not-required decisions and shortages marked for ordering.
+- Added QR-assisted kit assembly: scanning matched stock picks it onto the spool, while scanning new stock opens the closest compatible requirement for confirmation.
+- Added a copied purchasing list for shortages and visible Ready, Reserved, Missing and Needs ordering summaries.
+- Synced kit progress back to Gear check while preserving the required human readiness confirmation before Cutting.
+- Protected reserved quantities from ordinary spool use and stocktake, and recorded every pick or return in the immutable stock movement ledger.
+- Added Personal/Business workspace and production-role enforcement in the database, plus responsive full-screen tablet and stacked phone layouts.
+- Added Smart Kit entry points from Workshop Stock, Jobs Gear check, the searchable command menu and Ask SpoolMate.
+- Bumped the PWA cache to `spoolmate-v366-smart-spool-kits`.
 
 ## v3.65 - Workshop stock and QR stocktake
 

@@ -18,6 +18,7 @@ const REQUIRED_FILES = [
   "supabase-migration-v338-support-admin.sql",
   "supabase-migration-v339-jobs-dashboard-preferences.sql",
   "supabase/migrations/20260822050724_workshop_stock.sql",
+  "supabase/migrations/20260822063407_smart_spool_kits.sql",
   "supabase/functions/delete-account/index.ts",
   "supabase/functions/ai-help/index.ts",
   "supabase/functions/support-admin/index.ts",
@@ -103,6 +104,7 @@ const businessWorkspaceMigration = read("supabase-migration-v318-business-worksp
 const supportAdminMigration = read("supabase-migration-v338-support-admin.sql");
 const jobsDashboardPreferencesMigration = read("supabase-migration-v339-jobs-dashboard-preferences.sql");
 const workshopStockMigration = read("supabase/migrations/20260822050724_workshop_stock.sql");
+const smartSpoolKitsMigration = read("supabase/migrations/20260822063407_smart_spool_kits.sql");
 const jobsStoryboard = read("video-production/storyboard-jobs.json");
 const jobsVoiceover = read("video-production/jobs-voiceover-script.txt");
 const jobsCaptions = read("video-production/spoolmate-jobs-tutorial.srt");
@@ -264,6 +266,33 @@ assert(
     && deleteAccountFunction.includes('.from("workshop_stock_items")')
     && /grant select, insert on public\.workshop_stock_items to authenticated/.test(workshopStockMigration),
   "Workshop stock register, QR labels, stocktake, spool usage, RLS or responsive layout is incomplete",
+);
+assert(
+  html.includes('id="workshopStockKitPanel"')
+    && html.includes('id="workshopStockKitRefreshButton"')
+    && html.includes('id="workshopStockKitScanButton"')
+    && html.includes('id="workshopStockKitOrderListButton"')
+    && app.includes('const WORKSHOP_STOCK_KIT_LINES_TABLE = "workshop_stock_kit_lines"')
+    && /function\s+smartKitRequirementsForProject\s*\(/.test(app)
+    && /function\s+openSmartSpoolKit\s*\(/.test(app)
+    && /function\s+handleScannedSmartKitStock\s*\(/.test(app)
+    && /function\s+syncSmartSpoolKitToGearCheck\s*\(/.test(app)
+    && app.includes('id: "smart-spool-kit"')
+    && app.includes('p_line_id: line.id')
+    && app.includes('p_return: returning')
+    && css.includes(".workshop-stock-kit-panel")
+    && css.includes(".workshop-stock-kit-line")
+    && /create table if not exists public\.workshop_stock_kit_lines/.test(smartSpoolKitsMigration)
+    && /alter table public\.workshop_stock_kit_lines enable row level security/.test(smartSpoolKitsMigration)
+    && /create or replace function private\.configure_spool_stock_kit_line_internal/.test(smartSpoolKitsMigration)
+    && /create or replace function private\.record_spool_stock_kit_pick_internal/.test(smartSpoolKitsMigration)
+    && /create or replace function private\.validate_spool_stock_kit_metadata_update/.test(smartSpoolKitsMigration)
+    && /create or replace function public\.configure_spool_stock_kit_line/.test(smartSpoolKitsMigration)
+    && /create or replace function public\.record_spool_stock_kit_pick/.test(smartSpoolKitsMigration)
+    && /p_movement_type in \('used_on_spool', 'stocktake'\)/.test(smartSpoolKitsMigration)
+    && /Return the picked quantity before changing the matched stock item/.test(smartSpoolKitsMigration)
+    && /grant update \(label, detail, unit, required_quantity, note, active, updated_at\)/.test(smartSpoolKitsMigration),
+  "Smart Spool Kit BOM generation, reservation, QR picking, Gear-check sync, database protection or responsive layout is incomplete",
 );
 assert(
   html.includes('id="spoolWorkspaceTabs"')

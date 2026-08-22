@@ -250,6 +250,24 @@ const workshopStockCurrentSpool = document.querySelector("#workshopStockCurrentS
 const workshopStockSummary = document.querySelector("#workshopStockSummary");
 const workshopStockList = document.querySelector("#workshopStockList");
 const workshopStockDetail = document.querySelector("#workshopStockDetail");
+const workshopStockKitPanel = document.querySelector("#workshopStockKitPanel");
+const workshopStockKitTitle = document.querySelector("#workshopStockKitTitle");
+const workshopStockKitSubtitle = document.querySelector("#workshopStockKitSubtitle");
+const workshopStockKitCloseButton = document.querySelector("#workshopStockKitCloseButton");
+const workshopStockKitRefreshButton = document.querySelector("#workshopStockKitRefreshButton");
+const workshopStockKitScanButton = document.querySelector("#workshopStockKitScanButton");
+const workshopStockKitOrderListButton = document.querySelector("#workshopStockKitOrderListButton");
+const workshopStockKitSummary = document.querySelector("#workshopStockKitSummary");
+const workshopStockKitLines = document.querySelector("#workshopStockKitLines");
+const workshopStockKitAllocationForm = document.querySelector("#workshopStockKitAllocationForm");
+const workshopStockKitAllocationTitle = document.querySelector("#workshopStockKitAllocationTitle");
+const workshopStockKitAllocationHelp = document.querySelector("#workshopStockKitAllocationHelp");
+const workshopStockKitAllocationCancelButton = document.querySelector("#workshopStockKitAllocationCancelButton");
+const workshopStockKitAllocationSaveButton = document.querySelector("#workshopStockKitAllocationSaveButton");
+const workshopStockKitStockSelect = document.querySelector("#workshopStockKitStockSelect");
+const workshopStockKitReserveInput = document.querySelector("#workshopStockKitReserveInput");
+const workshopStockKitOrderInput = document.querySelector("#workshopStockKitOrderInput");
+const workshopStockKitNoteInput = document.querySelector("#workshopStockKitNoteInput");
 const workshopStockItemForm = document.querySelector("#workshopStockItemForm");
 const workshopStockEditorTitle = document.querySelector("#workshopStockEditorTitle");
 const workshopStockEditorCancelButton = document.querySelector("#workshopStockEditorCancelButton");
@@ -464,7 +482,7 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.65";
+const APP_VERSION = "v3.66";
 const APP_BUILD_DATE = "2026-08-22";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
@@ -934,6 +952,7 @@ const CLOUD_PROFILES_TABLE = "profiles";
 const CLOUD_COMPANIES_TABLE = "companies";
 const WORKSHOP_STOCK_ITEMS_TABLE = "workshop_stock_items";
 const WORKSHOP_STOCK_MOVEMENTS_TABLE = "workshop_stock_movements";
+const WORKSHOP_STOCK_KIT_LINES_TABLE = "workshop_stock_kit_lines";
 const CLOUD_COMPANY_MEMBERS_TABLE = "company_members";
 const CLOUD_PROJECT_COMMENTS_TABLE = "project_comments";
 const CLOUD_PROJECT_PHOTOS_BUCKET = "spool-photos";
@@ -2223,6 +2242,7 @@ let teamMessagesError = "";
 let workshopStockItems = [];
 let workshopStockMovements = [];
 let workshopStockProjectMovements = [];
+let workshopStockReservations = [];
 let workshopStockWorkspaceKey = "";
 let workshopStockSelectedItemId = "";
 let workshopStockSearch = "";
@@ -2232,6 +2252,11 @@ let workshopStocktakeCountedIds = new Set();
 let workshopStockPrintSelection = new Set();
 let workshopStockEditingItemId = "";
 let workshopStockRouteHandled = false;
+let workshopStockKitLinesData = [];
+let workshopStockKitProject = null;
+let workshopStockKitBusy = false;
+let workshopStockKitEditingLineId = "";
+let workshopStockKitPreferredItemId = "";
 let currentCloudProjectOwnerId = null;
 let currentCloudProjectCompanyId = null;
 let cloudSaveDirty = false;
@@ -16352,6 +16377,7 @@ const ACTION_COMMANDS = [
   { id: "save", label: "Save spool", detail: "Save locally and to cloud when available", category: "Project", keywords: "cloud autosave store project", run: () => saveBrowserProjectButton?.click() },
   { id: "jobs", label: "Open Jobs dashboard", detail: "Find jobs, spools, assignments and production stages", category: "Project", keywords: "job dashboard production team spools", run: () => openBrowserProject() },
   { id: "workshop-stock", label: "Workshop stock", detail: "Scan stock, print QR labels, take counts and assign items to spools", category: "Workshop", keywords: "inventory materials stocktake qr labels receive use spool workshop", run: () => openWorkshopStock() },
+  { id: "smart-spool-kit", label: "Smart Spool Kit", detail: "Reserve, pick or order stock for the open cloud spool", category: "Workshop", keywords: "kit picking reserve stock bom gear check missing order", capability: "production", run: () => openSmartSpoolKit() },
   { id: "dashboard", label: "Open home dashboard", detail: "Continue, restore, start or open a spool", category: "Project", keywords: "home start restore session", run: () => openHomeDashboard() },
   { id: "project-details", label: "Edit project details", detail: "Job, spool, revision, client and drawing data", category: "Project", keywords: "job number spool number rev revision drawn by client weld gap", capability: "edit", run: () => promptForProjectDetails({ force: true }) },
   { id: "new-spool", label: "New spool", detail: "Save or discard the current drawing and start again", category: "Project", keywords: "new drawing reset blank", run: () => document.querySelector("#resetButton")?.click() },
@@ -20282,6 +20308,11 @@ const AI_HELPER_LOCAL_GUIDE = [
     help: "account",
   },
   {
+    patterns: [["smart", "kit"], ["spool", "kit"], ["reserve", "stock"], ["pick", "stock"], ["order", "list", "stock"]],
+    answer: "Use a Smart Spool Kit to turn the drawing BOM into a physical picking list:\n1. Open the cloud spool, then Workshop stock > Open Smart Kit, or open Jobs > Gear check > Open Smart Kit.\n2. Refresh from spool BOM to create the requirements.\n3. Match each requirement to a stock item and reserve the quantity, or enter the shortage under Needs ordering.\n4. Press Pick or scan the stock QR as material is placed into the spool kit.\n5. Copy the order list for shortages.\n\nReserved stock remains physically on hand but cannot be used by another spool. Picking deducts it and records the exact stock movement against this spool. Gear check updates from the Smart Kit and still requires a person to confirm readiness.",
+    help: "account",
+  },
+  {
     patterns: [["jobs", "dashboard"], ["my", "day"], ["many", "jobs"], ["job", "filter"], ["needs", "attention"]],
     answer: "Use the Jobs screen in two layers:\n1. Jobs is the compact manager list. Filter it with Active, My jobs, Completed or All, and use search for a job, client, spool or worker.\n2. My day is the action list: My/Team attention, Assigned to me, Ready for checking and On hold. Workshop users only see their own urgent work; owners and admins see team issues.\n3. Press Review on a job with issues to jump straight to its problem list.\n4. Open More for the Jobs guide, Team comms and daily or weekly reports.\n\nYou should see each spool only once in My day, under the most urgent queue that applies.",
     tutorial: "Production board",
@@ -22861,6 +22892,11 @@ async function handleProjectLibraryProductionAction(actionButton) {
   const action = actionButton.dataset.productionAction;
   const project = projectLibraryProjects.find((item) => item.id === projectId);
   const permission = projectPermission(project);
+  if (action === "open-smart-kit") {
+    if (!permission.canManageProduction) throw new Error(roleRequirementText("production"));
+    await openSmartSpoolKit(project);
+    return;
+  }
   if (action === "add-material-item") {
     if (!permission.canManageProduction) throw new Error(roleRequirementText("production"));
     const response = await openFieldInputDialog({
@@ -26916,15 +26952,16 @@ async function exportCloudAccountData() {
   accountExportDataButton.disabled = true;
   try {
     const own = (table, fields, column) => supabaseClient.from(table).select(fields).eq(column, cloudUser.id);
-    const [projectsResult, membershipsResult, commentsResult, messagesResult, stockItemsResult, stockMovementsResult] = await Promise.all([
+    const [projectsResult, membershipsResult, commentsResult, messagesResult, stockItemsResult, stockMovementsResult, stockKitLinesResult] = await Promise.all([
       own(CLOUD_PROJECTS_TABLE, "id,owner_id,company_id,name,project_info,drawing_state,created_at,updated_at", "owner_id"),
       own(CLOUD_COMPANY_MEMBERS_TABLE, "company_id,user_id,email,role,status,created_at,updated_at", "user_id"),
       own(CLOUD_PROJECT_COMMENTS_TABLE, "id,project_id,company_id,author_id,author_email,body,mentions,photo_path,resolved,resolved_at,resolved_by,created_at,updated_at", "author_id"),
       own(CLOUD_TEAM_MESSAGES_TABLE, "id,company_id,author_id,author_email,body,pinned,completed,completed_at,remove_after,created_at,updated_at", "author_id"),
       own(WORKSHOP_STOCK_ITEMS_TABLE, "id,owner_id,company_id,stock_code,name,description,category,location,unit,quantity_on_hand,minimum_quantity,archived,created_at,updated_at", "owner_id"),
       own(WORKSHOP_STOCK_MOVEMENTS_TABLE, "id,stock_item_id,project_id,actor_id,movement_type,quantity_change,quantity_before,quantity_after,note,created_at", "actor_id"),
+      own(WORKSHOP_STOCK_KIT_LINES_TABLE, "id,project_id,requirement_key,label,detail,unit,required_quantity,stock_item_id,reserved_quantity,picked_quantity,ordered_quantity,status,note,active,created_by,created_at,updated_at", "created_by"),
     ]);
-    const failed = [projectsResult, membershipsResult, commentsResult, messagesResult, stockItemsResult, stockMovementsResult].find((result) => result.error);
+    const failed = [projectsResult, membershipsResult, commentsResult, messagesResult, stockItemsResult, stockMovementsResult, stockKitLinesResult].find((result) => result.error);
     if (failed?.error) throw failed.error;
     const companyIds = [...new Set((membershipsResult.data ?? []).map((row) => row.company_id).filter(Boolean))];
     let companies = [];
@@ -26944,6 +26981,7 @@ async function exportCloudAccountData() {
       authoredTeamMessages: messagesResult.data ?? [],
       ownedWorkshopStockItems: stockItemsResult.data ?? [],
       authoredWorkshopStockMovements: stockMovementsResult.data ?? [],
+      createdSmartSpoolKitLines: stockKitLinesResult.data ?? [],
       localBrowserProjects: loadSavedBrowserProjects(),
       note: "Workshop photo paths are listed, but private photo binaries are not included in this JSON export.",
     };
@@ -29495,6 +29533,578 @@ function mapWorkshopStockMovement(row) {
   };
 }
 
+function mapWorkshopStockKitLine(row) {
+  return {
+    id: normalizeUuid(row?.id),
+    projectId: normalizeProjectId(row?.project_id),
+    requirementKey: String(row?.requirement_key ?? "").trim(),
+    label: String(row?.label ?? "").trim(),
+    detail: String(row?.detail ?? "").trim(),
+    unit: String(row?.unit ?? "ea").trim() || "ea",
+    requiredQuantity: Math.max(0, Number(row?.required_quantity) || 0),
+    stockItemId: normalizeUuid(row?.stock_item_id),
+    reservedQuantity: Math.max(0, Number(row?.reserved_quantity) || 0),
+    pickedQuantity: Math.max(0, Number(row?.picked_quantity) || 0),
+    orderedQuantity: Math.max(0, Number(row?.ordered_quantity) || 0),
+    status: ["pending", "reserved", "picked", "order", "na"].includes(row?.status) ? row.status : "pending",
+    note: String(row?.note ?? "").trim(),
+    active: row?.active !== false,
+    createdAt: String(row?.created_at ?? ""),
+    updatedAt: String(row?.updated_at ?? ""),
+  };
+}
+
+function smartKitProjectRecord(projectOrId = state.projectId) {
+  if (projectOrId && typeof projectOrId === "object") return projectOrId;
+  const projectId = normalizeProjectId(projectOrId);
+  if (!projectId) return null;
+  const saved = projectLibraryProjects.find((project) => project.id === projectId)
+    || (cloudProjectCache ?? []).find((project) => project.id === projectId);
+  if (saved) return { ...saved, source: saved.source ?? "cloud" };
+  if (projectId === normalizeProjectId(state.projectId) && currentProjectHasCloudRecord()) {
+    return {
+      id: projectId,
+      source: "cloud",
+      ownerId: normalizeUuid(currentCloudProjectOwnerId),
+      companyId: normalizeUuid(currentCloudProjectCompanyId),
+      name: projectDisplayName(),
+      projectInfo: normalizeProjectInfo(state.projectInfo),
+      state,
+    };
+  }
+  return null;
+}
+
+function smartKitProjectState(project = workshopStockKitProject) {
+  if (!project) return null;
+  if (project.id === normalizeProjectId(state.projectId) && currentProjectHasCloudRecord()) return state;
+  return drawingStateTarget(savedProjectState(project));
+}
+
+function smartKitQuantityText(value, unit = "ea") {
+  return workshopStockQuantityText(value, unit);
+}
+
+function smartKitRequirementQuantity(row) {
+  if (Number(row?.lengthMm) > 0) return { quantity: Number(row.lengthMm) / 1000, unit: "m" };
+  return { quantity: Math.max(1, Number(row?.quantity) || 1), unit: "ea" };
+}
+
+function smartKitRequirementsForProject(project = workshopStockKitProject) {
+  const target = smartKitProjectState(project);
+  if (!target) return [];
+  try {
+    return withTemporaryState(target, () => {
+      const requirements = takeoffCountRows(quantitySummary())
+        .filter((row) => !/^(branch|rollGroove|threadedEnd|weld):/.test(String(row.key)))
+        .map((row) => {
+          const amount = smartKitRequirementQuantity(row);
+          return {
+            requirementKey: String(row.key).slice(0, 160),
+            label: String(row.label).slice(0, 160),
+            detail: String(row.detail || row.countText || "Required by spool BOM").slice(0, 500),
+            requiredQuantity: Math.max(0.001, amount.quantity),
+            unit: amount.unit,
+          };
+        });
+      const existingKeys = new Set(requirements.map((line) => line.requirementKey));
+      const customItems = materialChecklistForState(target).items.filter((item) => item.custom && !existingKeys.has(item.key));
+      for (const item of customItems) {
+        const match = String(item.quantity ?? "").match(/[\d.]+/);
+        requirements.push({
+          requirementKey: String(item.key).slice(0, 160),
+          label: String(item.label).slice(0, 160),
+          detail: String(item.detail || "Added workshop item").slice(0, 500),
+          requiredQuantity: Math.max(0.001, Number(match?.[0]) || 1),
+          unit: "ea",
+        });
+      }
+      return requirements;
+    });
+  } catch (error) {
+    console.warn("Could not build the Smart Kit requirements from the spool.", error);
+    return [];
+  }
+}
+
+function smartKitLineFromId(lineId) {
+  const id = normalizeUuid(lineId);
+  return workshopStockKitLinesData.find((line) => line.id === id) ?? null;
+}
+
+function smartKitLineRemaining(line) {
+  return Math.max(0, Number(line?.requiredQuantity) - Number(line?.pickedQuantity));
+}
+
+function normalizeSmartKitUnit(unit) {
+  const text = String(unit ?? "").trim().toLowerCase().replace(/\s+/g, "");
+  if (["m", "metre", "metres", "meter", "meters", "lm"].includes(text)) return "m";
+  if (["ea", "each", "item", "items", "pc", "pcs", "piece", "pieces"].includes(text)) return "ea";
+  return text;
+}
+
+function smartKitUnitsCompatible(lineUnit, itemUnit) {
+  return normalizeSmartKitUnit(lineUnit) === normalizeSmartKitUnit(itemUnit);
+}
+
+function smartKitSearchTokens(value) {
+  return new Set(String(value ?? "").toLowerCase().split(/[^a-z0-9]+/).filter((token) => token.length > 1));
+}
+
+function smartKitStockMatchScore(line, item) {
+  if (!line || !item) return -1;
+  let score = smartKitUnitsCompatible(line.unit, item.unit) ? 30 : -40;
+  const key = String(line.requirementKey).toLowerCase();
+  const code = String(item.stockCode).toLowerCase();
+  const label = String(line.label).toLowerCase();
+  const name = String(item.name).toLowerCase();
+  if (code === key) score += 160;
+  if (name === label) score += 130;
+  if (name.includes(label) || label.includes(name)) score += 70;
+  const lineTokens = smartKitSearchTokens(`${line.requirementKey} ${line.label}`);
+  const itemTokens = smartKitSearchTokens(`${item.stockCode} ${item.name} ${item.category}`);
+  for (const token of lineTokens) if (itemTokens.has(token)) score += 12;
+  return score;
+}
+
+function bestSmartKitStockItem(line) {
+  const best = workshopStockItems
+    .map((item) => ({ item, score: smartKitStockMatchScore(line, item) }))
+    .sort((first, second) => second.score - first.score || first.item.name.localeCompare(second.item.name))[0];
+  return best?.score >= 30 ? best.item : null;
+}
+
+function workshopStockReservedQuantity(itemId, options = {}) {
+  const id = normalizeUuid(itemId);
+  const excludeLineId = normalizeUuid(options.excludeLineId);
+  return workshopStockReservations
+    .filter((line) => line.stockItemId === id && line.id !== excludeLineId && line.active && line.status !== "na")
+    .reduce((sum, line) => sum + line.reservedQuantity, 0);
+}
+
+function workshopStockAvailableQuantity(item, options = {}) {
+  if (!item) return 0;
+  return Math.max(0, item.quantityOnHand - workshopStockReservedQuantity(item.id, options));
+}
+
+async function loadWorkshopStockReservations() {
+  workshopStockReservations = [];
+  if (!supabaseClient || !cloudUser) return [];
+  const { data, error } = await supabaseClient
+    .from(WORKSHOP_STOCK_KIT_LINES_TABLE)
+    .select("id,project_id,requirement_key,label,detail,unit,required_quantity,stock_item_id,reserved_quantity,picked_quantity,ordered_quantity,status,note,active,created_at,updated_at")
+    .eq("active", true)
+    .gt("reserved_quantity", 0)
+    .limit(1000);
+  if (error) throw error;
+  workshopStockReservations = (data ?? []).map(mapWorkshopStockKitLine).filter((line) => line.id);
+  return workshopStockReservations;
+}
+
+async function loadSmartSpoolKitLines(projectId = workshopStockKitProject?.id) {
+  const id = normalizeProjectId(projectId);
+  workshopStockKitLinesData = [];
+  if (!supabaseClient || !cloudUser || !id) return [];
+  const { data, error } = await supabaseClient
+    .from(WORKSHOP_STOCK_KIT_LINES_TABLE)
+    .select("id,project_id,requirement_key,label,detail,unit,required_quantity,stock_item_id,reserved_quantity,picked_quantity,ordered_quantity,status,note,active,created_at,updated_at")
+    .eq("project_id", id)
+    .eq("active", true)
+    .order("label", { ascending: true });
+  if (error) throw error;
+  workshopStockKitLinesData = (data ?? []).map(mapWorkshopStockKitLine).filter((line) => line.id);
+  return workshopStockKitLinesData;
+}
+
+function smartSpoolKitStats(lines = workshopStockKitLinesData) {
+  const active = lines.filter((line) => line.active && line.status !== "na");
+  const picked = active.filter((line) => line.pickedQuantity >= line.requiredQuantity).length;
+  const reserved = active.filter((line) => line.reservedQuantity > 0 && line.pickedQuantity < line.requiredQuantity).length;
+  const order = active.filter((line) => line.orderedQuantity > 0).length;
+  const missing = active.filter((line) => line.pickedQuantity < line.requiredQuantity && line.reservedQuantity + line.orderedQuantity < smartKitLineRemaining(line)).length;
+  const ready = active.length > 0 && picked === active.length;
+  return { total: active.length, picked, reserved, order, missing, ready };
+}
+
+function smartSpoolKitStatusText(stats = smartSpoolKitStats()) {
+  if (!stats.total) return "Not prepared";
+  if (stats.ready) return "Ready to fabricate";
+  if (stats.order) return `${stats.order} need ordering`;
+  if (stats.missing) return `${stats.missing} still missing`;
+  return `${stats.picked}/${stats.total} picked`;
+}
+
+function renderSmartSpoolKit() {
+  if (!workshopStockKitPanel || workshopStockKitPanel.hidden) return;
+  const project = workshopStockKitProject;
+  const projectInfo = normalizeProjectInfo(project?.projectInfo ?? smartKitProjectState(project)?.projectInfo);
+  const stats = smartSpoolKitStats();
+  if (workshopStockKitTitle) workshopStockKitTitle.textContent = `${projectInfo.jobNumber || "Job"} / ${projectInfo.spoolNumber || "Spool"} Smart Kit`;
+  if (workshopStockKitSubtitle) workshopStockKitSubtitle.textContent = `${smartSpoolKitStatusText(stats)} · stock only leaves the workshop when it is picked.`;
+  if (workshopStockKitSummary) {
+    workshopStockKitSummary.innerHTML = `
+      <article class="${stats.ready ? "ready" : stats.missing ? "missing" : ""}"><span>Kit status</span><strong>${escapeHtml(stats.ready ? "Ready" : stats.missing ? "Missing" : "Building")}</strong><small>${escapeHtml(smartSpoolKitStatusText(stats))}</small></article>
+      <article><span>Requirements</span><strong>${stats.total}</strong><small>From spool BOM and Gear check</small></article>
+      <article class="${stats.picked === stats.total && stats.total ? "ready" : ""}"><span>Picked</span><strong>${stats.picked}</strong><small>Complete kit lines</small></article>
+      <article><span>Reserved</span><strong>${stats.reserved}</strong><small>Held in workshop stock</small></article>
+      <article class="${stats.order ? "order" : ""}"><span>Needs ordering</span><strong>${stats.order}</strong><small>${stats.order ? "Included in order list" : "Nothing marked"}</small></article>`;
+  }
+  if (!workshopStockKitLines) return;
+  if (workshopStockKitBusy) {
+    workshopStockKitLines.innerHTML = `<div class="workshop-stock-kit-empty"><strong>Preparing Smart Kit…</strong><span>Matching the spool BOM with ${escapeHtml(activeWorkspaceLabel())} workshop stock.</span></div>`;
+    return;
+  }
+  if (!workshopStockKitLinesData.length) {
+    workshopStockKitLines.innerHTML = `<div class="workshop-stock-kit-empty"><strong>No kit requirements yet</strong><span>Press Refresh from spool BOM to create the picking list from the current drawing, fittings and manually added Gear check items.</span></div>`;
+    return;
+  }
+  workshopStockKitLines.innerHTML = workshopStockKitLinesData.map((line) => {
+    const item = workshopStockItemFromId(line.stockItemId);
+    const percent = Math.min(100, Math.max(0, line.requiredQuantity ? (line.pickedQuantity / line.requiredQuantity) * 100 : 0));
+    const remaining = smartKitLineRemaining(line);
+    const canPick = line.reservedQuantity > 0 && Boolean(item);
+    return `
+      <article class="workshop-stock-kit-line ${escapeHtml(line.status)}" data-kit-line-id="${escapeHtml(line.id)}">
+        <div class="workshop-stock-kit-requirement"><strong>${escapeHtml(line.label)}</strong><span>${escapeHtml(line.detail || "Required by spool")}</span><span>Required ${escapeHtml(smartKitQuantityText(line.requiredQuantity, line.unit))}</span></div>
+        <div class="workshop-stock-kit-progress"><strong>${escapeHtml(smartKitQuantityText(line.pickedQuantity, line.unit))} picked</strong><div class="workshop-stock-kit-progress-bar"><i style="width:${percent.toFixed(1)}%"></i></div><span>${escapeHtml(smartKitQuantityText(remaining, line.unit))} remaining</span></div>
+        <div class="workshop-stock-kit-match"><strong>${escapeHtml(item ? `${item.stockCode} · ${item.name}` : line.status === "na" ? "Not required" : "No stock matched")}</strong><span>${escapeHtml(item ? `${smartKitQuantityText(line.reservedQuantity, line.unit)} reserved · ${smartKitQuantityText(workshopStockAvailableQuantity(item, { excludeLineId: line.id }), item.unit)} otherwise available` : line.orderedQuantity ? `${smartKitQuantityText(line.orderedQuantity, line.unit)} marked for ordering` : "Match workshop stock or mark the shortage")}</span><span>${escapeHtml(line.note)}</span></div>
+        <div class="workshop-stock-kit-line-actions">
+          <button type="button" data-kit-action="allocate" data-kit-line-id="${escapeHtml(line.id)}">${item || line.orderedQuantity ? "Edit allocation" : "Match stock"}</button>
+          <button type="button" class="primary" data-kit-action="pick" data-kit-line-id="${escapeHtml(line.id)}" ${canPick ? "" : "disabled"}>Pick</button>
+          <button type="button" data-kit-action="return" data-kit-line-id="${escapeHtml(line.id)}" ${line.pickedQuantity > 0 && item ? "" : "disabled"}>Undo pick</button>
+          <button type="button" data-kit-action="toggle-na" data-kit-line-id="${escapeHtml(line.id)}" ${line.pickedQuantity > 0 ? "disabled" : ""}>${line.status === "na" ? "Restore" : "Not needed"}</button>
+        </div>
+      </article>`;
+  }).join("");
+}
+
+async function syncSmartSpoolKitToGearCheck(projectId = workshopStockKitProject?.id) {
+  const id = normalizeProjectId(projectId);
+  const project = smartKitProjectRecord(id);
+  const target = smartKitProjectState(project);
+  if (!id || !project || !target) return false;
+  const checklist = materialChecklistForState(target);
+  const linesByKey = new Map(workshopStockKitLinesData.map((line) => [line.requirementKey, line]));
+  let changed = false;
+  for (const item of checklist.items) {
+    const line = linesByKey.get(item.key);
+    if (!line) continue;
+    const nextStatus = line.status === "na"
+      ? "na"
+      : line.pickedQuantity >= line.requiredQuantity
+      ? "inshop"
+      : line.orderedQuantity > 0
+      ? "order"
+      : "pending";
+    const stock = workshopStockItemFromId(line.stockItemId);
+    const nextNote = `Smart Kit: ${smartKitQuantityText(line.pickedQuantity, line.unit)} picked${line.reservedQuantity ? `; ${smartKitQuantityText(line.reservedQuantity, line.unit)} reserved` : ""}${line.orderedQuantity ? `; ${smartKitQuantityText(line.orderedQuantity, line.unit)} ordering` : ""}${stock ? `; ${stock.stockCode}${stock.location ? ` at ${stock.location}` : ""}` : ""}`.slice(0, 180);
+    if (item.status !== nextStatus || item.note !== nextNote) {
+      item.status = nextStatus;
+      item.note = nextNote;
+      changed = true;
+    }
+  }
+  if (!changed) return true;
+  checklist.checkedAt = "";
+  checklist.checkedBy = "";
+  checklist.overrideAt = "";
+  checklist.overrideBy = "";
+  checklist.overrideReason = "";
+  if (projectLibraryProjects.some((entry) => entry.id === id)) {
+    await updateSavedProjectWorkflow(id, { productionInfo: { materialChecklist: checklist } });
+    return true;
+  }
+  if (id === normalizeProjectId(state.projectId)) {
+    state.productionInfo = normalizeProductionInfo({ ...state.productionInfo, materialChecklist: checklist });
+    persistState();
+    markCloudSaveDirty();
+    queueCloudAutosave();
+    updateAll();
+    return true;
+  }
+  return false;
+}
+
+async function refreshSmartSpoolKitRequirements(options = {}) {
+  const project = workshopStockKitProject;
+  const projectId = normalizeProjectId(project?.id);
+  if (!projectId) throw new Error("Open a cloud spool before preparing a Smart Kit.");
+  if (!projectPermission(project, { source: "cloud" }).canManageProduction) throw new Error(roleRequirementText("production"));
+  const requirements = smartKitRequirementsForProject(project);
+  if (!requirements.length) throw new Error("Draw the spool or add Gear check items before creating its Smart Kit.");
+  workshopStockKitBusy = true;
+  renderSmartSpoolKit();
+  try {
+    await loadSmartSpoolKitLines(projectId);
+    const existingByKey = new Map(workshopStockKitLinesData.map((line) => [line.requirementKey, line]));
+    const currentKeys = new Set(requirements.map((requirement) => requirement.requirementKey));
+    for (const requirement of requirements) {
+      const existing = existingByKey.get(requirement.requirementKey);
+      if (existing) {
+        const protectedMinimum = existing.pickedQuantity + existing.reservedQuantity + existing.orderedQuantity;
+        const { error } = await supabaseClient
+          .from(WORKSHOP_STOCK_KIT_LINES_TABLE)
+          .update({
+            label: requirement.label,
+            detail: requirement.detail,
+            unit: protectedMinimum > 0 ? existing.unit : requirement.unit,
+            required_quantity: Math.max(requirement.requiredQuantity, protectedMinimum),
+            active: true,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabaseClient
+          .from(WORKSHOP_STOCK_KIT_LINES_TABLE)
+          .insert({
+            project_id: projectId,
+            requirement_key: requirement.requirementKey,
+            label: requirement.label,
+            detail: requirement.detail,
+            unit: requirement.unit,
+            required_quantity: requirement.requiredQuantity,
+            created_by: cloudUser.id,
+          });
+        if (error) throw error;
+      }
+    }
+    for (const existing of workshopStockKitLinesData) {
+      if (currentKeys.has(existing.requirementKey)) continue;
+      if (existing.reservedQuantity || existing.pickedQuantity || existing.orderedQuantity) continue;
+      const { error } = await supabaseClient
+        .from(WORKSHOP_STOCK_KIT_LINES_TABLE)
+        .update({ active: false, updated_at: new Date().toISOString() })
+        .eq("id", existing.id);
+      if (error) throw error;
+    }
+    await Promise.all([loadSmartSpoolKitLines(projectId), loadWorkshopStockReservations()]);
+    await syncSmartSpoolKitToGearCheck(projectId);
+    if (!options.silent) showAppNotice("Smart Kit refreshed from the spool BOM and Gear check.", { tone: "success" });
+    return true;
+  } finally {
+    workshopStockKitBusy = false;
+    renderWorkshopStock();
+  }
+}
+
+function closeSmartKitAllocation() {
+  workshopStockKitEditingLineId = "";
+  workshopStockKitPreferredItemId = "";
+  if (workshopStockKitAllocationForm) workshopStockKitAllocationForm.hidden = true;
+}
+
+function updateSmartKitAllocationHelp() {
+  const line = smartKitLineFromId(workshopStockKitEditingLineId);
+  const item = workshopStockItemFromId(workshopStockKitStockSelect?.value);
+  if (!line || !workshopStockKitAllocationHelp) return;
+  const remaining = smartKitLineRemaining(line);
+  const available = item ? workshopStockAvailableQuantity(item, { excludeLineId: line.id }) : 0;
+  workshopStockKitAllocationHelp.textContent = item
+    ? `${smartKitQuantityText(remaining, line.unit)} remains. ${smartKitQuantityText(available, item.unit)} of ${item.stockCode} is available after other Smart Kit reservations.${smartKitUnitsCompatible(line.unit, item.unit) ? "" : ` Units do not match (${line.unit} required / ${item.unit} stocked).`}`
+    : `${smartKitQuantityText(remaining, line.unit)} remains. Choose stock to reserve, or leave stock blank and enter the shortage under Needs ordering.`;
+}
+
+function openSmartKitAllocation(line, preferredItemId = "") {
+  if (!line || !workshopStockKitAllocationForm) return;
+  workshopStockKitEditingLineId = line.id;
+  workshopStockKitPreferredItemId = normalizeUuid(preferredItemId) || "";
+  workshopStockKitAllocationForm.hidden = false;
+  if (workshopStockKitAllocationTitle) workshopStockKitAllocationTitle.textContent = line.label;
+  if (workshopStockKitStockSelect) {
+    const ranked = workshopStockItems
+      .map((item) => ({ item, score: smartKitStockMatchScore(line, item) }))
+      .sort((first, second) => second.score - first.score || first.item.name.localeCompare(second.item.name));
+    workshopStockKitStockSelect.innerHTML = `<option value="">No stock item / ordering only</option>${ranked.map(({ item }) => {
+      const available = workshopStockAvailableQuantity(item, { excludeLineId: line.id });
+      const mismatch = smartKitUnitsCompatible(line.unit, item.unit) ? "" : " · unit mismatch";
+      return `<option value="${escapeHtml(item.id)}">${escapeHtml(item.stockCode)} · ${escapeHtml(item.name)} · ${escapeHtml(smartKitQuantityText(available, item.unit))} available${escapeHtml(mismatch)}</option>`;
+    }).join("")}`;
+    const suggested = workshopStockKitPreferredItemId || line.stockItemId || bestSmartKitStockItem(line)?.id || "";
+    workshopStockKitStockSelect.value = suggested;
+  }
+  if (workshopStockKitReserveInput) {
+    workshopStockKitReserveInput.max = String(smartKitLineRemaining(line));
+    workshopStockKitReserveInput.value = String(line.reservedQuantity);
+  }
+  if (workshopStockKitOrderInput) {
+    workshopStockKitOrderInput.max = String(smartKitLineRemaining(line));
+    workshopStockKitOrderInput.value = String(line.orderedQuantity);
+  }
+  if (workshopStockKitNoteInput) workshopStockKitNoteInput.value = line.note;
+  updateSmartKitAllocationHelp();
+  workshopStockKitStockSelect?.focus?.();
+}
+
+async function saveSmartKitAllocation() {
+  const line = smartKitLineFromId(workshopStockKitEditingLineId);
+  if (!line) throw new Error("That Smart Kit requirement is no longer available.");
+  const item = workshopStockItemFromId(workshopStockKitStockSelect?.value);
+  const reserved = Math.max(0, Number(workshopStockKitReserveInput?.value) || 0);
+  const ordered = Math.max(0, Number(workshopStockKitOrderInput?.value) || 0);
+  const remaining = smartKitLineRemaining(line);
+  if (reserved + ordered > remaining + 0.0001) throw new Error(`Allocate no more than ${smartKitQuantityText(remaining, line.unit)} remaining.`);
+  if (reserved > 0 && !item) throw new Error("Choose a workshop stock item before reserving it.");
+  if (reserved > 0 && !smartKitUnitsCompatible(line.unit, item.unit)) throw new Error(`Choose stock measured in ${line.unit}, or change that stock item's unit first.`);
+  const { error } = await supabaseClient.rpc("configure_spool_stock_kit_line", {
+    p_line_id: line.id,
+    p_stock_item_id: item?.id || null,
+    p_reserved_quantity: reserved,
+    p_ordered_quantity: ordered,
+    p_not_required: false,
+    p_note: String(workshopStockKitNoteInput?.value ?? "").trim().slice(0, 500),
+  });
+  if (error) throw error;
+  closeSmartKitAllocation();
+  await Promise.all([
+    loadSmartSpoolKitLines(line.projectId),
+    loadWorkshopStockReservations(),
+  ]);
+  await syncSmartSpoolKitToGearCheck(line.projectId);
+  renderWorkshopStock();
+  showAppNotice(reserved ? "Stock reserved for this spool kit." : ordered ? "Shortage added to the order list." : "Smart Kit allocation updated.", { tone: "success" });
+}
+
+async function recordSmartKitPick(line, returning = false) {
+  const maximum = returning ? line.pickedQuantity : line.reservedQuantity;
+  if (maximum <= 0) throw new Error(returning ? "Nothing has been picked from this line." : "Reserve stock before picking it.");
+  const response = await openFieldInputDialog({
+    title: returning ? `Undo pick · ${line.label}` : `Pick · ${line.label}`,
+    label: `Quantity (${line.unit})`,
+    value: String(maximum),
+    type: "number",
+    min: 0.001,
+    max: maximum,
+    step: 0.001,
+    unit: line.unit,
+    help: returning
+      ? "The quantity returns to physical workshop stock but remains reserved for this spool until you release it."
+      : `Picking deducts physical stock and records it against ${projectDisplayName(smartKitProjectState(workshopStockKitProject)?.projectInfo)}.`,
+    submitLabel: returning ? "Return to stock" : "Confirm pick",
+  });
+  if (response === null) return false;
+  const quantity = Number(response);
+  if (!Number.isFinite(quantity) || quantity <= 0 || quantity > maximum) throw new Error(`Enter a quantity up to ${smartKitQuantityText(maximum, line.unit)}.`);
+  const { error } = await supabaseClient.rpc("record_spool_stock_kit_pick", {
+    p_line_id: line.id,
+    p_quantity: quantity,
+    p_return: returning,
+    p_note: `Smart Kit · ${line.label}`,
+  });
+  if (error) throw error;
+  await Promise.all([
+    loadSmartSpoolKitLines(line.projectId),
+    loadWorkshopStock({ force: true }),
+  ]);
+  await syncSmartSpoolKitToGearCheck(line.projectId);
+  renderWorkshopStock();
+  showAppNotice(returning ? "Picked stock returned to the workshop and kept reserved." : "Stock picked and recorded on the spool.", { tone: "success" });
+  return true;
+}
+
+async function toggleSmartKitNotRequired(line) {
+  const restoring = line.status === "na";
+  const { error } = await supabaseClient.rpc("configure_spool_stock_kit_line", {
+    p_line_id: line.id,
+    p_stock_item_id: null,
+    p_reserved_quantity: 0,
+    p_ordered_quantity: 0,
+    p_not_required: !restoring,
+    p_note: restoring ? "" : "Not required for this fabrication kit",
+  });
+  if (error) throw error;
+  await Promise.all([loadSmartSpoolKitLines(line.projectId), loadWorkshopStockReservations()]);
+  await syncSmartSpoolKitToGearCheck(line.projectId);
+  renderWorkshopStock();
+}
+
+async function copySmartKitOrderList() {
+  const orderLines = workshopStockKitLinesData.filter((line) => line.active && line.status !== "na" && line.orderedQuantity > 0);
+  if (!orderLines.length) {
+    showAppNotice("No Smart Kit shortages are marked as Needs ordering.");
+    return false;
+  }
+  const info = normalizeProjectInfo(workshopStockKitProject?.projectInfo ?? smartKitProjectState(workshopStockKitProject)?.projectInfo);
+  const text = [
+    `SpoolMate order list · Job ${info.jobNumber || "not set"} · Spool ${info.spoolNumber || "not set"}`,
+    ...orderLines.map((line) => `- ${line.label}: ${smartKitQuantityText(line.orderedQuantity, line.unit)}${line.note ? ` · ${line.note}` : ""}`),
+  ].join("\n");
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    const response = await openFieldInputDialog({ title: "Smart Kit order list", label: "Copy this list", value: text, multiline: true, submitLabel: "Done" });
+    if (response === null) return false;
+  }
+  showAppNotice("Smart Kit order list copied.", { tone: "success" });
+  return true;
+}
+
+async function handleScannedSmartKitStock(itemId) {
+  const id = normalizeUuid(itemId);
+  let item = workshopStockItemFromId(id);
+  if (!item) {
+    const { data, error } = await supabaseClient
+      .from(WORKSHOP_STOCK_ITEMS_TABLE)
+      .select("id,owner_id,company_id,stock_code,name,description,category,location,unit,quantity_on_hand,minimum_quantity,archived,created_at,updated_at")
+      .eq("id", id)
+      .eq("archived", false)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("That stock QR is unavailable to this account.");
+    item = mapWorkshopStockItem(data);
+  }
+  const projectCompanyId = normalizeUuid(workshopStockKitProject?.companyId);
+  if (normalizeUuid(item.companyId) !== projectCompanyId) throw new Error("That stock item belongs to a different workspace than this spool kit.");
+  const matched = workshopStockKitLinesData.find((line) => line.stockItemId === item.id && line.reservedQuantity > 0 && line.status !== "na");
+  if (matched) return recordSmartKitPick(matched, false);
+  const candidate = workshopStockKitLinesData
+    .filter((line) => line.active && line.status !== "na" && smartKitLineRemaining(line) > 0 && smartKitUnitsCompatible(line.unit, item.unit))
+    .sort((first, second) => smartKitStockMatchScore(second, item) - smartKitStockMatchScore(first, item))[0];
+  if (!candidate) throw new Error("No remaining Smart Kit requirement uses this stock unit.");
+  openSmartKitAllocation(candidate, item.id);
+  showAppNotice(`Matched ${item.stockCode} to the closest kit requirement. Confirm the quantity to reserve.`);
+  return true;
+}
+
+async function openSmartSpoolKit(projectOrId = state.projectId) {
+  if (!(await ensureSupabaseClient()) || !cloudUser) {
+    openAuthDialog();
+    showAppNotice("Sign in before preparing a Smart Spool Kit.");
+    return false;
+  }
+  const project = smartKitProjectRecord(projectOrId);
+  if (!project || (project.source ?? "cloud") !== "cloud") throw new Error("Save this spool to the cloud before preparing its Smart Kit.");
+  const companyId = normalizeUuid(project.companyId);
+  if (companyId && normalizeUuid(activeCompany?.id) !== companyId) await selectWorkspace(`business:${companyId}`);
+  if (!companyId && activeWorkspaceIsBusiness()) await selectWorkspace("personal");
+  if (!projectPermission(project, { source: "cloud" }).canManageProduction) throw new Error(roleRequirementText("production"));
+  workshopStockKitProject = project;
+  const opened = await openWorkshopStock({ force: true });
+  if (!opened) return false;
+  workshopStockKitPanel.hidden = false;
+  closeWorkshopStockEditor();
+  closeSmartKitAllocation();
+  workshopStockKitBusy = true;
+  renderSmartSpoolKit();
+  try {
+    await loadSmartSpoolKitLines(project.id);
+    if (!workshopStockKitLinesData.length) await refreshSmartSpoolKitRequirements({ silent: true });
+    renderWorkshopStock();
+    return true;
+  } finally {
+    workshopStockKitBusy = false;
+    renderSmartSpoolKit();
+  }
+}
+
+function closeSmartSpoolKit() {
+  closeSmartKitAllocation();
+  if (workshopStockKitPanel) workshopStockKitPanel.hidden = true;
+  workshopStockKitLinesData = [];
+  workshopStockKitProject = null;
+  renderWorkshopStock();
+}
+
 function workshopStockItemFromId(itemId = workshopStockSelectedItemId) {
   const id = normalizeUuid(itemId);
   return workshopStockItems.find((item) => item.id === id) ?? null;
@@ -29513,7 +30123,7 @@ function workshopStockFilteredItems() {
 }
 
 function workshopStockItemIsLow(item) {
-  return Boolean(item && item.minimumQuantity > 0 && item.quantityOnHand <= item.minimumQuantity);
+  return Boolean(item && item.minimumQuantity > 0 && workshopStockAvailableQuantity(item) <= item.minimumQuantity);
 }
 
 function workshopStockErrorMessage(error) {
@@ -29567,6 +30177,7 @@ async function loadWorkshopStock(options = {}) {
     await Promise.all([
       loadWorkshopStockMovements(),
       loadWorkshopStockProjectMovements(),
+      loadWorkshopStockReservations(),
     ]);
     renderWorkshopStock();
     return true;
@@ -29596,6 +30207,7 @@ async function loadWorkshopStock(options = {}) {
     await Promise.all([
       loadWorkshopStockMovements(),
       loadWorkshopStockProjectMovements(),
+      loadWorkshopStockReservations(),
     ]);
     return true;
   } finally {
@@ -29608,11 +30220,18 @@ function resetWorkshopStockCache() {
   workshopStockItems = [];
   workshopStockMovements = [];
   workshopStockProjectMovements = [];
+  workshopStockReservations = [];
   workshopStockWorkspaceKey = "";
   workshopStockSelectedItemId = "";
   workshopStocktakeActive = false;
   workshopStocktakeCountedIds = new Set();
   workshopStockPrintSelection = new Set();
+  workshopStockKitLinesData = [];
+  workshopStockKitProject = null;
+  workshopStockKitEditingLineId = "";
+  workshopStockKitPreferredItemId = "";
+  if (workshopStockKitPanel) workshopStockKitPanel.hidden = true;
+  if (workshopStockKitAllocationForm) workshopStockKitAllocationForm.hidden = true;
 }
 
 function workshopStockCurrentProjectIdForItem(item) {
@@ -29643,7 +30262,8 @@ function workshopStockCurrentSpoolHtml() {
     <div><strong>Using stock on ${escapeHtml(project.jobNumber || "Job not set")} / ${escapeHtml(project.spoolNumber || "Spool not set")}</strong><span>Every Use action is recorded against cloud spool ${escapeHtml(projectId)}.</span></div>
     <div class="workshop-stock-spool-usage">${used.length
       ? used.slice(0, 5).map((entry) => `<span>${escapeHtml(entry.item.stockCode)} · ${escapeHtml(workshopStockQuantityText(entry.quantity, entry.item.unit))}</span>`).join("")
-      : `<span>No workshop stock recorded on this spool yet.</span>`}</div>`;
+      : `<span>No workshop stock recorded on this spool yet.</span>`}</div>
+    ${currentDrawingProjectPermission().canManageProduction ? `<button type="button" data-workshop-open-kit="${escapeHtml(projectId)}">Open Smart Kit</button>` : ""}`;
 }
 
 function workshopStockMovementLabel(type) {
@@ -29682,6 +30302,8 @@ function renderWorkshopStockList(items = workshopStockFilteredItems()) {
     const selected = item.id === workshopStockSelectedItemId;
     const counted = workshopStocktakeCountedIds.has(item.id);
     const canUse = Boolean(workshopStockCurrentProjectIdForItem(item));
+    const reserved = workshopStockReservedQuantity(item.id);
+    const available = workshopStockAvailableQuantity(item);
     return `
       <article class="workshop-stock-row ${selected ? "selected" : ""} ${low ? "low" : ""}" data-stock-row="${escapeHtml(item.id)}">
         <label class="workshop-stock-label-check" title="Include this item when printing labels"><input type="checkbox" data-stock-print-id="${escapeHtml(item.id)}" ${workshopStockPrintSelection.has(item.id) ? "checked" : ""} /><span>QR</span></label>
@@ -29689,7 +30311,7 @@ function renderWorkshopStockList(items = workshopStockFilteredItems()) {
           <span class="workshop-stock-code">${escapeHtml(item.stockCode)}</span>
           <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml([item.category, item.location].filter(Boolean).join(" · ") || "No location set")}</small></span>
         </button>
-        <span class="workshop-stock-quantity ${low ? "low" : ""}"><strong>${escapeHtml(workshopStockQuantityText(item.quantityOnHand, item.unit))}</strong><small>${low ? `Minimum ${escapeHtml(workshopStockQuantityText(item.minimumQuantity, item.unit))}` : "Available"}</small></span>
+        <span class="workshop-stock-quantity ${low ? "low" : ""}"><strong>${escapeHtml(workshopStockQuantityText(available, item.unit))}</strong><small>${reserved ? `${escapeHtml(workshopStockQuantityText(reserved, item.unit))} reserved · ${escapeHtml(workshopStockQuantityText(item.quantityOnHand, item.unit))} on hand` : low ? `Minimum ${escapeHtml(workshopStockQuantityText(item.minimumQuantity, item.unit))}` : "Available"}</small></span>
         <div class="workshop-stock-row-actions">
           <button type="button" data-stock-action="count" data-stock-id="${escapeHtml(item.id)}" class="${counted ? "counted" : ""}">${counted ? "Counted" : "Count"}</button>
           <button type="button" data-stock-action="use" data-stock-id="${escapeHtml(item.id)}" ${canUse ? "" : "disabled title=\"Open a matching cloud spool first\""}>Use on spool</button>
@@ -29720,6 +30342,8 @@ function renderWorkshopStockDetail() {
     return;
   }
   const low = workshopStockItemIsLow(item);
+  const reserved = workshopStockReservedQuantity(item.id);
+  const available = workshopStockAvailableQuantity(item);
   const canChange = workshopStockCanChangeQuantity();
   const canEdit = workshopStockCanEditItem(item);
   const projectId = workshopStockCurrentProjectIdForItem(item);
@@ -29734,7 +30358,7 @@ function renderWorkshopStockDetail() {
   workshopStockDetail.innerHTML = `
     <section class="workshop-stock-item-head ${low ? "low" : ""}">
       <div><span>${escapeHtml(item.stockCode)}</span><h2>${escapeHtml(item.name)}</h2><p>${escapeHtml(item.description || "No description")}</p></div>
-      <div class="workshop-stock-item-balance"><strong>${escapeHtml(workshopStockQuantityText(item.quantityOnHand, item.unit))}</strong><span>${low ? `Low · minimum ${escapeHtml(workshopStockQuantityText(item.minimumQuantity, item.unit))}` : "Available now"}</span></div>
+      <div class="workshop-stock-item-balance"><strong>${escapeHtml(workshopStockQuantityText(available, item.unit))}</strong><span>${reserved ? `${escapeHtml(workshopStockQuantityText(reserved, item.unit))} Smart Kit reserved · ${escapeHtml(workshopStockQuantityText(item.quantityOnHand, item.unit))} physical` : low ? `Low · minimum ${escapeHtml(workshopStockQuantityText(item.minimumQuantity, item.unit))}` : "Available now"}</span></div>
     </section>
     <section class="workshop-stock-meta"><span><b>Category</b>${escapeHtml(item.category)}</span><span><b>Location</b>${escapeHtml(item.location || "Not set")}</span><span><b>Workspace</b>${escapeHtml(activeWorkspaceLabel())}</span></section>
     <section class="workshop-stock-qr-panel"><img data-stock-qr-image="${escapeHtml(item.id)}" alt="QR code for ${escapeHtml(item.name)}" /><div><strong>Permanent stock QR</strong><span>Print this label and attach it to the bin, rack or item. Scanning opens this exact stock record.</span><button type="button" data-stock-detail-action="print">Print this label</button></div></section>
@@ -29771,6 +30395,7 @@ function renderWorkshopStock() {
   renderWorkshopStockSummary(items);
   renderWorkshopStockList(items);
   renderWorkshopStockDetail();
+  renderSmartSpoolKit();
 }
 
 function workshopStockItemUrl(item) {
@@ -30042,6 +30667,7 @@ async function openWorkshopStock(options = {}) {
 }
 
 function closeWorkshopStock() {
+  closeSmartSpoolKit();
   closeWorkshopStockEditor();
   if (workshopStockDialog) workshopStockDialog.hidden = true;
   document.body.classList.remove("workshop-stock-open");
@@ -30068,6 +30694,45 @@ function setupWorkshopStock() {
   workshopStockScanButton?.addEventListener("click", () => openQrScanner({ context: "stock" }));
   workshopStockRefreshButton?.addEventListener("click", () => loadWorkshopStock({ force: true }).catch((error) => showAppNotice(workshopStockErrorMessage(error))));
   workshopStockAddButton?.addEventListener("click", () => openWorkshopStockEditor());
+  workshopStockCurrentSpool?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-workshop-open-kit]");
+    if (!button) return;
+    openSmartSpoolKit(button.dataset.workshopOpenKit).catch((error) => showAppNotice(workshopStockErrorMessage(error), { tone: "warning" }));
+  });
+  workshopStockKitCloseButton?.addEventListener("click", closeSmartSpoolKit);
+  workshopStockKitRefreshButton?.addEventListener("click", () => {
+    refreshSmartSpoolKitRequirements().catch((error) => showAppNotice(workshopStockErrorMessage(error), { tone: "warning" }));
+  });
+  workshopStockKitScanButton?.addEventListener("click", () => openQrScanner({ context: "stock", smartKit: true }));
+  workshopStockKitOrderListButton?.addEventListener("click", () => {
+    copySmartKitOrderList().catch((error) => showAppNotice(error?.message || "The order list could not be copied."));
+  });
+  workshopStockKitAllocationCancelButton?.addEventListener("click", closeSmartKitAllocation);
+  workshopStockKitStockSelect?.addEventListener("change", updateSmartKitAllocationHelp);
+  workshopStockKitAllocationForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    if (workshopStockKitAllocationSaveButton) workshopStockKitAllocationSaveButton.disabled = true;
+    saveSmartKitAllocation().catch((error) => showAppNotice(workshopStockErrorMessage(error), { tone: "warning" })).finally(() => {
+      if (workshopStockKitAllocationSaveButton) workshopStockKitAllocationSaveButton.disabled = false;
+    });
+  });
+  workshopStockKitLines?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-kit-action]");
+    if (!button) return;
+    const line = smartKitLineFromId(button.dataset.kitLineId);
+    if (!line) return;
+    const action = button.dataset.kitAction;
+    const task = action === "allocate"
+      ? Promise.resolve(openSmartKitAllocation(line))
+      : action === "pick"
+      ? recordSmartKitPick(line, false)
+      : action === "return"
+      ? recordSmartKitPick(line, true)
+      : action === "toggle-na"
+      ? toggleSmartKitNotRequired(line)
+      : null;
+    task?.catch?.((error) => showAppNotice(workshopStockErrorMessage(error), { tone: "warning" }));
+  });
   workshopStockEditorCancelButton?.addEventListener("click", closeWorkshopStockEditor);
   workshopStockItemForm?.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -30137,6 +30802,16 @@ function setupWorkshopStock() {
     task?.catch?.((error) => showAppNotice(workshopStockErrorMessage(error), { tone: "warning" }));
   });
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && workshopStockKitAllocationForm?.hidden === false) {
+      event.preventDefault();
+      closeSmartKitAllocation();
+      return;
+    }
+    if (event.key === "Escape" && workshopStockKitPanel?.hidden === false) {
+      event.preventDefault();
+      closeSmartSpoolKit();
+      return;
+    }
     if (event.key === "Escape" && workshopStockDialog && !workshopStockDialog.hidden && workshopStockItemForm?.hidden !== false) {
       event.preventDefault();
       closeWorkshopStock();
@@ -30247,7 +30922,18 @@ async function scanQrImageFile(file, canvas) {
 
 function openScannedSpoolTraveller(value) {
   const target = scannedSpoolMateTarget(value);
+  const smartKitPanelOpen = workshopStockKitPanel?.hidden === false && Boolean(workshopStockKitProject);
+  if (smartKitPanelOpen && target.kind !== "stock") {
+    throw new Error("Scan a workshop stock QR label while assembling a Smart Kit.");
+  }
+  const smartKitOpen = target.kind === "stock" && smartKitPanelOpen;
   closeQrScanner();
+  if (smartKitOpen) {
+    handleScannedSmartKitStock(target.stockItemId).catch((error) => {
+      showAppNotice(workshopStockErrorMessage(error), { tone: "warning" });
+    });
+    return;
+  }
   if (target.kind === "stock" && cloudUser) {
     openWorkshopStock({ itemId: target.stockItemId, force: true }).catch((error) => {
       showAppNotice(workshopStockErrorMessage(error), { tone: "warning" });
@@ -30260,13 +30946,14 @@ function openScannedSpoolTraveller(value) {
 async function openQrScanner(options = {}) {
   closeQrScanner();
   const stockContext = options.context === "stock";
+  const smartKitContext = options.smartKit === true;
   const dialog = document.createElement("div");
   dialog.id = "qrScannerDialog";
   dialog.className = "qr-scanner-backdrop";
   dialog.tabIndex = -1;
   dialog.innerHTML = `
     <main class="qr-scanner" role="dialog" aria-modal="true" aria-labelledby="qrScannerTitle">
-      <header><div><span>Workshop shortcut</span><h1 id="qrScannerTitle">${stockContext ? "Scan stock QR" : "Scan SpoolMate QR"}</h1></div><button type="button" data-qr-close aria-label="Close QR scanner">Close</button></header>
+      <header><div><span>Workshop shortcut</span><h1 id="qrScannerTitle">${smartKitContext ? "Scan stock into Smart Kit" : stockContext ? "Scan stock QR" : "Scan SpoolMate QR"}</h1></div><button type="button" data-qr-close aria-label="Close QR scanner">Close</button></header>
       <div class="qr-scanner-camera">
         <video autoplay muted playsinline aria-label="Camera preview"></video>
         <div class="qr-scanner-target" aria-hidden="true"></div>
@@ -31783,6 +32470,7 @@ function productionMaterialChecklistHtml(project, checklist, permission) {
       ${normalized.checkedAt ? `<div class="material-check-result ready"><strong>Checklist confirmed</strong><span>${escapeHtml(normalized.checkedBy || "Team")} / ${escapeHtml(new Date(normalized.checkedAt).toLocaleString())}</span></div>` : ""}
       ${stats.overridden ? `<div class="material-check-result override"><strong>Authorised override</strong><span>${escapeHtml(normalized.overrideReason)} / ${escapeHtml(normalized.overrideBy || "Checker")}</span></div>` : ""}
       <div class="material-check-actions">
+        <button type="button" class="primary" data-production-action="open-smart-kit" data-project-id="${escapeHtml(project.id)}"${(project.source ?? projectLibrarySource) === "cloud" ? disabledAttr : ` disabled title="Save this spool to the cloud before preparing a Smart Kit"`}>Open Smart Kit</button>
         <button type="button" data-production-action="add-material-item" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Add item</button>
         <button type="button" class="primary" data-production-action="confirm-material-check" data-project-id="${escapeHtml(project.id)}"${disabledAttr}>Confirm gear ready</button>
         <button type="button" data-production-action="override-material-check" data-project-id="${escapeHtml(project.id)}"${overrideDisabledAttr}>Authorised override</button>
@@ -40496,6 +41184,7 @@ function openFieldInputDialog(options = {}) {
   fieldInputValue.placeholder = options.placeholder ?? "";
   fieldInputValue.step = options.step ?? "any";
   fieldInputValue.min = options.min ?? "";
+  fieldInputValue.max = options.max ?? "";
   fieldInputTextArea.placeholder = options.placeholder ?? "";
   fieldInputTextArea.readOnly = options.readOnly === true;
 

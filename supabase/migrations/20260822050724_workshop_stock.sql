@@ -224,7 +224,7 @@ begin
   end if;
 
   if v_item.company_id is null then
-    if v_item.owner_id <> v_actor then
+    if v_item.owner_id is distinct from v_actor then
       raise exception 'You do not have access to this personal stock item.';
     end if;
   else
@@ -255,7 +255,7 @@ begin
     end if;
 
     if v_item.company_id is null then
-      if v_project.company_id is not null or v_project.owner_id <> v_actor then
+      if v_project.company_id is not null or v_project.owner_id is distinct from v_actor then
         raise exception 'Personal workshop stock can only be assigned to your personal cloud spools.';
       end if;
     elsif v_project.company_id is distinct from v_item.company_id then
