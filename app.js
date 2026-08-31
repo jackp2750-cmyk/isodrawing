@@ -3,6 +3,8 @@ const fallbackCanvas = document.querySelector("#fallbackCanvas");
 const threeCanvas = document.querySelector("#threeCanvas");
 const previewStage = document.querySelector("#previewStage");
 const drawingPanel = document.querySelector(".drawing-panel");
+const selectionActionBar = document.querySelector("#selectionActionBar");
+const selectionActionSummary = document.querySelector("#selectionActionSummary");
 const controlPanel = document.querySelector(".control-panel");
 const previewPanel = document.querySelector(".preview-panel");
 const workspaceTitle = document.querySelector("#workspaceTitle");
@@ -179,6 +181,40 @@ const supportAdminResultCount = document.querySelector("#supportAdminResultCount
 const supportAdminResultList = document.querySelector("#supportAdminResultList");
 const supportAdminDetail = document.querySelector("#supportAdminDetail");
 const supportAdminAuditList = document.querySelector("#supportAdminAuditList");
+const schematicTakeoffButton = document.querySelector("#schematicTakeoffButton");
+const schematicTakeoffDialog = document.querySelector("#schematicTakeoffDialog");
+const schematicTakeoffCloseButton = document.querySelector("#schematicTakeoffCloseButton");
+const schematicTakeoffIdentity = document.querySelector("#schematicTakeoffIdentity");
+const schematicTakeoffFileInput = document.querySelector("#schematicTakeoffFileInput");
+const schematicTakeoffPreviousPageButton = document.querySelector("#schematicTakeoffPreviousPageButton");
+const schematicTakeoffNextPageButton = document.querySelector("#schematicTakeoffNextPageButton");
+const schematicTakeoffPageReadout = document.querySelector("#schematicTakeoffPageReadout");
+const schematicTakeoffToolButtons = [...document.querySelectorAll("[data-schematic-tool]")];
+const schematicTakeoffZoomOutButton = document.querySelector("#schematicTakeoffZoomOutButton");
+const schematicTakeoffFitButton = document.querySelector("#schematicTakeoffFitButton");
+const schematicTakeoffZoomInButton = document.querySelector("#schematicTakeoffZoomInButton");
+const schematicTakeoffZoomReadout = document.querySelector("#schematicTakeoffZoomReadout");
+const schematicTakeoffCanvas = document.querySelector("#schematicTakeoffCanvas");
+const schematicTakeoffEmpty = document.querySelector("#schematicTakeoffEmpty");
+const schematicTakeoffHint = document.querySelector("#schematicTakeoffHint");
+const schematicTakeoffClearButton = document.querySelector("#schematicTakeoffClearButton");
+const schematicTakeoffSelectionCount = document.querySelector("#schematicTakeoffSelectionCount");
+const schematicTakeoffSelectionList = document.querySelector("#schematicTakeoffSelectionList");
+const schematicTakeoffSelectionNameInput = document.querySelector("#schematicTakeoffSelectionNameInput");
+const schematicTakeoffReadyButton = document.querySelector("#schematicTakeoffReadyButton");
+const schematicTakeoffCropCanvas = document.querySelector("#schematicTakeoffCropCanvas");
+const schematicTakeoffCropEmpty = document.querySelector("#schematicTakeoffCropEmpty");
+const schematicTakeoffDownloadCropButton = document.querySelector("#schematicTakeoffDownloadCropButton");
+const schematicTakeoffFittingForm = document.querySelector("#schematicTakeoffFittingForm");
+const schematicTakeoffFittingTypeInput = document.querySelector("#schematicTakeoffFittingTypeInput");
+const schematicTakeoffFittingSizeInput = document.querySelector("#schematicTakeoffFittingSizeInput");
+const schematicTakeoffFittingQuantityInput = document.querySelector("#schematicTakeoffFittingQuantityInput");
+const schematicTakeoffFittingNoteInput = document.querySelector("#schematicTakeoffFittingNoteInput");
+const schematicTakeoffAddFittingButton = document.querySelector("#schematicTakeoffAddFittingButton");
+const schematicTakeoffFittingList = document.querySelector("#schematicTakeoffFittingList");
+const schematicTakeoffTotal = document.querySelector("#schematicTakeoffTotal");
+const schematicTakeoffSummary = document.querySelector("#schematicTakeoffSummary");
+const schematicTakeoffExportButton = document.querySelector("#schematicTakeoffExportButton");
 const licenceBanner = document.querySelector("#licenceBanner");
 const licenceBannerTitle = document.querySelector("#licenceBannerTitle");
 const licenceBannerMessage = document.querySelector("#licenceBannerMessage");
@@ -205,6 +241,16 @@ const newDrawingDialog = document.querySelector("#newDrawingDialog");
 const newDrawingCancelButton = document.querySelector("#newDrawingCancelButton");
 const newDrawingDiscardButton = document.querySelector("#newDrawingDiscardButton");
 const newDrawingSaveButton = document.querySelector("#newDrawingSaveButton");
+const workflowStartDialog = document.querySelector("#workflowStartDialog");
+const workflowStartQuickButton = document.querySelector("#workflowStartQuickButton");
+const workflowStartManagedButton = document.querySelector("#workflowStartManagedButton");
+const workflowStartCancelButton = document.querySelector("#workflowStartCancelButton");
+const workflowNextBar = document.querySelector("#workflowNextBar");
+const workflowNextKicker = document.querySelector("#workflowNextKicker");
+const workflowNextTitle = document.querySelector("#workflowNextTitle");
+const workflowNextMessage = document.querySelector("#workflowNextMessage");
+const workflowNextButton = document.querySelector("#workflowNextButton");
+const workflowNextModeButton = document.querySelector("#workflowNextModeButton");
 let homeDashboardDialog = document.querySelector("#homeDashboardDialog");
 let homeDashboardSubtitle = document.querySelector("#homeDashboardSubtitle");
 let homeDashboardAccount = document.querySelector("#homeDashboardAccount");
@@ -216,6 +262,7 @@ let homeDashboardRestoreButton = document.querySelector("#homeDashboardRestoreBu
 let homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
 let homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
 let homeDashboardWorkshopStockButton = document.querySelector("#homeDashboardWorkshopStockButton");
+let homeDashboardSchematicTakeoffButton = document.querySelector("#homeDashboardSchematicTakeoffButton");
 let homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
 let homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
 let homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
@@ -388,8 +435,15 @@ const fieldInputLabel = document.querySelector("#fieldInputLabel");
 const fieldInputValue = document.querySelector("#fieldInputValue");
 const fieldInputTextArea = document.querySelector("#fieldInputTextArea");
 const fieldInputUnit = document.querySelector("#fieldInputUnit");
+const fieldInputPreview = document.querySelector("#fieldInputPreview");
 const fieldInputCancelButton = document.querySelector("#fieldInputCancelButton");
 const fieldInputSubmitButton = document.querySelector("#fieldInputSubmitButton");
+const drawingChangePreviewDialog = document.querySelector("#drawingChangePreviewDialog");
+const drawingChangePreviewTitle = document.querySelector("#drawingChangePreviewTitle");
+const drawingChangePreviewHelp = document.querySelector("#drawingChangePreviewHelp");
+const drawingChangePreviewBody = document.querySelector("#drawingChangePreviewBody");
+const drawingChangePreviewCancelButton = document.querySelector("#drawingChangePreviewCancelButton");
+const drawingChangePreviewApplyButton = document.querySelector("#drawingChangePreviewApplyButton");
 const appToastStack = document.querySelector("#appToastStack");
 const appConfirmDialog = document.querySelector("#appConfirmDialog");
 const appConfirmTitle = document.querySelector("#appConfirmTitle");
@@ -482,12 +536,16 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.66";
-const APP_BUILD_DATE = "2026-08-22";
+const APP_VERSION = "v3.70";
+const APP_BUILD_DATE = "2026-08-30";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
+const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
+const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+const PDF_JS_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.mjs";
+const PDF_JS_WORKER_URL = "https://cdn.jsdelivr.net/npm/pdfjs-dist@6.3.289/build/pdf.worker.mjs";
 const TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Complete-Workflow-Fullscreen-Web.mp4`;
 const JOBS_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Jobs-My-Day-Current-Fullscreen-Web.mp4`;
 const DRAWING_TUTORIAL_VIDEO_URL = `${SUPABASE_URL}/storage/v1/object/public/tutorials/SpoolMate-Drawing-Masterclass-Fullscreen-Web.mp4`;
@@ -2165,8 +2223,12 @@ let drawingPanGesture = null;
 let drawingViewOffset = { x: 0, y: 0 };
 let projectDialogResolver = null;
 let newDrawingDialogResolver = null;
+let workflowStartDialogResolver = null;
+let workflowNextAction = null;
 let noteDialogResolver = null;
 let fieldInputDialogResolver = null;
+let fieldInputPreviewRenderer = null;
+let drawingChangePreviewResolver = null;
 let appConfirmDialogResolver = null;
 let noteDialogColour = DEFAULT_NOTE_COLOUR;
 let tutorialStepIndex = 0;
@@ -2227,6 +2289,11 @@ let supportAdminAccessCheckedUserId = "";
 let supportAdminBusy = false;
 let supportAdminSelectedUserId = "";
 let supportAdminCurrentDetail = null;
+let schematicTakeoffAccess = false;
+let schematicTakeoffAccessCheckedUserId = "";
+let schematicTakeoffState = null;
+let schematicTakeoffPdfModulePromise = null;
+let schematicTakeoffResizeFrame = 0;
 let companyMembers = [];
 let projectComments = [];
 let projectCommentsProjectId = null;
@@ -2285,6 +2352,8 @@ let projectLibraryJobFilter = readProjectLibraryJobFilter();
 let projectLibraryJobPins = readProjectLibraryStringList(JOB_DASHBOARD_PINS_KEY, 80);
 let projectLibraryRecentJobs = readProjectLibraryStringList(JOB_DASHBOARD_RECENTS_KEY, 12);
 let projectLibraryJobPage = 1;
+let projectLibraryBatchSelection = new Set();
+let projectLibraryBatchBusy = false;
 let dashboardPreferenceSaveTimer = 0;
 let dashboardPreferenceSaveBusy = false;
 const dashboardPreferenceSaveQueue = new Map();
@@ -2319,6 +2388,7 @@ let three = {
   interactionTimer: 0,
   labelFrameSkip: 0,
 };
+let pendingThreeViewRestore = null;
 let loadPlanThree = {
   ready: false,
   renderer: null,
@@ -2424,7 +2494,9 @@ function hardCodedDrawingDefaults() {
     angleDegrees: 45,
     anglePlane: "xy",
     flangeMode: "single",
+    flangeStandard: "ansi150",
     reducerType: "concentric",
+    weldGapMm: String(DEFAULT_WELD_GAP_MM),
     previewMode: "tricolor",
     show3dLabels: true,
     gridScale: 42,
@@ -2452,6 +2524,7 @@ function normalizeDrawingDefaults(defaults = {}) {
     flangeMode: normalizeFlangeMode(defaults.flangeMode ?? base.flangeMode),
     flangeStandard: normalizeFlangeStandard(defaults.flangeStandard ?? base.flangeStandard),
     reducerType: normalizeReducerType(defaults.reducerType ?? base.reducerType),
+    weldGapMm: String(normalizeWeldGapMm(defaults.weldGapMm ?? base.weldGapMm)),
     previewMode: normalizePreviewMode(defaults.previewMode ?? base.previewMode),
     show3dLabels: defaults.show3dLabels !== false,
     gridScale: clampNumber(Number(defaults.gridScale) || base.gridScale, 24, 72),
@@ -2570,6 +2643,7 @@ function drawingDefaultsFromState(source = state) {
     flangeMode: source?.flangeMode,
     flangeStandard: source?.flangeStandard,
     reducerType: source?.reducerType,
+    weldGapMm: source?.projectInfo?.weldGapMm,
     previewMode: source?.previewMode,
     show3dLabels: source?.show3dLabels !== false,
     gridScale: source?.gridScale,
@@ -2648,7 +2722,7 @@ function blankState(options = {}) {
     productionActivity: [],
     healthAcknowledgements: {},
     issueAudits: [],
-    projectInfo: defaultProjectInfo(defaults.pipeSpec),
+    projectInfo: defaultProjectInfo(defaults.pipeSpec, defaults.weldGapMm),
     history: [],
     redoHistory: [],
   };
@@ -3232,10 +3306,11 @@ function syncFittingDataProfileForSpec(previousSpec, nextSpec) {
   state.projectInfo = normalizeProjectInfo(project, nextSpec);
 }
 
-function defaultProjectInfo(specKey = "carbon40") {
+function defaultProjectInfo(specKey = "carbon40", weldGapMm = DEFAULT_WELD_GAP_MM) {
   return {
     ...PROJECT_INFO_DEFAULT,
     fittingProfile: defaultFittingDataProfileForSpec(specKey),
+    weldGapMm: String(normalizeWeldGapMm(weldGapMm)),
   };
 }
 
@@ -5162,6 +5237,291 @@ function toggleSelectedSegment(index) {
   setSelectedSegments([...selected]);
 }
 
+function selectionActionTarget(segment, t = 0.5) {
+  if (!segment) return null;
+  const normalizedT = clampNumber(Number(t) || 0, 0, 1);
+  const pointer = projectIso(lerpPoint(segment.start, segment.end, normalizedT));
+  const hit = {
+    segment,
+    distance: 0,
+    t: normalizedT,
+    ...(normalizedT === 0 || normalizedT === 1
+      ? { endpointIndex: normalizedT === 0 ? segment.from : segment.to }
+      : {}),
+  };
+  const endpointHit = normalizedT === 0 || normalizedT === 1 ? hit : null;
+  const pointIndex = endpointHit?.endpointIndex;
+  return {
+    pointer,
+    segmentHit: hit,
+    fittingHit: null,
+    reducerHit: null,
+    measurementHit: null,
+    pointHit: Number.isInteger(pointIndex)
+      ? { index: pointIndex, point: state.points[pointIndex], distance: 0 }
+      : null,
+    endpointHit,
+    noteHit: null,
+    notePoint: lerpPoint(segment.start, segment.end, normalizedT),
+    selectionMenu: true,
+  };
+}
+
+function selectedActionSegment() {
+  const selected = selectedSegmentIndexes();
+  const selectedIndex = selected[selected.length - 1];
+  return Number.isInteger(selectedIndex)
+    ? segments().find((segment) => segment.index === selectedIndex) ?? null
+    : null;
+}
+
+function positionSelectionContextMenu() {
+  const rect = selectionActionBar?.getBoundingClientRect();
+  const x = rect ? rect.left : window.innerWidth * 0.5;
+  const y = rect ? rect.bottom + 8 : window.innerHeight * 0.5;
+  positionDrawingContextMenu(x, y);
+}
+
+function openSelectionPipeSizeMenu() {
+  const segment = selectedActionSegment();
+  if (!segment || !ensureDrawingEditable("change pipe size")) return;
+  syncDrawingContextMenuHost();
+  drawingContextTarget = selectionActionTarget(segment, 0.5);
+  renderContextPipeSizeMenu();
+  positionSelectionContextMenu();
+}
+
+function selectionEndpointChoices() {
+  const selected = new Set(selectedSegmentIndexes());
+  const segmentData = segments().filter((segment) => selected.has(segment.index));
+  const allSegments = segments();
+  const choices = [];
+  const seen = new Set();
+  for (const segment of segmentData) {
+    for (const t of [0, 1]) {
+      const pointIndex = t === 0 ? segment.from : segment.to;
+      if (seen.has(pointIndex)) continue;
+      seen.add(pointIndex);
+      const connectionCount = allSegments.filter((item) => item.from === pointIndex || item.to === pointIndex).length;
+      choices.push({
+        segment,
+        t,
+        pointIndex,
+        open: connectionCount === 1,
+        label: `${t === 0 ? "Start" : "End"} of run ${segment.index + 1}`,
+      });
+    }
+  }
+  const openChoices = choices.filter((choice) => choice.open);
+  return openChoices.length ? openChoices : choices;
+}
+
+function renderSelectionEndTypeMenu(choice) {
+  drawingContextTarget = selectionActionTarget(choice.segment, choice.t);
+  drawingContextMenu.innerHTML = "";
+  setDrawingContextMenuVariant(null);
+  addDrawingContextHeader("Pipe end", `${choice.label} - choose the end preparation`);
+  appendDrawingContextActions([
+    {
+      label: "Back to pipe ends",
+      detail: "Choose another selected end",
+      action: renderSelectionEndsMenu,
+      keepOpen: true,
+    },
+    {
+      label: "Single flange",
+      detail: `Flush end / ${flangeStandardLabel(state.flangeStandard)}`,
+      action: () => placeContextFitting("flange", { flangeMode: "single", flangeStandard: state.flangeStandard }),
+    },
+    {
+      label: "Double flange",
+      detail: `Two plates and gasket / ${flangeStandardLabel(state.flangeStandard)}`,
+      action: () => placeContextFitting("flange", { flangeMode: "double", flangeStandard: state.flangeStandard }),
+    },
+    {
+      label: "Roll groove",
+      detail: "Victaulic-ready grooved pipe end",
+      action: () => placeContextFitting("rollGroove"),
+    },
+    {
+      label: "Threaded pipe end",
+      detail: "Coarse thread cut into the pipe end",
+      action: () => placeContextFitting("threadedEnd"),
+    },
+  ]);
+  clampDrawingContextMenuToViewport();
+}
+
+function renderSelectionEndsMenu() {
+  const choices = selectionEndpointChoices();
+  drawingContextMenu.innerHTML = "";
+  setDrawingContextMenuVariant(null);
+  addDrawingContextHeader("Pipe ends", choices.length === 1 ? "1 available end" : `${choices.length} available ends`);
+  appendDrawingContextActions(choices.map((choice) => ({
+    label: choice.label,
+    detail: choice.open ? "Open pipe end" : "Connected end",
+    action: () => renderSelectionEndTypeMenu(choice),
+    keepOpen: true,
+  })));
+  clampDrawingContextMenuToViewport();
+}
+
+function openSelectionEndsMenu() {
+  const segment = selectedActionSegment();
+  if (!segment || !ensureDrawingEditable("add a pipe end")) return;
+  syncDrawingContextMenuHost();
+  drawingContextTarget = selectionActionTarget(segment, 0.5);
+  renderSelectionEndsMenu();
+  positionSelectionContextMenu();
+}
+
+function renderSelectionFittingsMenu() {
+  drawingContextMenu.innerHTML = "";
+  setDrawingContextMenuVariant(null);
+  addDrawingContextHeader("Inline fittings", `Run ${drawingContextTarget.segmentHit.segment.index + 1}`);
+  appendDrawingContextActions([
+    {
+      label: "Valve",
+      detail: "Add a valve at the middle of this run",
+      action: () => placeContextFitting("valve"),
+    },
+    {
+      label: "Weld",
+      detail: "Add a numbered weld join",
+      action: () => placeContextFitting("weld"),
+    },
+    {
+      label: "Concentric reducer",
+      detail: "Centred transition / confirm outlet size",
+      action: () => placeContextFitting("reducer", { reducerType: "concentric" }),
+    },
+    {
+      label: "Eccentric reducer",
+      detail: "Flat-side transition / confirm outlet size",
+      action: () => placeContextFitting("reducer", { reducerType: "eccentric" }),
+    },
+    {
+      label: "Sockets",
+      detail: "Choose size, count, spacing and rotation",
+      action: () => renderSocketSetupMenu(),
+      keepOpen: true,
+    },
+  ]);
+  clampDrawingContextMenuToViewport();
+}
+
+function openSelectionFittingsMenu() {
+  const segment = selectedActionSegment();
+  if (!segment || !ensureDrawingEditable("add a fitting")) return;
+  syncDrawingContextMenuHost();
+  drawingContextTarget = selectionActionTarget(segment, 0.5);
+  renderSelectionFittingsMenu();
+  positionSelectionContextMenu();
+}
+
+function duplicateSelectedSegments() {
+  if (!ensureDrawingEditable("duplicate pipe runs")) return false;
+  const selected = selectedSegmentIndexes();
+  if (!selected.length) return false;
+  const selectedSet = new Set(selected);
+  const sourceEdges = selected.map((index) => ({ index, edge: state.edges[index] })).filter((item) => item.edge);
+  if (!sourceEdges.length) return false;
+
+  const snapshot = createUndoSnapshot();
+  const pointMap = new Map();
+  const edgeMap = new Map();
+  const offset = { x: 350, y: -350, z: 0 };
+  const mapPoint = (pointIndex) => {
+    if (pointMap.has(pointIndex)) return pointMap.get(pointIndex);
+    const nextIndex = state.points.length;
+    state.points.push(addPoints(state.points[pointIndex], offset));
+    pointMap.set(pointIndex, nextIndex);
+    return nextIndex;
+  };
+
+  for (const { index, edge } of sourceEdges) {
+    const nextIndex = state.edges.length;
+    state.edges.push({ ...edge, from: mapPoint(edge.from), to: mapPoint(edge.to) });
+    edgeMap.set(index, nextIndex);
+    const dimensionOffset = normalizeDimensionOffsets(state.dimensionOffsets, Math.max(state.edges.length, index + 1))[index];
+    if (dimensionOffset) {
+      state.dimensionOffsets = { ...state.dimensionOffsets, [nextIndex]: { ...dimensionOffset } };
+    }
+  }
+
+  for (const fitting of state.fittings.filter((item) => selectedSet.has(item.segmentIndex))) {
+    state.fittings.push({ ...fitting, id: nextFittingId++, segmentIndex: edgeMap.get(fitting.segmentIndex) });
+  }
+  for (const [sourcePoint, nextPoint] of pointMap) {
+    const incident = state.edges
+      .slice(0, snapshot.payload.edges.length)
+      .map((edge, index) => ({ edge, index }))
+      .filter(({ edge }) => edge.from === sourcePoint || edge.to === sourcePoint);
+    if (incident.length && incident.every(({ index }) => selectedSet.has(index))) {
+      if (state.nodeTypes?.[sourcePoint]) state.nodeTypes[nextPoint] = state.nodeTypes[sourcePoint];
+      if (state.reducerSideOverrides?.[sourcePoint]) state.reducerSideOverrides[nextPoint] = state.reducerSideOverrides[sourcePoint];
+      if (state.reducerTypeOverrides?.[sourcePoint]) state.reducerTypeOverrides[nextPoint] = state.reducerTypeOverrides[sourcePoint];
+    }
+  }
+
+  const duplicatedIndexes = [...edgeMap.values()];
+  setSelectedSegments(duplicatedIndexes);
+  state.selectedPoint = pointMap.get(sourceEdges[sourceEdges.length - 1].edge.to) ?? null;
+  state.activePoint = state.selectedPoint ?? state.activePoint;
+  state.selectedFitting = null;
+  state.selectedNote = null;
+  state.selectedMeasurement = null;
+  state.activeTool = "select";
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+  showAppNotice(`${duplicatedIndexes.length} pipe run${duplicatedIndexes.length === 1 ? "" : "s"} duplicated beside the original.`, { tone: "success" });
+  return true;
+}
+
+function updateSelectionActionBar() {
+  if (!selectionActionBar || !drawCanvas) return;
+  const selected = selectedSegmentIndexes();
+  const visible = selected.length > 0 && (appMode === "draw" || appMode === "edit");
+  selectionActionBar.hidden = !visible;
+  document.body.classList.toggle("selection-actions-open", visible);
+  if (!visible) return;
+
+  if (selectionActionSummary) {
+    selectionActionSummary.textContent = `${selected.length} run${selected.length === 1 ? "" : "s"}`;
+  }
+  const locked = drawingEditLocked();
+  selectionActionBar.querySelectorAll("button").forEach((button) => {
+    button.disabled = locked || (button.dataset.selectionAction === "length" && selected.length !== 1);
+  });
+
+  const selectedSet = new Set(selected);
+  const points = segments()
+    .filter((segment) => selectedSet.has(segment.index))
+    .map((segment) => projectIso(lerpPoint(segment.start, segment.end, 0.5)));
+  if (!points.length) return;
+  const anchor = points.reduce((total, point) => ({ x: total.x + point.x, y: total.y + point.y }), { x: 0, y: 0 });
+  anchor.x /= points.length;
+  anchor.y /= points.length;
+  const frameRect = drawCanvas.getBoundingClientRect();
+  const safeHalfWidth = Math.min(265, Math.max(120, frameRect.width * 0.34));
+  selectionActionBar.style.left = `${clampNumber(anchor.x, safeHalfWidth, Math.max(safeHalfWidth, frameRect.width - safeHalfWidth))}px`;
+  selectionActionBar.style.top = `${clampNumber(anchor.y, 70, Math.max(70, frameRect.height - 24))}px`;
+}
+
+function setupSelectionActionBar() {
+  selectionActionBar?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-selection-action]");
+    if (!button || button.disabled) return;
+    const action = button.dataset.selectionAction;
+    if (action === "length") editSelectedRunLength();
+    if (action === "size") openSelectionPipeSizeMenu();
+    if (action === "ends") openSelectionEndsMenu();
+    if (action === "fittings") openSelectionFittingsMenu();
+    if (action === "duplicate") duplicateSelectedSegments();
+    if (action === "delete") deleteSelection();
+  });
+}
+
 function isSegmentSelected(index) {
   return selectedSegmentIndexes().includes(index);
 }
@@ -6298,6 +6658,7 @@ function drawIso() {
   drawBoxSelectOverlay(ctx);
   drawProjectCornerTag(ctx, width, height);
   drawHealthIssueCallout(ctx, projection);
+  updateSelectionActionBar();
 }
 
 function drawGrid(ctx, width, height, projection) {
@@ -12859,7 +13220,7 @@ function preIssueFindingHtml(finding, index) {
   const actionLabel = preIssueFindingActionLabel(finding);
   const buttonLabel = finding.severity === "blocker"
     ? `Fix: ${actionLabel || "Review checks"}`
-    : actionLabel;
+    : `Fix: ${actionLabel || "Review checks"}`;
   return `
     <li class="ready-issue-finding ${escapeHtml(finding.severity)}">
       <div>
@@ -12895,8 +13256,7 @@ function issueAuditSummaryHtml(audit = latestIssueAudit()) {
   `;
 }
 
-function preIssueChecklistCardHtml() {
-  const checks = preIssueChecklist();
+function preIssueChecklistCardHtml(checks = preIssueChecklist()) {
   const status = preIssueChecklistStatus(checks);
   const projectText = checks.projectMissing.length
     ? `Missing ${checks.projectMissing.join(", ")}`
@@ -13081,8 +13441,9 @@ async function handlePreIssueFinding(index) {
   }
 }
 
-function updateWorkflowSummary() {
+function updateWorkflowSummary(issueChecks = preIssueChecklist()) {
   if (!workflowSummary) return;
+  const normalizedIssueChecks = issueChecks || preIssueChecklist();
   synchronizeWeldRegister(state);
   const permission = currentDrawingProjectPermission();
   const history = normalizeRevisionHistory(state.revisionHistory);
@@ -13096,8 +13457,7 @@ function updateWorkflowSummary() {
   const issueDisabledAttr = permission.canIssue
     ? ""
     : ` disabled title="${escapeHtml(currentPermissionRestrictionText("issue"))}"`;
-  const issueChecks = preIssueChecklist();
-  const issueBlockerCount = issueChecks.blockers.length;
+  const issueBlockerCount = normalizedIssueChecks.blockers.length;
   const issueActionLabel = issueBlockerCount
     ? `Fix ${issueBlockerCount} blocker${issueBlockerCount === 1 ? "" : "s"} before issue`
     : !state.checkedAt
@@ -13113,7 +13473,7 @@ function updateWorkflowSummary() {
         ${currentWorkflowRows().map(([label, value]) => `<li><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></li>`).join("")}
       </ul>
     </div>
-    ${preIssueChecklistCardHtml()}
+    ${preIssueChecklistCardHtml(normalizedIssueChecks)}
     <div class="workflow-actions">
       <button type="button" data-workflow-action="mark-checked"${reviewDisabledAttr}>Approve drawing</button>
       <button type="button" data-workflow-action="return-changes"${reviewDisabledAttr}>Return for changes</button>
@@ -13881,7 +14241,7 @@ async function restoreRevision(revisionId) {
 
 function saveCurrentSettingsAsDefaults() {
   persistUserDrawingDefaults();
-  showAppNotice("Current material, pipe size, dimensions, lifting, preview and drawing settings saved as your defaults.");
+  showAppNotice("Current material, pipe size, flange type, reducer preference, weld gap, dimensions and drawing settings are now your defaults.");
 }
 
 function projectBackupKey(source = state) {
@@ -14080,6 +14440,45 @@ function updatePipeSizeControls() {
   const selected = selectedSegmentsData();
   pipeSizeSelect.value = String(selected.length ? pipeSizeForSegment(selected[0]).nb : pipeSizeNbForSpec(state.pipeSizeNb, state.pipeSpec));
   updatePipeSizeReadout();
+}
+
+async function previewAndSetPipeSizeForSegments(indexes, pipeSizeNb) {
+  const requested = normalizeSelectedSegments(indexes, state.edges.length);
+  const selected = branchMainLinkedSegmentIndexes(requested);
+  const nextSize = pipeSizeNbForSpec(pipeSizeNb, state.pipeSpec);
+  if (!selected.length) {
+    setPipeSizeForSegments([], nextSize);
+    return true;
+  }
+  const currentSizes = [...new Set(selected.map((index) => normalizePipeSize(state.edges[index]?.pipeSizeNb ?? state.pipeSizeNb)))];
+  if (currentSizes.length === 1 && currentSizes[0] === nextSize) return false;
+
+  const beforeState = drawingPreviewCandidate();
+  const afterState = drawingPreviewCandidate(beforeState, (candidate) => {
+    candidate.pipeSizeNb = nextSize;
+    selected.forEach((index) => {
+      if (candidate.edges[index]) candidate.edges[index].pipeSizeNb = nextSize;
+    });
+  });
+  const currentLabel = currentSizes.length === 1
+    ? pipeSizeDisplayLabelByNb(currentSizes[0])
+    : "Mixed sizes";
+  const confirmed = await openDrawingChangePreview({
+    title: selected.length === 1 ? `Preview run ${selected[0] + 1} pipe size` : `Preview ${selected.length} pipe-size changes`,
+    help: "SpoolMate has recalculated reducer transitions and cut lengths for the proposed size.",
+    beforeState,
+    afterState,
+    affectedIndexes: selected,
+    facts: [{ label: "Pipe size", before: currentLabel, after: pipeSizeDisplayLabelByNb(nextSize) }],
+    note: "Any size mismatch at a connected run is shown as an automatic reducer before you apply the change.",
+    applyLabel: "Apply pipe size",
+  });
+  if (!confirmed) {
+    updatePipeSizeControls();
+    return false;
+  }
+  setPipeSizeForSegments(selected, nextSize);
+  return true;
 }
 
 function setPipeSizeForSegments(indexes, pipeSizeNb) {
@@ -14544,13 +14943,42 @@ function promptSelectedSocketSize() {
   openSelectedSocketSizeMenu(data.fitting.id);
 }
 
-function toggleSelectedReducerType() {
-  const data = selectedFittingData();
-  if (!data || data.fitting.type !== "reducer" || !ensureDrawingEditable("change reducer type")) return;
+async function previewAndSetManualReducerType(fittingId, nextType) {
+  const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "reducer");
+  if (!fitting) return false;
+  const currentType = fittingReducerType(fitting);
+  nextType = normalizeReducerType(nextType);
+  if (currentType === nextType) return false;
+  const confirmed = await confirmDrawingMutationPreview({
+    title: "Preview reducer type",
+    help: "Review the reducer profile and fabrication effect before applying it.",
+    affectedIndexes: [fitting.segmentIndex],
+    mutateCandidate: (candidate) => {
+      const changed = candidate.fittings.find((item) => item.id === fittingId && item.type === "reducer");
+      if (changed) changed.reducerType = nextType;
+    },
+    facts: [{ label: "Reducer type", before: reducerTypeLabel(currentType), after: reducerTypeLabel(nextType) }],
+    note: nextType === "eccentric"
+      ? "The ISO and 3D views will show the eccentric flat-side offset."
+      : "The ISO and 3D views will use centred ends for this reducer.",
+    applyLabel: "Apply reducer type",
+  });
+  if (!confirmed) return false;
+  const activeFitting = state.fittings.find((item) => item.id === fittingId && item.type === "reducer");
+  if (!activeFitting) return false;
   const snapshot = createUndoSnapshot();
-  data.fitting.reducerType = fittingReducerType(data.fitting) === "eccentric" ? "concentric" : "eccentric";
+  activeFitting.reducerType = nextType;
+  state.selectedFitting = activeFitting.id;
   recordHistory({ type: "snapshot", snapshot });
   updateAll();
+  return true;
+}
+
+async function toggleSelectedReducerType() {
+  const data = selectedFittingData();
+  if (!data || data.fitting.type !== "reducer" || !ensureDrawingEditable("change reducer type")) return;
+  const nextType = fittingReducerType(data.fitting) === "eccentric" ? "concentric" : "eccentric";
+  await previewAndSetManualReducerType(data.fitting.id, nextType);
 }
 
 function deleteSelectedFitting() {
@@ -14723,7 +15151,9 @@ function updateAppModeVisibility(mode = appMode) {
 function applyWorkflowKindUi() {
   const quick = isQuickPdfMode();
   document.body.dataset.workflowKind = quick ? "quick" : "managed";
-  if (quickPdfBar) quickPdfBar.hidden = !quick;
+  // The adaptive Next step strip now owns the fast path as well, avoiding two
+  // competing instruction bars above the drawing on tablets and phones.
+  if (quickPdfBar) quickPdfBar.hidden = true;
 
   const reviewButton = appModeButtons.find((button) => button.dataset.appMode === "review");
   const exportButton = appModeButtons.find((button) => button.dataset.appMode === "export");
@@ -14738,6 +15168,214 @@ function applyWorkflowKindUi() {
       : "Save project in this browser";
     saveBrowserProjectButton.setAttribute("aria-label", saveBrowserProjectButton.title);
   }
+}
+
+function workflowNextIssue(checks, findings) {
+  for (const finding of findings) {
+    const index = checks.findings.indexOf(finding);
+    if (index >= 0) return { finding, index };
+  }
+  return null;
+}
+
+function workflowNextStepData(precomputedChecks = null) {
+  if (!hasDrawingContent()) {
+    return {
+      id: "draw",
+      kicker: isQuickPdfMode() ? "QUICK PDF · NEXT" : "NEXT STEP",
+      title: "Start drawing",
+      message: "Choose Draw, then drag from the yellow point to create the first pipe run.",
+      label: "Start drawing",
+      tone: "draw",
+    };
+  }
+
+  if (isQuickPdfMode()) {
+    const issues = drawingHealthItems().filter((item) => item.severity === "error" && !item.acknowledged);
+    if (issues.length) {
+      return {
+        id: "quick-health",
+        kicker: "QUICK PDF · CHECK",
+        title: issues[0].title,
+        message: `${issues.length} drawing issue${issues.length === 1 ? " needs" : "s need"} attention before the PDF is ready.`,
+        label: issues.length === 1 ? "Fix issue" : `Fix next issue (${issues.length})`,
+        item: issues[0],
+        tone: "fix",
+      };
+    }
+    return {
+      id: "quick-export",
+      kicker: "QUICK PDF · READY",
+      title: "Your drawing is ready to download",
+      message: "Create the PDF now. You can still convert this drawing into a managed job later.",
+      label: "Download PDF",
+      tone: "export",
+    };
+  }
+
+  const project = normalizeProjectInfo(state.projectInfo);
+  const requiredDetails = [
+    ["jobNumber", "job number"],
+    ["spoolNumber", "spool number"],
+    ["revision", "revision"],
+  ];
+  const missing = requiredDetails.filter(([field]) => !project[field]);
+  if (missing.length) {
+    return {
+      id: "project",
+      kicker: "NEXT STEP · DETAILS",
+      title: "Add the spool details",
+      message: `Missing ${missing.map(([, label]) => label).join(", ")}. These identify the drawing and its PDF.`,
+      label: "Add details",
+      field: missing[0][0],
+      tone: "details",
+    };
+  }
+
+  if (cloudSaveConflict || cloudSaveError || (cloudSaveDirty && currentProjectHasCloudRecord())) {
+    return {
+      id: "save",
+      kicker: "NEXT STEP · SAVE",
+      title: cloudSaveError || cloudSaveConflict ? "Recover the failed save" : "Save the latest changes",
+      message: cloudSaveConflict
+        ? "A newer cloud copy exists. Review the save choice before continuing."
+        : cloudSaveError
+        ? "The local recovery copy is safe. Retry the cloud save before issuing."
+        : "Keep this revision protected before it moves into checking.",
+      label: cloudSaveError || cloudSaveConflict ? "Retry save" : "Save changes",
+      tone: "save",
+    };
+  }
+
+  const checks = precomputedChecks ?? preIssueChecklist();
+  const fixableBlockers = checks.blockers.filter((finding) => finding.action?.type !== "approval");
+  const blocker = workflowNextIssue(checks, fixableBlockers);
+  if (blocker) {
+    return {
+      id: "finding",
+      kicker: "NEXT STEP · FIX",
+      title: blocker.finding.title,
+      message: `${fixableBlockers.length} issue${fixableBlockers.length === 1 ? " is" : "s are"} blocking this drawing.`,
+      label: fixableBlockers.length === 1 ? "Fix blocker" : `Fix next blocker (${fixableBlockers.length})`,
+      findingIndex: blocker.index,
+      tone: "fix",
+    };
+  }
+
+  const warning = workflowNextIssue(checks, checks.warnings);
+  if (warning && !projectStatusAtLeast(state.projectStatus, "readycheck")) {
+    return {
+      id: "finding",
+      kicker: "NEXT STEP · REVIEW",
+      title: warning.finding.title,
+      message: `${checks.warnings.length} warning${checks.warnings.length === 1 ? " needs" : "s need"} a check or recorded decision.`,
+      label: checks.warnings.length === 1 ? "Fix warning" : `Fix next (${checks.warnings.length})`,
+      findingIndex: warning.index,
+      tone: "review",
+    };
+  }
+
+  if (!projectStatusAtLeast(state.projectStatus, "readycheck")) {
+    return {
+      id: "readycheck",
+      kicker: "NEXT STEP · REVIEW",
+      title: "Send the drawing for checking",
+      message: "The drawing checks are clear. Lock this draft and move it to Ready to check.",
+      label: "Send for checking",
+      tone: "review",
+    };
+  }
+
+  if (!state.checkedAt) {
+    return {
+      id: "approve",
+      kicker: "NEXT STEP · APPROVAL",
+      title: "Record the drawing approval",
+      message: "Enter the checker and optional review comment before this revision can be issued.",
+      label: "Approve drawing",
+      tone: "review",
+    };
+  }
+
+  if (!state.issuedAt) {
+    return {
+      id: "issue",
+      kicker: "NEXT STEP · ISSUE",
+      title: "Issue this revision",
+      message: checks.warnings.length
+        ? `${checks.warnings.length} warning${checks.warnings.length === 1 ? "" : "s"} will require a recorded override reason.`
+        : "All required checks and approval records are complete.",
+      label: "Issue drawing",
+      tone: "issue",
+    };
+  }
+
+  return {
+    id: "export",
+    kicker: "NEXT STEP · READY",
+    title: "Create the fabrication PDF",
+    message: `Revision ${project.revision || "-"} is issued and ready for workshop use.`,
+    label: "Download fabrication PDF",
+    tone: "export",
+  };
+}
+
+function updateWorkflowNextStep(precomputedChecks = null) {
+  if (!workflowNextBar || !workflowNextButton) return;
+  workflowNextAction = workflowNextStepData(precomputedChecks);
+  workflowNextBar.hidden = false;
+  workflowNextBar.dataset.tone = workflowNextAction.tone || "";
+  if (workflowNextKicker) workflowNextKicker.textContent = workflowNextAction.kicker;
+  if (workflowNextTitle) workflowNextTitle.textContent = workflowNextAction.title;
+  if (workflowNextMessage) workflowNextMessage.textContent = workflowNextAction.message;
+  workflowNextButton.textContent = workflowNextAction.label;
+  const needsUnlockedDrawing = ["draw", "project", "quick-health", "readycheck"].includes(workflowNextAction.id);
+  workflowNextButton.disabled = needsUnlockedDrawing && drawingEditLocked();
+  workflowNextButton.title = workflowNextButton.disabled ? currentPermissionRestrictionText("edit") : workflowNextAction.message;
+  if (workflowNextModeButton) {
+    workflowNextModeButton.hidden = !isQuickPdfMode();
+    workflowNextModeButton.textContent = "Use managed workflow";
+  }
+}
+
+async function runWorkflowNextStep() {
+  const action = workflowNextAction ?? workflowNextStepData();
+  if (action.id === "draw") {
+    applyAppMode("draw");
+    setTool("draw");
+    showMobilePanel("drawing");
+    drawCanvas?.focus?.();
+  } else if (action.id === "project") {
+    await editProjectDetailsFromHealth(action.field);
+  } else if (action.id === "save") {
+    if (cloudSaveError || cloudSaveConflict || currentCloudSaveQueueEntry()) await retryQueuedCloudSave();
+    else await saveBrowserProject();
+  } else if (action.id === "quick-health" && action.item) {
+    await focusHealthIssue(action.item);
+  } else if (action.id === "finding") {
+    await handlePreIssueFinding(action.findingIndex);
+  } else if (action.id === "readycheck") {
+    if (!(currentDrawingProjectPermission().canEdit || currentDrawingProjectPermission().canIssue)) {
+      showAppNotice(currentPermissionRestrictionText("edit"));
+      return;
+    }
+    const proceed = await confirmAppAction("Lock this draft and move it to Ready to check?", {
+      title: "Send drawing for checking",
+      confirmLabel: "Send for checking",
+    });
+    if (!proceed) return;
+    applyProjectStatusChange("readycheck");
+    updateControls();
+    updateAll();
+    showHealthPanel();
+  } else if (action.id === "approve") {
+    await handleWorkflowAction("mark-checked");
+  } else if (action.id === "issue") {
+    await handleWorkflowAction("issue-drawing");
+  } else if (action.id === "quick-export" || action.id === "export") {
+    await exportIsoImage();
+  }
+  updateWorkflowNextStep();
 }
 
 function defaultToolForMode(mode = appMode) {
@@ -14990,6 +15628,73 @@ function currentSpoolNavigationIdentity() {
   };
 }
 
+function threeVectorSnapshot(vector) {
+  if (!vector) return null;
+  const values = [Number(vector.x), Number(vector.y), Number(vector.z)];
+  return values.every(Number.isFinite) ? values : null;
+}
+
+function normalizedThreeViewState(source) {
+  if (!source || typeof source !== "object") return null;
+  const vectors = [source.position, source.target, source.up].map((value) => (
+    Array.isArray(value) && value.length === 3
+      ? value.map(Number)
+      : null
+  ));
+  if (vectors.some((value) => !value || !value.every(Number.isFinite))) return null;
+  const zoom = Number(source.zoom);
+  return {
+    position: vectors[0],
+    target: vectors[1],
+    up: vectors[2],
+    zoom: Number.isFinite(zoom) && zoom > 0 ? zoom : 1,
+    navigationMode: source.navigationMode === "pan" ? "pan" : "orbit",
+    userMoved: source.userMoved === true,
+  };
+}
+
+function captureThreeViewState() {
+  if (!three.ready || !three.camera || !three.controls) {
+    return pendingThreeViewRestore ? cloneSpoolWorkspaceValue(pendingThreeViewRestore) : null;
+  }
+  return normalizedThreeViewState({
+    position: threeVectorSnapshot(three.camera.position),
+    target: threeVectorSnapshot(three.controls.target),
+    up: threeVectorSnapshot(three.camera.up),
+    zoom: three.camera.zoom,
+    navigationMode: three.navigationMode,
+    userMoved: three.userMovedCamera,
+  });
+}
+
+function applyThreeViewState(source) {
+  const restore = normalizedThreeViewState(source);
+  if (!restore) return false;
+  if (!three.ready || !three.camera || !three.controls) {
+    pendingThreeViewRestore = restore;
+    return false;
+  }
+
+  pendingThreeViewRestore = null;
+  three.camera.position.set(...restore.position);
+  three.camera.up.set(...restore.up).normalize();
+  three.controls.target.set(...restore.target);
+  three.camera.zoom = clampNumber(
+    restore.zoom,
+    three.controls.minZoom ?? 0.28,
+    three.controls.maxZoom ?? 10,
+  );
+  three.camera.lookAt(three.controls.target);
+  three.camera.updateProjectionMatrix();
+  three.camera.updateMatrixWorld(true);
+  three.controls.update();
+  three.userMovedCamera = restore.userMoved;
+  setThreeNavigationMode(restore.navigationMode);
+  three.renderer?.render(three.scene, three.camera);
+  update3dLabelPositions({ force: true });
+  return true;
+}
+
 function captureTemporaryWorkspaceNavigation() {
   if (temporaryWorkspaceNavigationState) return temporaryWorkspaceNavigationState;
   temporaryWorkspaceNavigationState = {
@@ -15007,6 +15712,7 @@ function captureTemporaryWorkspaceNavigation() {
     inspectorTab: activeInspectorTabName(),
     surfaceState: captureWorkspaceSurfaceState(),
     focusMode: focusModeActive,
+    threeView: captureThreeViewState(),
   };
   return temporaryWorkspaceNavigationState;
 }
@@ -15017,6 +15723,7 @@ function discardTemporaryWorkspaceNavigation() {
 
 function primaryWorkspaceDialogOpen() {
   return [
+    workflowStartDialog,
     homeDashboardDialog,
     projectLibraryDialog,
     tutorialDialog,
@@ -15068,6 +15775,7 @@ function restoreTemporaryWorkspaceNavigation() {
   updateAll({ save: false });
   restoreWorkspaceSurfaceState(restore.surfaceState);
   if (restore.focusMode && !focusModeActive) setFocusMode(true);
+  applyThreeViewState(restore.threeView);
   renderWorkspaceLocationStrips();
   return true;
 }
@@ -15141,10 +15849,18 @@ function captureSpoolWorkspaceUiState() {
   return {
     appMode,
     activeTool: state.activeTool,
+    gridScale: state.gridScale,
     drawingViewOffset: { ...drawingViewOffset },
+    selectedSegments: selectedSegmentIndexes(),
+    selectedFitting: state.selectedFitting,
+    selectedNote: state.selectedNote,
+    selectedMeasurement: state.selectedMeasurement,
+    selectedPoint: state.selectedPoint,
+    activePoint: state.activePoint,
     inspectorTab: activeInspectorTabName(),
     surfaceState: captureWorkspaceSurfaceState(),
     focusMode: focusModeActive,
+    threeView: captureThreeViewState(),
   };
 }
 
@@ -15356,18 +16072,38 @@ async function restoreSpoolWorkspaceTab(tab) {
     }
     projectComments = [];
     projectCommentsProjectId = null;
-    three.userMovedCamera = false;
     setNextIdsFromState(state);
+    state.gridScale = clampNumber(Number(tab.ui?.gridScale) || state.gridScale, 10, 72);
     drawingViewOffset = {
       x: Number(tab.ui?.drawingViewOffset?.x) || 0,
       y: Number(tab.ui?.drawingViewOffset?.y) || 0,
     };
+    setSelectedSegments(tab.ui?.selectedSegments ?? selectedSegmentIndexes());
+    state.selectedFitting = Number.isInteger(tab.ui?.selectedFitting) &&
+      state.fittings.some((fitting) => fitting.id === tab.ui.selectedFitting)
+      ? tab.ui.selectedFitting
+      : state.selectedFitting;
+    state.selectedNote = Number.isInteger(tab.ui?.selectedNote) &&
+      state.notes.some((note) => note.id === tab.ui.selectedNote)
+      ? tab.ui.selectedNote
+      : state.selectedNote;
+    state.selectedMeasurement = Number.isInteger(tab.ui?.selectedMeasurement) &&
+      normalizeMeasurements(state.measurements).some((measurement) => measurement.id === tab.ui.selectedMeasurement)
+      ? tab.ui.selectedMeasurement
+      : state.selectedMeasurement;
+    state.selectedPoint = Number.isInteger(tab.ui?.selectedPoint) && state.points[tab.ui.selectedPoint]
+      ? tab.ui.selectedPoint
+      : state.selectedPoint;
+    state.activePoint = Number.isInteger(tab.ui?.activePoint) && state.points[tab.ui.activePoint]
+      ? tab.ui.activePoint
+      : state.activePoint;
     applyAppMode(tab.ui?.appMode || "draw", { persist: false, activateTab: false, keepTool: true });
     updateControls();
     withCloudDirtySuppressed(() => updateAll({ save: false }));
     activateInspectorTab(tab.ui?.inspectorTab || "properties");
     restoreWorkspaceSurfaceState(tab.ui?.surfaceState);
     if (tab.ui?.focusMode) setFocusMode(true);
+    applyThreeViewState(tab.ui?.threeView);
     updateCloudStatus();
     if (currentProjectHasCloudRecord()) {
       loadProjectComments({ silent: true }).catch((error) => console.warn("Spool comments could not be refreshed after changing tabs.", error));
@@ -15432,18 +16168,36 @@ async function openProjectInWorkspaceTab(projectId, source = projectLibrarySourc
   return true;
 }
 
-async function createNewSpoolWorkspaceTab() {
+async function createNewSpoolWorkspaceTab(requestedWorkflowKind = "") {
   if (spoolWorkspaceTabs.length >= 8) {
     showAppNotice("Close one open spool tab before starting another.", { tone: "warning" });
     return false;
   }
+  const workflowKind = requestedWorkflowKind === "quick" || requestedWorkflowKind === "managed"
+    ? requestedWorkflowKind
+    : await openWorkflowStartDialog();
+  if (workflowKind === "cancel") return false;
   const previousId = activeSpoolWorkspaceTabId;
-  const defaults = nextProjectInfoForNewSpool(state.projectInfo);
+  const previousInfo = normalizeProjectInfo(state.projectInfo);
+  const defaults = isQuickPdfMode()
+    ? normalizeProjectInfo({
+        ...previousInfo,
+        jobNumber: "",
+        spoolNumber: "",
+        client: previousInfo.client === "Quick PDF" ? "" : previousInfo.client,
+        area: previousInfo.area === "Quick drawing" ? "" : previousInfo.area,
+      })
+    : nextProjectInfoForNewSpool(previousInfo);
   await flushActiveSpoolWorkspaceTab();
   persistUserDrawingDefaults();
   spoolWorkspaceSwitching = true;
   try {
     state = blankState();
+    state.workflowKind = workflowKind;
+    if (workflowKind === "quick") {
+      state.projectInfo = quickPdfProjectInfo(previousInfo);
+      state.projectInfoPrompted = true;
+    }
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
     cloudPermissionReadOnly = false;
@@ -15466,7 +16220,9 @@ async function createNewSpoolWorkspaceTab() {
   }
   const newTab = addCurrentStateAsSpoolWorkspaceTab({ source: "draft" });
   setSpoolWorkspaceWindowed(false);
-  const confirmed = await promptForProjectDetails({ force: true, defaults });
+  const confirmed = workflowKind === "quick"
+    ? true
+    : await promptForProjectDetails({ force: true, defaults });
   if (!confirmed) {
     const newTabIndex = spoolWorkspaceTabs.findIndex((tab) => tab.id === newTab.id);
     if (newTabIndex >= 0) spoolWorkspaceTabs.splice(newTabIndex, 1);
@@ -15481,7 +16237,16 @@ async function createNewSpoolWorkspaceTab() {
   setTool("draw");
   setPreviewHidden(true);
   showMobilePanel("drawing");
-  activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
+  if (workflowKind === "quick") {
+    if (firstUseGuideState) {
+      firstUseGuideState.active = false;
+      persistFirstUseGuideState();
+      renderFirstUseGuide();
+    }
+    showAppNotice("Quick PDF is ready in a new tab. Draw the spool, then use the recommended next step.");
+  } else {
+    activateFirstUseGuide({ force: true, reset: true, compact: true, stepId: "draw" });
+  }
   captureCurrentSpoolWorkspaceTab();
   return true;
 }
@@ -16380,9 +17145,10 @@ const ACTION_COMMANDS = [
   { id: "smart-spool-kit", label: "Smart Spool Kit", detail: "Reserve, pick or order stock for the open cloud spool", category: "Workshop", keywords: "kit picking reserve stock bom gear check missing order", capability: "production", run: () => openSmartSpoolKit() },
   { id: "dashboard", label: "Open home dashboard", detail: "Continue, restore, start or open a spool", category: "Project", keywords: "home start restore session", run: () => openHomeDashboard() },
   { id: "project-details", label: "Edit project details", detail: "Job, spool, revision, client and drawing data", category: "Project", keywords: "job number spool number rev revision drawn by client weld gap", capability: "edit", run: () => promptForProjectDetails({ force: true }) },
-  { id: "new-spool", label: "New spool", detail: "Save or discard the current drawing and start again", category: "Project", keywords: "new drawing reset blank", run: () => document.querySelector("#resetButton")?.click() },
+  { id: "new-spool", label: "New spool", detail: "Choose Quick PDF or the managed workshop workflow", category: "Project", keywords: "new drawing reset blank quick managed", run: () => startNewDrawingChoice() },
   { id: "import-project", label: "Import spool project", detail: "Open a SpoolMate HTML or JSON project file", category: "Project", keywords: "load upload open file backup", run: () => document.querySelector("#importProjectButton")?.click() },
   { id: "drawing-assistant", label: "Drawing import assistant", detail: "Trace a supplied drawing, photo or PDF", category: "Project", keywords: "trace image photo supplied drawing calibration", run: () => openDrawingAssistantDialog() },
+  { id: "schematic-takeoff", label: "Schematic fitting takeoff", detail: "Upload a schematic and isolate only the area to count", category: "Private beta", keywords: "schematic takeoff lasso highlight fittings count area", privateFeature: SCHEMATIC_TAKEOFF_FEATURE_KEY, run: () => openSchematicTakeoffDialog() },
   { id: "account", label: "Account and workspace", detail: "Sign in, switch business workspace or manage plan", category: "Account", keywords: "login sign in business team subscription trial", run: () => document.querySelector("#accountButton")?.click() },
   { id: "tutorial", label: "Interactive tutorial", detail: "Open the guided SpoolMate lessons", category: "Help", keywords: "training learn beginner quick start", run: () => openTutorialDialog() },
   { id: "videos", label: "Video tutorials", detail: "Watch complete, Jobs and drawing guides", category: "Help", keywords: "training video watch guide", run: () => openVideoTutorialDialog() },
@@ -16396,6 +17162,7 @@ function normalizeActionCommandText(value) {
 }
 
 function actionCommandAllowed(command) {
+  if (command.privateFeature === SCHEMATIC_TAKEOFF_FEATURE_KEY && !schematicTakeoffAccess) return false;
   if (command.capability === "edit") return currentDrawingProjectPermission().canEdit;
   if (command.capability === "issue") return currentDrawingProjectPermission().canIssue;
   if (command.capability === "production") return currentDrawingProjectPermission().canManageProduction;
@@ -16411,6 +17178,7 @@ function matchingActionCommands(query) {
   if (!normalized) return [];
   const terms = normalized.split(/\s+/).filter(Boolean);
   return ACTION_COMMANDS
+    .filter((command) => !command.privateFeature || actionCommandAllowed(command))
     .map((command) => {
       const label = normalizeActionCommandText(command.label);
       const keywords = normalizeActionCommandText(`${command.keywords || ""} ${command.detail || ""} ${command.category || ""}`);
@@ -19533,6 +20301,7 @@ function runTutorialStepAction() {
 }
 
 function closePrimaryWorkspaceDialogs(except = "") {
+  if (except !== "workflow-start" && workflowStartDialog && !workflowStartDialog.hidden) closeWorkflowStartDialog("cancel");
   if (except !== "home" && homeDashboardDialog && !homeDashboardDialog.hidden) closeHomeDashboard();
   if (except !== "jobs" && projectLibraryDialog && !projectLibraryDialog.hidden) closeProjectLibrary();
   if (except !== "workshop-stock" && workshopStockDialog && !workshopStockDialog.hidden) closeWorkshopStock();
@@ -19542,6 +20311,7 @@ function closePrimaryWorkspaceDialogs(except = "") {
   if (except !== "ai" && aiHelperDialog && !aiHelperDialog.hidden) closeAiHelper();
   if (except !== "auth" && authDialog && !authDialog.hidden && !authGateOpen) closeAuthDialog();
   if (except !== "support-admin" && supportAdminDialog && !supportAdminDialog.hidden) closeSupportAdminDialog();
+  if (except !== "schematic-takeoff" && schematicTakeoffDialog && !schematicTakeoffDialog.hidden) closeSchematicTakeoffDialog();
   if (except !== "tools" && toolSettingsDialog && !toolSettingsDialog.hidden) closeToolSettingsDialog();
   if (except !== "legal" && legalSupportDialog && !legalSupportDialog.hidden) closeLegalSupportDialog();
   if (except !== "big-spool" && bigSpoolDialog && !bigSpoolDialog.hidden) closeBigSpoolDialog();
@@ -20313,6 +21083,11 @@ const AI_HELPER_LOCAL_GUIDE = [
     help: "account",
   },
   {
+    patterns: [["schematic", "takeoff"], ["schematic", "fittings"], ["highlight", "schematic"], ["lasso", "fittings"]],
+    answer: "Schematic Takeoff is currently a protected private beta:\n1. Open Home or Account and choose Schematic Takeoff.\n2. Open a PDF, image or device photo of the schematic.\n3. Use Rectangle or Lasso around only the section required; use Pan and pinch/zoom to position it.\n4. Name the area and mark it ready for rules.\n5. Confirm fittings against that boundary and export the selected-area CSV.\n\nThe uploaded file stays on this device in this first version. Automatic symbol and duplicate-count rules will be added after the recognition rules are agreed.",
+    help: "account",
+  },
+  {
     patterns: [["jobs", "dashboard"], ["my", "day"], ["many", "jobs"], ["job", "filter"], ["needs", "attention"]],
     answer: "Use the Jobs screen in two layers:\n1. Jobs is the compact manager list. Filter it with Active, My jobs, Completed or All, and use search for a job, client, spool or worker.\n2. My day is the action list: My/Team attention, Assigned to me, Ready for checking and On hold. Workshop users only see their own urgent work; owners and admins see team issues.\n3. Press Review on a job with issues to jump straight to its problem list.\n4. Open More for the Jobs guide, Team comms and daily or weekly reports.\n\nYou should see each spool only once in My day, under the most urgent queue that applies.",
     tutorial: "Production board",
@@ -20418,6 +21193,7 @@ function aiHelperGuideMatch(question, minimumScore = 2) {
 }
 
 function aiHelperCurrentSurface() {
+  if (workflowStartDialog && !workflowStartDialog.hidden) return "New spool choice";
   if (homeDashboardDialog && !homeDashboardDialog.hidden) return "Home dashboard";
   if (projectLibraryDialog && !projectLibraryDialog.hidden) return "Jobs dashboard";
   if (projectDialog && !projectDialog.hidden) return "Project details";
@@ -21000,6 +21776,7 @@ function updateControls() {
 function updateAll(options = {}) {
   const save = options.save !== false;
   normalizeDrawingTrustState();
+  const workflowChecks = !isQuickPdfMode() && hasDrawingContent() ? preIssueChecklist() : null;
   drawIso();
   updateSegmentList();
   updateStats();
@@ -21007,13 +21784,14 @@ function updateAll(options = {}) {
   updateWeightsSummary();
   updateBomSummary();
   updateHealthSummary();
-  updateWorkflowSummary();
+  if (!isQuickPdfMode()) updateWorkflowSummary(workflowChecks);
   updateBackupSummary();
   renderProjectComments();
   updateSelectionControls();
   updateHistoryButtons();
   updatePipeSizeControls();
   updatePropertiesPanel();
+  updateWorkflowNextStep(workflowChecks);
   update3dPreview();
   renderRoleAccessNotice();
   renderWorkspaceLocationStrips();
@@ -21133,10 +21911,13 @@ function hasInspectorSelection() {
 }
 
 function revealInspectorForSelection() {
-  // Selection should not replace the drawing with a sheet on touch devices,
-  // and it should not dismiss a 3D model the user explicitly opened.
-  if (isTabletLayout() || !previewPanelHidden) return;
-  setInspectorDrawerOpen(true);
+  // Selection stays on the drawing. Details and 3D only open when the user
+  // explicitly asks for them, so a tap never replaces or shrinks the canvas.
+  if (isTabletLayout() || !previewPanelHidden) {
+    updateSelectionActionBar();
+    return;
+  }
+  updateSelectionActionBar();
 }
 
 function workspaceLayoutKind() {
@@ -21159,6 +21940,8 @@ function clearMobileSheetPresentation() {
   document.body.classList.remove("mobile-panel-open");
   controlPanel?.classList.remove("mobile-sheet-open");
   previewPanel?.classList.remove("mobile-sheet-open");
+  drawingPanel?.setAttribute("aria-hidden", "false");
+  previewPanel?.setAttribute("aria-hidden", "false");
   if (mobilePanelScrim) mobilePanelScrim.hidden = true;
 }
 
@@ -21232,6 +22015,8 @@ function showMobilePanel(panel = "drawing") {
   let normalized = requested;
   const previousPanel = document.body.dataset.mobilePanel || "drawing";
   let previewLayoutChanged = false;
+  // Touch panels are full-screen sheets, never floating/minimized remnants.
+  previewPanelMinimized = false;
   if (normalized === "preview") {
     if (previewPanelHidden) {
       previewPanelHidden = false;
@@ -21260,6 +22045,9 @@ function showMobilePanel(panel = "drawing") {
   document.body.classList.add("inspector-drawer-closed");
   controlPanel?.classList.toggle("mobile-sheet-open", normalized === "inspector");
   previewPanel?.classList.toggle("mobile-sheet-open", normalized === "preview");
+  controlPanel?.setAttribute("aria-hidden", String(normalized !== "inspector"));
+  previewPanel?.setAttribute("aria-hidden", String(normalized !== "preview"));
+  drawingPanel?.setAttribute("aria-hidden", String(normalized !== "drawing"));
 
   if (mobilePanelScrim) {
     mobilePanelScrim.hidden = !sheetOpen;
@@ -21272,6 +22060,9 @@ function showMobilePanel(panel = "drawing") {
 
   if (normalized === "preview") {
     schedulePreviewStabilize();
+    window.requestAnimationFrame(() => previewPanel?.querySelector("[data-mobile-close-panel]")?.focus?.());
+  } else if (normalized === "inspector") {
+    window.requestAnimationFrame(() => controlPanel?.querySelector("[data-mobile-close-panel]")?.focus?.());
   } else if (normalized === "drawing") {
     closeDrawingContextMenu();
   }
@@ -21419,6 +22210,793 @@ function setupSupportAdminDialog() {
       setSupportAdminStatus(error?.message || "Support action failed.", "error");
     });
   });
+}
+
+function defaultSchematicTakeoffState() {
+  return {
+    fileName: "",
+    fileKind: "",
+    source: null,
+    sourceWidth: 0,
+    sourceHeight: 0,
+    objectUrl: "",
+    pdf: null,
+    page: 1,
+    pageCount: 1,
+    pageLoading: false,
+    tool: "rectangle",
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    selections: [],
+    selectedId: "",
+    activeSelection: null,
+    pointers: new Map(),
+    gesture: null,
+  };
+}
+
+function ensureSchematicTakeoffState() {
+  if (!schematicTakeoffState) schematicTakeoffState = defaultSchematicTakeoffState();
+  return schematicTakeoffState;
+}
+
+function schematicTakeoffSelectedArea() {
+  const takeoff = ensureSchematicTakeoffState();
+  return takeoff.selections.find((selection) => selection.id === takeoff.selectedId) ?? null;
+}
+
+function schematicTakeoffAreaBounds(selection) {
+  if (!selection) return null;
+  if (selection.kind === "rectangle") {
+    return { x: selection.x, y: selection.y, width: selection.width, height: selection.height };
+  }
+  const points = Array.isArray(selection.points) ? selection.points : [];
+  if (!points.length) return null;
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+}
+
+function schematicTakeoffCropCanvasForSelection(selection, maxDimension = 1800) {
+  const takeoff = ensureSchematicTakeoffState();
+  const bounds = schematicTakeoffAreaBounds(selection);
+  if (!selection || selection.page !== takeoff.page || !takeoff.source || !bounds || bounds.width < 1 || bounds.height < 1) return null;
+  const padding = selection.kind === "lasso" ? Math.max(4, Math.min(bounds.width, bounds.height) * 0.025) : 0;
+  const left = clampNumber(bounds.x - padding, 0, takeoff.sourceWidth);
+  const top = clampNumber(bounds.y - padding, 0, takeoff.sourceHeight);
+  const right = clampNumber(bounds.x + bounds.width + padding, 0, takeoff.sourceWidth);
+  const bottom = clampNumber(bounds.y + bounds.height + padding, 0, takeoff.sourceHeight);
+  const cropWidth = Math.max(1, right - left);
+  const cropHeight = Math.max(1, bottom - top);
+  const scale = Math.min(1, Math.max(0.05, maxDimension / Math.max(cropWidth, cropHeight)));
+  const crop = document.createElement("canvas");
+  crop.width = Math.max(1, Math.ceil(cropWidth * scale));
+  crop.height = Math.max(1, Math.ceil(cropHeight * scale));
+  const ctx = crop.getContext("2d");
+  ctx.save();
+  ctx.scale(scale, scale);
+  ctx.translate(-left, -top);
+  ctx.beginPath();
+  if (selection.kind === "rectangle") {
+    ctx.rect(selection.x, selection.y, selection.width, selection.height);
+  } else {
+    (selection.points || []).forEach((point, index) => {
+      if (index === 0) ctx.moveTo(point.x, point.y);
+      else ctx.lineTo(point.x, point.y);
+    });
+    ctx.closePath();
+  }
+  ctx.clip();
+  ctx.drawImage(takeoff.source, 0, 0, takeoff.sourceWidth, takeoff.sourceHeight);
+  ctx.restore();
+  return crop;
+}
+
+function renderSchematicTakeoffCropPreview() {
+  if (!schematicTakeoffCropCanvas) return;
+  const selected = schematicTakeoffSelectedArea();
+  const crop = schematicTakeoffCropCanvasForSelection(selected, 900);
+  const rect = schematicTakeoffCropCanvas.getBoundingClientRect();
+  const width = Math.max(1, Math.round(rect.width || 280));
+  const height = Math.max(1, Math.round(rect.height || 150));
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  schematicTakeoffCropCanvas.width = Math.round(width * dpr);
+  schematicTakeoffCropCanvas.height = Math.round(height * dpr);
+  const ctx = schematicTakeoffCropCanvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  if (!crop) {
+    if (schematicTakeoffCropEmpty) {
+      schematicTakeoffCropEmpty.hidden = false;
+      schematicTakeoffCropEmpty.textContent = selected && selected.page !== ensureSchematicTakeoffState().page
+        ? `Open page ${selected.page} to preview this selected area.`
+        : "Select an area to preview the exact crop.";
+    }
+    return;
+  }
+  if (schematicTakeoffCropEmpty) schematicTakeoffCropEmpty.hidden = true;
+  const fit = Math.min((width - 12) / crop.width, (height - 12) / crop.height);
+  const drawWidth = crop.width * fit;
+  const drawHeight = crop.height * fit;
+  ctx.drawImage(crop, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+}
+
+function downloadSchematicTakeoffCrop() {
+  const takeoff = ensureSchematicTakeoffState();
+  const selected = schematicTakeoffSelectedArea();
+  const crop = schematicTakeoffCropCanvasForSelection(selected, 2400);
+  if (!crop || !selected) return;
+  crop.toBlob((blob) => {
+    if (!blob) {
+      showAppNotice("The selected area image could not be prepared.", { tone: "error" });
+      return;
+    }
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.download = `${safeFilePart(takeoff.fileName.replace(/\.[^.]+$/, "") || "schematic", "schematic")}-${safeFilePart(selected.name, "selected-area")}.png`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+  }, "image/png");
+}
+
+function schematicTakeoffCanvasInfo() {
+  if (!schematicTakeoffCanvas) return null;
+  const rect = schematicTakeoffCanvas.getBoundingClientRect();
+  if (rect.width < 2 || rect.height < 2) return null;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const width = Math.max(1, Math.round(rect.width * dpr));
+  const height = Math.max(1, Math.round(rect.height * dpr));
+  if (schematicTakeoffCanvas.width !== width || schematicTakeoffCanvas.height !== height) {
+    schematicTakeoffCanvas.width = width;
+    schematicTakeoffCanvas.height = height;
+  }
+  const ctx = schematicTakeoffCanvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { ctx, width: rect.width, height: rect.height, dpr };
+}
+
+function schematicTakeoffViewTransform(info = schematicTakeoffCanvasInfo()) {
+  const takeoff = ensureSchematicTakeoffState();
+  if (!info || !takeoff.sourceWidth || !takeoff.sourceHeight) return null;
+  const fitScale = Math.min(
+    Math.max(0.01, (info.width - 36) / takeoff.sourceWidth),
+    Math.max(0.01, (info.height - 36) / takeoff.sourceHeight),
+  );
+  const scale = fitScale * takeoff.zoom;
+  return {
+    fitScale,
+    scale,
+    x: (info.width - takeoff.sourceWidth * scale) / 2 + takeoff.panX,
+    y: (info.height - takeoff.sourceHeight * scale) / 2 + takeoff.panY,
+  };
+}
+
+function schematicTakeoffPoint(event) {
+  const rect = schematicTakeoffCanvas?.getBoundingClientRect();
+  if (!rect) return { x: 0, y: 0 };
+  return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+}
+
+function schematicTakeoffImagePoint(point) {
+  const takeoff = ensureSchematicTakeoffState();
+  const transform = schematicTakeoffViewTransform();
+  if (!transform) return null;
+  return {
+    x: clampNumber((point.x - transform.x) / transform.scale, 0, takeoff.sourceWidth),
+    y: clampNumber((point.y - transform.y) / transform.scale, 0, takeoff.sourceHeight),
+  };
+}
+
+function drawSchematicTakeoffSelection(ctx, selection, transform, selected = false) {
+  const stroke = selected ? "#f59e0b" : "#08a6c2";
+  ctx.save();
+  ctx.translate(transform.x, transform.y);
+  ctx.scale(transform.scale, transform.scale);
+  ctx.lineWidth = (selected ? 4 : 3) / transform.scale;
+  ctx.strokeStyle = stroke;
+  ctx.fillStyle = selected ? "rgba(245, 158, 11, 0.14)" : "rgba(8, 166, 194, 0.12)";
+  ctx.beginPath();
+  if (selection.kind === "rectangle") {
+    ctx.rect(selection.x, selection.y, selection.width, selection.height);
+  } else {
+    (selection.points || []).forEach((point, index) => {
+      if (index === 0) ctx.moveTo(point.x, point.y);
+      else ctx.lineTo(point.x, point.y);
+    });
+    ctx.closePath();
+  }
+  ctx.fill();
+  ctx.stroke();
+  ctx.restore();
+
+  const bounds = schematicTakeoffAreaBounds(selection);
+  if (!bounds) return;
+  const labelX = transform.x + bounds.x * transform.scale;
+  const labelY = transform.y + bounds.y * transform.scale;
+  ctx.save();
+  ctx.font = "700 13px Segoe UI, sans-serif";
+  const label = `${selection.name}${selection.ready ? " · READY" : ""}`;
+  const width = ctx.measureText(label).width + 18;
+  ctx.fillStyle = selected ? "#9a5b00" : "#006f83";
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") ctx.roundRect(labelX, Math.max(4, labelY - 29), width, 25, 7);
+  else ctx.rect(labelX, Math.max(4, labelY - 29), width, 25);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(label, labelX + 9, Math.max(21, labelY - 12));
+  ctx.restore();
+}
+
+function renderSchematicTakeoffCanvas() {
+  if (!schematicTakeoffDialog || schematicTakeoffDialog.hidden) return;
+  const takeoff = ensureSchematicTakeoffState();
+  const info = schematicTakeoffCanvasInfo();
+  if (!info) return;
+  const { ctx, width, height } = info;
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#e9eef0";
+  ctx.fillRect(0, 0, width, height);
+  const hasSource = Boolean(takeoff.source && takeoff.sourceWidth && takeoff.sourceHeight);
+  if (schematicTakeoffEmpty) schematicTakeoffEmpty.hidden = hasSource || takeoff.pageLoading;
+  if (!hasSource) return;
+  const transform = schematicTakeoffViewTransform(info);
+  ctx.save();
+  ctx.shadowColor = "rgba(3, 30, 41, 0.22)";
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 6;
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(transform.x, transform.y, takeoff.sourceWidth * transform.scale, takeoff.sourceHeight * transform.scale);
+  ctx.restore();
+  ctx.drawImage(
+    takeoff.source,
+    transform.x,
+    transform.y,
+    takeoff.sourceWidth * transform.scale,
+    takeoff.sourceHeight * transform.scale,
+  );
+  takeoff.selections
+    .filter((selection) => selection.page === takeoff.page)
+    .forEach((selection) => drawSchematicTakeoffSelection(ctx, selection, transform, selection.id === takeoff.selectedId));
+  if (takeoff.activeSelection) {
+    drawSchematicTakeoffSelection(ctx, {
+      ...takeoff.activeSelection,
+      name: takeoff.activeSelection.kind === "lasso" ? "New lasso" : "New area",
+    }, transform, true);
+  }
+}
+
+function schematicTakeoffToolHint(tool = ensureSchematicTakeoffState().tool) {
+  if (tool === "pan") return "Pan: drag the schematic · pinch or use +/− to zoom";
+  if (tool === "lasso") return "Lasso: draw around only the required fittings";
+  return "Rectangle: drag around the required section";
+}
+
+function setSchematicTakeoffTool(tool) {
+  const allowed = new Set(["pan", "rectangle", "lasso"]);
+  const next = allowed.has(tool) ? tool : "rectangle";
+  const takeoff = ensureSchematicTakeoffState();
+  takeoff.tool = next;
+  takeoff.activeSelection = null;
+  takeoff.gesture = null;
+  schematicTakeoffToolButtons.forEach((button) => {
+    const active = button.dataset.schematicTool === next;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+  if (schematicTakeoffHint) schematicTakeoffHint.textContent = schematicTakeoffToolHint(next);
+  if (schematicTakeoffCanvas) schematicTakeoffCanvas.dataset.tool = next;
+  renderSchematicTakeoffCanvas();
+}
+
+function setSchematicTakeoffZoom(value, focus = null) {
+  const takeoff = ensureSchematicTakeoffState();
+  const oldTransform = schematicTakeoffViewTransform();
+  const nextZoom = clampNumber(Number(value) || 1, 0.35, 8);
+  if (focus && oldTransform) {
+    const imagePoint = {
+      x: (focus.x - oldTransform.x) / oldTransform.scale,
+      y: (focus.y - oldTransform.y) / oldTransform.scale,
+    };
+    takeoff.zoom = nextZoom;
+    const nextTransform = schematicTakeoffViewTransform();
+    takeoff.panX += focus.x - (nextTransform.x + imagePoint.x * nextTransform.scale);
+    takeoff.panY += focus.y - (nextTransform.y + imagePoint.y * nextTransform.scale);
+  } else {
+    takeoff.zoom = nextZoom;
+  }
+  if (schematicTakeoffZoomReadout) schematicTakeoffZoomReadout.value = `${Math.round(takeoff.zoom * 100)}%`;
+  renderSchematicTakeoffCanvas();
+}
+
+function fitSchematicTakeoffView() {
+  const takeoff = ensureSchematicTakeoffState();
+  takeoff.zoom = 1;
+  takeoff.panX = 0;
+  takeoff.panY = 0;
+  if (schematicTakeoffZoomReadout) schematicTakeoffZoomReadout.value = "100%";
+  renderSchematicTakeoffCanvas();
+}
+
+function schematicTakeoffAreaLabel(page = ensureSchematicTakeoffState().page) {
+  const takeoff = ensureSchematicTakeoffState();
+  const number = takeoff.selections.filter((selection) => selection.page === page).length + 1;
+  return takeoff.pageCount > 1 ? `Page ${page} · Area ${number}` : `Area ${number}`;
+}
+
+function addSchematicTakeoffSelection(selection) {
+  const takeoff = ensureSchematicTakeoffState();
+  const next = {
+    ...selection,
+    id: createTraceabilityId("AREA"),
+    page: takeoff.page,
+    name: schematicTakeoffAreaLabel(),
+    ready: false,
+    items: [],
+  };
+  takeoff.selections.push(next);
+  takeoff.selectedId = next.id;
+  renderSchematicTakeoffPanels();
+  renderSchematicTakeoffCanvas();
+}
+
+function finishSchematicTakeoffSelection() {
+  const takeoff = ensureSchematicTakeoffState();
+  const active = takeoff.activeSelection;
+  takeoff.activeSelection = null;
+  if (!active) return;
+  if (active.kind === "rectangle") {
+    if (active.width < 8 || active.height < 8) {
+      renderSchematicTakeoffCanvas();
+      return;
+    }
+    addSchematicTakeoffSelection(active);
+    return;
+  }
+  const points = active.points || [];
+  const bounds = schematicTakeoffAreaBounds(active);
+  if (points.length < 3 || !bounds || bounds.width < 8 || bounds.height < 8) {
+    renderSchematicTakeoffCanvas();
+    return;
+  }
+  addSchematicTakeoffSelection({ kind: "lasso", points });
+}
+
+function handleSchematicTakeoffPointerDown(event) {
+  const takeoff = ensureSchematicTakeoffState();
+  if (!takeoff.source || event.button > 0) return;
+  event.preventDefault();
+  schematicTakeoffCanvas?.setPointerCapture?.(event.pointerId);
+  const point = schematicTakeoffPoint(event);
+  takeoff.pointers.set(event.pointerId, point);
+  if (takeoff.pointers.size >= 2) {
+    const pointers = [...takeoff.pointers.values()].slice(0, 2);
+    const midpoint = { x: (pointers[0].x + pointers[1].x) / 2, y: (pointers[0].y + pointers[1].y) / 2 };
+    takeoff.activeSelection = null;
+    takeoff.gesture = {
+      type: "pinch",
+      distance: Math.hypot(pointers[1].x - pointers[0].x, pointers[1].y - pointers[0].y),
+      midpoint,
+      zoom: takeoff.zoom,
+      panX: takeoff.panX,
+      panY: takeoff.panY,
+    };
+    return;
+  }
+  if (takeoff.tool === "pan") {
+    takeoff.gesture = { type: "pan", pointerId: event.pointerId, start: point, panX: takeoff.panX, panY: takeoff.panY };
+    return;
+  }
+  const imagePoint = schematicTakeoffImagePoint(point);
+  if (!imagePoint) return;
+  takeoff.gesture = { type: "selection", pointerId: event.pointerId, start: imagePoint };
+  takeoff.activeSelection = takeoff.tool === "lasso"
+    ? { kind: "lasso", points: [imagePoint] }
+    : { kind: "rectangle", x: imagePoint.x, y: imagePoint.y, width: 0, height: 0 };
+  renderSchematicTakeoffCanvas();
+}
+
+function handleSchematicTakeoffPointerMove(event) {
+  const takeoff = ensureSchematicTakeoffState();
+  if (!takeoff.pointers.has(event.pointerId)) return;
+  event.preventDefault();
+  const point = schematicTakeoffPoint(event);
+  takeoff.pointers.set(event.pointerId, point);
+  if (takeoff.gesture?.type === "pinch" && takeoff.pointers.size >= 2) {
+    const pointers = [...takeoff.pointers.values()].slice(0, 2);
+    const distance = Math.max(1, Math.hypot(pointers[1].x - pointers[0].x, pointers[1].y - pointers[0].y));
+    const midpoint = { x: (pointers[0].x + pointers[1].x) / 2, y: (pointers[0].y + pointers[1].y) / 2 };
+    takeoff.panX = takeoff.gesture.panX + midpoint.x - takeoff.gesture.midpoint.x;
+    takeoff.panY = takeoff.gesture.panY + midpoint.y - takeoff.gesture.midpoint.y;
+    setSchematicTakeoffZoom(takeoff.gesture.zoom * distance / Math.max(1, takeoff.gesture.distance), midpoint);
+    return;
+  }
+  if (takeoff.gesture?.type === "pan" && takeoff.gesture.pointerId === event.pointerId) {
+    takeoff.panX = takeoff.gesture.panX + point.x - takeoff.gesture.start.x;
+    takeoff.panY = takeoff.gesture.panY + point.y - takeoff.gesture.start.y;
+    renderSchematicTakeoffCanvas();
+    return;
+  }
+  if (takeoff.gesture?.type !== "selection" || takeoff.gesture.pointerId !== event.pointerId || !takeoff.activeSelection) return;
+  const imagePoint = schematicTakeoffImagePoint(point);
+  if (!imagePoint) return;
+  if (takeoff.activeSelection.kind === "rectangle") {
+    takeoff.activeSelection.x = Math.min(takeoff.gesture.start.x, imagePoint.x);
+    takeoff.activeSelection.y = Math.min(takeoff.gesture.start.y, imagePoint.y);
+    takeoff.activeSelection.width = Math.abs(imagePoint.x - takeoff.gesture.start.x);
+    takeoff.activeSelection.height = Math.abs(imagePoint.y - takeoff.gesture.start.y);
+  } else {
+    const points = takeoff.activeSelection.points;
+    const previous = points.at(-1);
+    if (!previous || Math.hypot(imagePoint.x - previous.x, imagePoint.y - previous.y) > 2) points.push(imagePoint);
+  }
+  renderSchematicTakeoffCanvas();
+}
+
+function handleSchematicTakeoffPointerEnd(event, cancelled = false) {
+  const takeoff = ensureSchematicTakeoffState();
+  const gesture = takeoff.gesture;
+  takeoff.pointers.delete(event.pointerId);
+  if (gesture?.type === "pinch") {
+    if (takeoff.pointers.size < 2) takeoff.gesture = null;
+    return;
+  }
+  if (gesture?.pointerId !== event.pointerId) return;
+  takeoff.gesture = null;
+  if (gesture.type === "selection") {
+    if (cancelled) {
+      takeoff.activeSelection = null;
+      renderSchematicTakeoffCanvas();
+    } else {
+      finishSchematicTakeoffSelection();
+    }
+  }
+}
+
+function schematicTakeoffFittingCount(selection) {
+  return (selection?.items || []).reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0);
+}
+
+function renderSchematicTakeoffPanels() {
+  const takeoff = ensureSchematicTakeoffState();
+  const selected = schematicTakeoffSelectedArea();
+  const pageSelections = takeoff.selections.filter((selection) => selection.page === takeoff.page);
+  if (schematicTakeoffSelectionCount) schematicTakeoffSelectionCount.textContent = `${takeoff.selections.length} ${takeoff.selections.length === 1 ? "area" : "areas"}`;
+  if (schematicTakeoffSelectionList) {
+    schematicTakeoffSelectionList.innerHTML = takeoff.selections.length
+      ? takeoff.selections.map((selection) => `
+          <div class="schematic-selection-row${selection.id === takeoff.selectedId ? " active" : ""}">
+            <button type="button" data-schematic-selection="${escapeHtml(selection.id)}">
+              <strong>${escapeHtml(selection.name)}</strong>
+              <span>Page ${selection.page} · ${selection.kind === "lasso" ? "Lasso" : "Rectangle"} · ${schematicTakeoffFittingCount(selection)} fittings</span>
+            </button>
+            <button class="danger" type="button" data-delete-schematic-selection="${escapeHtml(selection.id)}" aria-label="Delete ${escapeHtml(selection.name)}">×</button>
+          </div>`).join("")
+      : '<div class="schematic-empty-list">Draw a rectangle or lasso to create Area 1.</div>';
+  }
+  if (schematicTakeoffSelectionNameInput) {
+    schematicTakeoffSelectionNameInput.disabled = !selected;
+    schematicTakeoffSelectionNameInput.value = selected?.name || "";
+  }
+  if (schematicTakeoffReadyButton) {
+    schematicTakeoffReadyButton.disabled = !selected;
+    schematicTakeoffReadyButton.textContent = selected?.ready ? "Area ready for recognition rules" : "Mark area ready for rules";
+  }
+  if (schematicTakeoffDownloadCropButton) schematicTakeoffDownloadCropButton.disabled = !selected || selected.page !== takeoff.page || !takeoff.source;
+  if (schematicTakeoffAddFittingButton) schematicTakeoffAddFittingButton.disabled = !selected;
+  if (schematicTakeoffFittingList) {
+    const items = selected?.items || [];
+    schematicTakeoffFittingList.innerHTML = items.length
+      ? items.map((item) => `
+          <div class="schematic-fitting-row">
+            <div><strong>${escapeHtml(item.type)} · ${escapeHtml(item.size || "Size not set")}</strong><span>${item.quantity} ${item.quantity === 1 ? "item" : "items"}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span></div>
+            <button class="danger" type="button" data-delete-schematic-fitting="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.type)}">×</button>
+          </div>`).join("")
+      : `<div class="schematic-empty-list">${selected ? "No confirmed fittings in this area yet." : "Select an area, then add confirmed fittings while we define automatic rules."}</div>`;
+  }
+  const allItems = takeoff.selections.flatMap((selection) => selection.items || []);
+  const total = allItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  if (schematicTakeoffTotal) schematicTakeoffTotal.textContent = `${total} ${total === 1 ? "fitting" : "fittings"}`;
+  const grouped = new Map();
+  allItems.forEach((item) => {
+    const key = `${item.type}\u0000${item.size || ""}`;
+    const current = grouped.get(key) || { type: item.type, size: item.size || "Size not set", quantity: 0 };
+    current.quantity += Number(item.quantity || 0);
+    grouped.set(key, current);
+  });
+  if (schematicTakeoffSummary) {
+    schematicTakeoffSummary.innerHTML = grouped.size
+      ? [...grouped.values()].sort((a, b) => a.type.localeCompare(b.type) || a.size.localeCompare(b.size)).map((item) => `<div><span>${escapeHtml(item.type)} · ${escapeHtml(item.size)}</span><strong>${item.quantity}</strong></div>`).join("")
+      : '<div class="schematic-empty-list">Confirmed fittings from every selected area will be combined here.</div>';
+  }
+  if (schematicTakeoffExportButton) schematicTakeoffExportButton.disabled = !allItems.length;
+  if (schematicTakeoffPageReadout) schematicTakeoffPageReadout.textContent = `Page ${takeoff.page} / ${takeoff.pageCount}`;
+  if (schematicTakeoffPreviousPageButton) schematicTakeoffPreviousPageButton.disabled = takeoff.pageLoading || takeoff.page <= 1;
+  if (schematicTakeoffNextPageButton) schematicTakeoffNextPageButton.disabled = takeoff.pageLoading || takeoff.page >= takeoff.pageCount;
+  if (schematicTakeoffClearButton) schematicTakeoffClearButton.disabled = !takeoff.selections.length;
+  if (schematicTakeoffHint && pageSelections.length) schematicTakeoffHint.textContent = `${pageSelections.length} selected ${pageSelections.length === 1 ? "area" : "areas"} on this page · ${schematicTakeoffToolHint()}`;
+  window.requestAnimationFrame(renderSchematicTakeoffCropPreview);
+}
+
+async function selectSchematicTakeoffArea(id) {
+  const takeoff = ensureSchematicTakeoffState();
+  const selection = takeoff.selections.find((item) => item.id === id);
+  if (!selection) return;
+  takeoff.selectedId = selection.id;
+  if (selection.page !== takeoff.page && takeoff.pdf) await renderSchematicTakeoffPdfPage(selection.page);
+  const bounds = schematicTakeoffAreaBounds(selection);
+  const info = schematicTakeoffCanvasInfo();
+  if (bounds && info && takeoff.sourceWidth && takeoff.sourceHeight) {
+    const fitScale = Math.min((info.width - 80) / Math.max(1, bounds.width), (info.height - 80) / Math.max(1, bounds.height));
+    const documentFit = Math.min((info.width - 36) / takeoff.sourceWidth, (info.height - 36) / takeoff.sourceHeight);
+    takeoff.zoom = clampNumber(fitScale / Math.max(0.001, documentFit), 1, 5);
+    const transform = schematicTakeoffViewTransform(info);
+    takeoff.panX += info.width / 2 - (transform.x + (bounds.x + bounds.width / 2) * transform.scale);
+    takeoff.panY += info.height / 2 - (transform.y + (bounds.y + bounds.height / 2) * transform.scale);
+  }
+  renderSchematicTakeoffPanels();
+  renderSchematicTakeoffCanvas();
+}
+
+function addConfirmedSchematicFitting() {
+  const selected = schematicTakeoffSelectedArea();
+  if (!selected) return;
+  const quantity = clampNumber(Math.round(Number(schematicTakeoffFittingQuantityInput?.value) || 1), 1, 9999);
+  selected.items.push({
+    id: createTraceabilityId("FIT"),
+    type: String(schematicTakeoffFittingTypeInput?.value || "Other").slice(0, 40),
+    size: String(schematicTakeoffFittingSizeInput?.value || "").trim().slice(0, 40),
+    quantity,
+    note: String(schematicTakeoffFittingNoteInput?.value || "").trim().slice(0, 120),
+    source: "confirmed",
+  });
+  if (schematicTakeoffFittingQuantityInput) schematicTakeoffFittingQuantityInput.value = "1";
+  if (schematicTakeoffFittingNoteInput) schematicTakeoffFittingNoteInput.value = "";
+  renderSchematicTakeoffPanels();
+}
+
+function exportSchematicTakeoffCsv() {
+  const takeoff = ensureSchematicTakeoffState();
+  const rows = [["Schematic", "Page", "Area", "Fitting", "Size", "Quantity", "Note", "Source"]];
+  takeoff.selections.forEach((selection) => {
+    (selection.items || []).forEach((item) => rows.push([
+      takeoff.fileName, selection.page, selection.name, item.type, item.size, item.quantity, item.note, item.source,
+    ]));
+  });
+  if (rows.length === 1) return;
+  const csv = rows.map((row) => row.map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
+  const filename = `${safeFilePart(takeoff.fileName.replace(/\.[^.]+$/, "") || "schematic", "schematic")}-selected-fitting-takeoff.csv`;
+  downloadTextFile(csv, filename, "text/csv");
+}
+
+async function schematicTakeoffPdfModule() {
+  if (!schematicTakeoffPdfModulePromise) {
+    schematicTakeoffPdfModulePromise = import(PDF_JS_URL).then((module) => {
+      module.GlobalWorkerOptions.workerSrc = PDF_JS_WORKER_URL;
+      return module;
+    });
+  }
+  return schematicTakeoffPdfModulePromise;
+}
+
+async function renderSchematicTakeoffPdfPage(pageNumber) {
+  const takeoff = ensureSchematicTakeoffState();
+  if (!takeoff.pdf) return;
+  takeoff.pageLoading = true;
+  takeoff.page = clampNumber(Math.round(Number(pageNumber) || 1), 1, takeoff.pageCount);
+  takeoff.source = null;
+  renderSchematicTakeoffPanels();
+  renderSchematicTakeoffCanvas();
+  try {
+    const page = await takeoff.pdf.getPage(takeoff.page);
+    const natural = page.getViewport({ scale: 1 });
+    const scale = Math.min(2.4, Math.max(1.2, 2600 / Math.max(natural.width, natural.height)));
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.ceil(viewport.width);
+    canvas.height = Math.ceil(viewport.height);
+    await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+    takeoff.source = canvas;
+    takeoff.sourceWidth = canvas.width;
+    takeoff.sourceHeight = canvas.height;
+    fitSchematicTakeoffView();
+  } finally {
+    takeoff.pageLoading = false;
+    renderSchematicTakeoffPanels();
+    renderSchematicTakeoffCanvas();
+  }
+}
+
+async function disposeSchematicTakeoffSource() {
+  const takeoff = ensureSchematicTakeoffState();
+  if (takeoff.objectUrl) URL.revokeObjectURL(takeoff.objectUrl);
+  takeoff.objectUrl = "";
+  if (takeoff.source && typeof takeoff.source.close === "function") takeoff.source.close();
+  takeoff.source = null;
+  if (takeoff.pdf) await takeoff.pdf.destroy().catch(() => null);
+  takeoff.pdf = null;
+}
+
+async function loadSchematicTakeoffFile(file) {
+  if (!file) return;
+  if (file.size > 40 * 1024 * 1024) throw new Error("Choose a schematic smaller than 40 MB for this private beta.");
+  const takeoff = ensureSchematicTakeoffState();
+  await disposeSchematicTakeoffSource();
+  takeoff.fileName = String(file.name || "schematic").slice(0, 180);
+  takeoff.selections = [];
+  takeoff.selectedId = "";
+  takeoff.page = 1;
+  takeoff.pageCount = 1;
+  const isPdf = file.type === "application/pdf" || file.name.toLowerCase().endsWith(".pdf");
+  if (isPdf) {
+    takeoff.fileKind = "pdf";
+    takeoff.pageLoading = true;
+    renderSchematicTakeoffCanvas();
+    try {
+      const pdfjs = await schematicTakeoffPdfModule();
+      const data = new Uint8Array(await file.arrayBuffer());
+      takeoff.pdf = await pdfjs.getDocument({ data }).promise;
+      takeoff.pageCount = takeoff.pdf.numPages;
+      await renderSchematicTakeoffPdfPage(1);
+    } catch (error) {
+      takeoff.pageLoading = false;
+      throw new Error(`The PDF could not be prepared for selection. ${error?.message || "Try exporting the page as an image."}`);
+    }
+  } else if (file.type.startsWith("image/")) {
+    takeoff.fileKind = "image";
+    let source = null;
+    if ("createImageBitmap" in globalThis) {
+      try {
+        source = await createImageBitmap(file);
+      } catch {
+        source = null;
+      }
+    }
+    if (!source) {
+      takeoff.objectUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.src = takeoff.objectUrl;
+      await image.decode();
+      source = image;
+    }
+    takeoff.source = source;
+    takeoff.sourceWidth = source.naturalWidth || source.width;
+    takeoff.sourceHeight = source.naturalHeight || source.height;
+    fitSchematicTakeoffView();
+  } else {
+    throw new Error("Use a PDF, PNG, JPG or another supported image file.");
+  }
+  renderSchematicTakeoffPanels();
+  renderSchematicTakeoffCanvas();
+  if (schematicTakeoffHint) schematicTakeoffHint.textContent = `${takeoff.fileName} ready · ${schematicTakeoffToolHint()}`;
+}
+
+async function openSchematicTakeoffDialog() {
+  if (!cloudUser) {
+    openAuthDialog({ mode: "signin" });
+    throw new Error("Sign in with an approved private-beta account first.");
+  }
+  if (!(await refreshSchematicTakeoffAccess({ force: true }))) {
+    throw new Error("This account is not approved for the Schematic Takeoff private beta.");
+  }
+  closePrimaryWorkspaceDialogs("schematic-takeoff");
+  ensureSchematicTakeoffState();
+  schematicTakeoffDialog.hidden = false;
+  document.body.classList.add("schematic-takeoff-open");
+  if (schematicTakeoffIdentity) schematicTakeoffIdentity.textContent = `${cloudUser.email || cloudUser.id} / protected account access confirmed`;
+  setSchematicTakeoffTool(schematicTakeoffState.tool);
+  renderSchematicTakeoffPanels();
+  window.requestAnimationFrame(() => {
+    renderSchematicTakeoffCanvas();
+    schematicTakeoffFileInput?.focus?.();
+  });
+}
+
+function closeSchematicTakeoffDialog() {
+  if (schematicTakeoffDialog) schematicTakeoffDialog.hidden = true;
+  document.body.classList.remove("schematic-takeoff-open");
+  const takeoff = ensureSchematicTakeoffState();
+  takeoff.pointers.clear();
+  takeoff.gesture = null;
+  takeoff.activeSelection = null;
+  scheduleTemporaryWorkspaceRestore();
+}
+
+function setupSchematicTakeoff() {
+  schematicTakeoffButton?.addEventListener("click", () => {
+    closeAuthDialog();
+    openSchematicTakeoffDialog().catch((error) => showAppNotice(error?.message || "Schematic Takeoff could not open.", { tone: "warning" }));
+  });
+  schematicTakeoffCloseButton?.addEventListener("click", closeSchematicTakeoffDialog);
+  schematicTakeoffDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === schematicTakeoffDialog) closeSchematicTakeoffDialog();
+  });
+  schematicTakeoffFileInput?.addEventListener("change", () => {
+    loadSchematicTakeoffFile(schematicTakeoffFileInput.files?.[0]).catch((error) => {
+      console.warn("Schematic file load failed.", error);
+      showAppNotice(error?.message || "The schematic could not be opened.", { tone: "error" });
+    });
+    schematicTakeoffFileInput.value = "";
+  });
+  schematicTakeoffToolButtons.forEach((button) => button.addEventListener("click", () => setSchematicTakeoffTool(button.dataset.schematicTool)));
+  schematicTakeoffZoomOutButton?.addEventListener("click", () => setSchematicTakeoffZoom(ensureSchematicTakeoffState().zoom / 1.25));
+  schematicTakeoffZoomInButton?.addEventListener("click", () => setSchematicTakeoffZoom(ensureSchematicTakeoffState().zoom * 1.25));
+  schematicTakeoffFitButton?.addEventListener("click", fitSchematicTakeoffView);
+  schematicTakeoffPreviousPageButton?.addEventListener("click", () => renderSchematicTakeoffPdfPage(ensureSchematicTakeoffState().page - 1));
+  schematicTakeoffNextPageButton?.addEventListener("click", () => renderSchematicTakeoffPdfPage(ensureSchematicTakeoffState().page + 1));
+  schematicTakeoffCanvas?.addEventListener("pointerdown", handleSchematicTakeoffPointerDown);
+  schematicTakeoffCanvas?.addEventListener("pointermove", handleSchematicTakeoffPointerMove);
+  schematicTakeoffCanvas?.addEventListener("pointerup", (event) => handleSchematicTakeoffPointerEnd(event));
+  schematicTakeoffCanvas?.addEventListener("pointercancel", (event) => handleSchematicTakeoffPointerEnd(event, true));
+  schematicTakeoffCanvas?.addEventListener("wheel", (event) => {
+    if (!ensureSchematicTakeoffState().source) return;
+    event.preventDefault();
+    setSchematicTakeoffZoom(ensureSchematicTakeoffState().zoom * (event.deltaY > 0 ? 0.88 : 1.14), schematicTakeoffPoint(event));
+  }, { passive: false });
+  schematicTakeoffSelectionList?.addEventListener("click", (event) => {
+    const deleteButton = event.target.closest("[data-delete-schematic-selection]");
+    if (deleteButton) {
+      const takeoff = ensureSchematicTakeoffState();
+      takeoff.selections = takeoff.selections.filter((selection) => selection.id !== deleteButton.dataset.deleteSchematicSelection);
+      if (!takeoff.selections.some((selection) => selection.id === takeoff.selectedId)) takeoff.selectedId = takeoff.selections.at(-1)?.id || "";
+      renderSchematicTakeoffPanels();
+      renderSchematicTakeoffCanvas();
+      return;
+    }
+    const selectionButton = event.target.closest("[data-schematic-selection]");
+    if (selectionButton) selectSchematicTakeoffArea(selectionButton.dataset.schematicSelection).catch((error) => showAppNotice(error?.message || "Area could not be opened."));
+  });
+  schematicTakeoffSelectionNameInput?.addEventListener("change", () => {
+    const selected = schematicTakeoffSelectedArea();
+    if (!selected) return;
+    selected.name = String(schematicTakeoffSelectionNameInput.value || "Area").trim().slice(0, 80) || "Area";
+    renderSchematicTakeoffPanels();
+    renderSchematicTakeoffCanvas();
+    schematicTakeoffSelectionNameInput.focus({ preventScroll: true });
+  });
+  schematicTakeoffReadyButton?.addEventListener("click", () => {
+    const selected = schematicTakeoffSelectedArea();
+    if (!selected) return;
+    selected.ready = true;
+    renderSchematicTakeoffPanels();
+    renderSchematicTakeoffCanvas();
+    showAppNotice(`${selected.name} is isolated and ready for the recognition rules.`, { tone: "success" });
+  });
+  schematicTakeoffDownloadCropButton?.addEventListener("click", downloadSchematicTakeoffCrop);
+  schematicTakeoffFittingForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    addConfirmedSchematicFitting();
+  });
+  schematicTakeoffFittingList?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-delete-schematic-fitting]");
+    const selected = schematicTakeoffSelectedArea();
+    if (!button || !selected) return;
+    selected.items = selected.items.filter((item) => item.id !== button.dataset.deleteSchematicFitting);
+    renderSchematicTakeoffPanels();
+  });
+  schematicTakeoffClearButton?.addEventListener("click", async () => {
+    const takeoff = ensureSchematicTakeoffState();
+    if (!takeoff.selections.length) return;
+    const confirmed = await confirmAppAction("This removes every boundary and confirmed fitting from the current schematic.", { title: "Clear selected areas?", confirmLabel: "Clear areas", tone: "warning" });
+    if (!confirmed) return;
+    takeoff.selections = [];
+    takeoff.selectedId = "";
+    renderSchematicTakeoffPanels();
+    renderSchematicTakeoffCanvas();
+  });
+  schematicTakeoffExportButton?.addEventListener("click", exportSchematicTakeoffCsv);
+  if ("ResizeObserver" in window && schematicTakeoffCanvas?.parentElement) {
+    const observer = new ResizeObserver(() => {
+      window.cancelAnimationFrame(schematicTakeoffResizeFrame);
+      schematicTakeoffResizeFrame = window.requestAnimationFrame(renderSchematicTakeoffCanvas);
+    });
+    observer.observe(schematicTakeoffCanvas.parentElement);
+  }
 }
 
 function setAuthMode(mode, options = {}) {
@@ -21908,6 +23486,11 @@ function ensureHomeDashboardShell() {
             <strong>Workshop stock</strong>
             <span>Scan stock, print QR labels, take counts and assign materials to spools.</span>
           </button>
+          <button class="home-dashboard-action schematic-takeoff-launch" id="homeDashboardSchematicTakeoffButton" type="button" hidden>
+            <svg><use href="#icon-report"></use></svg>
+            <strong>Schematic Takeoff</strong>
+            <span>Select an area and build its fittings list.</span>
+          </button>
           <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
             <svg><use href="#icon-help"></use></svg>
             <strong>Tutorial</strong>
@@ -21970,6 +23553,7 @@ function ensureHomeDashboardShell() {
   homeDashboardNewButton = document.querySelector("#homeDashboardNewButton");
   homeDashboardJobsButton = document.querySelector("#homeDashboardJobsButton");
   homeDashboardWorkshopStockButton = document.querySelector("#homeDashboardWorkshopStockButton");
+  homeDashboardSchematicTakeoffButton = document.querySelector("#homeDashboardSchematicTakeoffButton");
   homeDashboardTutorialButton = document.querySelector("#homeDashboardTutorialButton");
   homeDashboardVideoButton = document.querySelector("#homeDashboardVideoButton");
   homeDashboardSampleButton = document.querySelector("#homeDashboardSampleButton");
@@ -22018,6 +23602,13 @@ function setupHomeDashboard() {
     openWorkshopStock().catch((error) => {
       console.warn("Open workshop stock failed.", error);
       showAppNotice(workshopStockErrorMessage(error), { tone: "warning" });
+    });
+  });
+  homeDashboardSchematicTakeoffButton?.addEventListener("click", () => {
+    closeHomeDashboard();
+    openSchematicTakeoffDialog().catch((error) => {
+      console.warn("Open Schematic Takeoff failed.", error);
+      showAppNotice(error?.message || "Schematic Takeoff could not open.", { tone: "warning" });
     });
   });
   homeDashboardTutorialButton?.addEventListener("click", () => {
@@ -22464,6 +24055,13 @@ function setupProjectDialog() {
     }
   });
 
+  workflowStartQuickButton?.addEventListener("click", () => closeWorkflowStartDialog("quick"));
+  workflowStartManagedButton?.addEventListener("click", () => closeWorkflowStartDialog("managed"));
+  workflowStartCancelButton?.addEventListener("click", () => closeWorkflowStartDialog("cancel"));
+  workflowStartDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === workflowStartDialog) closeWorkflowStartDialog("cancel");
+  });
+
   projectDialogJobPickerButton?.addEventListener("click", () => {
     if (!projectJobQuickPick || projectDialogJobPickerButton.disabled) return;
     if (projectJobQuickPick.hidden) {
@@ -22518,7 +24116,10 @@ function setupProjectDialog() {
   });
   projectLibraryNewButton?.addEventListener("click", () => {
     closeProjectLibrary();
-    startNewDrawing();
+    startNewDrawingChoice().catch((error) => {
+      console.warn("Start new spool failed.", error);
+      showAppNotice(error?.message || "Start new spool failed.");
+    });
   });
   projectLibrarySaveButton?.addEventListener("click", () => {
     saveBrowserProject({ silent: true })
@@ -22589,6 +24190,12 @@ function setupProjectDialog() {
 function handleProjectLibraryActivation(event) {
   const target = event.target instanceof Element ? event.target : null;
   if (!target) return;
+
+  const batchSelect = target.closest(".project-batch-select, [data-project-batch-select]");
+  if (batchSelect) {
+    event.stopPropagation();
+    return;
+  }
 
   const libraryAction = target.closest("[data-project-library-action]");
   if (libraryAction) {
@@ -22726,6 +24333,20 @@ function handleProjectLibraryAction(actionElement) {
     renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
     return;
   }
+  if (action === "batch-clear") {
+    projectLibraryBatchSelection.clear();
+    updateProjectLibraryBatchUi();
+    return;
+  }
+  if (action === "batch-apply") {
+    applyProjectLibraryBatchUpdates(actionElement).catch((error) => {
+      projectLibraryBatchBusy = false;
+      console.warn("Batch production update failed.", error);
+      showAppNotice(error?.message || "The selected spools could not be updated.", { tone: "warning" });
+      renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+    });
+    return;
+  }
   if (action === "scan-qr") {
     openQrScanner().catch((error) => {
       console.warn("QR scanner could not open.", error);
@@ -22805,6 +24426,10 @@ function handleProjectLibraryAction(actionElement) {
 async function handleProjectLibraryFieldChange(event) {
   const target = event.target instanceof HTMLInputElement || event.target instanceof HTMLSelectElement ? event.target : null;
   if (!target) return;
+  if (target.dataset.projectBatchSelect) {
+    toggleProjectLibraryBatchSelection(target.dataset.projectId, target.checked);
+    return;
+  }
   if (target.dataset.materialCheckField) {
     await handleMaterialChecklistFieldChange(target);
     return;
@@ -23350,6 +24975,7 @@ function setupThree(THREE, OrbitControls) {
   });
   three.controls.addEventListener("end", () => {
     setThreePreviewInteracting(false);
+    captureCurrentSpoolWorkspaceTab();
   });
   threeCanvas?.addEventListener("contextmenu", (event) => event.preventDefault());
   applyThreeNavigationMode(three.navigationMode);
@@ -23359,6 +24985,7 @@ function setupThree(THREE, OrbitControls) {
   renderStatus.textContent = "Drag rotate / middle pan / wheel zoom";
   resizeThree();
   update3dPreview();
+  if (pendingThreeViewRestore) applyThreeViewState(pendingThreeViewRestore);
   redrawLoadPlanIfOpen();
   animateThree();
 }
@@ -27085,6 +28712,55 @@ async function refreshSupportAdminAccess(options = {}) {
   return supportAdminAccess;
 }
 
+function updateSchematicTakeoffLaunchers() {
+  document.querySelectorAll(".schematic-takeoff-launch").forEach((button) => {
+    button.hidden = !schematicTakeoffAccess;
+  });
+}
+
+function resetSchematicTakeoffAccess() {
+  schematicTakeoffAccess = false;
+  schematicTakeoffAccessCheckedUserId = "";
+  updateSchematicTakeoffLaunchers();
+  if (schematicTakeoffDialog && !schematicTakeoffDialog.hidden) closeSchematicTakeoffDialog();
+  if (schematicTakeoffState) {
+    disposeSchematicTakeoffSource().catch((error) => console.warn("Schematic Takeoff source cleanup failed.", error));
+    schematicTakeoffState = null;
+  }
+}
+
+async function refreshSchematicTakeoffAccess(options = {}) {
+  const userId = cloudUser?.id || "";
+  if (!userId || !supabaseClient) {
+    resetSchematicTakeoffAccess();
+    return false;
+  }
+  if (!options.force && schematicTakeoffAccessCheckedUserId === userId) return schematicTakeoffAccess;
+  schematicTakeoffAccessCheckedUserId = userId;
+  schematicTakeoffAccess = false;
+  updateSchematicTakeoffLaunchers();
+  try {
+    const { data, error } = await supabaseClient
+      .from(PRIVATE_FEATURE_ACCESS_TABLE)
+      .select("feature_key")
+      .eq("feature_key", SCHEMATIC_TAKEOFF_FEATURE_KEY)
+      .eq("user_id", userId)
+      .eq("active", true)
+      .maybeSingle();
+    if (error) throw error;
+    schematicTakeoffAccess = data?.feature_key === SCHEMATIC_TAKEOFF_FEATURE_KEY;
+    if (schematicTakeoffIdentity && schematicTakeoffAccess) {
+      schematicTakeoffIdentity.textContent = `${cloudUser.email || userId} / protected account access confirmed`;
+    }
+  } catch (error) {
+    if (!/private_feature_access|42P01|42501/i.test(String(error?.message || ""))) {
+      console.warn("Schematic Takeoff access check failed.", error);
+    }
+  }
+  updateSchematicTakeoffLaunchers();
+  return schematicTakeoffAccess;
+}
+
 function setSupportAdminStatus(message, tone = "") {
   if (!supportAdminStatus) return;
   supportAdminStatus.textContent = String(message || "Ready.");
@@ -29266,6 +30942,7 @@ async function applyCloudSession(session) {
     dashboardPreferenceSaveQueue.clear();
     dashboardPreferenceSaveBusy = false;
     resetSupportAdminAccess();
+    resetSchematicTakeoffAccess();
     cloudProfile = null;
     currentCloudProjectOwnerId = null;
     currentCloudProjectCompanyId = null;
@@ -29290,6 +30967,7 @@ async function applyCloudSession(session) {
   }
   updateCloudStatus();
   refreshSupportAdminAccess().catch((error) => console.warn("Support Admin availability check failed.", error));
+  refreshSchematicTakeoffAccess().catch((error) => console.warn("Schematic Takeoff availability check failed.", error));
   maybeShowLicenceWarning();
   if (hasActiveCloudLicense() && state.projectId && hasDrawingContent()) {
     queueCloudAutosave();
@@ -31390,6 +33068,7 @@ async function saveBrowserProject(options = {}) {
 
 async function openBrowserProject(options = {}) {
   captureTemporaryWorkspaceNavigation();
+  closeDrawingContextMenu();
   closePrimaryWorkspaceDialogs("jobs");
   ensureProjectLibraryDashboardShell();
   projectLibraryGuideVisible = false;
@@ -31487,6 +33166,7 @@ function rememberProjectLibraryFolderOpen(folderKey, open) {
 }
 
 function showProjectLibraryDialog() {
+  closeDrawingContextMenu();
   if (projectLibraryDialog) {
     projectLibraryDialog.hidden = false;
   }
@@ -31532,6 +33212,150 @@ function promiseWithTimeout(promise, timeoutMs, message = "Timed out") {
   });
 }
 
+function projectLibraryBatchBar(projects = projectLibraryProjects) {
+  const visibleIds = new Set((Array.isArray(projects) ? projects : []).map((project) => project.id));
+  const selectedCount = [...projectLibraryBatchSelection].filter((projectId) => visibleIds.has(projectId)).length;
+  const assignees = productionBoardAssigneeChoices(projectLibraryProjects);
+  const section = document.createElement("section");
+  section.className = "project-batch-bar";
+  section.dataset.projectBatchBar = "true";
+  section.hidden = selectedCount === 0;
+  section.innerHTML = `
+    <div class="project-batch-heading">
+      <div>
+        <strong><span data-project-batch-count>${selectedCount}</span> spool${selectedCount === 1 ? "" : "s"} selected</strong>
+        <span>Fill only the changes you want, then apply them together.</span>
+      </div>
+      <button type="button" data-project-library-action="batch-clear">Clear selection</button>
+    </div>
+    <div class="project-batch-fields">
+      <label>
+        <span>Assign worker</span>
+        <input data-project-batch-field="assignee" list="projectBatchAssigneeOptions" type="text" maxlength="80" placeholder="Leave unchanged" />
+      </label>
+      <label>
+        <span>Due date</span>
+        <input data-project-batch-field="dueDate" type="date" />
+      </label>
+      <label>
+        <span>Stage</span>
+        <select data-project-batch-field="status">
+          <option value="">Keep current stage</option>
+          ${PROJECT_STATUS_FLOW.map(([key, label]) => `<option value="${key}">${escapeHtml(label)}</option>`).join("")}
+        </select>
+      </label>
+      <label>
+        <span>Hold</span>
+        <select data-project-batch-field="hold">
+          <option value="keep">Keep current hold</option>
+          <option value="place">Place on hold</option>
+          <option value="remove">Remove hold</option>
+        </select>
+      </label>
+      <button type="button" class="primary-button" data-project-library-action="batch-apply"${projectLibraryBatchBusy ? " disabled" : ""}>${projectLibraryBatchBusy ? "Applying..." : "Apply to selected"}</button>
+    </div>
+    ${assignees.length ? `<datalist id="projectBatchAssigneeOptions">${assignees.map((name) => `<option value="${escapeHtml(name)}"></option>`).join("")}<option value="Unassigned"></option></datalist>` : ""}
+  `;
+  return section;
+}
+
+function updateProjectLibraryBatchUi() {
+  const selectedCount = projectLibraryBatchSelection.size;
+  projectLibraryDialog?.querySelectorAll("[data-project-batch-select]").forEach((checkbox) => {
+    checkbox.checked = projectLibraryBatchSelection.has(checkbox.dataset.projectId);
+  });
+  projectLibraryDialog?.querySelectorAll("[data-project-batch-bar]").forEach((bar) => {
+    bar.hidden = selectedCount === 0;
+    const count = bar.querySelector("[data-project-batch-count]");
+    if (count) count.textContent = String(selectedCount);
+    const heading = bar.querySelector(".project-batch-heading strong");
+    if (heading) heading.lastChild.textContent = ` spool${selectedCount === 1 ? "" : "s"} selected`;
+  });
+}
+
+function toggleProjectLibraryBatchSelection(projectId, selected) {
+  if (!projectId) return;
+  if (selected) projectLibraryBatchSelection.add(projectId);
+  else projectLibraryBatchSelection.delete(projectId);
+  updateProjectLibraryBatchUi();
+}
+
+async function applyProjectLibraryBatchUpdates(actionElement) {
+  if (projectLibraryBatchBusy || !projectLibraryBatchSelection.size) return;
+  const bar = actionElement?.closest("[data-project-batch-bar]")
+    ?? projectLibraryDialog?.querySelector("[data-project-batch-bar]:not([hidden])");
+  if (!bar) return;
+  const assigneeInput = bar.querySelector("[data-project-batch-field='assignee']");
+  const dueDateInput = bar.querySelector("[data-project-batch-field='dueDate']");
+  const statusInput = bar.querySelector("[data-project-batch-field='status']");
+  const holdInput = bar.querySelector("[data-project-batch-field='hold']");
+  const assigneeText = String(assigneeInput?.value ?? "").trim().slice(0, 80);
+  const dueDate = String(dueDateInput?.value ?? "").trim();
+  const status = String(statusInput?.value ?? "").trim();
+  const holdAction = String(holdInput?.value ?? "keep");
+  const changesRequested = Boolean(assigneeText || dueDate || status || holdAction !== "keep");
+  if (!changesRequested) {
+    showAppNotice("Choose an assignment, due date, stage or hold change first.");
+    return;
+  }
+
+  let holdReason = "";
+  if (holdAction === "place") {
+    const response = await openFieldInputDialog({
+      title: `Place ${projectLibraryBatchSelection.size} spools on hold`,
+      label: "Shared hold reason",
+      value: "",
+      placeholder: "Missing material, client hold, access unavailable...",
+      help: "This reason is recorded against every selected spool.",
+      submitLabel: "Apply hold",
+    });
+    holdReason = String(response ?? "").trim().slice(0, 140);
+    if (!holdReason) return;
+  }
+
+  const projectIds = [...projectLibraryBatchSelection];
+  projectLibraryBatchBusy = true;
+  bar.querySelectorAll("input, select, button").forEach((control) => { control.disabled = true; });
+  const failures = [];
+  let applied = 0;
+  for (const projectId of projectIds) {
+    const project = projectLibraryProjects.find((item) => item.id === projectId);
+    if (!project || !projectPermission(project).canManageProduction) {
+      const projectTitle = project ? savedProjectSpoolTitle(project) : "Unknown spool";
+      failures.push(`${projectTitle}: production access required`);
+      continue;
+    }
+    const productionInfo = {};
+    if (assigneeText) productionInfo.assignee = assigneeText.toLowerCase() === "unassigned" ? "" : assigneeText;
+    if (dueDate) productionInfo.dueDate = dueDate;
+    if (holdAction === "place") {
+      productionInfo.hold = true;
+      productionInfo.holdReason = holdReason;
+    } else if (holdAction === "remove") {
+      productionInfo.hold = false;
+      productionInfo.holdReason = "";
+    }
+    const updates = {};
+    if (Object.keys(productionInfo).length) updates.productionInfo = productionInfo;
+    if (status) updates.status = status;
+    try {
+      const changed = await updateSavedProjectWorkflow(projectId, updates);
+      if (changed) applied += 1;
+      else failures.push(`${savedProjectSpoolTitle(project)}: update was not saved`);
+    } catch (error) {
+      failures.push(`${savedProjectSpoolTitle(project)}: ${error?.message || "update failed"}`);
+    }
+  }
+  projectLibraryBatchBusy = false;
+  renderProjectLibrary(projectLibraryProjects, { source: projectLibrarySource });
+  if (applied) {
+    showAppNotice(`${applied} spool${applied === 1 ? "" : "s"} updated together.`, { tone: "success" });
+  }
+  if (failures.length) {
+    showAppNotice(`${failures.length} selected spool${failures.length === 1 ? "" : "s"} could not be updated. ${failures[0]}`, { tone: "warning" });
+  }
+}
+
 function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {}) {
   if (!projectLibraryList) return;
   applyRoleDefaultTeamDashboardView();
@@ -31541,6 +33365,10 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   ensureProjectLibraryReportSlot();
   projectLibrarySource = options.source === "cloud" ? "cloud" : "browser";
   projectLibraryProjects = Array.isArray(projects) ? [...projects] : [];
+  const availableProjectIds = new Set(projectLibraryProjects.map((project) => project.id));
+  projectLibraryBatchSelection = new Set(
+    [...projectLibraryBatchSelection].filter((projectId) => availableProjectIds.has(projectId)),
+  );
   const canSwitchProjectSource = Boolean(cloudUser && hasCloudReadAccess());
   if (projectLibrarySourceButton) {
     projectLibrarySourceButton.hidden = !canSwitchProjectSource;
@@ -31599,6 +33427,7 @@ function renderProjectLibrary(projects = loadSavedBrowserProjects(), options = {
   }
 
   projectLibraryList.append(projectDashboardCard(filteredProjects, { totalCount: projectLibraryProjects.length, query }));
+  projectLibraryList.append(projectLibraryBatchBar(filteredProjects));
 
   if (!filteredProjects.length) {
     const empty = document.createElement("div");
@@ -31649,6 +33478,7 @@ function renderProjectLibraryFolderWindow(folder) {
 
   header.append(copy, backButton);
   windowCard.append(header);
+  windowCard.append(projectLibraryBatchBar(folder.projects));
   windowCard.append(projectJobSummaryCard(folder));
   windowCard.append(projectProductionBoard(folder.projects));
 
@@ -33458,6 +35288,10 @@ function projectProductionCard(project) {
 
   card.innerHTML = `
     <div class="production-card-head">
+      <label class="project-batch-select" title="Select this spool for a batch workshop update">
+        <input type="checkbox" data-project-batch-select="true" data-project-id="${escapeHtml(project.id)}"${projectLibraryBatchSelection.has(project.id) ? " checked" : ""}${canManage ? "" : " disabled"} />
+        <span>Select</span>
+      </label>
       <button type="button" class="production-card-title" data-open-project-id="${escapeHtml(project.id)}" data-project-source="${escapeHtml(project.source ?? projectLibrarySource)}">
         <strong>${escapeHtml(savedProjectSpoolTitle(project))}</strong>
         <span>${escapeHtml(savedProjectDetailLine(project))}</span>
@@ -33966,7 +35800,17 @@ function projectLibraryRow(project) {
     newWindowButton.dataset.projectSource = project.source ?? projectLibrarySource;
     newWindowButton.title = "Keep the current spool open and load this one in another in-app tab";
 
-    row.append(main, openButton, newWindowButton, deleteButton);
+    const batchSelect = document.createElement("label");
+    batchSelect.className = "project-batch-select";
+    batchSelect.title = permission.canManageProduction
+      ? "Select this spool for a batch workshop update"
+      : roleRequirementText("production");
+    batchSelect.innerHTML = `
+      <input type="checkbox" data-project-batch-select="true" data-project-id="${escapeHtml(project.id)}"${projectLibraryBatchSelection.has(project.id) ? " checked" : ""}${permission.canManageProduction ? "" : " disabled"} />
+      <span>Select</span>
+    `;
+
+    row.append(batchSelect, main, openButton, newWindowButton, deleteButton);
     return row;
 }
 
@@ -36252,6 +38096,14 @@ function quickPdfProjectInfo(previousInfo = state.projectInfo) {
   }, state.pipeSpec);
 }
 
+async function startNewDrawingChoice() {
+  const workflowKind = await openWorkflowStartDialog();
+  if (workflowKind === "cancel") return false;
+  if (workflowKind === "quick") return startQuickPdfDrawing();
+  await startNewDrawing();
+  return true;
+}
+
 async function startQuickPdfDrawing() {
   clearPendingProjectCommentPhoto();
   const previousInfo = normalizeProjectInfo(state.projectInfo);
@@ -37094,6 +38946,29 @@ async function openNewDrawingDialog() {
   return new Promise((resolve) => {
     newDrawingDialogResolver = resolve;
   });
+}
+
+function openWorkflowStartDialog() {
+  if (!workflowStartDialog || !workflowStartQuickButton || !workflowStartManagedButton) {
+    return Promise.resolve("managed");
+  }
+  if (workflowStartDialogResolver) {
+    workflowStartDialogResolver("cancel");
+    workflowStartDialogResolver = null;
+  }
+  closePrimaryWorkspaceDialogs("workflow-start");
+  workflowStartDialog.hidden = false;
+  workflowStartQuickButton.focus();
+  return new Promise((resolve) => {
+    workflowStartDialogResolver = resolve;
+  });
+}
+
+function closeWorkflowStartDialog(choice = "cancel") {
+  if (workflowStartDialog) workflowStartDialog.hidden = true;
+  const resolve = workflowStartDialogResolver;
+  workflowStartDialogResolver = null;
+  resolve?.(choice);
 }
 
 function closeNewDrawingDialog(choice = "cancel") {
@@ -39821,8 +41696,8 @@ function renderContextPipeSizeMenu() {
   });
   drawingContextMenu.append(backButton);
   addDrawingContextHint(branchMainLinked
-    ? "This is the straight-through main at a welded branch. Both main sections will change together; the branch outlet stays unchanged."
-    : "Tap a size to apply it to the selected run. Use Undo if it was the wrong one.");
+    ? "This is the straight-through main at a welded branch. Both main sections will preview together; the branch outlet stays unchanged."
+    : "Tap a size to preview the resulting spool, reducers and cut length before applying it.");
 
   for (const size of pipeSizesForSpec(state.pipeSpec)) {
     const button = document.createElement("button");
@@ -39841,9 +41716,9 @@ function renderContextPipeSizeMenu() {
       : `NPS ${size.nps} / OD ${size.od.toFixed(1)} mm / ${pipeSpec().schedule}`;
     button.append(label, detail);
 
-    button.addEventListener("click", () => {
-      setPipeSizeForSegments(targetIndexes, size.nb);
+    button.addEventListener("click", async () => {
       closeDrawingContextMenu();
+      await previewAndSetPipeSizeForSegments(targetIndexes, size.nb);
     });
     drawingContextMenu.append(button);
   }
@@ -40317,6 +42192,21 @@ function openSelectedFlangeStandardMenu(fittingId) {
   positionDrawingContextMenu(Math.max(10, window.innerWidth * 0.5 - 165), Math.max(10, window.innerHeight * 0.22));
 }
 
+async function confirmDrawingMutationPreview(options = {}) {
+  const beforeState = drawingPreviewCandidate();
+  const afterState = drawingPreviewCandidate(beforeState, options.mutateCandidate);
+  return openDrawingChangePreview({
+    title: options.title,
+    help: options.help,
+    beforeState,
+    afterState,
+    affectedIndexes: options.affectedIndexes ?? [],
+    facts: options.facts ?? [],
+    note: options.note,
+    applyLabel: options.applyLabel,
+  });
+}
+
 function renderFlangeStandardMenu(fittingId, options = {}) {
   setDrawingContextMenuVariant(null);
   const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "flange");
@@ -40334,7 +42224,7 @@ function renderFlangeStandardMenu(fittingId, options = {}) {
     },
     keepOpen: !options.fromInspector,
   }]);
-  addDrawingContextHint("Tap a flange type to apply it now. Existing flange count stays the same.");
+  addDrawingContextHint("Tap a flange type to preview its effect before applying it. Existing flange count stays the same.");
   addDrawingContextSubheading("Common flange types");
   const current = fittingFlangeStandard(fitting);
   appendContextChoiceGrid(Object.entries(FLANGE_STANDARDS).map(([key, info]) => ({
@@ -40346,15 +42236,35 @@ function renderFlangeStandardMenu(fittingId, options = {}) {
   clampDrawingContextMenuToViewport();
 }
 
-function setFlangeStandardForFitting(fittingId, standard) {
+async function setFlangeStandardForFitting(fittingId, standard) {
   if (!ensureDrawingEditable("change flange standard")) return;
   const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "flange");
   if (!fitting) return;
   const nextStandard = normalizeFlangeStandard(standard);
-  if (fittingFlangeStandard(fitting) === nextStandard) return;
+  const currentStandard = fittingFlangeStandard(fitting);
+  if (currentStandard === nextStandard) return;
+  const confirmed = await confirmDrawingMutationPreview({
+    title: "Preview flange change",
+    help: "Review the selected flange type on the affected run before applying it.",
+    affectedIndexes: [fitting.segmentIndex],
+    mutateCandidate: (candidate) => {
+      const changed = candidate.fittings.find((item) => item.id === fittingId && item.type === "flange");
+      if (changed) changed.flangeStandard = nextStandard;
+    },
+    facts: [{
+      label: "Flange type",
+      before: flangeStandardInfo(currentStandard).label,
+      after: flangeStandardInfo(nextStandard).label,
+    }],
+    note: "The flange count and pipe route stay unchanged; the fabrication type, drilling and weight data are updated.",
+    applyLabel: "Apply flange type",
+  });
+  if (!confirmed) return;
+  const activeFitting = state.fittings.find((item) => item.id === fittingId && item.type === "flange");
+  if (!activeFitting) return;
   const snapshot = createUndoSnapshot();
-  fitting.flangeStandard = nextStandard;
-  state.selectedFitting = fitting.id;
+  activeFitting.flangeStandard = nextStandard;
+  state.selectedFitting = activeFitting.id;
   recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
@@ -40559,7 +42469,7 @@ function renderSocketSizeMenu(fittingId, options = {}) {
     keepOpen: !options.fromInspector,
   }]);
   drawingContextMenu.append(socketPreviewElement(settings));
-  addDrawingContextHint("Tap a socket size to apply it now.");
+  addDrawingContextHint("Tap a socket size to preview it on the spool before applying it.");
   addDrawingContextSubheading("Socket size");
   appendContextChoiceGrid(SOCKET_SIZE_CHOICES_NB.map((nb) => ({
     label: socketSizeChoiceLabel(nb),
@@ -40570,15 +42480,35 @@ function renderSocketSizeMenu(fittingId, options = {}) {
   clampDrawingContextMenuToViewport();
 }
 
-function setSocketSizeForFitting(fittingId, socketSizeNb) {
+async function setSocketSizeForFitting(fittingId, socketSizeNb) {
   if (!ensureDrawingEditable("change socket size")) return;
   const fitting = state.fittings.find((item) => item.id === fittingId && item.type === "socket");
   if (!fitting) return;
   const nextSize = normalizePipeSize(socketSizeNb);
-  if (fittingSocketSizeNb(fitting) === nextSize) return;
+  const currentSize = fittingSocketSizeNb(fitting);
+  if (currentSize === nextSize) return;
+  const confirmed = await confirmDrawingMutationPreview({
+    title: "Preview socket change",
+    help: "Review the socket size and affected fabrication run before applying it.",
+    affectedIndexes: [fitting.segmentIndex],
+    mutateCandidate: (candidate) => {
+      const changed = candidate.fittings.find((item) => item.id === fittingId && item.type === "socket");
+      if (changed) changed.socketSizeNb = nextSize;
+    },
+    facts: [{
+      label: "Socket size",
+      before: socketSizeChoiceLabel(currentSize),
+      after: socketSizeChoiceLabel(nextSize),
+    }],
+    note: "Socket position and pipe route stay unchanged; the socket callout and fabrication data use the new size.",
+    applyLabel: "Apply socket size",
+  });
+  if (!confirmed) return;
+  const activeFitting = state.fittings.find((item) => item.id === fittingId && item.type === "socket");
+  if (!activeFitting) return;
   const snapshot = createUndoSnapshot();
-  fitting.socketSizeNb = nextSize;
-  state.selectedFitting = fitting.id;
+  activeFitting.socketSizeNb = nextSize;
+  state.selectedFitting = activeFitting.id;
   recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
@@ -40684,33 +42614,48 @@ function toggleContextBendReducerSide() {
   updateAll();
 }
 
-function toggleContextAutoReducerType() {
+async function toggleContextAutoReducerType() {
   if (!ensureDrawingEditable("change reducer type")) return;
   const reducer = drawingContextTarget?.reducerHit?.reducer;
   if (!reducer) return;
 
+  const nodeIndex = reducer.nodeIndex;
+  const currentType = normalizeReducerType(reducer.reducerType);
+  const nextType = currentType === "eccentric" ? "concentric" : "eccentric";
+  const affectedIndexes = [reducer.firstSegmentIndex, reducer.secondSegmentIndex].filter(Number.isInteger);
+  const confirmed = await confirmDrawingMutationPreview({
+    title: "Preview automatic reducer type",
+    help: "Review the automatic reducer profile before applying this override.",
+    affectedIndexes,
+    mutateCandidate: (candidate) => {
+      candidate.reducerTypeOverrides = normalizeReducerTypeOverrides(candidate.reducerTypeOverrides, candidate.points.length);
+      if (nextType === normalizeReducerType(candidate.reducerType)) delete candidate.reducerTypeOverrides[nodeIndex];
+      else candidate.reducerTypeOverrides[nodeIndex] = nextType;
+    },
+    facts: [{ label: "Reducer type", before: reducerTypeLabel(currentType), after: reducerTypeLabel(nextType) }],
+    note: nextType === "eccentric"
+      ? "The reducer keeps one side flat and the ISO/3D profile shows the offset."
+      : "The reducer changes to a centred concentric profile.",
+    applyLabel: "Apply reducer type",
+  });
+  if (!confirmed) return;
   const snapshot = createUndoSnapshot();
   state.reducerTypeOverrides = normalizeReducerTypeOverrides(state.reducerTypeOverrides, state.points.length);
-  const nextType = normalizeReducerType(reducer.reducerType) === "eccentric" ? "concentric" : "eccentric";
   if (nextType === normalizeReducerType(state.reducerType)) {
-    delete state.reducerTypeOverrides[reducer.nodeIndex];
+    delete state.reducerTypeOverrides[nodeIndex];
   } else {
-    state.reducerTypeOverrides[reducer.nodeIndex] = nextType;
+    state.reducerTypeOverrides[nodeIndex] = nextType;
   }
   recordHistory({ type: "snapshot", snapshot });
   updateAll();
 }
 
-function toggleContextManualReducerType() {
+async function toggleContextManualReducerType() {
   if (!ensureDrawingEditable("change reducer type")) return;
   const fitting = drawingContextTarget?.fittingHit?.fitting;
   if (!fitting || fitting.type !== "reducer") return;
-
-  const snapshot = createUndoSnapshot();
-  fitting.reducerType = fittingReducerType(fitting) === "eccentric" ? "concentric" : "eccentric";
-  state.selectedFitting = fitting.id;
-  recordHistory({ type: "snapshot", snapshot });
-  updateAll();
+  const nextType = fittingReducerType(fitting) === "eccentric" ? "concentric" : "eccentric";
+  await previewAndSetManualReducerType(fitting.id, nextType);
 }
 
 async function setContextFittingWeight() {
@@ -40882,6 +42827,40 @@ function editContextSegmentLength() {
   });
 }
 
+function previewStateWithSegmentLength(source, segmentIndex, anchorIndex, lengthMm, edgeMeta = null) {
+  const candidate = drawingPreviewCandidate(source);
+  return withDrawingPreviewState(candidate, () => {
+    const segment = segments().find((item) => item.index === segmentIndex);
+    if (!segment) return candidate;
+    const normalizedLength = normalizeLength(lengthMm);
+    const fixedIndex = anchorIndex === segment.to ? segment.to : segment.from;
+    const targetIndex = fixedIndex === segment.from ? segment.to : segment.from;
+    const anchor = state.points[fixedIndex];
+    const target = state.points[targetIndex];
+    const direction = normalizePoint(subtractPoints(target, anchor));
+    translateSegmentSide(segment, fixedIndex, targetIndex, addPoints(anchor, direction, normalizedLength));
+    if (edgeMeta) {
+      state.edges[segment.index] = {
+        ...state.edges[segment.index],
+        ...normalizeOffsetEdgeMeta(edgeMeta),
+      };
+    } else if (segmentOffsetMeta(segment)) {
+      const meta = segmentOffsetMeta(segment);
+      state.edges[segment.index] = {
+        ...state.edges[segment.index],
+        ...normalizeOffsetEdgeMeta({
+          offsetSetMm: Math.round(normalizedLength / meta.multiplier),
+          offsetTravelMm: normalizedLength,
+          offsetAngleDeg: meta.angleDeg,
+          offsetPlane: meta.plane,
+          offsetDirection: meta.direction,
+        }),
+      };
+    }
+    return candidate;
+  });
+}
+
 async function editSegmentLengthFromDimensionSource(segment, options = {}) {
   if (!ensureDrawingEditable("edit length")) return false;
   if (!segment) return false;
@@ -40895,6 +42874,8 @@ async function editSegmentLengthFromDimensionSource(segment, options = {}) {
     ? "Offset travel C/C mm"
     : "Pipe C/C length mm";
   const currentValue = offsetMeta && editSet ? offsetMeta.setMm : currentLength;
+  const previewBaseState = drawingPreviewCandidate();
+  const previewAnchorIndex = Number.isInteger(options.anchorPointIndex) ? options.anchorPointIndex : segment.from;
   const text = await openFieldInputDialog({
     title: "Edit pipe length",
     label: promptLabel,
@@ -40907,6 +42888,43 @@ async function editSegmentLengthFromDimensionSource(segment, options = {}) {
       ? "For offsets, use set C/C for the offset height or travel C/C for the angled run."
       : "This changes the centre-to-centre length while keeping the pipe direction locked.",
     submitLabel: "Apply length",
+    preview: (value) => {
+      const numeric = Number(value);
+      if (!Number.isFinite(numeric) || numeric <= 0) return null;
+      const normalizedValue = normalizeLength(numeric);
+      const travelMm = offsetMeta && editSet
+        ? offsetTravelLengthMm(normalizedValue, offsetMeta.angleDeg)
+        : normalizedValue;
+      const edgeMeta = offsetMeta && editSet
+        ? {
+            offsetSetMm: normalizedValue,
+            offsetTravelMm: travelMm,
+            offsetAngleDeg: offsetMeta.angleDeg,
+            offsetPlane: offsetMeta.plane,
+            offsetDirection: offsetMeta.direction,
+          }
+        : null;
+      return {
+        beforeState: previewBaseState,
+        afterState: previewStateWithSegmentLength(
+          previewBaseState,
+          segment.index,
+          previewAnchorIndex,
+          travelMm,
+          edgeMeta,
+        ),
+        affectedIndexes: [segment.index],
+        lengthLabel: offsetMeta && editSet ? "Offset travel C/C" : "Run C/C",
+        facts: [{
+          label: offsetMeta && editSet ? "Offset set" : "Entered C/C",
+          before: drawingPreviewLength(currentValue),
+          after: drawingPreviewLength(normalizedValue),
+        }],
+        note: offsetMeta && editSet
+          ? `The ${formatAngle(offsetMeta.angleDeg)}° travel is calculated from the entered set before fitting deductions and weld gaps.`
+          : "The pipe direction stays locked while connected pipework moves with this end.",
+      };
+    },
   });
   if (text === null) return false;
 
@@ -41137,6 +43155,252 @@ function setupAppConfirmDialog() {
   });
 }
 
+function withDrawingPreviewState(previewState, callback) {
+  const previousState = state;
+  state = previewState;
+  try {
+    return callback();
+  } finally {
+    state = previousState;
+  }
+}
+
+function drawingPreviewCandidate(source = state, mutate = null) {
+  const candidate = spoolWorkspaceStateSnapshot(source);
+  if (typeof mutate === "function") mutate(candidate);
+  return candidate;
+}
+
+function drawingPreviewSummary(source, affectedIndexes = []) {
+  return withDrawingPreviewState(source, () => {
+    const segmentData = segments();
+    const takeoffs = takeoffData(segmentData);
+    const weldCounts = weldedSegmentEndCounts(segmentData, takeoffs);
+    const affected = new Set(normalizeSelectedSegments(affectedIndexes, state.edges.length));
+    const quantities = segmentData.map((segment) => ({
+      index: segment.index,
+      ...segmentQuantity(segment, takeoffs.segmentTakeoffs, weldCounts),
+    }));
+    const included = affected.size
+      ? quantities.filter((quantity) => affected.has(quantity.index))
+      : quantities;
+    const reducers = autoReducerTransitions(segmentData).map((reducer) => ({
+      nodeIndex: reducer.nodeIndex,
+      reducerType: normalizeReducerType(reducer.reducerType),
+      largeNb: reducer.largeNb,
+      smallNb: reducer.smallNb,
+    }));
+    return {
+      points: state.points.map(clonePoint),
+      segments: segmentData.map((segment) => ({
+        index: segment.index,
+        from: segment.from,
+        to: segment.to,
+        pipeSizeNb: pipeSizeForSegment(segment).nb,
+      })),
+      affected,
+      affectedCentrelineMm: included.reduce((total, quantity) => total + quantity.centrelineMm, 0),
+      affectedCutLengthMm: included.reduce((total, quantity) => total + quantity.cutLengthMm, 0),
+      totalCentrelineMm: quantities.reduce((total, quantity) => total + quantity.centrelineMm, 0),
+      totalCutLengthMm: quantities.reduce((total, quantity) => total + quantity.cutLengthMm, 0),
+      reducers,
+      weldGapMm: projectWeldGapMm(),
+    };
+  });
+}
+
+function previewIsoPoint(point) {
+  return {
+    x: (point.x - point.y) * 0.8660254,
+    y: (point.x + point.y) * 0.5 - point.z,
+  };
+}
+
+function createDrawingChangePreviewSvg(summary) {
+  const namespace = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(namespace, "svg");
+  svg.classList.add("drawing-change-preview-svg");
+  svg.setAttribute("viewBox", "0 0 420 176");
+  svg.setAttribute("role", "img");
+  svg.setAttribute("aria-label", "Preview of the resulting spool");
+
+  const projected = summary.points.map(previewIsoPoint);
+  const xs = projected.map((point) => point.x);
+  const ys = projected.map((point) => point.y);
+  const minX = Math.min(...xs, 0);
+  const maxX = Math.max(...xs, 1);
+  const minY = Math.min(...ys, 0);
+  const maxY = Math.max(...ys, 1);
+  const width = Math.max(1, maxX - minX);
+  const height = Math.max(1, maxY - minY);
+  const scale = Math.min(372 / width, 132 / height);
+  const offsetX = 210 - ((minX + maxX) * 0.5 * scale);
+  const offsetY = 88 - ((minY + maxY) * 0.5 * scale);
+  const screenPoint = (point) => ({ x: point.x * scale + offsetX, y: point.y * scale + offsetY });
+
+  const grid = document.createElementNS(namespace, "path");
+  grid.setAttribute("d", "M 0 44 H 420 M 0 88 H 420 M 0 132 H 420 M 105 0 V 176 M 210 0 V 176 M 315 0 V 176");
+  grid.setAttribute("class", "drawing-change-preview-grid");
+  svg.append(grid);
+
+  summary.segments.forEach((segment) => {
+    const start = screenPoint(projected[segment.from]);
+    const end = screenPoint(projected[segment.to]);
+    const line = document.createElementNS(namespace, "line");
+    line.setAttribute("x1", start.x.toFixed(2));
+    line.setAttribute("y1", start.y.toFixed(2));
+    line.setAttribute("x2", end.x.toFixed(2));
+    line.setAttribute("y2", end.y.toFixed(2));
+    line.setAttribute("class", summary.affected.has(segment.index)
+      ? "drawing-change-preview-run affected"
+      : "drawing-change-preview-run");
+    line.setAttribute("data-size", String(segment.pipeSizeNb));
+    svg.append(line);
+  });
+
+  summary.points.forEach((point, index) => {
+    const screen = screenPoint(projected[index]);
+    const marker = document.createElementNS(namespace, "circle");
+    marker.setAttribute("cx", screen.x.toFixed(2));
+    marker.setAttribute("cy", screen.y.toFixed(2));
+    marker.setAttribute("r", "3.4");
+    marker.setAttribute("class", "drawing-change-preview-node");
+    svg.append(marker);
+  });
+
+  summary.reducers.forEach((reducer) => {
+    const point = projected[reducer.nodeIndex];
+    if (!point) return;
+    const screen = screenPoint(point);
+    const marker = document.createElementNS(namespace, "rect");
+    marker.setAttribute("x", (screen.x - 7).toFixed(2));
+    marker.setAttribute("y", (screen.y - 7).toFixed(2));
+    marker.setAttribute("width", "14");
+    marker.setAttribute("height", "14");
+    marker.setAttribute("rx", "2");
+    marker.setAttribute("transform", `rotate(45 ${screen.x.toFixed(2)} ${screen.y.toFixed(2)})`);
+    marker.setAttribute("class", "drawing-change-preview-reducer");
+    svg.append(marker);
+  });
+  return svg;
+}
+
+function drawingPreviewLength(value) {
+  return `${formatLength(Math.max(0, Number(value) || 0))} mm`;
+}
+
+function drawingPreviewWeldGap(value) {
+  const gap = Math.max(0, Number(value) || 0);
+  return `${gap.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} mm`;
+}
+
+function drawingChangeMetric(label, before, after, options = {}) {
+  const metric = document.createElement("article");
+  metric.className = "drawing-change-preview-metric";
+  const heading = document.createElement("span");
+  heading.textContent = label;
+  const values = document.createElement("div");
+  const previous = document.createElement("small");
+  previous.textContent = String(before);
+  const arrow = document.createElement("b");
+  arrow.textContent = "→";
+  const next = document.createElement("strong");
+  next.textContent = String(after);
+  if (String(before) === String(after)) metric.classList.add("unchanged");
+  if (options.emphasis) metric.classList.add("emphasis");
+  values.append(previous, arrow, next);
+  metric.append(heading, values);
+  return metric;
+}
+
+function renderDrawingChangePreview(container, options = {}) {
+  if (!container || !options.beforeState || !options.afterState) return false;
+  const affectedIndexes = options.affectedIndexes ?? [];
+  const before = drawingPreviewSummary(options.beforeState, affectedIndexes);
+  const after = drawingPreviewSummary(options.afterState, affectedIndexes);
+  container.replaceChildren();
+
+  const visual = document.createElement("div");
+  visual.className = "drawing-change-preview-visual";
+  visual.append(createDrawingChangePreviewSvg(after));
+  const badge = document.createElement("span");
+  badge.className = "drawing-change-preview-badge";
+  badge.textContent = `${after.reducers.length} auto reducer${after.reducers.length === 1 ? "" : "s"}`;
+  visual.append(badge);
+  container.append(visual);
+
+  const metrics = document.createElement("div");
+  metrics.className = "drawing-change-preview-metrics";
+  (options.facts ?? []).forEach((fact) => {
+    metrics.append(drawingChangeMetric(fact.label, fact.before, fact.after, { emphasis: true }));
+  });
+  metrics.append(
+    drawingChangeMetric(options.lengthLabel || "Affected C/C", drawingPreviewLength(before.affectedCentrelineMm), drawingPreviewLength(after.affectedCentrelineMm)),
+    drawingChangeMetric("Resulting cut", drawingPreviewLength(before.affectedCutLengthMm), drawingPreviewLength(after.affectedCutLengthMm), { emphasis: true }),
+    drawingChangeMetric("Auto reducers", before.reducers.length, after.reducers.length),
+    drawingChangeMetric("Weld gap / welded end", drawingPreviewWeldGap(before.weldGapMm), drawingPreviewWeldGap(after.weldGapMm)),
+  );
+  container.append(metrics);
+
+  const note = document.createElement("p");
+  note.className = "drawing-change-preview-note";
+  if (after.reducers.length > before.reducers.length) {
+    note.textContent = `${after.reducers.length - before.reducers.length} automatic reducer${after.reducers.length - before.reducers.length === 1 ? " will" : "s will"} be added where pipe sizes change.`;
+  } else if (after.reducers.length < before.reducers.length) {
+    note.textContent = `${before.reducers.length - after.reducers.length} automatic reducer${before.reducers.length - after.reducers.length === 1 ? " is" : "s are"} no longer required.`;
+  } else {
+    note.textContent = options.note || "The highlighted run is the part affected by this change. Nothing is changed until you press Apply.";
+  }
+  container.append(note);
+  container.hidden = false;
+  return true;
+}
+
+function openDrawingChangePreview(options = {}) {
+  if (!drawingChangePreviewDialog || !drawingChangePreviewBody) return Promise.resolve(true);
+  if (drawingChangePreviewResolver) closeDrawingChangePreview(false);
+  closeActionMenu();
+  closeDrawingContextMenu();
+  if (drawingChangePreviewTitle) drawingChangePreviewTitle.textContent = options.title || "Preview change";
+  if (drawingChangePreviewHelp) drawingChangePreviewHelp.textContent = options.help || "Check the spool and fabrication effect before this change is applied.";
+  if (drawingChangePreviewApplyButton) drawingChangePreviewApplyButton.textContent = options.applyLabel || "Apply change";
+  renderDrawingChangePreview(drawingChangePreviewBody, options);
+  drawingChangePreviewDialog.hidden = false;
+  window.setTimeout(() => drawingChangePreviewApplyButton?.focus(), 30);
+  return new Promise((resolve) => {
+    drawingChangePreviewResolver = resolve;
+  });
+}
+
+function closeDrawingChangePreview(result = false) {
+  if (drawingChangePreviewDialog) drawingChangePreviewDialog.hidden = true;
+  const resolver = drawingChangePreviewResolver;
+  drawingChangePreviewResolver = null;
+  resolver?.(result);
+}
+
+function setupDrawingChangePreview() {
+  drawingChangePreviewCancelButton?.addEventListener("click", () => closeDrawingChangePreview(false));
+  drawingChangePreviewApplyButton?.addEventListener("click", () => closeDrawingChangePreview(true));
+  drawingChangePreviewDialog?.addEventListener("pointerdown", (event) => {
+    if (event.target === drawingChangePreviewDialog) closeDrawingChangePreview(false);
+  });
+}
+
+function updateFieldInputLivePreview() {
+  if (!fieldInputPreview || typeof fieldInputPreviewRenderer !== "function") return;
+  try {
+    const preview = fieldInputPreviewRenderer(fieldInputValue?.value ?? "");
+    if (!preview || !renderDrawingChangePreview(fieldInputPreview, preview)) {
+      fieldInputPreview.hidden = true;
+      fieldInputPreview.replaceChildren();
+    }
+  } catch (error) {
+    console.warn("The drawing change preview could not be updated.", error);
+    fieldInputPreview.hidden = true;
+  }
+}
+
 function openFieldInputDialog(options = {}) {
   if (
     !fieldInputDialog ||
@@ -41153,6 +43417,7 @@ function openFieldInputDialog(options = {}) {
   }
 
   const multiline = options.multiline === true;
+  fieldInputPreviewRenderer = !multiline && typeof options.preview === "function" ? options.preview : null;
   closeActionMenu();
   closeDrawingContextMenu();
   closeHelpDialog();
@@ -41165,6 +43430,7 @@ function openFieldInputDialog(options = {}) {
   fieldInputSubmitButton.textContent = options.submitLabel ?? "Apply";
 
   fieldInputForm.classList.toggle("field-input-multiline", multiline);
+  fieldInputForm.classList.toggle("has-live-preview", Boolean(fieldInputPreviewRenderer));
   fieldInputValue.hidden = multiline;
   fieldInputTextArea.hidden = !multiline;
 
@@ -41188,6 +43454,12 @@ function openFieldInputDialog(options = {}) {
   fieldInputTextArea.placeholder = options.placeholder ?? "";
   fieldInputTextArea.readOnly = options.readOnly === true;
 
+  if (fieldInputPreview) {
+    fieldInputPreview.hidden = true;
+    fieldInputPreview.replaceChildren();
+  }
+  updateFieldInputLivePreview();
+
   fieldInputDialog.hidden = false;
   window.setTimeout(() => {
     activeControl.focus();
@@ -41202,6 +43474,11 @@ function openFieldInputDialog(options = {}) {
 function closeFieldInputDialog(result = null) {
   if (fieldInputDialog) fieldInputDialog.hidden = true;
   if (fieldInputTextArea) fieldInputTextArea.readOnly = false;
+  fieldInputPreviewRenderer = null;
+  if (fieldInputPreview) {
+    fieldInputPreview.hidden = true;
+    fieldInputPreview.replaceChildren();
+  }
   const resolver = fieldInputDialogResolver;
   fieldInputDialogResolver = null;
   resolver?.(result);
@@ -41228,6 +43505,7 @@ function setupFieldInputDialog() {
       submitFieldInputDialog();
     }
   });
+  fieldInputValue?.addEventListener("input", updateFieldInputLivePreview);
 }
 
 function promptNoteDetails(options = {}) {
@@ -42138,8 +44416,30 @@ stepLengthInput.addEventListener("input", () => {
   persistState();
 });
 
-selectedRunLengthInput.addEventListener("change", () => {
-  setSelectedSegmentLength(selectedRunLengthInput.value);
+selectedRunLengthInput.addEventListener("change", async () => {
+  const segment = selectedSegmentData();
+  if (!segment) return;
+  const nextLength = normalizeLength(selectedRunLengthInput.value);
+  const currentLength = pointLength(segment.vector);
+  if (Math.abs(nextLength - currentLength) < 0.1) return;
+  const anchorIndex = state.selectedPoint === segment.to ? segment.to : segment.from;
+  const beforeState = drawingPreviewCandidate();
+  const afterState = previewStateWithSegmentLength(beforeState, segment.index, anchorIndex, nextLength);
+  const confirmed = await openDrawingChangePreview({
+    title: `Preview run ${segment.index + 1} length`,
+    help: "Review the connected spool movement and resulting cut length before applying it.",
+    beforeState,
+    afterState,
+    affectedIndexes: [segment.index],
+    facts: [{ label: "Run C/C", before: drawingPreviewLength(currentLength), after: drawingPreviewLength(nextLength) }],
+    note: "The pipe direction stays locked while connected pipework moves with this end.",
+    applyLabel: "Apply length",
+  });
+  if (!confirmed) {
+    updateSelectionControls();
+    return;
+  }
+  setSelectedSegmentLength(nextLength);
 });
 
 angleInput.addEventListener("input", () => {
@@ -42171,11 +44471,11 @@ pipeSpecSelect.addEventListener("change", () => {
 
 projectDialogInputs.fittingProfile?.addEventListener("change", updateProjectFittingProfileHelp);
 
-pipeSizeSelect.addEventListener("change", () => {
+pipeSizeSelect.addEventListener("change", async () => {
   const pipeSizeNb = pipeSizeNbForSpec(pipeSizeSelect.value, state.pipeSpec);
   const selected = selectedSegmentIndexes();
   if (selected.length) {
-    setPipeSizeForSegments(selected, pipeSizeNb);
+    await previewAndSetPipeSizeForSegments(selected, pipeSizeNb);
   } else {
     state.pipeSizeNb = pipeSizeNb;
     updateAll();
@@ -42382,6 +44682,20 @@ document.querySelector("#sampleButton").addEventListener("click", loadSampleDraw
 undoButton?.addEventListener("click", undo);
 redoButton?.addEventListener("click", redo);
 document.querySelector("#resetButton").addEventListener("click", startNewDrawing);
+workflowNextButton?.addEventListener("click", () => {
+  runWorkflowNextStep().catch((error) => {
+    console.warn("Recommended next step failed.", error);
+    showAppNotice(error?.message || "That next step could not be completed.");
+  });
+});
+workflowNextModeButton?.addEventListener("click", (event) => {
+  event.preventDefault();
+  showAppNotice("Opening the managed job setup…");
+  convertQuickPdfToManagedWorkflow().catch((error) => {
+    console.warn("Managed workflow conversion failed.", error);
+    showAppNotice(error?.message || "Could not change to managed workflow.");
+  });
+});
 saveDefaultsButton?.addEventListener("click", saveCurrentSettingsAsDefaults);
 saveBrowserProjectButton?.addEventListener("click", () => {
   saveBrowserProject().catch((error) => {
@@ -42475,6 +44789,10 @@ document.addEventListener("keydown", (event) => {
       closeLoadPlanDialog();
       return;
     }
+    if (workflowStartDialog && !workflowStartDialog.hidden) {
+      closeWorkflowStartDialog("cancel");
+      return;
+    }
     if (newDrawingDialog && !newDrawingDialog.hidden) {
       closeNewDrawingDialog("cancel");
       return;
@@ -42487,12 +44805,20 @@ document.addEventListener("keydown", (event) => {
       closeSupportAdminDialog();
       return;
     }
+    if (schematicTakeoffDialog && !schematicTakeoffDialog.hidden) {
+      closeSchematicTakeoffDialog();
+      return;
+    }
     if (legalSupportDialog && !legalSupportDialog.hidden) {
       closeLegalSupportDialog();
       return;
     }
     if (toolSettingsDialog && !toolSettingsDialog.hidden) {
       closeToolSettingsDialog();
+      return;
+    }
+    if (drawingChangePreviewDialog && !drawingChangePreviewDialog.hidden) {
+      closeDrawingChangePreview(false);
       return;
     }
     if (fieldInputDialog && !fieldInputDialog.hidden) {
@@ -42570,15 +44896,18 @@ function shouldStopDrawingOnEnter(target) {
 function keyboardBlockingOverlayOpen() {
   return Boolean(
     actionMenuOpen() ||
+    (workflowStartDialog && !workflowStartDialog.hidden) ||
     (projectDialog && !projectDialog.hidden) ||
     (newDrawingDialog && !newDrawingDialog.hidden) ||
     (authDialog && !authDialog.hidden) ||
     (supportAdminDialog && !supportAdminDialog.hidden) ||
+    (schematicTakeoffDialog && !schematicTakeoffDialog.hidden) ||
     (legalSupportDialog && !legalSupportDialog.hidden) ||
     (homeDashboardDialog && !homeDashboardDialog.hidden) ||
     (projectLibraryDialog && !projectLibraryDialog.hidden) ||
     (regressionDialog && !regressionDialog.hidden) ||
     (toolSettingsDialog && !toolSettingsDialog.hidden) ||
+    (drawingChangePreviewDialog && !drawingChangePreviewDialog.hidden) ||
     (fieldInputDialog && !fieldInputDialog.hidden) ||
     (appConfirmDialog && !appConfirmDialog.hidden) ||
     (noteDialog && !noteDialog.hidden) ||
@@ -42624,11 +44953,13 @@ setupInspectorTabs();
 setupAppModes();
 setupInterfaceDensity();
 setupMobilePanels();
+setupSelectionActionBar();
 setupFittingsToolMenu();
 setupAppTheme();
 setupActionMenu();
 setupAuthDialog();
 setupSupportAdminDialog();
+setupSchematicTakeoff();
 setupLegalSupportDialog();
 setupHomeDashboard();
 setupWorkshopStock();
@@ -42637,6 +44968,7 @@ setupFirstUseGuide();
 setupProjectDialog();
 setupToolSettingsDialog();
 setupFieldInputDialog();
+setupDrawingChangePreview();
 setupAppConfirmDialog();
 setupNoteDialog();
 setupTutorialDialog();

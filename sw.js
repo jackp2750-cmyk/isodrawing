@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v366-smart-spool-kits";
+const CACHE_NAME = "spoolmate-v370-schematic-takeoff-beta";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=366",
-  "./app.js?v=366",
+  "./styles.css?v=370",
+  "./app.js?v=370",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

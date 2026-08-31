@@ -1,8 +1,10 @@
 # SpoolMate
 
-Current app version: `v3.66`
+Current app version: `v3.70`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
+
+Every open spool now retains its own working surface, 2D zoom and pan, selection, Inspector panel, drawing mode and exact 3D camera. New spools remember the user's recent material, pipe size, flange standard, reducer preference and weld gap. Length, selected pipe-size, flange, socket and reducer edits show a live fabrication preview with the proposed spool, cut length, weld gap and automatic-reducer effect before Apply.
 
 The start dashboard offers two deliberately separate routes. Quick PDF needs no account, Jobs board, allocation or approval workflow: it opens a temporary drawing immediately and creates a clearly identified user-check working PDF. Managed job retains saving, review, formal issue, QR, production and business-team controls. A Quick PDF can be converted to a managed job without redrawing it.
 
@@ -168,6 +170,12 @@ Run the bundled integrity check before uploading an update:
 node verify-app.cjs
 ```
 
+With the app served locally on port 8765 and Playwright available, the protected takeoff layout and rectangle/lasso/crop interactions can also be checked at desktop, iPad, Android tablet, phone and short-landscape sizes:
+
+```powershell
+node test-schematic-takeoff.cjs
+```
+
 It checks JavaScript/CSS syntax and structure, control/icon references, app/cache version wiring, PWA files, pipe and fitting table consistency, flange drilling rows and Supabase RPC definitions. The built-in Review Test Kit covers drawing behaviour using known sample spools. A final real-device pass on PC, iPad and Android is still recommended for touch and visual layout.
 
 ## Hosting
@@ -255,10 +263,11 @@ With Supabase configured:
 - Account includes a JSON data export, privacy/support information, diagnostics and protected account deletion.
 - Trial accounts receive 30 days of full cloud access. After expiry, permitted cloud spools, comments and workshop photos remain readable/exportable while cloud writes are paused.
 - Expired users can continue local-only work and switch Jobs between Cloud and This device.
+- Approved private-beta accounts can open Schematic Takeoff, load a PDF/image locally, isolate exact areas with rectangle or lasso selection, preview/download the exact recognition crop, manually confirm fittings and export a selected-area CSV. Automatic recognition rules are intentionally deferred until they are agreed.
 
 ## Supabase Setup
 
-For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql`, `supabase-migration-v296-ai-helper.sql`, `supabase-migration-v318-business-workspaces.sql`, `supabase/migrations/20260822050724_workshop_stock.sql` and `supabase/migrations/20260822063407_smart_spool_kits.sql` in that order as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`; its current version already includes workshop stock and Smart Spool Kits.
+For an existing SpoolMate database, first run `supabase-migration-v279.sql` if it has not already been applied, then run `supabase-migration-v295-trial-access.sql`, `supabase-migration-v296-ai-helper.sql`, `supabase-migration-v318-business-workspaces.sql`, `supabase/migrations/20260822050724_workshop_stock.sql`, `supabase/migrations/20260822063407_smart_spool_kits.sql` and `supabase/migrations/20260830090000_schematic_takeoff_private_beta.sql` in that order as new queries in Supabase SQL Editor. For a brand-new database, run the complete `supabase-setup.sql`; its current version already includes workshop stock, Smart Spool Kits and the private-feature entitlement gate.
 
 The v2.95 migration must be applied before publishing the matching frontend. It separates authenticated read access from active-licence write access, adds the seven-day grace-state field and keeps expired cloud data visible without allowing edits. Trial expiry does not delete cloud data.
 
@@ -269,6 +278,8 @@ The v3.18 migration separates Personal and Business licences, includes five seat
 The v3.65 migration adds the workshop-stock register and immutable movement ledger. It enables RLS, grants only the required Data API operations, keeps the privileged stock mutation helper in the non-exposed `private` schema and exposes one authenticated RPC that checks the active workspace before changing a quantity.
 
 The v3.66 migration adds BOM-backed Smart Spool Kit requirements, protected reservations, transactional QR picking and shortage/order tracking. It keeps Personal and Business stock isolated, prevents ordinary spool use or stocktake from consuming reserved quantities, and limits kit changes to licensed production roles.
+
+The v3.70 migration adds a server-owned private-feature entitlement table. Authenticated users can only read their own active entitlement, while grants and revocations remain unavailable to browser clients. The migration seeds the active platform administrator and the verified Paragon beta account.
 
 Until online billing is connected, activate the owner account or a manually paid customer from the SQL Editor using the UUID shown in Authentication > Users:
 

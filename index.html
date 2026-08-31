@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=366" />
+    <link rel="stylesheet" href="./styles.css?v=370" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.66</span>
+              <span class="version-badge" id="appVersionBadge">v3.70</span>
             </div>
           </div>
 
@@ -652,6 +652,17 @@
               <button class="first-spool-guide-close" id="firstSpoolGuideCloseButton" type="button" aria-label="End first spool tips">End tips</button>
             </div>
           </section>
+          <section class="workflow-next-bar" id="workflowNextBar" aria-label="Recommended next step" aria-live="polite" hidden>
+            <div class="workflow-next-copy">
+              <small id="workflowNextKicker">NEXT STEP</small>
+              <strong id="workflowNextTitle">Start drawing</strong>
+              <span id="workflowNextMessage">Draw the first pipe run from the yellow point.</span>
+            </div>
+            <div class="workflow-next-actions">
+              <button class="workflow-next-mode-link" id="workflowNextModeButton" type="button" hidden>Use managed workflow</button>
+              <button class="primary-button" id="workflowNextButton" type="button">Start drawing</button>
+            </div>
+          </section>
           <section class="quick-pdf-bar" id="quickPdfBar" aria-label="Quick PDF actions" hidden>
             <div class="quick-pdf-copy">
               <small>FAST MODE</small>
@@ -667,6 +678,15 @@
           </section>
           <div class="canvas-frame">
             <canvas id="drawCanvas"></canvas>
+            <div class="selection-action-bar" id="selectionActionBar" role="toolbar" aria-label="Selected pipe actions" hidden>
+              <span class="selection-action-summary" id="selectionActionSummary">1 run</span>
+              <button type="button" data-selection-action="length" title="Change the selected pipe length">Length</button>
+              <button type="button" data-selection-action="size" title="Change pipe size">Size</button>
+              <button type="button" data-selection-action="ends" title="Add a flange, roll groove or thread to a pipe end">Ends</button>
+              <button type="button" data-selection-action="fittings" title="Add an inline fitting">Fittings</button>
+              <button type="button" data-selection-action="duplicate" title="Duplicate the selected pipe">Duplicate</button>
+              <button type="button" class="danger" data-selection-action="delete" title="Delete the selected pipe">Delete</button>
+            </div>
           </div>
         </section>
 
@@ -678,7 +698,7 @@
             </div>
             <div class="sheet-header-actions">
               <button class="sheet-switch-button" id="inspectorOpenPreviewButton" type="button" aria-label="Switch from Details to 3D preview">3D</button>
-              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close Details">Close</button>
+              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Back to drawing from Details">Back to drawing</button>
             </div>
           </div>
           <div class="inspector-tabs" role="tablist" aria-label="Detail views">
@@ -904,7 +924,7 @@
               </label>
               <span class="pill" id="spoolStats">0 runs</span>
               <button class="sheet-switch-button" id="previewOpenInspectorButton" type="button" aria-label="Switch from 3D preview to Details">Details</button>
-              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Close 3D preview">Close</button>
+              <button class="sheet-close-button" data-mobile-close-panel type="button" aria-label="Back to drawing from 3D preview">Back to drawing</button>
             </div>
           </div>
           <div class="preview-stage" id="previewStage">
@@ -1010,6 +1030,43 @@
         </section>
       </div>
 
+      <div class="project-dialog-backdrop workflow-start-backdrop" id="workflowStartDialog" hidden>
+        <section class="project-dialog-card workflow-start-card" aria-label="Choose how to start the spool">
+          <div class="project-dialog-header workflow-start-header">
+            <div>
+              <small>NEW SPOOL</small>
+              <strong>What do you need to do?</strong>
+              <span>Choose the fast drawing path or the complete workshop workflow. A Quick PDF can be converted later.</span>
+            </div>
+            <button class="icon-button labeled" id="workflowStartCancelButton" type="button">Cancel</button>
+          </div>
+          <div class="workflow-start-options">
+            <button class="workflow-start-option quick" id="workflowStartQuickButton" type="button">
+              <span class="workflow-start-badge">FASTEST</span>
+              <strong>Quick PDF</strong>
+              <span>Draw the spool, check it and download the PDF.</span>
+              <ul>
+                <li>No account required</li>
+                <li>No Jobs or approval workflow</li>
+                <li>Can become a managed job later</li>
+              </ul>
+              <b>Start Quick PDF</b>
+            </button>
+            <button class="workflow-start-option managed" id="workflowStartManagedButton" type="button">
+              <span class="workflow-start-badge">FULL WORKFLOW</span>
+              <strong>Managed Job</strong>
+              <span>Control the spool from drawing through workshop production.</span>
+              <ul>
+                <li>Saving, revisions and approval</li>
+                <li>QR traveller and production stages</li>
+                <li>Weld, NDT and assignment records</li>
+              </ul>
+              <b>Start Managed Job</b>
+            </button>
+          </div>
+        </section>
+      </div>
+
       <div class="project-dialog-backdrop home-dashboard-backdrop" id="homeDashboardDialog" hidden>
         <section class="project-dialog-card home-dashboard-card" aria-label="SpoolMate dashboard">
           <div class="home-dashboard-head">
@@ -1055,6 +1112,11 @@
               <svg><use href="#icon-report"></use></svg>
               <strong>Workshop stock</strong>
               <span>Scan stock, print QR labels, take counts and assign materials to spools.</span>
+            </button>
+            <button class="home-dashboard-action schematic-takeoff-launch" id="homeDashboardSchematicTakeoffButton" type="button" hidden>
+              <svg><use href="#icon-report"></use></svg>
+              <strong>Schematic Takeoff</strong>
+              <span>Select an area and build its fittings list.</span>
             </button>
             <button class="home-dashboard-action" id="homeDashboardTutorialButton" type="button">
               <svg><use href="#icon-help"></use></svg>
@@ -1192,6 +1254,7 @@
               <button class="icon-button labeled" id="diagnosticReportButton" type="button">Download diagnostics</button>
               <button class="icon-button labeled" id="legalSupportButton" type="button">Privacy, terms &amp; support</button>
               <button class="icon-button labeled support-admin-launch" id="supportAdminButton" type="button" hidden>Support Admin</button>
+              <button class="icon-button labeled schematic-takeoff-launch" id="schematicTakeoffButton" type="button" hidden>Schematic Takeoff <span>Private beta</span></button>
               <button class="icon-button labeled danger" id="accountDeleteButton" type="button" hidden>Delete cloud account</button>
             </div>
           </section>
@@ -1250,6 +1313,98 @@
             </div>
             <div class="support-admin-audit-list" id="supportAdminAuditList"></div>
           </section>
+        </section>
+      </div>
+
+      <div class="project-dialog-backdrop schematic-takeoff-backdrop" id="schematicTakeoffDialog" hidden>
+        <section class="project-dialog-card schematic-takeoff-card" role="dialog" aria-modal="true" aria-labelledby="schematicTakeoffTitle">
+          <header class="project-dialog-header schematic-takeoff-header">
+            <div>
+              <span class="schematic-private-badge">Private beta</span>
+              <strong id="schematicTakeoffTitle">Schematic fitting takeoff</strong>
+              <small>Upload a schematic, isolate the exact area and review only the fittings required for that selection.</small>
+            </div>
+            <button class="icon-button compact labeled" id="schematicTakeoffCloseButton" type="button">Close</button>
+          </header>
+          <div class="workspace-location-strip schematic-takeoff-identity">
+            <span>PRIVATE BETA</span><b id="schematicTakeoffIdentity">Checking access&hellip;</b><em>Files stay on this device in this first version.</em>
+          </div>
+          <div class="schematic-takeoff-toolbar" aria-label="Schematic takeoff controls">
+            <label class="primary-button schematic-file-button" for="schematicTakeoffFileInput">
+              <span>Open schematic</span>
+              <input id="schematicTakeoffFileInput" type="file" accept="image/*,.pdf,application/pdf" />
+            </label>
+            <div class="schematic-page-controls" aria-label="PDF pages">
+              <button class="icon-button compact labeled" id="schematicTakeoffPreviousPageButton" type="button">Previous</button>
+              <span id="schematicTakeoffPageReadout">Page 1 / 1</span>
+              <button class="icon-button compact labeled" id="schematicTakeoffNextPageButton" type="button">Next</button>
+            </div>
+            <div class="schematic-tool-choice" role="group" aria-label="Selection tool">
+              <button type="button" data-schematic-tool="pan">Pan</button>
+              <button class="active" type="button" data-schematic-tool="rectangle">Rectangle</button>
+              <button type="button" data-schematic-tool="lasso">Lasso</button>
+            </div>
+            <div class="schematic-zoom-controls" aria-label="Schematic zoom">
+              <button class="icon-button compact labeled" id="schematicTakeoffZoomOutButton" type="button">−</button>
+              <button class="icon-button compact labeled" id="schematicTakeoffFitButton" type="button">Fit</button>
+              <button class="icon-button compact labeled" id="schematicTakeoffZoomInButton" type="button">+</button>
+              <output id="schematicTakeoffZoomReadout">100%</output>
+            </div>
+          </div>
+          <div class="schematic-takeoff-workspace">
+            <main class="schematic-takeoff-viewer">
+              <canvas id="schematicTakeoffCanvas" aria-label="Uploaded schematic and takeoff selections"></canvas>
+              <div class="schematic-takeoff-empty" id="schematicTakeoffEmpty">
+                <strong>Open a schematic to begin</strong>
+                <span>PDF, PNG, JPG and device photos are supported.</span>
+                <small>Then draw a rectangle or lasso around only the section you need.</small>
+              </div>
+              <div class="schematic-takeoff-hint" id="schematicTakeoffHint">Rectangle: drag around the required section</div>
+            </main>
+            <aside class="schematic-takeoff-sidebar">
+              <section class="schematic-takeoff-panel">
+                <div class="schematic-panel-heading">
+                  <div><strong>Selected areas</strong><small id="schematicTakeoffSelectionCount">0 areas</small></div>
+                  <button class="icon-button compact labeled danger" id="schematicTakeoffClearButton" type="button">Clear</button>
+                </div>
+                <p class="schematic-boundary-rule">A fitting will be counted when its centre lies inside the selected boundary. Labels just outside may be read for context once recognition rules are added.</p>
+                <div class="schematic-selection-list" id="schematicTakeoffSelectionList">
+                  <div class="schematic-empty-list">Draw a rectangle or lasso to create Area 1.</div>
+                </div>
+                <label class="field schematic-selection-name">
+                  <span>Area name</span>
+                  <input id="schematicTakeoffSelectionNameInput" type="text" maxlength="80" placeholder="Example: Plant room west" disabled />
+                </label>
+              </section>
+              <section class="schematic-takeoff-panel schematic-rules-panel">
+                <span class="schematic-stage-badge">Foundation ready</span>
+                <strong>Exact recognition input</strong>
+                <div class="schematic-crop-preview">
+                  <canvas id="schematicTakeoffCropCanvas" aria-label="Preview of the exact selected schematic area"></canvas>
+                  <span id="schematicTakeoffCropEmpty">Select an area to preview the exact crop.</span>
+                </div>
+                <p>Only this bounded crop will be sent into the recognition rules. This prevents whole-page and duplicate counts while keeping the original schematic on this device.</p>
+                <button class="secondary-button" id="schematicTakeoffDownloadCropButton" type="button" disabled>Download selected area</button>
+                <button class="secondary-button" id="schematicTakeoffReadyButton" type="button" disabled>Mark area ready for rules</button>
+              </section>
+              <section class="schematic-takeoff-panel">
+                <div class="schematic-panel-heading"><div><strong>Confirmed fittings</strong><small>Manual review foundation</small></div></div>
+                <form class="schematic-fitting-form" id="schematicTakeoffFittingForm">
+                  <label><span>Fitting</span><select id="schematicTakeoffFittingTypeInput"><option>Elbow</option><option>Tee</option><option>Reducer</option><option>Flange</option><option>Valve</option><option>Socket</option><option>Union</option><option>Coupling</option><option>Roll groove</option><option>Threaded end</option><option>Other</option></select></label>
+                  <label><span>Size</span><input id="schematicTakeoffFittingSizeInput" type="text" maxlength="40" placeholder="NB 50" /></label>
+                  <label><span>Qty</span><input id="schematicTakeoffFittingQuantityInput" type="number" min="1" max="9999" step="1" value="1" /></label>
+                  <label class="wide"><span>Note</span><input id="schematicTakeoffFittingNoteInput" type="text" maxlength="120" placeholder="Type, standard or uncertainty" /></label>
+                  <button class="primary-button wide" id="schematicTakeoffAddFittingButton" type="submit" disabled>Add confirmed fitting</button>
+                </form>
+                <div class="schematic-fitting-list" id="schematicTakeoffFittingList"><div class="schematic-empty-list">Select an area, then add confirmed fittings while we define automatic rules.</div></div>
+              </section>
+              <section class="schematic-takeoff-panel schematic-summary-panel">
+                <div class="schematic-panel-heading"><div><strong>Combined takeoff</strong><small id="schematicTakeoffTotal">0 fittings</small></div></div>
+                <div class="schematic-takeoff-summary" id="schematicTakeoffSummary"></div>
+                <button class="secondary-button" id="schematicTakeoffExportButton" type="button" disabled>Export CSV</button>
+              </section>
+            </aside>
+          </div>
         </section>
       </div>
 
@@ -1888,11 +2043,29 @@
               <em id="fieldInputUnit" hidden>mm</em>
             </div>
           </label>
+          <div class="drawing-change-preview field-input-preview" id="fieldInputPreview" hidden aria-live="polite"></div>
           <div class="project-dialog-actions field-input-actions">
             <button class="icon-button labeled" id="fieldInputCancelButton" type="button">Cancel</button>
             <button class="primary-button" id="fieldInputSubmitButton" type="submit">Apply</button>
           </div>
         </form>
+      </div>
+
+      <div class="project-dialog-backdrop drawing-change-preview-backdrop" id="drawingChangePreviewDialog" hidden>
+        <section class="project-dialog-card drawing-change-preview-card" role="dialog" aria-modal="true" aria-labelledby="drawingChangePreviewTitle">
+          <div class="project-dialog-header">
+            <div>
+              <span class="drawing-change-preview-kicker">Review before applying</span>
+              <strong id="drawingChangePreviewTitle">Preview change</strong>
+              <small id="drawingChangePreviewHelp">Check the spool and fabrication effect before this change is applied.</small>
+            </div>
+          </div>
+          <div class="drawing-change-preview" id="drawingChangePreviewBody" aria-live="polite"></div>
+          <div class="project-dialog-actions drawing-change-preview-actions">
+            <button class="icon-button labeled" id="drawingChangePreviewCancelButton" type="button">Keep current</button>
+            <button class="primary-button" id="drawingChangePreviewApplyButton" type="button">Apply change</button>
+          </div>
+        </section>
       </div>
 
       <button class="ai-helper-launcher" id="aiHelperButton" type="button" aria-expanded="false" aria-controls="aiHelperDialog">
@@ -2222,6 +2395,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=366"></script>
+    <script defer src="./app.js?v=370"></script>
   </body>
 </html>

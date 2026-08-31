@@ -1,6 +1,44 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.66`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.70`.
+
+## v3.70 - Private schematic fitting takeoff foundation
+
+- Added a protected Schematic Takeoff beta available only through server-owned per-user entitlements.
+- Added local PDF/image loading, multi-page PDF navigation, pan, wheel/pinch zoom, fit, rectangle selection and freehand lasso selection.
+- Kept each selection tied to its source page, with editable area names, focus navigation, an exact bounded-crop preview/download and an explicit ready-for-rules state.
+- Added a manual confirmation foundation for fitting type, size, quantity and notes, plus a combined selected-area takeoff and CSV export.
+- Kept customer schematic files on-device in this first version while automatic symbol, overlap and duplicate-count rules remain intentionally deferred.
+- Added desktop, iPad, Android tablet, phone and short-landscape layouts with touch-sized controls.
+- Added the private-feature Supabase migration and seeded access for the active platform administrator and verified Paragon beta account.
+- Bumped the PWA cache to `spoolmate-v370-schematic-takeoff-beta`.
+
+## v3.69 - Faster selection and workshop batch control
+
+- Added a compact action bar beside selected pipe runs with direct Length, Size, Ends, Fittings, Duplicate and Delete actions on desktop, iPad and Android.
+- Kept selection on the drawing instead of automatically opening or shrinking another panel.
+- Made Details and 3D predictable full-screen touch sheets with a clear Back to drawing action.
+- Added multi-spool selection and batch assignment, due date, production stage and hold updates in Jobs while retaining permissions, workflow gates and activity history.
+- Bumped the PWA cache to `spoolmate-v369-selection-batch-r3`.
+
+## v3.68 - Smart workspaces and change previews
+
+- Made each open spool remember its own 2D zoom and pan, selections, current mode, open Inspector surface and exact 3D camera/navigation state.
+- Restored that complete state after switching spool tabs or temporarily visiting Jobs, Account, Tutorial and other main surfaces.
+- Extended user drawing defaults to include flange standard, reducer preference and the selected 1.6 mm or 2.4 mm weld gap alongside material and pipe size.
+- Added live length previews that update the proposed spool, C/C and resulting cut length while the value is entered.
+- Added Apply-before-change previews for selected pipe sizes, flange standards, socket sizes and manual or automatic reducer types.
+- Recalculated and displayed automatic reducers, fabrication cut length and weld-gap effect inside every change preview.
+- Added responsive phone/tablet layouts and dark-theme styling for the preview workflow.
+- Bumped the PWA cache to `spoolmate-v368-smart-workspaces`.
+
+## v3.67 - Guided spool workflows
+
+- Added an explicit Quick PDF or Managed Job choice when starting a spool, while preserving the direct shortcuts for experienced users.
+- Added one adaptive next-step action that guides each spool from drawing through details, checks, saving, approval, issue and PDF export.
+- Turned QA warnings and blockers into direct Fix actions that take the user to the affected field or drawing item.
+- Kept the guidance compact and responsive across desktop, iPad, Android tablets and phones.
+- Bumped the PWA cache to `spoolmate-v367-guided-workflows`.
 
 ## v3.66 - Smart Spool Kits
 

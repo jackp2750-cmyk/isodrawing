@@ -19,6 +19,7 @@ const REQUIRED_FILES = [
   "supabase-migration-v339-jobs-dashboard-preferences.sql",
   "supabase/migrations/20260822050724_workshop_stock.sql",
   "supabase/migrations/20260822063407_smart_spool_kits.sql",
+  "supabase/migrations/20260830090000_schematic_takeoff_private_beta.sql",
   "supabase/functions/delete-account/index.ts",
   "supabase/functions/ai-help/index.ts",
   "supabase/functions/support-admin/index.ts",
@@ -105,6 +106,7 @@ const supportAdminMigration = read("supabase-migration-v338-support-admin.sql");
 const jobsDashboardPreferencesMigration = read("supabase-migration-v339-jobs-dashboard-preferences.sql");
 const workshopStockMigration = read("supabase/migrations/20260822050724_workshop_stock.sql");
 const smartSpoolKitsMigration = read("supabase/migrations/20260822063407_smart_spool_kits.sql");
+const schematicTakeoffMigration = read("supabase/migrations/20260830090000_schematic_takeoff_private_beta.sql");
 const jobsStoryboard = read("video-production/storyboard-jobs.json");
 const jobsVoiceover = read("video-production/jobs-voiceover-script.txt");
 const jobsCaptions = read("video-production/spoolmate-jobs-tutorial.srt");
@@ -230,6 +232,38 @@ assert(
     && css.includes(".action-command-result")
     && css.includes("max-height: min(52dvh, 420px)"),
   "Searchable command palette or keyboard/touch behavior is incomplete",
+);
+assert(
+  html.includes('id="schematicTakeoffDialog"')
+    && html.includes('id="schematicTakeoffFileInput"')
+    && html.includes('id="schematicTakeoffCanvas"')
+    && html.includes('data-schematic-tool="rectangle"')
+    && html.includes('data-schematic-tool="lasso"')
+    && html.includes('id="schematicTakeoffCropCanvas"')
+    && html.includes('id="schematicTakeoffDownloadCropButton"')
+    && html.includes('id="schematicTakeoffFittingForm"')
+    && html.includes('id="schematicTakeoffExportButton"')
+    && app.includes('const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access"')
+    && app.includes('const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff"')
+    && app.includes('id: "schematic-takeoff"')
+    && /function\s+refreshSchematicTakeoffAccess\s*\(/.test(app)
+    && /function\s+handleSchematicTakeoffPointerDown\s*\(/.test(app)
+    && /function\s+handleSchematicTakeoffPointerMove\s*\(/.test(app)
+    && /function\s+renderSchematicTakeoffPdfPage\s*\(/.test(app)
+    && /function\s+schematicTakeoffCropCanvasForSelection\s*\(/.test(app)
+    && /function\s+downloadSchematicTakeoffCrop\s*\(/.test(app)
+    && /function\s+exportSchematicTakeoffCsv\s*\(/.test(app)
+    && css.includes(".schematic-takeoff-card")
+    && css.includes("#schematicTakeoffCanvas")
+    && css.includes("@media (max-height: 560px) and (orientation: landscape)")
+    && /create table if not exists public\.private_feature_access/.test(schematicTakeoffMigration)
+    && /alter table public\.private_feature_access enable row level security/.test(schematicTakeoffMigration)
+    && /using \(\(select auth\.uid\(\)\) = user_id and active\)/.test(schematicTakeoffMigration)
+    && /revoke all on table public\.private_feature_access from public, anon, authenticated/.test(schematicTakeoffMigration)
+    && /grant select on table public\.private_feature_access to authenticated/.test(schematicTakeoffMigration)
+    && !/grant (?:insert|update|delete|all).*private_feature_access.*authenticated/i.test(schematicTakeoffMigration)
+    && schematicTakeoffMigration.includes("jpritchard@paragonplumbing.com.au"),
+  "Private schematic takeoff selection, account entitlement, RLS or responsive foundation is incomplete",
 );
 assert(
   html.includes('id="workshopStockDialog"')
