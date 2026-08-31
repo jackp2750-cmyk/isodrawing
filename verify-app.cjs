@@ -20,6 +20,7 @@ const REQUIRED_FILES = [
   "supabase/migrations/20260822050724_workshop_stock.sql",
   "supabase/migrations/20260822063407_smart_spool_kits.sql",
   "supabase/migrations/20260830090000_schematic_takeoff_private_beta.sql",
+  "supabase/migrations/20260901080351_workshop_stock_fk_indexes.sql",
   "supabase/functions/delete-account/index.ts",
   "supabase/functions/ai-help/index.ts",
   "supabase/functions/support-admin/index.ts",
@@ -107,6 +108,7 @@ const jobsDashboardPreferencesMigration = read("supabase-migration-v339-jobs-das
 const workshopStockMigration = read("supabase/migrations/20260822050724_workshop_stock.sql");
 const smartSpoolKitsMigration = read("supabase/migrations/20260822063407_smart_spool_kits.sql");
 const schematicTakeoffMigration = read("supabase/migrations/20260830090000_schematic_takeoff_private_beta.sql");
+const workshopStockFkIndexesMigration = read("supabase/migrations/20260901080351_workshop_stock_fk_indexes.sql");
 const jobsStoryboard = read("video-production/storyboard-jobs.json");
 const jobsVoiceover = read("video-production/jobs-voiceover-script.txt");
 const jobsCaptions = read("video-production/spoolmate-jobs-tutorial.srt");
@@ -327,6 +329,13 @@ assert(
     && /Return the picked quantity before changing the matched stock item/.test(smartSpoolKitsMigration)
     && /grant update \(label, detail, unit, required_quantity, note, active, updated_at\)/.test(smartSpoolKitsMigration),
   "Smart Spool Kit BOM generation, reservation, QR picking, Gear-check sync, database protection or responsive layout is incomplete",
+);
+assert(
+  /create index if not exists workshop_stock_movements_actor_id_idx/.test(workshopStockFkIndexesMigration)
+    && /on public\.workshop_stock_movements \(actor_id\)/.test(workshopStockFkIndexesMigration)
+    && /create index if not exists workshop_stock_kit_lines_created_by_idx/.test(workshopStockFkIndexesMigration)
+    && /on public\.workshop_stock_kit_lines \(created_by\)/.test(workshopStockFkIndexesMigration),
+  "Workshop Stock audit foreign keys are missing their covering indexes",
 );
 assert(
   html.includes('id="spoolWorkspaceTabs"')

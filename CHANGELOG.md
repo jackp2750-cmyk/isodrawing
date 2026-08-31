@@ -11,6 +11,7 @@ This log was reconstructed from the current project history and app state. Early
 - Kept customer schematic files on-device in this first version while automatic symbol, overlap and duplicate-count rules remain intentionally deferred.
 - Added desktop, iPad, Android tablet, phone and short-landscape layouts with touch-sized controls.
 - Added the private-feature Supabase migration and seeded access for the active platform administrator and verified Paragon beta account.
+- Added covering indexes for Workshop Stock movement actors and Smart Kit creators after the live Supabase performance-advisor review.
 - Bumped the PWA cache to `spoolmate-v370-schematic-takeoff-beta`.
 
 ## v3.69 - Faster selection and workshop batch control
