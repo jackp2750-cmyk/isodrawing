@@ -5,6 +5,7 @@ const previewStage = document.querySelector("#previewStage");
 const drawingPanel = document.querySelector(".drawing-panel");
 const selectionActionBar = document.querySelector("#selectionActionBar");
 const selectionActionSummary = document.querySelector("#selectionActionSummary");
+const selectionActionDragHandle = document.querySelector("#selectionActionDragHandle");
 const controlPanel = document.querySelector(".control-panel");
 const previewPanel = document.querySelector(".preview-panel");
 const workspaceTitle = document.querySelector("#workspaceTitle");
@@ -200,7 +201,11 @@ const schematicTakeoffHint = document.querySelector("#schematicTakeoffHint");
 const schematicTakeoffClearButton = document.querySelector("#schematicTakeoffClearButton");
 const schematicTakeoffSelectionCount = document.querySelector("#schematicTakeoffSelectionCount");
 const schematicTakeoffSelectionList = document.querySelector("#schematicTakeoffSelectionList");
+const schematicTakeoffSystemInput = document.querySelector("#schematicTakeoffSystemInput");
 const schematicTakeoffSelectionNameInput = document.querySelector("#schematicTakeoffSelectionNameInput");
+const schematicTakeoffSystemContext = document.querySelector("#schematicTakeoffSystemContext");
+const schematicTakeoffSystemContextName = document.querySelector("#schematicTakeoffSystemContextName");
+const schematicTakeoffDetectedTag = document.querySelector("#schematicTakeoffDetectedTag");
 const schematicTakeoffReadyButton = document.querySelector("#schematicTakeoffReadyButton");
 const schematicTakeoffCropCanvas = document.querySelector("#schematicTakeoffCropCanvas");
 const schematicTakeoffCropEmpty = document.querySelector("#schematicTakeoffCropEmpty");
@@ -210,6 +215,11 @@ const schematicTakeoffFittingTypeInput = document.querySelector("#schematicTakeo
 const schematicTakeoffFittingSizeInput = document.querySelector("#schematicTakeoffFittingSizeInput");
 const schematicTakeoffFittingQuantityInput = document.querySelector("#schematicTakeoffFittingQuantityInput");
 const schematicTakeoffFittingNoteInput = document.querySelector("#schematicTakeoffFittingNoteInput");
+const schematicTakeoffValveQuestions = document.querySelector("#schematicTakeoffValveQuestions");
+const schematicTakeoffValveConnectionInput = document.querySelector("#schematicTakeoffValveConnectionInput");
+const schematicTakeoffValveBrandInput = document.querySelector("#schematicTakeoffValveBrandInput");
+const schematicTakeoffValveFlangeField = document.querySelector("#schematicTakeoffValveFlangeField");
+const schematicTakeoffValveFlangeInput = document.querySelector("#schematicTakeoffValveFlangeInput");
 const schematicTakeoffAddFittingButton = document.querySelector("#schematicTakeoffAddFittingButton");
 const schematicTakeoffFittingList = document.querySelector("#schematicTakeoffFittingList");
 const schematicTakeoffTotal = document.querySelector("#schematicTakeoffTotal");
@@ -536,8 +546,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.70";
-const APP_BUILD_DATE = "2026-08-30";
+const APP_VERSION = "v3.72";
+const APP_BUILD_DATE = "2026-09-01";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -2212,6 +2222,9 @@ let socketDrag = null;
 let dimensionDrag = null;
 let dimensionHitTargets = [];
 let boxSelectDrag = null;
+let selectionActionBarDrag = null;
+let selectionActionBarManualPosition = null;
+let selectionActionBarSelectionKey = "";
 let measurementDraft = null;
 let shiftAngleSnap = false;
 let touchShiftAnglePointerId = null;
@@ -5484,28 +5497,81 @@ function updateSelectionActionBar() {
   const visible = selected.length > 0 && (appMode === "draw" || appMode === "edit");
   selectionActionBar.hidden = !visible;
   document.body.classList.toggle("selection-actions-open", visible);
-  if (!visible) return;
+  if (!visible) {
+    selectionActionBarSelectionKey = "";
+    selectionActionBarManualPosition = null;
+    selectionActionBar.classList.remove("user-positioned", "dragging");
+    selectionActionBar.style.removeProperty("left");
+    selectionActionBar.style.removeProperty("top");
+    selectionActionBar.style.removeProperty("width");
+    selectionActionBar.style.removeProperty("--selection-action-left");
+    selectionActionBar.style.removeProperty("--selection-action-top");
+    return;
+  }
+
+  const selectionKey = selected.join(",");
+  if (selectionKey !== selectionActionBarSelectionKey) {
+    selectionActionBarSelectionKey = selectionKey;
+    selectionActionBarManualPosition = null;
+    selectionActionBar.classList.remove("user-positioned");
+    selectionActionBar.style.removeProperty("width");
+    selectionActionBar.style.removeProperty("--selection-action-left");
+    selectionActionBar.style.removeProperty("--selection-action-top");
+  }
 
   if (selectionActionSummary) {
     selectionActionSummary.textContent = `${selected.length} run${selected.length === 1 ? "" : "s"}`;
   }
   const locked = drawingEditLocked();
-  selectionActionBar.querySelectorAll("button").forEach((button) => {
+  selectionActionBar.querySelectorAll("[data-selection-action]").forEach((button) => {
     button.disabled = locked || (button.dataset.selectionAction === "length" && selected.length !== 1);
   });
 
-  const selectedSet = new Set(selected);
-  const points = segments()
-    .filter((segment) => selectedSet.has(segment.index))
-    .map((segment) => projectIso(lerpPoint(segment.start, segment.end, 0.5)));
-  if (!points.length) return;
-  const anchor = points.reduce((total, point) => ({ x: total.x + point.x, y: total.y + point.y }), { x: 0, y: 0 });
-  anchor.x /= points.length;
-  anchor.y /= points.length;
   const frameRect = drawCanvas.getBoundingClientRect();
-  const safeHalfWidth = Math.min(265, Math.max(120, frameRect.width * 0.34));
-  selectionActionBar.style.left = `${clampNumber(anchor.x, safeHalfWidth, Math.max(safeHalfWidth, frameRect.width - safeHalfWidth))}px`;
-  selectionActionBar.style.top = `${clampNumber(anchor.y, 70, Math.max(70, frameRect.height - 24))}px`;
+  if (selectionActionBarManualPosition?.selectionKey === selectionKey) {
+    const barRect = selectionActionBar.getBoundingClientRect();
+    const maxLeft = Math.max(8, frameRect.width - barRect.width - 8);
+    const maxTop = Math.max(8, frameRect.height - barRect.height - 8);
+    selectionActionBarManualPosition.left = clampNumber(selectionActionBarManualPosition.left, 8, maxLeft);
+    selectionActionBarManualPosition.top = clampNumber(selectionActionBarManualPosition.top, 8, maxTop);
+    selectionActionBar.classList.add("user-positioned");
+    selectionActionBar.style.setProperty("--selection-action-left", `${selectionActionBarManualPosition.left}px`);
+    selectionActionBar.style.setProperty("--selection-action-top", `${selectionActionBarManualPosition.top}px`);
+    selectionActionBar.style.left = `${selectionActionBarManualPosition.left}px`;
+    selectionActionBar.style.top = `${selectionActionBarManualPosition.top}px`;
+    return;
+  }
+
+  const selectedSet = new Set(selected);
+  const selectedSegments = segments().filter((segment) => selectedSet.has(segment.index));
+  const points = selectedSegments.flatMap((segment) => [projectIso(segment.start), projectIso(segment.end)]);
+  if (!points.length) return;
+  const minX = Math.min(...points.map((point) => point.x));
+  const maxX = Math.max(...points.map((point) => point.x));
+  const minY = Math.min(...points.map((point) => point.y));
+  const maxY = Math.max(...points.map((point) => point.y));
+  const barRect = selectionActionBar.getBoundingClientRect();
+  const safeHalfWidth = Math.min(Math.max(120, barRect.width / 2), Math.max(120, frameRect.width / 2 - 8));
+  const anchorX = clampNumber((minX + maxX) / 2, safeHalfWidth + 8, Math.max(safeHalfWidth + 8, frameRect.width - safeHalfWidth - 8));
+  const roomAbove = minY - 18;
+  const roomBelow = frameRect.height - maxY - 18;
+  const anchorY = roomAbove >= barRect.height + 14 || roomAbove >= roomBelow
+    ? minY - 6
+    : maxY + barRect.height + 22;
+  const safeAnchorY = clampNumber(anchorY, barRect.height + 22, Math.max(barRect.height + 22, frameRect.height + 6));
+  selectionActionBar.classList.remove("user-positioned");
+  selectionActionBar.style.left = `${anchorX}px`;
+  selectionActionBar.style.top = `${safeAnchorY}px`;
+}
+
+function resetSelectionActionBarPosition() {
+  selectionActionBarManualPosition = null;
+  selectionActionBarDrag = null;
+  selectionActionBar?.classList.remove("user-positioned", "dragging");
+  selectionActionBar?.style.removeProperty("width");
+  selectionActionBar?.style.removeProperty("--selection-action-left");
+  selectionActionBar?.style.removeProperty("--selection-action-top");
+  updateSelectionActionBar();
 }
 
 function setupSelectionActionBar() {
@@ -5519,6 +5585,74 @@ function setupSelectionActionBar() {
     if (action === "fittings") openSelectionFittingsMenu();
     if (action === "duplicate") duplicateSelectedSegments();
     if (action === "delete") deleteSelection();
+  });
+
+  selectionActionDragHandle?.addEventListener("pointerdown", (event) => {
+    if (event.button !== undefined && event.button !== 0) return;
+    const frameRect = drawCanvas?.getBoundingClientRect();
+    const barRect = selectionActionBar?.getBoundingClientRect();
+    if (!frameRect || !barRect) return;
+    event.preventDefault();
+    event.stopPropagation();
+    selectionActionBarDrag = {
+      pointerId: event.pointerId,
+      offsetX: event.clientX - barRect.left,
+      offsetY: event.clientY - barRect.top,
+      width: barRect.width,
+      height: barRect.height,
+    };
+    selectionActionBarManualPosition = {
+      left: barRect.left - frameRect.left,
+      top: barRect.top - frameRect.top,
+      selectionKey: selectionActionBarSelectionKey,
+    };
+    selectionActionBar.classList.add("user-positioned", "dragging");
+    if (document.body.classList.contains("mobile-touch-layout") || isPhoneLayout()) {
+      selectionActionBar.style.width = `${Math.min(barRect.width, Math.max(180, frameRect.width - 16))}px`;
+    }
+    selectionActionBar.style.setProperty("--selection-action-left", `${selectionActionBarManualPosition.left}px`);
+    selectionActionBar.style.setProperty("--selection-action-top", `${selectionActionBarManualPosition.top}px`);
+    selectionActionBar.style.left = `${selectionActionBarManualPosition.left}px`;
+    selectionActionBar.style.top = `${selectionActionBarManualPosition.top}px`;
+    selectionActionDragHandle.setPointerCapture?.(event.pointerId);
+  });
+
+  selectionActionDragHandle?.addEventListener("pointermove", (event) => {
+    if (!selectionActionBarDrag || selectionActionBarDrag.pointerId !== event.pointerId) return;
+    const frameRect = drawCanvas?.getBoundingClientRect();
+    if (!frameRect || !selectionActionBarManualPosition) return;
+    const nextLeft = event.clientX - frameRect.left - selectionActionBarDrag.offsetX;
+    const nextTop = event.clientY - frameRect.top - selectionActionBarDrag.offsetY;
+    const maxLeft = Math.max(8, frameRect.width - selectionActionBarDrag.width - 8);
+    const maxTop = Math.max(8, frameRect.height - selectionActionBarDrag.height - 8);
+    selectionActionBarManualPosition.left = clampNumber(nextLeft, 8, maxLeft);
+    selectionActionBarManualPosition.top = clampNumber(nextTop, 8, maxTop);
+    selectionActionBar.style.setProperty("--selection-action-left", `${selectionActionBarManualPosition.left}px`);
+    selectionActionBar.style.setProperty("--selection-action-top", `${selectionActionBarManualPosition.top}px`);
+    selectionActionBar.style.left = `${selectionActionBarManualPosition.left}px`;
+    selectionActionBar.style.top = `${selectionActionBarManualPosition.top}px`;
+  });
+
+  const finishSelectionActionBarDrag = (event) => {
+    if (!selectionActionBarDrag || selectionActionBarDrag.pointerId !== event.pointerId) return;
+    selectionActionDragHandle?.releasePointerCapture?.(event.pointerId);
+    selectionActionBarDrag = null;
+    selectionActionBar?.classList.remove("dragging");
+  };
+  selectionActionDragHandle?.addEventListener("pointerup", finishSelectionActionBarDrag);
+  selectionActionDragHandle?.addEventListener("pointercancel", finishSelectionActionBarDrag);
+  selectionActionDragHandle?.addEventListener("lostpointercapture", () => {
+    selectionActionBarDrag = null;
+    selectionActionBar?.classList.remove("dragging");
+  });
+  selectionActionDragHandle?.addEventListener("dblclick", (event) => {
+    event.preventDefault();
+    resetSelectionActionBarPosition();
+  });
+  selectionActionDragHandle?.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape" && event.key !== "Home") return;
+    event.preventDefault();
+    resetSelectionActionBarPosition();
   });
 }
 
@@ -22229,6 +22363,8 @@ function defaultSchematicTakeoffState() {
     panX: 0,
     panY: 0,
     selections: [],
+    pageTextByPage: new Map(),
+    lastSystemCode: "",
     selectedId: "",
     activeSelection: null,
     pointers: new Map(),
@@ -22258,6 +22394,64 @@ function schematicTakeoffAreaBounds(selection) {
   const x = Math.min(...xs);
   const y = Math.min(...ys);
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
+}
+
+function normalizeSchematicSystemCode(value) {
+  return String(value || "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9/& -]/g, "")
+    .replace(/\s+/g, " ")
+    .slice(0, 32);
+}
+
+function schematicTakeoffSelectionContainsPoint(selection, point, padding = 0) {
+  const bounds = schematicTakeoffAreaBounds(selection);
+  if (!bounds || !point) return false;
+  if (
+    point.x < bounds.x - padding
+    || point.x > bounds.x + bounds.width + padding
+    || point.y < bounds.y - padding
+    || point.y > bounds.y + bounds.height + padding
+  ) return false;
+  if (selection.kind === "rectangle" || padding > 0) return true;
+  const points = Array.isArray(selection.points) ? selection.points : [];
+  let inside = false;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const a = points[i];
+    const b = points[j];
+    const crosses = ((a.y > point.y) !== (b.y > point.y))
+      && point.x < ((b.x - a.x) * (point.y - a.y)) / (b.y - a.y) + a.x;
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function schematicTakeoffTextForSelection(selection) {
+  const takeoff = ensureSchematicTakeoffState();
+  const entries = takeoff.pageTextByPage instanceof Map ? takeoff.pageTextByPage.get(selection?.page) || [] : [];
+  const bounds = schematicTakeoffAreaBounds(selection);
+  const padding = bounds ? Math.max(8, Math.min(bounds.width, bounds.height) * 0.08) : 0;
+  return entries.filter((entry) => schematicTakeoffSelectionContainsPoint(selection, entry, padding));
+}
+
+function schematicTakeoffDetectSystemContext(selection) {
+  const selectedText = schematicTakeoffTextForSelection(selection).map((entry) => entry.text).filter(Boolean);
+  const candidateText = selectedText.join(" ").toUpperCase();
+  const tags = [];
+  const tagPattern = /\b([A-Z]{2,10})-([A-Z0-9]*\d[A-Z0-9]*(?:-[A-Z0-9]+)*)\b/g;
+  let match = tagPattern.exec(candidateText);
+  while (match) {
+    const tag = `${match[1]}-${match[2]}`;
+    if (!tags.some((item) => item.tag === tag)) tags.push({ systemCode: match[1], tag });
+    match = tagPattern.exec(candidateText);
+  }
+  const detected = tags[0] || null;
+  return {
+    systemCode: detected?.systemCode || "",
+    equipmentTags: tags.map((item) => item.tag),
+    source: detected ? "pdf-text" : "",
+  };
 }
 
 function schematicTakeoffCropCanvasForSelection(selection, maxDimension = 1800) {
@@ -22421,7 +22615,7 @@ function drawSchematicTakeoffSelection(ctx, selection, transform, selected = fal
   const labelY = transform.y + bounds.y * transform.scale;
   ctx.save();
   ctx.font = "700 13px Segoe UI, sans-serif";
-  const label = `${selection.name}${selection.ready ? " · READY" : ""}`;
+  const label = `${selection.systemCode ? `${selection.systemCode} · ` : ""}${selection.name}${selection.ready ? " · READY" : ""}`;
   const width = ctx.measureText(label).width + 18;
   ctx.fillStyle = selected ? "#9a5b00" : "#006f83";
   ctx.beginPath();
@@ -22531,14 +22725,19 @@ function schematicTakeoffAreaLabel(page = ensureSchematicTakeoffState().page) {
 
 function addSchematicTakeoffSelection(selection) {
   const takeoff = ensureSchematicTakeoffState();
+  const detectedContext = schematicTakeoffDetectSystemContext({ ...selection, page: takeoff.page });
   const next = {
     ...selection,
     id: createTraceabilityId("AREA"),
     page: takeoff.page,
     name: schematicTakeoffAreaLabel(),
+    systemCode: detectedContext.systemCode || takeoff.lastSystemCode || "",
+    equipmentTags: detectedContext.equipmentTags,
+    systemSource: detectedContext.source || (takeoff.lastSystemCode ? "previous-selection" : ""),
     ready: false,
     items: [],
   };
+  if (next.systemCode) takeoff.lastSystemCode = next.systemCode;
   takeoff.selections.push(next);
   takeoff.selectedId = next.id;
   renderSchematicTakeoffPanels();
@@ -22662,6 +22861,24 @@ function schematicTakeoffFittingCount(selection) {
   return (selection?.items || []).reduce((sum, item) => sum + Math.max(0, Number(item.quantity) || 0), 0);
 }
 
+function schematicTakeoffValveDetails(item) {
+  if (String(item?.type || "").toLowerCase() !== "valve") return [];
+  return [item.connectionType, item.brand, item.flangeType].map((value) => String(value || "").trim()).filter(Boolean);
+}
+
+function schematicTakeoffItemDescription(item) {
+  const details = schematicTakeoffValveDetails(item);
+  return `${item.type} · ${item.size || "Size not set"}${details.length ? ` · ${details.join(" · ")}` : ""}`;
+}
+
+function updateSchematicTakeoffValveQuestions() {
+  const isValve = String(schematicTakeoffFittingTypeInput?.value || "").toLowerCase() === "valve";
+  if (schematicTakeoffValveQuestions) schematicTakeoffValveQuestions.hidden = !isValve;
+  const needsFlange = isValve && ["Flanged", "Mixed"].includes(schematicTakeoffValveConnectionInput?.value || "");
+  if (schematicTakeoffValveFlangeField) schematicTakeoffValveFlangeField.hidden = !needsFlange;
+  if (schematicTakeoffValveFlangeInput) schematicTakeoffValveFlangeInput.required = needsFlange;
+}
+
 function renderSchematicTakeoffPanels() {
   const takeoff = ensureSchematicTakeoffState();
   const selected = schematicTakeoffSelectedArea();
@@ -22673,15 +22890,33 @@ function renderSchematicTakeoffPanels() {
           <div class="schematic-selection-row${selection.id === takeoff.selectedId ? " active" : ""}">
             <button type="button" data-schematic-selection="${escapeHtml(selection.id)}">
               <strong>${escapeHtml(selection.name)}</strong>
-              <span>Page ${selection.page} · ${selection.kind === "lasso" ? "Lasso" : "Rectangle"} · ${schematicTakeoffFittingCount(selection)} fittings</span>
+              <span><b>${escapeHtml(selection.systemCode || "Unassigned")}</b> · Page ${selection.page} · ${selection.kind === "lasso" ? "Lasso" : "Rectangle"} · ${schematicTakeoffFittingCount(selection)} fittings</span>
             </button>
             <button class="danger" type="button" data-delete-schematic-selection="${escapeHtml(selection.id)}" aria-label="Delete ${escapeHtml(selection.name)}">×</button>
           </div>`).join("")
       : '<div class="schematic-empty-list">Draw a rectangle or lasso to create Area 1.</div>';
   }
+  if (schematicTakeoffSystemInput) {
+    schematicTakeoffSystemInput.disabled = !selected;
+    schematicTakeoffSystemInput.value = selected?.systemCode || "";
+  }
   if (schematicTakeoffSelectionNameInput) {
     schematicTakeoffSelectionNameInput.disabled = !selected;
     schematicTakeoffSelectionNameInput.value = selected?.name || "";
+  }
+  if (schematicTakeoffSystemContext) schematicTakeoffSystemContext.hidden = !selected;
+  if (schematicTakeoffSystemContextName) {
+    schematicTakeoffSystemContextName.textContent = selected?.systemCode ? `${selected.systemCode} side table` : "System not assigned";
+  }
+  if (schematicTakeoffDetectedTag) {
+    const tags = selected?.equipmentTags || [];
+    schematicTakeoffDetectedTag.textContent = !selected
+      ? "Set the system shown on the selected schematic area."
+      : tags.length
+      ? `Detected equipment tag${tags.length === 1 ? "" : "s"}: ${tags.join(", ")} · system ${selected.systemCode || "not assigned"}`
+      : selected.systemSource === "previous-selection"
+      ? `Using ${selected.systemCode} from the previous selected area. Confirm it before adding fittings.`
+      : "No readable equipment tag was found in this crop. Enter the system code shown on the schematic.";
   }
   if (schematicTakeoffReadyButton) {
     schematicTakeoffReadyButton.disabled = !selected;
@@ -22694,7 +22929,7 @@ function renderSchematicTakeoffPanels() {
     schematicTakeoffFittingList.innerHTML = items.length
       ? items.map((item) => `
           <div class="schematic-fitting-row">
-            <div><strong>${escapeHtml(item.type)} · ${escapeHtml(item.size || "Size not set")}</strong><span>${item.quantity} ${item.quantity === 1 ? "item" : "items"}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span></div>
+            <div><strong>${escapeHtml(schematicTakeoffItemDescription(item))}</strong><span>${item.quantity} ${item.quantity === 1 ? "item" : "items"}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span></div>
             <button class="danger" type="button" data-delete-schematic-fitting="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.type)}">×</button>
           </div>`).join("")
       : `<div class="schematic-empty-list">${selected ? "No confirmed fittings in this area yet." : "Select an area, then add confirmed fittings while we define automatic rules."}</div>`;
@@ -22702,17 +22937,37 @@ function renderSchematicTakeoffPanels() {
   const allItems = takeoff.selections.flatMap((selection) => selection.items || []);
   const total = allItems.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
   if (schematicTakeoffTotal) schematicTakeoffTotal.textContent = `${total} ${total === 1 ? "fitting" : "fittings"}`;
-  const grouped = new Map();
-  allItems.forEach((item) => {
-    const key = `${item.type}\u0000${item.size || ""}`;
-    const current = grouped.get(key) || { type: item.type, size: item.size || "Size not set", quantity: 0 };
-    current.quantity += Number(item.quantity || 0);
-    grouped.set(key, current);
+  const systems = new Map();
+  takeoff.selections.forEach((selection) => {
+    const systemCode = normalizeSchematicSystemCode(selection.systemCode) || "UNASSIGNED";
+    const system = systems.get(systemCode) || { code: systemCode, areas: 0, quantity: 0, equipmentTags: new Set(), items: new Map() };
+    system.areas += 1;
+    (selection.equipmentTags || []).forEach((tag) => system.equipmentTags.add(tag));
+    (selection.items || []).forEach((item) => {
+      const descriptor = schematicTakeoffItemDescription(item);
+      const key = `${descriptor}\u0000${item.note || ""}`;
+      const current = system.items.get(key) || { ...item, descriptor, quantity: 0 };
+      current.quantity += Number(item.quantity || 0);
+      system.quantity += Number(item.quantity || 0);
+      system.items.set(key, current);
+    });
+    systems.set(systemCode, system);
   });
   if (schematicTakeoffSummary) {
-    schematicTakeoffSummary.innerHTML = grouped.size
-      ? [...grouped.values()].sort((a, b) => a.type.localeCompare(b.type) || a.size.localeCompare(b.size)).map((item) => `<div><span>${escapeHtml(item.type)} · ${escapeHtml(item.size)}</span><strong>${item.quantity}</strong></div>`).join("")
-      : '<div class="schematic-empty-list">Confirmed fittings from every selected area will be combined here.</div>';
+    schematicTakeoffSummary.innerHTML = systems.size
+      ? [...systems.values()].sort((a, b) => a.code.localeCompare(b.code)).map((system) => {
+          const tags = [...system.equipmentTags];
+          const rows = [...system.items.values()]
+            .sort((a, b) => a.descriptor.localeCompare(b.descriptor))
+            .map((item) => `<div class="schematic-system-takeoff-row"><span>${escapeHtml(item.descriptor)}</span><strong>${item.quantity}</strong></div>`)
+            .join("");
+          return `<section class="schematic-system-takeoff${system.code === "UNASSIGNED" ? " unassigned" : ""}">
+            <header><div><span>SYSTEM</span><strong>${escapeHtml(system.code)}</strong></div><b>${system.quantity} fitting${system.quantity === 1 ? "" : "s"}</b></header>
+            <small>${system.areas} selected ${system.areas === 1 ? "area" : "areas"}${tags.length ? ` · ${escapeHtml(tags.join(", "))}` : ""}</small>
+            <div>${rows || '<div class="schematic-empty-list">No fittings confirmed for this system yet.</div>'}</div>
+          </section>`;
+        }).join("")
+      : '<div class="schematic-empty-list">Each selected area will create a side table grouped by its system.</div>';
   }
   if (schematicTakeoffExportButton) schematicTakeoffExportButton.disabled = !allItems.length;
   if (schematicTakeoffPageReadout) schematicTakeoffPageReadout.textContent = `Page ${takeoff.page} / ${takeoff.pageCount}`;
@@ -22720,6 +22975,7 @@ function renderSchematicTakeoffPanels() {
   if (schematicTakeoffNextPageButton) schematicTakeoffNextPageButton.disabled = takeoff.pageLoading || takeoff.page >= takeoff.pageCount;
   if (schematicTakeoffClearButton) schematicTakeoffClearButton.disabled = !takeoff.selections.length;
   if (schematicTakeoffHint && pageSelections.length) schematicTakeoffHint.textContent = `${pageSelections.length} selected ${pageSelections.length === 1 ? "area" : "areas"} on this page · ${schematicTakeoffToolHint()}`;
+  updateSchematicTakeoffValveQuestions();
   window.requestAnimationFrame(renderSchematicTakeoffCropPreview);
 }
 
@@ -22746,12 +23002,37 @@ async function selectSchematicTakeoffArea(id) {
 function addConfirmedSchematicFitting() {
   const selected = schematicTakeoffSelectedArea();
   if (!selected) return;
+  const fittingType = String(schematicTakeoffFittingTypeInput?.value || "Other").slice(0, 40);
+  const isValve = fittingType.toLowerCase() === "valve";
+  const connectionType = isValve ? String(schematicTakeoffValveConnectionInput?.value || "") : "";
+  const brand = isValve ? String(schematicTakeoffValveBrandInput?.value || "") : "";
+  const flangeType = isValve && ["Flanged", "Mixed"].includes(connectionType)
+    ? String(schematicTakeoffValveFlangeInput?.value || "").trim().slice(0, 60)
+    : "";
+  if (isValve && !connectionType) {
+    showAppNotice("Choose whether this valve is Victaulic / grooved, flanged or mixed.", { tone: "warning" });
+    schematicTakeoffValveConnectionInput?.focus();
+    return;
+  }
+  if (isValve && !brand) {
+    showAppNotice("Choose Victaulic, Ebro or Hydroflow as the valve brand.", { tone: "warning" });
+    schematicTakeoffValveBrandInput?.focus();
+    return;
+  }
+  if (isValve && ["Flanged", "Mixed"].includes(connectionType) && !flangeType) {
+    showAppNotice("Enter the flange type or standard for this valve.", { tone: "warning" });
+    schematicTakeoffValveFlangeInput?.focus();
+    return;
+  }
   const quantity = clampNumber(Math.round(Number(schematicTakeoffFittingQuantityInput?.value) || 1), 1, 9999);
   selected.items.push({
     id: createTraceabilityId("FIT"),
-    type: String(schematicTakeoffFittingTypeInput?.value || "Other").slice(0, 40),
+    type: fittingType,
     size: String(schematicTakeoffFittingSizeInput?.value || "").trim().slice(0, 40),
     quantity,
+    connectionType,
+    brand,
+    flangeType,
     note: String(schematicTakeoffFittingNoteInput?.value || "").trim().slice(0, 120),
     source: "confirmed",
   });
@@ -22762,10 +23043,22 @@ function addConfirmedSchematicFitting() {
 
 function exportSchematicTakeoffCsv() {
   const takeoff = ensureSchematicTakeoffState();
-  const rows = [["Schematic", "Page", "Area", "Fitting", "Size", "Quantity", "Note", "Source"]];
+  const rows = [["Schematic", "System", "Equipment tag", "Page", "Area", "Fitting", "Size", "Quantity", "Valve connection", "Valve brand", "Flange type / standard", "Note", "Source"]];
   takeoff.selections.forEach((selection) => {
     (selection.items || []).forEach((item) => rows.push([
-      takeoff.fileName, selection.page, selection.name, item.type, item.size, item.quantity, item.note, item.source,
+      takeoff.fileName,
+      selection.systemCode || "Unassigned",
+      (selection.equipmentTags || []).join("; "),
+      selection.page,
+      selection.name,
+      item.type,
+      item.size,
+      item.quantity,
+      item.connectionType || "",
+      item.brand || "",
+      item.flangeType || "",
+      item.note,
+      item.source,
     ]));
   });
   if (rows.length === 1) return;
@@ -22793,6 +23086,7 @@ async function renderSchematicTakeoffPdfPage(pageNumber) {
   renderSchematicTakeoffPanels();
   renderSchematicTakeoffCanvas();
   try {
+    const pdfjs = await schematicTakeoffPdfModule();
     const page = await takeoff.pdf.getPage(takeoff.page);
     const natural = page.getViewport({ scale: 1 });
     const scale = Math.min(2.4, Math.max(1.2, 2600 / Math.max(natural.width, natural.height)));
@@ -22801,9 +23095,28 @@ async function renderSchematicTakeoffPdfPage(pageNumber) {
     canvas.width = Math.ceil(viewport.width);
     canvas.height = Math.ceil(viewport.height);
     await page.render({ canvasContext: canvas.getContext("2d"), viewport }).promise;
+    const textContent = await page.getTextContent().catch(() => ({ items: [] }));
+    const pageText = (textContent.items || []).map((item) => {
+      const text = String(item.str || "").trim();
+      if (!text || !Array.isArray(item.transform)) return null;
+      const transform = pdfjs.Util.transform(viewport.transform, item.transform);
+      const height = Math.max(6, Math.hypot(transform[2], transform[3]));
+      const width = Math.max(height * 0.3, Math.abs(Number(item.width || 0) * scale));
+      return { text, x: transform[4] + width / 2, y: transform[5] - height / 2, width, height };
+    }).filter(Boolean);
+    takeoff.pageTextByPage.set(takeoff.page, pageText);
     takeoff.source = canvas;
     takeoff.sourceWidth = canvas.width;
     takeoff.sourceHeight = canvas.height;
+    takeoff.selections.filter((selection) => selection.page === takeoff.page).forEach((selection) => {
+      const detected = schematicTakeoffDetectSystemContext(selection);
+      if (detected.equipmentTags.length) selection.equipmentTags = detected.equipmentTags;
+      if (!selection.systemCode && detected.systemCode) {
+        selection.systemCode = detected.systemCode;
+        selection.systemSource = detected.source;
+        takeoff.lastSystemCode = detected.systemCode;
+      }
+    });
     fitSchematicTakeoffView();
   } finally {
     takeoff.pageLoading = false;
@@ -22829,6 +23142,8 @@ async function loadSchematicTakeoffFile(file) {
   await disposeSchematicTakeoffSource();
   takeoff.fileName = String(file.name || "schematic").slice(0, 180);
   takeoff.selections = [];
+  takeoff.pageTextByPage = new Map();
+  takeoff.lastSystemCode = "";
   takeoff.selectedId = "";
   takeoff.page = 1;
   takeoff.pageCount = 1;
@@ -22959,6 +23274,16 @@ function setupSchematicTakeoff() {
     renderSchematicTakeoffCanvas();
     schematicTakeoffSelectionNameInput.focus({ preventScroll: true });
   });
+  schematicTakeoffSystemInput?.addEventListener("change", () => {
+    const selected = schematicTakeoffSelectedArea();
+    if (!selected) return;
+    selected.systemCode = normalizeSchematicSystemCode(schematicTakeoffSystemInput.value);
+    selected.systemSource = "manual";
+    if (selected.systemCode) ensureSchematicTakeoffState().lastSystemCode = selected.systemCode;
+    renderSchematicTakeoffPanels();
+    renderSchematicTakeoffCanvas();
+    schematicTakeoffSystemInput.focus({ preventScroll: true });
+  });
   schematicTakeoffReadyButton?.addEventListener("click", () => {
     const selected = schematicTakeoffSelectedArea();
     if (!selected) return;
@@ -22968,6 +23293,8 @@ function setupSchematicTakeoff() {
     showAppNotice(`${selected.name} is isolated and ready for the recognition rules.`, { tone: "success" });
   });
   schematicTakeoffDownloadCropButton?.addEventListener("click", downloadSchematicTakeoffCrop);
+  schematicTakeoffFittingTypeInput?.addEventListener("change", updateSchematicTakeoffValveQuestions);
+  schematicTakeoffValveConnectionInput?.addEventListener("change", updateSchematicTakeoffValveQuestions);
   schematicTakeoffFittingForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     addConfirmedSchematicFitting();

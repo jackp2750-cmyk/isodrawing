@@ -183,6 +183,13 @@ assert(serviceWorker.includes(`./styles.css?v=${assetVersion}`), "Service worker
 assert(readme.includes(`Current app version: \`${appVersion}\``), "README current version differs from app.js");
 assert(changelog.includes(`Current app version: \`${appVersion}\``), "CHANGELOG current version differs from app.js");
 assert(
+  html.includes('id="selectionActionDragHandle"')
+    && app.includes("selectionActionBarManualPosition")
+    && app.includes('addEventListener("pointermove"')
+    && css.includes(".selection-action-bar.user-positioned"),
+  "Selected-run toolbar drag, redraw persistence or positioning styles are incomplete"
+);
+assert(
   html.includes('id="bigSpoolDialog"')
     && html.includes('id="bigSpoolMaxLengthInput"')
     && html.includes('id="bigSpoolManualDistanceInput"')
@@ -244,6 +251,10 @@ assert(
     && html.includes('id="schematicTakeoffCropCanvas"')
     && html.includes('id="schematicTakeoffDownloadCropButton"')
     && html.includes('id="schematicTakeoffFittingForm"')
+    && html.includes('id="schematicTakeoffSystemInput"')
+    && html.includes('id="schematicTakeoffValveQuestions"')
+    && html.includes('id="schematicTakeoffValveConnectionInput"')
+    && html.includes('id="schematicTakeoffValveBrandInput"')
     && html.includes('id="schematicTakeoffExportButton"')
     && app.includes('const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access"')
     && app.includes('const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff"')
@@ -254,6 +265,11 @@ assert(
     && /function\s+renderSchematicTakeoffPdfPage\s*\(/.test(app)
     && /function\s+schematicTakeoffCropCanvasForSelection\s*\(/.test(app)
     && /function\s+downloadSchematicTakeoffCrop\s*\(/.test(app)
+    && /function\s+schematicTakeoffDetectSystemContext\s*\(/.test(app)
+    && /function\s+updateSchematicTakeoffValveQuestions\s*\(/.test(app)
+    && html.includes('<option value="Victaulic">Victaulic</option>')
+    && html.includes('<option value="Ebro">Ebro</option>')
+    && html.includes('<option value="Hydroflow">Hydroflow</option>')
     && /function\s+exportSchematicTakeoffCsv\s*\(/.test(app)
     && css.includes(".schematic-takeoff-card")
     && css.includes("#schematicTakeoffCanvas")
@@ -265,7 +281,7 @@ assert(
     && /grant select on table public\.private_feature_access to authenticated/.test(schematicTakeoffMigration)
     && !/grant (?:insert|update|delete|all).*private_feature_access.*authenticated/i.test(schematicTakeoffMigration)
     && schematicTakeoffMigration.includes("jpritchard@paragonplumbing.com.au"),
-  "Private schematic takeoff selection, account entitlement, RLS or responsive foundation is incomplete",
+  "Private schematic takeoff selection, system/valve classification, account entitlement, RLS or responsive foundation is incomplete",
 );
 assert(
   html.includes('id="workshopStockDialog"')

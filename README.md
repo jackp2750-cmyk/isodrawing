@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.70`
+Current app version: `v3.72`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -263,7 +263,7 @@ With Supabase configured:
 - Account includes a JSON data export, privacy/support information, diagnostics and protected account deletion.
 - Trial accounts receive 30 days of full cloud access. After expiry, permitted cloud spools, comments and workshop photos remain readable/exportable while cloud writes are paused.
 - Expired users can continue local-only work and switch Jobs between Cloud and This device.
-- Approved private-beta accounts can open Schematic Takeoff, load a PDF/image locally, isolate exact areas with rectangle or lasso selection, preview/download the exact recognition crop, manually confirm fittings and export a selected-area CSV. Automatic recognition rules are intentionally deferred until they are agreed.
+- Approved private-beta accounts can open Schematic Takeoff, load a PDF/image locally, isolate exact areas with rectangle or lasso selection and preview/download the exact recognition crop. Text-based PDFs now suggest a system such as CHWP from an equipment tag such as CHWP-B4-1; scanned images keep an editable system field until local OCR is added. Confirmed valves require a Victaulic/grooved, flanged or mixed connection, a Victaulic/Ebro/Hydroflow brand and—where applicable—a flange type/standard. Side tables and CSV exports remain separated by system. Automatic symbol counting is still deferred until the agreed schematic symbols and legend rules are supplied.
 
 ## Supabase Setup
 

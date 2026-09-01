@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=370" />
+    <link rel="stylesheet" href="./styles.css?v=372" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.70</span>
+              <span class="version-badge" id="appVersionBadge">v3.72</span>
             </div>
           </div>
 
@@ -679,7 +679,10 @@
           <div class="canvas-frame">
             <canvas id="drawCanvas"></canvas>
             <div class="selection-action-bar" id="selectionActionBar" role="toolbar" aria-label="Selected pipe actions" hidden>
-              <span class="selection-action-summary" id="selectionActionSummary">1 run</span>
+              <button class="selection-action-drag-handle" id="selectionActionDragHandle" type="button" title="Drag this toolbar out of the way. Double-click to return it beside the selected pipe." aria-label="Move selected pipe toolbar">
+                <span class="selection-action-summary" id="selectionActionSummary">1 run</span>
+                <span class="selection-action-grip" aria-hidden="true">⠿</span>
+              </button>
               <button type="button" data-selection-action="length" title="Change the selected pipe length">Length</button>
               <button type="button" data-selection-action="size" title="Change pipe size">Size</button>
               <button type="button" data-selection-action="ends" title="Add a flange, roll groove or thread to a pipe end">Ends</button>
@@ -1371,10 +1374,21 @@
                 <div class="schematic-selection-list" id="schematicTakeoffSelectionList">
                   <div class="schematic-empty-list">Draw a rectangle or lasso to create Area 1.</div>
                 </div>
-                <label class="field schematic-selection-name">
-                  <span>Area name</span>
-                  <input id="schematicTakeoffSelectionNameInput" type="text" maxlength="80" placeholder="Example: Plant room west" disabled />
-                </label>
+                <div class="schematic-selection-fields">
+                  <label class="field schematic-selection-system">
+                    <span>System table</span>
+                    <input id="schematicTakeoffSystemInput" type="text" maxlength="32" placeholder="CHWP" autocapitalize="characters" spellcheck="false" disabled />
+                  </label>
+                  <label class="field schematic-selection-name">
+                    <span>Area name</span>
+                    <input id="schematicTakeoffSelectionNameInput" type="text" maxlength="80" placeholder="Example: Pump B4-1" disabled />
+                  </label>
+                </div>
+                <div class="schematic-system-context" id="schematicTakeoffSystemContext" hidden>
+                  <span>System takeoff table</span>
+                  <strong id="schematicTakeoffSystemContextName">Unassigned</strong>
+                  <small id="schematicTakeoffDetectedTag">Set the system shown on the selected schematic area.</small>
+                </div>
               </section>
               <section class="schematic-takeoff-panel schematic-rules-panel">
                 <span class="schematic-stage-badge">Foundation ready</span>
@@ -1394,12 +1408,19 @@
                   <label><span>Size</span><input id="schematicTakeoffFittingSizeInput" type="text" maxlength="40" placeholder="NB 50" /></label>
                   <label><span>Qty</span><input id="schematicTakeoffFittingQuantityInput" type="number" min="1" max="9999" step="1" value="1" /></label>
                   <label class="wide"><span>Note</span><input id="schematicTakeoffFittingNoteInput" type="text" maxlength="120" placeholder="Type, standard or uncertainty" /></label>
+                  <fieldset class="schematic-valve-questions wide" id="schematicTakeoffValveQuestions" hidden>
+                    <legend>Valve classification</legend>
+                    <label><span>Connection</span><select id="schematicTakeoffValveConnectionInput"><option value="">Select connection</option><option value="Victaulic / grooved">Victaulic / grooved</option><option value="Flanged">Flanged</option><option value="Mixed">Mixed</option></select></label>
+                    <label><span>Brand</span><select id="schematicTakeoffValveBrandInput"><option value="">Select brand</option><option value="Victaulic">Victaulic</option><option value="Ebro">Ebro</option><option value="Hydroflow">Hydroflow</option></select></label>
+                    <label class="wide" id="schematicTakeoffValveFlangeField" hidden><span>Flange type / standard</span><input id="schematicTakeoffValveFlangeInput" type="text" maxlength="60" placeholder="Example: wafer PN16, lugged or Table E" /></label>
+                    <small class="wide">Every counted valve must be reviewed so grooved, flanged and mixed valves are not combined.</small>
+                  </fieldset>
                   <button class="primary-button wide" id="schematicTakeoffAddFittingButton" type="submit" disabled>Add confirmed fitting</button>
                 </form>
                 <div class="schematic-fitting-list" id="schematicTakeoffFittingList"><div class="schematic-empty-list">Select an area, then add confirmed fittings while we define automatic rules.</div></div>
               </section>
               <section class="schematic-takeoff-panel schematic-summary-panel">
-                <div class="schematic-panel-heading"><div><strong>Combined takeoff</strong><small id="schematicTakeoffTotal">0 fittings</small></div></div>
+                <div class="schematic-panel-heading"><div><strong>Takeoff by system</strong><small id="schematicTakeoffTotal">0 fittings</small></div></div>
                 <div class="schematic-takeoff-summary" id="schematicTakeoffSummary"></div>
                 <button class="secondary-button" id="schematicTakeoffExportButton" type="button" disabled>Export CSV</button>
               </section>
@@ -2395,6 +2416,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=370"></script>
+    <script defer src="./app.js?v=372"></script>
   </body>
 </html>

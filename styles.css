@@ -1470,6 +1470,21 @@ body.schematic-takeoff-open #aiHelperButton {
   text-align: left;
 }
 
+.schematic-selection-row > button:first-child span b {
+  color: var(--teal-strong);
+}
+
+.schematic-fitting-row > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.schematic-fitting-row > div > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
 .schematic-selection-row small,
 .schematic-fitting-row small,
 .schematic-summary-row small {
@@ -1477,13 +1492,21 @@ body.schematic-takeoff-open #aiHelperButton {
   font-size: 10px;
 }
 
+.schematic-selection-fields {
+  display: grid;
+  grid-template-columns: minmax(100px, 0.7fr) minmax(0, 1.3fr);
+  gap: 7px;
+}
+
 .schematic-selection-name,
+.schematic-selection-system,
 .schematic-fitting-form label {
   display: grid;
   gap: 4px;
 }
 
 .schematic-selection-name > span,
+.schematic-selection-system > span,
 .schematic-fitting-form label > span {
   color: var(--muted);
   font-size: 10px;
@@ -1503,7 +1526,8 @@ body.schematic-takeoff-open #aiHelperButton {
 
 .schematic-fitting-form input,
 .schematic-fitting-form select,
-.schematic-selection-name input {
+.schematic-selection-name input,
+.schematic-selection-system input {
   width: 100%;
   min-height: 38px;
   border: 1px solid var(--line-strong);
@@ -1511,6 +1535,126 @@ body.schematic-takeoff-open #aiHelperButton {
   background: var(--button);
   color: var(--ink);
   padding: 7px 8px;
+}
+
+.schematic-system-context {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 3px 8px;
+  padding: 8px 9px;
+  border: 1px solid rgba(0, 127, 171, 0.3);
+  border-radius: 8px;
+  background: var(--teal-wash);
+}
+
+.schematic-system-context[hidden],
+.schematic-valve-questions[hidden],
+#schematicTakeoffValveFlangeField[hidden] {
+  display: none !important;
+}
+
+.schematic-system-context > span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.schematic-system-context > strong {
+  color: var(--teal-strong);
+  font-size: 12px;
+}
+
+.schematic-system-context > small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.schematic-valve-questions {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0;
+  padding: 9px;
+  border: 1px solid rgba(217, 143, 0, 0.38);
+  border-radius: 9px;
+  background: rgba(255, 248, 225, 0.72);
+}
+
+.schematic-valve-questions legend {
+  padding: 0 5px;
+  color: #8a5500;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.schematic-valve-questions > small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.schematic-system-takeoff {
+  display: grid;
+  gap: 6px;
+  padding: 9px;
+  border: 1px solid rgba(0, 127, 171, 0.34);
+  border-radius: 9px;
+  background: var(--panel-strong);
+}
+
+.schematic-system-takeoff.unassigned {
+  border-color: rgba(217, 143, 0, 0.45);
+}
+
+.schematic-system-takeoff > header,
+.schematic-system-takeoff-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.schematic-system-takeoff > header > div {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.schematic-system-takeoff > header span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.07em;
+}
+
+.schematic-system-takeoff > header strong {
+  color: var(--teal-strong);
+  font-size: 16px;
+}
+
+.schematic-system-takeoff > header b,
+.schematic-system-takeoff > small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.schematic-system-takeoff > div {
+  display: grid;
+  gap: 4px;
+}
+
+.schematic-system-takeoff-row {
+  padding: 6px 7px;
+  border-radius: 7px;
+  background: var(--button);
+  font-size: 11px;
 }
 
 .schematic-rules-panel {
@@ -1562,9 +1706,15 @@ body.schematic-takeoff-open #aiHelperButton {
 
 :root[data-theme="dark"] .schematic-takeoff-identity,
 :root[data-theme="dark"] .schematic-rules-panel,
-:root[data-theme="dark"] .schematic-boundary-rule {
+:root[data-theme="dark"] .schematic-boundary-rule,
+:root[data-theme="dark"] .schematic-system-context {
   border-color: #316a78;
   background: #18343c;
+}
+
+:root[data-theme="dark"] .schematic-valve-questions {
+  border-color: #725f32;
+  background: #302a1b;
 }
 
 :root[data-theme="dark"] .schematic-private-badge,
@@ -1673,6 +1823,10 @@ body.schematic-takeoff-open #aiHelperButton {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
+  .schematic-selection-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .schematic-fitting-form label:nth-child(3) {
     grid-column: 1 / -1;
   }
@@ -1731,6 +1885,13 @@ body.mobile-touch-layout .selection-action-bar {
   max-width: none;
   overflow-x: auto;
   transform: none;
+}
+
+body.mobile-touch-layout .selection-action-bar.user-positioned {
+  position: absolute;
+  right: auto;
+  bottom: auto;
+  max-width: calc(100% - 16px);
 }
 
 .project-library-row {
@@ -3462,6 +3623,18 @@ body[data-workflow-kind="quick"] .project-context-strip .project-readout {
   backdrop-filter: blur(12px);
 }
 
+.selection-action-bar.user-positioned {
+  left: var(--selection-action-left, 8px) !important;
+  right: auto;
+  top: var(--selection-action-top, 8px) !important;
+  bottom: auto;
+  transform: none;
+}
+
+.selection-action-bar.dragging {
+  box-shadow: 0 16px 42px rgba(14, 42, 51, 0.3);
+}
+
 .selection-action-bar[hidden] {
   display: none;
 }
@@ -3474,6 +3647,52 @@ body[data-workflow-kind="quick"] .project-context-strip .project-readout {
   font-weight: 950;
   text-transform: uppercase;
   white-space: nowrap;
+}
+
+.selection-action-bar .selection-action-drag-handle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 0 7px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--teal-strong);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.selection-action-bar .selection-action-drag-handle:hover:not(:disabled) {
+  border-color: rgba(0, 127, 171, 0.25);
+  background: rgba(0, 127, 171, 0.08);
+  color: var(--teal-strong);
+}
+
+.selection-action-bar.dragging .selection-action-drag-handle {
+  cursor: grabbing;
+}
+
+.selection-action-grip {
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+}
+
+@media (min-width: 641px) {
+  body.mobile-touch-layout .selection-action-bar {
+    left: 50% !important;
+    right: auto;
+    width: max-content;
+    max-width: calc(100% - 16px);
+    transform: translateX(-50%);
+  }
+
+  body.mobile-touch-layout .selection-action-bar.user-positioned {
+    width: auto;
+    transform: none;
+  }
 }
 
 .selection-action-bar button {
@@ -3746,6 +3965,12 @@ body[data-workflow-kind="quick"] .project-context-strip .project-readout {
     flex: 0 0 auto;
     min-height: 42px;
     padding-inline: 12px;
+  }
+
+  .selection-action-bar.user-positioned {
+    position: absolute;
+    right: auto;
+    bottom: auto;
   }
 
   .selection-action-summary {

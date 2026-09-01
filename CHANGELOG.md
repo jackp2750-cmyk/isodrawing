@@ -1,6 +1,25 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.70`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.72`.
+
+## v3.72 - System-grouped schematic valve takeoff
+
+- Added a system code to every schematic selection so CHWP and other services create separate side tables instead of being mixed together.
+- Added local text extraction for text-based PDFs and a first naming rule that suggests `CHWP` from an equipment tag such as `CHWP-B4-1`.
+- Kept the system editable for scanned/image schematics and carried the previous confirmed system into the next selection for faster repeated takeoff.
+- Added required valve classification for Victaulic/grooved, flanged or mixed connections.
+- Limited the initial valve brands to Victaulic, Ebro and Hydroflow and required a flange type/standard for flanged or mixed valves.
+- Added system, equipment tag, valve connection, brand and flange details to the grouped takeoff and CSV export.
+- Bumped the PWA cache to `spoolmate-v372-system-valve-takeoff`.
+
+## v3.71 - Movable selected-run toolbar
+
+- Added a clearly marked drag grip to the Length, Size, Ends, Fittings, Duplicate and Delete toolbar.
+- Preserved the toolbar's manual position through canvas redraws and constrained it to the visible drawing area.
+- Improved automatic placement so the toolbar chooses space above or below the selected pipe instead of covering it.
+- Kept a compact movable toolbar on iPad and Android tablets while retaining the safe scrollable action tray on narrow phones.
+- Added double-click, Escape and Home reset controls to return the toolbar beside the current selection.
+- Bumped the PWA cache to `spoolmate-v371-movable-selection-toolbar`.
 
 ## v3.70 - Private schematic fitting takeoff foundation
 

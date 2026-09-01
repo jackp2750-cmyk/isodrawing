@@ -89,6 +89,37 @@ function check(condition, message) {
         };
       });
       check(cropState.width > 10 && cropState.height > 10 && cropState.pngLength > 100 && !cropState.downloadDisabled, `${name}: exact selected-area crop was not prepared (${JSON.stringify(cropState)})`);
+
+      const detectedSystem = await page.evaluate(() => {
+        const selection = schematicTakeoffSelectedArea();
+        const bounds = schematicTakeoffAreaBounds(selection);
+        schematicTakeoffState.pageTextByPage.set(selection.page, [{
+          text: "CHWP-B4-1",
+          x: bounds.x + bounds.width / 2,
+          y: bounds.y + bounds.height / 2,
+        }]);
+        return schematicTakeoffDetectSystemContext(selection);
+      });
+      check(detectedSystem.systemCode === "CHWP" && detectedSystem.equipmentTags.includes("CHWP-B4-1"), `${name}: system was not derived from the selected equipment tag (${JSON.stringify(detectedSystem)})`);
+
+      await page.locator("#schematicTakeoffSystemInput").fill("chwp");
+      await page.locator("#schematicTakeoffSystemInput").press("Tab");
+      await page.locator("#schematicTakeoffFittingTypeInput").selectOption("Valve");
+      check(await page.locator("#schematicTakeoffValveQuestions").isVisible(), `${name}: valve classification questions did not open`);
+      await page.locator("#schematicTakeoffValveConnectionInput").selectOption("Flanged");
+      await page.locator("#schematicTakeoffValveBrandInput").selectOption("Ebro");
+      await page.locator("#schematicTakeoffValveFlangeInput").fill("Wafer PN16");
+      await page.locator("#schematicTakeoffFittingSizeInput").fill("NB 100");
+      await page.locator("#schematicTakeoffFittingQuantityInput").fill("3");
+      await page.locator("#schematicTakeoffAddFittingButton").click();
+      const systemTable = await page.evaluate(() => ({
+        systemCode: schematicTakeoffSelectedArea()?.systemCode,
+        item: schematicTakeoffSelectedArea()?.items?.[0],
+        summary: document.querySelector("#schematicTakeoffSummary")?.textContent || "",
+      }));
+      check(systemTable.systemCode === "CHWP", `${name}: system input did not normalize to CHWP`);
+      check(systemTable.item?.type === "Valve" && systemTable.item?.quantity === 3 && systemTable.item?.connectionType === "Flanged" && systemTable.item?.brand === "Ebro" && systemTable.item?.flangeType === "Wafer PN16", `${name}: valve classification was not retained (${JSON.stringify(systemTable.item)})`);
+      check(systemTable.summary.includes("CHWP") && systemTable.summary.includes("Ebro") && systemTable.summary.includes("Wafer PN16"), `${name}: CHWP side table did not include the classified valve (${systemTable.summary})`);
       await page.locator("#schematicTakeoffZoomInButton").click();
       check((await page.locator("#schematicTakeoffZoomReadout").evaluate((element) => element.value)) === "125%", `${name}: zoom control did not update`);
 
