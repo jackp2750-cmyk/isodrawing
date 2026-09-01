@@ -1056,6 +1056,10 @@ body.action-menu-open .topbar-actions {
 }
 
 @media (max-width: 720px) {
+  .schematic-symbol-library-grid {
+    grid-template-columns: 1fr;
+  }
+
   .project-dashboard-toolbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1688,6 +1692,113 @@ body.schematic-takeoff-open #aiHelperButton {
 .schematic-rules-panel {
   border-color: #a9d8e3;
   background: #eff9fc;
+}
+
+.schematic-symbol-library {
+  border: 1px solid rgba(13, 126, 151, 0.2);
+  border-radius: 12px;
+  background: rgba(238, 249, 250, 0.7);
+  overflow: clip;
+}
+
+.schematic-symbol-library > summary {
+  cursor: pointer;
+  min-height: 42px;
+  padding: 11px 13px;
+  color: #075e72;
+  font-weight: 800;
+  list-style-position: inside;
+}
+
+.schematic-symbol-library[open] > summary {
+  border-bottom: 1px solid rgba(13, 126, 151, 0.16);
+}
+
+.schematic-symbol-library > p,
+.schematic-symbol-source {
+  display: block;
+  margin: 0;
+  padding: 10px 13px 0;
+  color: #4f626a;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.schematic-symbol-library-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  padding: 10px 13px;
+}
+
+.schematic-symbol-library-grid > span {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 8px 9px 8px 30px;
+  border: 1px solid rgba(75, 96, 104, 0.15);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.schematic-symbol-library-grid > span::before {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  color: #fff;
+  background: #68747a;
+  content: "?";
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.schematic-symbol-library-grid > span[data-rule-state="automatic"]::before {
+  background: #16835d;
+  content: "✓";
+}
+
+.schematic-symbol-library-grid b {
+  color: #18333d;
+  font-size: 0.76rem;
+  line-height: 1.2;
+}
+
+.schematic-symbol-library-grid small {
+  color: #60747c;
+  font-size: 0.67rem;
+  line-height: 1.25;
+}
+
+.schematic-symbol-source {
+  padding-top: 0;
+  padding-bottom: 11px;
+}
+
+:root[data-theme="dark"] .schematic-symbol-library {
+  border-color: rgba(72, 191, 214, 0.25);
+  background: rgba(7, 51, 62, 0.45);
+}
+
+:root[data-theme="dark"] .schematic-symbol-library > summary,
+:root[data-theme="dark"] .schematic-symbol-library-grid b {
+  color: #d7f5fa;
+}
+
+:root[data-theme="dark"] .schematic-symbol-library > p,
+:root[data-theme="dark"] .schematic-symbol-library-grid small,
+:root[data-theme="dark"] .schematic-symbol-source {
+  color: #a7c4cc;
+}
+
+:root[data-theme="dark"] .schematic-symbol-library-grid > span {
+  border-color: rgba(126, 184, 198, 0.18);
+  background: rgba(7, 34, 42, 0.66);
 }
 
 .schematic-recognition-actions {

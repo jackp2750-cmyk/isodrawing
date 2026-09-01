@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=373" />
+    <link rel="stylesheet" href="./styles.css?v=374" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.73</span>
+              <span class="version-badge" id="appVersionBadge">v3.74</span>
             </div>
           </div>
 
@@ -1397,7 +1397,25 @@
                   <canvas id="schematicTakeoffCropCanvas" aria-label="Preview of the exact selected schematic area"></canvas>
                   <span id="schematicTakeoffCropEmpty">Select an area to preview the exact crop.</span>
                 </div>
-                <p>SpoolMate scans only the bounded crop on this device, colour-marks recognised symbols and builds the system order table. Review every mark before ordering.</p>
+                <p>SpoolMate scans only the bounded crop on this device, colour-marks recognised symbols and builds the system order table. Anything fitting-like that cannot be identified safely receives a <strong>?</strong> mark for human classification.</p>
+                <details class="schematic-symbol-library">
+                  <summary>Australian HVAC symbol library</summary>
+                  <p>Based on the Curtin M-D-100 chilled-water legend, Macquarie mechanical standard drawings and manufacturer geometry. A drawing's own legend always takes priority.</p>
+                  <div class="schematic-symbol-library-grid">
+                    <span data-rule-state="automatic"><b>Isolation valve</b><small>Automatic when the standard bow-tie symbol is clear</small></span>
+                    <span data-rule-state="review"><b>Motorised valve</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Balancing valve</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Check valve</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Pressure-reducing valve</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Pressure-relief valve</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Reducer / eccentric reducer</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Strainer</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Flange / flexible connection</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Gauge / sensor / meter</b><small>Available for ? review</small></span>
+                    <span data-rule-state="review"><b>Pump</b><small>Available for ? review</small></span>
+                  </div>
+                  <small class="schematic-symbol-source">Reference: Curtin University M-D-100 Typical Chilled/HHW Schematic. Automatic results assist the take-off; always add anything missed.</small>
+                </details>
                 <div class="schematic-recognition-actions">
                   <button class="primary-button" id="schematicTakeoffCountButton" type="button" disabled>Count symbols in this area</button>
                   <button class="secondary-button" id="schematicTakeoffClearDetectionsButton" type="button" disabled>Clear detected marks</button>
@@ -1409,7 +1427,7 @@
               <section class="schematic-takeoff-panel">
                 <div class="schematic-panel-heading"><div><strong>Review and manual corrections</strong><small>Confirm automatic rows or add anything missed</small></div></div>
                 <form class="schematic-fitting-form" id="schematicTakeoffFittingForm">
-                  <label><span>Fitting</span><select id="schematicTakeoffFittingTypeInput"><option>Elbow</option><option>Tee</option><option>Reducer</option><option>Flange</option><option>Valve</option><option>Socket</option><option>Union</option><option>Coupling</option><option>Roll groove</option><option>Threaded end</option><option>Other</option></select></label>
+                  <label><span>Fitting / item</span><select id="schematicTakeoffFittingTypeInput"><option value="Unclassified symbol" disabled>Choose classification</option><option>Elbow</option><option>Tee</option><option>Reducer</option><option>Eccentric reducer</option><option>Flange</option><option>Flexible connection</option><option>Isolation valve</option><option value="Valve">Valve — type not set</option><option>Motorised valve</option><option>Balancing valve</option><option>Check valve</option><option>Pressure reducing valve</option><option>Pressure relief valve</option><option>Strainer</option><option>Gauge</option><option>Sensor</option><option>Flow meter</option><option>Energy meter</option><option>Differential pressure sensor</option><option>Flow switch / sensor</option><option>Pump</option><option>Socket</option><option>Union</option><option>Coupling</option><option>Roll groove</option><option>Threaded end</option><option>Other</option></select></label>
                   <label><span>Size</span><input id="schematicTakeoffFittingSizeInput" type="text" maxlength="40" placeholder="NB 50" /></label>
                   <label><span>Qty</span><input id="schematicTakeoffFittingQuantityInput" type="number" min="1" max="9999" step="1" value="1" /></label>
                   <label class="wide"><span>Note</span><input id="schematicTakeoffFittingNoteInput" type="text" maxlength="120" placeholder="Type, standard or uncertainty" /></label>
@@ -1428,7 +1446,7 @@
                 <div class="schematic-fitting-list" id="schematicTakeoffFittingList"><div class="schematic-empty-list">Select an area, then count symbols or add a fitting manually.</div></div>
               </section>
               <section class="schematic-takeoff-panel schematic-summary-panel">
-                <div class="schematic-panel-heading"><div><strong>Order table by system</strong><small id="schematicTakeoffTotal">0 fittings</small></div></div>
+                <div class="schematic-panel-heading"><div><strong>Order table by system</strong><small id="schematicTakeoffTotal">0 items</small></div></div>
                 <div class="schematic-takeoff-summary" id="schematicTakeoffSummary"></div>
                 <button class="secondary-button" id="schematicTakeoffExportButton" type="button" disabled>Export CSV</button>
               </section>
@@ -2424,6 +2442,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=373"></script>
+    <script defer src="./app.js?v=374"></script>
   </body>
 </html>

@@ -89,10 +89,14 @@ function check(condition, message) {
       selected.systemSource = "manual";
       const direct = schematicTakeoffDetectValveSymbols(selected);
       await countSchematicTakeoffSymbols();
-      const automatic = selected.items.find((item) => Array.isArray(item.markers));
+      const automatic = selected.items.find((item) => item.symbolClass === "Isolation valve");
+      const uncertain = selected.items.filter((item) => item.unclassified);
       return {
         directCount: direct.markers.length,
+        directUnknownCount: direct.unknownMarkers?.length || 0,
         automaticCount: schematicTakeoffItemQuantity(automatic),
+        uncertainCount: uncertain.length,
+        questionMarkCount: uncertain.flatMap((item) => item.markers || []).filter((marker) => marker.questionMark).length,
         confidences: automatic?.markers?.map((marker) => marker.confidence) || [],
         markers: automatic?.markers?.map((marker) => ({ x: Math.round(marker.x), y: Math.round(marker.y), width: Math.round(marker.width), height: Math.round(marker.height), confidence: marker.confidence, purity: Number(marker.shapePurity || 0).toFixed(3), orientation: marker.orientation })) || [],
         exportDisabled: document.querySelector("#schematicTakeoffExportButton").disabled,
@@ -100,16 +104,18 @@ function check(condition, message) {
         summaryText: document.querySelector("#schematicTakeoffSummary").textContent,
         itemId: automatic?.id || "",
         markerId: automatic?.markers?.[0]?.id || "",
+        firstUnknownId: uncertain[0]?.id || "",
       };
     });
 
     if (suppliedFixture) {
       check(result.directCount > 0, `supplied fixture: no standard valve symbols detected (${JSON.stringify(result)})`);
-      console.log(`supplied fixture: ${result.directCount} valve symbols detected; ${JSON.stringify(result.markers)}`);
+      console.log(`supplied fixture: ${result.directCount} isolation valves and ${result.uncertainCount} ? review items detected; ${JSON.stringify(result.markers)}`);
       await page.screenshot({ path: path.join(os.tmpdir(), "spoolmate-schematic-recognition-supplied.png"), fullPage: false });
     } else {
       check(result.directCount === 4, `synthetic: expected 4 valve symbols, found ${result.directCount} (${JSON.stringify(result)})`);
       check(result.automaticCount === 4, `synthetic: automatic count did not create four review marks (${JSON.stringify(result)})`);
+      check(result.uncertainCount > 0 && result.questionMarkCount === result.uncertainCount, `synthetic: uncertain symbol was not protected by a ? review mark (${JSON.stringify(result)})`);
     }
     check(result.exportDisabled, "unreviewed automatic count should block CSV export");
     check(result.reviewText.includes("included"), "detected-mark review controls did not render");
@@ -140,8 +146,31 @@ function check(condition, message) {
       }, result);
       check(reviewed.reviewed && reviewed.source === "automatic-reviewed", `automatic row was not confirmed (${JSON.stringify(reviewed)})`);
       check(reviewed.quantity === result.automaticCount - 1, "review changed the accepted coloured-mark quantity");
-      check(!reviewed.exportDisabled, "reviewed order table did not enable CSV export");
+      check(reviewed.exportDisabled === (result.uncertainCount > 0), "unclassified ? items did not keep CSV export safely blocked");
       check(reviewed.summary.includes("NB 100") && reviewed.summary.includes("Ebro") && reviewed.summary.includes("Wafer PN16"), "reviewed valve details did not reach the CHWP order table");
+      if (result.uncertainCount > 0) {
+        await page.locator(`[data-edit-schematic-fitting="${result.firstUnknownId}"]`).click();
+        await page.locator("#schematicTakeoffFittingTypeInput").selectOption("Pump");
+        await page.locator("#schematicTakeoffFittingSizeInput").fill("NB 100");
+        await page.locator("#schematicTakeoffAddFittingButton").click();
+        const classified = await page.evaluate(({ firstUnknownId }) => {
+          const item = schematicTakeoffSelectedArea().items.find((entry) => entry.id === firstUnknownId);
+          return { type: item?.type, reviewed: item?.reviewed, unclassified: item?.unclassified, questionMark: item?.markers?.[0]?.questionMark };
+        }, result);
+        check(classified.type === "Pump" && classified.reviewed && !classified.unclassified && !classified.questionMark, `? item could not be classified individually (${JSON.stringify(classified)})`);
+        const excludedUnknowns = await page.evaluate(() => {
+          const selected = schematicTakeoffSelectedArea();
+          selected.items.filter((item) => item.unclassified).forEach((item) => {
+            (item.markers || []).filter((marker) => marker.included !== false).forEach((marker) => toggleSchematicTakeoffMarker(item.id, marker.id));
+          });
+          return {
+            exportDisabled: document.querySelector("#schematicTakeoffExportButton").disabled,
+            questionMarks: selected.items.filter((item) => item.unclassified).flatMap((item) => item.markers || []).filter((marker) => marker.questionMark).length,
+          };
+        });
+        check(!excludedUnknowns.exportDisabled, "excluding every false ? mark did not unblock export");
+        check(excludedUnknowns.questionMarks === Math.max(0, result.uncertainCount - 1), "question-mark identity was lost when excluding a possible item");
+      }
     }
     check(errors.length === 0, errors.join(" | "));
     console.log("Schematic local recognition review passed");

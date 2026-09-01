@@ -1,6 +1,18 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.73`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.74`.
+
+## v3.74 - Australian HVAC legend and safe unknown-symbol review
+
+- Added a visible Australian HVAC symbol library based on Curtin M-D-100 chilled-water conventions, Macquarie mechanical standard drawings and manufacturer geometry.
+- Expanded take-off classification choices to isolation, motorised, balancing, check, pressure-reducing and pressure-relief valves plus reducers, eccentric reducers, strainers, flexible connections, flanges, gauges, sensors, meters and pumps.
+- Kept high-confidence bow-tie isolation valves automatic while conservatively marking other fitting-like locations with individual `?` badges instead of guessing their type.
+- Added an individual classification workflow for every `?` item; choosing its type, size and required valve details replaces the question mark with the correct colour and order-table description.
+- Kept uncertain included items visibly flagged and blocked order CSV export until each is classified or excluded as a false match.
+- Added connected-ink and pipe-direction checks plus de-duplication limits to prevent nearby labels and straight pipework from flooding the schematic with uncertain marks.
+- Added synthetic and supplied-CHWP regression coverage for the question-mark safety flow, including classification and exclusion.
+- Preserved the existing draft-versus-issued fabrication PDF protections, cloud-save recovery and last-session restoration checks.
+- Bumped the PWA cache to `spoolmate-v374-hvac-symbol-review`.
 
 ## v3.73 - Local schematic symbol counting and order review
 

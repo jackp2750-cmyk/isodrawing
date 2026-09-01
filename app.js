@@ -550,24 +550,70 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.73";
+const APP_VERSION = "v3.74";
 const APP_BUILD_DATE = "2026-09-01";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
 const SCHEMATIC_TAKEOFF_ITEM_COLORS = Object.freeze({
   Valve: "#7c3aed",
+  "Isolation valve": "#7c3aed",
+  "Motorised valve": "#5b4bc4",
+  "Balancing valve": "#008e85",
+  "Check valve": "#1677d2",
+  "Pressure reducing valve": "#d96d00",
+  "Pressure relief valve": "#c93756",
   Elbow: "#e9780b",
   Tee: "#0f9f6e",
   Reducer: "#1677d2",
+  "Eccentric reducer": "#2455b8",
   Flange: "#d83f87",
+  "Flexible connection": "#8b5e34",
+  Strainer: "#4b7f52",
+  Gauge: "#5069a6",
+  Sensor: "#5e6f89",
+  "Flow meter": "#0085a8",
+  "Energy meter": "#007373",
+  "Differential pressure sensor": "#5663b5",
+  "Flow switch / sensor": "#447287",
+  Pump: "#a33f76",
   Socket: "#008ea1",
   Union: "#a35c00",
   Coupling: "#3978a8",
   "Roll groove": "#18835d",
   "Threaded end": "#7254b3",
+  "Unclassified symbol": "#d97706",
   Other: "#68747a",
 });
+const SCHEMATIC_TAKEOFF_VALVE_TYPES = new Set([
+  "Valve",
+  "Isolation valve",
+  "Motorised valve",
+  "Balancing valve",
+  "Check valve",
+  "Pressure reducing valve",
+  "Pressure relief valve",
+]);
+const SCHEMATIC_TAKEOFF_LEGEND_TYPES = Object.freeze([
+  "Isolation valve",
+  "Motorised valve",
+  "Balancing valve",
+  "Check valve",
+  "Pressure reducing valve",
+  "Pressure relief valve",
+  "Reducer",
+  "Eccentric reducer",
+  "Strainer",
+  "Flange",
+  "Flexible connection",
+  "Gauge",
+  "Sensor",
+  "Flow meter",
+  "Energy meter",
+  "Differential pressure sensor",
+  "Flow switch / sensor",
+  "Pump",
+]);
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -22608,6 +22654,216 @@ function schematicTakeoffBoxOverlap(a, b) {
   return intersection / Math.max(1, Math.min(a.width * a.height, b.width * b.height));
 }
 
+function schematicTakeoffMaskIntegral(mask, width, height) {
+  const stride = width + 1;
+  const integral = new Uint32Array((width + 1) * (height + 1));
+  for (let y = 1; y <= height; y += 1) {
+    let rowTotal = 0;
+    const sourceOffset = (y - 1) * width;
+    const targetOffset = y * stride;
+    const previousOffset = (y - 1) * stride;
+    for (let x = 1; x <= width; x += 1) {
+      rowTotal += mask[sourceOffset + x - 1];
+      integral[targetOffset + x] = integral[previousOffset + x] + rowTotal;
+    }
+  }
+  return { integral, stride, width, height };
+}
+
+function schematicTakeoffMaskRectSum(source, left, top, right, bottom) {
+  const x1 = clampNumber(Math.floor(left), 0, source.width);
+  const y1 = clampNumber(Math.floor(top), 0, source.height);
+  const x2 = clampNumber(Math.ceil(right), 0, source.width);
+  const y2 = clampNumber(Math.ceil(bottom), 0, source.height);
+  if (x2 <= x1 || y2 <= y1) return 0;
+  const { integral, stride } = source;
+  return integral[y2 * stride + x2]
+    - integral[y1 * stride + x2]
+    - integral[y2 * stride + x1]
+    + integral[y1 * stride + x1];
+}
+
+function schematicTakeoffConnectedInkStats(mask, width, height, centerX, centerY, half, band, directions) {
+  const left = Math.max(0, Math.floor(centerX - half));
+  const top = Math.max(0, Math.floor(centerY - half));
+  const right = Math.min(width - 1, Math.ceil(centerX + half));
+  const bottom = Math.min(height - 1, Math.ceil(centerY + half));
+  const localWidth = right - left + 1;
+  const localHeight = bottom - top + 1;
+  const visited = new Uint8Array(localWidth * localHeight);
+  const queue = new Int32Array(localWidth * localHeight);
+  let seedX = -1;
+  let seedY = -1;
+  let seedDistance = Infinity;
+  const searchRadius = Math.max(3, band + 2);
+  for (let y = Math.max(top, Math.round(centerY - searchRadius)); y <= Math.min(bottom, Math.round(centerY + searchRadius)); y += 1) {
+    for (let x = Math.max(left, Math.round(centerX - searchRadius)); x <= Math.min(right, Math.round(centerX + searchRadius)); x += 1) {
+      if (!mask[y * width + x]) continue;
+      const distance = Math.hypot(x - centerX, y - centerY);
+      if (distance < seedDistance) {
+        seedX = x;
+        seedY = y;
+        seedDistance = distance;
+      }
+    }
+  }
+  if (seedX < 0) return null;
+  let read = 0;
+  let write = 0;
+  const seedIndex = (seedY - top) * localWidth + (seedX - left);
+  queue[write++] = seedIndex;
+  visited[seedIndex] = 1;
+  let count = 0;
+  let offAxis = 0;
+  let minX = seedX;
+  let maxX = seedX;
+  let minY = seedY;
+  let maxY = seedY;
+  const hasHorizontalAxis = directions.includes("left") || directions.includes("right");
+  const hasVerticalAxis = directions.includes("up") || directions.includes("down");
+  while (read < write) {
+    const localIndex = queue[read++];
+    const localY = Math.floor(localIndex / localWidth);
+    const localX = localIndex - localY * localWidth;
+    const x = left + localX;
+    const y = top + localY;
+    count += 1;
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+    const onExpectedAxis = (hasHorizontalAxis && Math.abs(y - centerY) <= band)
+      || (hasVerticalAxis && Math.abs(x - centerX) <= band);
+    if (!onExpectedAxis) offAxis += 1;
+    for (let offsetY = -1; offsetY <= 1; offsetY += 1) {
+      for (let offsetX = -1; offsetX <= 1; offsetX += 1) {
+        if (!offsetX && !offsetY) continue;
+        const nextX = localX + offsetX;
+        const nextY = localY + offsetY;
+        if (nextX < 0 || nextY < 0 || nextX >= localWidth || nextY >= localHeight) continue;
+        const nextIndex = nextY * localWidth + nextX;
+        if (visited[nextIndex]) continue;
+        visited[nextIndex] = 1;
+        if (mask[(top + nextY) * width + left + nextX]) queue[write++] = nextIndex;
+      }
+    }
+  }
+  const reach = half * 0.7;
+  const reachedDirections = [
+    minX <= centerX - reach ? "left" : "",
+    maxX >= centerX + reach ? "right" : "",
+    minY <= centerY - reach ? "up" : "",
+    maxY >= centerY + reach ? "down" : "",
+  ].filter(Boolean);
+  return { count, offAxis, minX, maxX, minY, maxY, reachedDirections };
+}
+
+function schematicTakeoffDetectUnclassifiedSymbols(mask, width, height, geometry, selection, knownMarkers = []) {
+  const source = schematicTakeoffMaskIntegral(mask, width, height);
+  const shortSide = Math.max(1, Math.min(width, height));
+  const baseHalf = clampNumber(Math.round(shortSide / 58), 7, 17);
+  const radii = [...new Set([
+    baseHalf,
+    Math.round(baseHalf * 1.4),
+    Math.round(baseHalf * 1.9),
+    Math.round(baseHalf * 2.55),
+  ].map((value) => clampNumber(value, 7, 38)))];
+  const step = clampNumber(Math.round(shortSide / 210), 2, 5);
+  const knownBoxes = knownMarkers.map((marker) => ({
+    x: (marker.x - geometry.left) * geometry.scale,
+    y: (marker.y - geometry.top) * geometry.scale,
+    width: marker.width * geometry.scale,
+    height: marker.height * geometry.scale,
+  }));
+  const candidates = [];
+  radii.forEach((half) => {
+    const band = Math.max(2, Math.round(half * 0.16));
+    const reach = Math.round(half * 2.65);
+    const inner = Math.round(half * 1.05);
+    for (let y = reach + 2; y < height - reach - 2; y += step) {
+      for (let x = reach + 2; x < width - reach - 2; x += step) {
+        if (!schematicTakeoffInkNear(mask, width, height, x, y, band)) continue;
+        const directionCoverage = {
+          left: schematicTakeoffStrokeCoverage(mask, width, height, x - reach, y, x - inner, y, band),
+          right: schematicTakeoffStrokeCoverage(mask, width, height, x + inner, y, x + reach, y, band),
+          up: schematicTakeoffStrokeCoverage(mask, width, height, x, y - reach, x, y - inner, band),
+          down: schematicTakeoffStrokeCoverage(mask, width, height, x, y + inner, x, y + reach, band),
+        };
+        const directions = Object.entries(directionCoverage).filter(([, coverage]) => coverage >= 0.7).map(([direction]) => direction);
+        if (directions.length < 2) continue;
+        const horizontal = directions.includes("left") && directions.includes("right");
+        const vertical = directions.includes("up") && directions.includes("down");
+        const adjacent = directions.length >= 2 && !horizontal && !vertical;
+        const localInk = schematicTakeoffMaskRectSum(source, x - half, y - half, x + half + 1, y + half + 1);
+        const horizontalAxisInk = schematicTakeoffMaskRectSum(source, x - half, y - band, x + half + 1, y + band + 1);
+        const verticalAxisInk = schematicTakeoffMaskRectSum(source, x - band, y - half, x + band + 1, y + half + 1);
+        const expectedAxisInk = Math.max(horizontal ? horizontalAxisInk : 0, vertical ? verticalAxisInk : 0);
+        const offAxisInk = Math.max(0, localInk - expectedAxisInk);
+        const localArea = (half * 2 + 1) ** 2;
+        const density = localInk / localArea;
+        const offAxisRatio = offAxisInk / Math.max(1, localInk);
+        const junction = directions.length >= 3;
+        if (!adjacent && !junction && (density < 0.095 || offAxisInk < half * 1.35 || offAxisRatio < 0.2)) continue;
+        if ((adjacent || junction) && density < 0.045) continue;
+        const box = { x: x - half, y: y - half, width: half * 2, height: half * 2 };
+        const overlapsKnown = knownBoxes.some((known) => {
+          const knownCenterX = known.x + known.width / 2;
+          const knownCenterY = known.y + known.height / 2;
+          return schematicTakeoffBoxOverlap(box, known) > 0.08
+            || Math.hypot(x - knownCenterX, y - knownCenterY) < Math.max(half * 1.55, known.width, known.height);
+        });
+        if (overlapsKnown) continue;
+        const weakestDirection = Math.min(...directions.map((direction) => directionCoverage[direction]));
+        const score = weakestDirection * 0.46
+          + Math.min(1, density * 4.4) * 0.25
+          + Math.min(1, offAxisRatio * 2.2) * 0.18
+          + Math.min(1, directions.length / 3) * 0.11;
+        candidates.push({ ...box, centerX: x, centerY: y, score, directions, density, offAxisRatio });
+      }
+    }
+  });
+  candidates.sort((a, b) => b.score - a.score || b.width * b.height - a.width * a.height);
+  const accepted = [];
+  candidates.forEach((candidate) => {
+    if (accepted.length >= 16) return;
+    const half = candidate.width / 2;
+    const band = Math.max(2, Math.round(half * 0.16));
+    const connected = schematicTakeoffConnectedInkStats(mask, width, height, candidate.centerX, candidate.centerY, half, band, candidate.directions);
+    if (!connected) return;
+    const reached = candidate.directions.filter((direction) => connected.reachedDirections.includes(direction));
+    if (reached.length < 2 || connected.count < half * 1.8) return;
+    const opposite = (reached.includes("left") && reached.includes("right")) || (reached.includes("up") && reached.includes("down"));
+    const adjacent = reached.length >= 2 && !opposite;
+    const junction = reached.length >= 3;
+    if (!adjacent && !junction && (connected.offAxis < half * 0.8 || connected.offAxis / Math.max(1, connected.count) < 0.09)) return;
+    const duplicate = accepted.some((existing) => {
+      const distance = Math.hypot(candidate.centerX - existing.centerX, candidate.centerY - existing.centerY);
+      return distance < Math.max(candidate.width, candidate.height, existing.width, existing.height) * 1.55
+        || schematicTakeoffBoxOverlap(candidate, existing) > 0.18;
+    });
+    if (!duplicate) accepted.push({ ...candidate, connected });
+  });
+  return accepted
+    .filter((candidate) => schematicTakeoffSelectionContainsPoint(selection, {
+      x: geometry.left + candidate.centerX / geometry.scale,
+      y: geometry.top + candidate.centerY / geometry.scale,
+    }))
+    .slice(0, 12)
+    .map((candidate) => ({
+      id: createTraceabilityId("MARK"),
+      type: "Unclassified symbol",
+      x: geometry.left + candidate.x / geometry.scale,
+      y: geometry.top + candidate.y / geometry.scale,
+      width: candidate.width / geometry.scale,
+      height: candidate.height / geometry.scale,
+      confidence: clampNumber(Math.round(candidate.score * 82), 35, 78),
+      included: true,
+      questionMark: true,
+      reason: "Possible fitting or item — classification uncertain",
+      directions: candidate.directions,
+    }));
+}
+
 function schematicTakeoffPointSegmentDistance(px, py, x1, y1, x2, y2) {
   const dx = x2 - x1;
   const dy = y2 - y1;
@@ -22796,12 +23052,18 @@ function schematicTakeoffDetectValveSymbols(selection) {
       included: true,
       number: index + 1,
     }));
+  const unknownMarkers = schematicTakeoffDetectUnclassifiedSymbols(mask, width, height, geometry, selection, markers);
+  const recognisedText = markers.length
+    ? `${markers.length} isolation valve ${markers.length === 1 ? "symbol" : "symbols"} found`
+    : "No clear isolation valves found";
+  const uncertainText = unknownMarkers.length
+    ? `${unknownMarkers.length} possible ${unknownMarkers.length === 1 ? "item has" : "items have"} a ? mark for classification`
+    : "no other uncertain fitting locations marked";
   return {
     markers,
+    unknownMarkers,
     threshold,
-    message: markers.length
-      ? `${markers.length} standard valve ${markers.length === 1 ? "symbol" : "symbols"} found. Review every coloured mark.`
-      : "No standard bow-tie valve symbols were found. Add missed items manually; other symbol rules are still being expanded.",
+    message: `${recognisedText}; ${uncertainText}. Review every coloured mark before ordering.`,
   };
 }
 
@@ -22859,7 +23121,7 @@ function renderSchematicTakeoffCropPreview() {
       ctx.font = "800 8px Segoe UI, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(String(marker.number || markerIndex + 1), markerLeft + markerWidth, markerTop + 0.5);
+      ctx.fillText(marker.questionMark ? "?" : String(marker.number || markerIndex + 1), markerLeft + markerWidth, markerTop + 0.5);
       ctx.restore();
     });
   });
@@ -23007,7 +23269,7 @@ function drawSchematicTakeoffMarkers(ctx, selection, transform) {
       ctx.font = "800 10px Segoe UI, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.fillText(String(marker.number || markerIndex + 1), badgeX, badgeY + 0.5);
+      ctx.fillText(marker.questionMark ? "?" : String(marker.number || markerIndex + 1), badgeX, badgeY + 0.5);
       if (!included) {
         ctx.strokeStyle = "#ffffff";
         ctx.lineWidth = 2;
@@ -23266,11 +23528,17 @@ function schematicTakeoffItemQuantity(item) {
   return markerCount === null ? Math.max(0, Number(item?.quantity) || 0) : markerCount;
 }
 
+function schematicTakeoffIsValveType(type) {
+  return SCHEMATIC_TAKEOFF_VALVE_TYPES.has(String(type || ""));
+}
+
 function schematicTakeoffItemNeedsReview(item) {
   if (!Array.isArray(item?.markers)) return false;
+  if (schematicTakeoffItemQuantity(item) === 0) return false;
+  if (item.unclassified || String(item.type || "") === "Unclassified symbol") return true;
   if (!item.reviewed) return true;
   if (!String(item.size || "").trim()) return true;
-  if (String(item.type || "").toLowerCase() !== "valve") return false;
+  if (!schematicTakeoffIsValveType(item.type)) return false;
   if (!item.connectionType || !item.brand) return true;
   return ["Flanged", "Mixed"].includes(item.connectionType) && !item.flangeType;
 }
@@ -23280,17 +23548,18 @@ function schematicTakeoffFittingCount(selection) {
 }
 
 function schematicTakeoffValveDetails(item) {
-  if (String(item?.type || "").toLowerCase() !== "valve") return [];
+  if (!schematicTakeoffIsValveType(item?.type)) return [];
   return [item.connectionType, item.brand, item.flangeType].map((value) => String(value || "").trim()).filter(Boolean);
 }
 
 function schematicTakeoffItemDescription(item) {
   const details = schematicTakeoffValveDetails(item);
-  return `${item.type} · ${item.size || "Size not set"}${details.length ? ` · ${details.join(" · ")}` : ""}`;
+  const type = item.unclassified || String(item.type || "") === "Unclassified symbol" ? "? Unclassified symbol" : item.type;
+  return `${type} · ${item.size || "Size not set"}${details.length ? ` · ${details.join(" · ")}` : ""}`;
 }
 
 function updateSchematicTakeoffValveQuestions() {
-  const isValve = String(schematicTakeoffFittingTypeInput?.value || "").toLowerCase() === "valve";
+  const isValve = schematicTakeoffIsValveType(schematicTakeoffFittingTypeInput?.value);
   if (schematicTakeoffValveQuestions) schematicTakeoffValveQuestions.hidden = !isValve;
   const needsFlange = isValve && ["Flanged", "Mixed"].includes(schematicTakeoffValveConnectionInput?.value || "");
   if (schematicTakeoffValveFlangeField) schematicTakeoffValveFlangeField.hidden = !needsFlange;
@@ -23326,7 +23595,7 @@ function editSchematicTakeoffFitting(itemId) {
   takeoff.editingItemId = item.id;
   if (schematicTakeoffFittingTypeInput) {
     schematicTakeoffFittingTypeInput.value = item.type || "Other";
-    schematicTakeoffFittingTypeInput.disabled = Array.isArray(item.markers);
+    schematicTakeoffFittingTypeInput.disabled = Array.isArray(item.markers) && !item.unclassified;
   }
   if (schematicTakeoffFittingSizeInput) schematicTakeoffFittingSizeInput.value = item.size || "";
   if (schematicTakeoffFittingQuantityInput) {
@@ -23337,10 +23606,13 @@ function editSchematicTakeoffFitting(itemId) {
   if (schematicTakeoffValveConnectionInput) schematicTakeoffValveConnectionInput.value = item.connectionType || "";
   if (schematicTakeoffValveBrandInput) schematicTakeoffValveBrandInput.value = item.brand || "";
   if (schematicTakeoffValveFlangeInput) schematicTakeoffValveFlangeInput.value = item.flangeType || "";
-  if (schematicTakeoffAddFittingButton) schematicTakeoffAddFittingButton.textContent = Array.isArray(item.markers) ? "Confirm counted item" : "Update fitting";
+  if (schematicTakeoffAddFittingButton) schematicTakeoffAddFittingButton.textContent = item.unclassified
+    ? "Classify ? item"
+    : Array.isArray(item.markers) ? "Confirm counted item" : "Update fitting";
   if (schematicTakeoffCancelEditButton) schematicTakeoffCancelEditButton.hidden = false;
   updateSchematicTakeoffValveQuestions();
-  schematicTakeoffFittingSizeInput?.focus({ preventScroll: true });
+  if (item.unclassified) schematicTakeoffFittingTypeInput?.focus({ preventScroll: true });
+  else schematicTakeoffFittingSizeInput?.focus({ preventScroll: true });
   schematicTakeoffFittingForm?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
 }
 
@@ -23354,17 +23626,20 @@ async function countSchematicTakeoffSymbols() {
     return;
   }
   takeoff.recognitionBusy = true;
-  selected.recognitionStatus = "Scanning the bounded area for standard valve symbols…";
+  selected.recognitionStatus = "Scanning the bounded area with the Australian HVAC symbol library…";
   renderSchematicTakeoffPanels();
   await new Promise((resolve) => window.setTimeout(resolve, 32));
   try {
     const result = schematicTakeoffDetectValveSymbols(selected);
-    const existing = (selected.items || []).find((item) => Array.isArray(item.markers) && item.type === "Valve");
+    const existingAutomatic = (selected.items || []).filter((item) => Array.isArray(item.markers));
+    const existing = existingAutomatic.find((item) => item.symbolClass === "Isolation valve" || item.type === "Isolation valve" || item.type === "Valve");
+    const reusedAutomaticIds = new Set(existing?.id ? [existing.id] : []);
     selected.items = (selected.items || []).filter((item) => !Array.isArray(item.markers));
     if (result.markers.length) {
       selected.items.push({
         id: existing?.id || createTraceabilityId("FIT"),
-        type: "Valve",
+        type: "Isolation valve",
+        symbolClass: "Isolation valve",
         size: existing?.size || "",
         quantity: result.markers.length,
         connectionType: existing?.connectionType || "",
@@ -23376,10 +23651,43 @@ async function countSchematicTakeoffSymbols() {
         markers: result.markers,
       });
     }
-    selected.ready = result.markers.length > 0;
+    (result.unknownMarkers || []).forEach((marker) => {
+      const markerCenter = { x: marker.x + marker.width / 2, y: marker.y + marker.height / 2 };
+      const previous = existingAutomatic.find((item) => {
+        if (reusedAutomaticIds.has(item.id) || !Array.isArray(item.markers) || item.markers.length !== 1) return false;
+        const priorMarker = item.markers[0];
+        const priorCenter = { x: priorMarker.x + priorMarker.width / 2, y: priorMarker.y + priorMarker.height / 2 };
+        return Math.hypot(markerCenter.x - priorCenter.x, markerCenter.y - priorCenter.y)
+          <= Math.max(marker.width, marker.height, priorMarker.width, priorMarker.height) * 0.9;
+      });
+      const reviewed = previous?.reviewed === true && !previous?.unclassified;
+      if (previous?.id) reusedAutomaticIds.add(previous.id);
+      const type = reviewed ? previous.type : "Unclassified symbol";
+      selected.items.push({
+        id: previous?.id || createTraceabilityId("FIT"),
+        type,
+        symbolClass: reviewed ? previous.symbolClass || previous.type : "Unclassified symbol",
+        size: reviewed ? previous.size || "" : "",
+        quantity: 1,
+        connectionType: reviewed ? previous.connectionType || "" : "",
+        brand: reviewed ? previous.brand || "" : "",
+        flangeType: reviewed ? previous.flangeType || "" : "",
+        note: reviewed ? previous.note || "" : "Possible fitting or item — identify from the drawing legend",
+        source: reviewed ? "automatic-reviewed" : "automatic-unclassified",
+        reviewed,
+        unclassified: !reviewed,
+        markers: [{
+          ...marker,
+          type,
+          questionMark: !reviewed,
+          number: reviewed ? 1 : undefined,
+        }],
+      });
+    });
+    selected.ready = result.markers.length + (result.unknownMarkers || []).length > 0;
     selected.recognitionStatus = result.message;
-    if (takeoff.editingItemId === existing?.id && !result.markers.length) clearSchematicTakeoffFittingEditor();
-    showAppNotice(result.message, { tone: result.markers.length ? "success" : "warning", duration: 5200 });
+    if (takeoff.editingItemId && !selected.items.some((item) => item.id === takeoff.editingItemId)) clearSchematicTakeoffFittingEditor();
+    showAppNotice(result.message, { tone: selected.ready ? "success" : "warning", duration: 6200 });
   } catch (error) {
     console.error("Local schematic recognition failed.", error);
     selected.recognitionStatus = "The local scan could not finish. The crop and manual take-off controls are still available.";
@@ -23429,7 +23737,7 @@ function renderSchematicTakeoffPanels() {
           <div class="schematic-selection-row${selection.id === takeoff.selectedId ? " active" : ""}">
             <button type="button" data-schematic-selection="${escapeHtml(selection.id)}">
               <strong>${escapeHtml(selection.name)}</strong>
-              <span><b>${escapeHtml(selection.systemCode || "Unassigned")}</b> · Page ${selection.page} · ${selection.kind === "lasso" ? "Lasso" : "Rectangle"} · ${schematicTakeoffFittingCount(selection)} fittings</span>
+              <span><b>${escapeHtml(selection.systemCode || "Unassigned")}</b> · Page ${selection.page} · ${selection.kind === "lasso" ? "Lasso" : "Rectangle"} · ${schematicTakeoffFittingCount(selection)} items</span>
             </button>
             <button class="danger" type="button" data-delete-schematic-selection="${escapeHtml(selection.id)}" aria-label="Delete ${escapeHtml(selection.name)}">×</button>
           </div>`).join("")
@@ -23467,7 +23775,7 @@ function renderSchematicTakeoffPanels() {
   if (schematicTakeoffRecognitionStatus) {
     schematicTakeoffRecognitionStatus.textContent = !selected
       ? "Select an area to begin."
-      : selected.recognitionStatus || "Press Count symbols in this area. SpoolMate currently recognises standard bow-tie valve symbols.";
+      : selected.recognitionStatus || "Press Count symbols in this area. Clear isolation valves are identified automatically; other likely fittings receive a ? for review.";
     schematicTakeoffRecognitionStatus.dataset.tone = detectedItems.length ? "success" : "neutral";
   }
   if (schematicTakeoffDetectionReview) {
@@ -23479,11 +23787,11 @@ function renderSchematicTakeoffPanels() {
             <button class="schematic-detection-chip${marker.included === false ? " excluded" : ""}" type="button"
               data-toggle-schematic-marker="${escapeHtml(marker.id)}" data-schematic-marker-item="${escapeHtml(item.id)}"
               style="--detection-color:${escapeHtml(color)}" aria-pressed="${marker.included !== false}">
-              <b>${marker.number || markerIndex + 1}</b><span>${Math.round(marker.confidence || 0)}%</span>
+              <b>${marker.questionMark ? "?" : marker.number || markerIndex + 1}</b><span>${Math.round(marker.confidence || 0)}%</span>
             </button>`).join("");
           return `<section class="schematic-detection-group" style="--detection-color:${escapeHtml(color)}">
             <header><span class="schematic-item-swatch"></span><strong>${escapeHtml(item.type)}</strong><b>${included} included</b></header>
-            <small>Tap a numbered mark to exclude a false match. Grey crossed marks are not added to the order table.</small>
+            <small>${item.unclassified ? "? means SpoolMate found a likely fitting location but will not guess its type. Review it below or exclude it if it is not an order item." : "Tap a numbered mark to exclude a false match. Grey crossed marks are not added to the order table."}</small>
             <div class="schematic-detection-chips">${markers}</div>
           </section>`;
         }).join("")
@@ -23502,16 +23810,16 @@ function renderSchematicTakeoffPanels() {
           </div>`).join("")
       : `<div class="schematic-empty-list">${selected ? "No fittings in this area yet. Run the automatic count or add one manually." : "Select an area, then count symbols or add a fitting manually."}</div>`;
   }
-  const allItems = takeoff.selections.flatMap((selection) => selection.items || []);
+  const allItems = takeoff.selections.flatMap((selection) => selection.items || []).filter((item) => schematicTakeoffItemQuantity(item) > 0);
   const total = allItems.reduce((sum, item) => sum + schematicTakeoffItemQuantity(item), 0);
-  if (schematicTakeoffTotal) schematicTakeoffTotal.textContent = `${total} ${total === 1 ? "fitting" : "fittings"}`;
+  if (schematicTakeoffTotal) schematicTakeoffTotal.textContent = `${total} ${total === 1 ? "item" : "items"}`;
   const systems = new Map();
   takeoff.selections.forEach((selection) => {
     const systemCode = normalizeSchematicSystemCode(selection.systemCode) || "UNASSIGNED";
     const system = systems.get(systemCode) || { code: systemCode, areas: 0, quantity: 0, equipmentTags: new Set(), items: new Map() };
     system.areas += 1;
     (selection.equipmentTags || []).forEach((tag) => system.equipmentTags.add(tag));
-    (selection.items || []).forEach((item) => {
+    (selection.items || []).filter((item) => schematicTakeoffItemQuantity(item) > 0).forEach((item) => {
       const descriptor = schematicTakeoffItemDescription(item);
       const key = `${descriptor}\u0000${item.note || ""}`;
       const current = system.items.get(key) || { ...item, descriptor, quantity: 0 };
@@ -23531,12 +23839,12 @@ function renderSchematicTakeoffPanels() {
             .map((item) => `<div class="schematic-system-takeoff-row${item.needsReview ? " needs-review" : ""}"><span><i class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></i>${escapeHtml(item.descriptor)}${item.needsReview ? " · Review required" : ""}</span><strong>${item.quantity}</strong></div>`)
             .join("");
           return `<section class="schematic-system-takeoff${system.code === "UNASSIGNED" ? " unassigned" : ""}">
-            <header><div><span>SYSTEM</span><strong>${escapeHtml(system.code)}</strong></div><b>${system.quantity} fitting${system.quantity === 1 ? "" : "s"}</b></header>
+            <header><div><span>SYSTEM</span><strong>${escapeHtml(system.code)}</strong></div><b>${system.quantity} item${system.quantity === 1 ? "" : "s"}</b></header>
             <small>${system.areas} selected ${system.areas === 1 ? "area" : "areas"}${tags.length ? ` · ${escapeHtml(tags.join(", "))}` : ""}</small>
             <div>${rows || '<div class="schematic-empty-list">No fittings confirmed for this system yet.</div>'}</div>
           </section>`;
         }).join("")
-      : '<div class="schematic-empty-list">Each selected area will create a side table grouped by its system.</div>';
+          : '<div class="schematic-empty-list">Each selected area will create a side table grouped by its system.</div>';
   }
   const needsReview = allItems.some((item) => schematicTakeoffItemNeedsReview(item));
   if (schematicTakeoffExportButton) {
@@ -23578,7 +23886,12 @@ function addConfirmedSchematicFitting() {
   if (!selected) return;
   const editingItem = (selected.items || []).find((item) => item.id === takeoff.editingItemId) || null;
   const fittingType = String(schematicTakeoffFittingTypeInput?.value || "Other").slice(0, 40);
-  const isValve = fittingType.toLowerCase() === "valve";
+  if (fittingType === "Unclassified symbol") {
+    showAppNotice("Choose what the ? symbol represents before confirming it.", { tone: "warning" });
+    schematicTakeoffFittingTypeInput?.focus();
+    return;
+  }
+  const isValve = schematicTakeoffIsValveType(fittingType);
   const connectionType = isValve ? String(schematicTakeoffValveConnectionInput?.value || "") : "";
   const brand = isValve ? String(schematicTakeoffValveBrandInput?.value || "") : "";
   const flangeType = isValve && ["Flanged", "Mixed"].includes(connectionType)
@@ -23620,7 +23933,16 @@ function addConfirmedSchematicFitting() {
     note: String(schematicTakeoffFittingNoteInput?.value || "").trim().slice(0, 120),
     source: Array.isArray(editingItem?.markers) ? "automatic-reviewed" : "confirmed",
     reviewed: true,
+    unclassified: false,
   };
+  if (Array.isArray(nextItem.markers)) {
+    nextItem.markers = nextItem.markers.map((marker, markerIndex) => ({
+      ...marker,
+      type: fittingType,
+      questionMark: false,
+      number: marker.number || markerIndex + 1,
+    }));
+  }
   if (editingItem) {
     const index = selected.items.findIndex((item) => item.id === editingItem.id);
     selected.items.splice(index, 1, nextItem);
@@ -23639,9 +23961,9 @@ function exportSchematicTakeoffCsv() {
     showAppNotice("Review every automatically counted row before exporting the order table.", { tone: "warning" });
     return;
   }
-  const rows = [["Schematic", "System", "Equipment tag", "Page", "Area", "Fitting", "Size", "Quantity", "Valve connection", "Valve brand", "Flange type / standard", "Review status", "Note", "Source"]];
+  const rows = [["Schematic", "System", "Equipment tag", "Page", "Area", "Fitting / item", "Size", "Quantity", "Valve connection", "Valve brand", "Flange type / standard", "Review status", "Note", "Source"]];
   takeoff.selections.forEach((selection) => {
-    (selection.items || []).forEach((item) => rows.push([
+    (selection.items || []).filter((item) => schematicTakeoffItemQuantity(item) > 0).forEach((item) => rows.push([
       takeoff.fileName,
       selection.systemCode || "Unassigned",
       (selection.equipmentTags || []).join("; "),

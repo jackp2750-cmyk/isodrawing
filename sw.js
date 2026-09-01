@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v373-local-symbol-count";
+const CACHE_NAME = "spoolmate-v374-hvac-symbol-review";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=373",
-  "./app.js?v=373",
+  "./styles.css?v=374",
+  "./app.js?v=374",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [
