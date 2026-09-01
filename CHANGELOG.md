@@ -1,6 +1,16 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.72`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.73`.
+
+## v3.73 - Local schematic symbol counting and order review
+
+- Added one-button local recognition for standard horizontal and vertical bow-tie valve symbols inside the selected schematic boundary.
+- Added numbered, colour-grouped marks to the main schematic and exact crop preview so every counted item can be checked visually.
+- Added an individual include/exclude control for every mark; excluded false matches immediately leave the quantity and order table.
+- Added a mandatory review step for automatically counted valves, including size, Victaulic/flanged/mixed connection, Victaulic/Ebro/Hydroflow brand and flange type where required.
+- Added a CHWP-or-other-system order table that visibly flags unreviewed rows and blocks CSV export until automatic counts are classified.
+- Kept recognition entirely on-device and added dedicated synthetic plus supplied-schematic regression coverage.
+- Bumped the PWA cache to `spoolmate-v373-local-symbol-count`.
 
 ## v3.72 - System-grouped schematic valve takeoff
 

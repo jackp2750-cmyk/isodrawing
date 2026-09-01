@@ -127,11 +127,15 @@ function check(condition, message) {
         const card = document.querySelector(".schematic-takeoff-card");
         const sidebar = document.querySelector(".schematic-takeoff-sidebar");
         const close = document.querySelector("#schematicTakeoffCloseButton").getBoundingClientRect();
+        const countButton = document.querySelector("#schematicTakeoffCountButton").getBoundingClientRect();
+        const detectionReview = document.querySelector("#schematicTakeoffDetectionReview").getBoundingClientRect();
         return {
           card: { width: card.clientWidth, scrollWidth: card.scrollWidth, height: card.clientHeight, scrollHeight: card.scrollHeight },
           pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           sidebarWidth: sidebar.getBoundingClientRect().width,
           closeVisible: close.left >= 0 && close.right <= innerWidth && close.top >= 0 && close.bottom <= innerHeight,
+          countControlUsable: countButton.width > 80 && countButton.height >= 36,
+          detectionReviewUsable: detectionReview.width > 180,
           selectedCount: document.querySelector("#schematicTakeoffSelectionCount").textContent,
         };
       });
@@ -140,6 +144,7 @@ function check(condition, message) {
       check(layout.pageOverflow <= 2, `${name}: page overflows horizontally`);
       check(layout.sidebarWidth > 200, `${name}: review sidebar is unusable`);
       check(layout.closeVisible, `${name}: close button is outside the viewport`);
+      check(layout.countControlUsable && layout.detectionReviewUsable, `${name}: automatic-count review controls are unusable (${JSON.stringify(layout)})`);
       check(layout.selectedCount === "2 areas", `${name}: rectangle/lasso selections did not render`);
       check(pageErrors.length === 0, `${name}: ${pageErrors.join(" | ")}`);
 

@@ -1485,6 +1485,34 @@ body.schematic-takeoff-open #aiHelperButton {
   font-size: 10px;
 }
 
+.schematic-fitting-row {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+.schematic-fitting-row.needs-review,
+.schematic-system-takeoff-row.needs-review {
+  border-color: rgba(217, 143, 0, 0.48);
+  background: rgba(255, 248, 225, 0.78);
+}
+
+.schematic-item-swatch {
+  width: 13px;
+  height: 13px;
+  display: inline-block;
+  flex: 0 0 13px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  background: var(--detection-color, #68747a);
+  box-shadow: 0 0 0 1px var(--detection-color, #68747a);
+}
+
+.schematic-system-takeoff-row > span {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .schematic-selection-row small,
 .schematic-fitting-row small,
 .schematic-summary-row small {
@@ -1662,6 +1690,113 @@ body.schematic-takeoff-open #aiHelperButton {
   background: #eff9fc;
 }
 
+.schematic-recognition-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 0.85fr));
+  gap: 6px;
+}
+
+.schematic-recognition-actions button {
+  min-height: 40px;
+  padding-inline: 8px;
+  font-size: 10px;
+}
+
+.schematic-recognition-status {
+  padding: 8px 9px;
+  border: 1px solid #9dc6d0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.74);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.schematic-recognition-status[data-tone="success"] {
+  border-color: rgba(15, 159, 110, 0.42);
+  background: rgba(231, 250, 242, 0.88);
+  color: #176c50;
+}
+
+.schematic-detection-review {
+  display: grid;
+  gap: 7px;
+}
+
+.schematic-detection-group {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid color-mix(in srgb, var(--detection-color) 42%, var(--line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--detection-color) 7%, var(--panel));
+}
+
+.schematic-detection-group > header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+}
+
+.schematic-detection-group > header b,
+.schematic-detection-group > small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.schematic-detection-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.schematic-detection-chip {
+  min-width: 55px;
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb, var(--detection-color) 55%, var(--line));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--detection-color) 12%, var(--button));
+  color: var(--ink);
+}
+
+.schematic-detection-chip b {
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--detection-color);
+  color: #fff;
+  font-size: 10px;
+}
+
+.schematic-detection-chip span {
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.schematic-detection-chip.excluded {
+  opacity: 0.58;
+  filter: grayscale(1);
+  text-decoration: line-through;
+}
+
+.schematic-fitting-form-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.schematic-fitting-form-actions > button:first-child {
+  flex: 1 1 auto;
+}
+
 .schematic-crop-preview {
   position: relative;
   min-height: 148px;
@@ -1715,6 +1850,23 @@ body.schematic-takeoff-open #aiHelperButton {
 :root[data-theme="dark"] .schematic-valve-questions {
   border-color: #725f32;
   background: #302a1b;
+}
+
+:root[data-theme="dark"] .schematic-fitting-row.needs-review,
+:root[data-theme="dark"] .schematic-system-takeoff-row.needs-review {
+  border-color: #725f32;
+  background: #302a1b;
+}
+
+:root[data-theme="dark"] .schematic-recognition-status {
+  border-color: #386c78;
+  background: #18343c;
+}
+
+:root[data-theme="dark"] .schematic-recognition-status[data-tone="success"] {
+  border-color: #316f5c;
+  background: #173a30;
+  color: #8ed9bd;
 }
 
 :root[data-theme="dark"] .schematic-private-badge,
@@ -1829,6 +1981,23 @@ body.schematic-takeoff-open #aiHelperButton {
 
   .schematic-fitting-form label:nth-child(3) {
     grid-column: 1 / -1;
+  }
+
+  .schematic-recognition-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .schematic-fitting-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .schematic-fitting-row > .danger {
+    grid-column: 3;
+  }
+
+  .schematic-fitting-row > .secondary-button {
+    grid-column: 2 / -1;
+    justify-self: stretch;
   }
 }
 

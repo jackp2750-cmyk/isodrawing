@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.72`
+Current app version: `v3.73`
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -174,6 +174,12 @@ With the app served locally on port 8765 and Playwright available, the protected
 
 ```powershell
 node test-schematic-takeoff.cjs
+```
+
+The local valve-symbol recogniser, coloured mark review, accepted quantity and protected order export are covered separately:
+
+```powershell
+node test-schematic-recognition.cjs
 ```
 
 It checks JavaScript/CSS syntax and structure, control/icon references, app/cache version wiring, PWA files, pipe and fitting table consistency, flange drilling rows and Supabase RPC definitions. The built-in Review Test Kit covers drawing behaviour using known sample spools. A final real-device pass on PC, iPad and Android is still recommended for touch and visual layout.

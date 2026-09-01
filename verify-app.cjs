@@ -250,6 +250,9 @@ assert(
     && html.includes('data-schematic-tool="lasso"')
     && html.includes('id="schematicTakeoffCropCanvas"')
     && html.includes('id="schematicTakeoffDownloadCropButton"')
+    && html.includes('id="schematicTakeoffCountButton"')
+    && html.includes('id="schematicTakeoffClearDetectionsButton"')
+    && html.includes('id="schematicTakeoffDetectionReview"')
     && html.includes('id="schematicTakeoffFittingForm"')
     && html.includes('id="schematicTakeoffSystemInput"')
     && html.includes('id="schematicTakeoffValveQuestions"')
@@ -266,6 +269,9 @@ assert(
     && /function\s+schematicTakeoffCropCanvasForSelection\s*\(/.test(app)
     && /function\s+downloadSchematicTakeoffCrop\s*\(/.test(app)
     && /function\s+schematicTakeoffDetectSystemContext\s*\(/.test(app)
+    && /function\s+schematicTakeoffDetectValveSymbols\s*\(/.test(app)
+    && /function\s+countSchematicTakeoffSymbols\s*\(/.test(app)
+    && /function\s+toggleSchematicTakeoffMarker\s*\(/.test(app)
     && /function\s+updateSchematicTakeoffValveQuestions\s*\(/.test(app)
     && html.includes('<option value="Victaulic">Victaulic</option>')
     && html.includes('<option value="Ebro">Ebro</option>')
@@ -281,7 +287,7 @@ assert(
     && /grant select on table public\.private_feature_access to authenticated/.test(schematicTakeoffMigration)
     && !/grant (?:insert|update|delete|all).*private_feature_access.*authenticated/i.test(schematicTakeoffMigration)
     && schematicTakeoffMigration.includes("jpritchard@paragonplumbing.com.au"),
-  "Private schematic takeoff selection, system/valve classification, account entitlement, RLS or responsive foundation is incomplete",
+  "Private schematic takeoff selection, local symbol recognition, review controls, system/valve classification, account entitlement, RLS or responsive layout is incomplete",
 );
 assert(
   html.includes('id="workshopStockDialog"')

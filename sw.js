@@ -1,9 +1,9 @@
-const CACHE_NAME = "spoolmate-v372-system-valve-takeoff";
+const CACHE_NAME = "spoolmate-v373-local-symbol-count";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=372",
-  "./app.js?v=372",
+  "./styles.css?v=373",
+  "./app.js?v=373",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=372" />
+    <link rel="stylesheet" href="./styles.css?v=373" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.72</span>
+              <span class="version-badge" id="appVersionBadge">v3.73</span>
             </div>
           </div>
 
@@ -1370,7 +1370,7 @@
                   <div><strong>Selected areas</strong><small id="schematicTakeoffSelectionCount">0 areas</small></div>
                   <button class="icon-button compact labeled danger" id="schematicTakeoffClearButton" type="button">Clear</button>
                 </div>
-                <p class="schematic-boundary-rule">A fitting will be counted when its centre lies inside the selected boundary. Labels just outside may be read for context once recognition rules are added.</p>
+                <p class="schematic-boundary-rule">A symbol is counted when its centre lies inside the selected boundary. Numbered colours identify the detected order group; tap any incorrect mark to exclude it.</p>
                 <div class="schematic-selection-list" id="schematicTakeoffSelectionList">
                   <div class="schematic-empty-list">Draw a rectangle or lasso to create Area 1.</div>
                 </div>
@@ -1391,18 +1391,23 @@
                 </div>
               </section>
               <section class="schematic-takeoff-panel schematic-rules-panel">
-                <span class="schematic-stage-badge">Foundation ready</span>
-                <strong>Exact recognition input</strong>
+                <span class="schematic-stage-badge">Local recognition</span>
+                <strong>Automatic symbol count</strong>
                 <div class="schematic-crop-preview">
                   <canvas id="schematicTakeoffCropCanvas" aria-label="Preview of the exact selected schematic area"></canvas>
                   <span id="schematicTakeoffCropEmpty">Select an area to preview the exact crop.</span>
                 </div>
-                <p>Only this bounded crop will be sent into the recognition rules. This prevents whole-page and duplicate counts while keeping the original schematic on this device.</p>
-                <button class="secondary-button" id="schematicTakeoffDownloadCropButton" type="button" disabled>Download selected area</button>
-                <button class="secondary-button" id="schematicTakeoffReadyButton" type="button" disabled>Mark area ready for rules</button>
+                <p>SpoolMate scans only the bounded crop on this device, colour-marks recognised symbols and builds the system order table. Review every mark before ordering.</p>
+                <div class="schematic-recognition-actions">
+                  <button class="primary-button" id="schematicTakeoffCountButton" type="button" disabled>Count symbols in this area</button>
+                  <button class="secondary-button" id="schematicTakeoffClearDetectionsButton" type="button" disabled>Clear detected marks</button>
+                  <button class="secondary-button" id="schematicTakeoffDownloadCropButton" type="button" disabled>Download selected area</button>
+                </div>
+                <div class="schematic-recognition-status" id="schematicTakeoffRecognitionStatus" role="status" aria-live="polite">Select an area to begin.</div>
+                <div class="schematic-detection-review" id="schematicTakeoffDetectionReview"><div class="schematic-empty-list">Recognised items will appear here with the same colours used on the schematic.</div></div>
               </section>
               <section class="schematic-takeoff-panel">
-                <div class="schematic-panel-heading"><div><strong>Confirmed fittings</strong><small>Manual review foundation</small></div></div>
+                <div class="schematic-panel-heading"><div><strong>Review and manual corrections</strong><small>Confirm automatic rows or add anything missed</small></div></div>
                 <form class="schematic-fitting-form" id="schematicTakeoffFittingForm">
                   <label><span>Fitting</span><select id="schematicTakeoffFittingTypeInput"><option>Elbow</option><option>Tee</option><option>Reducer</option><option>Flange</option><option>Valve</option><option>Socket</option><option>Union</option><option>Coupling</option><option>Roll groove</option><option>Threaded end</option><option>Other</option></select></label>
                   <label><span>Size</span><input id="schematicTakeoffFittingSizeInput" type="text" maxlength="40" placeholder="NB 50" /></label>
@@ -1415,12 +1420,15 @@
                     <label class="wide" id="schematicTakeoffValveFlangeField" hidden><span>Flange type / standard</span><input id="schematicTakeoffValveFlangeInput" type="text" maxlength="60" placeholder="Example: wafer PN16, lugged or Table E" /></label>
                     <small class="wide">Every counted valve must be reviewed so grooved, flanged and mixed valves are not combined.</small>
                   </fieldset>
-                  <button class="primary-button wide" id="schematicTakeoffAddFittingButton" type="submit" disabled>Add confirmed fitting</button>
+                  <div class="schematic-fitting-form-actions wide">
+                    <button class="primary-button" id="schematicTakeoffAddFittingButton" type="submit" disabled>Add confirmed fitting</button>
+                    <button class="secondary-button" id="schematicTakeoffCancelEditButton" type="button" hidden>Cancel review</button>
+                  </div>
                 </form>
-                <div class="schematic-fitting-list" id="schematicTakeoffFittingList"><div class="schematic-empty-list">Select an area, then add confirmed fittings while we define automatic rules.</div></div>
+                <div class="schematic-fitting-list" id="schematicTakeoffFittingList"><div class="schematic-empty-list">Select an area, then count symbols or add a fitting manually.</div></div>
               </section>
               <section class="schematic-takeoff-panel schematic-summary-panel">
-                <div class="schematic-panel-heading"><div><strong>Takeoff by system</strong><small id="schematicTakeoffTotal">0 fittings</small></div></div>
+                <div class="schematic-panel-heading"><div><strong>Order table by system</strong><small id="schematicTakeoffTotal">0 fittings</small></div></div>
                 <div class="schematic-takeoff-summary" id="schematicTakeoffSummary"></div>
                 <button class="secondary-button" id="schematicTakeoffExportButton" type="button" disabled>Export CSV</button>
               </section>
@@ -2416,6 +2424,6 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=372"></script>
+    <script defer src="./app.js?v=373"></script>
   </body>
 </html>
