@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.80`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.81`.
+
+## v3.81 - Unambiguous valve counts
+
+- Confirmed that the supplied stacked-valve crop is recognised as two separate isolation valves without loosening the detection threshold.
+- Changed recognised marker badges from an unexplained sequence number to `item/total`, making the counted quantity visible directly on the schematic.
+- Faded markers from overlapping non-selected areas so only the active area's detections appear prominent.
+- Added a regression fixture requiring two vertically stacked isolation valves to remain two counted items.
+- Bumped the PWA cache to `spoolmate-v381-unambiguous-valve-counts`.
 
 ## v3.80 - Faster schematic cleanup and manual placement
 

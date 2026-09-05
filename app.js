@@ -582,7 +582,7 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.80";
+const APP_VERSION = "v3.81";
 const APP_BUILD_DATE = "2026-09-06";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
@@ -23468,7 +23468,7 @@ function drawSchematicTakeoffSelection(ctx, selection, transform, selected = fal
   ctx.restore();
 }
 
-function drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color, badgeText = "") {
+function drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color, badgeText = "", muted = false) {
   const left = transform.x + marker.x * transform.scale;
   const top = transform.y + marker.y * transform.scale;
   const width = marker.width * transform.scale;
@@ -23476,6 +23476,7 @@ function drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color, 
   const included = marker.included !== false;
   const pending = marker.pending === true;
   ctx.save();
+  ctx.globalAlpha = muted ? 0.38 : 1;
   ctx.lineWidth = included ? 3 : 2;
   ctx.strokeStyle = included ? color : "#738087";
   ctx.fillStyle = included ? `${color}${pending ? "1f" : "2b"}` : "rgba(115, 128, 135, 0.12)";
@@ -23485,19 +23486,28 @@ function drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color, 
   else ctx.rect(left, top, Math.max(8, width), Math.max(8, height));
   ctx.fill();
   ctx.stroke();
-  const badgeRadius = 11;
   const badgeX = left + width;
   const badgeY = top;
+  const resolvedBadgeText = badgeText || (marker.questionMark ? "?" : String(marker.number || markerIndex + 1));
+  const isCountBadge = resolvedBadgeText.includes("/");
+  const badgeHeight = 22;
+  const badgeWidth = isCountBadge ? Math.max(28, resolvedBadgeText.length * 5.8 + 9) : badgeHeight;
   ctx.setLineDash([]);
   ctx.fillStyle = included ? color : "#738087";
   ctx.beginPath();
-  ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+  if (isCountBadge && typeof ctx.roundRect === "function") {
+    ctx.roundRect(badgeX - badgeWidth / 2, badgeY - badgeHeight / 2, badgeWidth, badgeHeight, badgeHeight / 2);
+  } else if (isCountBadge) {
+    ctx.rect(badgeX - badgeWidth / 2, badgeY - badgeHeight / 2, badgeWidth, badgeHeight);
+  } else {
+    ctx.arc(badgeX, badgeY, badgeHeight / 2, 0, Math.PI * 2);
+  }
   ctx.fill();
   ctx.fillStyle = "#ffffff";
-  ctx.font = "800 10px Segoe UI, sans-serif";
+  ctx.font = `800 ${isCountBadge ? 8 : 10}px Segoe UI, sans-serif`;
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(badgeText || (marker.questionMark ? "?" : String(marker.number || markerIndex + 1)), badgeX, badgeY + 0.5);
+  ctx.fillText(resolvedBadgeText, badgeX, badgeY + 0.5);
   if (!included) {
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 2;
@@ -23511,16 +23521,24 @@ function drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color, 
   ctx.restore();
 }
 
-function drawSchematicTakeoffMarkers(ctx, selection, transform) {
+function drawSchematicTakeoffMarkers(ctx, selection, transform, muted = false) {
   (selection?.items || []).forEach((item) => {
     const color = schematicTakeoffItemColor(item.type);
     const markers = Array.isArray(item.markers) ? item.markers : [];
-    markers.forEach((marker, markerIndex) => drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color));
-    if (item.manualMarker) drawSchematicTakeoffMarker(ctx, item.manualMarker, 0, transform, color, "M");
+    markers.forEach((marker, markerIndex) => drawSchematicTakeoffMarker(
+      ctx,
+      marker,
+      markerIndex,
+      transform,
+      color,
+      marker.questionMark ? "?" : `${marker.number || markerIndex + 1}/${markers.length}`,
+      muted,
+    ));
+    if (item.manualMarker) drawSchematicTakeoffMarker(ctx, item.manualMarker, 0, transform, color, "M", muted);
   });
   const pending = ensureSchematicTakeoffState().pendingManualMarker;
   if (pending?.selectionId === selection?.id) {
-    drawSchematicTakeoffMarker(ctx, { ...pending, pending: true }, 0, transform, "#0096b6", "+");
+    drawSchematicTakeoffMarker(ctx, { ...pending, pending: true }, 0, transform, "#0096b6", "+", muted);
   }
 }
 
@@ -23556,7 +23574,8 @@ function renderSchematicTakeoffCanvas() {
     .forEach((selection) => drawSchematicTakeoffSelection(ctx, selection, transform, selection.id === takeoff.selectedId));
   takeoff.selections
     .filter((selection) => selection.page === takeoff.page)
-    .forEach((selection) => drawSchematicTakeoffMarkers(ctx, selection, transform));
+    .sort((first, second) => Number(first.id === takeoff.selectedId) - Number(second.id === takeoff.selectedId))
+    .forEach((selection) => drawSchematicTakeoffMarkers(ctx, selection, transform, selection.id !== takeoff.selectedId));
   if (takeoff.activeSelection) {
     drawSchematicTakeoffSelection(ctx, {
       ...takeoff.activeSelection,

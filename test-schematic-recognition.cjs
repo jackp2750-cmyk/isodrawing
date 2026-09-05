@@ -211,6 +211,47 @@ function check(condition, message) {
       check(clearedQuestions.automaticPreserved, "bulk orange ? cleanup removed a confirmed coloured fitting");
       check(clearedQuestions.buttonDisabled, "bulk orange ? cleanup control did not disable after clearing every question mark");
     }
+    if (!suppliedFixture) {
+      const stackedValveCount = await page.evaluate(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 180;
+        canvas.height = 170;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff3db";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#665e53";
+        ctx.lineWidth = 3;
+        const drawValve = (x, y, size = 15) => {
+          ctx.beginPath();
+          ctx.moveTo(8, y);
+          ctx.lineTo(x - size, y);
+          ctx.moveTo(x - size, y - size * 0.7);
+          ctx.lineTo(x, y);
+          ctx.lineTo(x - size, y + size * 0.7);
+          ctx.closePath();
+          ctx.moveTo(x + size, y - size * 0.7);
+          ctx.lineTo(x, y);
+          ctx.lineTo(x + size, y + size * 0.7);
+          ctx.closePath();
+          ctx.moveTo(x + size, y);
+          ctx.lineTo(canvas.width - 8, y);
+          ctx.stroke();
+        };
+        drawValve(90, 52);
+        drawValve(90, 118);
+        schematicTakeoffState = defaultSchematicTakeoffState();
+        schematicTakeoffState.source = canvas;
+        schematicTakeoffState.sourceWidth = canvas.width;
+        schematicTakeoffState.sourceHeight = canvas.height;
+        schematicTakeoffState.fileName = "stacked-isolation-valves.png";
+        schematicTakeoffState.fileKind = "image";
+        const selection = { id: "stacked", page: 1, kind: "rectangle", x: 0, y: 0, width: canvas.width, height: canvas.height, items: [] };
+        schematicTakeoffState.selections = [selection];
+        schematicTakeoffState.selectedId = selection.id;
+        return schematicTakeoffDetectValveSymbols(selection).markers.length;
+      });
+      check(stackedValveCount === 2, `stacked isolation valves must remain two separate counted items (found ${stackedValveCount})`);
+    }
     check(errors.length === 0, errors.join(" | "));
     console.log("Schematic local recognition review passed");
   } finally {

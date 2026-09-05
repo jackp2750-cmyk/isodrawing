@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.80`
+Current app version: `v3.81`
+
+Recognised schematic badges now show `item/total` for their selected area, while markers belonging to other overlapping areas are faded. Closely stacked isolation valves remain separate counted items, with a regression fixture protecting the two-valve arrangement.
 
 Schematic review is faster: one button removes every orange `?` suggestion across all selected areas without deleting confirmed or manually added fittings. A missed fitting can be placed at its exact drawing position with the `+ Fitting` tool, a desktop right-click or a touch long-press, then classified once in the side table.
 
