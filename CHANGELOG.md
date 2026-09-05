@@ -1,6 +1,16 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.78`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.79`.
+
+## v3.79 - Stage 3 labelled-symbol recognition
+
+- Connected the Stage 3 symbol profile to the actual automatic-count engine instead of displaying it only as a reference legend.
+- Added PDF text-guided recognition for labelled pumps, chillers, heat exchangers, heat pumps, cooling towers and dosing pots within the selected boundary.
+- Added direct recognition for labelled temperature sensors, magnetic flow meters, flow meters, pressure gauges, differential-pressure switches and flow switches.
+- Groups every recognised type into its own coloured review row while retaining `?` markers for shapes that still cannot be classified safely.
+- Preserves confirmed classifications when a selected area is rescanned and keeps equipment connection verification in the order workflow.
+- Added regression checks for the supplied Stage 3 tag conventions across desktop, iPad, Android tablet and phone layouts.
+- Bumped the PWA cache to `spoolmate-v379-stage3-labelled-recognition`.
 
 ## v3.78 - Schematic material and equipment connection rules
 

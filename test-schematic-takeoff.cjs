@@ -102,6 +102,22 @@ function check(condition, message) {
       });
       check(detectedSystem.systemCode === "CHWP" && detectedSystem.equipmentTags.includes("CHWP-B4-1"), `${name}: system was not derived from the selected equipment tag (${JSON.stringify(detectedSystem)})`);
       check(detectedSystem.suggestedPipeSize === "NB 100", `${name}: pipe size was not derived from the selected pipework label (${JSON.stringify(detectedSystem)})`);
+      const labelledSymbols = await page.evaluate(() => {
+        const selection = schematicTakeoffSelectedArea();
+        const bounds = schematicTakeoffAreaBounds(selection);
+        const labels = ["CHWP-B4-1 500kPa", "CH-B4-1 2945kW", "HX-B4-2", "T", "M", "DP"];
+        schematicTakeoffState.pageTextByPage.set(selection.page, labels.map((text, index) => ({
+          text,
+          x: bounds.x + bounds.width * (0.18 + index * 0.11),
+          y: bounds.y + bounds.height * 0.55,
+          width: Math.max(8, text.length * 6),
+          height: 10,
+        })));
+        return schematicTakeoffDetectTextGuidedSymbols(selection).map((group) => ({ type: group.type, count: group.markers.length }));
+      });
+      for (const type of ["Pump", "Chiller", "Heat exchanger", "Temperature sensor", "Mag flow meter", "Differential pressure switch"]) {
+        check(labelledSymbols.some((group) => group.type === type && group.count === 1), `${name}: labelled ${type} symbol was not recognised (${JSON.stringify(labelledSymbols)})`);
+      }
 
       await page.locator("#schematicTakeoffSystemInput").fill("chwp");
       await page.locator("#schematicTakeoffSystemInput").press("Tab");

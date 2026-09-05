@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=378" />
+    <link rel="stylesheet" href="./styles.css?v=379" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.78</span>
+              <span class="version-badge" id="appVersionBadge">v3.79</span>
             </div>
           </div>
 
@@ -1404,6 +1404,8 @@
                   <p>Based on the Curtin M-D-100 chilled-water legend, Macquarie mechanical standard drawings and manufacturer geometry. A drawing's own legend always takes priority.</p>
                   <div class="schematic-symbol-library-grid">
                     <span data-rule-state="automatic"><b>Isolation valve</b><small>Automatic when the standard bow-tie symbol is clear</small></span>
+                    <span data-rule-state="automatic"><b>Labelled equipment</b><small>Pumps, chillers, heat exchangers, heat pumps, cooling towers and dosing pots</small></span>
+                    <span data-rule-state="automatic"><b>Labelled instruments</b><small>Temperature, magnetic flow, flow, pressure and differential-pressure labels</small></span>
                     <span data-rule-state="review"><b>Motorised valve</b><small>Available for ? review</small></span>
                     <span data-rule-state="review"><b>Balancing valve</b><small>Available for ? review</small></span>
                     <span data-rule-state="review"><b>Check valve</b><small>Available for ? review</small></span>
@@ -1419,7 +1421,7 @@
                 </details>
                 <details class="schematic-symbol-library schematic-stage3-library">
                   <summary>Stage 3 engineering symbol profile</summary>
-                  <p>This project-specific profile records the labels supplied for the 28 numbered examples. Ignored annotations never enter the order table; symbol 11 remains a <strong>?</strong> until confirmed.</p>
+                  <p>This project-specific profile drives the automatic tag count as well as the review library for the 28 numbered examples. Ignored annotations never enter the order table; symbol 11 and any ambiguous shape remain a <strong>?</strong> until confirmed.</p>
                   <div class="schematic-stage3-symbol-grid" id="schematicTakeoffStage3Legend"></div>
                 </details>
                 <div class="schematic-recognition-actions">
@@ -2475,8 +2477,8 @@
         }
       }
     </script>
-    <script defer src="./ebro-hp112-bolting.js?v=378"></script>
-    <script defer src="./ebro-hp114-bolting.js?v=378"></script>
-    <script defer src="./app.js?v=378"></script>
+    <script defer src="./ebro-hp112-bolting.js?v=379"></script>
+    <script defer src="./ebro-hp114-bolting.js?v=379"></script>
+    <script defer src="./app.js?v=379"></script>
   </body>
 </html>

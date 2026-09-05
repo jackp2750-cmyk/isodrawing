@@ -581,8 +581,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.78";
-const APP_BUILD_DATE = "2026-09-04";
+const APP_VERSION = "v3.79";
+const APP_BUILD_DATE = "2026-09-05";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -23069,6 +23069,63 @@ function schematicTakeoffValveShapePurity(mask, width, height, x, y, halfWidth, 
   return ink ? expectedInk / ink : 0;
 }
 
+function schematicTakeoffTextGuidedSymbolType(value) {
+  const text = String(value || "").trim().toUpperCase().replace(/\s+/g, " ");
+  // PDF extractors sometimes keep the equipment tag with its duty text. Match the
+  // tag wherever it appears in that text item while leaving single-letter symbols exact.
+  if (/\b(?:CHWP|CWP|HHWP|HWP|PCWP|P)-[A-Z0-9]+(?:-[A-Z0-9]+)+\b/.test(text)) return "Pump";
+  if (/\b(?:CH|CHLR)-[A-Z0-9]+(?:-[A-Z0-9]+)+\b/.test(text)) return "Chiller";
+  if (/\b(?:HX|HEX)-[A-Z0-9]+(?:-[A-Z0-9]+)+\b/.test(text)) return "Heat exchanger";
+  if (/\bHP-[A-Z0-9]+(?:-[A-Z0-9]+)+\b/.test(text)) return "Heat pump";
+  if (/\b(?:CT|CWT)-[A-Z0-9]+(?:-[A-Z0-9]+)+\b/.test(text)) return "Cooling tower";
+  if (/\b(?:DPOT|DOSING\s*POT)-[A-Z0-9-]+\b/.test(text)) return "Dosing pot";
+  if (text === "T" || text === "TS") return "Temperature sensor";
+  if (text === "M" || text === "MAG") return "Mag flow meter";
+  if (text === "FM") return "Flow meter";
+  if (text === "PG" || text === "P") return "Pressure gauge";
+  if (text === "DP" || text === "DPS") return "Differential pressure switch";
+  if (text === "FS") return "Flow switch / sensor";
+  return "";
+}
+
+function schematicTakeoffDetectTextGuidedSymbols(selection) {
+  const entries = schematicTakeoffTextForSelection(selection);
+  const groups = new Map();
+  entries.forEach((entry) => {
+    const type = schematicTakeoffTextGuidedSymbolType(entry.text);
+    if (!type) return;
+    const equipment = schematicTakeoffIsEquipmentType(type) || ["Cooling tower", "Dosing pot"].includes(type);
+    const height = clampNumber(Number(entry.height) || 10, 6, 80);
+    const width = clampNumber(Number(entry.width) || height, height * 0.5, 260);
+    const symbolSize = equipment ? clampNumber(height * 5.2, 28, 96) : clampNumber(Math.max(height * 2.5, width + height), 18, 58);
+    const centerX = Number(entry.x) || 0;
+    const centerY = equipment ? (Number(entry.y) || 0) - height * 3.2 : Number(entry.y) || 0;
+    const marker = {
+      id: createTraceabilityId("MARK"),
+      type,
+      x: centerX - symbolSize / 2,
+      y: centerY - symbolSize / 2,
+      width: symbolSize,
+      height: symbolSize,
+      confidence: equipment ? 94 : 91,
+      included: true,
+      source: "pdf-text",
+      detectedLabel: String(entry.text || "").trim(),
+      reason: equipment ? `Equipment tag ${String(entry.text || "").trim()}` : `Drawing label ${String(entry.text || "").trim()}`,
+    };
+    const current = groups.get(type) || [];
+    const duplicate = current.some((existing) => Math.hypot(
+      existing.x + existing.width / 2 - centerX,
+      existing.y + existing.height / 2 - centerY,
+    ) < Math.max(symbolSize, existing.width) * 0.8);
+    if (!duplicate && schematicTakeoffSelectionContainsPoint(selection, entry, 0)) current.push(marker);
+    groups.set(type, current);
+  });
+  return [...groups.entries()]
+    .filter(([, markers]) => markers.length)
+    .map(([type, markers]) => ({ type, symbolClass: type, markers }));
+}
+
 function schematicTakeoffDetectValveSymbols(selection) {
   const geometry = schematicTakeoffCropGeometry(selection, 1100);
   const crop = schematicTakeoffCropCanvasForSelection(selection, 1100);
@@ -23214,18 +23271,27 @@ function schematicTakeoffDetectValveSymbols(selection) {
       included: true,
       number: index + 1,
     }));
-  const unknownMarkers = schematicTakeoffDetectUnclassifiedSymbols(mask, width, height, geometry, selection, markers);
+  const textGuidedGroups = schematicTakeoffDetectTextGuidedSymbols(selection);
+  const textGuidedMarkers = textGuidedGroups.flatMap((group) => group.markers);
+  const unknownMarkers = schematicTakeoffDetectUnclassifiedSymbols(mask, width, height, geometry, selection, [...markers, ...textGuidedMarkers]);
   const recognisedText = markers.length
     ? `${markers.length} isolation valve ${markers.length === 1 ? "symbol" : "symbols"} found`
     : "No clear isolation valves found";
   const uncertainText = unknownMarkers.length
     ? `${unknownMarkers.length} possible ${unknownMarkers.length === 1 ? "item has" : "items have"} a ? mark for classification`
     : "no other uncertain fitting locations marked";
+  const textGuidedText = textGuidedGroups.length
+    ? textGuidedGroups.map((group) => `${group.markers.length} ${group.type.toLowerCase()}`).join(", ")
+    : "no labelled equipment or instrument symbols found";
   return {
     markers,
+    classifiedGroups: [
+      ...(markers.length ? [{ type: "Isolation valve", symbolClass: "Isolation valve", markers }] : []),
+      ...textGuidedGroups,
+    ],
     unknownMarkers,
     threshold,
-    message: `${recognisedText}; ${uncertainText}. Review every coloured mark before ordering.`,
+    message: `${recognisedText}; ${textGuidedText}; ${uncertainText}. Review every coloured mark before ordering.`,
   };
 }
 
@@ -23704,6 +23770,12 @@ function schematicTakeoffIsEquipmentType(type) {
   return SCHEMATIC_TAKEOFF_EQUIPMENT_TYPES.has(String(type || ""));
 }
 
+function schematicTakeoffItemTypeRequiresSize(type) {
+  return schematicTakeoffIsValveType(type)
+    || schematicTakeoffIsEquipmentType(type)
+    || ["Strainer", "Suction diffuser", "Elbow", "Tee", "Reducer", "Eccentric reducer", "Flange", "Gasket", "Bolt", "Flexible connection", "Flexible connection bellow", "End cap", "Flanged end cap", "Socket", "Union", "Coupling", "Roll groove", "Threaded end"].includes(String(type || ""));
+}
+
 function schematicTakeoffComparableSize(value) {
   const detected = schematicTakeoffPipeSizesFromText(value);
   if (detected.length === 1) return detected[0].key;
@@ -24087,16 +24159,17 @@ function schematicTakeoffItemNeedsReview(item) {
   if (schematicTakeoffItemQuantity(item) === 0) return false;
   if (item?.unclassified || String(item?.type || "") === "Unclassified symbol") return true;
   if (Array.isArray(item?.markers) && !item?.reviewed) return true;
+  if (schematicTakeoffItemTypeRequiresSize(item?.type) && !String(item?.size || "").trim()) return true;
   const ebroFlanged = schematicTakeoffIsValveType(item?.type)
     && schematicTakeoffSupportsEbroLookup(item?.type)
     && item?.brand === "Ebro"
     && ["Flanged", "Mixed"].includes(item?.connectionType);
   if (ebroFlanged && !item?.ebroBolting?.matched) return true;
   if (schematicTakeoffIsValveType(item?.type)) {
-    if (!String(item.size || "").trim() || !item.connectionType || !item.brand || !item.flangeType) return true;
+    if (!item.connectionType || !item.brand || !item.flangeType) return true;
     if (!ebroFlanged && !String(item.boltSpec || "").trim()) return true;
   }
-  if (item?.type === "Strainer" && (!String(item.size || "").trim() || !String(item.flangeType || "").trim())) return true;
+  if (item?.type === "Strainer" && !String(item.flangeType || "").trim()) return true;
   if (schematicTakeoffIsEquipmentType(item?.type) && !schematicTakeoffEquipmentConfigComplete(item)) return true;
   return schematicTakeoffDerivedRequirements(item).some((requirement) => requirement.needsReview);
 }
@@ -24272,16 +24345,22 @@ async function countSchematicTakeoffSymbols() {
   try {
     const result = schematicTakeoffDetectValveSymbols(selected);
     const existingAutomatic = (selected.items || []).filter((item) => Array.isArray(item.markers));
-    const existing = existingAutomatic.find((item) => item.symbolClass === "Isolation valve" || item.type === "Isolation valve" || item.type === "Valve");
-    const reusedAutomaticIds = new Set(existing?.id ? [existing.id] : []);
+    const reusedAutomaticIds = new Set();
     selected.items = (selected.items || []).filter((item) => !Array.isArray(item.markers));
-    if (result.markers.length) {
+    const classifiedGroups = Array.isArray(result.classifiedGroups)
+      ? result.classifiedGroups
+      : result.markers.length ? [{ type: "Isolation valve", symbolClass: "Isolation valve", markers: result.markers }] : [];
+    classifiedGroups.forEach((group) => {
+      const existing = existingAutomatic.find((item) => !reusedAutomaticIds.has(item.id)
+        && (item.symbolClass === group.symbolClass || item.type === group.type || (group.type === "Isolation valve" && item.type === "Valve")));
+      if (existing?.id) reusedAutomaticIds.add(existing.id);
+      const needsPipeSize = schematicTakeoffItemTypeRequiresSize(group.type);
       selected.items.push({
         id: existing?.id || createTraceabilityId("FIT"),
-        type: "Isolation valve",
-        symbolClass: "Isolation valve",
-        size: existing?.size || selected.suggestedPipeSize || "",
-        quantity: result.markers.length,
+        type: existing?.reviewed ? existing.type || group.type : group.type,
+        symbolClass: group.symbolClass || group.type,
+        size: existing?.size || (needsPipeSize ? selected.suggestedPipeSize || "" : ""),
+        quantity: group.markers.length,
         connectionType: existing?.connectionType || "",
         brand: existing?.brand || "",
         flangeType: existing?.flangeType || "",
@@ -24289,12 +24368,15 @@ async function countSchematicTakeoffSymbols() {
         ebroModel: existing?.ebroModel || "",
         ebroConnection: existing?.ebroConnection || "",
         ebroBolting: existing?.ebroBolting || null,
-        note: existing?.note || "Standard valve symbols counted locally",
+        equipmentConfig: existing?.equipmentConfig || null,
+        note: existing?.note || (group.markers.some((marker) => marker.detectedLabel)
+          ? `Matched from ${[...new Set(group.markers.map((marker) => marker.detectedLabel).filter(Boolean))].join(", ")}`
+          : `Standard ${group.type.toLowerCase()} symbols counted locally`),
         source: existing?.reviewed ? "automatic-reviewed" : "automatic-local-rule",
         reviewed: existing?.reviewed === true,
-        markers: result.markers,
+        markers: group.markers.map((marker, markerIndex) => ({ ...marker, number: marker.number || markerIndex + 1 })),
       });
-    }
+    });
     (result.unknownMarkers || []).forEach((marker) => {
       const markerCenter = { x: marker.x + marker.width / 2, y: marker.y + marker.height / 2 };
       const previous = existingAutomatic.find((item) => {
@@ -24328,7 +24410,8 @@ async function countSchematicTakeoffSymbols() {
         }],
       });
     });
-    selected.ready = result.markers.length + (result.unknownMarkers || []).length > 0;
+    const classifiedCount = (result.classifiedGroups || []).reduce((sum, group) => sum + (group.markers?.length || 0), 0);
+    selected.ready = classifiedCount + (result.unknownMarkers || []).length > 0;
     selected.recognitionStatus = result.message;
     if (takeoff.editingItemId && !selected.items.some((item) => item.id === takeoff.editingItemId)) clearSchematicTakeoffFittingEditor();
     showAppNotice(result.message, { tone: selected.ready ? "success" : "warning", duration: 6200 });
@@ -24449,7 +24532,7 @@ function renderSchematicTakeoffPanels() {
   if (schematicTakeoffRecognitionStatus) {
     schematicTakeoffRecognitionStatus.textContent = !selected
       ? "Select an area to begin."
-      : selected.recognitionStatus || "Press Count symbols in this area. Clear isolation valves are identified automatically; the Stage 3 profile helps classify other likely fittings, which remain ? until safely confirmed.";
+      : selected.recognitionStatus || "Press Count symbols in this area. Clear isolation valves and labelled Stage 3 equipment or instrument tags are counted automatically; ambiguous shapes receive a ? for review.";
     schematicTakeoffRecognitionStatus.dataset.tone = detectedItems.length ? "success" : "neutral";
   }
   if (schematicTakeoffDetectionReview) {
@@ -24629,7 +24712,7 @@ function addConfirmedSchematicFitting() {
     return;
   }
   const size = String(schematicTakeoffFittingSizeInput?.value || "").trim().slice(0, 40);
-  if ((Array.isArray(editingItem?.markers) || isValve || isEquipment || fittingType === "Strainer") && !size) {
+  if (schematicTakeoffItemTypeRequiresSize(fittingType) && !size) {
     showAppNotice(isEquipment ? "Enter the pipe or line size before saving this equipment." : "Enter the pipe size before confirming this order item.", { tone: "warning" });
     schematicTakeoffFittingSizeInput?.focus();
     return;

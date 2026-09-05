@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v378-schematic-material-rules";
+const CACHE_NAME = "spoolmate-v379-stage3-labelled-recognition";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=378",
-  "./ebro-hp112-bolting.js?v=378",
-  "./ebro-hp114-bolting.js?v=378",
-  "./app.js?v=378",
+  "./styles.css?v=379",
+  "./ebro-hp112-bolting.js?v=379",
+  "./ebro-hp114-bolting.js?v=379",
+  "./app.js?v=379",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

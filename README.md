@@ -1,6 +1,6 @@
 # SpoolMate
 
-Current app version: `v3.78`
+Current app version: `v3.79`
 
 The private schematic take-off now separates counted drawing symbols from rule-added order materials. It reads unambiguous DN, NB, NPS and inch pipe-size labels inside each selected area; adds matching valve flanges, gaskets and verified bolt quantities; and requires explicit nozzle verification before adding pump, heat-exchanger, chiller or heat-pump reducers and connection kits. Pump rules cover suction/discharge reducers, bellows or three flexible Victaulic couplings per side, plus strainer or suction-diffuser connection materials.
 
