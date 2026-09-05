@@ -192,6 +192,25 @@ function check(condition, message) {
         check(excludedUnknowns.questionMarks === Math.max(0, result.uncertainCount - 1), "question-mark identity was lost when excluding a possible item");
       }
     }
+    const clearedQuestions = await page.evaluate(({ itemId }) => {
+      const before = schematicTakeoffState.selections
+        .flatMap((selection) => selection.items || [])
+        .filter((item) => item.unclassified || (item.markers || []).some((marker) => marker.questionMark))
+        .reduce((sum, item) => sum + Math.max(1, (item.markers || []).filter((marker) => marker.questionMark).length), 0);
+      clearAllSchematicTakeoffQuestionMarks();
+      const remainingItems = schematicTakeoffSelectedArea().items;
+      return {
+        before,
+        after: remainingItems.filter((item) => item.unclassified || (item.markers || []).some((marker) => marker.questionMark)).length,
+        automaticPreserved: remainingItems.some((item) => item.id === itemId),
+        buttonDisabled: document.querySelector("#schematicTakeoffClearQuestionsButton").disabled,
+      };
+    }, result);
+    if (result.uncertainCount > 1) {
+      check(clearedQuestions.before > 0 && clearedQuestions.after === 0, `bulk orange ? cleanup failed (${JSON.stringify(clearedQuestions)})`);
+      check(clearedQuestions.automaticPreserved, "bulk orange ? cleanup removed a confirmed coloured fitting");
+      check(clearedQuestions.buttonDisabled, "bulk orange ? cleanup control did not disable after clearing every question mark");
+    }
     check(errors.length === 0, errors.join(" | "));
     console.log("Schematic local recognition review passed");
   } finally {

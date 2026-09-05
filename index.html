@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=379" />
+    <link rel="stylesheet" href="./styles.css?v=380" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.79</span>
+              <span class="version-badge" id="appVersionBadge">v3.80</span>
             </div>
           </div>
 
@@ -1346,6 +1346,7 @@
               <button type="button" data-schematic-tool="pan">Pan</button>
               <button class="active" type="button" data-schematic-tool="rectangle">Rectangle</button>
               <button type="button" data-schematic-tool="lasso">Lasso</button>
+              <button type="button" data-schematic-tool="manual">+ Fitting</button>
             </div>
             <div class="schematic-zoom-controls" aria-label="Schematic zoom">
               <button class="icon-button compact labeled" id="schematicTakeoffZoomOutButton" type="button">−</button>
@@ -1362,7 +1363,7 @@
                 <span>PDF, PNG, JPG and device photos are supported.</span>
                 <small>Then draw a rectangle or lasso around only the section you need.</small>
               </div>
-              <div class="schematic-takeoff-hint" id="schematicTakeoffHint">Rectangle: drag around the required section</div>
+              <div class="schematic-takeoff-hint" id="schematicTakeoffHint">Rectangle: drag around the required section · right-click or long-press to add a missed fitting</div>
             </main>
             <aside class="schematic-takeoff-sidebar">
               <section class="schematic-takeoff-panel">
@@ -1370,7 +1371,7 @@
                   <div><strong>Selected areas</strong><small id="schematicTakeoffSelectionCount">0 areas</small></div>
                   <button class="icon-button compact labeled danger" id="schematicTakeoffClearButton" type="button">Clear</button>
                 </div>
-                <p class="schematic-boundary-rule">A symbol is counted when its centre lies inside the selected boundary. Numbered colours identify the detected order group; tap any incorrect mark to exclude it.</p>
+                <p class="schematic-boundary-rule">A symbol is counted when its centre lies inside the selected boundary. Tap an incorrect numbered mark to exclude it, remove all orange ? marks together, or right-click/long-press the drawing to add a missed fitting.</p>
                 <div class="schematic-selection-list" id="schematicTakeoffSelectionList">
                   <div class="schematic-empty-list">Draw a rectangle or lasso to create Area 1.</div>
                 </div>
@@ -1426,6 +1427,7 @@
                 </details>
                 <div class="schematic-recognition-actions">
                   <button class="primary-button" id="schematicTakeoffCountButton" type="button" disabled>Count symbols in this area</button>
+                  <button class="secondary-button" id="schematicTakeoffClearQuestionsButton" type="button" disabled>Remove all ? marks</button>
                   <button class="secondary-button" id="schematicTakeoffClearDetectionsButton" type="button" disabled>Clear detected marks</button>
                   <button class="secondary-button" id="schematicTakeoffDownloadCropButton" type="button" disabled>Download selected area</button>
                 </div>
@@ -1433,7 +1435,7 @@
                 <div class="schematic-detection-review" id="schematicTakeoffDetectionReview"><div class="schematic-empty-list">Recognised items will appear here with the same colours used on the schematic.</div></div>
               </section>
               <section class="schematic-takeoff-panel">
-                <div class="schematic-panel-heading"><div><strong>Review and manual corrections</strong><small>Confirm automatic rows or add anything missed</small></div></div>
+                <div class="schematic-panel-heading"><div><strong>Review and manual corrections</strong><small>Use + Fitting, right-click or long-press to mark an exact missed location</small></div></div>
                 <form class="schematic-fitting-form" id="schematicTakeoffFittingForm">
                   <label><span>Fitting / item</span><select id="schematicTakeoffFittingTypeInput"><option value="Unclassified symbol" disabled>Choose classification</option><option>Elbow</option><option>Tee</option><option>Reducer</option><option>Eccentric reducer</option><option>Flange</option><option>Gasket</option><option>Bolt</option><option>Flexible connection</option><option>Flexible connection bellow</option><option>Binder symbol</option><option>Isolation valve</option><option value="Valve">Valve — type not set</option><option>Motorised valve</option><option>Balancing valve</option><option>Check valve</option><option>Pressure reducing valve</option><option>Pressure relief valve</option><option>Strainer</option><option>Suction diffuser</option><option>Gauge</option><option>Pressure gauge</option><option>Sensor</option><option>Temperature sensor</option><option>Flow meter</option><option>Mag flow meter</option><option>Energy meter</option><option>Differential pressure sensor</option><option>Differential pressure switch</option><option>Flow switch / sensor</option><option>Air bleed to tundish</option><option>Pump</option><option>Heat exchanger</option><option>Chiller</option><option>Heat pump</option><option>Dosing pot</option><option>Cooling tower</option><option>End cap</option><option>Flanged end cap</option><option>Socket</option><option>Union</option><option>Coupling</option><option>Roll groove</option><option>Threaded end</option><option>Other</option></select></label>
                   <label><span>Size</span><input id="schematicTakeoffFittingSizeInput" type="text" maxlength="40" placeholder="NB 50" /></label>
@@ -2477,8 +2479,8 @@
         }
       }
     </script>
-    <script defer src="./ebro-hp112-bolting.js?v=379"></script>
-    <script defer src="./ebro-hp114-bolting.js?v=379"></script>
-    <script defer src="./app.js?v=379"></script>
+    <script defer src="./ebro-hp112-bolting.js?v=380"></script>
+    <script defer src="./ebro-hp114-bolting.js?v=380"></script>
+    <script defer src="./app.js?v=380"></script>
   </body>
 </html>

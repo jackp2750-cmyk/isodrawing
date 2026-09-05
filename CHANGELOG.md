@@ -1,6 +1,15 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.79`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.80`.
+
+## v3.80 - Faster schematic cleanup and manual placement
+
+- Added one-click removal of every orange `?` suggestion across all selected schematic areas while preserving confirmed automatic detections and manually added fittings.
+- Kept cleanup reversible: running Count again restores the automatic suggestions for a fresh review.
+- Added exact-point manual placement with the visible `+ Fitting` tool, desktop right-click and iPad/Android long-press.
+- Manual fittings inherit the selected system and area, retain a visible `M` marker at the placed position and flow into the review table and order export.
+- Added regression coverage for bulk cleanup and manual placement across desktop, iPad, Android tablet, phone portrait and phone landscape layouts.
+- Bumped the PWA cache to `spoolmate-v380-schematic-fast-review`.
 
 ## v3.79 - Stage 3 labelled-symbol recognition
 

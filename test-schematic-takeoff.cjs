@@ -257,6 +257,58 @@ function check(condition, message) {
       await page.locator("#schematicTakeoffZoomInButton").click();
       check((await page.locator("#schematicTakeoffZoomReadout").evaluate((element) => element.value)) === "125%", `${name}: zoom control did not update`);
 
+      const manualPoint = await page.evaluate(() => {
+        setSchematicTakeoffTool("manual");
+        const selection = schematicTakeoffSelectedArea();
+        const bounds = schematicTakeoffAreaBounds(selection);
+        const transform = schematicTakeoffViewTransform();
+        const rect = schematicTakeoffCanvas.getBoundingClientRect();
+        return {
+          x: rect.left + transform.x + (bounds.x + bounds.width / 2) * transform.scale,
+          y: rect.top + transform.y + (bounds.y + bounds.height / 2) * transform.scale,
+        };
+      });
+      await page.mouse.click(manualPoint.x, manualPoint.y);
+      const pendingManual = await page.evaluate(() => ({
+        marker: schematicTakeoffState.pendingManualMarker,
+        buttonText: document.querySelector("#schematicTakeoffAddFittingButton")?.textContent || "",
+      }));
+      check(pendingManual.marker?.selectionId === (await page.evaluate(() => schematicTakeoffSelectedArea()?.id)) && pendingManual.buttonText.includes("marked point"), `${name}: + Fitting did not pin the exact schematic location (${JSON.stringify(pendingManual)})`);
+      await page.locator("#schematicTakeoffFittingTypeInput").selectOption("Temperature sensor");
+      await page.locator("#schematicTakeoffFittingNoteInput").fill("Manually placed test item");
+      await page.locator("#schematicTakeoffAddFittingButton").click();
+      const positionedManual = await page.evaluate(() => {
+        const item = schematicTakeoffSelectedArea()?.items?.find((entry) => entry.note === "Manually placed test item");
+        return { item, pending: schematicTakeoffState.pendingManualMarker, summary: document.querySelector("#schematicTakeoffSummary")?.textContent || "" };
+      });
+      check(positionedManual.item?.type === "Temperature sensor" && positionedManual.item?.source === "manual-positioned" && positionedManual.item?.manualMarker && !positionedManual.pending, `${name}: manually positioned fitting was not saved at its marked location (${JSON.stringify(positionedManual)})`);
+      check(positionedManual.summary.includes("Temperature sensor"), `${name}: manually positioned fitting did not reach the system order table`);
+
+      await page.evaluate(() => setSchematicTakeoffTool("pan"));
+      await page.mouse.click(manualPoint.x, manualPoint.y, { button: "right" });
+      const rightClickPending = await page.evaluate(() => Boolean(schematicTakeoffState.pendingManualMarker));
+      check(rightClickPending, `${name}: right-click did not start exact manual fitting placement`);
+      await page.locator("#schematicTakeoffCancelEditButton").click();
+      check(!(await page.evaluate(() => schematicTakeoffState.pendingManualMarker)), `${name}: cancelling manual placement left a marker behind`);
+      if (name === "ipad") {
+        const longPressPending = await page.evaluate(async ({ x, y }) => {
+          const rect = schematicTakeoffCanvas.getBoundingClientRect();
+          const point = { x: x - rect.left, y: y - rect.top };
+          setSchematicTakeoffTool("pan");
+          schematicTakeoffState.pointers.set(91, point);
+          schematicTakeoffState.gesture = { type: "pan", pointerId: 91, start: point, panX: schematicTakeoffState.panX, panY: schematicTakeoffState.panY };
+          scheduleSchematicTakeoffLongPress({ pointerType: "touch", pointerId: 91 }, point);
+          await new Promise((resolve) => setTimeout(resolve, 680));
+          const pending = Boolean(schematicTakeoffState.pendingManualMarker);
+          schematicTakeoffState.pointers.delete(91);
+          cancelSchematicTakeoffLongPress();
+          clearSchematicTakeoffFittingEditor();
+          renderSchematicTakeoffCanvas();
+          return pending;
+        }, manualPoint);
+        check(longPressPending, "ipad: long-press did not start exact manual fitting placement");
+      }
+
       const layout = await page.evaluate(() => {
         const card = document.querySelector(".schematic-takeoff-card");
         const sidebar = document.querySelector(".schematic-takeoff-sidebar");

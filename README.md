@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.79`
+Current app version: `v3.80`
+
+Schematic review is faster: one button removes every orange `?` suggestion across all selected areas without deleting confirmed or manually added fittings. A missed fitting can be placed at its exact drawing position with the `+ Fitting` tool, a desktop right-click or a touch long-press, then classified once in the side table.
 
 The private schematic take-off now separates counted drawing symbols from rule-added order materials. It reads unambiguous DN, NB, NPS and inch pipe-size labels inside each selected area; adds matching valve flanges, gaskets and verified bolt quantities; and requires explicit nozzle verification before adding pump, heat-exchanger, chiller or heat-pump reducers and connection kits. Pump rules cover suction/discharge reducers, bellows or three flexible Victaulic couplings per side, plus strainer or suction-diffuser connection materials.
 

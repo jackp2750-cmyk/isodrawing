@@ -211,6 +211,7 @@ const schematicTakeoffCropCanvas = document.querySelector("#schematicTakeoffCrop
 const schematicTakeoffCropEmpty = document.querySelector("#schematicTakeoffCropEmpty");
 const schematicTakeoffDownloadCropButton = document.querySelector("#schematicTakeoffDownloadCropButton");
 const schematicTakeoffCountButton = document.querySelector("#schematicTakeoffCountButton");
+const schematicTakeoffClearQuestionsButton = document.querySelector("#schematicTakeoffClearQuestionsButton");
 const schematicTakeoffClearDetectionsButton = document.querySelector("#schematicTakeoffClearDetectionsButton");
 const schematicTakeoffRecognitionStatus = document.querySelector("#schematicTakeoffRecognitionStatus");
 const schematicTakeoffDetectionReview = document.querySelector("#schematicTakeoffDetectionReview");
@@ -581,8 +582,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.79";
-const APP_BUILD_DATE = "2026-09-05";
+const APP_VERSION = "v3.80";
+const APP_BUILD_DATE = "2026-09-06";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -22554,10 +22555,12 @@ function defaultSchematicTakeoffState() {
     lastSystemCode: "",
     selectedId: "",
     editingItemId: "",
+    pendingManualMarker: null,
     recognitionBusy: false,
     activeSelection: null,
     pointers: new Map(),
     gesture: null,
+    longPress: null,
   };
 }
 
@@ -23452,7 +23455,7 @@ function drawSchematicTakeoffSelection(ctx, selection, transform, selected = fal
   const labelY = transform.y + bounds.y * transform.scale;
   ctx.save();
   ctx.font = "700 13px Segoe UI, sans-serif";
-  const detectedCount = (selection.items || []).filter((item) => Array.isArray(item.markers)).reduce((sum, item) => sum + schematicTakeoffItemQuantity(item), 0);
+  const detectedCount = (selection.items || []).reduce((sum, item) => sum + schematicTakeoffItemQuantity(item), 0);
   const label = `${selection.systemCode ? `${selection.systemCode} · ` : ""}${selection.name}${detectedCount ? ` · ${detectedCount} FOUND` : selection.ready ? " · READY" : ""}`;
   const width = ctx.measureText(label).width + 18;
   ctx.fillStyle = selected ? "#9a5b00" : "#006f83";
@@ -23465,52 +23468,60 @@ function drawSchematicTakeoffSelection(ctx, selection, transform, selected = fal
   ctx.restore();
 }
 
+function drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color, badgeText = "") {
+  const left = transform.x + marker.x * transform.scale;
+  const top = transform.y + marker.y * transform.scale;
+  const width = marker.width * transform.scale;
+  const height = marker.height * transform.scale;
+  const included = marker.included !== false;
+  const pending = marker.pending === true;
+  ctx.save();
+  ctx.lineWidth = included ? 3 : 2;
+  ctx.strokeStyle = included ? color : "#738087";
+  ctx.fillStyle = included ? `${color}${pending ? "1f" : "2b"}` : "rgba(115, 128, 135, 0.12)";
+  ctx.setLineDash(pending ? [6, 4] : included ? [] : [6, 5]);
+  ctx.beginPath();
+  if (typeof ctx.roundRect === "function") ctx.roundRect(left, top, Math.max(8, width), Math.max(8, height), 6);
+  else ctx.rect(left, top, Math.max(8, width), Math.max(8, height));
+  ctx.fill();
+  ctx.stroke();
+  const badgeRadius = 11;
+  const badgeX = left + width;
+  const badgeY = top;
+  ctx.setLineDash([]);
+  ctx.fillStyle = included ? color : "#738087";
+  ctx.beginPath();
+  ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 10px Segoe UI, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(badgeText || (marker.questionMark ? "?" : String(marker.number || markerIndex + 1)), badgeX, badgeY + 0.5);
+  if (!included) {
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(badgeX - 4, badgeY - 4);
+    ctx.lineTo(badgeX + 4, badgeY + 4);
+    ctx.moveTo(badgeX + 4, badgeY - 4);
+    ctx.lineTo(badgeX - 4, badgeY + 4);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawSchematicTakeoffMarkers(ctx, selection, transform) {
   (selection?.items || []).forEach((item) => {
-    const markers = Array.isArray(item.markers) ? item.markers : [];
     const color = schematicTakeoffItemColor(item.type);
-    markers.forEach((marker, markerIndex) => {
-      const left = transform.x + marker.x * transform.scale;
-      const top = transform.y + marker.y * transform.scale;
-      const width = marker.width * transform.scale;
-      const height = marker.height * transform.scale;
-      const included = marker.included !== false;
-      ctx.save();
-      ctx.lineWidth = included ? 3 : 2;
-      ctx.strokeStyle = included ? color : "#738087";
-      ctx.fillStyle = included ? `${color}2b` : "rgba(115, 128, 135, 0.12)";
-      ctx.setLineDash(included ? [] : [6, 5]);
-      ctx.beginPath();
-      if (typeof ctx.roundRect === "function") ctx.roundRect(left, top, Math.max(8, width), Math.max(8, height), 6);
-      else ctx.rect(left, top, Math.max(8, width), Math.max(8, height));
-      ctx.fill();
-      ctx.stroke();
-      const badgeRadius = 11;
-      const badgeX = left + width;
-      const badgeY = top;
-      ctx.setLineDash([]);
-      ctx.fillStyle = included ? color : "#738087";
-      ctx.beginPath();
-      ctx.arc(badgeX, badgeY, badgeRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "800 10px Segoe UI, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(marker.questionMark ? "?" : String(marker.number || markerIndex + 1), badgeX, badgeY + 0.5);
-      if (!included) {
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(badgeX - 4, badgeY - 4);
-        ctx.lineTo(badgeX + 4, badgeY + 4);
-        ctx.moveTo(badgeX + 4, badgeY - 4);
-        ctx.lineTo(badgeX - 4, badgeY + 4);
-        ctx.stroke();
-      }
-      ctx.restore();
-    });
+    const markers = Array.isArray(item.markers) ? item.markers : [];
+    markers.forEach((marker, markerIndex) => drawSchematicTakeoffMarker(ctx, marker, markerIndex, transform, color));
+    if (item.manualMarker) drawSchematicTakeoffMarker(ctx, item.manualMarker, 0, transform, color, "M");
   });
+  const pending = ensureSchematicTakeoffState().pendingManualMarker;
+  if (pending?.selectionId === selection?.id) {
+    drawSchematicTakeoffMarker(ctx, { ...pending, pending: true }, 0, transform, "#0096b6", "+");
+  }
 }
 
 function renderSchematicTakeoffCanvas() {
@@ -23555,13 +23566,14 @@ function renderSchematicTakeoffCanvas() {
 }
 
 function schematicTakeoffToolHint(tool = ensureSchematicTakeoffState().tool) {
-  if (tool === "pan") return "Pan: drag the schematic · pinch or use +/− to zoom";
-  if (tool === "lasso") return "Lasso: draw around only the required fittings";
-  return "Rectangle: drag around the required section";
+  if (tool === "manual") return "+ Fitting: tap the exact missed location, then complete its details";
+  if (tool === "pan") return "Pan: drag the schematic · pinch or use +/− to zoom · long-press to add a fitting";
+  if (tool === "lasso") return "Lasso: draw around only the required fittings · long-press to add a fitting";
+  return "Rectangle: drag around the required section · right-click or long-press to add a missed fitting";
 }
 
 function setSchematicTakeoffTool(tool) {
-  const allowed = new Set(["pan", "rectangle", "lasso"]);
+  const allowed = new Set(["pan", "rectangle", "lasso", "manual"]);
   const next = allowed.has(tool) ? tool : "rectangle";
   const takeoff = ensureSchematicTakeoffState();
   takeoff.tool = next;
@@ -23658,14 +23670,87 @@ function finishSchematicTakeoffSelection() {
   addSchematicTakeoffSelection({ kind: "lasso", points });
 }
 
+function cancelSchematicTakeoffLongPress() {
+  const takeoff = ensureSchematicTakeoffState();
+  if (takeoff.longPress?.timer) window.clearTimeout(takeoff.longPress.timer);
+  takeoff.longPress = null;
+}
+
+function schematicTakeoffAreaAtPoint(imagePoint) {
+  const takeoff = ensureSchematicTakeoffState();
+  const selected = schematicTakeoffSelectedArea();
+  if (selected?.page === takeoff.page && schematicTakeoffSelectionContainsPoint(selected, imagePoint)) return selected;
+  return [...takeoff.selections].reverse().find((selection) => selection.page === takeoff.page
+    && schematicTakeoffSelectionContainsPoint(selection, imagePoint)) || null;
+}
+
+function beginSchematicTakeoffManualPlacement(canvasPoint) {
+  const takeoff = ensureSchematicTakeoffState();
+  const imagePoint = schematicTakeoffImagePoint(canvasPoint);
+  const selection = imagePoint ? schematicTakeoffAreaAtPoint(imagePoint) : null;
+  if (!selection) {
+    showAppNotice("Place the fitting inside one of your selected areas so SpoolMate knows which system table it belongs to.", { tone: "warning", duration: 5200 });
+    return false;
+  }
+  takeoff.selectedId = selection.id;
+  clearSchematicTakeoffFittingEditor();
+  const transform = schematicTakeoffViewTransform();
+  const markerSize = clampNumber(34 / Math.max(0.01, transform?.scale || 1), 9, 90);
+  takeoff.pendingManualMarker = {
+    id: createTraceabilityId("MARK"),
+    selectionId: selection.id,
+    x: imagePoint.x - markerSize / 2,
+    y: imagePoint.y - markerSize / 2,
+    width: markerSize,
+    height: markerSize,
+    included: true,
+    confidence: 100,
+    source: "manual-positioned",
+  };
+  if (schematicTakeoffFittingSizeInput && selection.suggestedPipeSize) schematicTakeoffFittingSizeInput.value = selection.suggestedPipeSize;
+  if (schematicTakeoffAddFittingButton) schematicTakeoffAddFittingButton.textContent = "Add fitting at marked point";
+  if (schematicTakeoffCancelEditButton) schematicTakeoffCancelEditButton.hidden = false;
+  updateSchematicTakeoffValveQuestions();
+  renderSchematicTakeoffPanels();
+  renderSchematicTakeoffCanvas();
+  schematicTakeoffFittingForm?.scrollIntoView?.({ block: "nearest", behavior: "smooth" });
+  schematicTakeoffFittingTypeInput?.focus?.({ preventScroll: true });
+  showAppNotice("Missed location marked with +. Choose the fitting and save it into this system table.", { tone: "success", duration: 4200 });
+  return true;
+}
+
+function scheduleSchematicTakeoffLongPress(event, point) {
+  const takeoff = ensureSchematicTakeoffState();
+  cancelSchematicTakeoffLongPress();
+  if (event.pointerType === "mouse" || takeoff.tool === "manual") return;
+  const press = { pointerId: event.pointerId, start: point, triggered: false, timer: 0 };
+  press.timer = window.setTimeout(() => {
+    const current = takeoff.longPress;
+    const latest = takeoff.pointers.get(event.pointerId);
+    if (current !== press || !latest || takeoff.pointers.size !== 1
+      || Math.hypot(latest.x - press.start.x, latest.y - press.start.y) > 10) return;
+    press.triggered = true;
+    takeoff.activeSelection = null;
+    takeoff.gesture = null;
+    beginSchematicTakeoffManualPlacement(latest);
+  }, 620);
+  takeoff.longPress = press;
+}
+
 function handleSchematicTakeoffPointerDown(event) {
   const takeoff = ensureSchematicTakeoffState();
   if (!takeoff.source || event.button > 0) return;
   event.preventDefault();
-  schematicTakeoffCanvas?.setPointerCapture?.(event.pointerId);
   const point = schematicTakeoffPoint(event);
+  if (takeoff.tool === "manual") {
+    beginSchematicTakeoffManualPlacement(point);
+    return;
+  }
+  schematicTakeoffCanvas?.setPointerCapture?.(event.pointerId);
   takeoff.pointers.set(event.pointerId, point);
+  scheduleSchematicTakeoffLongPress(event, point);
   if (takeoff.pointers.size >= 2) {
+    cancelSchematicTakeoffLongPress();
     const pointers = [...takeoff.pointers.values()].slice(0, 2);
     const midpoint = { x: (pointers[0].x + pointers[1].x) / 2, y: (pointers[0].y + pointers[1].y) / 2 };
     takeoff.activeSelection = null;
@@ -23698,6 +23783,10 @@ function handleSchematicTakeoffPointerMove(event) {
   event.preventDefault();
   const point = schematicTakeoffPoint(event);
   takeoff.pointers.set(event.pointerId, point);
+  if (takeoff.longPress?.pointerId === event.pointerId
+    && Math.hypot(point.x - takeoff.longPress.start.x, point.y - takeoff.longPress.start.y) > 10) {
+    cancelSchematicTakeoffLongPress();
+  }
   if (takeoff.gesture?.type === "pinch" && takeoff.pointers.size >= 2) {
     const pointers = [...takeoff.pointers.values()].slice(0, 2);
     const distance = Math.max(1, Math.hypot(pointers[1].x - pointers[0].x, pointers[1].y - pointers[0].y));
@@ -23732,7 +23821,15 @@ function handleSchematicTakeoffPointerMove(event) {
 function handleSchematicTakeoffPointerEnd(event, cancelled = false) {
   const takeoff = ensureSchematicTakeoffState();
   const gesture = takeoff.gesture;
+  const longPressTriggered = takeoff.longPress?.pointerId === event.pointerId && takeoff.longPress.triggered;
+  cancelSchematicTakeoffLongPress();
   takeoff.pointers.delete(event.pointerId);
+  if (longPressTriggered) {
+    takeoff.activeSelection = null;
+    takeoff.gesture = null;
+    renderSchematicTakeoffCanvas();
+    return;
+  }
   if (gesture?.type === "pinch") {
     if (takeoff.pointers.size < 2) takeoff.gesture = null;
     return;
@@ -24253,6 +24350,7 @@ function updateSchematicTakeoffValveQuestions() {
 function clearSchematicTakeoffFittingEditor() {
   const takeoff = ensureSchematicTakeoffState();
   takeoff.editingItemId = "";
+  takeoff.pendingManualMarker = null;
   if (schematicTakeoffFittingTypeInput) {
     schematicTakeoffFittingTypeInput.value = "Elbow";
     schematicTakeoffFittingTypeInput.disabled = false;
@@ -24439,6 +24537,31 @@ function clearSchematicTakeoffDetections() {
   renderSchematicTakeoffCanvas();
 }
 
+function clearAllSchematicTakeoffQuestionMarks() {
+  const takeoff = ensureSchematicTakeoffState();
+  const removedIds = new Set();
+  let removedMarks = 0;
+  takeoff.selections.forEach((selection) => {
+    const questionItems = (selection.items || []).filter((item) => item.unclassified === true
+      || (Array.isArray(item.markers) && item.markers.some((marker) => marker.questionMark)));
+    const selectionRemovedMarks = questionItems.reduce((sum, item) => sum
+      + Math.max(1, (item.markers || []).filter((marker) => marker.questionMark).length), 0);
+    questionItems.forEach((item) => {
+      removedIds.add(item.id);
+    });
+    if (!questionItems.length) return;
+    removedMarks += selectionRemovedMarks;
+    selection.items = (selection.items || []).filter((item) => !removedIds.has(item.id));
+    selection.ready = selection.items.some((item) => schematicTakeoffItemQuantity(item) > 0);
+    selection.recognitionStatus = `${selectionRemovedMarks} orange ? ${selectionRemovedMarks === 1 ? "mark" : "marks"} removed. Right-click, long-press or use + Fitting to add anything genuinely missed.`;
+  });
+  if (!removedMarks) return;
+  if (removedIds.has(takeoff.editingItemId)) clearSchematicTakeoffFittingEditor();
+  renderSchematicTakeoffPanels();
+  renderSchematicTakeoffCanvas();
+  showAppNotice(`${removedMarks} orange ? ${removedMarks === 1 ? "mark" : "marks"} removed. Run Count again any time to restore the suggestions.`, { tone: "success", duration: 5200 });
+}
+
 function toggleSchematicTakeoffMarker(itemId, markerId) {
   const selected = schematicTakeoffSelectedArea();
   const item = (selected?.items || []).find((entry) => entry.id === itemId);
@@ -24528,6 +24651,16 @@ function renderSchematicTakeoffPanels() {
     schematicTakeoffCountButton.textContent = takeoff.recognitionBusy ? "Counting symbols…" : "Count symbols in this area";
   }
   const detectedItems = (selected?.items || []).filter((item) => Array.isArray(item.markers));
+  const questionMarkCount = takeoff.selections
+    .flatMap((selection) => selection.items || [])
+    .filter((item) => item.unclassified === true || (item.markers || []).some((marker) => marker.questionMark))
+    .reduce((sum, item) => sum + Math.max(1, (item.markers || []).filter((marker) => marker.questionMark).length), 0);
+  if (schematicTakeoffClearQuestionsButton) {
+    schematicTakeoffClearQuestionsButton.disabled = !questionMarkCount || takeoff.recognitionBusy;
+    schematicTakeoffClearQuestionsButton.textContent = questionMarkCount
+      ? `Remove all ${questionMarkCount} ? marks`
+      : "Remove all ? marks";
+  }
   if (schematicTakeoffClearDetectionsButton) schematicTakeoffClearDetectionsButton.disabled = !detectedItems.length || takeoff.recognitionBusy;
   if (schematicTakeoffRecognitionStatus) {
     schematicTakeoffRecognitionStatus.textContent = !selected
@@ -24572,7 +24705,7 @@ function renderSchematicTakeoffPanels() {
           return `
             <div class="schematic-fitting-row${schematicTakeoffItemNeedsReview(item) ? " needs-review" : ""}">
               <span class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></span>
-              <div><strong>${escapeHtml(schematicTakeoffItemDescription(item))}</strong><span>${schematicTakeoffItemQuantity(item)} ${schematicTakeoffItemQuantity(item) === 1 ? "item" : "items"}${Array.isArray(item.markers) ? ` · Automatic count${schematicTakeoffItemNeedsReview(item) ? " · REVIEW REQUIRED" : " · Reviewed"}` : ""}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span>${materialLine}${boltLine}</div>
+              <div><strong>${escapeHtml(schematicTakeoffItemDescription(item))}</strong><span>${schematicTakeoffItemQuantity(item)} ${schematicTakeoffItemQuantity(item) === 1 ? "item" : "items"}${Array.isArray(item.markers) ? ` · Automatic count${schematicTakeoffItemNeedsReview(item) ? " · REVIEW REQUIRED" : " · Reviewed"}` : item.manualMarker ? " · Placed manually" : ""}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span>${materialLine}${boltLine}</div>
               <button class="secondary-button compact" type="button" data-edit-schematic-fitting="${escapeHtml(item.id)}">${schematicTakeoffItemNeedsReview(item) ? "Review" : "Edit"}</button>
               <button class="danger" type="button" data-delete-schematic-fitting="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.type)}">×</button>
             </div>`;
@@ -24677,6 +24810,9 @@ function addConfirmedSchematicFitting() {
   const selected = schematicTakeoffSelectedArea();
   if (!selected) return;
   const editingItem = (selected.items || []).find((item) => item.id === takeoff.editingItemId) || null;
+  const pendingManualMarker = !editingItem && takeoff.pendingManualMarker?.selectionId === selected.id
+    ? takeoff.pendingManualMarker
+    : null;
   const fittingType = String(schematicTakeoffFittingTypeInput?.value || "Other").slice(0, 40);
   if (fittingType === "Unclassified symbol") {
     showAppNotice("Choose what the ? symbol represents before confirming it.", { tone: "warning" });
@@ -24758,7 +24894,9 @@ function addConfirmedSchematicFitting() {
     ebroBolting,
     equipmentConfig,
     note: String(schematicTakeoffFittingNoteInput?.value || "").trim().slice(0, 120),
-    source: Array.isArray(editingItem?.markers) ? "automatic-reviewed" : "confirmed",
+    source: editingItem?.manualMarker || pendingManualMarker
+      ? "manual-positioned"
+      : Array.isArray(editingItem?.markers) ? "automatic-reviewed" : "confirmed",
     reviewed: true,
     unclassified: false,
   };
@@ -24769,6 +24907,14 @@ function addConfirmedSchematicFitting() {
       questionMark: false,
       number: marker.number || markerIndex + 1,
     }));
+  }
+  if (pendingManualMarker) {
+    nextItem.manualMarker = {
+      ...pendingManualMarker,
+      type: fittingType,
+      pending: false,
+      selectionId: selected.id,
+    };
   }
   if (editingItem) {
     const index = selected.items.findIndex((item) => item.id === editingItem.id);
@@ -25000,6 +25146,7 @@ function closeSchematicTakeoffDialog() {
   document.body.classList.remove("schematic-takeoff-open");
   const takeoff = ensureSchematicTakeoffState();
   takeoff.pointers.clear();
+  cancelSchematicTakeoffLongPress();
   takeoff.gesture = null;
   takeoff.activeSelection = null;
   scheduleTemporaryWorkspaceRestore();
@@ -25031,6 +25178,11 @@ function setupSchematicTakeoff() {
   schematicTakeoffCanvas?.addEventListener("pointermove", handleSchematicTakeoffPointerMove);
   schematicTakeoffCanvas?.addEventListener("pointerup", (event) => handleSchematicTakeoffPointerEnd(event));
   schematicTakeoffCanvas?.addEventListener("pointercancel", (event) => handleSchematicTakeoffPointerEnd(event, true));
+  schematicTakeoffCanvas?.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    if (!ensureSchematicTakeoffState().source) return;
+    beginSchematicTakeoffManualPlacement(schematicTakeoffPoint(event));
+  });
   schematicTakeoffCanvas?.addEventListener("wheel", (event) => {
     if (!ensureSchematicTakeoffState().source) return;
     event.preventDefault();
@@ -25072,6 +25224,7 @@ function setupSchematicTakeoff() {
     schematicTakeoffSystemInput.focus({ preventScroll: true });
   });
   schematicTakeoffCountButton?.addEventListener("click", countSchematicTakeoffSymbols);
+  schematicTakeoffClearQuestionsButton?.addEventListener("click", clearAllSchematicTakeoffQuestionMarks);
   schematicTakeoffClearDetectionsButton?.addEventListener("click", clearSchematicTakeoffDetections);
   schematicTakeoffDownloadCropButton?.addEventListener("click", downloadSchematicTakeoffCrop);
   schematicTakeoffDetectionReview?.addEventListener("click", (event) => {
@@ -25089,7 +25242,11 @@ function setupSchematicTakeoff() {
   schematicTakeoffValveFlangeInput?.addEventListener("input", renderSchematicTakeoffEbroBolting);
   schematicTakeoffEbroModelInput?.addEventListener("change", renderSchematicTakeoffEbroBolting);
   schematicTakeoffEbroConnectionInput?.addEventListener("change", renderSchematicTakeoffEbroBolting);
-  schematicTakeoffCancelEditButton?.addEventListener("click", clearSchematicTakeoffFittingEditor);
+  schematicTakeoffCancelEditButton?.addEventListener("click", () => {
+    clearSchematicTakeoffFittingEditor();
+    renderSchematicTakeoffPanels();
+    renderSchematicTakeoffCanvas();
+  });
   schematicTakeoffFittingForm?.addEventListener("submit", (event) => {
     event.preventDefault();
     addConfirmedSchematicFitting();

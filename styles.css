@@ -1331,6 +1331,10 @@ body.schematic-takeoff-open #aiHelperButton {
   cursor: grabbing;
 }
 
+#schematicTakeoffCanvas[data-tool="manual"] {
+  cursor: copy;
+}
+
 .schematic-takeoff-empty {
   position: absolute;
   inset: 50% auto auto 50%;
@@ -2065,8 +2069,12 @@ body.schematic-takeoff-open #aiHelperButton {
 
 .schematic-recognition-actions {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) repeat(2, minmax(0, 0.85fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
+}
+
+#schematicTakeoffCountButton {
+  grid-column: 1 / -1;
 }
 
 .schematic-recognition-actions button {
