@@ -16,6 +16,7 @@ function check(condition, message) {
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(APP_URL, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(1600);
     await page.evaluate(() => {
       document.querySelectorAll(".project-dialog-backdrop").forEach((dialog) => { dialog.hidden = true; });
       cloudUser = { id: "recognition-test", email: "private-beta@example.test" };
@@ -91,6 +92,7 @@ function check(condition, message) {
       await countSchematicTakeoffSymbols();
       const automatic = selected.items.find((item) => item.symbolClass === "Isolation valve");
       const uncertain = selected.items.filter((item) => item.unclassified);
+      const stage3 = SCHEMATIC_TAKEOFF_STAGE3_SYMBOL_KNOWLEDGE;
       return {
         directCount: direct.markers.length,
         directUnknownCount: direct.unknownMarkers?.length || 0,
@@ -105,6 +107,12 @@ function check(condition, message) {
         itemId: automatic?.id || "",
         markerId: automatic?.markers?.[0]?.id || "",
         firstUnknownId: uncertain[0]?.id || "",
+        stage3Count: stage3.length,
+        stage3Symbol3: stage3.find((symbol) => symbol.number === 3),
+        stage3Symbol11: stage3.find((symbol) => symbol.number === 11),
+        stage3Symbol19: stage3.find((symbol) => symbol.number === 19),
+        stage3Ignored: stage3.filter((symbol) => symbol.behavior === "ignore").map((symbol) => symbol.number),
+        stage3LegendText: document.querySelector("#schematicTakeoffStage3Legend")?.textContent || "",
       };
     });
 
@@ -120,6 +128,12 @@ function check(condition, message) {
     check(result.exportDisabled, "unreviewed automatic count should block CSV export");
     check(result.reviewText.includes("included"), "detected-mark review controls did not render");
     check(result.summaryText.includes("CHWP") && result.summaryText.includes("Review required"), "system order table did not show the automatic review row");
+    check(result.stage3Count === 28, `Stage 3 symbol profile is incomplete (${result.stage3Count})`);
+    check(result.stage3Symbol3?.components?.some((component) => component.type === "Binder symbol" && component.quantity === 2), "Stage 3 symbol 3 lost its two binder components");
+    check(result.stage3Symbol11?.type === "Unclassified symbol" && result.stage3Symbol11?.behavior === "review", "unlabelled Stage 3 symbol 11 must remain a ? review item");
+    check(result.stage3Symbol19?.type === "Pump" && result.stage3Symbol19?.inferred && result.stage3Symbol19?.behavior === "review", "inferred Stage 3 symbol 19 pump must require review");
+    check(JSON.stringify(result.stage3Ignored) === JSON.stringify([9, 24]), `Stage 3 ignored-symbol rules changed (${JSON.stringify(result.stage3Ignored)})`);
+    check(result.stage3LegendText.includes("Motorised valve with two binder symbols") && result.stage3LegendText.includes("? Unconfirmed symbol"), "Stage 3 symbol profile did not render in the take-off workspace");
 
     if (result.itemId && result.markerId) {
       const toggled = await page.evaluate(({ itemId, markerId }) => {
@@ -152,12 +166,18 @@ function check(condition, message) {
         await page.locator(`[data-edit-schematic-fitting="${result.firstUnknownId}"]`).click();
         await page.locator("#schematicTakeoffFittingTypeInput").selectOption("Pump");
         await page.locator("#schematicTakeoffFittingSizeInput").fill("NB 100");
+        await page.locator("#schematicTakeoffPumpSuctionSizeInput").fill("NB 100");
+        await page.locator("#schematicTakeoffPumpDischargeSizeInput").fill("NB 80");
+        await page.locator("#schematicTakeoffEquipmentFlangeInput").fill("PN 16");
+        await page.locator("#schematicTakeoffPumpFlexibleInput").selectOption("Bellow");
+        await page.locator("#schematicTakeoffPumpSuctionComponentInput").selectOption("Strainer");
+        await page.locator("#schematicTakeoffEquipmentVerifiedInput").check();
         await page.locator("#schematicTakeoffAddFittingButton").click();
         const classified = await page.evaluate(({ firstUnknownId }) => {
           const item = schematicTakeoffSelectedArea().items.find((entry) => entry.id === firstUnknownId);
-          return { type: item?.type, reviewed: item?.reviewed, unclassified: item?.unclassified, questionMark: item?.markers?.[0]?.questionMark };
+          return { type: item?.type, reviewed: item?.reviewed, unclassified: item?.unclassified, questionMark: item?.markers?.[0]?.questionMark, equipmentConfig: item?.equipmentConfig };
         }, result);
-        check(classified.type === "Pump" && classified.reviewed && !classified.unclassified && !classified.questionMark, `? item could not be classified individually (${JSON.stringify(classified)})`);
+        check(classified.type === "Pump" && classified.reviewed && !classified.unclassified && !classified.questionMark && classified.equipmentConfig?.verified, `? item could not be classified and equipment-verified individually (${JSON.stringify(classified)})`);
         const excludedUnknowns = await page.evaluate(() => {
           const selected = schematicTakeoffSelectedArea();
           selected.items.filter((item) => item.unclassified).forEach((item) => {

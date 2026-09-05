@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=374" />
+    <link rel="stylesheet" href="./styles.css?v=378" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.74</span>
+              <span class="version-badge" id="appVersionBadge">v3.78</span>
             </div>
           </div>
 
@@ -1388,6 +1388,7 @@
                   <span>System takeoff table</span>
                   <strong id="schematicTakeoffSystemContextName">Unassigned</strong>
                   <small id="schematicTakeoffDetectedTag">Set the system shown on the selected schematic area.</small>
+                  <small id="schematicTakeoffDetectedSize">Pipe size will be read from labels inside this area where possible.</small>
                 </div>
               </section>
               <section class="schematic-takeoff-panel schematic-rules-panel">
@@ -1416,6 +1417,11 @@
                   </div>
                   <small class="schematic-symbol-source">Reference: Curtin University M-D-100 Typical Chilled/HHW Schematic. Automatic results assist the take-off; always add anything missed.</small>
                 </details>
+                <details class="schematic-symbol-library schematic-stage3-library">
+                  <summary>Stage 3 engineering symbol profile</summary>
+                  <p>This project-specific profile records the labels supplied for the 28 numbered examples. Ignored annotations never enter the order table; symbol 11 remains a <strong>?</strong> until confirmed.</p>
+                  <div class="schematic-stage3-symbol-grid" id="schematicTakeoffStage3Legend"></div>
+                </details>
                 <div class="schematic-recognition-actions">
                   <button class="primary-button" id="schematicTakeoffCountButton" type="button" disabled>Count symbols in this area</button>
                   <button class="secondary-button" id="schematicTakeoffClearDetectionsButton" type="button" disabled>Clear detected marks</button>
@@ -1427,7 +1433,7 @@
               <section class="schematic-takeoff-panel">
                 <div class="schematic-panel-heading"><div><strong>Review and manual corrections</strong><small>Confirm automatic rows or add anything missed</small></div></div>
                 <form class="schematic-fitting-form" id="schematicTakeoffFittingForm">
-                  <label><span>Fitting / item</span><select id="schematicTakeoffFittingTypeInput"><option value="Unclassified symbol" disabled>Choose classification</option><option>Elbow</option><option>Tee</option><option>Reducer</option><option>Eccentric reducer</option><option>Flange</option><option>Flexible connection</option><option>Isolation valve</option><option value="Valve">Valve — type not set</option><option>Motorised valve</option><option>Balancing valve</option><option>Check valve</option><option>Pressure reducing valve</option><option>Pressure relief valve</option><option>Strainer</option><option>Gauge</option><option>Sensor</option><option>Flow meter</option><option>Energy meter</option><option>Differential pressure sensor</option><option>Flow switch / sensor</option><option>Pump</option><option>Socket</option><option>Union</option><option>Coupling</option><option>Roll groove</option><option>Threaded end</option><option>Other</option></select></label>
+                  <label><span>Fitting / item</span><select id="schematicTakeoffFittingTypeInput"><option value="Unclassified symbol" disabled>Choose classification</option><option>Elbow</option><option>Tee</option><option>Reducer</option><option>Eccentric reducer</option><option>Flange</option><option>Gasket</option><option>Bolt</option><option>Flexible connection</option><option>Flexible connection bellow</option><option>Binder symbol</option><option>Isolation valve</option><option value="Valve">Valve — type not set</option><option>Motorised valve</option><option>Balancing valve</option><option>Check valve</option><option>Pressure reducing valve</option><option>Pressure relief valve</option><option>Strainer</option><option>Suction diffuser</option><option>Gauge</option><option>Pressure gauge</option><option>Sensor</option><option>Temperature sensor</option><option>Flow meter</option><option>Mag flow meter</option><option>Energy meter</option><option>Differential pressure sensor</option><option>Differential pressure switch</option><option>Flow switch / sensor</option><option>Air bleed to tundish</option><option>Pump</option><option>Heat exchanger</option><option>Chiller</option><option>Heat pump</option><option>Dosing pot</option><option>Cooling tower</option><option>End cap</option><option>Flanged end cap</option><option>Socket</option><option>Union</option><option>Coupling</option><option>Roll groove</option><option>Threaded end</option><option>Other</option></select></label>
                   <label><span>Size</span><input id="schematicTakeoffFittingSizeInput" type="text" maxlength="40" placeholder="NB 50" /></label>
                   <label><span>Qty</span><input id="schematicTakeoffFittingQuantityInput" type="number" min="1" max="9999" step="1" value="1" /></label>
                   <label class="wide"><span>Note</span><input id="schematicTakeoffFittingNoteInput" type="text" maxlength="120" placeholder="Type, standard or uncertainty" /></label>
@@ -1435,8 +1441,35 @@
                     <legend>Valve classification</legend>
                     <label><span>Connection</span><select id="schematicTakeoffValveConnectionInput"><option value="">Select connection</option><option value="Victaulic / grooved">Victaulic / grooved</option><option value="Flanged">Flanged</option><option value="Mixed">Mixed</option></select></label>
                     <label><span>Brand</span><select id="schematicTakeoffValveBrandInput"><option value="">Select brand</option><option value="Victaulic">Victaulic</option><option value="Ebro">Ebro</option><option value="Hydroflow">Hydroflow</option></select></label>
-                    <label class="wide" id="schematicTakeoffValveFlangeField" hidden><span>Flange type / standard</span><input id="schematicTakeoffValveFlangeInput" type="text" maxlength="60" placeholder="Example: wafer PN16, lugged or Table E" /></label>
+                    <label class="wide" id="schematicTakeoffValveFlangeField"><span>Matching connection flange / standard</span><input id="schematicTakeoffValveFlangeInput" type="text" maxlength="60" list="schematicTakeoffValveFlangeOptions" placeholder="Example: PN 16, AS 2129 Table E or grooved flange adaptor" /><datalist id="schematicTakeoffValveFlangeOptions"></datalist></label>
+                    <label class="wide" id="schematicTakeoffValveBoltSpecField"><span>Bolt set per valve (non-EBRO)</span><input id="schematicTakeoffValveBoltSpecInput" type="text" maxlength="80" placeholder="Example: 8 x M16 x 120 — leave blank only when EBRO lookup is verified" /></label>
+                    <section class="schematic-ebro-bolting wide" id="schematicTakeoffEbroBolting" hidden>
+                      <header><div><span>Valve bolt-length lookup</span><strong>EBRO verified table</strong></div><b id="schematicTakeoffEbroMatchBadge">Enter size</b></header>
+                      <label><span>Valve model</span><select id="schematicTakeoffEbroModelInput"><option value="HP112">HP112</option><option value="HP114">HP114</option></select></label>
+                      <label><span>Installation arrangement</span><select id="schematicTakeoffEbroConnectionInput"><option value="1">1 — Through bolts</option><option value="2">2 — Threaded rods</option><option value="3">3 — Side screws</option><option value="4">4 — Special-order screws</option></select></label>
+                      <output id="schematicTakeoffEbroBoltingResult">Enter the valve size and exact flange standard to select the required bolt set.</output>
+                      <small>Lengths assume the EBRO-listed mating-flange thickness and a 2 mm gasket. Confirm the actual flange, gasket, fastener material and lubricant before ordering or tightening.</small>
+                    </section>
                     <small class="wide">Every counted valve must be reviewed so grooved, flanged and mixed valves are not combined.</small>
+                  </fieldset>
+                  <fieldset class="schematic-valve-questions wide" id="schematicTakeoffStrainerQuestions" hidden>
+                    <legend>Strainer connections</legend>
+                    <label class="wide"><span>Matching flange / standard</span><input id="schematicTakeoffStrainerFlangeInput" type="text" maxlength="60" placeholder="Example: PN 16 or AS 2129 Table E" /></label>
+                    <small class="wide">The order table will add two matching connection flanges and two gaskets for every strainer.</small>
+                  </fieldset>
+                  <fieldset class="schematic-valve-questions schematic-equipment-questions wide" id="schematicTakeoffEquipmentQuestions" hidden>
+                    <legend>Equipment connection verification</legend>
+                    <p class="wide">The schematic identifies the equipment, but SpoolMate will not guess nozzle sizes. Verify these fields before its reducers, flanges, gaskets and pump connections enter the order table.</p>
+                    <label id="schematicTakeoffEquipmentConnectionSizeField"><span>Equipment connection size</span><input id="schematicTakeoffEquipmentConnectionSizeInput" type="text" maxlength="40" placeholder="NB 80" /></label>
+                    <label id="schematicTakeoffEquipmentConnectionCountField"><span>Number of connections</span><input id="schematicTakeoffEquipmentConnectionCountInput" type="number" min="1" max="24" step="1" value="2" /></label>
+                    <label id="schematicTakeoffPumpSuctionLineSizeField" hidden><span>Suction pipe size</span><input id="schematicTakeoffPumpSuctionLineSizeInput" type="text" maxlength="40" placeholder="Read from pipework, e.g. NB 125" /></label>
+                    <label id="schematicTakeoffPumpSuctionSizeField" hidden><span>Pump suction nozzle size</span><input id="schematicTakeoffPumpSuctionSizeInput" type="text" maxlength="40" placeholder="Verify, e.g. NB 100" /></label>
+                    <label id="schematicTakeoffPumpDischargeLineSizeField" hidden><span>Discharge pipe size</span><input id="schematicTakeoffPumpDischargeLineSizeInput" type="text" maxlength="40" placeholder="Read from pipework, e.g. NB 100" /></label>
+                    <label id="schematicTakeoffPumpDischargeSizeField" hidden><span>Pump discharge nozzle size</span><input id="schematicTakeoffPumpDischargeSizeInput" type="text" maxlength="40" placeholder="Verify, e.g. NB 80" /></label>
+                    <label class="wide"><span>Connection flange / standard</span><input id="schematicTakeoffEquipmentFlangeInput" type="text" maxlength="60" placeholder="Example: PN 16 or AS 2129 Table E" /></label>
+                    <label class="wide" id="schematicTakeoffPumpFlexibleField" hidden><span>Flexible connections</span><select id="schematicTakeoffPumpFlexibleInput"><option value="">Select arrangement</option><option value="Bellow">1 bellow on suction and discharge</option><option value="Victaulic">3 flexible Victaulics on each side</option></select></label>
+                    <label class="wide" id="schematicTakeoffPumpSuctionComponentField" hidden><span>Suction component</span><select id="schematicTakeoffPumpSuctionComponentInput"><option value="">Select suction component</option><option value="Strainer">Strainer — add 2 flanges + 2 gaskets</option><option value="Suction diffuser">Suction diffuser — add 1 Victaulic + 1 gasket</option></select></label>
+                    <label class="schematic-equipment-verified wide"><input id="schematicTakeoffEquipmentVerifiedInput" type="checkbox" /><span>I verified the equipment connection sizes and arrangement</span></label>
                   </fieldset>
                   <div class="schematic-fitting-form-actions wide">
                     <button class="primary-button" id="schematicTakeoffAddFittingButton" type="submit" disabled>Add confirmed fitting</button>
@@ -1446,7 +1479,7 @@
                 <div class="schematic-fitting-list" id="schematicTakeoffFittingList"><div class="schematic-empty-list">Select an area, then count symbols or add a fitting manually.</div></div>
               </section>
               <section class="schematic-takeoff-panel schematic-summary-panel">
-                <div class="schematic-panel-heading"><div><strong>Order table by system</strong><small id="schematicTakeoffTotal">0 items</small></div></div>
+                <div class="schematic-panel-heading"><div><strong>Order table by system</strong><small id="schematicTakeoffTotal">0 counted · 0 rule-added</small></div></div>
                 <div class="schematic-takeoff-summary" id="schematicTakeoffSummary"></div>
                 <button class="secondary-button" id="schematicTakeoffExportButton" type="button" disabled>Export CSV</button>
               </section>
@@ -2442,6 +2475,8 @@
         }
       }
     </script>
-    <script defer src="./app.js?v=374"></script>
+    <script defer src="./ebro-hp112-bolting.js?v=378"></script>
+    <script defer src="./ebro-hp114-bolting.js?v=378"></script>
+    <script defer src="./app.js?v=378"></script>
   </body>
 </html>

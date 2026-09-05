@@ -36,6 +36,8 @@ $allowedFiles = @(
     "README.md",
     "RUN-THIS-ONCE-IN-SUPABASE.sql",
     "app.js",
+    "ebro-hp112-bolting.js",
+    "ebro-hp114-bolting.js",
     "index.html",
     "manifest.webmanifest",
     "prepare-github-upload.ps1",
@@ -48,6 +50,8 @@ $allowedFiles = @(
     "supabase-migration-v339-jobs-dashboard-preferences.sql",
     "supabase-setup.sql",
     "sw.js",
+    "test-schematic-recognition.cjs",
+    "test-schematic-takeoff.cjs",
     "verify-app.cjs"
 )
 

@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.74`
+Current app version: `v3.78`
+
+The private schematic take-off now separates counted drawing symbols from rule-added order materials. It reads unambiguous DN, NB, NPS and inch pipe-size labels inside each selected area; adds matching valve flanges, gaskets and verified bolt quantities; and requires explicit nozzle verification before adding pump, heat-exchanger, chiller or heat-pump reducers and connection kits. Pump rules cover suction/discharge reducers, bellows or three flexible Victaulic couplings per side, plus strainer or suction-diffuser connection materials.
 
 SpoolMate is a browser-based pipe spool drawing app. It lets you sketch a spool in a 2D isometric drawing view, preview it as a 3D model, and export fabrication information such as cut lists, fitting takeoffs, weights, dimensions and PDF fab sheets.
 
@@ -21,6 +23,10 @@ The built-in video tutorial library now contains 22 real-app guides. The expande
 Ask SpoolMate now recognises the current workspace surface, tool and Inspector tab, changes its suggested questions for Jobs, Big Spool, 3D, Draw, Edit, Review and Export, and gives exact PC/touch steps with a visible expected result. Its signed-in AI context contains workflow state only; project names, drawing geometry, notes and photos are not sent.
 
 The private Schematic Takeoff beta now uses an Australian chilled-water symbol library based on Curtin M-D-100 and Macquarie mechanical standard drawings. Clear bow-tie isolation valves are counted automatically. Other fitting-like locations that cannot be classified safely receive individual `?` marks; each must be classified from the drawing legend or excluded before the order CSV can be exported.
+
+The Stage 3 engineering schematic profile records all 28 numbered examples supplied from the Grosvenor Place markup set, including composite component quantities. Pipe-size annotations and confirmed non-order graphics are ignored, quoted duplicate labels inherit their preceding definition, and the single unlabelled symbol plus the inferred standalone pump remain `?` review items rather than being silently trusted.
+
+EBRO HP112 and HP114 valve reviews now have separate verified bolt-length lookups. HP112 is backed by all 206 rows in Works Standard EW 1822 Rev. 0; HP114 is backed by all 193 rows in Works Standard EW 1823 Rev. 1. Enter the valve DN and exact flange standard, then choose the HP112 installation arrangement or use the HP114 model-specific connection 4. The order table returns the total bolt quantity, diameter and length, automatically adds any required connection-5 bolt group and keeps unmatched combinations flagged rather than estimating them. Published lengths assume each source table's listed mating-flange thickness and a 2 mm gasket, both shown beside the result for checking.
 
 See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 
@@ -271,7 +277,7 @@ With Supabase configured:
 - Account includes a JSON data export, privacy/support information, diagnostics and protected account deletion.
 - Trial accounts receive 30 days of full cloud access. After expiry, permitted cloud spools, comments and workshop photos remain readable/exportable while cloud writes are paused.
 - Expired users can continue local-only work and switch Jobs between Cloud and This device.
-- Approved private-beta accounts can open Schematic Takeoff, load a PDF/image locally, isolate exact areas with rectangle or lasso selection and preview/download the exact recognition crop. Text-based PDFs now suggest a system such as CHWP from an equipment tag such as CHWP-B4-1; scanned images keep an editable system field until local OCR is added. Confirmed valves require a Victaulic/grooved, flanged or mixed connection, a Victaulic/Ebro/Hydroflow brand and—where applicable—a flange type/standard. Side tables and CSV exports remain separated by system. Automatic symbol counting is still deferred until the agreed schematic symbols and legend rules are supplied.
+- Approved private-beta accounts can open Schematic Takeoff, load a PDF/image locally, isolate exact areas with rectangle or lasso selection and preview/download the exact recognition crop. Text-based PDFs suggest a system such as CHWP from an equipment tag such as CHWP-B4-1; scanned images keep an editable system field until local OCR is added. Clear isolation valves are counted locally and uncertain fitting-like marks stay as `?` until classified or excluded. Confirmed valves require a Victaulic/grooved, flanged or mixed connection, a Victaulic/Ebro/Hydroflow brand and—where applicable—a flange type/standard. EBRO HP112 and HP114 flanged valves return verified, model-specific bolt lengths by size and flange standard, with the applicable installation connection retained in the order row. Side tables and CSV exports remain separated by system.
 
 ## Supabase Setup
 

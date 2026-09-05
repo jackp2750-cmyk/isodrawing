@@ -1,6 +1,47 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.74`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.78`.
+
+## v3.78 - Schematic material and equipment connection rules
+
+- Separated items counted on the schematic from materials automatically added for ordering, with both groups visible per system and traceable in the CSV.
+- Added pipe-size inference for clear DN, NB, NPS and inch labels inside a selected schematic area; multiple sizes are shown for human selection instead of being guessed.
+- Added two matching connection flanges and two gaskets for every verified valve, including check valves, and converted verified EBRO HP112/HP114 bolt schedules into actual total bolt quantities.
+- Added a manual manufacturer bolt-set field for non-EBRO valves and blocks order export while that bolt schedule remains unknown.
+- Added pump nozzle verification with eccentric suction and concentric discharge reducer rules, one bellow per side or three flexible Victaulic couplings per side, and strainer versus suction-diffuser material rules.
+- Added verified connection-size, connection-count, flange, gasket and reducer rules for heat exchangers, chillers and heat pumps without estimating unknown equipment nozzle sizes.
+- Updated the responsive take-off review and order table for desktop, iPad, Android tablets and phones, and bumped the PWA cache to `spoolmate-v378-schematic-material-rules`.
+
+## v3.77 - EBRO HP114 verified bolt-length lookup
+
+- Added all 193 HP114 valve/flange combinations from EBRO Works Standard EW 1823 Rev. 1 for DN50 through DN600.
+- Added HP114 as a distinct valve-model choice beside HP112; each model now uses only its own face-to-face dimensions, flange standards and bolt lengths.
+- Made the installation selector model-aware: HP112 retains arrangements 1-4 while HP114 uses its published connection 4 screws and automatically includes connection 5 wherever required.
+- Added HP114 AS 2129, AS 4087, PN, JIS, ASME and AWWA combinations without estimating unsupported rows.
+- Preserved the EW 1823 length basis of the listed mating-flange thickness plus a 2 mm gasket and the referenced EW 1810 Rev. 1 torque table.
+- Added model-specific error messages, CSV traceability and automated desktop, iPad, Android tablet, iPhone and Android phone checks.
+- Bumped the PWA cache to `spoolmate-v377-ebro-hp114-bolt-lengths`.
+
+## v3.76 - EBRO HP112 verified bolt-length lookup
+
+- Added all 206 HP112 valve/flange combinations from EBRO Works Standard EW 1822 Rev. 0 for DN80 through DN600.
+- Added a model-aware bolt-length lookup to the schematic valve review: size, exact flange standard and installation arrangement now return quantity, diameter and length.
+- Automatically includes the separate connection-5 bolt group wherever the EBRO flange pattern requires it and multiplies every bolt quantity by the number of valves in the order table.
+- Shows face-to-face, flange-hole count and the mating-flange/gasket assumptions used for the published length; the source table assumes the listed counter-flange thickness plus a 2 mm gasket.
+- Marks unsupported or incomplete EBRO combinations for review and blocks order CSV export instead of guessing a length.
+- Added valve model, arrangement, total bolt order, dimensional assumptions and EBRO table reference to CSV exports.
+- Structured the lookup by valve model so later manufacturer supplements can be added without mixing their bolting tables.
+- Bumped the PWA cache to `spoolmate-v376-ebro-hp112-bolt-lengths`.
+
+## v3.75 - Stage 3 engineering symbol profile
+
+- Added the user-labelled 28-symbol Stage 3 engineering schematic profile to the take-off workspace.
+- Recorded composite definitions, including motorised valves with binder symbols, the pressure-gauge/temperature-sensor/flexible-bellow group and the strainer/binder/pump group.
+- Added manual order classifications for mag flow meters, binder symbols, air bleeds to tundish, temperature sensors, pressure gauges, flexible connection bellows, differential pressure switches, heat exchangers, chillers, heat pumps, dosing pots, cooling towers and end caps.
+- Treated symbols 9 and 24 as ignored drawing graphics and symbol 25 as a pipe-size annotation that supplies context without entering the order table.
+- Inherited symbol 2 from isolation valve and symbol 14 from temperature sensor as requested.
+- Kept unlabelled symbol 11 as `?`; the standalone pump at symbol 19 is shown as an inferred review item until explicitly confirmed.
+- Added a visible component breakdown for every composite symbol and bumped the PWA cache to `spoolmate-v375-stage3-symbol-profile`.
 
 ## v3.74 - Australian HVAC legend and safe unknown-symbol review
 

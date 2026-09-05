@@ -7,8 +7,11 @@ const REQUIRED_FILES = [
   "index.html",
   "styles.css",
   "app.js",
+  "ebro-hp112-bolting.js",
+  "ebro-hp114-bolting.js",
   "sw.js",
   "manifest.webmanifest",
+  "prepare-github-upload.ps1",
   "README.md",
   "CHANGELOG.md",
   "supabase-setup.sql",
@@ -95,10 +98,13 @@ for (const file of REQUIRED_FILES) {
 const html = read("index.html");
 const css = read("styles.css");
 const app = read("app.js");
+const ebroHp112Source = read("ebro-hp112-bolting.js");
+const ebroHp114Source = read("ebro-hp114-bolting.js");
 const serviceWorker = read("sw.js");
 const manifest = JSON.parse(read("manifest.webmanifest"));
 const readme = read("README.md");
 const changelog = read("CHANGELOG.md");
+const githubUploadPrep = read("prepare-github-upload.ps1");
 const supabaseSql = read("supabase-setup.sql");
 const trialAccessMigration = read("supabase-migration-v295-trial-access.sql");
 const aiHelperMigration = read("supabase-migration-v296-ai-helper.sql");
@@ -121,6 +127,24 @@ try {
   new Function(app);
 } catch (error) {
   fail(`app.js syntax error: ${error.message}`);
+}
+
+let ebroHp112Data = null;
+try {
+  const context = { window: {} };
+  vm.runInNewContext(ebroHp112Source, context);
+  ebroHp112Data = context.window.EBRO_HP112_BOLTING;
+} catch (error) {
+  fail(`ebro-hp112-bolting.js syntax error: ${error.message}`);
+}
+
+let ebroHp114Data = null;
+try {
+  const context = { window: {} };
+  vm.runInNewContext(ebroHp114Source, context);
+  ebroHp114Data = context.window.EBRO_HP114_BOLTING;
+} catch (error) {
+  fail(`ebro-hp114-bolting.js syntax error: ${error.message}`);
 }
 
 try {
@@ -180,8 +204,57 @@ assert(appVersion?.replace(/\D/g, "") === assetVersion, "APP_VERSION and static 
 assert(html.includes(`styles.css?v=${assetVersion}`), "CSS and JS cache-busting versions differ");
 assert(serviceWorker.includes(`./app.js?v=${assetVersion}`), "Service worker app.js version differs from index.html");
 assert(serviceWorker.includes(`./styles.css?v=${assetVersion}`), "Service worker CSS version differs from index.html");
+assert(html.includes(`ebro-hp112-bolting.js?v=${assetVersion}`), "EBRO HP112 table is not loaded with the current asset version");
+assert(serviceWorker.includes(`./ebro-hp112-bolting.js?v=${assetVersion}`), "Service worker EBRO table version differs from index.html");
+assert(html.includes(`ebro-hp114-bolting.js?v=${assetVersion}`), "EBRO HP114 table is not loaded with the current asset version");
+assert(serviceWorker.includes(`./ebro-hp114-bolting.js?v=${assetVersion}`), "Service worker HP114 table version differs from index.html");
+assert(githubUploadPrep.includes('"ebro-hp112-bolting.js"') && githubUploadPrep.includes('"ebro-hp114-bolting.js"'), "Safe GitHub upload omits an EBRO bolt table");
 assert(readme.includes(`Current app version: \`${appVersion}\``), "README current version differs from app.js");
 assert(changelog.includes(`Current app version: \`${appVersion}\``), "CHANGELOG current version differs from app.js");
+
+if (ebroHp112Data) {
+  const fields = ebroHp112Data.fields || [];
+  const ebroRows = (ebroHp112Data.rows || []).map((values) => Object.fromEntries(fields.map((field, index) => [field, values[index]])));
+  const rowKey = (row) => `${row.dn}|${row.standard}`;
+  const byKey = new Map(ebroRows.map((row) => [rowKey(row), row]));
+  const ebroDns = [...new Set(ebroRows.map((row) => row.dn))];
+  assert(ebroHp112Data.model === "HP112", "EBRO bolt table model is not HP112");
+  assert(ebroHp112Data.boltingStandard.includes("EW 1822 Rev. 0"), "EBRO EW 1822 source revision is missing");
+  assert(ebroHp112Data.gasketThicknessMm === 2, "EBRO HP112 table must retain its 2 mm gasket-length assumption");
+  assert(ebroRows.length === 206, `EBRO HP112 table should contain 206 verified rows, found ${ebroRows.length}`);
+  assert(new Set(ebroRows.map(rowKey)).size === ebroRows.length, "EBRO HP112 size/flange rows are not unique");
+  assert(JSON.stringify(ebroDns) === JSON.stringify([80, 100, 150, 200, 250, 300, 350, 400, 450, 500, 600]), "EBRO HP112 DN coverage changed");
+  assert(byKey.get("100|PN 16")?.connection1 === "8 x M16 x 200", "EBRO DN100 PN16 through-bolt length differs from EW 1822");
+  assert(byKey.get("300|PN 16")?.connection1 === "10 x M24 x 270", "EBRO DN300 PN16 primary bolt length differs from EW 1822");
+  assert(byKey.get("300|PN 16")?.connection5 === "4 x M24 x 55", "EBRO DN300 PN16 additional bolt group differs from EW 1822");
+  assert(byKey.get("150|PN 25")?.connection3 === "not available", "EBRO DN150 PN25 unavailable arrangement was lost");
+  assert(byKey.get("600|AS 2129 - Table J")?.connection1 === "20 x M36 x 500", "EBRO DN600 AS 2129 Table J bolt length differs from EW 1822");
+  assert(ebroRows.every((row) => row.page >= 3 && row.page <= 10 && /^\d+ x .+ x \d+$/.test(row.connection1)), "EBRO HP112 row shape or PDF-page traceability is invalid");
+  notes.push(`${ebroRows.length} verified EBRO HP112 bolt-length rows`);
+}
+
+if (ebroHp114Data) {
+  const fields = ebroHp114Data.fields || [];
+  const ebroRows = (ebroHp114Data.rows || []).map((values) => Object.fromEntries(fields.map((field, index) => [field, values[index]])));
+  const rowKey = (row) => `${row.dn}|${row.standard}`;
+  const byKey = new Map(ebroRows.map((row) => [rowKey(row), row]));
+  const ebroDns = [...new Set(ebroRows.map((row) => row.dn))];
+  assert(ebroHp114Data.model === "HP114", "EBRO bolt table model is not HP114");
+  assert(ebroHp114Data.boltingStandard.includes("EW 1823 Rev. 1"), "EBRO EW 1823 source revision is missing");
+  assert(ebroHp114Data.torqueStandard.includes("EW 1810 Rev. 1"), "EBRO HP114 torque source revision is missing");
+  assert(ebroHp114Data.gasketThicknessMm === 2, "EBRO HP114 table must retain its 2 mm gasket-length assumption");
+  assert(ebroRows.length === 193, `EBRO HP114 table should contain 193 verified rows, found ${ebroRows.length}`);
+  assert(new Set(ebroRows.map(rowKey)).size === ebroRows.length, "EBRO HP114 size/flange rows are not unique");
+  assert(JSON.stringify(ebroDns) === JSON.stringify([50, 65, 80, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600]), "EBRO HP114 DN coverage changed");
+  assert(byKey.get("50|PN 10")?.connection4 === "8 x M16 x 40", "EBRO HP114 DN50 PN10 bolt length differs from EW 1823");
+  assert(byKey.get("100|PN 16")?.connection4 === "16 x M16 x 45", "EBRO HP114 DN100 PN16 bolt length differs from EW 1823");
+  assert(byKey.get("300|AS 4087 class 16")?.connection4 === "24 x M20 x 65", "EBRO HP114 DN300 AS4087 bolt length differs from EW 1823");
+  assert(byKey.get("450|PN 16")?.connection4 === "32 x M27 x 95" && byKey.get("450|PN 16")?.connection5 === "8 x M27 x 75", "EBRO HP114 DN450 PN16 split bolt groups differ from EW 1823");
+  assert(byKey.get("600|AS 2129 - Table E")?.connection4 === "24 x M30 x 110" && byKey.get("600|AS 2129 - Table E")?.connection5 === "8 x M30 x 90", "EBRO HP114 DN600 Table E bolt groups differ from EW 1823");
+  assert(ebroRows.every((row) => row.page >= 25 && row.page <= 29 && /^\d+ x .+ x \d+$/.test(row.connection4)), "EBRO HP114 row shape or PDF-page traceability is invalid");
+  notes.push(`${ebroRows.length} verified EBRO HP114 bolt-length rows`);
+}
+
 assert(
   html.includes('id="selectionActionDragHandle"')
     && app.includes("selectionActionBarManualPosition")
@@ -258,6 +331,14 @@ assert(
     && html.includes('id="schematicTakeoffValveQuestions"')
     && html.includes('id="schematicTakeoffValveConnectionInput"')
     && html.includes('id="schematicTakeoffValveBrandInput"')
+    && html.includes('id="schematicTakeoffDetectedSize"')
+    && html.includes('id="schematicTakeoffValveBoltSpecInput"')
+    && html.includes('id="schematicTakeoffEquipmentQuestions"')
+    && html.includes('id="schematicTakeoffPumpSuctionSizeInput"')
+    && html.includes('id="schematicTakeoffPumpDischargeSizeInput"')
+    && html.includes('id="schematicTakeoffPumpFlexibleInput"')
+    && html.includes('id="schematicTakeoffPumpSuctionComponentInput"')
+    && html.includes('id="schematicTakeoffEquipmentVerifiedInput"')
     && html.includes('id="schematicTakeoffExportButton"')
     && app.includes('const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access"')
     && app.includes('const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff"')
@@ -269,6 +350,9 @@ assert(
     && /function\s+schematicTakeoffCropCanvasForSelection\s*\(/.test(app)
     && /function\s+downloadSchematicTakeoffCrop\s*\(/.test(app)
     && /function\s+schematicTakeoffDetectSystemContext\s*\(/.test(app)
+    && /function\s+schematicTakeoffPipeSizesFromText\s*\(/.test(app)
+    && /function\s+schematicTakeoffDerivedRequirements\s*\(/.test(app)
+    && /function\s+schematicTakeoffEquipmentConfigComplete\s*\(/.test(app)
     && /function\s+schematicTakeoffDetectValveSymbols\s*\(/.test(app)
     && /function\s+countSchematicTakeoffSymbols\s*\(/.test(app)
     && /function\s+toggleSchematicTakeoffMarker\s*\(/.test(app)
@@ -277,6 +361,10 @@ assert(
     && html.includes('<option value="Ebro">Ebro</option>')
     && html.includes('<option value="Hydroflow">Hydroflow</option>')
     && /function\s+exportSchematicTakeoffCsv\s*\(/.test(app)
+    && app.includes('"Added by material rule"')
+    && app.includes('"Three flexible Victaulic couplings on pump suction"')
+    && app.includes('"Three flexible Victaulic couplings on pump discharge"')
+    && app.includes('"Two matching gaskets per valve"')
     && css.includes(".schematic-takeoff-card")
     && css.includes("#schematicTakeoffCanvas")
     && css.includes("@media (max-height: 560px) and (orientation: landscape)")

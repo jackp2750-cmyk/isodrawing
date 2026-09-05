@@ -1,9 +1,11 @@
-const CACHE_NAME = "spoolmate-v374-hvac-symbol-review";
+const CACHE_NAME = "spoolmate-v378-schematic-material-rules";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=374",
-  "./app.js?v=374",
+  "./styles.css?v=378",
+  "./ebro-hp112-bolting.js?v=378",
+  "./ebro-hp114-bolting.js?v=378",
+  "./app.js?v=378",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

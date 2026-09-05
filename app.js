@@ -206,6 +206,7 @@ const schematicTakeoffSelectionNameInput = document.querySelector("#schematicTak
 const schematicTakeoffSystemContext = document.querySelector("#schematicTakeoffSystemContext");
 const schematicTakeoffSystemContextName = document.querySelector("#schematicTakeoffSystemContextName");
 const schematicTakeoffDetectedTag = document.querySelector("#schematicTakeoffDetectedTag");
+const schematicTakeoffDetectedSize = document.querySelector("#schematicTakeoffDetectedSize");
 const schematicTakeoffCropCanvas = document.querySelector("#schematicTakeoffCropCanvas");
 const schematicTakeoffCropEmpty = document.querySelector("#schematicTakeoffCropEmpty");
 const schematicTakeoffDownloadCropButton = document.querySelector("#schematicTakeoffDownloadCropButton");
@@ -213,6 +214,7 @@ const schematicTakeoffCountButton = document.querySelector("#schematicTakeoffCou
 const schematicTakeoffClearDetectionsButton = document.querySelector("#schematicTakeoffClearDetectionsButton");
 const schematicTakeoffRecognitionStatus = document.querySelector("#schematicTakeoffRecognitionStatus");
 const schematicTakeoffDetectionReview = document.querySelector("#schematicTakeoffDetectionReview");
+const schematicTakeoffStage3Legend = document.querySelector("#schematicTakeoffStage3Legend");
 const schematicTakeoffFittingForm = document.querySelector("#schematicTakeoffFittingForm");
 const schematicTakeoffFittingTypeInput = document.querySelector("#schematicTakeoffFittingTypeInput");
 const schematicTakeoffFittingSizeInput = document.querySelector("#schematicTakeoffFittingSizeInput");
@@ -223,6 +225,35 @@ const schematicTakeoffValveConnectionInput = document.querySelector("#schematicT
 const schematicTakeoffValveBrandInput = document.querySelector("#schematicTakeoffValveBrandInput");
 const schematicTakeoffValveFlangeField = document.querySelector("#schematicTakeoffValveFlangeField");
 const schematicTakeoffValveFlangeInput = document.querySelector("#schematicTakeoffValveFlangeInput");
+const schematicTakeoffValveFlangeOptions = document.querySelector("#schematicTakeoffValveFlangeOptions");
+const schematicTakeoffValveBoltSpecField = document.querySelector("#schematicTakeoffValveBoltSpecField");
+const schematicTakeoffValveBoltSpecInput = document.querySelector("#schematicTakeoffValveBoltSpecInput");
+const schematicTakeoffStrainerQuestions = document.querySelector("#schematicTakeoffStrainerQuestions");
+const schematicTakeoffStrainerFlangeInput = document.querySelector("#schematicTakeoffStrainerFlangeInput");
+const schematicTakeoffEbroBolting = document.querySelector("#schematicTakeoffEbroBolting");
+const schematicTakeoffEbroModelInput = document.querySelector("#schematicTakeoffEbroModelInput");
+const schematicTakeoffEbroConnectionInput = document.querySelector("#schematicTakeoffEbroConnectionInput");
+const schematicTakeoffEbroBoltingResult = document.querySelector("#schematicTakeoffEbroBoltingResult");
+const schematicTakeoffEbroMatchBadge = document.querySelector("#schematicTakeoffEbroMatchBadge");
+const schematicTakeoffEquipmentQuestions = document.querySelector("#schematicTakeoffEquipmentQuestions");
+const schematicTakeoffEquipmentConnectionSizeField = document.querySelector("#schematicTakeoffEquipmentConnectionSizeField");
+const schematicTakeoffEquipmentConnectionSizeInput = document.querySelector("#schematicTakeoffEquipmentConnectionSizeInput");
+const schematicTakeoffEquipmentConnectionCountField = document.querySelector("#schematicTakeoffEquipmentConnectionCountField");
+const schematicTakeoffEquipmentConnectionCountInput = document.querySelector("#schematicTakeoffEquipmentConnectionCountInput");
+const schematicTakeoffPumpSuctionLineSizeField = document.querySelector("#schematicTakeoffPumpSuctionLineSizeField");
+const schematicTakeoffPumpSuctionLineSizeInput = document.querySelector("#schematicTakeoffPumpSuctionLineSizeInput");
+const schematicTakeoffPumpSuctionSizeField = document.querySelector("#schematicTakeoffPumpSuctionSizeField");
+const schematicTakeoffPumpSuctionSizeInput = document.querySelector("#schematicTakeoffPumpSuctionSizeInput");
+const schematicTakeoffPumpDischargeLineSizeField = document.querySelector("#schematicTakeoffPumpDischargeLineSizeField");
+const schematicTakeoffPumpDischargeLineSizeInput = document.querySelector("#schematicTakeoffPumpDischargeLineSizeInput");
+const schematicTakeoffPumpDischargeSizeField = document.querySelector("#schematicTakeoffPumpDischargeSizeField");
+const schematicTakeoffPumpDischargeSizeInput = document.querySelector("#schematicTakeoffPumpDischargeSizeInput");
+const schematicTakeoffEquipmentFlangeInput = document.querySelector("#schematicTakeoffEquipmentFlangeInput");
+const schematicTakeoffPumpFlexibleField = document.querySelector("#schematicTakeoffPumpFlexibleField");
+const schematicTakeoffPumpFlexibleInput = document.querySelector("#schematicTakeoffPumpFlexibleInput");
+const schematicTakeoffPumpSuctionComponentField = document.querySelector("#schematicTakeoffPumpSuctionComponentField");
+const schematicTakeoffPumpSuctionComponentInput = document.querySelector("#schematicTakeoffPumpSuctionComponentInput");
+const schematicTakeoffEquipmentVerifiedInput = document.querySelector("#schematicTakeoffEquipmentVerifiedInput");
 const schematicTakeoffAddFittingButton = document.querySelector("#schematicTakeoffAddFittingButton");
 const schematicTakeoffCancelEditButton = document.querySelector("#schematicTakeoffCancelEditButton");
 const schematicTakeoffFittingList = document.querySelector("#schematicTakeoffFittingList");
@@ -550,8 +581,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.74";
-const APP_BUILD_DATE = "2026-09-01";
+const APP_VERSION = "v3.78";
+const APP_BUILD_DATE = "2026-09-04";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -568,15 +599,34 @@ const SCHEMATIC_TAKEOFF_ITEM_COLORS = Object.freeze({
   Reducer: "#1677d2",
   "Eccentric reducer": "#2455b8",
   Flange: "#d83f87",
+  Gasket: "#bb4f8a",
+  Bolt: "#53606a",
+  "Connection flange": "#d83f87",
+  "Suction diffuser": "#4b7f52",
+  "Flexible Victaulic": "#18835d",
   "Flexible connection": "#8b5e34",
+  "Flexible connection bellow": "#8b5e34",
+  "Binder symbol": "#8a633f",
   Strainer: "#4b7f52",
   Gauge: "#5069a6",
+  "Pressure gauge": "#5069a6",
   Sensor: "#5e6f89",
+  "Temperature sensor": "#5e6f89",
   "Flow meter": "#0085a8",
+  "Mag flow meter": "#007f96",
   "Energy meter": "#007373",
   "Differential pressure sensor": "#5663b5",
+  "Differential pressure switch": "#5663b5",
   "Flow switch / sensor": "#447287",
+  "Air bleed to tundish": "#4f7482",
   Pump: "#a33f76",
+  "Heat exchanger": "#ad5a21",
+  Chiller: "#256f91",
+  "Heat pump": "#9b4c82",
+  "Dosing pot": "#7d526e",
+  "Cooling tower": "#397875",
+  "End cap": "#6c5e91",
+  "Flanged end cap": "#8a5178",
   Socket: "#008ea1",
   Union: "#a35c00",
   Coupling: "#3978a8",
@@ -594,6 +644,7 @@ const SCHEMATIC_TAKEOFF_VALVE_TYPES = new Set([
   "Pressure reducing valve",
   "Pressure relief valve",
 ]);
+const SCHEMATIC_TAKEOFF_EQUIPMENT_TYPES = new Set(["Pump", "Heat exchanger", "Chiller", "Heat pump"]);
 const SCHEMATIC_TAKEOFF_LEGEND_TYPES = Object.freeze([
   "Isolation valve",
   "Motorised valve",
@@ -606,14 +657,87 @@ const SCHEMATIC_TAKEOFF_LEGEND_TYPES = Object.freeze([
   "Strainer",
   "Flange",
   "Flexible connection",
+  "Flexible connection bellow",
+  "Binder symbol",
   "Gauge",
+  "Pressure gauge",
   "Sensor",
+  "Temperature sensor",
   "Flow meter",
+  "Mag flow meter",
   "Energy meter",
   "Differential pressure sensor",
+  "Differential pressure switch",
   "Flow switch / sensor",
+  "Air bleed to tundish",
   "Pump",
+  "Heat exchanger",
+  "Chiller",
+  "Heat pump",
+  "Dosing pot",
+  "Cooling tower",
+  "End cap",
+  "Flanged end cap",
 ]);
+const SCHEMATIC_TAKEOFF_STAGE3_SYMBOL_KNOWLEDGE = Object.freeze([
+  { number: 1, label: "Isolation valve", type: "Isolation valve", components: [{ type: "Isolation valve", quantity: 1 }] },
+  { number: 2, label: "Isolation valve with pipe size shown", type: "Isolation valve", sizeFromDrawing: true, components: [{ type: "Isolation valve", quantity: 1 }] },
+  { number: 3, label: "Motorised valve with two binder symbols", type: "Motorised valve", components: [{ type: "Motorised valve", quantity: 1 }, { type: "Binder symbol", quantity: 2 }] },
+  { number: 4, label: "One binder symbol and one motorised valve", type: "Motorised valve", components: [{ type: "Binder symbol", quantity: 1 }, { type: "Motorised valve", quantity: 1 }] },
+  { number: 5, label: "Check valve", type: "Check valve", components: [{ type: "Check valve", quantity: 1 }] },
+  { number: 6, label: "Strainer", type: "Strainer", components: [{ type: "Strainer", quantity: 1 }] },
+  { number: 7, label: "Mag flow", type: "Mag flow meter", components: [{ type: "Mag flow meter", quantity: 1 }] },
+  { number: 8, label: "Pressure relief", type: "Pressure relief valve", components: [{ type: "Pressure relief valve", quantity: 1 }] },
+  { number: 9, label: "Do not count", behavior: "ignore", components: [] },
+  { number: 10, label: "Air bleed into tundish", type: "Air bleed to tundish", components: [{ type: "Air bleed to tundish", quantity: 1 }] },
+  { number: 11, label: "Unconfirmed symbol", type: "Unclassified symbol", behavior: "review", components: [] },
+  { number: 12, label: "Flanged end cap", type: "Flanged end cap", components: [{ type: "Flanged end cap", quantity: 1 }] },
+  { number: 13, label: "Temperature sensor", type: "Temperature sensor", components: [{ type: "Temperature sensor", quantity: 1 }] },
+  { number: 14, label: "Temperature sensor", type: "Temperature sensor", components: [{ type: "Temperature sensor", quantity: 1 }] },
+  { number: 15, label: "Pressure gauge, temperature sensor and flexible connection bellow", type: "Pressure gauge", components: [{ type: "Pressure gauge", quantity: 1 }, { type: "Temperature sensor", quantity: 1 }, { type: "Flexible connection bellow", quantity: 1 }] },
+  { number: 16, label: "Differential pressure switch", type: "Differential pressure switch", components: [{ type: "Differential pressure switch", quantity: 1 }] },
+  { number: 17, label: "Flow meter", type: "Flow meter", components: [{ type: "Flow meter", quantity: 1 }] },
+  { number: 18, label: "Strainer, binder and pump", type: "Pump", components: [{ type: "Strainer", quantity: 1 }, { type: "Binder symbol", quantity: 1 }, { type: "Pump", quantity: 1 }] },
+  { number: 19, label: "Pump", type: "Pump", inferred: true, behavior: "review", components: [{ type: "Pump", quantity: 1 }] },
+  { number: 20, label: "Heat exchanger", type: "Heat exchanger", components: [{ type: "Heat exchanger", quantity: 1 }] },
+  { number: 21, label: "Chiller", type: "Chiller", components: [{ type: "Chiller", quantity: 1 }] },
+  { number: 22, label: "Heat pump", type: "Heat pump", components: [{ type: "Heat pump", quantity: 1 }] },
+  { number: 23, label: "Dosing pot", type: "Dosing pot", components: [{ type: "Dosing pot", quantity: 1 }] },
+  { number: 24, label: "Do not count", behavior: "ignore", components: [] },
+  { number: 25, label: "Pipe size annotation", behavior: "annotation", components: [] },
+  { number: 26, label: "End cap", type: "End cap", components: [{ type: "End cap", quantity: 1 }] },
+  { number: 27, label: "Cooling tower", type: "Cooling tower", components: [{ type: "Cooling tower", quantity: 1 }] },
+  { number: 28, label: "Chiller", type: "Chiller", components: [{ type: "Chiller", quantity: 1 }] },
+]);
+const EBRO_BOLTING_DATA = Object.freeze({
+  HP112: window.EBRO_HP112_BOLTING || null,
+  HP114: window.EBRO_HP114_BOLTING || null,
+});
+const EBRO_CONNECTION_LABELS = Object.freeze({
+  HP112: Object.freeze({
+    1: "through bolts / screws",
+    2: "threaded rods / studs",
+    3: "screws, arrangement 3",
+    4: "screws, special-order arrangement",
+    5: "additional screws required by the flange pattern",
+  }),
+  HP114: Object.freeze({
+    4: "HP114 lug-body screws",
+    5: "additional lug-body screws required by the flange pattern",
+  }),
+});
+const EBRO_MODEL_CONNECTION_OPTIONS = Object.freeze({
+  HP112: Object.freeze([
+    Object.freeze({ value: "1", label: "1 — Through bolts" }),
+    Object.freeze({ value: "2", label: "2 — Threaded rods" }),
+    Object.freeze({ value: "3", label: "3 — Side screws" }),
+    Object.freeze({ value: "4", label: "4 — Special-order screws" }),
+  ]),
+  HP114: Object.freeze([
+    Object.freeze({ value: "4", label: "4 — Lug screws" }),
+  ]),
+});
+const ebroRowsCache = new Map();
 const SUPABASE_URL = "https://wsrfxqnsquzzwqijfmec.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndzcmZ4cW5zcXV6endxaWpmbWVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NTgyMTcsImV4cCI6MjA5NjQzNDIxN30.sg_8KInh9fRG5Lmz3jHCZxkYZqRhzZuTqsB7rzddBx4";
 const SUPABASE_JS_URL = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -22500,6 +22624,41 @@ function schematicTakeoffTextForSelection(selection) {
   return entries.filter((entry) => schematicTakeoffSelectionContainsPoint(selection, entry, padding));
 }
 
+const SCHEMATIC_NPS_TO_DN = new Map([
+  [0.5, 15], [0.75, 20], [1, 25], [1.25, 32], [1.5, 40], [2, 50], [2.5, 65], [3, 80],
+  [4, 100], [5, 125], [6, 150], [8, 200], [10, 250], [12, 300], [14, 350], [16, 400],
+  [18, 450], [20, 500], [24, 600], [28, 700], [30, 750], [32, 800], [36, 900], [40, 1000],
+]);
+
+function schematicTakeoffPipeSizesFromText(value) {
+  const text = String(value || "").toUpperCase().replace(/[Ø⌀]/g, " DN ").replace(/\s+/g, " ");
+  const found = new Map();
+  const addNominal = (number, source) => {
+    const dn = Number(number);
+    if (!Number.isFinite(dn) || dn < 10 || dn > 2500) return;
+    const rounded = Math.round(dn);
+    const key = `DN:${rounded}`;
+    if (!found.has(key)) found.set(key, { key, label: `NB ${rounded}`, dn: rounded, source });
+  };
+  const addInches = (sourceValue, source) => {
+    const inches = ebroInchNumber(String(sourceValue || "").replace(/-/g, " "));
+    if (!Number.isFinite(inches) || inches <= 0) return;
+    const dn = SCHEMATIC_NPS_TO_DN.get(inches);
+    const key = dn ? `DN:${dn}` : `NPS:${inches}`;
+    if (!found.has(key)) found.set(key, { key, label: dn ? `NB ${dn}` : `NPS ${sourceValue}`, dn: dn || null, inches, source });
+  };
+  let match;
+  const nominalPrefix = /\b(DN|NB|NOMINAL\s+BORE)\s*[-:]?\s*(\d{2,4})\b/g;
+  while ((match = nominalPrefix.exec(text))) addNominal(match[2], match[0]);
+  const nominalSuffix = /\b(\d{2,4})\s*(DN|NB)\b/g;
+  while ((match = nominalSuffix.exec(text))) addNominal(match[1], match[0]);
+  const inchPattern = /\b(?:NPS\s*[-:]?\s*)?(\d+(?:\.\d+)?(?:\s*-?\s*\d+\/\d+)?|\d+\/\d+)\s*(?:IN(?:CH(?:ES)?)?|["″])(?![A-Z0-9])/g;
+  while ((match = inchPattern.exec(text))) addInches(match[1], match[0]);
+  const npsPattern = /\bNPS\s*[-:]?\s*(\d+(?:\.\d+)?(?:\s*-?\s*\d+\/\d+)?|\d+\/\d+)\b/g;
+  while ((match = npsPattern.exec(text))) addInches(match[1], match[0]);
+  return [...found.values()];
+}
+
 function schematicTakeoffDetectSystemContext(selection) {
   const selectedText = schematicTakeoffTextForSelection(selection).map((entry) => entry.text).filter(Boolean);
   const candidateText = selectedText.join(" ").toUpperCase();
@@ -22512,9 +22671,12 @@ function schematicTakeoffDetectSystemContext(selection) {
     match = tagPattern.exec(candidateText);
   }
   const detected = tags[0] || null;
+  const pipeSizes = schematicTakeoffPipeSizesFromText(candidateText);
   return {
     systemCode: detected?.systemCode || "",
     equipmentTags: tags.map((item) => item.tag),
+    pipeSizes,
+    suggestedPipeSize: pipeSizes.length === 1 ? pipeSizes[0].label : "",
     source: detected ? "pdf-text" : "",
   };
 }
@@ -23394,6 +23556,8 @@ function addSchematicTakeoffSelection(selection) {
     name: schematicTakeoffAreaLabel(),
     systemCode: detectedContext.systemCode || takeoff.lastSystemCode || "",
     equipmentTags: detectedContext.equipmentTags,
+    detectedPipeSizes: detectedContext.pipeSizes,
+    suggestedPipeSize: detectedContext.suggestedPipeSize,
     systemSource: detectedContext.source || (takeoff.lastSystemCode ? "previous-selection" : ""),
     ready: false,
     recognitionStatus: "",
@@ -23532,15 +23696,409 @@ function schematicTakeoffIsValveType(type) {
   return SCHEMATIC_TAKEOFF_VALVE_TYPES.has(String(type || ""));
 }
 
+function schematicTakeoffSupportsEbroLookup(type) {
+  return ["Valve", "Isolation valve", "Motorised valve", "Balancing valve"].includes(String(type || ""));
+}
+
+function schematicTakeoffIsEquipmentType(type) {
+  return SCHEMATIC_TAKEOFF_EQUIPMENT_TYPES.has(String(type || ""));
+}
+
+function schematicTakeoffComparableSize(value) {
+  const detected = schematicTakeoffPipeSizesFromText(value);
+  if (detected.length === 1) return detected[0].key;
+  return String(value || "").trim().toUpperCase().replace(/\s+/g, " ");
+}
+
+function schematicTakeoffEquipmentConfigComplete(item) {
+  const config = item?.equipmentConfig || {};
+  if (!config.verified || !String(item?.size || "").trim() || !String(config.flangeType || "").trim()) return false;
+  if (item?.type === "Pump") {
+    return Boolean(
+      String(config.suctionLineSize || "").trim()
+      && String(config.suctionSize || "").trim()
+      && String(config.dischargeLineSize || "").trim()
+      && String(config.dischargeSize || "").trim()
+      && config.flexibleConnection
+      && config.suctionComponent,
+    );
+  }
+  return Boolean(String(config.connectionSize || "").trim() && Number(config.connectionCount) > 0);
+}
+
+function schematicTakeoffBoltRequirement(spec, multiplier, reason, extra = {}) {
+  const text = String(spec || "").trim();
+  const match = text.match(/^(\d+)\s*[x×]\s*(M\d+)\s*[x×]\s*(\d+(?:\.\d+)?)\b/i);
+  if (!match) {
+    return {
+      type: "Bolt set",
+      size: text || "Size and length not verified",
+      quantity: Math.max(1, Number(multiplier) || 1),
+      unit: "sets",
+      reason,
+      needsReview: !text,
+      ...extra,
+    };
+  }
+  return {
+    type: "Bolt",
+    size: `${match[2].toUpperCase()} × ${match[3]} mm`,
+    quantity: Number(match[1]) * Math.max(1, Number(multiplier) || 1),
+    unit: "bolts",
+    reason,
+    needsReview: false,
+    ...extra,
+  };
+}
+
+function schematicTakeoffDerivedRequirements(item) {
+  const quantity = schematicTakeoffItemQuantity(item);
+  if (!item || quantity <= 0) return [];
+  const requirements = [];
+  const add = (type, size, count, reason, options = {}) => {
+    requirements.push({
+      type,
+      size: String(size || "Size not verified"),
+      quantity: Math.max(0, Number(count) || 0),
+      unit: options.unit || "items",
+      specification: String(options.specification || ""),
+      reason,
+      needsReview: Boolean(options.needsReview),
+      parentType: item.type,
+    });
+  };
+  if (schematicTakeoffIsValveType(item.type)) {
+    const connection = item.flangeType || "Connection flange not verified";
+    add("Connection flange", item.size, quantity * 2, "Two matching flanges per valve", { specification: connection, needsReview: !item.flangeType });
+    add("Gasket", item.size, quantity * 2, "Two matching gaskets per valve", { specification: connection, needsReview: !item.flangeType });
+    if (schematicTakeoffSupportsEbroLookup(item.type) && item.brand === "Ebro" && item.ebroBolting?.matched) {
+      requirements.push(schematicTakeoffBoltRequirement(item.ebroBolting.primaryBoltSpec, quantity, `${item.ebroModel || "EBRO"} verified valve bolting`, { specification: item.ebroBolting.boltingStandard || "" }));
+      if (item.ebroBolting.additionalBoltSpec) {
+        requirements.push(schematicTakeoffBoltRequirement(item.ebroBolting.additionalBoltSpec, quantity, `${item.ebroModel || "EBRO"} additional connection bolts`, { specification: item.ebroBolting.boltingStandard || "" }));
+      }
+    } else {
+      requirements.push(schematicTakeoffBoltRequirement(item.boltSpec, quantity, `${item.brand || "Valve"} manufacturer bolt schedule`, { needsReview: !item.boltSpec }));
+    }
+  }
+  if (item.type === "Strainer") {
+    add("Connection flange", item.size, quantity * 2, "Two flanges per strainer", { specification: item.flangeType || "Match project flange standard" });
+    add("Gasket", item.size, quantity * 2, "Two gaskets per strainer", { specification: item.flangeType || "Match project flange standard" });
+  }
+  if (!schematicTakeoffIsEquipmentType(item.type)) return requirements;
+  const config = item.equipmentConfig || {};
+  if (!schematicTakeoffEquipmentConfigComplete(item)) {
+    add("Equipment connection kit", config.connectionSize || config.suctionSize || item.size, quantity, `${item.type} nozzle sizes and arrangement must be verified`, { unit: "kits", needsReview: true });
+    return requirements;
+  }
+  const flangeStandard = config.flangeType;
+  if (item.type === "Pump") {
+    const connections = [
+      { side: "Suction", lineSize: config.suctionLineSize, size: config.suctionSize, reducer: "Eccentric reducer" },
+      { side: "Discharge", lineSize: config.dischargeLineSize, size: config.dischargeSize, reducer: "Reducer" },
+    ];
+    connections.forEach((connection) => {
+      add("Connection flange", connection.size, quantity, `${connection.side} connection flange`, { specification: flangeStandard });
+      add("Gasket", connection.size, quantity, `${connection.side} connection gasket`, { specification: flangeStandard });
+      if (schematicTakeoffComparableSize(connection.lineSize) !== schematicTakeoffComparableSize(connection.size)) {
+        add(connection.reducer, `${connection.lineSize} → ${connection.size}`, quantity, `${connection.side} line-to-pump transition`, { specification: connection.side === "Suction" ? "Eccentric; verify flat orientation" : "Concentric" });
+      }
+    });
+    if (config.flexibleConnection === "Bellow") {
+      add("Flexible connection bellow", config.suctionSize, quantity, "One bellow on pump suction");
+      add("Flexible connection bellow", config.dischargeSize, quantity, "One bellow on pump discharge");
+    } else {
+      add("Flexible Victaulic", config.suctionSize, quantity * 3, "Three flexible Victaulic couplings on pump suction");
+      add("Flexible Victaulic", config.dischargeSize, quantity * 3, "Three flexible Victaulic couplings on pump discharge");
+    }
+    if (config.suctionComponent === "Strainer") {
+      add("Strainer", config.suctionLineSize, quantity, "Pump suction strainer");
+      add("Connection flange", config.suctionLineSize, quantity * 2, "Two flanges per suction strainer", { specification: flangeStandard });
+      add("Gasket", config.suctionLineSize, quantity * 2, "Two gaskets per suction strainer", { specification: flangeStandard });
+    } else {
+      add("Suction diffuser", config.suctionLineSize, quantity, "Pump suction diffuser");
+      add("Coupling", config.suctionLineSize, quantity, "One Victaulic connection per suction diffuser", { specification: "Victaulic" });
+      add("Gasket", config.suctionLineSize, quantity, "One gasket per suction diffuser", { specification: "Victaulic" });
+    }
+    return requirements;
+  }
+  const connectionCount = Math.max(1, Math.round(Number(config.connectionCount) || 2)) * quantity;
+  add("Connection flange", config.connectionSize, connectionCount, `${item.type} connection flanges`, { specification: flangeStandard });
+  add("Gasket", config.connectionSize, connectionCount, `${item.type} connection gaskets`, { specification: flangeStandard });
+  if (schematicTakeoffComparableSize(item.size) !== schematicTakeoffComparableSize(config.connectionSize)) {
+    add("Reducer", `${item.size} → ${config.connectionSize}`, connectionCount, `${item.type} line-to-equipment transitions`, { specification: "Verify concentric or eccentric orientation" });
+  }
+  return requirements;
+}
+
+function ebroDataForModel(model = "HP112") {
+  return EBRO_BOLTING_DATA[String(model || "HP112").trim().toUpperCase()] || null;
+}
+
+function ebroRows(model = "HP112") {
+  const modelKey = String(model || "HP112").trim().toUpperCase();
+  if (ebroRowsCache.has(modelKey)) return ebroRowsCache.get(modelKey);
+  const data = ebroDataForModel(modelKey);
+  const fields = Array.isArray(data?.fields) ? data.fields : [];
+  const sourceRows = Array.isArray(data?.rows) ? data.rows : [];
+  const rows = sourceRows.map((values) => Object.fromEntries(fields.map((field, index) => [field, values[index]])));
+  ebroRowsCache.set(modelKey, rows);
+  return rows;
+}
+
+function ebroHp112Rows() {
+  return ebroRows("HP112");
+}
+
+function ebroHp114Rows() {
+  return ebroRows("HP114");
+}
+
+function ebroInchNumber(value) {
+  const parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return NaN;
+  return parts.reduce((total, part) => {
+    const fraction = part.match(/^(\d+)\/(\d+)$/);
+    return total + (fraction ? Number(fraction[1]) / Number(fraction[2]) : Number(part));
+  }, 0);
+}
+
+function ebroDnFromSize(value, model = "HP112") {
+  const text = String(value || "").trim().toUpperCase().replace(/(\d)\s*-\s*(\d+\/\d+)/g, "$1 $2");
+  if (!text) return null;
+  const rows = ebroRows(model);
+  const supportedDns = new Set(rows.map((row) => Number(row.dn)));
+  const inchMatch = text.match(/(?:NPS\s*)?(\d+(?:\.\d+)?(?:\s+\d+\/\d+)?|\d+\/\d+)\s*(?:IN(?:CH(?:ES)?)?|[\"″])/);
+  if (inchMatch) {
+    const inches = ebroInchNumber(inchMatch[1]);
+    return Number(rows.find((row) => Number(row.inch) === inches)?.dn) || null;
+  }
+  const nominalMatch = text.match(/(?:DN|NB|NOMINAL\s+BORE)\s*[-:]?\s*(\d+)/);
+  const numeric = Number(nominalMatch?.[1] || text.match(/^\s*(\d+)\s*$/)?.[1]);
+  if (supportedDns.has(numeric)) return numeric;
+  const npsMatch = text.match(/(?:NPS)\s*[-:]?\s*(\d+(?:\.\d+)?(?:\s+\d+\/\d+)?|\d+\/\d+)/);
+  if (npsMatch) return Number(rows.find((row) => Number(row.inch) === ebroInchNumber(npsMatch[1]))?.dn) || null;
+  return null;
+}
+
+function ebroHp112DnFromSize(value) {
+  return ebroDnFromSize(value, "HP112");
+}
+
+function ebroHp112StandardKey(value) {
+  let source = String(value || "").trim().toUpperCase();
+  if (!source) return "";
+  source = source
+    .replace(/\b(?:EBRO|HP\s*(?:112|114)|WAFER|LUGGED?|BUTTERFLY|VALVE)\b/g, " ")
+    .replace(/\bANSI\b/g, "ASME")
+    .replace(/\bCLASS\b/g, "CL");
+  let key = source.replace(/[^A-Z0-9]/g, "");
+  const shortTable = key.match(/^TABLE([A-Z])$/);
+  if (shortTable) key = `AS2129TABLE${shortTable[1]}`;
+  key = key.replace(/^AS4087CL(\d+)$/, "AS4087PN$1");
+  return key;
+}
+
+function ebroStandardsForDn(dn, model = "HP112") {
+  const targetDn = Number(dn);
+  return [...new Set(ebroRows(model)
+    .filter((row) => !targetDn || Number(row.dn) === targetDn)
+    .map((row) => String(row.standard)))]
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+function ebroHp112StandardsForDn(dn) {
+  return ebroStandardsForDn(dn, "HP112");
+}
+
+function updateEbroConnectionOptions() {
+  if (!schematicTakeoffEbroConnectionInput) return;
+  const model = String(schematicTakeoffEbroModelInput?.value || "HP112").toUpperCase();
+  const options = EBRO_MODEL_CONNECTION_OPTIONS[model] || EBRO_MODEL_CONNECTION_OPTIONS.HP112;
+  const current = schematicTakeoffEbroConnectionInput.value;
+  if (schematicTakeoffEbroConnectionInput.dataset.model !== model) {
+    schematicTakeoffEbroConnectionInput.innerHTML = options
+      .map((option) => `<option value="${escapeHtml(option.value)}">${escapeHtml(option.label)}</option>`)
+      .join("");
+    schematicTakeoffEbroConnectionInput.dataset.model = model;
+  }
+  schematicTakeoffEbroConnectionInput.value = options.some((option) => option.value === current)
+    ? current
+    : options[0].value;
+}
+
+function updateEbroHp112FlangeOptions() {
+  if (!schematicTakeoffValveFlangeOptions) return;
+  const model = String(schematicTakeoffEbroModelInput?.value || "HP112").toUpperCase();
+  const dn = ebroDnFromSize(schematicTakeoffFittingSizeInput?.value, model);
+  const cacheKey = `${model}:${dn || "all"}`;
+  if (schematicTakeoffValveFlangeOptions.dataset.ebroKey === cacheKey) return;
+  schematicTakeoffValveFlangeOptions.dataset.ebroKey = cacheKey;
+  schematicTakeoffValveFlangeOptions.innerHTML = ebroStandardsForDn(dn, model)
+    .map((standard) => `<option value="${escapeHtml(standard)}"></option>`)
+    .join("");
+}
+
+function ebroTorqueForSpec(spec, data) {
+  const value = String(spec || "");
+  const metric = value.match(/\b(M\d+)\b/i)?.[1]?.toUpperCase();
+  if (metric) {
+    const nm = Number(data?.metricFullShankTorqueNm?.[metric]);
+    return Number.isFinite(nm) ? { fastener: metric, nm, basis: "metric full-shank screw" } : null;
+  }
+  const imperial = value.match(/(\d+(?:\s+\d+\/\d+|\/\d+)?)\s*[\"″]/)?.[1];
+  if (!imperial) return null;
+  const fastener = `${imperial.replace(/\s+/g, " ").trim()}\"`;
+  const nm = Number(data?.imperialStudTorqueNm?.[fastener]);
+  return Number.isFinite(nm) ? { fastener, nm, basis: "stainless UNC / 8UN stud" } : null;
+}
+
+function ebroLookup(model, size, standard, connection) {
+  const modelKey = String(model || "HP112").trim().toUpperCase();
+  const data = ebroDataForModel(modelKey);
+  const rows = ebroRows(modelKey);
+  if (!data || !rows.length) {
+    return { matched: false, status: "data-unavailable", message: `The EBRO ${modelKey} reference table did not load.` };
+  }
+  const rawSize = String(size || "").trim();
+  const dn = ebroDnFromSize(rawSize, modelKey);
+  if (!rawSize) return { matched: false, status: "size-missing", message: `Enter the EBRO ${modelKey} valve size, such as DN100 or 4 inch.` };
+  const supportedDns = [...new Set(rows.map((row) => Number(row.dn)))];
+  if (!dn) return { matched: false, status: "size-unsupported", message: `No ${modelKey} table row matches that size. This supplement covers DN${Math.min(...supportedDns)} to DN${Math.max(...supportedDns)} in listed sizes.` };
+  const flangeText = String(standard || "").trim();
+  if (!flangeText) return { matched: false, status: "standard-missing", dn, message: "Choose the exact flange standard for this valve." };
+  const standardKey = ebroHp112StandardKey(flangeText);
+  const candidates = rows.filter((row) => Number(row.dn) === dn);
+  const row = candidates.find((candidate) => ebroHp112StandardKey(candidate.standard) === standardKey);
+  if (!row) {
+    return {
+      matched: false,
+      status: "standard-unsupported",
+      dn,
+      message: `No verified ${modelKey} ${flangeText} row exists for DN${dn}. Pick one of the standards suggested for this size.`,
+    };
+  }
+  const arrangement = modelKey === "HP114" ? 4 : clampNumber(Math.round(Number(connection) || 1), 1, 4);
+  const primaryBoltSpec = String(row[`connection${arrangement}`] || "not available");
+  if (/not available|required/i.test(primaryBoltSpec)) {
+    return {
+      matched: false,
+      status: "arrangement-unavailable",
+      dn,
+      row,
+      arrangement,
+      message: `Arrangement ${arrangement} is not available for ${modelKey} DN${dn} ${row.standard}. Choose another EBRO arrangement.`,
+    };
+  }
+  const additionalBoltSpec = /^\d+\s*x/i.test(String(row.connection5 || "")) ? String(row.connection5) : "";
+  const torque = ebroTorqueForSpec(primaryBoltSpec, data);
+  return {
+    matched: true,
+    model: data.model,
+    dn,
+    nps: `${row.inch}\"`,
+    standard: row.standard,
+    arrangement,
+    arrangementLabel: EBRO_CONNECTION_LABELS[modelKey]?.[arrangement] || `arrangement ${arrangement}`,
+    connections: String(row.connections || arrangement),
+    faceToFaceMm: Number(row.faceToFaceMm),
+    flangeBoltHoles: Number(row.flangeBoltHoles),
+    counterFlangeThicknessMm: Number(row.counterFlangeThicknessMm),
+    gasketThicknessMm: Number(data.gasketThicknessMm),
+    primaryBoltSpec,
+    additionalBoltSpec,
+    torqueNm: torque?.nm || null,
+    torqueFastener: torque?.fastener || "",
+    torqueBasis: torque?.basis || "",
+    boltingStandard: data.boltingStandard,
+    torqueStandard: data.torqueStandard,
+    sourceUrl: data.sourceUrl || "",
+    sourcePage: Number(row.page),
+  };
+}
+
+function ebroHp112Lookup(size, standard, connection = 1) {
+  return ebroLookup("HP112", size, standard, connection);
+}
+
+function ebroHp114Lookup(size, standard) {
+  return ebroLookup("HP114", size, standard, 4);
+}
+
+function ebroHp112BoltSpecForQuantity(spec, valveQuantity = 1) {
+  const value = String(spec || "").trim();
+  const match = value.match(/^(\d+)\s*x\s*(.+)$/i);
+  if (!match) return value;
+  const quantity = Math.max(0, Number(match[1]) || 0) * Math.max(1, Number(valveQuantity) || 1);
+  return `${quantity} × ${match[2].replace(/\s+x\s+/gi, " × ")}`;
+}
+
+function schematicTakeoffEbroBoltingText(item, valveQuantity = 1) {
+  const match = item?.ebroBolting;
+  if (!match?.matched) return "";
+  const parts = [ebroHp112BoltSpecForQuantity(match.primaryBoltSpec, valveQuantity)];
+  if (match.additionalBoltSpec) parts.push(`${ebroHp112BoltSpecForQuantity(match.additionalBoltSpec, valveQuantity)} additional`);
+  return parts.filter(Boolean).join(" + ");
+}
+
+function currentSchematicTakeoffEbroLookup() {
+  return ebroLookup(
+    schematicTakeoffEbroModelInput?.value || "HP112",
+    schematicTakeoffFittingSizeInput?.value,
+    schematicTakeoffValveFlangeInput?.value,
+    schematicTakeoffEbroConnectionInput?.value || 1,
+  );
+}
+
+function renderSchematicTakeoffEbroBolting() {
+  updateEbroConnectionOptions();
+  updateEbroHp112FlangeOptions();
+  const isValve = schematicTakeoffIsValveType(schematicTakeoffFittingTypeInput?.value);
+  const needsFlange = isValve && ["Flanged", "Mixed"].includes(schematicTakeoffValveConnectionInput?.value || "");
+  const isEbro = needsFlange
+    && schematicTakeoffSupportsEbroLookup(schematicTakeoffFittingTypeInput?.value)
+    && schematicTakeoffValveBrandInput?.value === "Ebro";
+  if (schematicTakeoffEbroBolting) schematicTakeoffEbroBolting.hidden = !isEbro;
+  if (!isEbro || !schematicTakeoffEbroBoltingResult || !schematicTakeoffEbroMatchBadge) return null;
+  const match = currentSchematicTakeoffEbroLookup();
+  schematicTakeoffEbroMatchBadge.dataset.tone = match.matched ? "matched" : "review";
+  schematicTakeoffEbroMatchBadge.textContent = match.matched ? "Verified match" : "Review required";
+  if (!match.matched) {
+    schematicTakeoffEbroBoltingResult.innerHTML = `<em>? ${escapeHtml(match.message)}</em>`;
+    return match;
+  }
+  const extra = match.additionalBoltSpec
+    ? `<span><b>Plus required:</b> ${escapeHtml(ebroHp112BoltSpecForQuantity(match.additionalBoltSpec))}</span>`
+    : "";
+  const specialOrder = match.model === "HP112" && match.arrangement === 4 ? "<em>HP112 arrangement 4 is special-order only.</em>" : "";
+  const connectionDescription = match.model === "HP114"
+    ? `connection ${escapeHtml(match.connections.replace("+", " + "))}`
+    : `arrangement ${match.arrangement}`;
+  schematicTakeoffEbroBoltingResult.innerHTML = `
+    <strong>Required: ${escapeHtml(ebroHp112BoltSpecForQuantity(match.primaryBoltSpec))}</strong>
+    ${extra}
+    <span>${escapeHtml(match.model)} / DN${match.dn} / ${escapeHtml(match.standard)} / ${connectionDescription}</span>
+    <span><b>Valve:</b> ${match.faceToFaceMm} mm face-to-face · ${match.flangeBoltHoles} flange holes</span>
+    <span><b>Length basis:</b> ${match.counterFlangeThicknessMm} mm mating flange + ${match.gasketThicknessMm} mm gasket</span>
+    ${specialOrder}`;
+  return match;
+}
+
 function schematicTakeoffItemNeedsReview(item) {
-  if (!Array.isArray(item?.markers)) return false;
   if (schematicTakeoffItemQuantity(item) === 0) return false;
-  if (item.unclassified || String(item.type || "") === "Unclassified symbol") return true;
-  if (!item.reviewed) return true;
-  if (!String(item.size || "").trim()) return true;
-  if (!schematicTakeoffIsValveType(item.type)) return false;
-  if (!item.connectionType || !item.brand) return true;
-  return ["Flanged", "Mixed"].includes(item.connectionType) && !item.flangeType;
+  if (item?.unclassified || String(item?.type || "") === "Unclassified symbol") return true;
+  if (Array.isArray(item?.markers) && !item?.reviewed) return true;
+  const ebroFlanged = schematicTakeoffIsValveType(item?.type)
+    && schematicTakeoffSupportsEbroLookup(item?.type)
+    && item?.brand === "Ebro"
+    && ["Flanged", "Mixed"].includes(item?.connectionType);
+  if (ebroFlanged && !item?.ebroBolting?.matched) return true;
+  if (schematicTakeoffIsValveType(item?.type)) {
+    if (!String(item.size || "").trim() || !item.connectionType || !item.brand || !item.flangeType) return true;
+    if (!ebroFlanged && !String(item.boltSpec || "").trim()) return true;
+  }
+  if (item?.type === "Strainer" && (!String(item.size || "").trim() || !String(item.flangeType || "").trim())) return true;
+  if (schematicTakeoffIsEquipmentType(item?.type) && !schematicTakeoffEquipmentConfigComplete(item)) return true;
+  return schematicTakeoffDerivedRequirements(item).some((requirement) => requirement.needsReview);
 }
 
 function schematicTakeoffFittingCount(selection) {
@@ -23549,21 +24107,74 @@ function schematicTakeoffFittingCount(selection) {
 
 function schematicTakeoffValveDetails(item) {
   if (!schematicTakeoffIsValveType(item?.type)) return [];
-  return [item.connectionType, item.brand, item.flangeType].map((value) => String(value || "").trim()).filter(Boolean);
+  const model = item.brand === "Ebro" && item.ebroModel ? item.ebroModel : "";
+  return [item.connectionType, item.brand, model, item.flangeType].map((value) => String(value || "").trim()).filter(Boolean);
+}
+
+function schematicTakeoffEquipmentDetails(item) {
+  if (!schematicTakeoffIsEquipmentType(item?.type)) return [];
+  const config = item.equipmentConfig || {};
+  if (item.type === "Pump") {
+    return [
+      config.suctionSize ? `Suction ${config.suctionLineSize || item.size} → ${config.suctionSize}` : "Suction not verified",
+      config.dischargeSize ? `Discharge ${config.dischargeLineSize || item.size} → ${config.dischargeSize}` : "Discharge not verified",
+      config.flexibleConnection,
+      config.suctionComponent,
+      config.flangeType,
+      config.verified ? "Verified" : "Verification required",
+    ].filter(Boolean);
+  }
+  return [
+    config.connectionSize ? `${config.connectionCount || 2} connections at ${config.connectionSize}` : "Connections not verified",
+    config.flangeType,
+    config.verified ? "Verified" : "Verification required",
+  ].filter(Boolean);
 }
 
 function schematicTakeoffItemDescription(item) {
-  const details = schematicTakeoffValveDetails(item);
+  const details = [...schematicTakeoffValveDetails(item), ...schematicTakeoffEquipmentDetails(item)];
   const type = item.unclassified || String(item.type || "") === "Unclassified symbol" ? "? Unclassified symbol" : item.type;
   return `${type} · ${item.size || "Size not set"}${details.length ? ` · ${details.join(" · ")}` : ""}`;
 }
 
 function updateSchematicTakeoffValveQuestions() {
+  const selected = schematicTakeoffSelectedArea();
+  const type = schematicTakeoffFittingTypeInput?.value || "";
   const isValve = schematicTakeoffIsValveType(schematicTakeoffFittingTypeInput?.value);
+  const isEquipment = schematicTakeoffIsEquipmentType(type);
+  const isPump = type === "Pump";
+  const isStrainer = type === "Strainer";
+  if (!String(schematicTakeoffFittingSizeInput?.value || "").trim()
+    && (isValve || isEquipment || type === "Strainer")
+    && selected?.suggestedPipeSize) {
+    schematicTakeoffFittingSizeInput.value = selected.suggestedPipeSize;
+  }
+  const sizeLabel = schematicTakeoffFittingSizeInput?.closest("label")?.querySelector("span");
+  if (sizeLabel) sizeLabel.textContent = isEquipment ? "Pipe / line size" : isValve ? "Valve / pipe size" : "Size";
   if (schematicTakeoffValveQuestions) schematicTakeoffValveQuestions.hidden = !isValve;
-  const needsFlange = isValve && ["Flanged", "Mixed"].includes(schematicTakeoffValveConnectionInput?.value || "");
-  if (schematicTakeoffValveFlangeField) schematicTakeoffValveFlangeField.hidden = !needsFlange;
-  if (schematicTakeoffValveFlangeInput) schematicTakeoffValveFlangeInput.required = needsFlange;
+  if (schematicTakeoffStrainerQuestions) schematicTakeoffStrainerQuestions.hidden = !isStrainer;
+  const usesEbroLookup = isValve
+    && schematicTakeoffSupportsEbroLookup(type)
+    && ["Flanged", "Mixed"].includes(schematicTakeoffValveConnectionInput?.value || "")
+    && schematicTakeoffValveBrandInput?.value === "Ebro";
+  if (schematicTakeoffValveFlangeField) schematicTakeoffValveFlangeField.hidden = !isValve;
+  if (schematicTakeoffValveFlangeInput) schematicTakeoffValveFlangeInput.required = isValve;
+  if (schematicTakeoffValveBoltSpecField) schematicTakeoffValveBoltSpecField.hidden = !isValve || usesEbroLookup;
+  if (schematicTakeoffStrainerFlangeInput) schematicTakeoffStrainerFlangeInput.required = isStrainer;
+  if (schematicTakeoffEquipmentQuestions) schematicTakeoffEquipmentQuestions.hidden = !isEquipment;
+  if (schematicTakeoffEquipmentConnectionSizeField) schematicTakeoffEquipmentConnectionSizeField.hidden = !isEquipment || isPump;
+  if (schematicTakeoffEquipmentConnectionCountField) schematicTakeoffEquipmentConnectionCountField.hidden = !isEquipment || isPump;
+  if (schematicTakeoffPumpSuctionLineSizeField) schematicTakeoffPumpSuctionLineSizeField.hidden = !isPump;
+  if (schematicTakeoffPumpSuctionSizeField) schematicTakeoffPumpSuctionSizeField.hidden = !isPump;
+  if (schematicTakeoffPumpDischargeLineSizeField) schematicTakeoffPumpDischargeLineSizeField.hidden = !isPump;
+  if (schematicTakeoffPumpDischargeSizeField) schematicTakeoffPumpDischargeSizeField.hidden = !isPump;
+  if (schematicTakeoffPumpFlexibleField) schematicTakeoffPumpFlexibleField.hidden = !isPump;
+  if (schematicTakeoffPumpSuctionComponentField) schematicTakeoffPumpSuctionComponentField.hidden = !isPump;
+  if (isPump && schematicTakeoffFittingSizeInput?.value) {
+    if (schematicTakeoffPumpSuctionLineSizeInput && !schematicTakeoffPumpSuctionLineSizeInput.value) schematicTakeoffPumpSuctionLineSizeInput.value = schematicTakeoffFittingSizeInput.value;
+    if (schematicTakeoffPumpDischargeLineSizeInput && !schematicTakeoffPumpDischargeLineSizeInput.value) schematicTakeoffPumpDischargeLineSizeInput.value = schematicTakeoffFittingSizeInput.value;
+  }
+  renderSchematicTakeoffEbroBolting();
 }
 
 function clearSchematicTakeoffFittingEditor() {
@@ -23582,6 +24193,20 @@ function clearSchematicTakeoffFittingEditor() {
   if (schematicTakeoffValveConnectionInput) schematicTakeoffValveConnectionInput.value = "";
   if (schematicTakeoffValveBrandInput) schematicTakeoffValveBrandInput.value = "";
   if (schematicTakeoffValveFlangeInput) schematicTakeoffValveFlangeInput.value = "";
+  if (schematicTakeoffValveBoltSpecInput) schematicTakeoffValveBoltSpecInput.value = "";
+  if (schematicTakeoffStrainerFlangeInput) schematicTakeoffStrainerFlangeInput.value = "";
+  if (schematicTakeoffEbroModelInput) schematicTakeoffEbroModelInput.value = "HP112";
+  if (schematicTakeoffEbroConnectionInput) schematicTakeoffEbroConnectionInput.value = "1";
+  if (schematicTakeoffEquipmentConnectionSizeInput) schematicTakeoffEquipmentConnectionSizeInput.value = "";
+  if (schematicTakeoffEquipmentConnectionCountInput) schematicTakeoffEquipmentConnectionCountInput.value = "2";
+  if (schematicTakeoffPumpSuctionLineSizeInput) schematicTakeoffPumpSuctionLineSizeInput.value = "";
+  if (schematicTakeoffPumpSuctionSizeInput) schematicTakeoffPumpSuctionSizeInput.value = "";
+  if (schematicTakeoffPumpDischargeLineSizeInput) schematicTakeoffPumpDischargeLineSizeInput.value = "";
+  if (schematicTakeoffPumpDischargeSizeInput) schematicTakeoffPumpDischargeSizeInput.value = "";
+  if (schematicTakeoffEquipmentFlangeInput) schematicTakeoffEquipmentFlangeInput.value = "";
+  if (schematicTakeoffPumpFlexibleInput) schematicTakeoffPumpFlexibleInput.value = "";
+  if (schematicTakeoffPumpSuctionComponentInput) schematicTakeoffPumpSuctionComponentInput.value = "";
+  if (schematicTakeoffEquipmentVerifiedInput) schematicTakeoffEquipmentVerifiedInput.checked = false;
   if (schematicTakeoffAddFittingButton) schematicTakeoffAddFittingButton.textContent = "Add confirmed fitting";
   if (schematicTakeoffCancelEditButton) schematicTakeoffCancelEditButton.hidden = true;
   updateSchematicTakeoffValveQuestions();
@@ -23606,6 +24231,21 @@ function editSchematicTakeoffFitting(itemId) {
   if (schematicTakeoffValveConnectionInput) schematicTakeoffValveConnectionInput.value = item.connectionType || "";
   if (schematicTakeoffValveBrandInput) schematicTakeoffValveBrandInput.value = item.brand || "";
   if (schematicTakeoffValveFlangeInput) schematicTakeoffValveFlangeInput.value = item.flangeType || "";
+  if (schematicTakeoffValveBoltSpecInput) schematicTakeoffValveBoltSpecInput.value = item.boltSpec || "";
+  if (schematicTakeoffStrainerFlangeInput) schematicTakeoffStrainerFlangeInput.value = item.type === "Strainer" ? item.flangeType || "" : "";
+  if (schematicTakeoffEbroModelInput) schematicTakeoffEbroModelInput.value = item.ebroModel || "HP112";
+  if (schematicTakeoffEbroConnectionInput) schematicTakeoffEbroConnectionInput.value = String(item.ebroConnection || 1);
+  const equipment = item.equipmentConfig || {};
+  if (schematicTakeoffEquipmentConnectionSizeInput) schematicTakeoffEquipmentConnectionSizeInput.value = equipment.connectionSize || "";
+  if (schematicTakeoffEquipmentConnectionCountInput) schematicTakeoffEquipmentConnectionCountInput.value = String(equipment.connectionCount || 2);
+  if (schematicTakeoffPumpSuctionLineSizeInput) schematicTakeoffPumpSuctionLineSizeInput.value = equipment.suctionLineSize || item.size || "";
+  if (schematicTakeoffPumpSuctionSizeInput) schematicTakeoffPumpSuctionSizeInput.value = equipment.suctionSize || "";
+  if (schematicTakeoffPumpDischargeLineSizeInput) schematicTakeoffPumpDischargeLineSizeInput.value = equipment.dischargeLineSize || item.size || "";
+  if (schematicTakeoffPumpDischargeSizeInput) schematicTakeoffPumpDischargeSizeInput.value = equipment.dischargeSize || "";
+  if (schematicTakeoffEquipmentFlangeInput) schematicTakeoffEquipmentFlangeInput.value = equipment.flangeType || "";
+  if (schematicTakeoffPumpFlexibleInput) schematicTakeoffPumpFlexibleInput.value = equipment.flexibleConnection || "";
+  if (schematicTakeoffPumpSuctionComponentInput) schematicTakeoffPumpSuctionComponentInput.value = equipment.suctionComponent || "";
+  if (schematicTakeoffEquipmentVerifiedInput) schematicTakeoffEquipmentVerifiedInput.checked = equipment.verified === true;
   if (schematicTakeoffAddFittingButton) schematicTakeoffAddFittingButton.textContent = item.unclassified
     ? "Classify ? item"
     : Array.isArray(item.markers) ? "Confirm counted item" : "Update fitting";
@@ -23640,11 +24280,15 @@ async function countSchematicTakeoffSymbols() {
         id: existing?.id || createTraceabilityId("FIT"),
         type: "Isolation valve",
         symbolClass: "Isolation valve",
-        size: existing?.size || "",
+        size: existing?.size || selected.suggestedPipeSize || "",
         quantity: result.markers.length,
         connectionType: existing?.connectionType || "",
         brand: existing?.brand || "",
         flangeType: existing?.flangeType || "",
+        boltSpec: existing?.boltSpec || "",
+        ebroModel: existing?.ebroModel || "",
+        ebroConnection: existing?.ebroConnection || "",
+        ebroBolting: existing?.ebroBolting || null,
         note: existing?.note || "Standard valve symbols counted locally",
         source: existing?.reviewed ? "automatic-reviewed" : "automatic-local-rule",
         reviewed: existing?.reviewed === true,
@@ -23726,7 +24370,27 @@ function toggleSchematicTakeoffMarker(itemId, markerId) {
   renderSchematicTakeoffCanvas();
 }
 
+function renderSchematicTakeoffStage3Legend() {
+  if (!schematicTakeoffStage3Legend || schematicTakeoffStage3Legend.dataset.rendered === "true") return;
+  schematicTakeoffStage3Legend.innerHTML = SCHEMATIC_TAKEOFF_STAGE3_SYMBOL_KNOWLEDGE.map((symbol) => {
+    const components = symbol.components?.length
+      ? symbol.components.map((component) => `${component.quantity} × ${component.type}`).join(" + ")
+      : symbol.behavior === "annotation"
+      ? "Use as pipe-size context — do not order"
+      : symbol.behavior === "ignore"
+      ? "Ignore — do not order"
+      : "? — confirmation required";
+    const review = symbol.behavior === "review" || symbol.inferred;
+    return `<span data-rule-state="${review ? "review" : symbol.behavior === "ignore" || symbol.behavior === "annotation" ? "ignore" : "confirmed"}">
+      <b><i>${symbol.number}</i>${escapeHtml(review ? `? ${symbol.label}` : symbol.label)}</b>
+      <small>${escapeHtml(components)}</small>
+    </span>`;
+  }).join("");
+  schematicTakeoffStage3Legend.dataset.rendered = "true";
+}
+
 function renderSchematicTakeoffPanels() {
+  renderSchematicTakeoffStage3Legend();
   const takeoff = ensureSchematicTakeoffState();
   const selected = schematicTakeoffSelectedArea();
   const pageSelections = takeoff.selections.filter((selection) => selection.page === takeoff.page);
@@ -23765,6 +24429,16 @@ function renderSchematicTakeoffPanels() {
       ? `Using ${selected.systemCode} from the previous selected area. Confirm it before adding fittings.`
       : "No readable equipment tag was found in this crop. Enter the system code shown on the schematic.";
   }
+  if (schematicTakeoffDetectedSize) {
+    const sizes = selected?.detectedPipeSizes || [];
+    schematicTakeoffDetectedSize.textContent = !selected
+      ? "Pipe size will be read from labels inside this area where possible."
+      : sizes.length === 1
+      ? `Detected pipe size: ${sizes[0].label}. It will be suggested for valves and equipment in this area.`
+      : sizes.length > 1
+      ? `Multiple pipe sizes detected: ${sizes.map((size) => size.label).join(", ")}. Choose the correct size for each item.`
+      : "No unambiguous DN, NB, NPS or inch pipe-size label was found. Enter the size during review.";
+  }
   if (schematicTakeoffDownloadCropButton) schematicTakeoffDownloadCropButton.disabled = !selected || selected.page !== takeoff.page || !takeoff.source;
   if (schematicTakeoffCountButton) {
     schematicTakeoffCountButton.disabled = !selected || takeoff.recognitionBusy || selected?.page !== takeoff.page || !takeoff.source;
@@ -23775,7 +24449,7 @@ function renderSchematicTakeoffPanels() {
   if (schematicTakeoffRecognitionStatus) {
     schematicTakeoffRecognitionStatus.textContent = !selected
       ? "Select an area to begin."
-      : selected.recognitionStatus || "Press Count symbols in this area. Clear isolation valves are identified automatically; other likely fittings receive a ? for review.";
+      : selected.recognitionStatus || "Press Count symbols in this area. Clear isolation valves are identified automatically; the Stage 3 profile helps classify other likely fittings, which remain ? until safely confirmed.";
     schematicTakeoffRecognitionStatus.dataset.tone = detectedItems.length ? "success" : "neutral";
   }
   if (schematicTakeoffDetectionReview) {
@@ -23801,22 +24475,35 @@ function renderSchematicTakeoffPanels() {
   if (schematicTakeoffFittingList) {
     const items = selected?.items || [];
     schematicTakeoffFittingList.innerHTML = items.length
-      ? items.map((item) => `
-          <div class="schematic-fitting-row${schematicTakeoffItemNeedsReview(item) ? " needs-review" : ""}">
-            <span class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></span>
-            <div><strong>${escapeHtml(schematicTakeoffItemDescription(item))}</strong><span>${schematicTakeoffItemQuantity(item)} ${schematicTakeoffItemQuantity(item) === 1 ? "item" : "items"}${Array.isArray(item.markers) ? ` · Automatic count${schematicTakeoffItemNeedsReview(item) ? " · REVIEW REQUIRED" : " · Reviewed"}` : ""}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span></div>
-            <button class="secondary-button compact" type="button" data-edit-schematic-fitting="${escapeHtml(item.id)}">${schematicTakeoffItemNeedsReview(item) ? "Review" : "Edit"}</button>
-            <button class="danger" type="button" data-delete-schematic-fitting="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.type)}">×</button>
-          </div>`).join("")
+      ? items.map((item) => {
+          const boltOrder = schematicTakeoffEbroBoltingText(item, schematicTakeoffItemQuantity(item));
+          const materialRules = schematicTakeoffDerivedRequirements(item);
+          const materialLine = materialRules.length
+            ? `<small class="schematic-material-rule-line${materialRules.some((rule) => rule.needsReview) ? " needs-review" : ""}"><b>Order additions:</b> ${materialRules.map((rule) => `${rule.quantity} ${escapeHtml(rule.type)}`).join(" · ")}</small>`
+            : "";
+          const boltLine = boltOrder
+            ? `<small class="schematic-ebro-order-line"><b>Order bolts:</b> ${escapeHtml(boltOrder)}</small>`
+            : item.brand === "Ebro" && ["Flanged", "Mixed"].includes(item.connectionType)
+            ? `<small class="schematic-ebro-order-line needs-review"><b>Order bolts:</b> ? exact ${escapeHtml(item.ebroModel || "EBRO")} row required</small>`
+            : "";
+          return `
+            <div class="schematic-fitting-row${schematicTakeoffItemNeedsReview(item) ? " needs-review" : ""}">
+              <span class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></span>
+              <div><strong>${escapeHtml(schematicTakeoffItemDescription(item))}</strong><span>${schematicTakeoffItemQuantity(item)} ${schematicTakeoffItemQuantity(item) === 1 ? "item" : "items"}${Array.isArray(item.markers) ? ` · Automatic count${schematicTakeoffItemNeedsReview(item) ? " · REVIEW REQUIRED" : " · Reviewed"}` : ""}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span>${materialLine}${boltLine}</div>
+              <button class="secondary-button compact" type="button" data-edit-schematic-fitting="${escapeHtml(item.id)}">${schematicTakeoffItemNeedsReview(item) ? "Review" : "Edit"}</button>
+              <button class="danger" type="button" data-delete-schematic-fitting="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.type)}">×</button>
+            </div>`;
+        }).join("")
       : `<div class="schematic-empty-list">${selected ? "No fittings in this area yet. Run the automatic count or add one manually." : "Select an area, then count symbols or add a fitting manually."}</div>`;
   }
   const allItems = takeoff.selections.flatMap((selection) => selection.items || []).filter((item) => schematicTakeoffItemQuantity(item) > 0);
   const total = allItems.reduce((sum, item) => sum + schematicTakeoffItemQuantity(item), 0);
-  if (schematicTakeoffTotal) schematicTakeoffTotal.textContent = `${total} ${total === 1 ? "item" : "items"}`;
+  const derivedTotal = allItems.flatMap((item) => schematicTakeoffDerivedRequirements(item)).reduce((sum, item) => sum + item.quantity, 0);
+  if (schematicTakeoffTotal) schematicTakeoffTotal.textContent = `${total} counted · ${derivedTotal} rule-added`;
   const systems = new Map();
   takeoff.selections.forEach((selection) => {
     const systemCode = normalizeSchematicSystemCode(selection.systemCode) || "UNASSIGNED";
-    const system = systems.get(systemCode) || { code: systemCode, areas: 0, quantity: 0, equipmentTags: new Set(), items: new Map() };
+    const system = systems.get(systemCode) || { code: systemCode, areas: 0, quantity: 0, derivedQuantity: 0, equipmentTags: new Set(), items: new Map(), derived: new Map() };
     system.areas += 1;
     (selection.equipmentTags || []).forEach((tag) => system.equipmentTags.add(tag));
     (selection.items || []).filter((item) => schematicTakeoffItemQuantity(item) > 0).forEach((item) => {
@@ -23827,6 +24514,15 @@ function renderSchematicTakeoffPanels() {
       current.needsReview = current.needsReview || schematicTakeoffItemNeedsReview(item);
       system.quantity += schematicTakeoffItemQuantity(item);
       system.items.set(key, current);
+      schematicTakeoffDerivedRequirements(item).forEach((requirement) => {
+        const derivedKey = `${requirement.type}\u0000${requirement.size}\u0000${requirement.specification}`;
+        const derived = system.derived.get(derivedKey) || { ...requirement, reasons: new Set(), quantity: 0 };
+        derived.quantity += requirement.quantity;
+        derived.needsReview = derived.needsReview || requirement.needsReview;
+        derived.reasons.add(requirement.reason);
+        system.derivedQuantity += requirement.quantity;
+        system.derived.set(derivedKey, derived);
+      });
     });
     systems.set(systemCode, system);
   });
@@ -23836,12 +24532,25 @@ function renderSchematicTakeoffPanels() {
           const tags = [...system.equipmentTags];
           const rows = [...system.items.values()]
             .sort((a, b) => a.descriptor.localeCompare(b.descriptor))
-            .map((item) => `<div class="schematic-system-takeoff-row${item.needsReview ? " needs-review" : ""}"><span><i class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></i>${escapeHtml(item.descriptor)}${item.needsReview ? " · Review required" : ""}</span><strong>${item.quantity}</strong></div>`)
+            .map((item) => {
+              const boltOrder = schematicTakeoffEbroBoltingText(item, item.quantity);
+              const boltLine = boltOrder
+                ? `<small class="schematic-ebro-order-line"><b>Order bolts:</b> ${escapeHtml(boltOrder)}</small>`
+                : item.brand === "Ebro" && ["Flanged", "Mixed"].includes(item.connectionType)
+                ? `<small class="schematic-ebro-order-line needs-review"><b>Order bolts:</b> ? exact ${escapeHtml(item.ebroModel || "EBRO")} row required</small>`
+                : "";
+              return `<div class="schematic-system-takeoff-row${item.needsReview ? " needs-review" : ""}"><span><i class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></i>${escapeHtml(item.descriptor)}${item.needsReview ? " · Review required" : ""}${boltLine}</span><strong>${item.quantity}</strong></div>`;
+            })
+            .join("");
+          const derivedRows = [...system.derived.values()]
+            .sort((a, b) => `${a.type} ${a.size}`.localeCompare(`${b.type} ${b.size}`, undefined, { numeric: true }))
+            .map((item) => `<div class="schematic-system-takeoff-row schematic-rule-added${item.needsReview ? " needs-review" : ""}"><span><i class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></i><span>${escapeHtml(item.type)} · ${escapeHtml(item.size)}${item.specification ? ` · ${escapeHtml(item.specification)}` : ""}<small>${escapeHtml([...item.reasons].join("; "))}${item.needsReview ? " · REVIEW REQUIRED" : ""}</small></span></span><strong>${item.quantity} ${escapeHtml(item.unit || "items")}</strong></div>`)
             .join("");
           return `<section class="schematic-system-takeoff${system.code === "UNASSIGNED" ? " unassigned" : ""}">
-            <header><div><span>SYSTEM</span><strong>${escapeHtml(system.code)}</strong></div><b>${system.quantity} item${system.quantity === 1 ? "" : "s"}</b></header>
+            <header><div><span>SYSTEM</span><strong>${escapeHtml(system.code)}</strong></div><b>${system.quantity} counted · ${system.derivedQuantity} added</b></header>
             <small>${system.areas} selected ${system.areas === 1 ? "area" : "areas"}${tags.length ? ` · ${escapeHtml(tags.join(", "))}` : ""}</small>
-            <div>${rows || '<div class="schematic-empty-list">No fittings confirmed for this system yet.</div>'}</div>
+            <div class="schematic-order-group"><b>COUNTED ON SCHEMATIC</b>${rows || '<div class="schematic-empty-list">No fittings confirmed for this system yet.</div>'}</div>
+            <div class="schematic-order-group rule-added"><b>ADDED BY MATERIAL RULES</b>${derivedRows || '<div class="schematic-empty-list">No connection materials have been added yet.</div>'}</div>
           </section>`;
         }).join("")
           : '<div class="schematic-empty-list">Each selected area will create a side table grouped by its system.</div>';
@@ -23849,7 +24558,7 @@ function renderSchematicTakeoffPanels() {
   const needsReview = allItems.some((item) => schematicTakeoffItemNeedsReview(item));
   if (schematicTakeoffExportButton) {
     schematicTakeoffExportButton.disabled = !allItems.length || needsReview;
-    schematicTakeoffExportButton.textContent = needsReview ? "Review automatic items before export" : "Export order CSV";
+    schematicTakeoffExportButton.textContent = needsReview ? "Review flagged items before export" : "Export order CSV";
   }
   if (schematicTakeoffPageReadout) schematicTakeoffPageReadout.textContent = `Page ${takeoff.page} / ${takeoff.pageCount}`;
   if (schematicTakeoffPreviousPageButton) schematicTakeoffPreviousPageButton.disabled = takeoff.pageLoading || takeoff.page <= 1;
@@ -23892,11 +24601,13 @@ function addConfirmedSchematicFitting() {
     return;
   }
   const isValve = schematicTakeoffIsValveType(fittingType);
+  const isEquipment = schematicTakeoffIsEquipmentType(fittingType);
   const connectionType = isValve ? String(schematicTakeoffValveConnectionInput?.value || "") : "";
   const brand = isValve ? String(schematicTakeoffValveBrandInput?.value || "") : "";
-  const flangeType = isValve && ["Flanged", "Mixed"].includes(connectionType)
-    ? String(schematicTakeoffValveFlangeInput?.value || "").trim().slice(0, 60)
-    : "";
+  const flangeType = String(isValve
+    ? schematicTakeoffValveFlangeInput?.value || ""
+    : fittingType === "Strainer" ? schematicTakeoffStrainerFlangeInput?.value || "" : "").trim().slice(0, 60);
+  const boltSpec = isValve ? String(schematicTakeoffValveBoltSpecInput?.value || "").trim().slice(0, 80) : "";
   if (isValve && !connectionType) {
     showAppNotice("Choose whether this valve is Victaulic / grooved, flanged or mixed.", { tone: "warning" });
     schematicTakeoffValveConnectionInput?.focus();
@@ -23907,20 +24618,48 @@ function addConfirmedSchematicFitting() {
     schematicTakeoffValveBrandInput?.focus();
     return;
   }
-  if (isValve && ["Flanged", "Mixed"].includes(connectionType) && !flangeType) {
-    showAppNotice("Enter the flange type or standard for this valve.", { tone: "warning" });
+  if (isValve && !flangeType) {
+    showAppNotice("Enter the matching connection flange or standard for this valve.", { tone: "warning" });
     schematicTakeoffValveFlangeInput?.focus();
     return;
   }
+  if (fittingType === "Strainer" && !flangeType) {
+    showAppNotice("Enter the matching flange or standard for this strainer.", { tone: "warning" });
+    schematicTakeoffStrainerFlangeInput?.focus();
+    return;
+  }
   const size = String(schematicTakeoffFittingSizeInput?.value || "").trim().slice(0, 40);
-  if (Array.isArray(editingItem?.markers) && !size) {
-    showAppNotice("Enter the valve size before confirming the automatic count for ordering.", { tone: "warning" });
+  if ((Array.isArray(editingItem?.markers) || isValve || isEquipment || fittingType === "Strainer") && !size) {
+    showAppNotice(isEquipment ? "Enter the pipe or line size before saving this equipment." : "Enter the pipe size before confirming this order item.", { tone: "warning" });
     schematicTakeoffFittingSizeInput?.focus();
     return;
   }
   const quantity = Array.isArray(editingItem?.markers)
     ? schematicTakeoffItemQuantity(editingItem)
     : clampNumber(Math.round(Number(schematicTakeoffFittingQuantityInput?.value) || 1), 1, 9999);
+  const ebroFlanged = schematicTakeoffSupportsEbroLookup(fittingType) && brand === "Ebro" && ["Flanged", "Mixed"].includes(connectionType);
+  const ebroModel = ebroFlanged ? String(schematicTakeoffEbroModelInput?.value || "HP112") : "";
+  const ebroConnection = ebroFlanged ? String(schematicTakeoffEbroConnectionInput?.value || "1") : "";
+  const ebroBolting = ebroFlanged ? ebroLookup(ebroModel, size, flangeType, ebroConnection) : null;
+  const equipmentConfig = isEquipment ? {
+    connectionSize: String(schematicTakeoffEquipmentConnectionSizeInput?.value || "").trim().slice(0, 40),
+    connectionCount: clampNumber(Math.round(Number(schematicTakeoffEquipmentConnectionCountInput?.value) || 2), 1, 24),
+    suctionLineSize: String(schematicTakeoffPumpSuctionLineSizeInput?.value || size).trim().slice(0, 40),
+    suctionSize: String(schematicTakeoffPumpSuctionSizeInput?.value || "").trim().slice(0, 40),
+    dischargeLineSize: String(schematicTakeoffPumpDischargeLineSizeInput?.value || size).trim().slice(0, 40),
+    dischargeSize: String(schematicTakeoffPumpDischargeSizeInput?.value || "").trim().slice(0, 40),
+    flangeType: String(schematicTakeoffEquipmentFlangeInput?.value || "").trim().slice(0, 60),
+    flexibleConnection: String(schematicTakeoffPumpFlexibleInput?.value || ""),
+    suctionComponent: String(schematicTakeoffPumpSuctionComponentInput?.value || ""),
+    verified: schematicTakeoffEquipmentVerifiedInput?.checked === true,
+  } : null;
+  const equipmentDraft = { type: fittingType, size, equipmentConfig };
+  if (equipmentConfig?.verified && !schematicTakeoffEquipmentConfigComplete(equipmentDraft)) {
+    showAppNotice(fittingType === "Pump"
+      ? "Enter both suction/discharge pipe sizes, both pump nozzle sizes, the flange standard, flexible arrangement and suction component before marking this pump verified."
+      : "Enter the equipment connection size, connection count and flange standard before marking it verified.", { tone: "warning", duration: 6500 });
+    return;
+  }
   const nextItem = {
     ...(editingItem || {}),
     id: editingItem?.id || createTraceabilityId("FIT"),
@@ -23930,6 +24669,11 @@ function addConfirmedSchematicFitting() {
     connectionType,
     brand,
     flangeType,
+    boltSpec,
+    ebroModel,
+    ebroConnection,
+    ebroBolting,
+    equipmentConfig,
     note: String(schematicTakeoffFittingNoteInput?.value || "").trim().slice(0, 120),
     source: Array.isArray(editingItem?.markers) ? "automatic-reviewed" : "confirmed",
     reviewed: true,
@@ -23949,6 +24693,13 @@ function addConfirmedSchematicFitting() {
   } else {
     selected.items.push(nextItem);
   }
+  if (ebroFlanged && !ebroBolting?.matched) {
+    showAppNotice(`EBRO valve saved for review: ${ebroBolting?.message || "exact bolt length is not confirmed."}`, { tone: "warning", duration: 6000 });
+  } else if (isValve && !ebroFlanged && !boltSpec) {
+    showAppNotice("Valve saved for review. Add the manufacturer bolt set before exporting the order table.", { tone: "warning", duration: 6000 });
+  } else if (isEquipment && !schematicTakeoffEquipmentConfigComplete(nextItem)) {
+    showAppNotice(`${fittingType} saved as unverified. Its reducers and connection materials will remain flagged until the nozzle details are confirmed.`, { tone: "warning", duration: 6500 });
+  }
   clearSchematicTakeoffFittingEditor();
   renderSchematicTakeoffPanels();
   renderSchematicTakeoffCanvas();
@@ -23956,29 +24707,55 @@ function addConfirmedSchematicFitting() {
 
 function exportSchematicTakeoffCsv() {
   const takeoff = ensureSchematicTakeoffState();
-  const automaticNeedsReview = takeoff.selections.flatMap((selection) => selection.items || []).some((item) => schematicTakeoffItemNeedsReview(item));
-  if (automaticNeedsReview) {
-    showAppNotice("Review every automatically counted row before exporting the order table.", { tone: "warning" });
+  const hasItemsNeedingReview = takeoff.selections.flatMap((selection) => selection.items || []).some((item) => schematicTakeoffItemNeedsReview(item));
+  if (hasItemsNeedingReview) {
+    showAppNotice("Review every flagged row before exporting the order table.", { tone: "warning" });
     return;
   }
-  const rows = [["Schematic", "System", "Equipment tag", "Page", "Area", "Fitting / item", "Size", "Quantity", "Valve connection", "Valve brand", "Flange type / standard", "Review status", "Note", "Source"]];
+  const rows = [["Schematic", "System", "Equipment tag", "Page", "Area", "Row kind", "Parent item", "Fitting / item", "Size", "Quantity", "Unit", "Specification", "Material rule / reason", "Valve connection", "Valve brand", "Valve model", "Flange type / standard", "EBRO arrangement", "Bolt order quantity / diameter / length (mm)", "Face-to-face (mm)", "Mating flange thickness used (mm)", "Gasket thickness used (mm)", "EBRO source", "Review status", "Note", "Source"]];
   takeoff.selections.forEach((selection) => {
-    (selection.items || []).filter((item) => schematicTakeoffItemQuantity(item) > 0).forEach((item) => rows.push([
-      takeoff.fileName,
-      selection.systemCode || "Unassigned",
-      (selection.equipmentTags || []).join("; "),
-      selection.page,
-      selection.name,
-      item.type,
-      item.size,
-      schematicTakeoffItemQuantity(item),
-      item.connectionType || "",
-      item.brand || "",
-      item.flangeType || "",
-      Array.isArray(item.markers) ? (item.reviewed ? "Reviewed automatic count" : "Review required") : "Manually confirmed",
-      item.note,
-      item.source,
-    ]));
+    (selection.items || []).filter((item) => schematicTakeoffItemQuantity(item) > 0).forEach((item) => {
+      const common = [takeoff.fileName, selection.systemCode || "Unassigned", (selection.equipmentTags || []).join("; "), selection.page, selection.name];
+      rows.push([
+        ...common,
+        "Counted on schematic",
+        "",
+        item.type,
+        item.size,
+        schematicTakeoffItemQuantity(item),
+        "items",
+        "",
+        "",
+        item.connectionType || "",
+        item.brand || "",
+        item.ebroModel || "",
+        item.flangeType || "",
+        item.ebroConnection || "",
+        schematicTakeoffEbroBoltingText(item, schematicTakeoffItemQuantity(item)),
+        item.ebroBolting?.matched ? item.ebroBolting.faceToFaceMm : "",
+        item.ebroBolting?.matched ? item.ebroBolting.counterFlangeThicknessMm : "",
+        item.ebroBolting?.matched ? item.ebroBolting.gasketThicknessMm : "",
+        item.ebroBolting?.matched ? `${item.ebroBolting.boltingStandard}; PDF page ${item.ebroBolting.sourcePage}` : "",
+        schematicTakeoffItemNeedsReview(item) ? "Review required" : Array.isArray(item.markers) ? "Reviewed automatic count" : "Manually confirmed",
+        item.note,
+        item.source,
+      ]);
+      schematicTakeoffDerivedRequirements(item).forEach((requirement) => rows.push([
+        ...common,
+        "Added by material rule",
+        item.type,
+        requirement.type,
+        requirement.size,
+        requirement.quantity,
+        requirement.unit || "items",
+        requirement.specification || "",
+        requirement.reason,
+        "", "", "", "", "", "", "", "", "", "",
+        requirement.needsReview ? "Review required" : "Rule confirmed",
+        "",
+        "material-rule",
+      ]));
+    });
   });
   if (rows.length === 1) return;
   const csv = rows.map((row) => row.map((value) => `"${String(value ?? "").replace(/"/g, '""')}"`).join(",")).join("\r\n");
@@ -24030,6 +24807,8 @@ async function renderSchematicTakeoffPdfPage(pageNumber) {
     takeoff.selections.filter((selection) => selection.page === takeoff.page).forEach((selection) => {
       const detected = schematicTakeoffDetectSystemContext(selection);
       if (detected.equipmentTags.length) selection.equipmentTags = detected.equipmentTags;
+      selection.detectedPipeSizes = detected.pipeSizes;
+      selection.suggestedPipeSize = detected.suggestedPipeSize;
       if (!selection.systemCode && detected.systemCode) {
         selection.systemCode = detected.systemCode;
         selection.systemSource = detected.source;
@@ -24219,6 +24998,14 @@ function setupSchematicTakeoff() {
   });
   schematicTakeoffFittingTypeInput?.addEventListener("change", updateSchematicTakeoffValveQuestions);
   schematicTakeoffValveConnectionInput?.addEventListener("change", updateSchematicTakeoffValveQuestions);
+  schematicTakeoffValveBrandInput?.addEventListener("change", updateSchematicTakeoffValveQuestions);
+  schematicTakeoffFittingSizeInput?.addEventListener("input", () => {
+    updateSchematicTakeoffValveQuestions();
+    renderSchematicTakeoffEbroBolting();
+  });
+  schematicTakeoffValveFlangeInput?.addEventListener("input", renderSchematicTakeoffEbroBolting);
+  schematicTakeoffEbroModelInput?.addEventListener("change", renderSchematicTakeoffEbroBolting);
+  schematicTakeoffEbroConnectionInput?.addEventListener("change", renderSchematicTakeoffEbroBolting);
   schematicTakeoffCancelEditButton?.addEventListener("click", clearSchematicTakeoffFittingEditor);
   schematicTakeoffFittingForm?.addEventListener("submit", (event) => {
     event.preventDefault();
