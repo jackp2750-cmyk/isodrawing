@@ -1295,8 +1295,8 @@ body.schematic-takeoff-open #aiHelperButton {
   min-width: 0;
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(310px, 370px);
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) minmax(430px, 500px);
+  gap: 12px;
 }
 
 .schematic-takeoff-viewer {
@@ -1378,16 +1378,81 @@ body.schematic-takeoff-open #aiHelperButton {
   min-height: 0;
   display: grid;
   align-content: start;
-  gap: 9px;
+  gap: 12px;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding-right: 2px;
 }
 
+.schematic-review-steps {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  padding: 5px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel-strong) 94%, transparent);
+  box-shadow: 0 5px 14px rgba(3, 30, 41, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.schematic-review-steps button {
+  min-width: 0;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  padding: 7px 8px;
+  text-align: left;
+}
+
+.schematic-review-steps button > span,
+.schematic-review-steps button > b {
+  display: grid;
+  place-items: center;
+  min-width: 23px;
+  height: 23px;
+  border-radius: 999px;
+  background: var(--button);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.schematic-review-steps button > strong {
+  min-width: 0;
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+.schematic-review-steps button.active {
+  border-color: #70c7da;
+  background: var(--teal-wash);
+  color: var(--teal-strong);
+}
+
+.schematic-review-steps button.active > span,
+.schematic-review-steps button.active > b {
+  background: var(--teal);
+  color: #fff;
+}
+
+.schematic-review-steps button:disabled {
+  opacity: 0.48;
+}
+
 .schematic-takeoff-panel {
   display: grid;
-  gap: 9px;
-  padding: 11px;
+  gap: 12px;
+  padding: 15px;
   border: 1px solid var(--line);
   border-radius: 11px;
   background: var(--panel);
@@ -1456,11 +1521,15 @@ body.schematic-takeoff-open #aiHelperButton {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 7px;
-  padding: 7px 8px;
+  gap: 9px;
+  padding: 11px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel-strong);
+}
+
+.schematic-selection-row {
+  min-height: 58px;
 }
 
 .schematic-selection-row.active {
@@ -1496,6 +1565,19 @@ body.schematic-takeoff-open #aiHelperButton {
 
 .schematic-fitting-row {
   grid-template-columns: auto minmax(0, 1fr) auto auto;
+  min-height: 62px;
+}
+
+.schematic-fitting-row .secondary-button,
+.schematic-fitting-row .schematic-fitting-remove {
+  min-height: 40px;
+  padding-inline: 11px;
+}
+
+.schematic-fitting-remove {
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 850;
 }
 
 .schematic-fitting-row.needs-review,
@@ -1566,12 +1648,16 @@ body.schematic-takeoff-open #aiHelperButton {
 .schematic-selection-name input,
 .schematic-selection-system input {
   width: 100%;
-  min-height: 38px;
+  min-height: 44px;
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: var(--button);
   color: var(--ink);
   padding: 7px 8px;
+}
+
+.schematic-fitting-form[hidden] {
+  display: none !important;
 }
 
 .schematic-system-context {
@@ -2135,7 +2221,7 @@ body.schematic-takeoff-open #aiHelperButton {
 
 .schematic-detection-chip {
   min-width: 55px;
-  min-height: 38px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2178,9 +2264,55 @@ body.schematic-takeoff-open #aiHelperButton {
   flex: 1 1 auto;
 }
 
+.schematic-review-next {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid rgba(217, 143, 0, 0.42);
+  border-radius: 10px;
+  background: rgba(255, 248, 225, 0.82);
+}
+
+.schematic-review-next[data-complete="true"] {
+  border-color: rgba(15, 159, 110, 0.36);
+  background: rgba(231, 250, 242, 0.82);
+}
+
+.schematic-review-next > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.schematic-review-next strong {
+  font-size: 12px;
+}
+
+.schematic-review-next small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.schematic-review-next button,
+.schematic-step-next {
+  min-height: 46px;
+}
+
+.schematic-order-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 8px;
+}
+
+.schematic-order-actions button {
+  min-height: 46px;
+}
+
 .schematic-crop-preview {
   position: relative;
-  min-height: 148px;
+  min-height: 210px;
   overflow: hidden;
   border: 1px solid #9dc6d0;
   border-radius: 9px;
@@ -2193,7 +2325,7 @@ body.schematic-takeoff-open #aiHelperButton {
 
 #schematicTakeoffCropCanvas {
   width: 100%;
-  height: 148px;
+  height: 210px;
   display: block;
 }
 
@@ -2293,7 +2425,7 @@ body.schematic-takeoff-open #aiHelperButton {
   }
 
   .schematic-takeoff-sidebar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
   }
 }
@@ -2372,13 +2504,34 @@ body.schematic-takeoff-open #aiHelperButton {
     grid-template-columns: auto minmax(0, 1fr) auto;
   }
 
+  .schematic-fitting-row > div {
+    grid-column: 2 / -1;
+  }
+
   .schematic-fitting-row > .danger {
     grid-column: 3;
   }
 
   .schematic-fitting-row > .secondary-button {
-    grid-column: 2 / -1;
+    grid-column: 2;
     justify-self: stretch;
+  }
+
+  .schematic-review-next,
+  .schematic-order-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .schematic-review-next button {
+    width: 100%;
+  }
+
+  .schematic-crop-preview {
+    min-height: 180px;
+  }
+
+  #schematicTakeoffCropCanvas {
+    height: 180px;
   }
 }
 
@@ -2411,7 +2564,7 @@ body.schematic-takeoff-open #aiHelperButton {
   }
 
   .schematic-takeoff-workspace {
-    grid-template-columns: minmax(0, 1.35fr) minmax(270px, 0.65fr);
+    grid-template-columns: minmax(0, 1.25fr) minmax(330px, 0.75fr);
     grid-template-rows: minmax(0, 1fr);
   }
 

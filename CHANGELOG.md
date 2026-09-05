@@ -1,6 +1,16 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.81`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.82`.
+
+## v3.82 - Guided schematic fitting review
+
+- Replaced the long take-off sidebar with three clear stages: Areas, Sort fittings and Order table.
+- Added live stage counts for selected areas, fitting groups still needing review and total counted order items.
+- Enlarged the review column, selected-area cards, crop preview, fitting rows and touch controls across desktop, iPad, Android and phones.
+- Keeps the detailed fitting form closed until Review next, Add manually or a specific marked item is selected.
+- Moves unresolved fittings to the top and gives uncertain rows a clear Not a fitting action instead of a small delete icon.
+- Added direct Continue and Back controls between stages and expanded responsive regression checks for the guided flow.
+- Bumped the PWA cache to `spoolmate-v382-guided-takeoff-review`.
 
 ## v3.81 - Unambiguous valve counts
 

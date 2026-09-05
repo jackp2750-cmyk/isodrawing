@@ -198,6 +198,13 @@ const schematicTakeoffZoomReadout = document.querySelector("#schematicTakeoffZoo
 const schematicTakeoffCanvas = document.querySelector("#schematicTakeoffCanvas");
 const schematicTakeoffEmpty = document.querySelector("#schematicTakeoffEmpty");
 const schematicTakeoffHint = document.querySelector("#schematicTakeoffHint");
+const schematicTakeoffSidebar = document.querySelector(".schematic-takeoff-sidebar");
+const schematicTakeoffReviewStepButtons = [...document.querySelectorAll("[data-schematic-review-step]")];
+const schematicTakeoffReviewPanels = [...document.querySelectorAll("[data-schematic-review-panel]")];
+const schematicTakeoffAreasStepCount = document.querySelector("#schematicTakeoffAreasStepCount");
+const schematicTakeoffSortStepCount = document.querySelector("#schematicTakeoffSortStepCount");
+const schematicTakeoffOrderStepCount = document.querySelector("#schematicTakeoffOrderStepCount");
+const schematicTakeoffStartSortButton = document.querySelector("#schematicTakeoffStartSortButton");
 const schematicTakeoffClearButton = document.querySelector("#schematicTakeoffClearButton");
 const schematicTakeoffSelectionCount = document.querySelector("#schematicTakeoffSelectionCount");
 const schematicTakeoffSelectionList = document.querySelector("#schematicTakeoffSelectionList");
@@ -257,7 +264,13 @@ const schematicTakeoffPumpSuctionComponentInput = document.querySelector("#schem
 const schematicTakeoffEquipmentVerifiedInput = document.querySelector("#schematicTakeoffEquipmentVerifiedInput");
 const schematicTakeoffAddFittingButton = document.querySelector("#schematicTakeoffAddFittingButton");
 const schematicTakeoffCancelEditButton = document.querySelector("#schematicTakeoffCancelEditButton");
+const schematicTakeoffReviewNextBar = document.querySelector("#schematicTakeoffReviewNextBar");
+const schematicTakeoffReviewNextTitle = document.querySelector("#schematicTakeoffReviewNextTitle");
+const schematicTakeoffOpenManualEditorButton = document.querySelector("#schematicTakeoffOpenManualEditorButton");
+const schematicTakeoffReviewNextButton = document.querySelector("#schematicTakeoffReviewNextButton");
 const schematicTakeoffFittingList = document.querySelector("#schematicTakeoffFittingList");
+const schematicTakeoffOpenOrderButton = document.querySelector("#schematicTakeoffOpenOrderButton");
+const schematicTakeoffBackToSortButton = document.querySelector("#schematicTakeoffBackToSortButton");
 const schematicTakeoffTotal = document.querySelector("#schematicTakeoffTotal");
 const schematicTakeoffSummary = document.querySelector("#schematicTakeoffSummary");
 const schematicTakeoffExportButton = document.querySelector("#schematicTakeoffExportButton");
@@ -582,7 +595,7 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.81";
+const APP_VERSION = "v3.82";
 const APP_BUILD_DATE = "2026-09-06";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
@@ -22547,6 +22560,7 @@ function defaultSchematicTakeoffState() {
     pageCount: 1,
     pageLoading: false,
     tool: "rectangle",
+    reviewStep: "areas",
     zoom: 1,
     panX: 0,
     panY: 0,
@@ -22555,6 +22569,7 @@ function defaultSchematicTakeoffState() {
     lastSystemCode: "",
     selectedId: "",
     editingItemId: "",
+    editorOpen: false,
     pendingManualMarker: null,
     recognitionBusy: false,
     activeSelection: null,
@@ -22572,6 +22587,26 @@ function ensureSchematicTakeoffState() {
 function schematicTakeoffSelectedArea() {
   const takeoff = ensureSchematicTakeoffState();
   return takeoff.selections.find((selection) => selection.id === takeoff.selectedId) ?? null;
+}
+
+function applySchematicTakeoffReviewStep() {
+  const step = ensureSchematicTakeoffState().reviewStep || "areas";
+  schematicTakeoffReviewStepButtons.forEach((button) => {
+    const active = button.dataset.schematicReviewStep === step;
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-selected", String(active));
+  });
+  schematicTakeoffReviewPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.schematicReviewPanel !== step;
+  });
+}
+
+function setSchematicTakeoffReviewStep(step, options = {}) {
+  const takeoff = ensureSchematicTakeoffState();
+  const allowed = new Set(["areas", "sort", "order"]);
+  takeoff.reviewStep = allowed.has(step) ? step : "areas";
+  applySchematicTakeoffReviewStep();
+  if (options.scroll !== false) schematicTakeoffSidebar?.scrollTo?.({ top: 0, behavior: options.instant ? "auto" : "smooth" });
 }
 
 function schematicTakeoffAreaBounds(selection) {
@@ -23663,6 +23698,7 @@ function addSchematicTakeoffSelection(selection) {
   if (next.systemCode) takeoff.lastSystemCode = next.systemCode;
   takeoff.selections.push(next);
   takeoff.selectedId = next.id;
+  takeoff.reviewStep = "areas";
   renderSchematicTakeoffPanels();
   renderSchematicTakeoffCanvas();
 }
@@ -23712,7 +23748,9 @@ function beginSchematicTakeoffManualPlacement(canvasPoint) {
     return false;
   }
   takeoff.selectedId = selection.id;
+  setSchematicTakeoffReviewStep("sort", { instant: true });
   clearSchematicTakeoffFittingEditor();
+  takeoff.editorOpen = true;
   const transform = schematicTakeoffViewTransform();
   const markerSize = clampNumber(34 / Math.max(0.01, transform?.scale || 1), 9, 90);
   takeoff.pendingManualMarker = {
@@ -24369,6 +24407,7 @@ function updateSchematicTakeoffValveQuestions() {
 function clearSchematicTakeoffFittingEditor() {
   const takeoff = ensureSchematicTakeoffState();
   takeoff.editingItemId = "";
+  takeoff.editorOpen = false;
   takeoff.pendingManualMarker = null;
   if (schematicTakeoffFittingTypeInput) {
     schematicTakeoffFittingTypeInput.value = "Elbow";
@@ -24402,12 +24441,27 @@ function clearSchematicTakeoffFittingEditor() {
   updateSchematicTakeoffValveQuestions();
 }
 
+function openSchematicTakeoffManualEditor() {
+  const takeoff = ensureSchematicTakeoffState();
+  const selected = schematicTakeoffSelectedArea();
+  if (!selected) return;
+  clearSchematicTakeoffFittingEditor();
+  takeoff.editorOpen = true;
+  setSchematicTakeoffReviewStep("sort", { instant: true });
+  if (schematicTakeoffFittingSizeInput && selected.suggestedPipeSize) schematicTakeoffFittingSizeInput.value = selected.suggestedPipeSize;
+  renderSchematicTakeoffPanels();
+  schematicTakeoffFittingTypeInput?.focus?.({ preventScroll: true });
+}
+
 function editSchematicTakeoffFitting(itemId) {
   const takeoff = ensureSchematicTakeoffState();
   const selected = schematicTakeoffSelectedArea();
   const item = (selected?.items || []).find((entry) => entry.id === itemId);
   if (!item) return;
   takeoff.editingItemId = item.id;
+  takeoff.editorOpen = true;
+  setSchematicTakeoffReviewStep("sort", { instant: true });
+  if (schematicTakeoffFittingForm) schematicTakeoffFittingForm.hidden = false;
   if (schematicTakeoffFittingTypeInput) {
     schematicTakeoffFittingTypeInput.value = item.type || "Other";
     schematicTakeoffFittingTypeInput.disabled = Array.isArray(item.markers) && !item.unclassified;
@@ -24455,6 +24509,7 @@ async function countSchematicTakeoffSymbols() {
     schematicTakeoffSystemInput?.focus();
     return;
   }
+  setSchematicTakeoffReviewStep("sort", { instant: true });
   takeoff.recognitionBusy = true;
   selected.recognitionStatus = "Scanning the bounded area with the Australian HVAC symbol library…";
   renderSchematicTakeoffPanels();
@@ -24619,6 +24674,24 @@ function renderSchematicTakeoffPanels() {
   const takeoff = ensureSchematicTakeoffState();
   const selected = schematicTakeoffSelectedArea();
   const pageSelections = takeoff.selections.filter((selection) => selection.page === takeoff.page);
+  const workflowItems = takeoff.selections
+    .flatMap((selection) => selection.items || [])
+    .filter((item) => schematicTakeoffItemQuantity(item) > 0);
+  const reviewItems = workflowItems.filter((item) => schematicTakeoffItemNeedsReview(item));
+  if (takeoff.reviewStep === "sort" && !selected) takeoff.reviewStep = "areas";
+  if (takeoff.reviewStep === "order" && !workflowItems.length) takeoff.reviewStep = selected ? "sort" : "areas";
+  applySchematicTakeoffReviewStep();
+  if (schematicTakeoffAreasStepCount) schematicTakeoffAreasStepCount.textContent = String(takeoff.selections.length);
+  if (schematicTakeoffSortStepCount) schematicTakeoffSortStepCount.textContent = reviewItems.length
+    ? String(reviewItems.length)
+    : workflowItems.length ? "✓" : "0";
+  if (schematicTakeoffOrderStepCount) schematicTakeoffOrderStepCount.textContent = String(workflowItems.reduce((sum, item) => sum + schematicTakeoffItemQuantity(item), 0));
+  schematicTakeoffReviewStepButtons.forEach((button) => {
+    const step = button.dataset.schematicReviewStep;
+    button.disabled = step === "sort" ? !selected : step === "order" ? !workflowItems.length : false;
+  });
+  if (schematicTakeoffStartSortButton) schematicTakeoffStartSortButton.disabled = !selected || !selected.systemCode;
+  if (schematicTakeoffOpenOrderButton) schematicTakeoffOpenOrderButton.disabled = !workflowItems.length;
   if (schematicTakeoffSelectionCount) schematicTakeoffSelectionCount.textContent = `${takeoff.selections.length} ${takeoff.selections.length === 1 ? "area" : "areas"}`;
   if (schematicTakeoffSelectionList) {
     schematicTakeoffSelectionList.innerHTML = takeoff.selections.length
@@ -24707,8 +24780,26 @@ function renderSchematicTakeoffPanels() {
       : '<div class="schematic-empty-list">Recognised items will appear here with the same colours used on the schematic.</div>';
   }
   if (schematicTakeoffAddFittingButton) schematicTakeoffAddFittingButton.disabled = !selected;
+  const selectedReviewItems = (selected?.items || []).filter((item) => schematicTakeoffItemNeedsReview(item));
+  const editorOpen = Boolean(takeoff.editorOpen || takeoff.editingItemId || takeoff.pendingManualMarker);
+  if (schematicTakeoffFittingForm) schematicTakeoffFittingForm.hidden = !editorOpen;
+  if (schematicTakeoffReviewNextBar) schematicTakeoffReviewNextBar.dataset.complete = selectedReviewItems.length ? "false" : "true";
+  if (schematicTakeoffReviewNextTitle) {
+    const selectedHasItems = (selected?.items || []).some((item) => schematicTakeoffItemQuantity(item) > 0);
+    schematicTakeoffReviewNextTitle.textContent = !selected
+      ? "Choose an area first"
+      : selectedReviewItems.length
+      ? `${selectedReviewItems.length} ${selectedReviewItems.length === 1 ? "group needs" : "groups need"} review in this area`
+      : selectedHasItems ? "This area is fully sorted" : "Count this area or add a missed fitting";
+  }
+  if (schematicTakeoffReviewNextButton) {
+    schematicTakeoffReviewNextButton.disabled = !selectedReviewItems.length;
+    schematicTakeoffReviewNextButton.textContent = selectedReviewItems.length ? `Review next (${selectedReviewItems.length})` : "Review complete";
+  }
   if (schematicTakeoffFittingList) {
-    const items = selected?.items || [];
+    const items = [...(selected?.items || [])].sort((first, second) =>
+      Number(schematicTakeoffItemNeedsReview(second)) - Number(schematicTakeoffItemNeedsReview(first))
+      || schematicTakeoffItemDescription(first).localeCompare(schematicTakeoffItemDescription(second), undefined, { numeric: true }));
     schematicTakeoffFittingList.innerHTML = items.length
       ? items.map((item) => {
           const boltOrder = schematicTakeoffEbroBoltingText(item, schematicTakeoffItemQuantity(item));
@@ -24726,7 +24817,7 @@ function renderSchematicTakeoffPanels() {
               <span class="schematic-item-swatch" style="--detection-color:${escapeHtml(schematicTakeoffItemColor(item.type))}"></span>
               <div><strong>${escapeHtml(schematicTakeoffItemDescription(item))}</strong><span>${schematicTakeoffItemQuantity(item)} ${schematicTakeoffItemQuantity(item) === 1 ? "item" : "items"}${Array.isArray(item.markers) ? ` · Automatic count${schematicTakeoffItemNeedsReview(item) ? " · REVIEW REQUIRED" : " · Reviewed"}` : item.manualMarker ? " · Placed manually" : ""}${item.note ? ` · ${escapeHtml(item.note)}` : ""}</span>${materialLine}${boltLine}</div>
               <button class="secondary-button compact" type="button" data-edit-schematic-fitting="${escapeHtml(item.id)}">${schematicTakeoffItemNeedsReview(item) ? "Review" : "Edit"}</button>
-              <button class="danger" type="button" data-delete-schematic-fitting="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.type)}">×</button>
+              <button class="danger schematic-fitting-remove" type="button" data-delete-schematic-fitting="${escapeHtml(item.id)}" aria-label="Remove ${escapeHtml(item.type)}">${item.unclassified ? "Not a fitting" : "Remove"}</button>
             </div>`;
         }).join("")
       : `<div class="schematic-empty-list">${selected ? "No fittings in this area yet. Run the automatic count or add one manually." : "Select an area, then count symbols or add a fitting manually."}</div>`;
@@ -25092,6 +25183,7 @@ async function loadSchematicTakeoffFile(file) {
   takeoff.lastSystemCode = "";
   takeoff.selectedId = "";
   takeoff.editingItemId = "";
+  takeoff.reviewStep = "areas";
   takeoff.recognitionBusy = false;
   takeoff.page = 1;
   takeoff.pageCount = 1;
@@ -25188,6 +25280,27 @@ function setupSchematicTakeoff() {
     schematicTakeoffFileInput.value = "";
   });
   schematicTakeoffToolButtons.forEach((button) => button.addEventListener("click", () => setSchematicTakeoffTool(button.dataset.schematicTool)));
+  schematicTakeoffReviewStepButtons.forEach((button) => button.addEventListener("click", () => {
+    if (button.disabled) return;
+    setSchematicTakeoffReviewStep(button.dataset.schematicReviewStep);
+  }));
+  schematicTakeoffStartSortButton?.addEventListener("click", () => {
+    const selected = schematicTakeoffSelectedArea();
+    if (!selected) return;
+    if (!selected.systemCode) {
+      showAppNotice("Confirm the system table before sorting this area.", { tone: "warning" });
+      schematicTakeoffSystemInput?.focus?.();
+      return;
+    }
+    setSchematicTakeoffReviewStep("sort");
+  });
+  schematicTakeoffOpenOrderButton?.addEventListener("click", () => setSchematicTakeoffReviewStep("order"));
+  schematicTakeoffBackToSortButton?.addEventListener("click", () => setSchematicTakeoffReviewStep("sort"));
+  schematicTakeoffOpenManualEditorButton?.addEventListener("click", openSchematicTakeoffManualEditor);
+  schematicTakeoffReviewNextButton?.addEventListener("click", () => {
+    const next = (schematicTakeoffSelectedArea()?.items || []).find((item) => schematicTakeoffItemNeedsReview(item));
+    if (next) editSchematicTakeoffFitting(next.id);
+  });
   schematicTakeoffZoomOutButton?.addEventListener("click", () => setSchematicTakeoffZoom(ensureSchematicTakeoffState().zoom / 1.25));
   schematicTakeoffZoomInButton?.addEventListener("click", () => setSchematicTakeoffZoom(ensureSchematicTakeoffState().zoom * 1.25));
   schematicTakeoffFitButton?.addEventListener("click", fitSchematicTakeoffView);
@@ -25291,6 +25404,7 @@ function setupSchematicTakeoff() {
     if (!confirmed) return;
     takeoff.selections = [];
     takeoff.selectedId = "";
+    takeoff.reviewStep = "areas";
     clearSchematicTakeoffFittingEditor();
     renderSchematicTakeoffPanels();
     renderSchematicTakeoffCanvas();

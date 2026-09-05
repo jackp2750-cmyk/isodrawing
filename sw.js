@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v381-unambiguous-valve-counts";
+const CACHE_NAME = "spoolmate-v382-guided-takeoff-review";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=381",
-  "./ebro-hp112-bolting.js?v=381",
-  "./ebro-hp114-bolting.js?v=381",
-  "./app.js?v=381",
+  "./styles.css?v=382",
+  "./ebro-hp112-bolting.js?v=382",
+  "./ebro-hp114-bolting.js?v=382",
+  "./app.js?v=382",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.81`
+Current app version: `v3.82`
+
+The schematic take-off review now uses three large stages—Areas, Sort fittings and Order table—instead of one long sidebar. The current step occupies the full review width, areas and fitting rows have larger touch targets, items needing attention rise to the top, and the detailed editor opens only when it is needed.
 
 Recognised schematic badges now show `item/total` for their selected area, while markers belonging to other overlapping areas are faded. Closely stacked isolation valves remain separate counted items, with a regression fixture protecting the two-valve arrangement.
 

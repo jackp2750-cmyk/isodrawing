@@ -121,6 +121,10 @@ function check(condition, message) {
 
       await page.locator("#schematicTakeoffSystemInput").fill("chwp");
       await page.locator("#schematicTakeoffSystemInput").press("Tab");
+      await page.locator("#schematicTakeoffStartSortButton").click();
+      check(await page.locator('[data-schematic-review-panel="sort"]').first().isVisible(), `${name}: sorting step did not open`);
+      await page.locator("#schematicTakeoffOpenManualEditorButton").click();
+      check(await page.locator("#schematicTakeoffFittingForm").isVisible(), `${name}: manual fitting editor did not open on request`);
       await page.locator("#schematicTakeoffFittingTypeInput").selectOption("Isolation valve");
       check(await page.locator("#schematicTakeoffValveQuestions").isVisible(), `${name}: valve classification questions did not open`);
       await page.locator("#schematicTakeoffValveConnectionInput").selectOption("Flanged");
@@ -238,6 +242,7 @@ function check(condition, message) {
       check(materialRules.suctionDiffuserRules.some((row) => row.type === "Suction diffuser" && row.quantity === 1) && materialRules.suctionDiffuserRules.some((row) => row.type === "Coupling" && row.quantity === 1), `${name}: suction diffuser connection rule failed (${JSON.stringify(materialRules.suctionDiffuserRules)})`);
       check(materialRules.heatExchangerRules.some((row) => row.type === "Connection flange" && row.quantity === 8) && materialRules.heatExchangerRules.some((row) => row.type === "Reducer" && row.quantity === 8), `${name}: verified heat-exchanger connection count was not multiplied by equipment quantity (${JSON.stringify(materialRules.heatExchangerRules)})`);
       check(materialRules.unverifiedPumpReview, `${name}: an unverified pump was allowed through order review`);
+      await page.locator("#schematicTakeoffOpenManualEditorButton").click();
       await page.locator("#schematicTakeoffFittingTypeInput").selectOption("Pump");
       await page.locator("#schematicTakeoffFittingSizeInput").fill("NB 100");
       const equipmentEditor = await page.evaluate(() => ({
@@ -309,12 +314,19 @@ function check(condition, message) {
         check(longPressPending, "ipad: long-press did not start exact manual fitting placement");
       }
 
+      await page.locator("#schematicTakeoffOpenOrderButton").click();
+      check(await page.locator('[data-schematic-review-panel="order"]').isVisible(), `${name}: order-table step did not open`);
+      await page.locator("#schematicTakeoffBackToSortButton").click();
+      check(await page.locator('[data-schematic-review-panel="sort"]').first().isVisible(), `${name}: back to fitting review did not restore sorting`);
+
       const layout = await page.evaluate(() => {
         const card = document.querySelector(".schematic-takeoff-card");
         const sidebar = document.querySelector(".schematic-takeoff-sidebar");
         const close = document.querySelector("#schematicTakeoffCloseButton").getBoundingClientRect();
         const countButton = document.querySelector("#schematicTakeoffCountButton").getBoundingClientRect();
         const detectionReview = document.querySelector("#schematicTakeoffDetectionReview").getBoundingClientRect();
+        const reviewSteps = document.querySelector(".schematic-review-steps").getBoundingClientRect();
+        const fittingRow = document.querySelector(".schematic-fitting-row")?.getBoundingClientRect();
         return {
           card: { width: card.clientWidth, scrollWidth: card.scrollWidth, height: card.clientHeight, scrollHeight: card.scrollHeight },
           pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -322,6 +334,10 @@ function check(condition, message) {
           closeVisible: close.left >= 0 && close.right <= innerWidth && close.top >= 0 && close.bottom <= innerHeight,
           countControlUsable: countButton.width > 80 && countButton.height >= 36,
           detectionReviewUsable: detectionReview.width > 180,
+          reviewStepsUsable: reviewSteps.width > 260 && reviewSteps.height >= 50,
+          fittingRowsLargeEnough: !fittingRow || fittingRow.height >= 58,
+          activeStep: document.querySelector("[data-schematic-review-step].active")?.dataset.schematicReviewStep || "",
+          visibleStepPanels: [...document.querySelectorAll("[data-schematic-review-panel]")].filter((panel) => !panel.hidden).map((panel) => panel.dataset.schematicReviewPanel),
           selectedCount: document.querySelector("#schematicTakeoffSelectionCount").textContent,
         };
       });
@@ -331,6 +347,8 @@ function check(condition, message) {
       check(layout.sidebarWidth > 200, `${name}: review sidebar is unusable`);
       check(layout.closeVisible, `${name}: close button is outside the viewport`);
       check(layout.countControlUsable && layout.detectionReviewUsable, `${name}: automatic-count review controls are unusable (${JSON.stringify(layout)})`);
+      check(layout.reviewStepsUsable && layout.fittingRowsLargeEnough, `${name}: review steps or fitting rows are too small (${JSON.stringify(layout)})`);
+      check(layout.activeStep === "sort" && JSON.stringify(layout.visibleStepPanels) === JSON.stringify(["sort", "sort"]), `${name}: step navigation exposed the wrong panels (${JSON.stringify(layout)})`);
       check(layout.selectedCount === "2 areas", `${name}: rectangle/lasso selections did not render`);
       check(pageErrors.length === 0, `${name}: ${pageErrors.join(" | ")}`);
 
