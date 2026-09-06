@@ -1,6 +1,15 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.83`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.84`.
+
+## v3.84 - Complete Stage 3 pump-train recognition
+
+- Preserved both isolation valves when two parallel valve symbols are drawn only a few pixels apart; the supplied CHWP crop now counts all six valves.
+- Added shape-based recognition for the Stage 3 mag-flow symbol using its circle, internal M and paired connection bars.
+- Suppressed PDF text labels from orange `?` suggestions while retaining genuinely unresolved schematic geometry for review.
+- Changed the completed count action to `Recount this area` so an existing selection can be deliberately refreshed after recognition updates.
+- Added regression coverage for two close parallel valve pairs, mag-flow discrimination and the exact supplied CHWP pump arrangement.
+- Bumped the PWA cache to `spoolmate-v384-stage3-symbol-recognition`.
 
 ## v3.83 - Pump-side symbol recognition and clear EBRO quantities
 

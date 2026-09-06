@@ -101,6 +101,7 @@ function check(condition, message) {
       return {
         directCount: direct.markers.length,
         directUnknownCount: direct.unknownMarkers?.length || 0,
+        directUnknowns: (direct.unknownMarkers || []).map((marker) => ({ x: Math.round(marker.x + marker.width / 2), y: Math.round(marker.y + marker.height / 2), width: Math.round(marker.width), height: Math.round(marker.height), directions: marker.directions })),
         classified: (direct.classifiedGroups || []).map((group) => ({ type: group.type, count: group.markers?.length || 0, markers: (group.markers || []).map((marker) => ({ x: Math.round(marker.x), y: Math.round(marker.y), width: Math.round(marker.width), height: Math.round(marker.height), source: marker.source })) })),
         automaticCount: schematicTakeoffItemQuantity(automatic),
         uncertainCount: uncertain.length,
@@ -124,7 +125,7 @@ function check(condition, message) {
 
     if (suppliedFixture) {
       check(result.directCount > 0, `supplied fixture: no standard valve symbols detected (${JSON.stringify(result)})`);
-      console.log(`supplied fixture: ${result.directCount} isolation valves and ${result.uncertainCount} ? review items detected; ${JSON.stringify(result.markers)}; classified ${JSON.stringify(result.classified)}`);
+      console.log(`supplied fixture: ${result.directCount} isolation valves and ${result.uncertainCount} ? review items detected; ${JSON.stringify(result.markers)}; classified ${JSON.stringify(result.classified)}; unknowns ${JSON.stringify(result.directUnknowns)}`);
       await page.screenshot({ path: path.join(os.tmpdir(), "spoolmate-schematic-recognition-supplied.png"), fullPage: false });
       check(errors.length === 0, errors.join(" | "));
       return;
@@ -194,9 +195,10 @@ function check(condition, message) {
           return {
             exportDisabled: document.querySelector("#schematicTakeoffExportButton").disabled,
             questionMarks: selected.items.filter((item) => item.unclassified).flatMap((item) => item.markers || []).filter((marker) => marker.questionMark).length,
+            blockers: selected.items.filter((item) => (item.markers || []).some((marker) => marker.included !== false) && (!item.reviewed || item.unclassified)).map((item) => ({ type: item.type, source: item.source, reviewed: item.reviewed, unclassified: item.unclassified, included: (item.markers || []).filter((marker) => marker.included !== false).length })),
           };
         });
-        check(!excludedUnknowns.exportDisabled, "excluding every false ? mark did not unblock export");
+        check(!excludedUnknowns.exportDisabled, `excluding every false ? mark did not unblock export (${JSON.stringify({ excludedUnknowns, classified: result.classified })})`);
         check(excludedUnknowns.questionMarks === Math.max(0, result.uncertainCount - 1), "question-mark identity was lost when excluding a possible item");
       }
     }
@@ -260,6 +262,90 @@ function check(condition, message) {
       });
       check(stackedValveCount === 2, `stacked isolation valves must remain two separate counted items (found ${stackedValveCount})`);
 
+      const closeParallelValveCount = await page.evaluate(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 260;
+        canvas.height = 190;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff3db";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#665e53";
+        ctx.lineWidth = 2;
+        const drawValve = (x, y, halfWidth = 11, halfHeight = 7) => {
+          ctx.beginPath();
+          ctx.moveTo(x - halfWidth, y - halfHeight);
+          ctx.lineTo(x, y);
+          ctx.lineTo(x - halfWidth, y + halfHeight);
+          ctx.closePath();
+          ctx.moveTo(x + halfWidth, y - halfHeight);
+          ctx.lineTo(x, y);
+          ctx.lineTo(x + halfWidth, y + halfHeight);
+          ctx.closePath();
+          ctx.moveTo(x - halfWidth - 12, y);
+          ctx.lineTo(x + halfWidth + 12, y);
+          ctx.stroke();
+        };
+        const drawParallelPair = (mainY) => {
+          const bypassY = mainY - 18;
+          ctx.beginPath();
+          ctx.moveTo(18, mainY);
+          ctx.lineTo(242, mainY);
+          ctx.moveTo(88, mainY);
+          ctx.lineTo(88, bypassY);
+          ctx.lineTo(172, bypassY);
+          ctx.lineTo(172, mainY);
+          ctx.stroke();
+          drawValve(130, mainY);
+          drawValve(130, bypassY);
+        };
+        drawParallelPair(72);
+        drawParallelPair(154);
+        schematicTakeoffState = defaultSchematicTakeoffState();
+        schematicTakeoffState.source = canvas;
+        schematicTakeoffState.sourceWidth = canvas.width;
+        schematicTakeoffState.sourceHeight = canvas.height;
+        schematicTakeoffState.fileName = "close-parallel-isolation-valves.png";
+        schematicTakeoffState.fileKind = "image";
+        const selection = { id: "parallel", page: 1, kind: "rectangle", x: 0, y: 0, width: canvas.width, height: canvas.height, items: [] };
+        schematicTakeoffState.selections = [selection];
+        schematicTakeoffState.selectedId = selection.id;
+        return schematicTakeoffDetectValveSymbols(selection).markers.length;
+      });
+      check(closeParallelValveCount === 4, `two close parallel valve pairs must remain four separate counted items (found ${closeParallelValveCount})`);
+
+      const textAnnotationUnknowns = await page.evaluate(() => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 260;
+        canvas.height = 130;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff3db";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "#665e53";
+        ctx.fillStyle = "#665e53";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(12, 72);
+        ctx.lineTo(248, 72);
+        ctx.stroke();
+        ctx.font = "16px sans-serif";
+        ctx.fillText("150dia", 100, 68);
+        schematicTakeoffState = defaultSchematicTakeoffState();
+        schematicTakeoffState.source = canvas;
+        schematicTakeoffState.sourceWidth = canvas.width;
+        schematicTakeoffState.sourceHeight = canvas.height;
+        schematicTakeoffState.fileName = "text-annotation.png";
+        schematicTakeoffState.fileKind = "image";
+        schematicTakeoffState.pageTextByPage.set(1, [{ text: "150dia", x: 130, y: 60, width: 60, height: 16 }]);
+        const selection = { id: "text-annotation", page: 1, kind: "rectangle", x: 0, y: 0, width: canvas.width, height: canvas.height, items: [] };
+        schematicTakeoffState.selections = [selection];
+        schematicTakeoffState.selectedId = selection.id;
+        return schematicTakeoffDetectValveSymbols(selection).unknownMarkers.map((marker) => ({
+          x: marker.x + marker.width / 2,
+          y: marker.y + marker.height / 2,
+        }));
+      });
+      check(!textAnnotationUnknowns.some((center) => center.x >= 92 && center.x <= 168 && center.y >= 40 && center.y <= 82), `PDF text annotation produced false ? marks (${JSON.stringify(textAnnotationUnknowns)})`);
+
       const pumpAssembly = await page.evaluate(() => {
         const canvas = document.createElement("canvas");
         canvas.width = 520;
@@ -311,8 +397,12 @@ function check(condition, message) {
         ctx.arc(335, 90, 2.5, 0, Math.PI * 2);
         ctx.fill();
 
-        // Flexible bellow: it must remain a review mark, not an isolation valve.
+        // Mag flow meter: circle, internal M and paired connection bars.
         ctx.beginPath();
+        ctx.moveTo(390, 80);
+        ctx.lineTo(390, 100);
+        ctx.moveTo(420, 80);
+        ctx.lineTo(420, 100);
         ctx.arc(405, 90, 10, 0, Math.PI * 2);
         ctx.moveTo(398, 84);
         ctx.lineTo(401, 96);
@@ -359,9 +449,10 @@ function check(condition, message) {
       check(pumpGroupCount("Pump") === 1, `pump context was not detected (${JSON.stringify(pumpAssembly)})`);
       check(pumpGroupCount("Strainer") === 1, `pump strainer was not detected (${JSON.stringify(pumpAssembly)})`);
       check(pumpGroupCount("Check valve") === 1, `pump check valve was not detected (${JSON.stringify(pumpAssembly)})`);
+      check(pumpGroupCount("Mag flow meter") === 1, `mag flow meter was not detected (${JSON.stringify(pumpAssembly)})`);
       check(pumpGroupCount("Isolation valve") === 1, `vertical isolation valve was not detected exactly once (${JSON.stringify(pumpAssembly)})`);
-      check(!pumpAssembly.groups.find((group) => group.type === "Isolation valve")?.centers.some((center) => Math.abs(center.x - 405) < 20), `flexible bellow was misclassified as an isolation valve (${JSON.stringify(pumpAssembly)})`);
-      check(pumpAssembly.unknownCenters.some((center) => Math.abs(center.x - 405) < 20), `flexible bellow did not remain marked for review (${JSON.stringify(pumpAssembly)})`);
+      check(!pumpAssembly.groups.find((group) => group.type === "Isolation valve")?.centers.some((center) => Math.abs(center.x - 405) < 20), `mag flow meter was misclassified as an isolation valve (${JSON.stringify(pumpAssembly)})`);
+      check(!pumpAssembly.unknownCenters.some((center) => Math.abs(center.x - 405) < 20), `mag flow meter incorrectly remained marked for review (${JSON.stringify(pumpAssembly)})`);
     }
     check(errors.length === 0, errors.join(" | "));
     console.log("Schematic local recognition review passed");

@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v383-schematic-recognition-ebro-counts";
+const CACHE_NAME = "spoolmate-v384-stage3-symbol-recognition";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=383",
-  "./ebro-hp112-bolting.js?v=383",
-  "./ebro-hp114-bolting.js?v=383",
-  "./app.js?v=383",
+  "./styles.css?v=384",
+  "./ebro-hp112-bolting.js?v=384",
+  "./ebro-hp114-bolting.js?v=384",
+  "./app.js?v=384",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [
