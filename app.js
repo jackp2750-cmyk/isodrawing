@@ -595,7 +595,7 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.82";
+const APP_VERSION = "v3.83";
 const APP_BUILD_DATE = "2026-09-06";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
@@ -23164,6 +23164,287 @@ function schematicTakeoffDetectTextGuidedSymbols(selection) {
     .map(([type, markers]) => ({ type, symbolClass: type, markers }));
 }
 
+function schematicTakeoffOrientedStrokeCoverage(mask, width, height, centerX, centerY, orientation, axial1, normal1, axial2, normal2, radius = 1) {
+  const point = (axial, normal) => orientation === "horizontal"
+    ? { x: centerX + axial, y: centerY + normal }
+    : { x: centerX + normal, y: centerY + axial };
+  const first = point(axial1, normal1);
+  const second = point(axial2, normal2);
+  return schematicTakeoffStrokeCoverage(mask, width, height, first.x, first.y, second.x, second.y, radius);
+}
+
+function schematicTakeoffStrainerTemplateScore(mask, width, height, centerX, centerY, half, orientation) {
+  const radius = Math.max(1, Math.round(half * 0.12));
+  const axis = schematicTakeoffOrientedStrokeCoverage(mask, width, height, centerX, centerY, orientation, -half, 0, half, 0, radius);
+  const ends = [
+    schematicTakeoffOrientedStrokeCoverage(mask, width, height, centerX, centerY, orientation, -half, -half * 0.65, -half, half * 0.65, radius),
+    schematicTakeoffOrientedStrokeCoverage(mask, width, height, centerX, centerY, orientation, half, -half * 0.65, half, half * 0.65, radius),
+  ];
+  const continuations = [
+    schematicTakeoffOrientedStrokeCoverage(mask, width, height, centerX, centerY, orientation, -half * 2, 0, -half * 1.05, 0, radius),
+    schematicTakeoffOrientedStrokeCoverage(mask, width, height, centerX, centerY, orientation, half * 1.05, 0, half * 2, 0, radius),
+  ];
+  let bestBranch = null;
+  [-1, 1].forEach((normalSign) => {
+    [-1, 1].forEach((axialSign) => {
+      const branch = schematicTakeoffOrientedStrokeCoverage(
+        mask, width, height, centerX, centerY, orientation,
+        -0.55 * half * axialSign, 0,
+        0.5 * half * axialSign, 1.02 * half * normalSign,
+        radius,
+      );
+      const cap = schematicTakeoffOrientedStrokeCoverage(
+        mask, width, height, centerX, centerY, orientation,
+        0.5 * half * axialSign, 1.02 * half * normalSign,
+        -0.05 * half * axialSign, 1.58 * half * normalSign,
+        radius,
+      );
+      const score = branch * 0.58 + cap * 0.42;
+      if (!bestBranch || score > bestBranch.score) bestBranch = { branch, cap, score, normalSign, axialSign };
+    });
+  });
+  if (
+    axis < 0.82
+    || Math.min(...ends) < 0.58
+    || Math.min(...continuations) < 0.64
+    || !bestBranch
+    || bestBranch.branch < 0.68
+    || bestBranch.cap < 0.54
+  ) return null;
+  return {
+    score: axis * 0.14
+      + ((ends[0] + ends[1]) / 2) * 0.2
+      + ((continuations[0] + continuations[1]) / 2) * 0.13
+      + bestBranch.branch * 0.31
+      + bestBranch.cap * 0.22,
+    branch: bestBranch,
+  };
+}
+
+function schematicTakeoffDetectPumpAccessorySymbols(mask, width, height, geometry, selection, textGuidedGroups, knownMarkers = []) {
+  const pumps = textGuidedGroups.find((group) => group.type === "Pump")?.markers || [];
+  if (!pumps.length) return [];
+  const knownBoxes = knownMarkers.map((marker) => ({
+    x: (marker.x - geometry.left) * geometry.scale,
+    y: (marker.y - geometry.top) * geometry.scale,
+    width: marker.width * geometry.scale,
+    height: marker.height * geometry.scale,
+  }));
+  const found = { Strainer: [] };
+  pumps.forEach((pump) => {
+    const centerX = (pump.x + pump.width / 2 - geometry.left) * geometry.scale;
+    const centerY = (pump.y + pump.height / 2 - geometry.top) * geometry.scale;
+    const extent = clampNumber(Math.max(pump.width, pump.height) * geometry.scale, 28, 110);
+    const horizontalPair = [
+      schematicTakeoffStrokeCoverage(mask, width, height, centerX - extent * 1.9, centerY, centerX - extent * 0.62, centerY, 2),
+      schematicTakeoffStrokeCoverage(mask, width, height, centerX + extent * 0.62, centerY, centerX + extent * 1.9, centerY, 2),
+    ];
+    const verticalPair = [
+      schematicTakeoffStrokeCoverage(mask, width, height, centerX, centerY - extent * 1.9, centerX, centerY - extent * 0.62, 2),
+      schematicTakeoffStrokeCoverage(mask, width, height, centerX, centerY + extent * 0.62, centerX, centerY + extent * 1.9, 2),
+    ];
+    const orientation = Math.min(...horizontalPair) >= Math.min(...verticalPair) ? "horizontal" : "vertical";
+    const candidates = { Strainer: [] };
+    const minimumHalf = clampNumber(Math.round(extent * 0.17), 6, 18);
+    const maximumHalf = clampNumber(Math.round(extent * 0.36), minimumHalf + 2, 28);
+    for (let side = -1; side <= 1; side += 2) {
+      // On this schematic family the strainer/check are the first inline bodies
+      // beside the pump; the flexible bellow and isolation valve sit farther out.
+      // Keeping the search to the first two pump-body widths prevents the bellow's
+      // internal M from being mistaken for the swing-check flap.
+      for (let distance = extent * 0.82; distance <= extent * 2.05; distance += 2) {
+        for (let normal = -extent * 0.24; normal <= extent * 0.24; normal += 2) {
+          const candidateX = orientation === "horizontal" ? centerX + distance * side : centerX + normal;
+          const candidateY = orientation === "horizontal" ? centerY + normal : centerY + distance * side;
+          if (candidateX < 30 || candidateY < 30 || candidateX >= width - 30 || candidateY >= height - 30) continue;
+          if (!schematicTakeoffInkNear(mask, width, height, candidateX, candidateY, 2)) continue;
+          for (let half = minimumHalf; half <= maximumHalf; half += 2) {
+            const candidateBox = orientation === "horizontal"
+              ? { x: candidateX - half * 1.25, y: candidateY - half * 1.8, width: half * 2.5, height: half * 3.6 }
+              : { x: candidateX - half * 1.8, y: candidateY - half * 1.25, width: half * 3.6, height: half * 2.5 };
+            const overlapsKnown = knownBoxes.some((known) => schematicTakeoffBoxOverlap(candidateBox, known) > 0.16);
+            if (overlapsKnown) continue;
+            const strainer = schematicTakeoffStrainerTemplateScore(mask, width, height, candidateX, candidateY, half, orientation);
+            if (strainer?.score >= 0.72) candidates.Strainer.push({ ...candidateBox, centerX: candidateX, centerY: candidateY, half, score: strainer.score, distance, orientation });
+          }
+        }
+      }
+    }
+    Object.entries(candidates).forEach(([type, options]) => {
+      options.sort((first, second) => first.distance - second.distance || second.score - first.score || first.half - second.half);
+      const candidate = options.find((option) => {
+        const sourceBox = {
+          x: geometry.left + option.x / geometry.scale,
+          y: geometry.top + option.y / geometry.scale,
+          width: option.width / geometry.scale,
+          height: option.height / geometry.scale,
+        };
+        return !Object.values(found).flat().some((existing) => schematicTakeoffBoxOverlap(existing, sourceBox) > 0.16);
+      });
+      if (!candidate) return;
+      const sourceCenter = {
+        x: geometry.left + candidate.centerX / geometry.scale,
+        y: geometry.top + candidate.centerY / geometry.scale,
+      };
+      if (!schematicTakeoffSelectionContainsPoint(selection, sourceCenter)) return;
+      const marker = {
+        id: createTraceabilityId("MARK"),
+        type,
+        x: geometry.left + candidate.x / geometry.scale,
+        y: geometry.top + candidate.y / geometry.scale,
+        width: candidate.width / geometry.scale,
+        height: candidate.height / geometry.scale,
+        confidence: clampNumber(Math.round(candidate.score * 100), 72, 96),
+        included: true,
+        source: "pump-context-shape",
+        reason: `${type} shape beside labelled pump`,
+        orientation: candidate.orientation,
+      };
+      const duplicate = found[type].some((existing) => schematicTakeoffBoxOverlap(existing, marker) > 0.22);
+      if (!duplicate) found[type].push(marker);
+    });
+  });
+  return Object.entries(found)
+    .filter(([, markers]) => markers.length)
+    .map(([type, markers]) => ({ type, symbolClass: type, markers }));
+}
+
+function schematicTakeoffFindIsolationValveNearMarker(mask, width, height, geometry, marker) {
+  const verticalInline = marker.directions?.includes("up") && marker.directions?.includes("down");
+  if (!verticalInline) return null;
+  const markerCenterX = (marker.x + marker.width / 2 - geometry.left) * geometry.scale;
+  const markerCenterY = (marker.y + marker.height / 2 - geometry.top) * geometry.scale;
+  const search = clampNumber(Math.round(Math.max(marker.width, marker.height) * geometry.scale), 7, 24);
+  const suggestedOrientations = ["vertical"];
+  let best = null;
+  for (let y = Math.round(markerCenterY - search); y <= Math.round(markerCenterY + search); y += 1) {
+    for (let x = Math.round(markerCenterX - search); x <= Math.round(markerCenterX + search); x += 1) {
+      if (!schematicTakeoffInkNear(mask, width, height, x, y, 1)) continue;
+      suggestedOrientations.forEach((orientation) => {
+        for (let crossHalf = 4; crossHalf <= 10; crossHalf += 1) {
+          for (let axialHalf = Math.max(7, crossHalf + 2); axialHalf <= 18; axialHalf += 1) {
+            const halfWidth = orientation === "horizontal" ? axialHalf : crossHalf;
+            const halfHeight = orientation === "horizontal" ? crossHalf : axialHalf;
+            if (x - halfWidth < 2 || x + halfWidth >= width - 2 || y - halfHeight < 2 || y + halfHeight >= height - 2) continue;
+            const diagonals = [
+              schematicTakeoffStrokeCoverage(mask, width, height, x, y, x - halfWidth, y - halfHeight),
+              schematicTakeoffStrokeCoverage(mask, width, height, x, y, x - halfWidth, y + halfHeight),
+              schematicTakeoffStrokeCoverage(mask, width, height, x, y, x + halfWidth, y - halfHeight),
+              schematicTakeoffStrokeCoverage(mask, width, height, x, y, x + halfWidth, y + halfHeight),
+            ];
+            if (Math.min(...diagonals) < 0.76) continue;
+            const closingEdges = orientation === "horizontal"
+              ? [
+                schematicTakeoffStrokeCoverage(mask, width, height, x - halfWidth, y - halfHeight, x - halfWidth, y + halfHeight),
+                schematicTakeoffStrokeCoverage(mask, width, height, x + halfWidth, y - halfHeight, x + halfWidth, y + halfHeight),
+              ]
+              : [
+                schematicTakeoffStrokeCoverage(mask, width, height, x - halfWidth, y - halfHeight, x + halfWidth, y - halfHeight),
+                schematicTakeoffStrokeCoverage(mask, width, height, x - halfWidth, y + halfHeight, x + halfWidth, y + halfHeight),
+              ];
+            if (Math.min(...closingEdges) < 0.72) continue;
+            const axisCoverage = orientation === "horizontal"
+              ? schematicTakeoffStrokeCoverage(mask, width, height, x - halfWidth, y, x + halfWidth, y)
+              : schematicTakeoffStrokeCoverage(mask, width, height, x, y - halfHeight, x, y + halfHeight);
+            if (axisCoverage < 0.8) continue;
+            const continuation = Math.max(8, Math.round(Math.max(halfWidth, halfHeight) * 0.9));
+            const continuations = orientation === "horizontal"
+              ? [
+                schematicTakeoffStrokeCoverage(mask, width, height, x - halfWidth - continuation, y, x - halfWidth - 1, y),
+                schematicTakeoffStrokeCoverage(mask, width, height, x + halfWidth + 1, y, x + halfWidth + continuation, y),
+              ]
+              : [
+                schematicTakeoffStrokeCoverage(mask, width, height, x, y - halfHeight - continuation, x, y - halfHeight - 1),
+                schematicTakeoffStrokeCoverage(mask, width, height, x, y + halfHeight + 1, x, y + halfHeight + continuation),
+              ];
+            if (Math.min(...continuations) < 0.62) continue;
+            const purity = schematicTakeoffValveShapePurity(mask, width, height, x, y, halfWidth, halfHeight, orientation);
+            if (purity < 0.965) continue;
+            const score = diagonals.reduce((sum, value) => sum + value, 0) / diagonals.length * 0.48
+              + (closingEdges[0] + closingEdges[1]) / 2 * 0.18
+              + axisCoverage * 0.12
+              + (continuations[0] + continuations[1]) / 2 * 0.1
+              + purity * 0.12;
+            if (!best || score > best.score) best = { x, y, halfWidth, halfHeight, orientation, purity, score };
+          }
+        }
+      });
+    }
+  }
+  if (!best || best.score < 0.88) return null;
+  return {
+    id: createTraceabilityId("MARK"),
+    type: "Valve",
+    x: geometry.left + (best.x - best.halfWidth - 2) / geometry.scale,
+    y: geometry.top + (best.y - best.halfHeight - 2) / geometry.scale,
+    width: (best.halfWidth * 2 + 4) / geometry.scale,
+    height: (best.halfHeight * 2 + 4) / geometry.scale,
+    confidence: clampNumber(Math.round(best.score * 100), 80, 98),
+    shapePurity: best.purity,
+    orientation: best.orientation,
+    included: true,
+    source: "question-mark-promoted",
+    reason: "Isolation-valve bow-tie shape confirmed from uncertain inline mark",
+  };
+}
+
+function schematicTakeoffPromotePumpCheckValves(unknownMarkers, textGuidedGroups, strainerGroups) {
+  const pumps = textGuidedGroups.find((group) => group.type === "Pump")?.markers || [];
+  const strainers = strainerGroups.find((group) => group.type === "Strainer")?.markers || [];
+  const promoted = [];
+  const used = new Set();
+  pumps.forEach((pump) => {
+    const pumpCenter = { x: pump.x + pump.width / 2, y: pump.y + pump.height / 2 };
+    const extent = clampNumber(Math.max(pump.width, pump.height), 28, 110);
+    const nearbyStrainer = strainers
+      .map((marker) => ({ marker, distance: Math.hypot(marker.x + marker.width / 2 - pumpCenter.x, marker.y + marker.height / 2 - pumpCenter.y) }))
+      .filter((entry) => entry.distance <= extent * 2.2)
+      .sort((first, second) => first.distance - second.distance)[0]?.marker;
+    if (!nearbyStrainer) return;
+    const orientation = nearbyStrainer.orientation || "horizontal";
+    const strainerCenter = { x: nearbyStrainer.x + nearbyStrainer.width / 2, y: nearbyStrainer.y + nearbyStrainer.height / 2 };
+    const strainerSide = Math.sign(orientation === "horizontal" ? strainerCenter.x - pumpCenter.x : strainerCenter.y - pumpCenter.y) || -1;
+    const candidates = unknownMarkers
+      .filter((marker) => !used.has(marker.id))
+      .map((marker) => {
+        const center = { x: marker.x + marker.width / 2, y: marker.y + marker.height / 2 };
+        const axial = orientation === "horizontal" ? Math.abs(center.x - pumpCenter.x) : Math.abs(center.y - pumpCenter.y);
+        const normal = orientation === "horizontal" ? Math.abs(center.y - pumpCenter.y) : Math.abs(center.x - pumpCenter.x);
+        const inline = orientation === "horizontal"
+          ? marker.directions?.includes("left") && marker.directions?.includes("right")
+          : marker.directions?.includes("up") && marker.directions?.includes("down");
+        const candidateSide = Math.sign(orientation === "horizontal" ? center.x - pumpCenter.x : center.y - pumpCenter.y);
+        return { marker, center, axial, normal, inline, oppositeStrainer: candidateSide === -strainerSide };
+      })
+      .filter((entry) => entry.inline && entry.oppositeStrainer && entry.axial >= extent * 0.65 && entry.axial <= extent * 1.95 && entry.normal <= extent * 0.3)
+      .sort((first, second) => first.axial - second.axial || first.normal - second.normal);
+    const candidate = candidates[0];
+    if (!candidate) return;
+    used.add(candidate.marker.id);
+    const width = Math.max(candidate.marker.width, extent * 0.55);
+    const height = Math.max(candidate.marker.height, extent * 0.4);
+    promoted.push({
+      ...candidate.marker,
+      id: createTraceabilityId("MARK"),
+      type: "Check valve",
+      x: candidate.center.x - width / 2,
+      y: candidate.center.y - height / 2,
+      width,
+      height,
+      confidence: 86,
+      included: true,
+      questionMark: false,
+      source: "pump-context-shape",
+      reason: "Inline swing-check shape beside labelled pump",
+      orientation,
+    });
+  });
+  return {
+    groups: promoted.length ? [{ type: "Check valve", symbolClass: "Check valve", markers: promoted }] : [],
+    unknownMarkers: unknownMarkers.filter((marker) => !used.has(marker.id)),
+  };
+}
+
 function schematicTakeoffDetectValveSymbols(selection) {
   const geometry = schematicTakeoffCropGeometry(selection, 1100);
   const crop = schematicTakeoffCropCanvasForSelection(selection, 1100);
@@ -23175,7 +23456,7 @@ function schematicTakeoffDetectValveSymbols(selection) {
   const maximumHalf = Math.max(minimumHalf + 2, Math.min(30, Math.round(Math.min(width, height) / 8)));
   const sizes = [];
   for (let size = minimumHalf; size <= maximumHalf; size += Math.max(2, Math.round(size / 6))) sizes.push(size);
-  const aspectRatios = [0.58, 0.72, 0.88, 1.05, 1.24, 1.45];
+  const aspectRatios = [0.46, 0.58, 0.72, 0.88, 1.05, 1.24, 1.45, 1.72];
   const seedDistance = Math.max(3, Math.round(minimumHalf * 0.55));
   const seedRadius = Math.max(1, Math.round(seedDistance * 0.45));
   for (let y = maximumHalf + 2; y < height - maximumHalf - 2; y += centerStep) {
@@ -23243,7 +23524,7 @@ function schematicTakeoffDetectValveSymbols(selection) {
             : (horizontalEdgePair[0] + horizontalEdgePair[1]) / 2;
           const axisCoverage = orientation === "horizontal" ? horizontalAxis : verticalAxis;
           const shapePurity = schematicTakeoffValveShapePurity(mask, width, height, x, y, halfWidth, halfHeight, orientation);
-          if (shapePurity < 0.7) return;
+          if (shapePurity < 0.965) return;
           const score = diagonalAverage * 0.62 + weakestDiagonal * 0.1 + outerEdges * 0.1 + axisCoverage * 0.08 + shapePurity * 0.1;
           if (!best || score > best.score) {
             best = {
@@ -23274,23 +23555,7 @@ function schematicTakeoffDetectValveSymbols(selection) {
     });
     if (!duplicate) accepted.push(candidate);
   });
-  const sizeClusters = [];
-  accepted.forEach((candidate) => {
-    const major = Math.max(candidate.width, candidate.height);
-    const cluster = sizeClusters.find((entry) => Math.abs(major - entry.mean) / Math.max(1, entry.mean) <= 0.18);
-    if (cluster) {
-      cluster.members.push(candidate);
-      cluster.mean = cluster.members.reduce((sum, item) => sum + Math.max(item.width, item.height), 0) / cluster.members.length;
-    } else {
-      sizeClusters.push({ mean: major, members: [candidate] });
-    }
-  });
-  sizeClusters.sort((a, b) => b.members.length - a.members.length || b.mean - a.mean);
-  const dominantCluster = sizeClusters[0] || null;
-  const scaleAccepted = dominantCluster && accepted.length > 1
-    ? accepted.filter((candidate) => Math.abs(Math.max(candidate.width, candidate.height) - dominantCluster.mean) / Math.max(1, dominantCluster.mean) <= 0.22)
-    : accepted;
-  const markers = scaleAccepted
+  const markers = accepted
     .filter((candidate) => schematicTakeoffSelectionContainsPoint(selection, {
       x: geometry.left + candidate.centerX / geometry.scale,
       y: geometry.top + candidate.centerY / geometry.scale,
@@ -23311,9 +23576,29 @@ function schematicTakeoffDetectValveSymbols(selection) {
     }));
   const textGuidedGroups = schematicTakeoffDetectTextGuidedSymbols(selection);
   const textGuidedMarkers = textGuidedGroups.flatMap((group) => group.markers);
-  const unknownMarkers = schematicTakeoffDetectUnclassifiedSymbols(mask, width, height, geometry, selection, [...markers, ...textGuidedMarkers]);
-  const recognisedText = markers.length
-    ? `${markers.length} isolation valve ${markers.length === 1 ? "symbol" : "symbols"} found`
+  const pumpAccessoryGroups = schematicTakeoffDetectPumpAccessorySymbols(mask, width, height, geometry, selection, textGuidedGroups, markers);
+  const pumpAccessoryMarkers = pumpAccessoryGroups.flatMap((group) => group.markers);
+  let unknownMarkers = schematicTakeoffDetectUnclassifiedSymbols(mask, width, height, geometry, selection, [...markers, ...textGuidedMarkers, ...pumpAccessoryMarkers]);
+  const promotedUnknownIds = new Set();
+  const promotedIsolationMarkers = [];
+  unknownMarkers.forEach((unknown) => {
+    const promoted = schematicTakeoffFindIsolationValveNearMarker(mask, width, height, geometry, unknown);
+    if (!promoted) return;
+    const duplicate = [...markers, ...promotedIsolationMarkers]
+      .some((existing) => schematicTakeoffBoxOverlap(existing, promoted) > 0.22);
+    if (duplicate) return;
+    promotedUnknownIds.add(unknown.id);
+    promotedIsolationMarkers.push(promoted);
+  });
+  unknownMarkers = unknownMarkers.filter((marker) => !promotedUnknownIds.has(marker.id));
+  const allIsolationMarkers = [...markers, ...promotedIsolationMarkers]
+    .sort((first, second) => first.y - second.y || first.x - second.x)
+    .map((marker, index) => ({ ...marker, number: index + 1 }));
+  const checkValvePromotion = schematicTakeoffPromotePumpCheckValves(unknownMarkers, textGuidedGroups, pumpAccessoryGroups);
+  unknownMarkers = checkValvePromotion.unknownMarkers;
+  const shapeGuidedGroups = [...pumpAccessoryGroups, ...checkValvePromotion.groups];
+  const recognisedText = allIsolationMarkers.length
+    ? `${allIsolationMarkers.length} isolation valve ${allIsolationMarkers.length === 1 ? "symbol" : "symbols"} found`
     : "No clear isolation valves found";
   const uncertainText = unknownMarkers.length
     ? `${unknownMarkers.length} possible ${unknownMarkers.length === 1 ? "item has" : "items have"} a ? mark for classification`
@@ -23321,15 +23606,20 @@ function schematicTakeoffDetectValveSymbols(selection) {
   const textGuidedText = textGuidedGroups.length
     ? textGuidedGroups.map((group) => `${group.markers.length} ${group.type.toLowerCase()}`).join(", ")
     : "no labelled equipment or instrument symbols found";
+  const shapeGuidedText = shapeGuidedGroups.length
+    ? shapeGuidedGroups.map((group) => `${group.markers.length} ${group.type.toLowerCase()}`).join(", ")
+    : "no pump accessories identified";
   return {
-    markers,
+    markers: allIsolationMarkers,
     classifiedGroups: [
-      ...(markers.length ? [{ type: "Isolation valve", symbolClass: "Isolation valve", markers }] : []),
+      ...(allIsolationMarkers.length ? [{ type: "Isolation valve", symbolClass: "Isolation valve", markers: allIsolationMarkers }] : []),
       ...textGuidedGroups,
+      ...pumpAccessoryGroups,
+      ...checkValvePromotion.groups,
     ],
     unknownMarkers,
     threshold,
-    message: `${recognisedText}; ${textGuidedText}; ${uncertainText}. Review every coloured mark before ordering.`,
+    message: `${recognisedText}; ${textGuidedText}; ${shapeGuidedText}; ${uncertainText}. Review every coloured mark before ordering.`,
   };
 }
 
@@ -24258,6 +24548,10 @@ function ebroHp112BoltSpecForQuantity(spec, valveQuantity = 1) {
   return `${quantity} × ${match[2].replace(/\s+x\s+/gi, " × ")}`;
 }
 
+function ebroBoltSpecQuantity(spec) {
+  return Math.max(0, Number(String(spec || "").trim().match(/^(\d+)\s*[x×]/i)?.[1]) || 0);
+}
+
 function schematicTakeoffEbroBoltingText(item, valveQuantity = 1) {
   const match = item?.ebroBolting;
   if (!match?.matched) return "";
@@ -24292,16 +24586,26 @@ function renderSchematicTakeoffEbroBolting() {
     schematicTakeoffEbroBoltingResult.innerHTML = `<em>? ${escapeHtml(match.message)}</em>`;
     return match;
   }
+  const valveQuantity = clampNumber(Math.round(Number(schematicTakeoffFittingQuantityInput?.value) || 1), 1, 9999);
+  const primaryPerValve = ebroHp112BoltSpecForQuantity(match.primaryBoltSpec);
+  const primaryTotal = ebroHp112BoltSpecForQuantity(match.primaryBoltSpec, valveQuantity);
   const extra = match.additionalBoltSpec
-    ? `<span><b>Plus required:</b> ${escapeHtml(ebroHp112BoltSpecForQuantity(match.additionalBoltSpec))}</span>`
+    ? `<span><b>Additional per valve:</b> ${escapeHtml(ebroHp112BoltSpecForQuantity(match.additionalBoltSpec))}</span>
+       <span><b>Additional for ${valveQuantity} ${valveQuantity === 1 ? "valve" : "valves"}:</b> ${escapeHtml(ebroHp112BoltSpecForQuantity(match.additionalBoltSpec, valveQuantity))}</span>`
     : "";
   const specialOrder = match.model === "HP112" && match.arrangement === 4 ? "<em>HP112 arrangement 4 is special-order only.</em>" : "";
   const connectionDescription = match.model === "HP114"
     ? `connection ${escapeHtml(match.connections.replace("+", " + "))}`
     : `arrangement ${match.arrangement}`;
+  const boltCountPerValve = ebroBoltSpecQuantity(match.primaryBoltSpec) + ebroBoltSpecQuantity(match.additionalBoltSpec);
+  const hp114FaceBreakdown = match.model === "HP114"
+    ? `<span><b>Both flange faces:</b> ${match.flangeBoltHoles} bolts each side × 2 sides = ${boltCountPerValve} bolts per valve</span>`
+    : "";
   schematicTakeoffEbroBoltingResult.innerHTML = `
-    <strong>Required: ${escapeHtml(ebroHp112BoltSpecForQuantity(match.primaryBoltSpec))}</strong>
+    <strong>For ${valveQuantity} ${valveQuantity === 1 ? "valve" : "valves"}: ${escapeHtml(primaryTotal)}</strong>
+    <span><b>Per valve:</b> ${escapeHtml(primaryPerValve)}</span>
     ${extra}
+    ${hp114FaceBreakdown}
     <span>${escapeHtml(match.model)} / DN${match.dn} / ${escapeHtml(match.standard)} / ${connectionDescription}</span>
     <span><b>Valve:</b> ${match.faceToFaceMm} mm face-to-face · ${match.flangeBoltHoles} flange holes</span>
     <span><b>Length basis:</b> ${match.counterFlangeThicknessMm} mm mating flange + ${match.gasketThicknessMm} mm gasket</span>
@@ -25371,6 +25675,7 @@ function setupSchematicTakeoff() {
     updateSchematicTakeoffValveQuestions();
     renderSchematicTakeoffEbroBolting();
   });
+  schematicTakeoffFittingQuantityInput?.addEventListener("input", renderSchematicTakeoffEbroBolting);
   schematicTakeoffValveFlangeInput?.addEventListener("input", renderSchematicTakeoffEbroBolting);
   schematicTakeoffEbroModelInput?.addEventListener("change", renderSchematicTakeoffEbroBolting);
   schematicTakeoffEbroConnectionInput?.addEventListener("change", renderSchematicTakeoffEbroBolting);

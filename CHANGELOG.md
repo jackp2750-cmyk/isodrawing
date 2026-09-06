@@ -1,6 +1,16 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.82`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.83`.
+
+## v3.83 - Pump-side symbol recognition and clear EBRO quantities
+
+- Added shape-and-pump-context recognition for strainers and swing check valves in the supplied Stage 3 CHWP arrangement.
+- Added a second pass for vertical isolation valves while preventing flexible bellows from being counted as isolation valves.
+- Kept uncertain shapes as orange `?` review items and now names the recognised strainer and check valve in the count result.
+- Changed EBRO bolt guidance to show both the per-valve quantity and the total for the entered valve quantity.
+- Clarified HP114 quantities as bolts per flange face and across both faces; DN150 PN25 now explicitly shows 8 per side, 16 per valve and 64 for four valves.
+- Added regression coverage for the Stage 3 pump assembly and verified that every HP114 table row supplies two flange faces of bolts.
+- Bumped the PWA cache to `spoolmate-v383-schematic-recognition-ebro-counts`.
 
 ## v3.82 - Guided schematic fitting review
 

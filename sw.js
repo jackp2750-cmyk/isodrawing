@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v382-guided-takeoff-review";
+const CACHE_NAME = "spoolmate-v383-schematic-recognition-ebro-counts";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=382",
-  "./ebro-hp112-bolting.js?v=382",
-  "./ebro-hp114-bolting.js?v=382",
-  "./app.js?v=382",
+  "./styles.css?v=383",
+  "./ebro-hp112-bolting.js?v=383",
+  "./ebro-hp114-bolting.js?v=383",
+  "./app.js?v=383",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

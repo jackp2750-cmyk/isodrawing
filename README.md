@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.82`
+Current app version: `v3.83`
+
+The Stage 3 take-off recogniser now identifies the pump-side strainer and check valve in the supplied CHWP arrangement, counts vertical isolation valves and leaves flexible bellows as review items instead of valves. EBRO HP114 bolt results clearly separate the per-valve quantity from the total: DN150 PN25 is 8 bolts per flange face, 16 per valve and 64 for four valves.
 
 The schematic take-off review now uses three large stages—Areas, Sort fittings and Order table—instead of one long sidebar. The current step occupies the full review width, areas and fitting rows have larger touch targets, items needing attention rise to the top, and the detailed editor opens only when it is needed.
 

@@ -248,9 +248,12 @@ if (ebroHp114Data) {
   assert(JSON.stringify(ebroDns) === JSON.stringify([50, 65, 80, 100, 125, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600]), "EBRO HP114 DN coverage changed");
   assert(byKey.get("50|PN 10")?.connection4 === "8 x M16 x 40", "EBRO HP114 DN50 PN10 bolt length differs from EW 1823");
   assert(byKey.get("100|PN 16")?.connection4 === "16 x M16 x 45", "EBRO HP114 DN100 PN16 bolt length differs from EW 1823");
+  assert(byKey.get("150|PN 25")?.connection4 === "16 x M24 x 55" && byKey.get("150|PN 25")?.flangeBoltHoles === 8, "EBRO HP114 DN150 PN25 must retain 8 bolts per flange face and 16 M24 x 55 bolts per valve");
   assert(byKey.get("300|AS 4087 class 16")?.connection4 === "24 x M20 x 65", "EBRO HP114 DN300 AS4087 bolt length differs from EW 1823");
   assert(byKey.get("450|PN 16")?.connection4 === "32 x M27 x 95" && byKey.get("450|PN 16")?.connection5 === "8 x M27 x 75", "EBRO HP114 DN450 PN16 split bolt groups differ from EW 1823");
   assert(byKey.get("600|AS 2129 - Table E")?.connection4 === "24 x M30 x 110" && byKey.get("600|AS 2129 - Table E")?.connection5 === "8 x M30 x 90", "EBRO HP114 DN600 Table E bolt groups differ from EW 1823");
+  const boltCount = (spec) => Number(String(spec || "").match(/^(\d+)\s*x/i)?.[1] || 0);
+  assert(ebroRows.every((row) => boltCount(row.connection4) + boltCount(row.connection5) === Number(row.flangeBoltHoles) * 2), "EBRO HP114 bolt groups must cover both flange faces for every verified row");
   assert(ebroRows.every((row) => row.page >= 25 && row.page <= 29 && /^\d+ x .+ x \d+$/.test(row.connection4)), "EBRO HP114 row shape or PDF-page traceability is invalid");
   notes.push(`${ebroRows.length} verified EBRO HP114 bolt-length rows`);
 }

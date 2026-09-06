@@ -160,7 +160,25 @@ function check(condition, message) {
         result: document.querySelector("#schematicTakeoffEbroBoltingResult")?.textContent || "",
       }));
       check(hp114Editor.connection === "4" && JSON.stringify(hp114Editor.connectionOptions) === JSON.stringify(["4"]), `${name}: HP114 did not switch to its model-specific connection 4 (${JSON.stringify(hp114Editor)})`);
-      check(hp114Editor.result.includes("HP114") && hp114Editor.result.includes("16 × M16 × 45"), `${name}: HP114 DN100 PN16 result was not shown (${hp114Editor.result})`);
+      check(hp114Editor.result.includes("HP114") && hp114Editor.result.includes("For 3 valves: 48 × M16 × 45") && hp114Editor.result.includes("8 bolts each side × 2 sides = 16 bolts per valve"), `${name}: HP114 DN100 PN16 per-valve and total quantities were not shown (${hp114Editor.result})`);
+      await page.locator("#schematicTakeoffFittingSizeInput").fill("NB 150");
+      await page.locator("#schematicTakeoffValveFlangeInput").fill("PN 25");
+      await page.locator("#schematicTakeoffFittingQuantityInput").fill("4");
+      const hp114Dn150Editor = await page.locator("#schematicTakeoffEbroBoltingResult").textContent();
+      check(hp114Dn150Editor.includes("For 4 valves: 64 × M24 × 55") && hp114Dn150Editor.includes("Per valve: 16 × M24 × 55") && hp114Dn150Editor.includes("8 bolts each side × 2 sides = 16 bolts per valve"), `${name}: HP114 DN150 PN25 did not show 16 bolts per valve and 64 for four (${hp114Dn150Editor})`);
+      if (name === "ipad") {
+        await page.locator("#schematicTakeoffEbroBolting").screenshot({ path: path.join(os.tmpdir(), "spoolmate-ebro-hp114-dn150-ipad.png") });
+      }
+      await page.locator("#schematicTakeoffAddFittingButton").click();
+      const hp114Dn150Order = await page.evaluate(() => ({
+        item: schematicTakeoffSelectedArea()?.items?.[0],
+        summary: document.querySelector("#schematicTakeoffSummary")?.textContent || "",
+      }));
+      check(hp114Dn150Order.item?.quantity === 4 && hp114Dn150Order.item?.ebroBolting?.primaryBoltSpec === "16 x M24 x 55" && hp114Dn150Order.summary.includes("64 × M24 × 55"), `${name}: HP114 DN150 PN25 order total was not retained (${JSON.stringify(hp114Dn150Order)})`);
+      await page.locator(`[data-edit-schematic-fitting="${systemTable.item.id}"]`).click();
+      await page.locator("#schematicTakeoffFittingSizeInput").fill("NB 100");
+      await page.locator("#schematicTakeoffValveFlangeInput").fill("Wafer PN16");
+      await page.locator("#schematicTakeoffFittingQuantityInput").fill("3");
       if (name === "ipad") {
         await page.locator("#schematicTakeoffEbroBolting").screenshot({ path: path.join(os.tmpdir(), "spoolmate-ebro-hp114-ipad.png") });
       }
