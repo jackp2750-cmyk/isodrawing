@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.86`
+Current app version: `v3.87`
+
+The live 3D preview now opens in a locked drawing-comparison view. Its post-drop horizontal run therefore faces the same screen direction as the 2D isometric by default; reverse-side orbiting only begins after the user explicitly chooses `Free rotate`, and `Match 2D` restores the locked comparison.
 
 The live 3D preview now distinguishes a true 2D-matched camera from a manually rotated view. A prominent `Match 2D` action restores the drawing orientation, a status badge warns when left and right may appear reversed, and live A-E/D1-D4 labels let each bend be followed in drawing order.
 

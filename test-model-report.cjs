@@ -56,16 +56,31 @@ function check(condition, message) {
       };
       const liveProjected = testPoints.map(projectLivePoint);
       const liveMatchedStatus = previewOrientationStatus.textContent;
+      const liveRotationLocked = three.controls.enableRotate === false;
       const liveRunLabels = [...previewLabelLayer.querySelectorAll(".pipe-size-label > span")].map((element) => element.textContent);
       const livePointLabels = [...previewLabelLayer.querySelectorAll(".three-point-label")].map((element) => element.textContent);
+      enableThreeFreeRotate();
+      const liveRotationUnlocked = three.controls.enableRotate === true;
       const target = three.controls.target.clone();
       three.camera.position.copy(target).add(new three.module.Vector3(8, -8, 6));
       three.camera.lookAt(target);
       three.camera.updateMatrixWorld(true);
       updateThreeOrientationStatus();
       const liveRotatedStatus = previewOrientationStatus.textContent;
-      resetThreeView();
+      openPreviewPreservingWorkspace();
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       const liveResetStatus = previewOrientationStatus.textContent;
+      const liveOpenRotationLocked = three.controls.enableRotate === false;
+      applyThreeViewState({
+        position: target.clone().add(new three.module.Vector3(-8, 8, 6)).toArray(),
+        target: target.toArray(),
+        up: [0, 0, 1],
+        zoom: 1,
+        navigationMode: "orbit",
+        userMoved: true,
+      });
+      const liveSavedRestoreStatus = previewOrientationStatus.textContent;
+      const liveSavedRestoreRotationLocked = three.controls.enableRotate === false;
       const views = capture3dReportViews();
       const iso = views.find((view) => view.matchesDrawingOrientation);
       if (!iso) return { error: "No drawing-matched isometric view was captured." };
@@ -111,8 +126,13 @@ function check(condition, message) {
           up: three.camera.up.toArray(),
         },
         liveMatchedStatus,
+        liveRotationLocked,
+        liveRotationUnlocked,
         liveRotatedStatus,
         liveResetStatus,
+        liveOpenRotationLocked,
+        liveSavedRestoreStatus,
+        liveSavedRestoreRotationLocked,
         liveRunLabels,
         livePointLabels,
         png: canvas.toDataURL("image/png"),
@@ -124,9 +144,14 @@ function check(condition, message) {
     check(result.segmentLabels.join(",") === "D1,D2,D3,D4", `Unexpected run labels: ${result.segmentLabels.join(",")}`);
     check(result.maxAngleDifference < 0.0001, `3D isometric projection differs from 2D by ${result.maxAngleDifference} radians`);
     check(result.liveMaxAngleDifference < 0.0001, `Live 3D projection differs from 2D: ${JSON.stringify({ angles: result.liveAngleDifference, camera: result.liveCamera, live: result.liveProjected, iso: result.projected2d })}`);
-    check(result.liveMatchedStatus === "Matches 2D view", `Unexpected matched status: ${result.liveMatchedStatus}`);
+    check(result.liveMatchedStatus === "2D turn direction locked", `Unexpected matched status: ${result.liveMatchedStatus}`);
+    check(result.liveRotationLocked, "Live 3D rotation was not locked in drawing-comparison mode");
+    check(result.liveRotationUnlocked, "Free rotate did not explicitly unlock live 3D orbiting");
     check(result.liveRotatedStatus.includes("left/right may appear reversed"), `Unexpected rotated status: ${result.liveRotatedStatus}`);
-    check(result.liveResetStatus === "Matches 2D view", `Unexpected reset status: ${result.liveResetStatus}`);
+    check(result.liveResetStatus === "2D turn direction locked", `Unexpected reset status: ${result.liveResetStatus}`);
+    check(result.liveOpenRotationLocked, "Opening live 3D did not restore the locked drawing comparison");
+    check(result.liveSavedRestoreStatus === "2D turn direction locked", `A saved reverse-side camera overrode the drawing comparison: ${result.liveSavedRestoreStatus}`);
+    check(result.liveSavedRestoreRotationLocked, "A saved spool view unlocked the drawing comparison");
     check(result.liveRunLabels.join(",") === "D1,D2,D3,D4", `Unexpected live run labels: ${result.liveRunLabels.join(",")}`);
     check(result.livePointLabels.join(",") === "A,B,C,D,E", `Unexpected live point labels: ${result.livePointLabels.join(",")}`);
     check(pageErrors.length === 0, `Browser errors: ${pageErrors.join(" | ")}`);

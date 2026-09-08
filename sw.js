@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v386-live-orientation-check";
+const CACHE_NAME = "spoolmate-v387-locked-2d-comparison";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=386",
-  "./ebro-hp112-bolting.js?v=386",
-  "./ebro-hp114-bolting.js?v=386",
-  "./app.js?v=386",
+  "./styles.css?v=387",
+  "./ebro-hp112-bolting.js?v=387",
+  "./ebro-hp114-bolting.js?v=387",
+  "./app.js?v=387",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

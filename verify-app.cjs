@@ -835,8 +835,11 @@ assert(
 );
 assert(
   /id=["']previewResetButton["'][^>]*>Match 2D</.test(html) &&
+    /id=["']previewRotateButton["'][^>]*>Free rotate</.test(html) &&
     /id=["']previewOrientationStatus["']/.test(html) &&
     /function\s+threeCameraMatches2dOrientation\s*\(/.test(app) &&
+    /comparisonLocked:\s*true/.test(app) &&
+    /function\s+enableThreeFreeRotate\s*\(/.test(app) &&
     /Rotated view - left\/right may appear reversed/.test(app) &&
     /className\s*=\s*["']three-point-label["']/.test(app) &&
     /return \[`D\$\{segment\.index \+ 1\}`/.test(app) &&

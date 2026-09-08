@@ -596,7 +596,7 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.86";
+const APP_VERSION = "v3.87";
 const APP_BUILD_DATE = "2026-09-08";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
@@ -1015,12 +1015,12 @@ const VIDEO_TUTORIALS = [
     eyebrow: "3D inspection",
     title: "Control and inspect the 3D model",
     duration: 147,
-    description: "Use Full, Rotate, Move, zoom and Match 2D on PC, iPad and Android, compare every model style, inspect tee, reducer, branch, offset and prepared-end geometry, then export a clean 3D image.",
+    description: "Use Full, Free rotate, Move, zoom and Match 2D on PC, iPad and Android, compare every model style, inspect tee, reducer, branch, offset and prepared-end geometry, then export a clean 3D image.",
     shortDescription: "Orbit, pan, zoom, styles and fabrication checks",
     url: THREE_D_INSPECTION_TUTORIAL_VIDEO_URL,
     chapters: [
       [0, "Open the live 3D model"],
-      [18, "Orbit smoothly in Rotate mode"],
+      [18, "Orbit smoothly with Free rotate"],
       [34, "Move, zoom and Match 2D"],
       [49, "Choose the right model style"],
       [68, "Read the size-colour key and labels"],
@@ -1908,7 +1908,7 @@ const TUTORIAL_STEPS = [
     demo: "preview",
     items: [
       "Switch between realistic, stainless, outline and CAD styles.",
-      "Use Rotate for spinning the model.",
+      "Use Free rotate only when you want to leave the drawing-matched comparison.",
       "Use Move for pan-style navigation.",
     ],
   },
@@ -2595,6 +2595,7 @@ let three = {
   labels: [],
   animationFrame: 0,
   navigationMode: "orbit",
+  comparisonLocked: true,
   userMovedCamera: false,
   modelCenter: null,
   previewGrid: null,
@@ -14978,7 +14979,7 @@ function updateThreeOrientationStatus() {
   previewOrientationStatus.classList.toggle("matches", matches);
   previewOrientationStatus.classList.toggle("rotated", !matches);
   previewOrientationStatus.textContent = matches
-    ? "Matches 2D view"
+    ? (three.comparisonLocked ? "2D turn direction locked" : "Matches 2D view")
     : "Rotated view - left/right may appear reversed";
   previewOrientationStatus.title = matches
     ? "The camera uses the same orientation as the 2D isometric drawing."
@@ -16035,6 +16036,16 @@ function applyThreeViewState(source) {
   }
 
   pendingThreeViewRestore = null;
+  // The drawing-comparison view is authoritative. Do not let a camera saved
+  // from an older session or another spool tab silently mirror the final turn.
+  if (three.comparisonLocked) {
+    three.userMovedCamera = false;
+    frameThreeCamera({ reset: true });
+    applyThreeNavigationMode(three.navigationMode);
+    updateThreeOrientationStatus();
+    return true;
+  }
+
   three.camera.position.set(...restore.position);
   three.camera.up.set(...restore.up).normalize();
   three.controls.target.set(...restore.target);
@@ -17081,6 +17092,14 @@ function openPreviewPreservingWorkspace() {
   } else {
     setPreviewHidden(false);
   }
+  // Side-by-side 3D is a drawing comparison first. Always open on the same
+  // handed view as the 2D isometric; free rotation remains an explicit action.
+  three.comparisonLocked = true;
+  three.userMovedCamera = false;
+  pendingThreeViewRestore = null;
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => resetThreeView({ silent: true }));
+  });
   renderWorkspaceLocationStrips();
 }
 
@@ -18431,7 +18450,7 @@ function tutorialPracticeDetails(step = currentTutorialStep()) {
     case "preview":
       return {
         title: "Practice 3D",
-        cue: "Choose a view style, switch to Rotate, then drag the mini model sideways.",
+        cue: "Choose a view style, switch to Free rotate, then drag the mini model sideways.",
         hint: "The preview is restored for this topic so you can try the controls.",
         done: "3D model controls used in the mini flow.",
       };
@@ -19126,7 +19145,7 @@ function tutorialTrainerContent(kind, phase, complete) {
           <div class="tutorial-trainer-mode-block">
             <small>Navigation mode</small>
             <div class="tutorial-trainer-mode-row">
-              <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="rotate-mode" ${phase < 1 && !complete ? "disabled" : ""}>Rotate</button>
+              <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="rotate-mode" ${phase < 1 && !complete ? "disabled" : ""}>Free rotate</button>
               <button type="button" disabled>Move</button>
               <button type="button" disabled>Match 2D</button>
             </div>
@@ -19157,10 +19176,10 @@ function tutorialTrainerContent(kind, phase, complete) {
                   <ellipse class="tutorial-model-end" cx="232" cy="34" rx="5" ry="9" />
                 </g>
               </svg>
-              <b>${phase === 0 ? "choose view first" : "choose rotate"}</b>
+              <b>${phase === 0 ? "choose view first" : "choose free rotate"}</b>
             </div>
           `}
-          <div class="tutorial-trainer-instructions">${complete ? "3D model rotated." : phase === 0 ? "Open the 3D view menu and choose Illustrated workshop." : phase === 1 ? "Choose Rotate under Navigation mode." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold on the mini model and drag sideways to rotate it."}</div>
+          <div class="tutorial-trainer-instructions">${complete ? "3D model rotated." : phase === 0 ? "Open the 3D view menu and choose Illustrated workshop." : phase === 1 ? "Choose Free rotate under Navigation mode." : tutorialTrainer?.missedDrag ? String(tutorialTrainer.missedDrag) : "Hold on the mini model and drag sideways to rotate it."}</div>
         </div>
       `;
     case "focus":
@@ -21455,7 +21474,7 @@ const AI_HELPER_LOCAL_GUIDE = [
   },
   {
     patterns: [["3d"], ["preview"], ["rotate", "model"]],
-    answer: "In 3D Preview:\n1. Choose Rotate, then drag to inspect the model from any side.\n2. Choose Move to pan along the spool.\n3. Use the mouse wheel or two-finger pinch to zoom.\n4. Press Match 2D before comparing bend directions with the drawing.\n\nThe camera badge says Matches 2D view when left and right can be compared directly. A Rotated view warning means you may be looking from the reverse side, where screen-left and screen-right appear swapped.",
+    answer: "In 3D Preview:\n1. The preview opens locked to the 2D isometric direction so every horizontal turn faces the same way on both screens.\n2. Choose Move to pan and use the mouse wheel or two-finger pinch to zoom without changing that direction.\n3. Choose Free rotate only when you deliberately want to inspect the reverse side.\n4. Press Match 2D to return to the drawing-locked comparison.\n\nThe camera badge says 2D turn direction locked when the drawing and model can be compared directly.",
     tutorial: "3D preview",
     help: "touch",
   },
@@ -27957,6 +27976,8 @@ function setupThree(THREE, OrbitControls) {
     three.controls.zoomToCursor = true;
   }
   three.controls.addEventListener("start", () => {
+    // Rotation is disabled while comparisonLocked, so interaction here is a
+    // safe pan or zoom that should remain stable until the view is reopened.
     three.userMovedCamera = true;
     setThreePreviewInteracting(true);
   });
@@ -27974,6 +27995,7 @@ function setupThree(THREE, OrbitControls) {
   resizeThree();
   update3dPreview();
   if (pendingThreeViewRestore) applyThreeViewState(pendingThreeViewRestore);
+  if (!previewPanelHidden) resetThreeView({ silent: true });
   redrawLoadPlanIfOpen();
   animateThree();
 }
@@ -28014,7 +28036,7 @@ function applyThreeNavigationMode(mode = three.navigationMode) {
   }
 
   for (const [button, active] of [
-    [previewRotateButton, mode !== "pan"],
+    [previewRotateButton, mode !== "pan" && !three.comparisonLocked],
     [previewMoveButton, mode === "pan"],
   ]) {
     if (!button) continue;
@@ -28024,6 +28046,7 @@ function applyThreeNavigationMode(mode = three.navigationMode) {
 
   if (!three.controls || !three.module) return;
   const THREE = three.module;
+  three.controls.enableRotate = !three.comparisonLocked && mode !== "pan";
   three.controls.mouseButtons = mode === "pan"
     ? {
         LEFT: THREE.MOUSE.PAN,
@@ -28046,12 +28069,22 @@ function applyThreeNavigationMode(mode = three.navigationMode) {
       };
 }
 
-function resetThreeView() {
+function enableThreeFreeRotate() {
+  three.comparisonLocked = false;
+  setThreeNavigationMode("orbit");
+  updateThreeOrientationStatus();
+}
+
+function resetThreeView(options = {}) {
   if (!three.ready) return;
+  three.comparisonLocked = true;
   three.userMovedCamera = false;
   frameThreeCamera({ reset: true });
+  applyThreeNavigationMode(three.navigationMode);
   updateThreeOrientationStatus();
-  showAppNotice("3D camera restored to the same viewing direction as the 2D isometric drawing.", { tone: "success" });
+  if (options?.silent !== true) {
+    showAppNotice("3D is locked to the same turn direction as the 2D isometric drawing. Choose Free rotate only when you want another viewpoint.", { tone: "success" });
+  }
 }
 
 function resizeThree() {
@@ -47696,7 +47729,7 @@ previewLabelToggle?.addEventListener("change", () => {
   persistState();
 });
 
-previewRotateButton?.addEventListener("click", () => setThreeNavigationMode("orbit"));
+previewRotateButton?.addEventListener("click", enableThreeFreeRotate);
 previewMoveButton?.addEventListener("click", () => setThreeNavigationMode("pan"));
 previewResetButton?.addEventListener("click", resetThreeView);
 

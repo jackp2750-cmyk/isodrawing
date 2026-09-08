@@ -1,6 +1,13 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.86`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.87`.
+
+## v3.87 - Locked 2D/3D turn comparison
+
+- Made every newly opened live 3D preview start in the exact 2D isometric viewing direction instead of restoring an old reverse-side camera.
+- Locked rotation in the comparison view so a post-drop run shown turning left in 2D also remains visibly left in the adjacent 3D panel.
+- Renamed the deliberate orbit action to `Free rotate`; `Match 2D` restores and locks the comparison again.
+- Bumped the PWA cache to `spoolmate-v387-locked-2d-comparison`.
 
 ## v3.86 - Unambiguous live 3D direction
 
