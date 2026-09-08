@@ -1,6 +1,13 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.85`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.86`.
+
+## v3.86 - Unambiguous live 3D direction
+
+- Replaced the unclear live-model `Fit` action with `Match 2D`, which restores the exact isometric drawing viewpoint.
+- Added a persistent camera badge that distinguishes the matched drawing view from a rotated reverse-side view where left and right can appear swapped.
+- Added A-E point labels and D1-D4-style run IDs to the live 3D preview for direct comparison with the 2D drawing and cut table.
+- Bumped the PWA cache to `spoolmate-v386-live-orientation-check`.
 
 ## v3.85 - Traceable 2D and 3D bend orientation
 

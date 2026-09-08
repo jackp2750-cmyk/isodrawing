@@ -19,7 +19,7 @@
         document.documentElement.dataset.theme = "light";
       }
     </script>
-    <link rel="stylesheet" href="./styles.css?v=385" />
+    <link rel="stylesheet" href="./styles.css?v=386" />
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -190,7 +190,7 @@
             <div>
               <strong>SpoolMate</strong>
               <small>2D isometric pipe spools to 3D images</small>
-              <span class="version-badge" id="appVersionBadge">v3.85</span>
+              <span class="version-badge" id="appVersionBadge">v3.86</span>
             </div>
           </div>
 
@@ -907,7 +907,7 @@
               <div class="preview-nav" aria-label="3D navigation">
                 <button class="active" id="previewRotateButton" type="button" aria-pressed="true">Rotate</button>
                 <button id="previewMoveButton" type="button" aria-pressed="false">Move</button>
-                <button id="previewResetButton" type="button" title="Fit spool to view">Fit</button>
+                <button id="previewResetButton" type="button" title="Restore the same viewing direction as the 2D isometric drawing">Match 2D</button>
               </div>
               <button class="icon-button compact labeled" id="previewFullscreenButton" type="button" title="View 3D full screen" aria-label="View 3D full screen" aria-pressed="false">
                 <svg><use href="#icon-fullscreen"></use></svg>
@@ -934,6 +934,7 @@
             <canvas id="threeCanvas" hidden></canvas>
             <canvas id="fallbackCanvas"></canvas>
             <div class="preview-label-layer" id="previewLabelLayer" aria-hidden="true"></div>
+            <div class="preview-orientation-status matches" id="previewOrientationStatus" role="status">Matches 2D view</div>
             <div class="preview-size-colour-legend" id="previewSizeColourLegend" aria-label="Pipe size colour key" hidden></div>
           </div>
           <div class="preview-float-resize" id="previewFloatResize" aria-hidden="true"></div>
@@ -2268,7 +2269,7 @@
                 </article>
                 <article>
                   <strong>3D view</strong>
-                  <p>Tap 3D above the drawing. Drag to rotate, use Move to pan, pinch to zoom, and Fit to centre the whole spool.</p>
+                  <p>Tap 3D above the drawing. Drag to rotate, use Move to pan and pinch to zoom. Tap Match 2D before comparing bend directions; the badge warns when a reverse-side view may make left and right look swapped.</p>
                 </article>
                 <article>
                   <strong>If the menu does not open</strong>
@@ -2494,8 +2495,8 @@
         }
       }
     </script>
-    <script defer src="./ebro-hp112-bolting.js?v=385"></script>
-    <script defer src="./ebro-hp114-bolting.js?v=385"></script>
-    <script defer src="./app.js?v=385"></script>
+    <script defer src="./ebro-hp112-bolting.js?v=386"></script>
+    <script defer src="./ebro-hp114-bolting.js?v=386"></script>
+    <script defer src="./app.js?v=386"></script>
   </body>
 </html>

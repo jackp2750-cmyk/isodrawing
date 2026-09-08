@@ -834,6 +834,16 @@ assert(
   "Traceable 2D/3D model-report orientation is incomplete",
 );
 assert(
+  /id=["']previewResetButton["'][^>]*>Match 2D</.test(html) &&
+    /id=["']previewOrientationStatus["']/.test(html) &&
+    /function\s+threeCameraMatches2dOrientation\s*\(/.test(app) &&
+    /Rotated view - left\/right may appear reversed/.test(app) &&
+    /className\s*=\s*["']three-point-label["']/.test(app) &&
+    /return \[`D\$\{segment\.index \+ 1\}`/.test(app) &&
+    /\.preview-orientation-status\.rotated/.test(css),
+  "Live 3D drawing-orientation guidance is incomplete",
+);
+assert(
   /ROLL_GROOVE_SETBACK_MM\s*=\s*18/.test(app) &&
     /ROLL_GROOVE_VISUAL_WIDTH_MM\s*=\s*9/.test(app) &&
     /function\s+rollGrooveAssembly\s*\(/.test(app) &&

@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.85`
+Current app version: `v3.86`
+
+The live 3D preview now distinguishes a true 2D-matched camera from a manually rotated view. A prominent `Match 2D` action restores the drawing orientation, a status badge warns when left and right may appear reversed, and live A-E/D1-D4 labels let each bend be followed in drawing order.
 
 Fabrication PDF 3D reference views now use the same fixed isometric orientation as the 2D drawing and carry matching point letters and run IDs. This makes every bend direction traceable between the drawing, cut table and model instead of depending on visual interpretation of an unlabelled 3D view.
 

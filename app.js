@@ -16,6 +16,7 @@ const previewModeSelect = document.querySelector("#previewModeSelect");
 const previewModePanelSelect = document.querySelector("#previewModePanelSelect");
 const previewLabelToggle = document.querySelector("#previewLabelToggle");
 const previewSizeColourLegend = document.querySelector("#previewSizeColourLegend");
+const previewOrientationStatus = document.querySelector("#previewOrientationStatus");
 const previewRotateButton = document.querySelector("#previewRotateButton");
 const previewMoveButton = document.querySelector("#previewMoveButton");
 const previewResetButton = document.querySelector("#previewResetButton");
@@ -595,7 +596,7 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.85";
+const APP_VERSION = "v3.86";
 const APP_BUILD_DATE = "2026-09-08";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
@@ -843,7 +844,7 @@ const VIDEO_TUTORIALS = [
       [29, "Draw exact and 45 degree runs"],
       [47, "Add fittings and prepared ends"],
       [64, "Edit lengths and pipe sizes"],
-      [81, "Fit and inspect in 3D"],
+      [81, "Match the 2D view and inspect in 3D"],
       [93, "Download the working PDF"],
       [111, "Convert to managed workflow"],
     ],
@@ -1014,13 +1015,13 @@ const VIDEO_TUTORIALS = [
     eyebrow: "3D inspection",
     title: "Control and inspect the 3D model",
     duration: 147,
-    description: "Use Full, Rotate, Move, zoom and Fit on PC, iPad and Android, compare every model style, inspect tee, reducer, branch, offset and prepared-end geometry, then export a clean 3D image.",
+    description: "Use Full, Rotate, Move, zoom and Match 2D on PC, iPad and Android, compare every model style, inspect tee, reducer, branch, offset and prepared-end geometry, then export a clean 3D image.",
     shortDescription: "Orbit, pan, zoom, styles and fabrication checks",
     url: THREE_D_INSPECTION_TUTORIAL_VIDEO_URL,
     chapters: [
       [0, "Open the live 3D model"],
       [18, "Orbit smoothly in Rotate mode"],
-      [34, "Move, zoom and Fit"],
+      [34, "Move, zoom and Match 2D"],
       [49, "Choose the right model style"],
       [68, "Read the size-colour key and labels"],
       [85, "Inspect a fabricated branch"],
@@ -14959,6 +14960,29 @@ function syncPreviewCanvasVisibility() {
     threeCanvas.hidden = true;
     fallbackCanvas.hidden = false;
   }
+  updateThreeOrientationStatus();
+}
+
+function threeCameraMatches2dOrientation() {
+  if (!three.ready || !three.module || !three.camera || !three.controls) return true;
+  const viewDirection = three.controls.target.clone().sub(three.camera.position).normalize();
+  const expectedDirection = new three.module.Vector3(1, 1, 1).normalize();
+  const viewUp = new three.module.Vector3(0, 1, 0).applyQuaternion(three.camera.quaternion).normalize();
+  const expectedUp = new three.module.Vector3(-0.5, -0.5, 1).normalize();
+  return viewDirection.dot(expectedDirection) > 0.9995 && viewUp.dot(expectedUp) > 0.9995;
+}
+
+function updateThreeOrientationStatus() {
+  if (!previewOrientationStatus) return;
+  const matches = threeCameraMatches2dOrientation();
+  previewOrientationStatus.classList.toggle("matches", matches);
+  previewOrientationStatus.classList.toggle("rotated", !matches);
+  previewOrientationStatus.textContent = matches
+    ? "Matches 2D view"
+    : "Rotated view - left/right may appear reversed";
+  previewOrientationStatus.title = matches
+    ? "The camera uses the same orientation as the 2D isometric drawing."
+    : "Choose Match 2D above before comparing bend directions.";
 }
 
 function forcePreviewRender() {
@@ -16027,6 +16051,7 @@ function applyThreeViewState(source) {
   setThreeNavigationMode(restore.navigationMode);
   three.renderer?.render(three.scene, three.camera);
   update3dLabelPositions({ force: true });
+  updateThreeOrientationStatus();
   return true;
 }
 
@@ -19103,7 +19128,7 @@ function tutorialTrainerContent(kind, phase, complete) {
             <div class="tutorial-trainer-mode-row">
               <button type="button" class="${phase >= 2 || complete ? "active" : ""}" data-tutorial-trainer-choice="rotate-mode" ${phase < 1 && !complete ? "disabled" : ""}>Rotate</button>
               <button type="button" disabled>Move</button>
-              <button type="button" disabled>Fit</button>
+              <button type="button" disabled>Match 2D</button>
             </div>
           </div>
           ${phase >= 2 || complete ? `
@@ -21430,7 +21455,7 @@ const AI_HELPER_LOCAL_GUIDE = [
   },
   {
     patterns: [["3d"], ["preview"], ["rotate", "model"]],
-    answer: "In 3D Preview:\n1. Choose Rotate, then drag to spin the model.\n2. Choose Move to pan along the spool.\n3. Use the mouse wheel or two-finger pinch to zoom.\n4. Press Fit whenever the model is cropped or lost.\n\nYou should see the complete spool centred without changing the 2D drawing. Phones and tablets use the 3D panel so the workspace remains usable.",
+    answer: "In 3D Preview:\n1. Choose Rotate, then drag to inspect the model from any side.\n2. Choose Move to pan along the spool.\n3. Use the mouse wheel or two-finger pinch to zoom.\n4. Press Match 2D before comparing bend directions with the drawing.\n\nThe camera badge says Matches 2D view when left and right can be compared directly. A Rotated view warning means you may be looking from the reverse side, where screen-left and screen-right appear swapped.",
     tutorial: "3D preview",
     help: "touch",
   },
@@ -21452,7 +21477,7 @@ const AI_HELPER_LOCAL_GUIDE = [
   },
   {
     patterns: [["thread", "end"], ["threaded", "pipe"], ["add", "thread"]],
-    answer: "To add a threaded end:\n1. Choose Select.\n2. Right-click the pipe endpoint, or long-press it on touch.\n3. Choose Pipe end > Threaded.\n4. Use 3D Preview and Fit to check the coarse thread is wrapped around the actual pipe end.\n\nThreads can only be applied at a pipe endpoint, not in the middle of a run.",
+    answer: "To add a threaded end:\n1. Choose Select.\n2. Right-click the pipe endpoint, or long-press it on touch.\n3. Choose Pipe end > Threaded.\n4. Use 3D Preview and Match 2D to check the coarse thread is wrapped around the actual pipe end.\n\nThreads can only be applied at a pipe endpoint, not in the middle of a run.",
     tutorial: "End fittings",
     help: "edit",
   },
@@ -27937,6 +27962,7 @@ function setupThree(THREE, OrbitControls) {
   });
   three.controls.addEventListener("end", () => {
     setThreePreviewInteracting(false);
+    updateThreeOrientationStatus();
     captureCurrentSpoolWorkspaceTab();
   });
   threeCanvas?.addEventListener("contextmenu", (event) => event.preventDefault());
@@ -28024,6 +28050,8 @@ function resetThreeView() {
   if (!three.ready) return;
   three.userMovedCamera = false;
   frameThreeCamera({ reset: true });
+  updateThreeOrientationStatus();
+  showAppNotice("3D camera restored to the same viewing direction as the 2D isometric drawing.", { tone: "success" });
 }
 
 function resizeThree() {
@@ -30294,6 +30322,16 @@ function build3dPipeLabels(segmentData, modelPoints) {
     three.labels.push({ element: label, point: midpoint });
   }
 
+  for (const [index, point] of modelPoints.entries()) {
+    const label = document.createElement("div");
+    label.className = "three-point-label";
+    if (index === 0 || index === modelPoints.length - 1) label.classList.add("endpoint");
+    label.textContent = pointLabel(index);
+    label.title = `Point ${pointLabel(index)} - matches the 2D drawing and cut table`;
+    previewLabelLayer.append(label);
+    three.labels.push({ element: label, point });
+  }
+
   const quantities = quantitySummary(segmentData);
   for (const reducer of quantities.reducers) {
     const modelPoint = toModelUnits(reducerCentrePoint(reducer));
@@ -30361,7 +30399,7 @@ function build3dPipeLabels(segmentData, modelPoints) {
 }
 
 function pipePreviewLabelLines(segment) {
-  return [pipeSizeSpecLabel(pipeSizeForSegment(segment))];
+  return [`D${segment.index + 1}`, pipeSizeSpecLabel(pipeSizeForSegment(segment))];
 }
 
 function update3dLabelPositions(options = {}) {
@@ -30487,6 +30525,12 @@ function frameThreeCamera(options = {}) {
   const previousZoom = preserveView ? three.camera.zoom : 1;
   const target = preserveView ? center.clone().add(previousTargetOffset) : center.clone();
 
+  if (!preserveView) {
+    // Re-establish the same Z-up handedness used by rawIso(). A restored or
+    // reverse-side camera must never leak into Match 2D.
+    three.camera.up.set(-0.5, -0.5, 1).normalize();
+  }
+
   three.camera.near = 0.1;
   three.camera.far = maxDim * 20 + 100;
   if (preserveView && previousOffset.length() > 0.001) {
@@ -30534,6 +30578,7 @@ function frameThreeCamera(options = {}) {
     three.controls.update();
   }
   three.modelCenter = center.clone();
+  updateThreeOrientationStatus();
 }
 
 function disposeObject3d(object) {
