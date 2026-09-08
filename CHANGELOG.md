@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.88`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.89`.
+
+## v3.89 - Selected-run 2D/3D tracing
+
+- Carried the active 2D run selection into the live solid model using the same orange emphasis, including the elbow entering that run.
+- Kept the selected run label and its two point letters visible in 3D even when the general label toggle is off.
+- Added explicit `D# · point → point` direction text so a drop-and-return that overlaps an earlier run in isometric projection can be followed without interpreting the final bend backwards.
+- Added the reported 3,041 mm run, 1,671 mm drop and 1,682 mm screen-left return as a permanent model regression fixture.
+- Bumped the PWA cache to `spoolmate-v389-selected-run-match`.
 
 ## v3.88 - True elbow geometry and Stop on bend
 

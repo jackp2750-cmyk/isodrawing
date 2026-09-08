@@ -513,6 +513,15 @@ function check(condition, message) {
           points: [{ x: 0, y: 0, z: 1200 }, { x: 0, y: 0, z: 0 }, { x: 0, y: -3200, z: 0 }, { x: 1100, y: -3200, z: 0 }],
         },
         {
+          name: "reported long run drop and overlapping screen-left return",
+          points: [
+            { x: 0, y: 0, z: 0 },
+            { x: 0, y: -3041, z: 0 },
+            { x: 0, y: -3041, z: -1671 },
+            { x: -1682, y: -3041, z: -1671 },
+          ],
+        },
+        {
           name: "45 degree rise and return",
           points: [{ x: 0, y: 0, z: 0 }, { x: 2200, y: 0, z: 0 }, { x: 3200, y: 0, z: 1000 }, { x: 4700, y: 0, z: 1000 }],
         },
@@ -596,6 +605,51 @@ function check(condition, message) {
       check(handedness.minimumReportDirectionDot > 0.999999, `PDF 3D mirrored ${handedness.name}: ${JSON.stringify(handedness)}`);
       check(handedness.minimumFallbackDirectionDot > 0.999999, `Fallback 3D mirrored ${handedness.name}: ${JSON.stringify(handedness)}`);
     }
+
+    const selectedRunTrace = await page.evaluate(() => {
+      state = {
+        ...blankState({ userDefaults: false }),
+        points: [
+          { x: 0, y: 0, z: 0 },
+          { x: 0, y: -3041, z: 0 },
+          { x: 0, y: -3041, z: -1671 },
+          { x: -1682, y: -3041, z: -1671 },
+        ],
+        edges: [
+          { from: 0, to: 1, pipeSizeNb: 150 },
+          { from: 1, to: 2, pipeSizeNb: 150 },
+          { from: 2, to: 3, pipeSizeNb: 150 },
+        ],
+        activePoint: 3,
+        selectedSegments: [2],
+        selectedSegment: 2,
+        pipeSizeNb: 150,
+        pipeSpec: "carbon40",
+        previewMode: "tricolor",
+        show3dLabels: false,
+      };
+      rebuildThreeSpool();
+      frameThreeCamera({ reset: true });
+      const selectedGeometryTypes = [];
+      three.spoolGroup.traverse((object) => {
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        if (materials.some((material) => material?.userData?.spoolmateSelectedRun === true)) {
+          selectedGeometryTypes.push(object.geometry?.type ?? object.type);
+        }
+      });
+      return {
+        selectedGeometryTypes,
+        runLabels: [...previewLabelLayer.querySelectorAll(".selected-run-label span")].map((element) => element.textContent),
+        pointLabels: [...previewLabelLayer.querySelectorAll(".selected-run-point")].map((element) => element.textContent).sort(),
+        labelLayerHidden: previewLabelLayer.hidden,
+        allLabelCount: previewLabelLayer.children.length,
+      };
+    });
+    check(selectedRunTrace.selectedGeometryTypes.includes("CylinderGeometry"), `Selected straight run is not highlighted in 3D: ${JSON.stringify(selectedRunTrace)}`);
+    check(selectedRunTrace.selectedGeometryTypes.includes("TubeGeometry"), `Elbow entering the selected run is not highlighted in 3D: ${JSON.stringify(selectedRunTrace)}`);
+    check(selectedRunTrace.runLabels.join(",") === "D3 · C → D", `Selected 3D run direction is not explicit: ${JSON.stringify(selectedRunTrace)}`);
+    check(selectedRunTrace.pointLabels.join(",") === "C,D", `Selected 3D endpoint labels are missing: ${JSON.stringify(selectedRunTrace)}`);
+    check(!selectedRunTrace.labelLayerHidden && selectedRunTrace.allLabelCount === 3, `Selected 3D trace was hidden with general labels off: ${JSON.stringify(selectedRunTrace)}`);
 
     const styleAudit = await page.evaluate(() => {
       state = {

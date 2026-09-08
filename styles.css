@@ -8858,6 +8858,17 @@ body.numbered-dimensions-active .dimension-edit-pill {
   line-height: 1;
 }
 
+.pipe-size-label.selected-run-label {
+  border-color: rgba(185, 84, 54, 0.74);
+  background: rgba(255, 244, 238, 0.97);
+  color: #8f351f;
+  box-shadow: 0 4px 14px rgba(185, 84, 54, 0.2);
+}
+
+.pipe-size-label.selected-run-label small {
+  color: #7d493b;
+}
+
 .three-point-label {
   position: absolute;
   display: grid;
@@ -8878,6 +8889,12 @@ body.numbered-dimensions-active .dimension-edit-pill {
 .three-point-label.endpoint {
   border-color: #a46900;
   background: rgba(255, 241, 189, 0.97);
+}
+
+.three-point-label.selected-run-point {
+  border-color: #b95436;
+  background: rgba(255, 244, 238, 0.98);
+  color: #7d2f1d;
 }
 
 .reducer-type-label {

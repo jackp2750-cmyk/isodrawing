@@ -596,8 +596,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.88";
-const APP_BUILD_DATE = "2026-09-08";
+const APP_VERSION = "v3.89";
+const APP_BUILD_DATE = "2026-09-09";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -28500,7 +28500,7 @@ function flangeRenderTransform(fitting, position, direction, pipeRadius, pipeSiz
   };
 }
 
-function rebuildThreeSpool() {
+function rebuildThreeSpool(options = {}) {
   const THREE = three.module;
   const style = previewViewStyle();
   updateThreeSceneStyle(style);
@@ -28529,6 +28529,20 @@ function rebuildThreeSpool() {
         depthTest: true,
       })
     : null;
+  const selectedSegmentSet = new Set(options.selectionHighlight === false ? [] : selectedSegmentIndexes());
+  const selectedPipeMaterial = selectedSegmentSet.size
+    ? previewMaterial({
+        ...style,
+        opacity: 1,
+        emissive: 0xb95436,
+        emissiveIntensity: style.lineDrawing ? 0 : 0.16,
+        colors: {
+          ...style.colors,
+          pipe: isDarkAppTheme() ? 0xff8a5c : 0xb95436,
+        },
+      }, "pipe")
+    : null;
+  if (selectedPipeMaterial) selectedPipeMaterial.userData.spoolmateSelectedRun = true;
 
   const modelPoints = state.points.map((point) => {
     const modelPoint = toModelUnits(point);
@@ -28555,6 +28569,7 @@ function rebuildThreeSpool() {
   const triColorSizeKeys = [...new Set(segmentData.map(triColorSegmentSizeKey))].sort((a, b) => a - b);
   const triColorMaterials = new Map();
   const pipeMaterialForSegment = (segment) => {
+    if (selectedSegmentSet.has(segment.index) && selectedPipeMaterial) return selectedPipeMaterial;
     if (!style.triColor) return pipeMaterial;
     const sizeKey = triColorSegmentSizeKey(segment);
     if (triColorMaterials.has(sizeKey)) return triColorMaterials.get(sizeKey);
@@ -28645,7 +28660,12 @@ function rebuildThreeSpool() {
     const elbowSegment = explicitBendSegment ?? elbowSegments.reduce((largest, segment) =>
       !largest || pipeRadiusMetres(segment) > pipeRadiusMetres(largest) ? segment : largest
     , null);
-    const elbowPipeMaterial = elbowSegment ? pipeMaterialForSegment(elbowSegment) : pipeMaterial;
+    const selectedElbowSegment = elbowSegments.find((segment) => selectedSegmentSet.has(segment.index));
+    const elbowPipeMaterial = selectedElbowSegment
+      ? pipeMaterialForSegment(selectedElbowSegment)
+      : elbowSegment
+      ? pipeMaterialForSegment(elbowSegment)
+      : pipeMaterial;
     const elbow = style.lineDrawing
       ? outlineElbowBetween(
         elbowData.entry,
@@ -30529,19 +30549,29 @@ function lugPointMarker3d(position, style) {
 function clear3dPipeLabels() {
   three.labels = [];
   previewLabelLayer.innerHTML = "";
-  previewLabelLayer.hidden = state.show3dLabels === false;
+  previewLabelLayer.hidden = state.show3dLabels === false && selectedSegmentIndexes().length === 0;
 }
 
 function build3dPipeLabels(segmentData, modelPoints) {
   clear3dPipeLabels();
-  previewLabelLayer.hidden = state.show3dLabels === false;
-  if (!three.ready || state.show3dLabels === false) return;
+  const showAllLabels = state.show3dLabels !== false;
+  const selectedSet = new Set(selectedSegmentIndexes());
+  const selectedPointIndexes = new Set();
+  for (const segment of segmentData) {
+    if (!selectedSet.has(segment.index)) continue;
+    selectedPointIndexes.add(segment.from);
+    selectedPointIndexes.add(segment.to);
+  }
+  previewLabelLayer.hidden = !showAllLabels && selectedSet.size === 0;
+  if (!three.ready || previewLabelLayer.hidden) return;
 
   for (const segment of segmentData) {
+    if (!showAllLabels && !selectedSet.has(segment.index)) continue;
     const midpoint = modelPoints[segment.from].clone().lerp(modelPoints[segment.to], 0.5);
     const label = document.createElement("div");
     label.className = "pipe-size-label";
-    for (const [index, line] of pipePreviewLabelLines(segment).entries()) {
+    if (selectedSet.has(segment.index)) label.classList.add("selected-run-label");
+    for (const [index, line] of pipePreviewLabelLines(segment, { selected: selectedSet.has(segment.index) }).entries()) {
       const element = document.createElement(index === 0 ? "span" : "small");
       element.textContent = line;
       label.append(element);
@@ -30551,9 +30581,11 @@ function build3dPipeLabels(segmentData, modelPoints) {
   }
 
   for (const [index, point] of modelPoints.entries()) {
+    if (!showAllLabels && !selectedPointIndexes.has(index)) continue;
     const label = document.createElement("div");
     label.className = "three-point-label";
     if (index === 0 || index === modelPoints.length - 1) label.classList.add("endpoint");
+    if (selectedPointIndexes.has(index)) label.classList.add("selected-run-point");
     label.textContent = pointLabel(index);
     label.title = `Point ${pointLabel(index)} - matches the 2D drawing and cut table`;
     previewLabelLayer.append(label);
@@ -30626,12 +30658,16 @@ function build3dPipeLabels(segmentData, modelPoints) {
   update3dLabelPositions();
 }
 
-function pipePreviewLabelLines(segment) {
-  return [`D${segment.index + 1}`, pipeSizeSpecLabel(pipeSizeForSegment(segment))];
+function pipePreviewLabelLines(segment, options = {}) {
+  const run = `D${segment.index + 1}`;
+  const direction = options.selected === true
+    ? ` · ${pointLabel(segment.from)} → ${pointLabel(segment.to)}`
+    : "";
+  return [`${run}${direction}`, pipeSizeSpecLabel(pipeSizeForSegment(segment))];
 }
 
 function update3dLabelPositions(options = {}) {
-  if (!three.ready || state.show3dLabels === false || !three.labels.length) return;
+  if (!three.ready || !three.labels.length) return;
   if (three.interacting && options.force !== true) {
     three.labelFrameSkip = (three.labelFrameSkip + 1) % 6;
     if (three.labelFrameSkip !== 0) return;
@@ -42493,9 +42529,12 @@ function exportedProjectPayload() {
 }
 
 function capture3dPreviewImage() {
+  let restoreLiveSelection = false;
   try {
     if (three.ready) {
-      update3dPreview();
+      restoreLiveSelection = selectedSegmentIndexes().length > 0;
+      rebuildThreeSpool({ selectionHighlight: false });
+      frameThreeCamera();
       three.renderer.render(three.scene, three.camera);
       return threeCanvas.toDataURL("image/png");
     }
@@ -42505,13 +42544,21 @@ function capture3dPreviewImage() {
   } catch (error) {
     console.warn("Could not capture 3D model for export.", error);
     return "";
+  } finally {
+    if (restoreLiveSelection && three.ready) {
+      rebuildThreeSpool();
+      frameThreeCamera();
+      three.renderer.render(three.scene, three.camera);
+    }
   }
 }
 
 function capture3dReportViews() {
+  let restoreLiveSelection = false;
   try {
     if (three.ready && three.module && three.scene) {
-      rebuildThreeSpool();
+      restoreLiveSelection = selectedSegmentIndexes().length > 0;
+      rebuildThreeSpool({ selectionHighlight: false });
       const views = [
         {
           title: "Isometric - matches 2D orientation",
@@ -42535,6 +42582,8 @@ function capture3dReportViews() {
     }
   } catch (error) {
     console.warn("Could not capture offscreen 3D model views.", error);
+  } finally {
+    if (restoreLiveSelection && three.ready) rebuildThreeSpool();
   }
 
   const fallback = capture3dPreviewImage();

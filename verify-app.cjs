@@ -843,7 +843,10 @@ assert(
     /function\s+enableThreeFreeRotate\s*\(/.test(app) &&
     /Rotated view - left\/right may appear reversed/.test(app) &&
     /className\s*=\s*["']three-point-label["']/.test(app) &&
-    /return \[`D\$\{segment\.index \+ 1\}`/.test(app) &&
+    /const\s+run\s*=\s*`D\$\{segment\.index \+ 1\}`/.test(app) &&
+    /pointLabel\(segment\.from\)[\s\S]{0,80}pointLabel\(segment\.to\)/.test(app) &&
+    /spoolmateSelectedRun/.test(app) &&
+    /\.selected-run-label/.test(css) &&
     /\.preview-orientation-status\.rotated/.test(css),
   "Live 3D drawing-orientation guidance is incomplete",
 );

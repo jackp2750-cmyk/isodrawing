@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.88`
+Current app version: `v3.89`
+
+The live 3D preview now carries the drawing selection into the solid model. A selected run uses the same orange emphasis as the 2D drawing and keeps its `D# · point → point` label plus both endpoint letters visible even when general 3D labels are off. This makes overlapping isometric routes—such as a long run, drop and return—traceable without mistaking the return for a reversed bend.
 
 Live 3D pipework now uses the selected pipe or tube's true outside diameter instead of an exaggerated display size. Elbows use the same centre-to-end dimensions as the fabrication calculations and form a tangent circular centreline. A terminal run set to exactly the elbow C/E is therefore completely occupied by the bend, with a clean terminal face instead of a malformed straight stub. Right-click or long-press that terminal bend leg and choose `Stop on bend` to set the end automatically and add a labelled C/E note. Impossible short runs between two fittings no longer render backwards and are called out directly in Review.
 
