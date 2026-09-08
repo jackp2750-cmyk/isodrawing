@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v384-stage3-symbol-recognition";
+const CACHE_NAME = "spoolmate-v385-labelled-model-orientation";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=384",
-  "./ebro-hp112-bolting.js?v=384",
-  "./ebro-hp114-bolting.js?v=384",
-  "./app.js?v=384",
+  "./styles.css?v=385",
+  "./ebro-hp112-bolting.js?v=385",
+  "./ebro-hp114-bolting.js?v=385",
+  "./app.js?v=385",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

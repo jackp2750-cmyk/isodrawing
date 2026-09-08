@@ -1,6 +1,13 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.84`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.85`.
+
+## v3.85 - Traceable 2D and 3D bend orientation
+
+- Locked the fabrication PDF isometric model capture to the same projection used by the 2D isometric drawing.
+- Added matching point letters and run IDs directly over every 3D reference view so each bend can be traced back to the drawing and cut table.
+- Labelled the primary model view as matching the 2D orientation, removing ambiguity caused by an unmarked camera angle.
+- Bumped the PWA cache to `spoolmate-v385-labelled-model-orientation`.
 
 ## v3.84 - Complete Stage 3 pump-train recognition
 

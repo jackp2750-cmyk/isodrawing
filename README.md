@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.84`
+Current app version: `v3.85`
+
+Fabrication PDF 3D reference views now use the same fixed isometric orientation as the 2D drawing and carry matching point letters and run IDs. This makes every bend direction traceable between the drawing, cut table and model instead of depending on visual interpretation of an unlabelled 3D view.
 
 The Stage 3 take-off recogniser now counts both valves in closely stacked parallel pairs, so the supplied CHWP pump crop returns all six isolation valves. It also recognises the complete mag-flow symbol from its circle, internal M and paired connection bars, suppresses PDF text annotations from orange `?` suggestions, and identifies the pump-side strainer and check valve. EBRO HP114 bolt results clearly separate the per-valve quantity from the total: DN150 PN25 is 8 bolts per flange face, 16 per valve and 64 for four valves.
 

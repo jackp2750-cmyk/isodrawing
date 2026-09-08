@@ -595,8 +595,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.84";
-const APP_BUILD_DATE = "2026-09-06";
+const APP_VERSION = "v3.85";
+const APP_BUILD_DATE = "2026-09-08";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -42174,9 +42174,10 @@ function capture3dReportViews() {
       rebuildThreeSpool();
       const views = [
         {
-          title: "Isometric",
+          title: "Isometric - matches 2D orientation",
           direction: [-1, -1, -1],
           up: [-0.45, -0.45, 1],
+          matchesDrawingOrientation: true,
         },
         {
           title: "Plan",
@@ -42221,6 +42222,25 @@ function capture3dReportView(config) {
   fitReportCameraToBox(camera, box, width / height, config);
   renderer.render(three.scene, camera);
   const dataUrl = renderer.domElement.toDataURL("image/png");
+  const projectLabel = (position) => {
+    const projected = position.clone().project(camera);
+    return {
+      x: (projected.x + 1) * width * 0.5,
+      y: (1 - projected.y) * height * 0.5,
+    };
+  };
+  const modelPoints = state.points.map((point) => {
+    const modelPoint = toModelUnits(point);
+    return new THREE.Vector3(modelPoint.x, modelPoint.y, modelPoint.z);
+  });
+  const pointLabels = modelPoints.map((position, index) => ({
+    label: pointLabel(index),
+    ...projectLabel(position),
+  }));
+  const segmentLabels = segments().map((segment, index) => ({
+    label: `D${index + 1}`,
+    ...projectLabel(modelPoints[segment.from].clone().lerp(modelPoints[segment.to], 0.5)),
+  }));
   renderer.dispose();
 
   return {
@@ -42228,6 +42248,9 @@ function capture3dReportView(config) {
     dataUrl,
     width,
     height,
+    pointLabels,
+    segmentLabels,
+    matchesDrawingOrientation: config.matchesDrawingOrientation === true,
   };
 }
 
@@ -42890,13 +42913,59 @@ function drawModelViewCard(ctx, view, area) {
   ctx.fillStyle = "#607174";
   ctx.font = "800 11px Inter, system-ui, sans-serif";
   ctx.textAlign = "right";
-  ctx.fillText("not to scale", area.x + area.width - 24, area.y + 32);
+  ctx.fillText(view.matchesDrawingOrientation ? "point + run IDs match 2D" : "not to scale", area.x + area.width - 24, area.y + 32);
   ctx.textAlign = "left";
-  drawContainedImage(ctx, view.image, {
+  const imageBounds = drawContainedImage(ctx, view.image, {
     x: area.x + 16,
     y: area.y + 52,
     width: area.width - 32,
     height: area.height - 68,
+  });
+  drawModelViewAnnotations(ctx, view, imageBounds, area.width < 520);
+}
+
+function drawModelViewAnnotations(ctx, view, imageBounds, compact = false) {
+  if (!imageBounds || !view?.width || !view?.height) return;
+  const mapPosition = (entry) => ({
+    x: imageBounds.x + clampNumber(Number(entry.x) || 0, 0, view.width) / view.width * imageBounds.width,
+    y: imageBounds.y + clampNumber(Number(entry.y) || 0, 0, view.height) / view.height * imageBounds.height,
+  });
+  const segmentFont = compact ? 9 : 11;
+  const pointRadius = compact ? 8 : 10;
+
+  (view.segmentLabels || []).forEach((entry) => {
+    const position = mapPosition(entry);
+    const label = String(entry.label || "");
+    ctx.save();
+    ctx.font = `950 ${segmentFont}px Inter, system-ui, sans-serif`;
+    const width = Math.max(24, ctx.measureText(label).width + 12);
+    roundRect(ctx, position.x - width / 2, position.y - segmentFont - 5, width, segmentFont + 10, 7);
+    ctx.fillStyle = "rgba(17, 57, 65, 0.9)";
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(label, position.x, position.y - segmentFont / 2);
+    ctx.restore();
+  });
+
+  (view.pointLabels || []).forEach((entry, index, entries) => {
+    const position = mapPosition(entry);
+    const endpoint = index === 0 || index === entries.length - 1;
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(position.x, position.y, pointRadius, 0, Math.PI * 2);
+    ctx.fillStyle = endpoint ? "#fff1bd" : "#fffdf8";
+    ctx.fill();
+    ctx.strokeStyle = endpoint ? "#a46900" : "#007f8b";
+    ctx.lineWidth = compact ? 2 : 3;
+    ctx.stroke();
+    ctx.fillStyle = "#17383f";
+    ctx.font = `950 ${compact ? 10 : 12}px Inter, system-ui, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(String(entry.label || ""), position.x, position.y + 0.5);
+    ctx.restore();
   });
 }
 
@@ -42916,6 +42985,7 @@ function drawContainedImage(ctx, image, area) {
   const x = area.x + (area.width - width) * 0.5;
   const y = area.y + (area.height - height) * 0.5;
   ctx.drawImage(image, x, y, width, height);
+  return { x, y, width, height };
 }
 
 function buildImagePdf(pages) {

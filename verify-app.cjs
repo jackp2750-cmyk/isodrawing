@@ -7,6 +7,7 @@ const REQUIRED_FILES = [
   "index.html",
   "styles.css",
   "app.js",
+  "test-model-report.cjs",
   "ebro-hp112-bolting.js",
   "ebro-hp114-bolting.js",
   "sw.js",
@@ -823,6 +824,14 @@ assert(
     /projectedHalfWidth\s*\/\s*Math\.max\(aspect,\s*0\.25\)/.test(app) &&
     /body:not\(\.preview-panel-hidden\)\s+\.ai-helper-launcher/.test(css),
   "Default tri-colour or illustrated 3D model rendering is incomplete",
+);
+assert(
+  /matchesDrawingOrientation:\s*true/.test(app) &&
+    /function\s+drawModelViewAnnotations\s*\(/.test(app) &&
+    /pointLabels/.test(app) &&
+    /segmentLabels/.test(app) &&
+    /point \+ run IDs match 2D/.test(app),
+  "Traceable 2D/3D model-report orientation is incomplete",
 );
 assert(
   /ROLL_GROOVE_SETBACK_MM\s*=\s*18/.test(app) &&
