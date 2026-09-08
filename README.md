@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.87`
+Current app version: `v3.88`
+
+Live 3D pipework now uses the selected pipe or tube's true outside diameter instead of an exaggerated display size. Elbows use the same centre-to-end dimensions as the fabrication calculations and form a tangent circular centreline. A terminal run set to exactly the elbow C/E is therefore completely occupied by the bend, with a clean terminal face instead of a malformed straight stub. Right-click or long-press that terminal bend leg and choose `Stop on bend` to set the end automatically and add a labelled C/E note. Impossible short runs between two fittings no longer render backwards and are called out directly in Review.
 
 The live 3D preview now opens in a locked drawing-comparison view. Its post-drop horizontal run therefore faces the same screen direction as the 2D isometric by default; reverse-side orbiting only begins after the user explicitly chooses `Free rotate`, and `Match 2D` restores the locked comparison.
 
@@ -52,6 +54,7 @@ See [CHANGELOG.md](CHANGELOG.md) for the detailed update log.
 - Add exact X, Y and Z runs, plus angled offset runs.
 - Hold Shift on a keyboard, or Hold 45° beside the drawing on touch, while drawing to use 45 degree offset snap guides.
 - Edit run length, angle, pipe size and fitting details from the inspector or right-click/long-press menus.
+- Use `Stop on bend` on a terminal bend leg to set its end to the correct centre-to-end automatically and add an amber drawing note.
 - Select one run, multiple runs with Shift, or multiple runs with box select.
 - Keep the side rail focused on Draw, Select, Undo, Redo, Measure and Note, with Tee, Branch, Flange, Reducer, Groove, Valve, Socket and Weld grouped in one Fittings flyout.
 - The Fittings button shows the currently selected fitting so it stays clear what will be placed next.

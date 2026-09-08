@@ -573,7 +573,8 @@ assert(
   "Largest-outlet tee reducer regression coverage or all-leg reducer logic is missing",
 );
 assert(
-  /function\s+teeNodeLegLengthMetres\s*\(/.test(app) &&
+  /function\s+teeRenderCentreToEndMetres\s*\(/.test(app) &&
+    /teeTakeoffMm\(largestSize\)\s*\/\s*1000/.test(app) &&
     /Math\.max\(startReducerTrim,\s*nodeClearances\.start\)/.test(app) &&
     /Math\.max\(endReducerTrim,\s*nodeClearances\.end\)/.test(app) &&
     /computeAutoReducerRenderTrims\(autoReducers,\s*style\)/.test(app),
@@ -1436,6 +1437,19 @@ assert(
     app.includes("reducerDimensionDetail(reducer)") &&
     css.includes(".reducer-type-label"),
   "Concentric/eccentric reducer selection, saved state, iso shape, dimensions or 3D labels are incomplete",
+);
+
+assert(
+  app.includes("function bendStopTargetForHit") &&
+    app.includes("function stopContextBend") &&
+    app.includes('label: "Stop on bend"') &&
+    app.includes("function elbowCentrelineCurve") &&
+    app.includes("const firstCentreToEnd = bendTakeoffMm(bendSegment ?? firstSegment, bendDegrees) / 1000") &&
+    app.includes("function reducerBendSegment") &&
+    app.includes("const actualBendTakeoffMm = bendSegment ? bendTakeoffMm(bendSegment, options.bend) : 0") &&
+    /return Number\.isFinite\(od\) && od > 0 \? od \/ 2000/.test(app) &&
+    app.includes('colour: "amber"'),
+  "Stop-on-bend actions or centre-to-end 3D elbow geometry are incomplete",
 );
 
 const rpcCalls = matches(app, /\.rpc\(\s*["']([^"']+)["']/g).map((match) => match[1]);

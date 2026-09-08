@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v387-locked-2d-comparison";
+const CACHE_NAME = "spoolmate-v388-true-elbow-stop";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=387",
-  "./ebro-hp112-bolting.js?v=387",
-  "./ebro-hp114-bolting.js?v=387",
-  "./app.js?v=387",
+  "./styles.css?v=388",
+  "./ebro-hp112-bolting.js?v=388",
+  "./ebro-hp114-bolting.js?v=388",
+  "./app.js?v=388",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

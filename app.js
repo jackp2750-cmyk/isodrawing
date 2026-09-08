@@ -596,7 +596,7 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.87";
+const APP_VERSION = "v3.88";
 const APP_BUILD_DATE = "2026-09-08";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
@@ -9567,9 +9567,12 @@ function updatePreviewSizeColourLegend(segmentData = segments()) {
 }
 
 function pipeRadiusMetres(segment = null) {
-  const od = (segment ? pipeSizeForSegment(segment) : selectedPipeSize()).od;
-  const maxOd = maxPipeOdMm();
-  return 0.055 + (od / maxOd) * 0.255;
+  const od = Number((segment ? pipeSizeForSegment(segment) : selectedPipeSize()).od);
+  // The solid model is fabrication geometry, so its pipe body must use the
+  // actual outside diameter. The old normalized display radius exaggerated
+  // small and medium pipe and could make a correct short C/E elbow look
+  // pinched or self-intersecting.
+  return Number.isFinite(od) && od > 0 ? od / 2000 : 0.01;
 }
 
 function toModelUnits(point) {
@@ -10443,6 +10446,83 @@ function bendEditAnchorForHit(hit) {
   return candidates[0].index;
 }
 
+function bendStopTargetForHit(hit, segmentData = segments()) {
+  if (!hit?.segment) return null;
+  const anchorIndex = bendEditAnchorForHit(hit);
+  if (anchorIndex === null) return null;
+
+  const connections = nodeConnections(segmentData);
+  const connected = connections.get(anchorIndex) ?? [];
+  if (connected.length !== 2) return null;
+
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
+  const candidates = connected
+    .map((connection) => {
+      const segment = segmentByIndex.get(connection.segmentIndex);
+      if (!segment) return null;
+      const terminalNodeIndex = connection.other;
+      const terminal = (connections.get(terminalNodeIndex)?.length ?? 0) === 1;
+      return { segment, terminalNodeIndex, terminal };
+    })
+    .filter((candidate) => candidate?.terminal);
+  if (!candidates.length) return null;
+
+  const target = candidates.find((candidate) => candidate.segment.index === hit.segment.index)
+    ?? (candidates.length === 1 ? candidates[0] : null);
+  if (!target) return null;
+
+  const bend = bendAngleForSegmentAt(target.segment, anchorIndex);
+  if (!Number.isFinite(bend) || bend < 0.5) return null;
+  const bendReducer = autoReducerTransitions(segmentData)
+    .find((reducer) => reducer.kind === "bend" && reducer.nodeIndex === anchorIndex);
+  const reducerOccupiesTerminalLeg = bendReducer &&
+    reducerPlacementSegment(bendReducer)?.index === target.segment.index;
+  // A reducer cannot occupy the same terminal leg that is being shortened to
+  // only the elbow C/E. Plan to move it to the other leg so the command always
+  // produces a physically coherent arrangement.
+  const moveReducerTo = reducerOccupiesTerminalLeg
+    ? (reducerPlacementSide(bendReducer) === "large" ? "small" : "large")
+    : null;
+  const bendSegment = reducerOccupiesTerminalLeg
+    ? target.segment
+    : reducerBendSegment(bendReducer) ?? target.segment;
+  const centreToEndMm = bendTakeoffMm(bendSegment, bend);
+  if (!Number.isFinite(centreToEndMm) || centreToEndMm <= 0) return null;
+
+  return {
+    ...target,
+    anchorIndex,
+    bend,
+    bendSegment,
+    bendSize: pipeSizeForSegment(bendSegment),
+    centreToEndMm,
+    estimated: !bendTakeoffIsPublished(bendSegment, bend),
+    moveReducerTo,
+  };
+}
+
+function segmentIsDocumentedStopOnBend(segment, segmentData = segments()) {
+  if (!segment) return false;
+  const connections = nodeConnections(segmentData);
+  const lengthMm = pointLength(segment.vector);
+  for (const [anchorIndex, terminalNodeIndex] of [[segment.from, segment.to], [segment.to, segment.from]]) {
+    if ((connections.get(anchorIndex)?.length ?? 0) !== 2) continue;
+    if ((connections.get(terminalNodeIndex)?.length ?? 0) !== 1) continue;
+    const bend = bendAngleForSegmentAt(segment, anchorIndex);
+    if (!Number.isFinite(bend) || bend < 0.5) continue;
+    const bendReducer = autoReducerTransitions(segmentData)
+      .find((reducer) => reducer.kind === "bend" && reducer.nodeIndex === anchorIndex);
+    const centreToEndMm = bendTakeoffMm(reducerBendSegment(bendReducer) ?? segment, bend);
+    if (Math.abs(lengthMm - centreToEndMm) > 1.1) continue;
+    const anchor = state.points[anchorIndex];
+    if (state.notes.some((note) =>
+      String(note.text ?? "").startsWith("STOP ON BEND") &&
+      pointLength(subtractPoints(note.point, anchor)) < 1
+    )) return true;
+  }
+  return false;
+}
+
 function bendAngleForSegmentAt(segment, anchorIndex) {
   const reference = referenceConnectionForSegment(segment, anchorIndex);
   if (!reference) return null;
@@ -10508,12 +10588,17 @@ function takeoffData(segmentData = segments()) {
       continue;
     }
 
-    const firstTakeoff = bendTakeoffMm(firstSegment, bend);
-    const secondTakeoff = bendTakeoffMm(secondSegment, bend);
+    const bendSegment = reducer?.kind === "bend" ? reducerBendSegment(reducer) : null;
+    const firstTakeoff = bendSegment
+      ? bendTakeoffMm(bendSegment, bend)
+      : bendTakeoffMm(firstSegment, bend);
+    const secondTakeoff = bendSegment
+      ? bendTakeoffMm(bendSegment, bend)
+      : bendTakeoffMm(secondSegment, bend);
     segmentTakeoffs.set(firstSegment.index, (segmentTakeoffs.get(firstSegment.index) ?? 0) + firstTakeoff);
     segmentTakeoffs.set(secondSegment.index, (segmentTakeoffs.get(secondSegment.index) ?? 0) + secondTakeoff);
 
-    const bendSize = largerPipeSize(firstSegment, secondSegment);
+    const bendSize = bendSegment ? pipeSizeForSegment(bendSegment) : largerPipeSize(firstSegment, secondSegment);
     elbows.push({
       nodeIndex,
       bend,
@@ -10532,6 +10617,7 @@ function takeoffData(segmentData = segments()) {
 
 function weldedSegmentEndCounts(segmentData = segments(), data = takeoffData(segmentData)) {
   const segmentIndexes = new Set(segmentData.map((segment) => segment.index));
+  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
   const weldedEnds = new Set();
   const add = (segmentIndex, nodeIndex) => {
     if (!segmentIndexes.has(segmentIndex) || !Number.isInteger(Number(nodeIndex))) return;
@@ -10539,8 +10625,10 @@ function weldedSegmentEndCounts(segmentData = segments(), data = takeoffData(seg
   };
 
   for (const elbow of data.elbows ?? []) {
-    add(elbow.firstSegmentIndex, elbow.nodeIndex);
-    add(elbow.secondSegmentIndex, elbow.nodeIndex);
+    const firstSegment = segmentByIndex.get(elbow.firstSegmentIndex);
+    const secondSegment = segmentByIndex.get(elbow.secondSegmentIndex);
+    if (!segmentIsDocumentedStopOnBend(firstSegment, segmentData)) add(elbow.firstSegmentIndex, elbow.nodeIndex);
+    if (!segmentIsDocumentedStopOnBend(secondSegment, segmentData)) add(elbow.secondSegmentIndex, elbow.nodeIndex);
   }
   for (const tee of data.tees ?? []) {
     for (const connection of tee.connections ?? []) add(connection.segmentIndex, tee.nodeIndex);
@@ -10551,12 +10639,18 @@ function weldedSegmentEndCounts(segmentData = segments(), data = takeoffData(seg
     for (const connection of branch.connections ?? []) add(connection.segmentIndex, branch.nodeIndex);
   }
   for (const reducer of data.reducers ?? []) {
+    if (reducer.kind === "bend") {
+      const placementSegment = reducerPlacementSegment(reducer);
+      if (!segmentIsDocumentedStopOnBend(placementSegment, segmentData)) {
+        add(placementSegment?.index, reducer.nodeIndex);
+      }
+      continue;
+    }
     add(reducer.firstSegmentIndex, reducer.nodeIndex);
     add(reducer.secondSegmentIndex, reducer.nodeIndex);
   }
   // End flanges are welded fitting connections even though the spool terminates
   // there. Roll-grooved, threaded and genuinely plain/open pipe ends are not.
-  const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
   for (const fitting of state.fittings ?? []) {
     const segment = segmentByIndex.get(Number(fitting.segmentIndex));
     if (!segment) continue;
@@ -10643,7 +10737,7 @@ function teeReducerFromEntries(nodeIndex, first, second) {
   const reducer = autoReducerForConnection(nodeIndex, first, second, first.segment, second.segment, { bend: 0 });
   if (!reducer) return null;
 
-  const takeoffMm = Math.min(reducer.lengthMm, pointLength(reducer.smallSegment.vector) * 0.45);
+  const takeoffMm = reducer.lengthMm;
   return {
     ...reducer,
     kind: "tee",
@@ -10677,7 +10771,7 @@ function teeTakeoffForNode(nodeIndex, connected, segmentData = segments()) {
     ...entry,
     // A smaller connected run is modelled as an equal tee plus a reducer.
     // The tee centre-to-end deduction therefore remains the line-size tee takeoff on every leg.
-    takeoffMm: Math.min(teeTakeoffMm(largestSize), entry.lengthMm * 0.45),
+    takeoffMm: teeTakeoffMm(largestSize),
   }));
   const reducing = entries.some((entry) => entry.size.nb !== largestSize.nb);
   const atlasWeightKg = atlasButtweldWeight(largestSize, "tee");
@@ -10713,7 +10807,7 @@ function branchTakeoffForNode(nodeIndex, connected, segmentData = segments()) {
   const connections = branchEntries.map((entry) => ({
     segmentIndex: entry.segment.index,
     nb: entry.size.nb,
-    takeoffMm: Math.min(branchTakeoffMm(info.mainSize, entry.size), entry.lengthMm * 0.45),
+    takeoffMm: branchTakeoffMm(info.mainSize, entry.size),
   }));
   const branchSize = branchEntries
     .map((entry) => entry.size)
@@ -10853,17 +10947,24 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
   const eccentricOffsetMm = reducerEccentricOffsetMm(largeSize, smallSize);
   const placementSide = isBendReducer ? reducerSideForNode(nodeIndex) : "small";
   const placementSegment = placementSide === "large" ? largeSegment : smallSegment;
-  const inlineFirstTakeoffMm = Math.min(lengthMm * 0.5, pointLength(firstSegment.vector) * 0.45);
-  const inlineSecondTakeoffMm = Math.min(lengthMm * 0.5, pointLength(secondSegment.vector) * 0.45);
-  const bendReducerTakeoffMm = Math.min(lengthMm, pointLength(placementSegment.vector) * 0.45);
+  // The reducer sits on one leg of a bend. The elbow is therefore the size on
+  // the opposite side of that reducer, not a fictitious reducing elbow.
+  const bendSegment = isBendReducer
+    ? (placementSide === "large" ? smallSegment : largeSegment)
+    : null;
+  const actualBendTakeoffMm = bendSegment ? bendTakeoffMm(bendSegment, options.bend) : 0;
+  // Always carry the actual reducer F/F into fabrication deductions. Short
+  // runs are rejected by Review; silently shrinking the fitting dimension can
+  // otherwise produce a plausible-looking but impossible cut length.
+  const inlineFirstTakeoffMm = lengthMm * 0.5;
+  const inlineSecondTakeoffMm = lengthMm * 0.5;
+  const bendReducerTakeoffMm = lengthMm;
   const firstTakeoffMm = isBendReducer
     ? (firstSegment.index === placementSegment.index ? bendReducerTakeoffMm : 0)
     : inlineFirstTakeoffMm;
   const secondTakeoffMm = isBendReducer
     ? (secondSegment.index === placementSegment.index ? bendReducerTakeoffMm : 0)
     : inlineSecondTakeoffMm;
-  const firstBendTakeoffMm = isBendReducer ? bendTakeoffMm(firstSegment, options.bend) : 0;
-  const secondBendTakeoffMm = isBendReducer ? bendTakeoffMm(secondSegment, options.bend) : 0;
   const atlasWeightKg = atlasReducerWeightForSizes(largeSize, smallSize, reducerType);
   const reducerWeightKg = atlasWeightKg ?? (lengthMm / 1000) * ((pipeMassPerMetreForSize(firstSize) + pipeMassPerMetreForSize(secondSize)) * 0.5) * 1.12;
   const reducerWeightSource = atlasWeightKg === null
@@ -10888,8 +10989,10 @@ function autoReducerForConnection(nodeIndex, firstConnection, secondConnection, 
     kind: isBendReducer ? "bend" : "inline",
     placementSide,
     bend: Number(options.bend) || 0,
-    largeBendTakeoffMm: firstIsLarge ? firstBendTakeoffMm : secondBendTakeoffMm,
-    smallBendTakeoffMm: firstIsLarge ? secondBendTakeoffMm : firstBendTakeoffMm,
+    bendTakeoffMm: actualBendTakeoffMm,
+    bendNb: bendSegment ? pipeSizeForSegment(bendSegment).nb : null,
+    largeBendTakeoffMm: actualBendTakeoffMm,
+    smallBendTakeoffMm: actualBendTakeoffMm,
     largeNb: largeSize.nb,
     smallNb: smallSize.nb,
     largeSegment,
@@ -10945,6 +11048,15 @@ function bendTakeoffMm(segment, bendDegrees) {
   // centre-to-end table in the supplied Atlas manual, so retain the geometric
   // centre-line estimate rather than presenting it as an Atlas dimension.
   return size.lrRadius * Math.tan((bend * Math.PI / 180) / 2);
+}
+
+function bendTakeoffIsPublished(segment, bendDegrees) {
+  const size = pipeSizeForSegment(segment);
+  const bend = normalizeBendAngle(bendDegrees);
+  if (isTubePipeSize(size)) return false;
+  if (Math.abs(bend - 45) < 0.5) return Number.isFinite(ELBOW_45_TAKEOFF_MM[size.nb]);
+  if (Math.abs(bend - 90) < 0.5) return Number.isFinite(size.lrRadius);
+  return false;
 }
 
 function largerPipeSize(firstSegment, secondSegment) {
@@ -11587,13 +11699,9 @@ function reducerRenderLengthMetres(reducer) {
   return clampNumber(nominalLength, minimumVisibleLength, maxLength);
 }
 
-function teeReducerStartOffsetMetres(reducer, style = null) {
+function teeReducerStartOffsetMetres(reducer) {
   if (!reducerStartsAtJoint(reducer)) return 0;
-  const coreRadius = Math.max(
-    pipeRadiusMetres(reducer.largeSegment),
-    pipeRadiusMetres(reducer.smallSegment),
-  );
-  return teeNodeLegLengthMetres(coreRadius, style);
+  return teeTakeoffMm(pipeSizeForSegment(reducer.largeSegment)) / 1000;
 }
 
 function reducerSideForNode(nodeIndex) {
@@ -11629,14 +11737,17 @@ function reducerPlacementSegment(reducer) {
   return reducerPlacementSide(reducer) === "large" ? reducer.largeSegment : reducer.smallSegment;
 }
 
+function reducerBendSegment(reducer) {
+  if (reducer?.kind !== "bend") return null;
+  return reducerPlacementSide(reducer) === "large" ? reducer.smallSegment : reducer.largeSegment;
+}
+
 function reducerPlacementOtherIndex(reducer) {
   return reducerPlacementSide(reducer) === "large" ? reducer.largeOtherIndex : reducer.smallOtherIndex;
 }
 
 function reducerPlacementBendTakeoffMm(reducer) {
-  return reducerPlacementSide(reducer) === "large"
-    ? Number(reducer.largeBendTakeoffMm) || 0
-    : Number(reducer.smallBendTakeoffMm) || 0;
+  return Number(reducer?.bendTakeoffMm) || 0;
 }
 
 function reducerLegOffsetMm(reducer) {
@@ -11671,7 +11782,7 @@ function computeAutoReducerRenderTrims(reducers, style = null) {
     if (reducer.kind === "bend") {
       addTrim(reducerPlacementSegment(reducer), reducer.nodeIndex, modelLength);
     } else if (reducerStartsAtJoint(reducer)) {
-      addTrim(reducer.smallSegment, reducer.nodeIndex, teeReducerStartOffsetMetres(reducer, style) + modelLength);
+      addTrim(reducer.smallSegment, reducer.nodeIndex, teeReducerStartOffsetMetres(reducer) + modelLength);
     } else {
       addTrim(reducer.largeSegment, reducer.nodeIndex, modelLength * 0.5);
       addTrim(reducer.smallSegment, reducer.nodeIndex, modelLength * 0.5);
@@ -12715,6 +12826,7 @@ function healthIssue(severity, title, detail = "", target = null, options = {}) 
 }
 
 function endpointHasFinish(segment, pointIndex) {
+  if (segmentIsDocumentedStopOnBend(segment)) return true;
   const endpointT = segment.from === pointIndex ? 0 : 1;
   return state.fittings.some((fitting) =>
     fitting.segmentIndex === segment.index &&
@@ -12805,7 +12917,7 @@ function drawingHealthItems() {
   }
   const unusuallyShortRuns = segmentData.filter((segment) => {
     const length = pointLength(segment.vector);
-    return length > 0.001 && length < MIN_LENGTH_MM;
+    return length > 0.001 && length < MIN_LENGTH_MM && !segmentIsDocumentedStopOnBend(segment, segmentData);
   });
   if (unusuallyShortRuns.length) {
     items.push(healthIssue(
@@ -12813,6 +12925,18 @@ function drawingHealthItems() {
       "Confirm very short pipe runs",
       `${unusuallyShortRuns.length} run${unusuallyShortRuns.length === 1 ? "" : "s"} are shorter than ${MIN_LENGTH_MM} mm.`,
       { type: "segments", segmentIndexes: unusuallyShortRuns.map((segment) => segment.index) },
+    ));
+  }
+  const overlappingFittingRuns = quantities.segments.filter(({ quantity }) =>
+    Number(quantity.bendTakeoffMm) + Number(quantity.weldGapMm) > Number(quantity.centrelineMm) + 0.5
+  );
+  if (overlappingFittingRuns.length) {
+    items.push(healthIssue(
+      "error",
+      "Fittings overlap on a short run",
+      `${overlappingFittingRuns.length} run${overlappingFittingRuns.length === 1 ? " is" : "s are"} shorter than the combined fitting deductions and weld gaps. Increase the C/C length or use Stop on bend only on a terminal elbow leg.`,
+      { type: "segments", segmentIndexes: overlappingFittingRuns.map(({ segment }) => segment.index) },
+      { guidance: "Show the highlighted run and compare its C/C with the bend, tee or reducer take-offs. The 3D model will not draw a backwards pipe between overlapping fittings." },
     ));
   }
   const pressureLimit = weakestPressureEstimate(segmentData);
@@ -21377,6 +21501,12 @@ const AI_HELPER_LOCAL_GUIDE = [
     help: "draw",
   },
   {
+    patterns: [["stop", "bend"], ["bend", "centre", "end"], ["bend", "center", "end"]],
+    answer: "To finish a spool on an elbow:\n1. Choose Select.\n2. Right-click the terminal bend leg on PC, or long-press it on iPad/Android.\n3. Choose Stop on bend.\n\nSpoolMate sets that free end run to the actual elbow size’s centre-to-end value and adds an amber STOP ON BEND note with the size, angle and C/E. The 3D elbow then occupies the complete terminal leg without an extra pipe stub. If a size-change reducer was on that same short leg, it is moved to the other bend leg so the arrangement remains buildable.",
+    tutorial: "Editing / fixing",
+    help: "edit",
+  },
+  {
     patterns: [["draw", "pipe"], ["first", "run"], ["start", "drawing"], ["start", "spool"], ["first", "spool"]],
     answer: "To start a spool:\n1. From Home choose New spool and enter the job, spool and revision details.\n2. Choose Draw.\n3. Press and drag from the yellow active point to the next point on the isometric paper.\n4. Continue from each new yellow point.\n5. Press Enter on a keyboard, or choose Select on touch, when the shape is finished.\n\nYou should see each run stay connected and the yellow point move to the end you can draw from next.",
     tutorial: "Draw pipe",
@@ -21474,7 +21604,7 @@ const AI_HELPER_LOCAL_GUIDE = [
   },
   {
     patterns: [["3d"], ["preview"], ["rotate", "model"]],
-    answer: "In 3D Preview:\n1. The preview opens locked to the 2D isometric direction so every horizontal turn faces the same way on both screens.\n2. Choose Move to pan and use the mouse wheel or two-finger pinch to zoom without changing that direction.\n3. Choose Free rotate only when you deliberately want to inspect the reverse side.\n4. Press Match 2D to return to the drawing-locked comparison.\n\nThe camera badge says 2D turn direction locked when the drawing and model can be compared directly.",
+    answer: "In 3D Preview:\n1. The preview opens locked to the 2D isometric direction so every horizontal turn faces the same way on both screens.\n2. Compare the A/B/C point letters and D1/D2 run labels with the drawing.\n3. Choose Move to pan and use the mouse wheel or two-finger pinch to zoom without changing that direction.\n4. Choose Free rotate only when you deliberately want to inspect the reverse side.\n5. Press Match 2D to return to the drawing-locked comparison.\n\nThe camera badge says 2D turn direction locked when the views can be compared directly. Pipe bodies use their real OD, and Review blocks any run whose fittings physically overlap.",
     tutorial: "3D preview",
     help: "touch",
   },
@@ -28194,24 +28324,16 @@ function nodeFittingClearanceMetres(nodeIndex, segment, connections, segmentByIn
     const info = branchNodeInfo(nodeIndex, connected, segmentData);
     const branchSegmentIndexes = new Set((info?.branchEntries ?? []).map((entry) => entry.segment.index));
     if (!branchSegmentIndexes.has(segment.index)) return 0;
-    const radius = pipeRadiusMetres(segment);
-    return style?.lineDrawing
-      ? Math.max(radius * 3.1, 0.095)
-      : Math.max(radius * 2.25, 0.055);
+    return branchTakeoffMm(info.mainSize, pipeSizeForSegment(segment)) / 1000;
   }
 
-  const radii = connected
+  const connectedSegments = connected
     .map((connection) => segmentByIndex.get(connection.segmentIndex))
-    .filter(Boolean)
-    .map((connectedSegment) => pipeRadiusMetres(connectedSegment));
-  const coreRadius = Math.max(radiusForNode(nodeIndex, connections, segmentByIndex), ...radii);
-  return teeNodeLegLengthMetres(coreRadius, style);
-}
-
-function teeNodeLegLengthMetres(coreRadius, style = null) {
-  return style?.lineDrawing
-    ? Math.max(coreRadius * 3.8, 0.2)
-    : Math.max(coreRadius * 3.15, 0.18);
+    .filter(Boolean);
+  const largestSize = connectedSegments
+    .map((connectedSegment) => pipeSizeForSegment(connectedSegment))
+    .sort((first, second) => second.od - first.od)[0];
+  return largestSize ? teeTakeoffMm(largestSize) / 1000 : 0;
 }
 
 function segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style) {
@@ -28415,8 +28537,8 @@ function rebuildThreeSpool() {
   const segmentData = segments();
   updatePreviewSizeColourLegend(segmentData);
   const connections = nodeConnections(segmentData);
-  const elbowTrims = computeGraphElbowTrims(modelPoints, segmentData, connections);
   const autoReducers = autoReducerTransitions(segmentData);
+  const elbowTrims = computeGraphElbowTrims(modelPoints, segmentData, connections, autoReducers);
   const reducerTrims = computeAutoReducerRenderTrims(autoReducers, style);
   const segmentByIndex = new Map(segmentData.map((segment) => [segment.index, segment]));
   const renderedSegments = new Map();
@@ -28456,20 +28578,32 @@ function rebuildThreeSpool() {
     const segmentRadius = pipeRadiusMetres(segment);
     const start = modelPoints[segment.from].clone();
     const end = modelPoints[segment.to].clone();
+    const segmentLength = start.distanceTo(end);
     const direction = end.clone().sub(start).normalize();
     const startTrim = elbowTrims.segment.get(`${segment.index}:${segment.from}`) ?? 0;
     const endTrim = elbowTrims.segment.get(`${segment.index}:${segment.to}`) ?? 0;
     const startReducerTrim = reducerTrims.get(`${segment.index}:${segment.from}`) ?? 0;
     const endReducerTrim = reducerTrims.get(`${segment.index}:${segment.to}`) ?? 0;
     const nodeClearances = segmentEndpointClearancesMetres(segment, connections, segmentByIndex, segmentData, style);
-    start.addScaledVector(direction, startTrim + Math.max(startReducerTrim, nodeClearances.start));
-    end.addScaledVector(direction, -(endTrim + Math.max(endReducerTrim, nodeClearances.end)));
     const threadLength = threadedPipeEndLength(segmentRadius);
-    if (threadedEndSides.has(`${segment.index}:start`)) {
-      start.addScaledVector(direction, threadLength);
-    }
-    if (threadedEndSides.has(`${segment.index}:end`)) {
-      end.addScaledVector(direction, -threadLength);
+    const startInset = startTrim
+      + Math.max(startReducerTrim, nodeClearances.start)
+      + (threadedEndSides.has(`${segment.index}:start`) ? threadLength : 0);
+    const endInset = endTrim
+      + Math.max(endReducerTrim, nodeClearances.end)
+      + (threadedEndSides.has(`${segment.index}:end`) ? threadLength : 0);
+    const totalInset = startInset + endInset;
+    if (totalInset >= segmentLength - 0.000001) {
+      // Never draw a backwards straight cylinder when two fittings consume a
+      // short run. Collapse it at their proportional meeting point; Review
+      // separately reports genuinely overlapping fitting deductions.
+      const meetingDistance = totalInset > 0 ? segmentLength * (startInset / totalInset) : segmentLength * 0.5;
+      const meetingPoint = start.clone().addScaledVector(direction, meetingDistance);
+      start.copy(meetingPoint);
+      end.copy(meetingPoint);
+    } else {
+      start.addScaledVector(direction, startInset);
+      end.addScaledVector(direction, -endInset);
     }
     renderedSegments.set(segment.index, { start: start.clone(), end: end.clone() });
 
@@ -28503,12 +28637,14 @@ function rebuildThreeSpool() {
   }
 
   for (const elbowData of elbowTrims.elbows) {
-    const elbowSegment = segmentData.reduce((closest, segment) => {
-      if (!closest) return segment;
-      const candidateDifference = Math.abs(pipeRadiusMetres(segment) - elbowData.radius);
-      const closestDifference = Math.abs(pipeRadiusMetres(closest) - elbowData.radius);
-      return candidateDifference < closestDifference ? segment : closest;
-    }, null);
+    const explicitBendSegment = segmentByIndex.get(elbowData.bendSegmentIndex);
+    const elbowSegments = [
+      segmentByIndex.get(elbowData.firstSegmentIndex),
+      segmentByIndex.get(elbowData.secondSegmentIndex),
+    ].filter(Boolean);
+    const elbowSegment = explicitBendSegment ?? elbowSegments.reduce((largest, segment) =>
+      !largest || pipeRadiusMetres(segment) > pipeRadiusMetres(largest) ? segment : largest
+    , null);
     const elbowPipeMaterial = elbowSegment ? pipeMaterialForSegment(elbowSegment) : pipeMaterial;
     const elbow = style.lineDrawing
       ? outlineElbowBetween(
@@ -28531,6 +28667,46 @@ function rebuildThreeSpool() {
       elbow.receiveShadow = true;
     }
     group.add(elbow);
+
+    // TubeGeometry is open-ended. When a terminal leg is exactly one elbow
+    // C/E long, the elbow itself reaches the spool end and needs a visible end
+    // face; otherwise the stopped bend appears hollow or unfinished.
+    const terminalEnds = [
+      {
+        nodeIndex: elbowData.firstOtherIndex,
+        point: elbowData.entry,
+        outward: elbowData.entry.clone().sub(elbowData.joint),
+        fullyConsumed: elbowData.firstTrim >= elbowData.firstLength - 0.000001,
+      },
+      {
+        nodeIndex: elbowData.secondOtherIndex,
+        point: elbowData.exit,
+        outward: elbowData.exit.clone().sub(elbowData.joint),
+        fullyConsumed: elbowData.secondTrim >= elbowData.secondLength - 0.000001,
+      },
+    ];
+    for (const terminalEnd of terminalEnds) {
+      if (!terminalEnd.fullyConsumed || (connections.get(terminalEnd.nodeIndex)?.length ?? 0) !== 1) continue;
+      if (terminalEnd.outward.length() < 0.0001) continue;
+      if (style.lineDrawing) {
+        group.add(outlineFlatPipeCap(
+          terminalEnd.point,
+          terminalEnd.outward,
+          elbowData.radius,
+          elbowPipeMaterial,
+        ));
+      } else {
+        const cap = flatPipeCap(
+          terminalEnd.point,
+          terminalEnd.outward,
+          elbowData.radius,
+          elbowPipeMaterial,
+        );
+        cap.userData.terminalElbowCap = true;
+        cap.castShadow = true;
+        group.add(cap);
+      }
+    }
 
     if (illustratedSeamMaterial) {
       const entryAxis = elbowData.joint.clone().sub(elbowData.entry);
@@ -29087,6 +29263,15 @@ function cylinderBetween(start, end, radius, material, radialSegments) {
   return mesh;
 }
 
+function flatPipeCap(position, direction, radius, material, radialSegments = 32) {
+  const THREE = three.module;
+  const geometry = new THREE.CircleGeometry(radius, radialSegments);
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.position.copy(position);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), direction.clone().normalize());
+  return mesh;
+}
+
 function orientedBoxMesh(center, axisX, axisY, axisZ, sizeX, sizeY, sizeZ, material) {
   const THREE = three.module;
   const geometry = new THREE.BoxGeometry(sizeX, sizeY, sizeZ);
@@ -29157,7 +29342,7 @@ function outlineFlatPipeCap(position, direction, radius, material) {
 function outlineElbowBetween(entry, joint, exit, radius, material) {
   const THREE = three.module;
   const group = new THREE.Group();
-  const curve = new THREE.QuadraticBezierCurve3(entry, joint, exit);
+  const curve = elbowCentrelineCurve(entry, joint, exit);
   const incoming = entry.clone().sub(joint).normalize();
   const outgoing = exit.clone().sub(joint).normalize();
   const bendNormal = incoming.clone().cross(outgoing);
@@ -29729,8 +29914,10 @@ function socketRadialDirection(direction, fitting = null) {
 
 function socketRadiusMetres(fitting) {
   const size = pipeSizeByNb(fittingSocketSizeNb(fitting), "carbon40");
-  const maxOd = maxPipeOdMm();
-  return Math.max(0.035, (0.055 + (size.od / maxOd) * 0.255) * 0.72);
+  const outsideDiameterMm = Number(size?.od);
+  return Number.isFinite(outsideDiameterMm) && outsideDiameterMm > 0
+    ? outsideDiameterMm / 2000
+    : 0.01;
 }
 
 function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims = null) {
@@ -29764,7 +29951,7 @@ function autoReducerAssembly(reducer, modelPoints, material, style, elbowTrims =
     end = start.clone().addScaledVector(placementDirection, modelLength);
   } else if (startsAtJoint) {
     const offset = clampNumber(
-      teeReducerStartOffsetMetres(reducer, style),
+      teeReducerStartOffsetMetres(reducer),
       0.015,
       Math.max(0.015, placementLength - modelLength),
     );
@@ -29888,13 +30075,21 @@ function mostOppositeRenderEntryPair(entries) {
   return best;
 }
 
+function teeRenderCentreToEndMetres(entries) {
+  const largestSize = entries
+    .map((entry) => entry.segment ? pipeSizeForSegment(entry.segment) : null)
+    .filter(Boolean)
+    .sort((first, second) => second.od - first.od)[0];
+  return largestSize ? teeTakeoffMm(largestSize) / 1000 : 0.025;
+}
+
 function teeNodeAssembly(position, connected, modelPoints, radius, material, segmentData = []) {
   const THREE = three.module;
   const group = new THREE.Group();
   const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
   const mainPair = mostOppositeRenderEntryPair(entries);
   const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
-  const length = teeNodeLegLengthMetres(coreRadius);
+  const length = teeRenderCentreToEndMetres(entries);
 
   if (mainPair) {
     const main = cylinderBetween(
@@ -29939,7 +30134,7 @@ function outlineTeeMarker(position, connected, modelPoints, radius, material, se
   const entries = connectionRenderEntries(position, connected, modelPoints, segmentData);
   const mainPair = mostOppositeRenderEntryPair(entries);
   const coreRadius = Math.max(radius, ...entries.map((entry) => entry.radius));
-  const length = teeNodeLegLengthMetres(coreRadius, { lineDrawing: true });
+  const length = teeRenderCentreToEndMetres(entries);
 
   if (mainPair) {
     group.add(outlinePipeBetween(
@@ -29986,7 +30181,7 @@ function branchNodeAssembly(nodeIndex, position, connected, modelPoints, segment
     if (direction.length() < 0.0001) continue;
     direction.normalize();
     const radius = pipeRadiusMetres(segment);
-    const collarLength = Math.max(radius * 2.25, 0.055);
+    const collarLength = branchTakeoffMm(info.mainSize, pipeSizeForSegment(segment)) / 1000;
     const collar = cylinderBetween(
       position.clone().addScaledVector(direction, radius * 0.02),
       position.clone().addScaledVector(direction, collarLength),
@@ -30030,7 +30225,7 @@ function outlineBranchMarker(nodeIndex, position, connected, modelPoints, segmen
     if (direction.length() < 0.0001) continue;
     direction.normalize();
     const radius = pipeRadiusMetres(segment);
-    const length = Math.max(radius * 3.1, 0.095);
+    const length = branchTakeoffMm(info.mainSize, pipeSizeForSegment(segment)) / 1000;
     const start = position.clone().addScaledVector(direction, radius * 0.16);
     const end = position.clone().addScaledVector(direction, length);
     group.add(outlineRing(start, direction, radius * 1.03, material));
@@ -30461,9 +30656,49 @@ function update3dLabelPositions(options = {}) {
 
 function curvedElbowBetween(entry, joint, exit, radius, material, radialSegments = 32) {
   const THREE = three.module;
-  const curve = new THREE.QuadraticBezierCurve3(entry, joint, exit);
+  const curve = elbowCentrelineCurve(entry, joint, exit);
   const geometry = new THREE.TubeGeometry(curve, 28, radius, radialSegments, false);
   return new THREE.Mesh(geometry, material);
+}
+
+function elbowCentrelineCurve(entry, joint, exit) {
+  const THREE = three.module;
+  const first = entry.clone().sub(joint);
+  const second = exit.clone().sub(joint);
+  const firstLength = first.length();
+  const secondLength = second.length();
+  if (firstLength < 0.0001 || secondLength < 0.0001) {
+    return new THREE.QuadraticBezierCurve3(entry, joint, exit);
+  }
+
+  // Equal-size elbows have the same centre-to-end on each leg. Build their
+  // centreline as a true circular arc tangent to both straight pipe axes.
+  const equalTakeoffs = Math.abs(firstLength - secondLength) <= Math.max(0.0005, Math.max(firstLength, secondLength) * 0.01);
+  const firstUnit = first.clone().normalize();
+  const secondUnit = second.clone().normalize();
+  const includedAngle = firstUnit.angleTo(secondUnit);
+  const denominator = 1 + Math.cos(includedAngle);
+  if (!equalTakeoffs || denominator < 0.000001) {
+    return new THREE.QuadraticBezierCurve3(entry, joint, exit);
+  }
+
+  const centerDistance = firstLength / denominator;
+  const center = joint.clone().add(firstUnit.clone().add(secondUnit).multiplyScalar(centerDistance));
+  const firstRadius = entry.clone().sub(center);
+  const secondRadius = exit.clone().sub(center);
+  const normal = firstRadius.clone().cross(secondRadius);
+  if (normal.length() < 0.000001) {
+    return new THREE.QuadraticBezierCurve3(entry, joint, exit);
+  }
+
+  normal.normalize();
+  const sweep = firstRadius.angleTo(secondRadius);
+  const curve = new THREE.Curve();
+  curve.getPoint = (t, target = new THREE.Vector3()) => target
+    .copy(firstRadius)
+    .applyAxisAngle(normal, sweep * clampNumber(t, 0, 1))
+    .add(center);
+  return curve;
 }
 
 function nodeConnections(segmentData) {
@@ -30477,7 +30712,7 @@ function nodeConnections(segmentData) {
   return connections;
 }
 
-function computeGraphElbowTrims(modelPoints, segmentData, connections) {
+function computeGraphElbowTrims(modelPoints, segmentData, connections, reducers = []) {
   const segmentTrims = new Map();
   const elbows = [];
   const smoothNodes = new Set();
@@ -30492,7 +30727,11 @@ function computeGraphElbowTrims(modelPoints, segmentData, connections) {
     const firstSegment = segmentByIndex.get(first.segmentIndex);
     const secondSegment = segmentByIndex.get(second.segmentIndex);
     if (!firstSegment || !secondSegment) continue;
-    const radius = Math.max(pipeRadiusMetres(firstSegment), pipeRadiusMetres(secondSegment));
+    const bendReducer = reducers.find((reducer) => reducer.kind === "bend" && reducer.nodeIndex === nodeIndex);
+    const bendSegment = reducerBendSegment(bendReducer);
+    const radius = bendSegment
+      ? pipeRadiusMetres(bendSegment)
+      : Math.max(pipeRadiusMetres(firstSegment), pipeRadiusMetres(secondSegment));
 
     const firstDirection = modelPoints[first.other].clone().sub(joint);
     const secondDirection = modelPoints[second.other].clone().sub(joint);
@@ -30503,16 +30742,39 @@ function computeGraphElbowTrims(modelPoints, segmentData, connections) {
     const angle = firstDirection.clone().normalize().angleTo(secondDirection.clone().normalize());
     if (Math.abs(Math.PI - angle) < 0.04) continue;
 
-    const trim = Math.min(Math.max(radius * 4.5, 0.12), firstLength * 0.38, secondLength * 0.38);
+    const bendDegrees = Math.abs(180 - angle * 180 / Math.PI);
+    const firstCentreToEnd = bendTakeoffMm(bendSegment ?? firstSegment, bendDegrees) / 1000;
+    const secondCentreToEnd = bendTakeoffMm(bendSegment ?? secondSegment, bendDegrees) / 1000;
+    const fallbackTrim = Math.max(radius * 4.5, 0.12);
+    const firstTrim = Math.min(
+      Number.isFinite(firstCentreToEnd) && firstCentreToEnd > 0 ? firstCentreToEnd : fallbackTrim,
+      firstLength,
+    );
+    const secondTrim = Math.min(
+      Number.isFinite(secondCentreToEnd) && secondCentreToEnd > 0 ? secondCentreToEnd : fallbackTrim,
+      secondLength,
+    );
     const firstUnit = firstDirection.normalize();
     const secondUnit = secondDirection.normalize();
-    segmentTrims.set(`${first.segmentIndex}:${nodeIndex}`, trim);
-    segmentTrims.set(`${second.segmentIndex}:${nodeIndex}`, trim);
+    segmentTrims.set(`${first.segmentIndex}:${nodeIndex}`, firstTrim);
+    segmentTrims.set(`${second.segmentIndex}:${nodeIndex}`, secondTrim);
     elbows.push({
-      entry: joint.clone().addScaledVector(firstUnit, trim),
+      entry: joint.clone().addScaledVector(firstUnit, firstTrim),
       joint: joint.clone(),
-      exit: joint.clone().addScaledVector(secondUnit, trim),
+      exit: joint.clone().addScaledVector(secondUnit, secondTrim),
       radius,
+      bendDegrees,
+      firstCentreToEnd,
+      secondCentreToEnd,
+      firstTrim,
+      secondTrim,
+      firstLength,
+      secondLength,
+      firstSegmentIndex: first.segmentIndex,
+      secondSegmentIndex: second.segmentIndex,
+      firstOtherIndex: first.other,
+      secondOtherIndex: second.other,
+      bendSegmentIndex: bendSegment?.index ?? null,
     });
     smoothNodes.add(nodeIndex);
   }
@@ -44227,6 +44489,7 @@ function renderDrawingContextMenu() {
   if (target?.segmentHit) {
     const bendAnchor = bendEditAnchorForHit(target.segmentHit);
     const currentBend = bendAnchor === null ? null : bendAngleForSegmentAt(target.segmentHit.segment, bendAnchor);
+    const bendStopTarget = bendStopTargetForHit(target.segmentHit);
     const selected = selectedSegmentIndexes();
     const deleteCount = selected.includes(target.segmentHit.segment.index) && selected.length > 1 ? selected.length : 1;
 
@@ -44248,6 +44511,14 @@ function renderDrawingContextMenu() {
         label: "Edit bend angle",
         detail: `${formatAngle(currentBend)} deg now`,
         action: () => editContextSegmentAngle(),
+      });
+    }
+
+    if (bendStopTarget) {
+      actions.push({
+        label: "Stop on bend",
+        detail: `Set end run to ${formatLength(bendStopTarget.centreToEndMm)} mm ${bendStopTarget.estimated ? "estimated " : ""}C/E${bendStopTarget.moveReducerTo ? ", move reducer to other leg" : ""} and add note`,
+        action: () => stopContextBend(),
       });
     }
 
@@ -44649,6 +44920,7 @@ function renderMobileDrawingContextMenu(target) {
     const segment = target.segmentHit.segment;
     const bendAnchor = bendEditAnchorForHit(target.segmentHit);
     const currentBend = bendAnchor === null ? null : bendAngleForSegmentAt(segment, bendAnchor);
+    const bendStopTarget = bendStopTargetForHit(target.segmentHit);
     const selected = selectedSegmentIndexes();
     const deleteCount = selected.includes(segment.index) && selected.length > 1 ? selected.length : 1;
 
@@ -44677,6 +44949,13 @@ function renderMobileDrawingContextMenu(target) {
         label: "Bend angle",
         detail: `${formatAngle(currentBend)} deg now`,
         action: () => editContextSegmentAngle(),
+      });
+    }
+    if (bendStopTarget) {
+      actions.push({
+        label: "Stop on bend",
+        detail: `${formatLength(bendStopTarget.centreToEndMm)} mm ${bendStopTarget.estimated ? "estimated " : ""}C/E${bendStopTarget.moveReducerTo ? " + move reducer" : ""} + automatic note`,
+        action: () => stopContextBend(),
       });
     }
     actions.push(
@@ -46092,6 +46371,86 @@ async function editContextSegmentAngle() {
   if (text === null) return;
 
   editSegmentBendAngle(hit.segment, anchorIndex, text);
+}
+
+function stopContextBend() {
+  if (!ensureDrawingEditable("stop on bend")) return false;
+  const target = bendStopTargetForHit(drawingContextTarget?.segmentHit);
+  if (!target) {
+    showAppNotice("Stop on bend needs a bend with a free end run.", { tone: "warning" });
+    return false;
+  }
+
+  const anchor = state.points[target.anchorIndex];
+  const terminal = state.points[target.terminalNodeIndex];
+  const direction = normalizePoint(subtractPoints(terminal, anchor));
+  if (pointLength(direction) < 0.5) return false;
+
+  const snapshot = createUndoSnapshot();
+  if (target.moveReducerTo) {
+    state.reducerSideOverrides = {
+      ...(state.reducerSideOverrides ?? {}),
+      [target.anchorIndex]: target.moveReducerTo,
+    };
+  }
+  // Some legitimate small-bore elbows have a C/E below the normal 50 mm
+  // drawing-run minimum, so preserve the published fitting dimension exactly.
+  const centreToEndMm = Math.max(
+    1,
+    Math.min(MAX_LENGTH_MM, Math.round(target.centreToEndMm / LENGTH_INCREMENT_MM) * LENGTH_INCREMENT_MM),
+  );
+  state.points[target.terminalNodeIndex] = addPoints(anchor, direction, centreToEndMm);
+
+  const offsetMeta = segmentOffsetMeta(target.segment);
+  if (offsetMeta) {
+    state.edges[target.segment.index] = {
+      ...state.edges[target.segment.index],
+      ...normalizeOffsetEdgeMeta({
+        offsetSetMm: Math.round(centreToEndMm / offsetMeta.multiplier),
+        offsetTravelMm: centreToEndMm,
+        offsetAngleDeg: offsetMeta.angleDeg,
+        offsetPlane: offsetMeta.plane,
+        offsetDirection: offsetMeta.direction,
+      }),
+    };
+  }
+
+  const noteText = `STOP ON BEND — ${pipeSizeDisplayLabel(target.bendSize)} / ${formatAngle(target.bend)}° / ${target.estimated ? "EST. " : ""}C/E ${formatLength(centreToEndMm)} mm`;
+  let note = state.notes.find((item) =>
+    String(item.text ?? "").startsWith("STOP ON BEND") &&
+    pointLength(subtractPoints(item.point, anchor)) < 1
+  );
+  if (note) {
+    note.text = noteText.slice(0, 80);
+    note.point = clonePoint(anchor);
+  } else {
+    note = {
+      id: nextNoteId,
+      text: noteText.slice(0, 80),
+      point: clonePoint(anchor),
+      labelPoint: defaultNoteLabelPoint(anchor),
+      colour: "amber",
+    };
+    state.notes.push(note);
+    nextNoteId += 1;
+  }
+
+  noteTextInput.value = note.text;
+  if (noteColorInput) noteColorInput.value = note.colour;
+  state.selectedNote = note.id;
+  state.selectedFitting = null;
+  state.selectedMeasurement = null;
+  state.selectedPoint = null;
+  state.activePoint = target.terminalNodeIndex;
+  clearSelectedSegments();
+  recordHistory({ type: "snapshot", snapshot });
+  updateAll();
+  revealInspectorForSelection();
+  showAppNotice(
+    `End run set to ${formatLength(centreToEndMm)} mm ${target.estimated ? "estimated " : ""}C/E${target.moveReducerTo ? " and reducer moved to the other bend leg" : ""}; STOP ON BEND note added${target.estimated ? " — confirm the supplier dimension before fabrication" : ""}.`,
+    { tone: "success" },
+  );
+  return true;
 }
 
 function contextPipeSizeDetail(segment) {

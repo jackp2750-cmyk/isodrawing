@@ -1,6 +1,20 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.87`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.88`.
+
+## v3.88 - True elbow geometry and Stop on bend
+
+- Replaced the invented 3D elbow trim and 38% short-run limit with the same Atlas centre-to-end value used by fabrication calculations.
+- Replaced exaggerated display diameters with each selected pipe or tube's true outside diameter throughout the solid model.
+- Rendered equal-size elbows on a true tangent circular centreline in both solid and outline 3D styles.
+- Allowed an elbow to consume a terminal run whose length is exactly its centre-to-end, removing the malformed pipe stub and closing the resulting terminal elbow face cleanly.
+- Prevented overlapping fitting deductions from creating a reversed 3D pipe and added a targeted Review error for impossible short runs.
+- Aligned tee model clearances with the published tee C/E and stopped short tee/reducer runs from silently shrinking their fabrication deductions.
+- Modelled a size change at a bend as one real-size elbow plus a reducer on the chosen leg, with the same elbow C/E on both axes, rather than a fictitious unequal-ended elbow.
+- Made `Stop on bend` automatically move a conflicting bend reducer to the other leg and suppress the nonexistent terminal pipe weld gap.
+- Marked sanitary-tube and non-standard-angle Stop-on-bend dimensions as estimates requiring supplier confirmation; Atlas-backed 45°/90° pipe dimensions remain exact.
+- Added `Stop on bend` to desktop right-click and touch long-press actions; it sets a free end run to the correct C/E and creates an amber `STOP ON BEND` note with angle and measurement.
+- Bumped the PWA cache to `spoolmate-v388-true-elbow-stop`.
 
 ## v3.87 - Locked 2D/3D turn comparison
 
