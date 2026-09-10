@@ -596,8 +596,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.89";
-const APP_BUILD_DATE = "2026-09-09";
+const APP_VERSION = "v3.90";
+const APP_BUILD_DATE = "2026-09-10";
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -5896,9 +5896,21 @@ function addDimensionHitTarget(target) {
 function chooseSegmentFromPointer(event, index) {
   if (event.shiftKey || event.ctrlKey || event.metaKey) {
     toggleSelectedSegment(index);
-    return;
+  } else {
+    selectSingleSegment(index);
   }
-  selectSingleSegment(index);
+  restoreThreeComparisonForDrawingSelection();
+}
+
+function restoreThreeComparisonForDrawingSelection() {
+  if (!three.ready || previewPanelHidden || three.comparisonLocked) return false;
+  three.comparisonLocked = true;
+  three.userMovedCamera = false;
+  pendingThreeViewRestore = null;
+  frameThreeCamera({ reset: true });
+  applyThreeNavigationMode(three.navigationMode);
+  updateThreeOrientationStatus();
+  return true;
 }
 
 function selectedPipeSize() {
@@ -12642,6 +12654,7 @@ function updateSegmentList() {
         setSelectedSegments(event.shiftKey || event.ctrlKey || event.metaKey
           ? [...new Set([...selectedSegmentIndexes(), ...segmentIndexes])]
           : segmentIndexes);
+        restoreThreeComparisonForDrawingSelection();
       } else {
         chooseSegmentFromPointer(event, segment.index);
       }
@@ -15108,6 +15121,10 @@ function updateThreeOrientationStatus() {
   previewOrientationStatus.title = matches
     ? "The camera uses the same orientation as the 2D isometric drawing."
     : "Choose Match 2D above before comparing bend directions.";
+  previewLabelLayer?.classList.toggle("rotated-comparison", !matches);
+  previewLabelLayer?.querySelectorAll(".selected-run-camera-warning").forEach((warning) => {
+    warning.hidden = matches;
+  });
 }
 
 function forcePreviewRender() {
@@ -30575,6 +30592,13 @@ function build3dPipeLabels(segmentData, modelPoints) {
       const element = document.createElement(index === 0 ? "span" : "small");
       element.textContent = line;
       label.append(element);
+    }
+    if (selectedSet.has(segment.index)) {
+      const warning = document.createElement("small");
+      warning.className = "selected-run-camera-warning";
+      warning.textContent = "ROTATED VIEW · SCREEN DIRECTION MAY REVERSE";
+      warning.hidden = threeCameraMatches2dOrientation();
+      label.append(warning);
     }
     previewLabelLayer.append(label);
     three.labels.push({ element: label, point: midpoint });
@@ -47401,6 +47425,7 @@ function finishBoxSelect(event) {
 
   boxSelectDrag = null;
   setSelectedSegments(chosen);
+  restoreThreeComparisonForDrawingSelection();
   state.selectedFitting = null;
   state.selectedNote = null;
   state.selectedMeasurement = null;

@@ -1,6 +1,13 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.89`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.90`.
+
+## v3.90 - Selection restores the drawing camera
+
+- Fixed the reported C→D reversal when the 3D preview had been left on the reverse side in Free rotate.
+- Selecting a run directly on the 2D drawing, in the cut list or with box select now restores and locks the drawing-matched 3D camera.
+- Added an explicit warning on the selected run label whenever the user deliberately rotates away again, so a reverse-side inspection cannot be mistaken for the isometric screen direction.
+- Bumped the PWA cache to `spoolmate-v390-selection-camera-lock`.
 
 ## v3.89 - Selected-run 2D/3D tracing
 

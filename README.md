@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.89`
+Current app version: `v3.90`
+
+Selecting a run on the 2D drawing now automatically returns an open 3D preview from Free rotate to the drawing-matched camera before showing the selected direction. If the user deliberately rotates again, the selected run carries an explicit `ROTATED VIEW · SCREEN DIRECTION MAY REVERSE` warning rather than presenting its arrow as a screen-space comparison.
 
 The live 3D preview now carries the drawing selection into the solid model. A selected run uses the same orange emphasis as the 2D drawing and keeps its `D# · point → point` label plus both endpoint letters visible even when general 3D labels are off. This makes overlapping isometric routes—such as a long run, drop and return—traceable without mistaking the return for a reversed bend.
 

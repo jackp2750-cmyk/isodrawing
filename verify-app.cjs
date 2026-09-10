@@ -846,6 +846,8 @@ assert(
     /const\s+run\s*=\s*`D\$\{segment\.index \+ 1\}`/.test(app) &&
     /pointLabel\(segment\.from\)[\s\S]{0,80}pointLabel\(segment\.to\)/.test(app) &&
     /spoolmateSelectedRun/.test(app) &&
+    /function\s+restoreThreeComparisonForDrawingSelection\s*\(/.test(app) &&
+    /ROTATED VIEW · SCREEN DIRECTION MAY REVERSE/.test(app) &&
     /\.selected-run-label/.test(css) &&
     /\.preview-orientation-status\.rotated/.test(css),
   "Live 3D drawing-orientation guidance is incomplete",

@@ -47,6 +47,7 @@ function check(condition, message) {
         pipeSpec: "carbon40",
         previewMode: "illustrated",
       };
+      previewPanelHidden = false;
       rebuildThreeSpool();
       frameThreeCamera({ reset: true });
       const projectLivePoint = (point) => {
@@ -637,12 +638,28 @@ function check(condition, message) {
           selectedGeometryTypes.push(object.geometry?.type ?? object.type);
         }
       });
+      enableThreeFreeRotate();
+      const rotatedTarget = three.controls.target.clone();
+      three.camera.position.copy(rotatedTarget).add(new three.module.Vector3(8, -8, 6));
+      three.camera.lookAt(rotatedTarget);
+      three.camera.updateMatrixWorld(true);
+      updateThreeOrientationStatus();
+      const rotatedStatus = previewOrientationStatus.textContent;
+      const rotatedWarningVisible = !previewLabelLayer.querySelector(".selected-run-camera-warning")?.hidden;
+      chooseSegmentFromPointer({ shiftKey: false, ctrlKey: false, metaKey: false }, 2);
       return {
         selectedGeometryTypes,
         runLabels: [...previewLabelLayer.querySelectorAll(".selected-run-label span")].map((element) => element.textContent),
         pointLabels: [...previewLabelLayer.querySelectorAll(".selected-run-point")].map((element) => element.textContent).sort(),
         labelLayerHidden: previewLabelLayer.hidden,
         allLabelCount: previewLabelLayer.children.length,
+        rotatedStatus,
+        rotatedWarningVisible,
+        relockedStatus: previewOrientationStatus.textContent,
+        relockedCamera: threeCameraMatches2dOrientation(),
+        relockedComparison: three.comparisonLocked,
+        relockedRotationDisabled: three.controls.enableRotate === false,
+        warningHiddenAfterRelock: previewLabelLayer.querySelector(".selected-run-camera-warning")?.hidden === true,
       };
     });
     check(selectedRunTrace.selectedGeometryTypes.includes("CylinderGeometry"), `Selected straight run is not highlighted in 3D: ${JSON.stringify(selectedRunTrace)}`);
@@ -650,6 +667,9 @@ function check(condition, message) {
     check(selectedRunTrace.runLabels.join(",") === "D3 · C → D", `Selected 3D run direction is not explicit: ${JSON.stringify(selectedRunTrace)}`);
     check(selectedRunTrace.pointLabels.join(",") === "C,D", `Selected 3D endpoint labels are missing: ${JSON.stringify(selectedRunTrace)}`);
     check(!selectedRunTrace.labelLayerHidden && selectedRunTrace.allLabelCount === 3, `Selected 3D trace was hidden with general labels off: ${JSON.stringify(selectedRunTrace)}`);
+    check(selectedRunTrace.rotatedStatus.includes("left/right may appear reversed") && selectedRunTrace.rotatedWarningVisible, `Reverse-side selected run did not warn directly: ${JSON.stringify(selectedRunTrace)}`);
+    check(selectedRunTrace.relockedStatus === "2D turn direction locked" && selectedRunTrace.relockedCamera && selectedRunTrace.relockedComparison && selectedRunTrace.relockedRotationDisabled, `Selecting the 2D run did not restore the drawing-matched camera: ${JSON.stringify(selectedRunTrace)}`);
+    check(selectedRunTrace.warningHiddenAfterRelock, `Rotated-view warning remained after the drawing camera was restored: ${JSON.stringify(selectedRunTrace)}`);
 
     const styleAudit = await page.evaluate(() => {
       state = {
