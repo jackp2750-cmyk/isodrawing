@@ -846,6 +846,9 @@ assert(
     /const\s+run\s*=\s*`D\$\{segment\.index \+ 1\}`/.test(app) &&
     /pointLabel\(segment\.from\)[\s\S]{0,80}pointLabel\(segment\.to\)/.test(app) &&
     /spoolmateSelectedRun/.test(app) &&
+    /THREE_COORDINATE_SYSTEM_VERSION\s*=\s*2/.test(app) &&
+    /y:\s*-point\.y\s*\/\s*1000/.test(app) &&
+    /three\.camera\.up\.set\(0,\s*0,\s*1\)/.test(app) &&
     /function\s+restoreThreeComparisonForDrawingSelection\s*\(/.test(app) &&
     /ROTATED VIEW · SCREEN DIRECTION MAY REVERSE/.test(app) &&
     /\.selected-run-label/.test(css) &&

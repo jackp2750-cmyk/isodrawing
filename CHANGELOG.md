@@ -1,6 +1,14 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.90`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.91`.
+
+## v3.91 - Correct right-handed 3D spool geometry
+
+- Fixed the actual 2D-to-3D handedness conversion: drafting Y is reflected when building the right-handed Three.js model, so horizontal turns no longer become their mirror after a rise or drop.
+- Moved the drawing-equivalent camera above the Z-up model instead of using an underside camera to imitate the 2D projection.
+- Made free rotation orbit around true Z-up fabrication space so horizontal runs stay in the horizontal plane while the model is inspected.
+- Migrated saved 3D camera positions from the earlier mirrored coordinate system.
+- Bumped the PWA cache to `spoolmate-v391-right-handed-3d`.
 
 ## v3.90 - Selection restores the drawing camera
 

@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v390-selection-camera-lock";
+const CACHE_NAME = "spoolmate-v391-right-handed-3d";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=390",
-  "./ebro-hp112-bolting.js?v=390",
-  "./ebro-hp114-bolting.js?v=390",
-  "./app.js?v=390",
+  "./styles.css?v=391",
+  "./ebro-hp112-bolting.js?v=391",
+  "./ebro-hp114-bolting.js?v=391",
+  "./app.js?v=391",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

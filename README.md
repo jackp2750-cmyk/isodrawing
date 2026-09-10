@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.90`
+Current app version: `v3.91`
+
+The solid preview now converts the left-handed drafting isometric coordinates into a right-handed, Z-up Three.js model by reflecting drafting Y. This fixes the physical handedness of horizontal turns at vertical bends instead of relying on a particular camera angle. Free rotation also orbits around true vertical, and older saved camera positions are migrated to the corrected coordinate system.
 
 Selecting a run on the 2D drawing now automatically returns an open 3D preview from Free rotate to the drawing-matched camera before showing the selected direction. If the user deliberately rotates again, the selected run carries an explicit `ROTATED VIEW · SCREEN DIRECTION MAY REVERSE` warning rather than presenting its arrow as a screen-space comparison.
 

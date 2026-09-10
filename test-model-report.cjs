@@ -60,8 +60,14 @@ function check(condition, message) {
       const liveRotationLocked = three.controls.enableRotate === false;
       const liveRunLabels = [...previewLabelLayer.querySelectorAll(".pipe-size-label > span")].map((element) => element.textContent);
       const livePointLabels = [...previewLabelLayer.querySelectorAll(".three-point-label")].map((element) => element.textContent);
+      const modelBasis = {
+        x: toModelUnits({ x: 1000, y: 0, z: 0 }),
+        y: toModelUnits({ x: 0, y: 1000, z: 0 }),
+        z: toModelUnits({ x: 0, y: 0, z: 1000 }),
+      };
       enableThreeFreeRotate();
       const liveRotationUnlocked = three.controls.enableRotate === true;
+      const liveFreeRotateZUp = three.camera.up.clone().normalize().dot(new three.module.Vector3(0, 0, 1));
       const target = three.controls.target.clone();
       three.camera.position.copy(target).add(new three.module.Vector3(8, -8, 6));
       three.camera.lookAt(target);
@@ -136,6 +142,8 @@ function check(condition, message) {
         liveSavedRestoreRotationLocked,
         liveRunLabels,
         livePointLabels,
+        modelBasis,
+        liveFreeRotateZUp,
         png: canvas.toDataURL("image/png"),
       };
     });
@@ -148,6 +156,13 @@ function check(condition, message) {
     check(result.liveMatchedStatus === "2D turn direction locked", `Unexpected matched status: ${result.liveMatchedStatus}`);
     check(result.liveRotationLocked, "Live 3D rotation was not locked in drawing-comparison mode");
     check(result.liveRotationUnlocked, "Free rotate did not explicitly unlock live 3D orbiting");
+    check(result.liveFreeRotateZUp > 0.999999, `Free rotate is not Z-up: ${JSON.stringify(result.liveCamera)}`);
+    check(
+      result.modelBasis.x.x === 1 && result.modelBasis.x.y === 0 && result.modelBasis.x.z === 0 &&
+      result.modelBasis.y.x === 0 && result.modelBasis.y.y === -1 && result.modelBasis.y.z === 0 &&
+      result.modelBasis.z.x === 0 && result.modelBasis.z.y === 0 && result.modelBasis.z.z === 1,
+      `Drafting coordinates were not converted to the right-handed 3D basis: ${JSON.stringify(result.modelBasis)}`,
+    );
     check(result.liveRotatedStatus.includes("left/right may appear reversed"), `Unexpected rotated status: ${result.liveRotatedStatus}`);
     check(result.liveResetStatus === "2D turn direction locked", `Unexpected reset status: ${result.liveResetStatus}`);
     check(result.liveOpenRotationLocked, "Opening live 3D did not restore the locked drawing comparison");
@@ -564,8 +579,8 @@ function check(condition, message) {
         });
         const reportCamera = new three.module.OrthographicCamera(-1, 1, 1, -1, 0.01, 1000);
         fitReportCameraToBox(reportCamera, reportSpoolBounds3d(three.module), 960 / 640, {
-          direction: [-1, -1, -1],
-          up: [-0.45, -0.45, 1],
+          direction: THREE_DRAWING_CAMERA_POSITION,
+          up: THREE_DRAWING_CAMERA_UP,
         });
         const reportPoints = fixture.points.map((point) => {
           const modelPoint = toModelUnits(point);

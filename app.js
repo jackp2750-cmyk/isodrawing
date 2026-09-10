@@ -596,8 +596,11 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.90";
+const APP_VERSION = "v3.91";
 const APP_BUILD_DATE = "2026-09-10";
+const THREE_COORDINATE_SYSTEM_VERSION = 2;
+const THREE_DRAWING_CAMERA_POSITION = Object.freeze([1, -1, 1]);
+const THREE_DRAWING_CAMERA_UP = Object.freeze([-0.5, 0.5, 1]);
 const SUPPORT_ADMIN_FUNCTION = "support-admin";
 const PRIVATE_FEATURE_ACCESS_TABLE = "private_feature_access";
 const SCHEMATIC_TAKEOFF_FEATURE_KEY = "schematic_takeoff";
@@ -9588,9 +9591,13 @@ function pipeRadiusMetres(segment = null) {
 }
 
 function toModelUnits(point) {
+  // The drafting isometric uses +X down-right, +Y down-left and +Z up. That
+  // screen basis is left-handed. Three.js is right-handed, so copying all
+  // three signs verbatim mirrors every out-of-plane turn once the model is
+  // orbited. Reflect drafting Y here to create the real Z-up 3D centreline.
   return {
     x: point.x / 1000,
-    y: point.y / 1000,
+    y: -point.y / 1000,
     z: point.z / 1000,
   };
 }
@@ -15104,9 +15111,9 @@ function syncPreviewCanvasVisibility() {
 function threeCameraMatches2dOrientation() {
   if (!three.ready || !three.module || !three.camera || !three.controls) return true;
   const viewDirection = three.controls.target.clone().sub(three.camera.position).normalize();
-  const expectedDirection = new three.module.Vector3(1, 1, 1).normalize();
+  const expectedDirection = new three.module.Vector3(...THREE_DRAWING_CAMERA_POSITION).normalize().multiplyScalar(-1);
   const viewUp = new three.module.Vector3(0, 1, 0).applyQuaternion(three.camera.quaternion).normalize();
-  const expectedUp = new three.module.Vector3(-0.5, -0.5, 1).normalize();
+  const expectedUp = new three.module.Vector3(...THREE_DRAWING_CAMERA_UP).normalize();
   return viewDirection.dot(expectedDirection) > 0.9995 && viewUp.dot(expectedUp) > 0.9995;
 }
 
@@ -16143,14 +16150,20 @@ function normalizedThreeViewState(source) {
       : null
   ));
   if (vectors.some((value) => !value || !value.every(Number.isFinite))) return null;
+  const coordinateSystemVersion = Number(source.coordinateSystemVersion) || 1;
+  const migrateVector = (value) => coordinateSystemVersion < THREE_COORDINATE_SYSTEM_VERSION
+    ? [value[0], -value[1], value[2]]
+    : value;
+  const migratedVectors = vectors.map(migrateVector);
   const zoom = Number(source.zoom);
   return {
-    position: vectors[0],
-    target: vectors[1],
-    up: vectors[2],
+    position: migratedVectors[0],
+    target: migratedVectors[1],
+    up: migratedVectors[2],
     zoom: Number.isFinite(zoom) && zoom > 0 ? zoom : 1,
     navigationMode: source.navigationMode === "pan" ? "pan" : "orbit",
     userMoved: source.userMoved === true,
+    coordinateSystemVersion: THREE_COORDINATE_SYSTEM_VERSION,
   };
 }
 
@@ -16165,6 +16178,7 @@ function captureThreeViewState() {
     zoom: three.camera.zoom,
     navigationMode: three.navigationMode,
     userMoved: three.userMovedCamera,
+    coordinateSystemVersion: THREE_COORDINATE_SYSTEM_VERSION,
   });
 }
 
@@ -16188,7 +16202,8 @@ function applyThreeViewState(source) {
   }
 
   three.camera.position.set(...restore.position);
-  three.camera.up.set(...restore.up).normalize();
+  // Free inspection is always a true fabrication-space orbit: Z remains up.
+  three.camera.up.set(0, 0, 1);
   three.controls.target.set(...restore.target);
   three.camera.zoom = clampNumber(
     restore.zoom,
@@ -28054,7 +28069,9 @@ function setupThree(THREE, OrbitControls) {
   three.scene.background = new THREE.Color(0xf8fbfb);
 
   three.camera = new THREE.OrthographicCamera(-8, 8, 6, -6, 0.1, 1000);
-  three.camera.up.set(-0.5, -0.5, 1).normalize();
+  // OrbitControls captures the camera's up basis at construction. Build it as
+  // a genuine Z-up control so free rotation cannot tumble horizontal pipework.
+  three.camera.up.set(0, 0, 1);
 
   three.renderer = new THREE.WebGLRenderer({
     canvas: threeCanvas,
@@ -28217,6 +28234,11 @@ function applyThreeNavigationMode(mode = three.navigationMode) {
 }
 
 function enableThreeFreeRotate() {
+  if (three.ready && three.camera && three.controls) {
+    three.camera.up.set(0, 0, 1);
+    three.camera.lookAt(three.controls.target);
+    three.camera.updateMatrixWorld(true);
+  }
   three.comparisonLocked = false;
   setThreeNavigationMode("orbit");
   updateThreeOrientationStatus();
@@ -28655,12 +28677,23 @@ function rebuildThreeSpool(options = {}) {
         : originalStart.clone().lerp(originalEnd, fragment.t1);
       if (fragmentStart.distanceTo(fragmentEnd) < segmentRadius * 0.25) continue;
       if (style.lineDrawing) {
-        group.add(outlinePipeBetween(fragmentStart, fragmentEnd, segmentRadius, segmentPipeMaterial, {
+        const pipe = outlinePipeBetween(fragmentStart, fragmentEnd, segmentRadius, segmentPipeMaterial, {
           startCap: fragment.t0 > 0 || (connections.get(segment.from)?.length ?? 0) <= 1,
           endCap: fragment.t1 < 1 || (connections.get(segment.to)?.length ?? 0) <= 1,
-        }));
+        });
+        pipe.userData.spoolmateSegmentIndex = segment.index;
+        pipe.userData.spoolmateFrom = segment.from;
+        pipe.userData.spoolmateTo = segment.to;
+        pipe.userData.spoolmateCentrelineStart = fragmentStart.toArray();
+        pipe.userData.spoolmateCentrelineEnd = fragmentEnd.toArray();
+        group.add(pipe);
       } else {
         const pipe = cylinderBetween(fragmentStart, fragmentEnd, segmentRadius, segmentPipeMaterial, 32);
+        pipe.userData.spoolmateSegmentIndex = segment.index;
+        pipe.userData.spoolmateFrom = segment.from;
+        pipe.userData.spoolmateTo = segment.to;
+        pipe.userData.spoolmateCentrelineStart = fragmentStart.toArray();
+        pipe.userData.spoolmateCentrelineEnd = fragmentEnd.toArray();
         pipe.castShadow = true;
         pipe.receiveShadow = true;
         group.add(pipe);
@@ -28703,6 +28736,10 @@ function rebuildThreeSpool(options = {}) {
       elbow.castShadow = true;
       elbow.receiveShadow = true;
     }
+    elbow.userData.spoolmateElbowNodeIndex = elbowData.nodeIndex;
+    elbow.userData.spoolmateCentrelineEntry = elbowData.entry.toArray();
+    elbow.userData.spoolmateCentrelineJoint = elbowData.joint.toArray();
+    elbow.userData.spoolmateCentrelineExit = elbowData.exit.toArray();
     group.add(elbow);
 
     // TubeGeometry is open-ended. When a terminal leg is exactly one elbow
@@ -30819,6 +30856,7 @@ function computeGraphElbowTrims(modelPoints, segmentData, connections, reducers 
     segmentTrims.set(`${first.segmentIndex}:${nodeIndex}`, firstTrim);
     segmentTrims.set(`${second.segmentIndex}:${nodeIndex}`, secondTrim);
     elbows.push({
+      nodeIndex,
       entry: joint.clone().addScaledVector(firstUnit, firstTrim),
       joint: joint.clone(),
       exit: joint.clone().addScaledVector(secondUnit, secondTrim),
@@ -30883,7 +30921,7 @@ function frameThreeCamera(options = {}) {
   if (!preserveView) {
     // Re-establish the same Z-up handedness used by rawIso(). A restored or
     // reverse-side camera must never leak into Match 2D.
-    three.camera.up.set(-0.5, -0.5, 1).normalize();
+    three.camera.up.set(...THREE_DRAWING_CAMERA_UP).normalize();
   }
 
   three.camera.near = 0.1;
@@ -30893,7 +30931,7 @@ function frameThreeCamera(options = {}) {
     three.camera.position.copy(target).add(previousOffset.normalize().multiplyScalar(distance));
     three.camera.zoom = clampNumber(previousZoom, three.controls.minZoom ?? 0.35, three.controls.maxZoom ?? 8);
   } else {
-    three.camera.position.copy(target).add(new THREE.Vector3(-maxDim * 1.25, -maxDim * 1.25, -maxDim * 1.25));
+    three.camera.position.copy(target).add(new THREE.Vector3(...THREE_DRAWING_CAMERA_POSITION).multiplyScalar(maxDim * 1.25));
     three.camera.zoom = 1;
   }
   three.camera.lookAt(target);
@@ -42586,8 +42624,8 @@ function capture3dReportViews() {
       const views = [
         {
           title: "Isometric - matches 2D orientation",
-          direction: [-1, -1, -1],
-          up: [-0.45, -0.45, 1],
+          direction: THREE_DRAWING_CAMERA_POSITION,
+          up: THREE_DRAWING_CAMERA_UP,
           matchesDrawingOrientation: true,
         },
         {
