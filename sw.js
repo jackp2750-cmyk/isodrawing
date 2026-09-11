@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v391-right-handed-3d";
+const CACHE_NAME = "spoolmate-v392-ipad-dimensions";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=391",
-  "./ebro-hp112-bolting.js?v=391",
-  "./ebro-hp114-bolting.js?v=391",
-  "./app.js?v=391",
+  "./styles.css?v=392",
+  "./ebro-hp112-bolting.js?v=392",
+  "./ebro-hp114-bolting.js?v=392",
+  "./app.js?v=392",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

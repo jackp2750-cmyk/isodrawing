@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.91`
+Current app version: `v3.92`
+
+On iPad and other touch layouts, the Pipe & display sheet stays in one on-screen column above its blue backdrop. Choosing a dimension display dismisses the sheet before the drawing and 3D preview are rebuilt, preventing the iPad native picker or backdrop from being stranded over the drawing during the heavier redraw.
 
 The solid preview now converts the left-handed drafting isometric coordinates into a right-handed, Z-up Three.js model by reflecting drafting Y. This fixes the physical handedness of horizontal turns at vertical bends instead of relying on a particular camera angle. Free rotation also orbits around true vertical, and older saved camera positions are migrated to the corrected coordinate system.
 

@@ -52,6 +52,7 @@ $allowedFiles = @(
     "sw.js",
     "test-schematic-recognition.cjs",
     "test-schematic-takeoff.cjs",
+    "test-ipad-dimensions.cjs",
     "verify-app.cjs"
 )
 

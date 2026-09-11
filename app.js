@@ -596,8 +596,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.91";
-const APP_BUILD_DATE = "2026-09-10";
+const APP_VERSION = "v3.92";
+const APP_BUILD_DATE = "2026-09-12";
 const THREE_COORDINATE_SYSTEM_VERSION = 2;
 const THREE_DRAWING_CAMERA_POSITION = Object.freeze([1, -1, 1]);
 const THREE_DRAWING_CAMERA_UP = Object.freeze([-0.5, 0.5, 1]);
@@ -17879,6 +17879,34 @@ function openWorkspaceSettings() {
   window.requestAnimationFrame(() => {
     const preferred = workspaceSettingsPanel.querySelector('[data-mode-settings]:not([hidden]) select, [data-mode-settings]:not([hidden]) input');
     preferred?.focus?.({ preventScroll: true });
+  });
+}
+
+let touchWorkspaceSettingsRedrawFrame = 0;
+
+function redrawAfterWorkspaceSettingsChange() {
+  const closingTouchSheet = isTabletLayout() && workspaceSettingsOpen();
+  if (!closingTouchSheet) {
+    updateAll();
+    return;
+  }
+
+  // iPad Safari can leave the native select and the blue settings scrim in an
+  // unresponsive-looking state when a full canvas/3D redraw starts inside the
+  // select's change event. Dismiss the sheet, release native focus and give the
+  // browser two paint frames before doing the heavier drawing work.
+  if (workspaceSettingsPanel?.contains(document.activeElement)) {
+    document.activeElement.blur?.();
+  }
+  closeWorkspaceSettings();
+  if (touchWorkspaceSettingsRedrawFrame) {
+    window.cancelAnimationFrame(touchWorkspaceSettingsRedrawFrame);
+  }
+  touchWorkspaceSettingsRedrawFrame = window.requestAnimationFrame(() => {
+    touchWorkspaceSettingsRedrawFrame = window.requestAnimationFrame(() => {
+      touchWorkspaceSettingsRedrawFrame = 0;
+      updateAll();
+    });
   });
 }
 
@@ -48148,7 +48176,7 @@ dimensionToggle.addEventListener("change", () => {
     : "clean";
   dimensionStyleSelect.disabled = !state.showDimensions;
   updateControls();
-  updateAll();
+  redrawAfterWorkspaceSettingsChange();
 });
 
 dimensionStyleSelect.addEventListener("change", () => {
@@ -48156,7 +48184,7 @@ dimensionStyleSelect.addEventListener("change", () => {
   state.showDimensions = true;
   state.drawingDetail = drawingDetailFromDimensionSettings(true, state.dimensionStyle);
   updateControls();
-  updateAll();
+  redrawAfterWorkspaceSettingsChange();
 });
 
 pipeLabelModeSelect?.addEventListener("change", () => {

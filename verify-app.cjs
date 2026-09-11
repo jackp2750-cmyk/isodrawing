@@ -8,6 +8,7 @@ const REQUIRED_FILES = [
   "styles.css",
   "app.js",
   "test-model-report.cjs",
+  "test-ipad-dimensions.cjs",
   "ebro-hp112-bolting.js",
   "ebro-hp114-bolting.js",
   "sw.js",
@@ -212,6 +213,15 @@ assert(serviceWorker.includes(`./ebro-hp114-bolting.js?v=${assetVersion}`), "Ser
 assert(githubUploadPrep.includes('"ebro-hp112-bolting.js"') && githubUploadPrep.includes('"ebro-hp114-bolting.js"'), "Safe GitHub upload omits an EBRO bolt table");
 assert(readme.includes(`Current app version: \`${appVersion}\``), "README current version differs from app.js");
 assert(changelog.includes(`Current app version: \`${appVersion}\``), "CHANGELOG current version differs from app.js");
+assert(
+  app.includes("function redrawAfterWorkspaceSettingsChange()")
+    && app.includes("document.activeElement.blur?.()")
+    && css.includes(".workspace-settings-scrim[hidden]")
+    && css.includes("body.workspace-settings-open .topbar")
+    && css.includes("z-index: 4702")
+    && css.includes("pointer-events: none !important"),
+  "iPad workspace-settings redraw guard is incomplete",
+);
 
 if (ebroHp112Data) {
   const fields = ebroHp112Data.fields || [];

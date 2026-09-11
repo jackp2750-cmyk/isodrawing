@@ -1,6 +1,15 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.91`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.92`.
+
+## v3.92 - Reliable iPad dimension controls
+
+- Fixed the iPad blue-screen trap when changing to Red C/C line dimensions from the Pipe & display sheet.
+- Corrected a responsive CSS conflict that put the dimension picker beyond the right edge and left the blue scrim above the controls; the sheet is now a single on-screen column above its backdrop.
+- The touch settings sheet now dismisses and releases the native picker before the canvas and 3D preview perform their heavier redraw.
+- Added a fail-safe preventing a hidden settings scrim from intercepting all touch input.
+- Added automated long-spool checks at iPad portrait and landscape sizes.
+- Bumped the PWA cache to `spoolmate-v392-ipad-dimensions`.
 
 ## v3.91 - Correct right-handed 3D spool geometry
 
