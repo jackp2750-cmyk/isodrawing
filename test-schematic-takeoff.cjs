@@ -363,7 +363,7 @@ function check(condition, message) {
       check(layout.card.scrollHeight <= layout.card.height + 2, `${name}: takeoff card overflows vertically`);
       check(layout.pageOverflow <= 2, `${name}: page overflows horizontally`);
       check(layout.sidebarWidth > 200, `${name}: review sidebar is unusable`);
-      check(layout.closeVisible, `${name}: close button is outside the viewport`);
+      check(layout.closeVisible, `${name}: close button is outside the viewport (${JSON.stringify(layout)})`);
       check(layout.countControlUsable && layout.detectionReviewUsable, `${name}: automatic-count review controls are unusable (${JSON.stringify(layout)})`);
       check(layout.reviewStepsUsable && layout.fittingRowsLargeEnough, `${name}: review steps or fitting rows are too small (${JSON.stringify(layout)})`);
       check(layout.activeStep === "sort" && JSON.stringify(layout.visibleStepPanels) === JSON.stringify(["sort", "sort"]), `${name}: step navigation exposed the wrong panels (${JSON.stringify(layout)})`);

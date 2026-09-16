@@ -1,11 +1,11 @@
-const CACHE_NAME = "spoolmate-v392-ipad-dimensions";
+const CACHE_NAME = "spoolmate-v393-interface-verification";
 const APP_SHELL = [
   "./",
   "./index.html",
-  "./styles.css?v=392",
-  "./ebro-hp112-bolting.js?v=392",
-  "./ebro-hp114-bolting.js?v=392",
-  "./app.js?v=392",
+  "./styles.css?v=393",
+  "./ebro-hp112-bolting.js?v=393",
+  "./ebro-hp114-bolting.js?v=393",
+  "./app.js?v=393",
   "./manifest.webmanifest"
 ];
 const OPTIONAL_ASSETS = [

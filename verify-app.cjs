@@ -9,6 +9,8 @@ const REQUIRED_FILES = [
   "app.js",
   "test-model-report.cjs",
   "test-ipad-dimensions.cjs",
+  "test-ipad-flow-audit.cjs",
+  "test-interface-checker.cjs",
   "ebro-hp112-bolting.js",
   "ebro-hp114-bolting.js",
   "sw.js",

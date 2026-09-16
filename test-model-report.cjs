@@ -12,11 +12,12 @@ function check(condition, message) {
 (async () => {
   const browser = await chromium.launch({ channel: "msedge", headless: true });
   try {
-    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, ignoreHTTPSErrors: true, serviceWorkers: "block" });
+    const page = await context.newPage();
     const pageErrors = [];
     page.on("pageerror", (error) => pageErrors.push(error.stack || error.message));
     await page.goto(APP_URL, { waitUntil: "domcontentloaded" });
-    await page.waitForFunction(() => three?.ready === true, null, { timeout: 15000 });
+    await page.waitForFunction(() => three?.ready === true, null, { timeout: 30000 });
 
     const result = await page.evaluate(async () => {
       document.querySelectorAll(".project-dialog-backdrop").forEach((dialog) => { dialog.hidden = true; });

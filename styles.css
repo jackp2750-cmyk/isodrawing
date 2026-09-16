@@ -2663,6 +2663,455 @@ body.mobile-touch-layout .selection-action-bar.user-positioned {
   }
 }
 
+/* v3.93 fabrication safeguards: spool interfaces and revision impact. */
+body.interface-checker-open #aiHelperButton {
+  display: none;
+}
+
+.interface-checker-card {
+  width: min(1080px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.interface-checker-card > .project-dialog-header,
+.revision-impact-card > .project-dialog-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.interface-checker-help,
+.interface-empty,
+.interface-verdict,
+.revision-impact-alert {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--button);
+}
+
+.interface-checker-help summary,
+.revision-impact-guide summary {
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.interface-checker-help summary span,
+.revision-impact-guide summary span {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.interface-checker-help > div {
+  margin-top: 9px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.interface-checker-help p,
+.interface-checker-help ul,
+.revision-impact-guide p {
+  margin: 5px 0;
+}
+
+.interface-checker-help ul {
+  padding-left: 20px;
+}
+
+.interface-checker-help span,
+.interface-empty span,
+.interface-verdict span,
+.revision-impact-alert span {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.interface-checker-selectors {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.interface-checker-selectors section {
+  min-width: 0;
+  display: grid;
+  gap: 9px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.interface-checker-selectors label {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.interface-checker-selectors select,
+.interface-checker-toolbar input {
+  min-width: 0;
+  width: 100%;
+  min-height: 44px;
+}
+
+.interface-swap {
+  min-width: 64px;
+  min-height: 54px;
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  font-size: 20px;
+}
+
+.interface-swap span {
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+.interface-checker-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.interface-checker-toolbar label {
+  display: grid;
+  grid-template-columns: minmax(90px, 130px) auto;
+  gap: 4px 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.interface-checker-toolbar label input {
+  grid-column: 1;
+}
+
+.interface-checker-toolbar label span {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.interface-checker-toolbar button {
+  min-height: 44px;
+}
+
+.interface-checker-result {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.interface-checker-record {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  gap: 8px 12px;
+  align-items: end;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.interface-checker-record label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.interface-checker-record textarea {
+  width: 100%;
+  min-height: 54px;
+  resize: vertical;
+}
+
+.interface-checker-record > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.interface-checker-record > div button {
+  min-height: 42px;
+}
+
+.interface-checker-record > small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+.interface-checker-record > small.success {
+  color: #0f766e;
+  font-weight: 900;
+}
+
+.interface-verdict.pass,
+.revision-impact-alert.pass {
+  border-color: rgba(15, 118, 110, 0.38);
+  background: #e9f8f3;
+}
+
+.interface-verdict.warning,
+.revision-impact-alert.warning {
+  border-color: rgba(217, 154, 35, 0.45);
+  background: #fff6df;
+}
+
+.interface-verdict.blocker {
+  border-color: rgba(180, 35, 24, 0.42);
+  background: #fff1ee;
+}
+
+.interface-check-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.interface-check {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-left-width: 5px;
+  border-radius: 9px;
+  background: var(--panel);
+}
+
+.interface-check.pass { border-left-color: #0f766e; }
+.interface-check.warning { border-left-color: #d99a23; }
+.interface-check.blocker { border-left-color: #b42318; }
+.interface-check > span { color: var(--muted); font-size: 10px; font-weight: 900; text-transform: uppercase; }
+.interface-check > strong { text-align: right; }
+.interface-check > small { grid-column: 1 / -1; color: var(--muted); line-height: 1.35; }
+
+.revision-row-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.revision-row-actions button {
+  min-height: 38px;
+}
+
+.revision-impact-card {
+  width: min(820px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  display: grid;
+  gap: 12px;
+  overflow: auto;
+}
+
+.revision-impact-guide {
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--button);
+}
+
+.revision-impact-guide p {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.revision-impact-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.revision-impact-toolbar button {
+  min-height: 42px;
+}
+
+.revision-impact-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.revision-impact-summary article,
+.revision-impact-details {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--panel);
+}
+
+.revision-impact-summary span,
+.revision-impact-details > span {
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.revision-impact-summary strong { font-size: 18px; }
+.revision-impact-details > div { display: grid; gap: 6px; }
+.revision-impact-details article { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.revision-impact-details article:last-child { border-bottom: 0; }
+.revision-run-change > span { display: grid; gap: 2px; }
+.revision-run-change > span small { color: var(--muted); text-transform: uppercase; }
+
+.interface-verification-card {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+}
+
+.interface-verification-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+
+.interface-verification-head > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.interface-verification-head span,
+.interface-verification-card > span,
+.interface-verification-card > small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.interface-verification-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.interface-verification-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-left-width: 5px;
+  border-radius: 8px;
+  background: var(--button);
+}
+
+.interface-verification-list li.pass { border-left-color: #0f766e; }
+.interface-verification-list li.warning { border-left-color: #d99a23; }
+.interface-verification-list li.blocker { border-left-color: #b42318; }
+.interface-verification-list li > div { min-width: 0; display: grid; gap: 2px; }
+.interface-verification-list li > div:last-child { text-align: right; }
+.interface-verification-list li span,
+.interface-verification-list li small { color: var(--muted); font-size: 10px; }
+
+/* Keep notifications clear of the open iPad settings sheet. */
+body.tablet-layout.field-layout.mobile-touch-layout.workspace-settings-open .app-toast-stack,
+body.phone-layout.field-layout.mobile-touch-layout.workspace-settings-open .app-toast-stack {
+  top: calc(env(safe-area-inset-top, 0px) + 170px);
+  right: 10px;
+  bottom: auto;
+  width: min(390px, calc(100vw - 20px));
+}
+
+@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+  .interface-checker-card,
+  .revision-impact-card {
+    width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .interface-checker-selectors {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .interface-checker-card {
+    grid-template-rows: auto auto auto auto minmax(180px, 1fr) auto;
+  }
+
+  .interface-checker-record {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .interface-checker-record > div {
+    justify-content: stretch;
+  }
+
+  .interface-checker-record > div button {
+    flex: 1 1 145px;
+  }
+
+  .interface-swap {
+    width: 100%;
+    min-height: 42px;
+    grid-template-columns: auto auto;
+  }
+
+  .interface-check-grid,
+  .revision-impact-summary {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .interface-check-grid,
+  .revision-impact-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .interface-checker-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .interface-verification-head,
+  .interface-verification-list li,
+  .interface-checker-help summary,
+  .revision-impact-guide summary {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+    flex-direction: column;
+  }
+
+  .interface-verification-list li > div:last-child {
+    text-align: left;
+  }
+}
+
 @media (max-width: 640px) {
   .selection-action-bar {
     position: fixed;

@@ -1,6 +1,21 @@
 # SpoolMate Update Log
 
-This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.92`.
+This log was reconstructed from the current project history and app state. Early work is grouped by feature area because the first prototype changes were not recorded as separate formal releases. Current app version: `v3.93`.
+
+## v3.93 - Spool interfaces and revision impact
+
+- Added an Interface Checker that compares the selected open ends of two saved spools before fabrication.
+- Size, end preparation, flange standard and out-of-tolerance coordinate differences are fabrication blockers; direction, plain field-weld and unverified thread arrangements remain explicit checks.
+- Added automatic best-end matching plus manual endpoint selection so the result is reviewable rather than silently inferred.
+- Interface checks can now be saved with the exact spool ends, tolerance, checker, time and note; the retained history appears in Review and travels with project/cloud data.
+- Added direct actions to open either compared spool in a workspace tab or add an interface issue to Workshop handoff without silently editing a drawing.
+- Added Revision Impact comparison for saved revisions, showing every exact changed run, previous/current length and size, total C/C length, fittings and weld changes.
+- Revision Impact now provides a copyable workshop summary and a printable/PDF comparison sheet.
+- Added concise in-context guidance explaining shared datums, opposing directions, positional tolerance and the required physical verification.
+- Added direct Interface Checker access from Menu, command search and the Review workflow.
+- Moved iPad notifications away from the open Pipe & display sheet so dimension controls stay tappable.
+- Added touch-browser regression coverage in WebKit and Chromium.
+- Bumped the PWA cache to `spoolmate-v393-interface-verification`.
 
 ## v3.92 - Reliable iPad dimension controls
 

@@ -1,6 +1,8 @@
 # SpoolMate
 
-Current app version: `v3.92`
+Current app version: `v3.93`
+
+Spool Interface Checker compares the connecting ends of two saved drawings before fabrication. It checks nominal size, end preparation, flange standard, coordinates and approach direction, and treats unresolved size, preparation and coordinate differences as blockers. A verification can retain the exact ends, positional tolerance, checker, time and workshop note in Review, with direct actions to open either spool or add an interface issue. Review also includes Revision Impact, which identifies every changed run with previous/current length and size, total C/C length, fitting quantities and weld-count changes; its workshop summary can be copied or printed/saved as PDF.
 
 On iPad and other touch layouts, the Pipe & display sheet stays in one on-screen column above its blue backdrop. Choosing a dimension display dismisses the sheet before the drawing and 3D preview are rebuilt, preventing the iPad native picker or backdrop from being stranded over the drawing during the heavier redraw.
 

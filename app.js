@@ -421,6 +421,7 @@ const actionCommandResults = document.querySelector("#actionCommandResults");
 const actionMenuJobsButton = document.querySelector("#actionMenuJobsButton");
 const actionMenuWorkshopStockButton = document.querySelector("#actionMenuWorkshopStockButton");
 const actionMenuBigSpoolButton = document.querySelector("#actionMenuBigSpoolButton");
+const actionMenuInterfaceCheckerButton = document.querySelector("#actionMenuInterfaceCheckerButton");
 const actionMenuAccountButton = document.querySelector("#actionMenuAccountButton");
 const workspaceSettingsButton = document.querySelector("#workspaceSettingsButton");
 const workspaceSettingsPanel = document.querySelector("#workspaceSettingsPanel");
@@ -596,8 +597,8 @@ const JOB_DASHBOARD_RECENTS_KEY = "spoolmate-job-dashboard-recents-v1";
 const JOB_DASHBOARD_PREFERENCES_VERSION = 1;
 const SPOOL_WORKSPACE_SESSION_KEY = "spoolmate-open-spool-tabs-v1";
 const LEGACY_STORAGE_KEYS = ["isospool-studio-state-v7", "isospool-studio-state-v6", "isospool-studio-state-v5", "isospool-studio-state-v4", "isospool-studio-state-v3", "isospool-studio-state-v2", "isospool-studio-state-v1"];
-const APP_VERSION = "v3.92";
-const APP_BUILD_DATE = "2026-09-12";
+const APP_VERSION = "v3.93";
+const APP_BUILD_DATE = "2026-09-16";
 const THREE_COORDINATE_SYSTEM_VERSION = 2;
 const THREE_DRAWING_CAMERA_POSITION = Object.freeze([1, -1, 1]);
 const THREE_DRAWING_CAMERA_UP = Object.freeze([-0.5, 0.5, 1]);
@@ -2694,6 +2695,7 @@ function sampleState() {
     productionActivity: [],
     healthAcknowledgements: {},
     issueAudits: [],
+    interfaceChecks: [],
     projectInfo: {
       jobNumber: "DEMO-001",
       spoolNumber: "SP-001",
@@ -2941,6 +2943,7 @@ function blankState(options = {}) {
     productionActivity: [],
     healthAcknowledgements: {},
     issueAudits: [],
+    interfaceChecks: [],
     projectInfo: defaultProjectInfo(defaults.pipeSpec, defaults.weldGapMm),
     history: [],
     redoHistory: [],
@@ -3048,6 +3051,7 @@ function statePayload(options = {}) {
     productionActivity: normalizeProductionActivity(state.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(state.healthAcknowledgements),
     issueAudits: normalizeIssueAudits(state.issueAudits),
+    interfaceChecks: normalizeInterfaceChecks(state.interfaceChecks),
     projectInfo: normalizeProjectInfo(state.projectInfo, state.pipeSpec),
   };
 }
@@ -3140,6 +3144,7 @@ function stateFromPayload(payload, options = {}) {
     productionActivity: normalizeProductionActivity(saved.productionActivity),
     healthAcknowledgements: normalizeHealthAcknowledgements(saved.healthAcknowledgements),
     issueAudits: normalizeIssueAudits(saved.issueAudits),
+    interfaceChecks: normalizeInterfaceChecks(saved.interfaceChecks),
     projectInfo: normalizeProjectInfo(saved.projectInfo, saved.pipeSpec),
     history: [],
     redoHistory: [],
@@ -4847,6 +4852,54 @@ function projectStatusIndex(value) {
 
 function projectStatusAtLeast(value, minimum) {
   return projectStatusIndex(value) >= projectStatusIndex(minimum);
+}
+
+function normalizeInterfaceCheckSource(source) {
+  if (!source || typeof source !== "object") return null;
+  const endpoint = source.endpoint && typeof source.endpoint === "object" ? source.endpoint : {};
+  const point = clonePoint(endpoint.point);
+  const direction = clonePoint(endpoint.direction);
+  return {
+    projectId: normalizeProjectId(source.projectId),
+    source: source.source === "cloud" ? "cloud" : "browser",
+    spoolUid: normalizeTraceabilityId(source.spoolUid),
+    label: String(source.label ?? "Spool").trim().slice(0, 180) || "Spool",
+    endpoint: {
+      id: String(endpoint.id ?? "").trim().slice(0, 40),
+      label: String(endpoint.label ?? "Pipe end").trim().slice(0, 120) || "Pipe end",
+      pipeSizeNb: normalizePipeSize(endpoint.pipeSizeNb),
+      preparationKey: String(endpoint.preparationKey ?? "plain").trim().slice(0, 80) || "plain",
+      preparationLabel: String(endpoint.preparationLabel ?? "Plain weld end").trim().slice(0, 120) || "Plain weld end",
+      point,
+      direction,
+    },
+  };
+}
+
+function normalizeInterfaceChecks(checks) {
+  if (!Array.isArray(checks)) return [];
+  return checks
+    .map((check) => {
+      const first = normalizeInterfaceCheckSource(check?.first);
+      const second = normalizeInterfaceCheckSource(check?.second);
+      if (!first || !second) return null;
+      const blockers = Math.max(0, Math.min(50, Math.round(Number(check?.blockers) || 0)));
+      const warnings = Math.max(0, Math.min(50, Math.round(Number(check?.warnings) || 0)));
+      return {
+        id: String(check?.id ?? "").trim().slice(0, 80) || `ifc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        createdAt: String(check?.createdAt ?? "").trim() || new Date().toISOString(),
+        checkedBy: String(check?.checkedBy ?? "").trim().slice(0, 120) || "Team member",
+        result: blockers ? "blocker" : warnings ? "warning" : "pass",
+        blockers,
+        warnings,
+        toleranceMm: Math.max(0, Math.min(1000, Number(check?.toleranceMm) || 0)),
+        note: String(check?.note ?? "").trim().slice(0, 700),
+        first,
+        second,
+      };
+    })
+    .filter(Boolean)
+    .slice(-80);
 }
 
 function normalizeRevisionHistory(history) {
@@ -13865,6 +13918,25 @@ function productionActivityCardHtml() {
   `;
 }
 
+function interfaceVerificationCardHtml() {
+  const checks = normalizeInterfaceChecks(state.interfaceChecks).slice().reverse();
+  const recent = checks.slice(0, 6);
+  return `
+    <div class="interface-verification-card">
+      <div class="interface-verification-head">
+        <div><strong>Spool interface verifications</strong><span>Saved connection checks remain with this spool and its cloud/project backup.</span></div>
+        <button type="button" data-workflow-action="interface-checker">Check interface</button>
+      </div>
+      ${recent.length ? `<ul class="interface-verification-list">${recent.map((check) => `
+        <li class="${escapeHtml(check.result)}">
+          <div><strong>${escapeHtml(check.first.label)} ↔ ${escapeHtml(check.second.label)}</strong><span>${escapeHtml(check.first.endpoint.label)} ↔ ${escapeHtml(check.second.endpoint.label)}</span><small>${escapeHtml(check.checkedBy)} · ${escapeHtml(formatProductionActivityTime(check.createdAt) || "Not dated")}</small></div>
+          <div><b>${check.blockers ? `${check.blockers} blocker${check.blockers === 1 ? "" : "s"}` : check.warnings ? `${check.warnings} check${check.warnings === 1 ? "" : "s"}` : "Ready"}</b>${check.note ? `<small>${escapeHtml(check.note)}</small>` : ""}</div>
+        </li>
+      `).join("")}</ul>` : "<span>No interface verification has been recorded for this spool.</span>"}
+      ${checks.length > recent.length ? `<small>${checks.length - recent.length} older verification${checks.length - recent.length === 1 ? "" : "s"} retained in the project data.</small>` : ""}
+    </div>`;
+}
+
 async function handlePreIssueFinding(index) {
   const finding = preIssueChecklist().findings[Number(index)];
   if (!finding) return;
@@ -13960,12 +14032,14 @@ function updateWorkflowSummary(issueChecks = preIssueChecklist()) {
       <button type="button" data-workflow-action="return-changes"${reviewDisabledAttr}>Return for changes</button>
       <button type="button" class="workflow-primary-action" data-workflow-action="issue-drawing"${issueDisabledAttr}>${escapeHtml(issueActionLabel)}</button>
       <button type="button" data-workflow-action="new-revision"${editDisabledAttr}>New revision</button>
+      <button type="button" data-workflow-action="interface-checker">Check spool interface</button>
       <button type="button" data-workflow-action="share-readonly">Read-only export</button>
     </div>
     ${weldRegisterCardHtml()}
     <details class="workflow-more-details">
       <summary><strong>Workshop handoff & history</strong><span>Production allocation and previous revisions</span></summary>
       ${productionWorkflowCardHtml()}
+    ${interfaceVerificationCardHtml()}
     <div class="revision-card">
       <strong>Revision history</strong>
       <div class="revision-current">
@@ -13981,8 +14055,9 @@ function updateWorkflowSummary(issueChecks = preIssueChecklist()) {
             <span>${escapeHtml(entry.createdAt ? new Date(entry.createdAt).toLocaleString() : "not dated")}</span>
             <small>${escapeHtml(entry.checkedAt ? `Checked by ${entry.checkedBy || "unknown"}` : "Not checked")} / ${escapeHtml(entry.issuedAt ? `Issued by ${entry.issuedBy || "unknown"}` : "Not issued")}</small>
             ${entry.issueAudit ? `<small class="revision-audit ${escapeHtml(entry.issueAudit.result)}">Ready to Issue: ${escapeHtml(entry.issueAudit.result === "overridden" ? `Overridden - ${entry.issueAudit.overrideReason || "reason recorded"}` : "Passed")}</small>` : ""}
+            ${normalizeInterfaceChecks(entry.state?.interfaceChecks).length ? `<small>${normalizeInterfaceChecks(entry.state?.interfaceChecks).length} interface verification${normalizeInterfaceChecks(entry.state?.interfaceChecks).length === 1 ? "" : "s"} retained</small>` : ""}
           </div>
-          <button type="button" data-restore-revision="${escapeHtml(entry.id)}">Restore</button>
+          <div class="revision-row-actions"><button type="button" data-compare-revision="${escapeHtml(entry.id)}">Compare</button><button type="button" data-restore-revision="${escapeHtml(entry.id)}">Restore</button></div>
         </li>
       `).join("")}</ul>` : "<span>No saved revisions yet.</span>"}
     </div>
@@ -14007,6 +14082,9 @@ function updateWorkflowSummary(issueChecks = preIssueChecklist()) {
   });
   workflowSummary.querySelectorAll("[data-restore-revision]").forEach((button) => {
     button.addEventListener("click", () => restoreRevision(button.dataset.restoreRevision));
+  });
+  workflowSummary.querySelectorAll("[data-compare-revision]").forEach((button) => {
+    button.addEventListener("click", () => openRevisionComparison(button.dataset.compareRevision));
   });
   workflowSummary.querySelectorAll("[data-production-field]").forEach((field) => {
     field.addEventListener("change", () => {
@@ -14161,6 +14239,7 @@ async function handleWorkflowAction(action) {
   if (action === "return-changes") await returnDrawingForChanges();
   if (action === "issue-drawing") await issueDrawing();
   if (action === "new-revision") createNextRevision();
+  if (action === "interface-checker") openInterfaceChecker();
   if (action === "share-readonly") shareReadOnlyProject();
   if (action === "open-jobs") await openBrowserProject();
   if (action === "open-health") showHealthPanel();
@@ -14624,6 +14703,526 @@ function nextRevisionValue(value) {
     return `A${chars.join("")}`;
   }
   return `${current}-1`;
+}
+
+function interfaceEndPreparation(drawingState, edgeIndex, endpointT) {
+  const fitting = (drawingState?.fittings ?? []).find((item) =>
+    item.segmentIndex === edgeIndex &&
+    ["flange", "rollGroove", "threadedEnd"].includes(item.type) &&
+    (normalizeFittingPosition(item.type, item.t) <= 0.5 ? 0 : 1) === endpointT
+  );
+  if (!fitting) return { key: "plain", type: "plain", label: "Plain weld end", detail: "No flange, roll groove or thread recorded" };
+  if (fitting.type === "flange") {
+    const standard = normalizeFlangeStandard(fitting.flangeStandard ?? drawingState.flangeStandard);
+    return {
+      key: `flange:${standard}`,
+      type: "flange",
+      standard,
+      label: `Flange · ${flangeStandardLabel(standard)}`,
+      detail: `${fittingFlangeMode(fitting) === "double" ? "Double flange assembly" : "Single connection flange"}`,
+    };
+  }
+  if (fitting.type === "rollGroove") return { key: "rollGroove", type: "rollGroove", label: "Roll-grooved end", detail: "Victaulic-ready pipe end" };
+  return { key: "threadedEnd", type: "threadedEnd", label: "Threaded end", detail: "Thread standard must be verified" };
+}
+
+function interfaceOpenEnds(drawingState) {
+  if (!drawingState || !Array.isArray(drawingState.points) || !Array.isArray(drawingState.edges)) return [];
+  const connectionCounts = new Map();
+  drawingState.edges.forEach((edge) => {
+    connectionCounts.set(edge.from, (connectionCounts.get(edge.from) ?? 0) + 1);
+    connectionCounts.set(edge.to, (connectionCounts.get(edge.to) ?? 0) + 1);
+  });
+  const ends = [];
+  drawingState.edges.forEach((edge, edgeIndex) => {
+    for (const [pointIndex, otherIndex, endpointT] of [[edge.from, edge.to, 0], [edge.to, edge.from, 1]]) {
+      if (connectionCounts.get(pointIndex) !== 1) continue;
+      const point = drawingState.points[pointIndex];
+      const other = drawingState.points[otherIndex];
+      if (!point || !other) continue;
+      const rawDirection = subtractPoints(point, other);
+      const length = pointLength(rawDirection) || 1;
+      const direction = { x: rawDirection.x / length, y: rawDirection.y / length, z: rawDirection.z / length };
+      const preparation = interfaceEndPreparation(drawingState, edgeIndex, endpointT);
+      ends.push({
+        id: `${edgeIndex}:${endpointT}`,
+        edgeIndex,
+        endpointT,
+        pointIndex,
+        point: clonePoint(point),
+        direction,
+        pipeSizeNb: normalizePipeSize(edge.pipeSizeNb ?? drawingState.pipeSizeNb),
+        pipeSpec: normalizePipeSpec(drawingState.pipeSpec),
+        preparation,
+        label: `Run ${edgeIndex + 1} · ${endpointT === 0 ? "start" : "end"} · Point ${pointLabel(pointIndex)}`,
+      });
+    }
+  });
+  return ends;
+}
+
+function interfaceCheckerSources() {
+  const currentProject = normalizeProjectInfo(state.projectInfo);
+  const sources = [{
+    id: "current",
+    projectId: normalizeProjectId(state.projectId),
+    source: currentCloudProjectOwnerId || currentCloudProjectCompanyId ? "cloud" : "browser",
+    spoolUid: ensureSpoolUid(state),
+    name: `Current · ${currentProject.jobNumber || "No job"} / ${currentProject.spoolNumber || "Untitled"}`,
+    drawingState: state,
+  }];
+  const seen = new Set([normalizeProjectId(state.projectId)].filter(Boolean));
+  const candidates = [...loadSavedBrowserProjects(), ...(Array.isArray(projectLibraryProjects) ? projectLibraryProjects : [])];
+  for (const project of candidates) {
+    const id = normalizeProjectId(project?.id);
+    if (!id || seen.has(id)) continue;
+    const drawingState = stateFromPayload(savedProjectState(project));
+    if (!drawingState) continue;
+    seen.add(id);
+    sources.push({
+      id,
+      projectId: id,
+      source: project.source === "cloud" || project.companyId || project.ownerId ? "cloud" : "browser",
+      spoolUid: normalizeTraceabilityId(drawingState.spoolUid),
+      name: projectDisplayName(normalizeProjectInfo(project.projectInfo ?? drawingState.projectInfo)),
+      drawingState,
+    });
+  }
+  return sources;
+}
+
+function interfaceEndpointDistance(first, second) {
+  if (!first?.point || !second?.point) return Number.POSITIVE_INFINITY;
+  return pointLength(subtractPoints(first.point, second.point));
+}
+
+function interfaceDirectionDot(first, second) {
+  if (!first?.direction || !second?.direction) return 1;
+  return first.direction.x * second.direction.x + first.direction.y * second.direction.y + first.direction.z * second.direction.z;
+}
+
+function bestInterfacePair(firstEnds, secondEnds) {
+  let best = null;
+  for (const first of firstEnds) {
+    for (const second of secondEnds) {
+      const sizePenalty = first.pipeSizeNb === second.pipeSizeNb ? 0 : 1000000;
+      const prepPenalty = first.preparation.type === second.preparation.type ? 0 : 500000;
+      const standardPenalty = first.preparation.key === second.preparation.key ? 0 : 100000;
+      const directionPenalty = Math.max(0, interfaceDirectionDot(first, second) + 1) * 10000;
+      const score = sizePenalty + prepPenalty + standardPenalty + directionPenalty + interfaceEndpointDistance(first, second);
+      if (!best || score < best.score) best = { first, second, score };
+    }
+  }
+  return best;
+}
+
+function interfaceComparison(first, second, toleranceMm = 5) {
+  if (!first || !second) return { rows: [], blockers: 0, warnings: 0 };
+  const rows = [];
+  const add = (status, label, value, detail) => rows.push({ status, label, value, detail });
+  const sizeMatch = first.pipeSizeNb === second.pipeSizeNb;
+  add(sizeMatch ? "pass" : "blocker", "Pipe size", sizeMatch ? `NB ${first.pipeSizeNb}` : `NB ${first.pipeSizeNb} ↔ NB ${second.pipeSizeNb}`, sizeMatch ? "Nominal sizes match" : "These ends cannot connect without a verified reducer or adaptor");
+  const preparationMatch = first.preparation.type === second.preparation.type;
+  add(preparationMatch ? "pass" : "blocker", "End preparation", preparationMatch ? first.preparation.label : `${first.preparation.label} ↔ ${second.preparation.label}`, preparationMatch ? "Connection types agree" : "Change one end or specify the correct transition fitting");
+  if (first.preparation.type === "flange" && second.preparation.type === "flange") {
+    const standardMatch = first.preparation.standard === second.preparation.standard;
+    add(standardMatch ? "pass" : "blocker", "Flange standard", `${flangeStandardLabel(first.preparation.standard)} ↔ ${flangeStandardLabel(second.preparation.standard)}`, standardMatch ? "Drilling standards match" : "Bolt circle and drilling may not align");
+  }
+  const distance = interfaceEndpointDistance(first, second);
+  add(distance <= toleranceMm ? "pass" : "blocker", "Connection coordinates", `${formatLength(distance)} mm apart`, distance <= toleranceMm ? `Within the ${formatLength(toleranceMm)} mm tolerance` : `Move or remeasure the interface; tolerance is ${formatLength(toleranceMm)} mm`);
+  const directionDot = interfaceDirectionDot(first, second);
+  const aligned = directionDot <= -0.985;
+  add(aligned ? "pass" : "warning", "Pipe direction", aligned ? "Opposed and aligned" : `Direction check ${Math.round(directionDot * 1000) / 1000}`, aligned ? "The two runs approach the joint from opposite directions" : "Confirm the bend direction and spool orientation before fabrication");
+  if (first.preparation.type === "plain" && second.preparation.type === "plain") {
+    add("warning", "Field joint", "Plain weld connection", "Apply the selected weld gap once at the interface and confirm which spool owns the joint");
+  }
+  if (first.preparation.type === "threadedEnd" && second.preparation.type === "threadedEnd") {
+    add("warning", "Thread standard", "Not recorded", "Confirm BSP/NPT standard and male/female arrangement");
+  }
+  return {
+    rows,
+    blockers: rows.filter((row) => row.status === "blocker").length,
+    warnings: rows.filter((row) => row.status === "warning").length,
+  };
+}
+
+function interfaceEndpointOptionHtml(endpoint) {
+  const point = endpoint.point;
+  return `<option value="${escapeHtml(endpoint.id)}">${escapeHtml(endpoint.label)} · NB ${endpoint.pipeSizeNb} · ${escapeHtml(endpoint.preparation.label)} · (${formatLength(point.x)}, ${formatLength(point.y)}, ${formatLength(point.z)})</option>`;
+}
+
+function interfaceCheckSourceSnapshot(source, endpoint) {
+  return normalizeInterfaceCheckSource({
+    projectId: source?.projectId,
+    source: source?.source,
+    spoolUid: source?.spoolUid ?? source?.drawingState?.spoolUid,
+    label: source?.name,
+    endpoint: {
+      id: endpoint?.id,
+      label: endpoint?.label,
+      pipeSizeNb: endpoint?.pipeSizeNb,
+      preparationKey: endpoint?.preparation?.key,
+      preparationLabel: endpoint?.preparation?.label,
+      point: endpoint?.point,
+      direction: endpoint?.direction,
+    },
+  });
+}
+
+function canRecordInterfaceCheck() {
+  const permission = currentDrawingProjectPermission();
+  return Boolean(permission.canEdit || permission.canIssue || permission.canManageProduction);
+}
+
+function recordInterfaceVerification(firstSource, first, secondSource, second, comparison, toleranceMm, note = "") {
+  if (!canRecordInterfaceCheck()) {
+    showAppNotice("Your role can view this interface but cannot record a verification.", { tone: "warning" });
+    return false;
+  }
+  const createdAt = new Date().toISOString();
+  const record = normalizeInterfaceChecks([{
+    id: `ifc-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+    createdAt,
+    checkedBy: productionActivityActor(),
+    blockers: comparison.blockers,
+    warnings: comparison.warnings,
+    toleranceMm,
+    note,
+    first: interfaceCheckSourceSnapshot(firstSource, first),
+    second: interfaceCheckSourceSnapshot(secondSource, second),
+  }])[0];
+  if (!record) return false;
+  state.interfaceChecks = normalizeInterfaceChecks([...normalizeInterfaceChecks(state.interfaceChecks), record]);
+  state.productionActivity = addProductionActivity(
+    state.productionActivity,
+    "interface",
+    `Interface ${record.result === "pass" ? "verified ready" : record.result === "warning" ? "recorded with checks" : "blocked"}: ${record.first.label} to ${record.second.label}${record.note ? ` · ${record.note}` : "."}`,
+    createdAt,
+  );
+  persistState();
+  updateWorkflowSummary();
+  return true;
+}
+
+async function openInterfaceCheckerSource(source, closeDialog) {
+  if (!source || source.id === "current" || normalizeProjectId(source.projectId) === normalizeProjectId(state.projectId)) {
+    showAppNotice("That spool is already open in the current tab.");
+    return false;
+  }
+  if (!source.projectId) {
+    showAppNotice("Save that spool before opening it in a workspace tab.", { tone: "warning" });
+    return false;
+  }
+  closeDialog?.();
+  return openProjectInWorkspaceTab(source.projectId, source.source);
+}
+
+function addInterfaceIssueNote(firstSource, secondSource, comparison, note = "") {
+  if (!canRecordInterfaceCheck()) {
+    showAppNotice("Your role cannot add a workshop issue note.", { tone: "warning" });
+    return false;
+  }
+  const body = String(note ?? "").trim().slice(0, 700);
+  const summary = body || `${comparison.blockers || 0} blocker${comparison.blockers === 1 ? "" : "s"} and ${comparison.warnings || 0} warning${comparison.warnings === 1 ? "" : "s"} require interface review.`;
+  state.productionActivity = addProductionActivity(state.productionActivity, "interface", `Interface issue · ${firstSource?.name || "Spool A"} ↔ ${secondSource?.name || "Spool B"} · ${summary}`);
+  persistState();
+  updateWorkflowSummary();
+  return true;
+}
+
+function openInterfaceChecker() {
+  closeActionMenu();
+  document.querySelector("#interfaceCheckerDialog")?.remove();
+  document.body.classList.add("interface-checker-open");
+  const sources = interfaceCheckerSources();
+  const dialog = document.createElement("div");
+  dialog.className = "project-dialog-backdrop interface-checker-backdrop";
+  dialog.id = "interfaceCheckerDialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.setAttribute("aria-label", "Spool interface checker");
+  dialog.innerHTML = `
+    <section class="project-dialog-card interface-checker-card">
+      <div class="project-dialog-header">
+        <div><small>FABRICATION SAFETY</small><strong>Spool interface checker</strong><span>Compare the exact ends that will meet before either spool is fabricated.</span></div>
+        <button class="icon-button compact labeled" type="button" data-interface-close>Close</button>
+      </div>
+      <details class="interface-checker-help"><summary><strong>How this check works</strong><span>Coordinates, direction, preparation and tolerance</span></summary><div><p>Select two saved spools and the exact ends that will meet.</p><ul><li>Coordinates must use the same job datum; tolerance is positional tolerance, not weld gap.</li><li>Directions should oppose each other because both pipes approach the same joint.</li><li>Flange drilling, threads and final site conditions still require physical verification.</li><li>Saving a result creates a traceable review record; it never changes either drawing automatically.</li></ul></div></details>
+      <div class="interface-checker-selectors">
+        <section><strong>Spool A</strong><label>Drawing<select data-interface-source="a"></select></label><label>Connecting end<select data-interface-end="a"></select></label></section>
+        <button type="button" class="interface-swap" data-interface-swap aria-label="Swap spool A and spool B">⇄<span>Swap</span></button>
+        <section><strong>Spool B</strong><label>Drawing<select data-interface-source="b"></select></label><label>Connecting end<select data-interface-end="b"></select></label></section>
+      </div>
+      <div class="interface-checker-toolbar"><label>Coordinate tolerance <input type="number" min="0" max="1000" step="1" value="5" data-interface-tolerance /><span>mm</span></label><button type="button" data-interface-best>Find best matching ends</button></div>
+      <div class="interface-checker-result" data-interface-result></div>
+      <div class="interface-checker-record"><label><span>Verification / issue note</span><textarea rows="2" maxlength="700" data-interface-note placeholder="Datum checked, site measurement, match mark or action required"></textarea></label><div><button type="button" data-interface-open="a">Open Spool A</button><button type="button" data-interface-open="b">Open Spool B</button><button type="button" data-interface-issue-note>Add issue note</button><button type="button" class="primary-button" data-interface-save>Save verification</button></div><small data-interface-record-status>The saved result is attached to the currently open spool and appears in Review.</small></div>
+    </section>`;
+  document.body.append(dialog);
+  const sourceA = dialog.querySelector('[data-interface-source="a"]');
+  const sourceB = dialog.querySelector('[data-interface-source="b"]');
+  const endA = dialog.querySelector('[data-interface-end="a"]');
+  const endB = dialog.querySelector('[data-interface-end="b"]');
+  const tolerance = dialog.querySelector("[data-interface-tolerance]");
+  const result = dialog.querySelector("[data-interface-result]");
+  const note = dialog.querySelector("[data-interface-note]");
+  const openA = dialog.querySelector('[data-interface-open="a"]');
+  const openB = dialog.querySelector('[data-interface-open="b"]');
+  const saveVerification = dialog.querySelector("[data-interface-save]");
+  const issueNote = dialog.querySelector("[data-interface-issue-note]");
+  const recordStatus = dialog.querySelector("[data-interface-record-status]");
+  let activeCheck = null;
+  const sourceOptions = sources.map((source) => `<option value="${escapeHtml(source.id)}">${escapeHtml(source.name)}</option>`).join("");
+  sourceA.innerHTML = sourceOptions;
+  sourceB.innerHTML = sourceOptions;
+  sourceA.value = "current";
+  sourceB.value = sources.find((source) => source.id !== "current")?.id ?? "current";
+  const sourceFor = (select) => sources.find((source) => source.id === select.value) ?? sources[0];
+  const populateEnds = (sourceSelect, endSelect, retained = "") => {
+    const ends = interfaceOpenEnds(sourceFor(sourceSelect)?.drawingState);
+    endSelect.innerHTML = ends.length ? ends.map(interfaceEndpointOptionHtml).join("") : '<option value="">No open pipe ends found</option>';
+    if (retained && ends.some((end) => end.id === retained)) endSelect.value = retained;
+    return ends;
+  };
+  const render = (autoChoose = false) => {
+    const endsA = populateEnds(sourceA, endA, endA.value);
+    const endsB = populateEnds(sourceB, endB, endB.value);
+    if (autoChoose) {
+      const pair = bestInterfacePair(endsA, endsB);
+      if (pair) { endA.value = pair.first.id; endB.value = pair.second.id; }
+    }
+    const first = endsA.find((end) => end.id === endA.value);
+    const second = endsB.find((end) => end.id === endB.value);
+    const firstSource = sourceFor(sourceA);
+    const secondSource = sourceFor(sourceB);
+    openA.disabled = firstSource?.id === "current" || normalizeProjectId(firstSource?.projectId) === normalizeProjectId(state.projectId);
+    openB.disabled = secondSource?.id === "current" || normalizeProjectId(secondSource?.projectId) === normalizeProjectId(state.projectId);
+    if (!first || !second || sourceA.value === sourceB.value) {
+      activeCheck = null;
+      saveVerification.disabled = true;
+      issueNote.disabled = true;
+      result.innerHTML = sources.length < 2
+        ? '<div class="interface-empty"><strong>Save or open another spool first</strong><span>The checker needs two different spool drawings.</span></div>'
+        : '<div class="interface-empty"><strong>Choose two different spools</strong><span>Select the two drawings that will connect.</span></div>';
+      return;
+    }
+    const toleranceMm = clampNumber(Number(tolerance.value) || 0, 0, 1000);
+    const comparison = interfaceComparison(first, second, toleranceMm);
+    activeCheck = { firstSource, first, secondSource, second, comparison, toleranceMm };
+    saveVerification.disabled = false;
+    issueNote.disabled = false;
+    const verdict = comparison.blockers ? "blocker" : comparison.warnings ? "warning" : "pass";
+    const title = comparison.blockers ? `${comparison.blockers} interface blocker${comparison.blockers === 1 ? "" : "s"}` : comparison.warnings ? `Fits with ${comparison.warnings} check${comparison.warnings === 1 ? "" : "s"}` : "Interface ready";
+    result.innerHTML = `<div class="interface-verdict ${verdict}"><strong>${escapeHtml(title)}</strong><span>${comparison.blockers ? "Do not fabricate this interface until the red items are resolved." : "Record the final site or workshop verification before issue."}</span></div><div class="interface-check-grid">${comparison.rows.map((row) => `<article class="interface-check ${row.status}"><span>${escapeHtml(row.label)}</span><strong>${escapeHtml(row.value)}</strong><small>${escapeHtml(row.detail)}</small></article>`).join("")}</div>`;
+  };
+  sourceA.addEventListener("change", () => render(true));
+  sourceB.addEventListener("change", () => render(true));
+  endA.addEventListener("change", () => render());
+  endB.addEventListener("change", () => render());
+  tolerance.addEventListener("input", () => render());
+  dialog.querySelector("[data-interface-best]")?.addEventListener("click", () => render(true));
+  dialog.querySelector("[data-interface-swap]")?.addEventListener("click", () => {
+    const sourceValue = sourceA.value;
+    const endValue = endA.value;
+    sourceA.value = sourceB.value;
+    sourceB.value = sourceValue;
+    populateEnds(sourceA, endA, endB.value);
+    populateEnds(sourceB, endB, endValue);
+    render();
+  });
+  const close = () => {
+    dialog.remove();
+    document.body.classList.remove("interface-checker-open");
+  };
+  openA?.addEventListener("click", () => openInterfaceCheckerSource(sourceFor(sourceA), close).catch((error) => showAppNotice(error?.message || "Could not open Spool A.", { tone: "warning" })));
+  openB?.addEventListener("click", () => openInterfaceCheckerSource(sourceFor(sourceB), close).catch((error) => showAppNotice(error?.message || "Could not open Spool B.", { tone: "warning" })));
+  saveVerification?.addEventListener("click", () => {
+    if (!activeCheck) return;
+    if (recordInterfaceVerification(activeCheck.firstSource, activeCheck.first, activeCheck.secondSource, activeCheck.second, activeCheck.comparison, activeCheck.toleranceMm, note?.value)) {
+      recordStatus.textContent = `Saved ${new Date().toLocaleTimeString()} · visible in Review.`;
+      recordStatus.classList.add("success");
+    }
+  });
+  issueNote?.addEventListener("click", () => {
+    if (!activeCheck) return;
+    if (addInterfaceIssueNote(activeCheck.firstSource, activeCheck.secondSource, activeCheck.comparison, note?.value)) {
+      recordStatus.textContent = "Issue note added to Workshop handoff & history.";
+      recordStatus.classList.add("success");
+    }
+  });
+  dialog.querySelector("[data-interface-close]")?.addEventListener("click", close);
+  dialog.addEventListener("pointerdown", (event) => { if (event.target === dialog) close(); });
+  dialog.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
+  render(true);
+  dialog.querySelector("[data-interface-close]")?.focus();
+}
+
+function drawingImpactStats(source) {
+  const points = Array.isArray(source?.points) ? source.points : [];
+  const edges = Array.isArray(source?.edges) ? source.edges : [];
+  const fittings = Array.isArray(source?.fittings) ? source.fittings : [];
+  const fittingCounts = {};
+  fittings.forEach((fitting) => { fittingCounts[fitting.type] = (fittingCounts[fitting.type] ?? 0) + 1; });
+  const edgeSignatures = edges.map((edge) => {
+    const from = points[edge.from] ?? {};
+    const to = points[edge.to] ?? {};
+    return [from.x, from.y, from.z, to.x, to.y, to.z, normalizePipeSize(edge.pipeSizeNb ?? source.pipeSizeNb)].map((value) => Number(value) || 0).join(":");
+  });
+  const totalLength = edges.reduce((total, edge) => {
+    const from = points[edge.from];
+    const to = points[edge.to];
+    return total + (from && to ? pointLength(subtractPoints(to, from)) : 0);
+  }, 0);
+  return { runCount: edges.length, fittingCount: fittings.length, weldCount: fittings.filter((item) => item.type === "weld").length, openEndCount: interfaceOpenEnds(source).length, fittingCounts, edgeSignatures, totalLength };
+}
+
+function revisionRunRecord(source, index) {
+  const edge = source?.edges?.[index];
+  if (!edge) return null;
+  const from = source?.points?.[edge.from];
+  const to = source?.points?.[edge.to];
+  if (!from || !to) return null;
+  const pipeSizeNb = normalizePipeSize(edge.pipeSizeNb ?? source.pipeSizeNb);
+  const length = pointLength(subtractPoints(to, from));
+  return {
+    index,
+    label: `Run ${index + 1} · ${pointLabel(edge.from)}–${pointLabel(edge.to)}`,
+    pipeSizeNb,
+    length,
+    geometry: [from.x, from.y, from.z, to.x, to.y, to.z].map((value) => Number(value) || 0).join(":"),
+  };
+}
+
+function revisionRunChanges(previousState, currentState) {
+  const count = Math.max(previousState?.edges?.length ?? 0, currentState?.edges?.length ?? 0);
+  const changes = [];
+  for (let index = 0; index < count; index += 1) {
+    const before = revisionRunRecord(previousState, index);
+    const after = revisionRunRecord(currentState, index);
+    if (!before && !after) continue;
+    if (!before) {
+      changes.push({ index, status: "added", before, after });
+      continue;
+    }
+    if (!after) {
+      changes.push({ index, status: "removed", before, after });
+      continue;
+    }
+    if (before.geometry !== after.geometry || before.pipeSizeNb !== after.pipeSizeNb) {
+      changes.push({ index, status: "changed", before, after });
+    }
+  }
+  return changes;
+}
+
+function revisionImpact(previousState, currentState) {
+  const before = drawingImpactStats(previousState);
+  const after = drawingImpactStats(currentState);
+  const runChanges = revisionRunChanges(previousState, currentState);
+  const changedRuns = runChanges.length;
+  const fittingTypes = [...new Set([...Object.keys(before.fittingCounts), ...Object.keys(after.fittingCounts)])].sort();
+  const fittingChanges = fittingTypes.map((type) => ({ type, before: before.fittingCounts[type] ?? 0, after: after.fittingCounts[type] ?? 0 })).filter((entry) => entry.before !== entry.after);
+  return { before, after, changedRuns, runChanges, fittingChanges, lengthDelta: after.totalLength - before.totalLength };
+}
+
+function signedImpactValue(value, formatter = String) {
+  if (!value) return "No change";
+  return `${value > 0 ? "+" : "−"}${formatter(Math.abs(value))}`;
+}
+
+function revisionRunChangeText(change) {
+  if (change.status === "added") return `${change.after.label}: added at NB ${change.after.pipeSizeNb}, ${formatLength(change.after.length)} mm`;
+  if (change.status === "removed") return `${change.before.label}: removed (was NB ${change.before.pipeSizeNb}, ${formatLength(change.before.length)} mm)`;
+  const sizeChange = change.before.pipeSizeNb === change.after.pipeSizeNb ? `NB ${change.after.pipeSizeNb}` : `NB ${change.before.pipeSizeNb} → NB ${change.after.pipeSizeNb}`;
+  return `${change.after.label}: ${formatLength(change.before.length)} → ${formatLength(change.after.length)} mm (${signedImpactValue(change.after.length - change.before.length, formatLength)} mm), ${sizeChange}`;
+}
+
+function revisionImpactWorkshopText(entry, currentRevision, impact) {
+  const project = normalizeProjectInfo(state.projectInfo);
+  return [
+    `SpoolMate revision impact · Job ${project.jobNumber || "-"} · Spool ${project.spoolNumber || "-"}`,
+    `Rev ${entry.revision || "-"} → Rev ${currentRevision || "-"} · Generated ${new Date().toLocaleString()}`,
+    `Changed runs: ${impact.changedRuns} · Total C/C pipe: ${signedImpactValue(impact.lengthDelta, formatLength)} mm · Fittings: ${signedImpactValue(impact.after.fittingCount - impact.before.fittingCount)} · Welds: ${signedImpactValue(impact.after.weldCount - impact.before.weldCount)}`,
+    "",
+    "Run changes:",
+    ...(impact.runChanges.length ? impact.runChanges.map((change) => `- ${revisionRunChangeText(change)}`) : ["- No fabrication run changes detected."]),
+    "",
+    "Fitting quantity changes:",
+    ...(impact.fittingChanges.length ? impact.fittingChanges.map((change) => `- ${fittingLabel({ type: change.type })}: ${change.before} → ${change.after}`) : ["- No fitting quantity changes."]),
+    "",
+    "Workshop action: confirm already-cut pipe, reserved stock, weld allocation and connected spools before releasing the new revision.",
+  ].join("\n");
+}
+
+async function copyRevisionImpact(entry, currentRevision, impact) {
+  const text = revisionImpactWorkshopText(entry, currentRevision, impact);
+  try {
+    if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+    await navigator.clipboard.writeText(text);
+    showAppNotice("Revision impact summary copied.", { tone: "success" });
+  } catch {
+    await openFieldInputDialog({ title: "Revision impact summary", label: "Copy this workshop summary", value: text, multiline: true, readOnly: true, submitLabel: "Done" });
+  }
+}
+
+function printRevisionImpact(entry, currentRevision, impact) {
+  const project = normalizeProjectInfo(state.projectInfo);
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) {
+    showAppNotice("Allow pop-ups to print the revision comparison.", { tone: "warning" });
+    return;
+  }
+  const runRows = impact.runChanges.length
+    ? impact.runChanges.map((change) => `<tr><td>${escapeHtml(change.after?.label || change.before?.label || `Run ${change.index + 1}`)}</td><td>${escapeHtml(change.status)}</td><td>${escapeHtml(change.before ? `${formatLength(change.before.length)} mm / NB ${change.before.pipeSizeNb}` : "-")}</td><td>${escapeHtml(change.after ? `${formatLength(change.after.length)} mm / NB ${change.after.pipeSizeNb}` : "-")}</td></tr>`).join("")
+    : '<tr><td colspan="4">No fabrication run changes detected.</td></tr>';
+  const fittingRows = impact.fittingChanges.length
+    ? impact.fittingChanges.map((change) => `<tr><td>${escapeHtml(fittingLabel({ type: change.type }))}</td><td>${change.before}</td><td>${change.after}</td><td>${escapeHtml(signedImpactValue(change.after - change.before))}</td></tr>`).join("")
+    : '<tr><td colspan="4">No fitting quantity changes.</td></tr>';
+  printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>SpoolMate revision impact</title><style>body{font-family:Arial,sans-serif;color:#17343a;margin:24px}header{display:flex;justify-content:space-between;gap:20px}h1{margin:0;font-size:24px}p{color:#52666c}button{background:#087b96;color:white;border:0;border-radius:7px;padding:10px 14px;font-weight:700}section{margin-top:24px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #bfd0d4;padding:8px;text-align:left}th{background:#eef5f6}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.summary b{border:1px solid #bfd0d4;padding:12px}.warning{padding:12px;background:#fff4d5;border:1px solid #e0b451}@media print{button{display:none}body{margin:12mm}}</style></head><body><header><div><h1>Revision impact · ${escapeHtml(project.jobNumber || "-")} / ${escapeHtml(project.spoolNumber || "-")}</h1><p>Rev ${escapeHtml(entry.revision || "-")} → Rev ${escapeHtml(currentRevision || "-")} · ${escapeHtml(new Date().toLocaleString())}</p></div><button onclick="window.print()">Print / Save PDF</button></header><div class="summary"><b>${impact.changedRuns}<br>changed runs</b><b>${escapeHtml(signedImpactValue(impact.lengthDelta, formatLength))} mm<br>C/C pipe</b><b>${escapeHtml(signedImpactValue(impact.after.fittingCount-impact.before.fittingCount))}<br>fittings</b><b>${escapeHtml(signedImpactValue(impact.after.weldCount-impact.before.weldCount))}<br>welds</b></div><p class="warning">Workshop action: confirm already-cut pipe, reserved stock, weld allocation and connected spools before releasing this revision.</p><section><h2>Run changes</h2><table><thead><tr><th>Run</th><th>Change</th><th>Previous</th><th>Current</th></tr></thead><tbody>${runRows}</tbody></table></section><section><h2>Fitting quantity changes</h2><table><thead><tr><th>Fitting</th><th>Previous</th><th>Current</th><th>Delta</th></tr></thead><tbody>${fittingRows}</tbody></table></section></body></html>`);
+  printWindow.document.close();
+}
+
+function openRevisionComparison(revisionId) {
+  document.querySelector("#revisionImpactDialog")?.remove();
+  const entry = normalizeRevisionHistory(state.revisionHistory).find((item) => item.id === revisionId);
+  const previousState = entry?.state ? stateFromPayload(entry.state) : null;
+  if (!entry || !previousState) {
+    showAppNotice("That saved revision is not available for comparison.");
+    return;
+  }
+  const impact = revisionImpact(previousState, state);
+  const currentRevision = normalizeProjectInfo(state.projectInfo).revision || "-";
+  const dialog = document.createElement("div");
+  dialog.className = "project-dialog-backdrop revision-impact-backdrop";
+  dialog.id = "revisionImpactDialog";
+  dialog.setAttribute("role", "dialog");
+  dialog.setAttribute("aria-modal", "true");
+  dialog.innerHTML = `
+    <section class="project-dialog-card revision-impact-card">
+      <div class="project-dialog-header"><div><small>REVISION CONTROL</small><strong>Rev ${escapeHtml(entry.revision || "-")} → Rev ${escapeHtml(currentRevision)}</strong><span>Changes that may affect fabrication, stock and field installation.</span></div><button class="icon-button compact labeled" type="button" data-revision-impact-close>Close</button></div>
+      <details class="revision-impact-guide"><summary><strong>How to use this comparison</strong><span>Check changed runs before releasing work</span></summary><p>A changed run means its endpoints, length or nominal size differ from the saved revision. Review already-cut material, ordered fittings, weld allocation and every connected spool. This report supports workshop review; it does not approve the revision automatically.</p></details>
+      <div class="revision-impact-summary"><article><span>Changed runs</span><strong>${impact.changedRuns}</strong></article><article><span>Total C/C pipe</span><strong>${escapeHtml(signedImpactValue(impact.lengthDelta, formatLength))} mm</strong></article><article><span>Fittings</span><strong>${escapeHtml(signedImpactValue(impact.after.fittingCount - impact.before.fittingCount))}</strong></article><article><span>Welds</span><strong>${escapeHtml(signedImpactValue(impact.after.weldCount - impact.before.weldCount))}</strong></article></div>
+      <div class="revision-impact-alert ${impact.changedRuns || impact.fittingChanges.length ? "warning" : "pass"}"><strong>${impact.changedRuns || impact.fittingChanges.length ? "Workshop review required" : "No fabrication geometry change detected"}</strong><span>${impact.changedRuns || impact.fittingChanges.length ? "Check already-cut pipe, reserved stock, weld allocation and connected spools before releasing this revision." : "Project details or workflow status may still have changed."}</span></div>
+      <div class="revision-impact-toolbar"><button type="button" data-revision-impact-copy>Copy workshop summary</button><button type="button" data-revision-impact-print>Print / Save PDF</button></div>
+      <section class="revision-impact-details"><strong>Changed runs</strong>${impact.runChanges.length ? `<div>${impact.runChanges.map((change) => `<article class="revision-run-change"><span>${escapeHtml(change.after?.label || change.before?.label || `Run ${change.index + 1}`)}<small>${escapeHtml(change.status)}</small></span><strong>${escapeHtml(change.before ? `${formatLength(change.before.length)} mm · NB ${change.before.pipeSizeNb}` : "Not present")} → ${escapeHtml(change.after ? `${formatLength(change.after.length)} mm · NB ${change.after.pipeSizeNb}` : "Removed")}</strong></article>`).join("")}</div>` : "<span>No fabrication run changes.</span>"}</section>
+      <section class="revision-impact-details"><strong>Fitting quantity changes</strong>${impact.fittingChanges.length ? `<div>${impact.fittingChanges.map((change) => `<article><span>${escapeHtml(fittingLabel({ type: change.type }))}</span><strong>${change.before} → ${change.after}</strong></article>`).join("")}</div>` : "<span>No fitting quantity changes.</span>"}</section>
+    </section>`;
+  document.body.append(dialog);
+  const close = () => dialog.remove();
+  dialog.querySelector("[data-revision-impact-close]")?.addEventListener("click", close);
+  dialog.querySelector("[data-revision-impact-copy]")?.addEventListener("click", () => copyRevisionImpact(entry, currentRevision, impact));
+  dialog.querySelector("[data-revision-impact-print]")?.addEventListener("click", () => printRevisionImpact(entry, currentRevision, impact));
+  dialog.addEventListener("pointerdown", (event) => { if (event.target === dialog) close(); });
+  dialog.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
+  dialog.querySelector("[data-revision-impact-close]")?.focus();
+}
+
+function openLatestRevisionComparison() {
+  const entry = normalizeRevisionHistory(state.revisionHistory)[0];
+  if (!entry) {
+    showAppNotice("Create or issue a revision first. SpoolMate will then compare it with the current drawing.");
+    return;
+  }
+  openRevisionComparison(entry.id);
 }
 
 function addRevisionSnapshot(note = "Saved revision", options = {}) {
@@ -17667,6 +18266,8 @@ const ACTION_COMMANDS = [
   { id: "cut-list", label: "Cut list", detail: "Open calculated pipe cut lengths", category: "Fabrication", keywords: "cutting list pipe lengths deductions", run: () => openCommandInspector("review", "cutlist") },
   { id: "weights", label: "Weights and lifting", detail: "Open spool mass, centre of gravity and lifting data", category: "Fabrication", keywords: "weight mass cog centre gravity lift lug", run: () => openCommandInspector("review", "weights") },
   { id: "big-spool", label: "Big Spool transport planner", detail: "Split a large master assembly into transport pieces", category: "Fabrication", keywords: "big spool split transport truck lift match joint field weld", capability: "edit", run: () => openBigSpoolDialog() },
+  { id: "interface-checker", label: "Spool interface checker", detail: "Compare the connecting ends of two saved spools", category: "Fabrication", keywords: "interface connect endpoint flange groove thread mismatch spool to spool", run: () => openInterfaceChecker() },
+  { id: "revision-impact", label: "Revision impact", detail: "Compare the current drawing with a saved revision", category: "Review", keywords: "revision compare changes delta impact old new remake", run: () => openLatestRevisionComparison() },
   { id: "bom", label: "Bill of materials", detail: "Open the fabrication material take-off", category: "Fabrication", keywords: "bom material takeoff take off order list", run: () => openCommandInspector("export", "bom") },
   { id: "preview-3d", label: "Open 3D model", detail: "Show the interactive spool preview", category: "View", keywords: "3d model rotate orbit preview", run: () => openPreviewPreservingWorkspace() },
   { id: "fit-drawing", label: "Fit drawing to screen", detail: "Zoom and centre the complete spool", category: "View", keywords: "zoom out centre center whole spool", run: () => document.querySelector("#fitDrawingButton")?.click() },
@@ -17955,6 +18556,7 @@ function setupInterfaceDensity() {
   }
   actionMenuJobsButton?.addEventListener("click", () => openBrowserProjectButton?.click());
   actionMenuBigSpoolButton?.addEventListener("click", () => bigSpoolButton?.click());
+  actionMenuInterfaceCheckerButton?.addEventListener("click", () => openInterfaceChecker());
   actionMenuAccountButton?.addEventListener("click", () => accountButton?.click());
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && workspaceSettingsOpen()) {
